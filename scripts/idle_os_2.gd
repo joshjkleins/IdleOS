@@ -500,19 +500,19 @@ func update_module_stats_header(skill_name: String):
 	var xp_current = skill["experience"]
 	var xp_needed = Stats.xp_for_level(level + 1)
 	
-	set_line(lvl_and_effeciency_index, "[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]")
+	set_line(lvl_and_effeciency_index, "[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]", false)
 	
 	# XP BAR
-	set_line(skill_xp_progress_bar_index, get_skill_xp_bar(skill))
+	set_line(skill_xp_progress_bar_index, get_skill_xp_bar(skill), false)
 	
-	set_line(skill_xp_nums_index, "[color=#aaaaaa]XP:[/color] [color=yellow]" + str(xp_current) + "[/color] / " + "[color=yellow]" + str(xp_needed) + "[/color]")
+	set_line(skill_xp_nums_index, "[color=#aaaaaa]XP:[/color] [color=yellow]" + str(xp_current) + "[/color] / " + "[color=yellow]" + str(xp_needed) + "[/color]", false)
 	
 	#Skill specific text, if any
 	match skill_name:
 		"Log Parsing":
 			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
-			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n")
+			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)
 
 func start_parser_ui():
 	add_line(parser.border("LOG PARSER v1.0"))     # 0
@@ -567,7 +567,7 @@ func start_log_stream():
 		if Inventory.inventory["logs"]["amount"] > 0 and process_running:
 			clear_logs()
 			
-		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount("logs"))))
+		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount("logs"))), false)
 		Stats.add_xp(Stats.player_stats["Log Parsing"], 500)
 		update_module_stats_header("Log Parsing")
 		
