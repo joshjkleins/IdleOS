@@ -1,0 +1,74 @@
+[gd_scene load_steps=4 format=3 uid="uid://g3kf6mnbkbca"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
+[ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[node name="IdleOS2" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_u0uic")
+script = ExtResource("2_u0uic")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Header" type="Label" parent="Panel/MarginContainer/TerminalRoot"]
+modulate = Color(0.892034, 0.892034, 0.892034, 1)
+layout_mode = 2
+text = "IDLE OS v0.1
+============================"
+
+[node name="Scrollback" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+bbcode_enabled = true
+
+[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_vertical = 0
+focus_mode = 2
+
+[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/InputLineContainer"]
+layout_mode = 2
+text = "IdleOS> "
+
+[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/InputLineContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
+placeholder_text = "type a command or -h for help"
+keep_editing_on_text_submit = true
+context_menu_enabled = false
+caret_blink = true
+
+[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]

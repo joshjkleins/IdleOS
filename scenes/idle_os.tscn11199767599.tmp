@@ -1,0 +1,89 @@
+[gd_scene load_steps=5 format=3 uid="uid://ctlrqdo8k58fp"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_rtl3f"]
+[ext_resource type="Script" uid="uid://duluj26t4b8fo" path="res://scripts/idle_os.gd" id="2_pudlb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kvrve"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[node name="IdleOS" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_rtl3f")
+script = ExtResource("2_pudlb")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Panel/MarginContainer/TerminalRoot"]
+modulate = Color(0.892034, 0.892034, 0.892034, 1)
+layout_mode = 2
+text = "IDLE OS v0.1
+============================"
+
+[node name="TaskList" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+text = "WORK: 0
+CAPACITY: 1/1
+EFFICIENCY: 1.00x"
+fit_content = true
+scroll_active = false
+
+[node name="ScrollbackPanel" type="PanelContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kvrve")
+
+[node name="Scrollback" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot/ScrollbackPanel"]
+layout_mode = 2
+mouse_filter = 1
+bbcode_enabled = true
+scroll_following = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/MarginContainer/TerminalRoot/HBoxContainer"]
+layout_mode = 2
+text = "> "
+
+[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
+placeholder_text = "type a command, type -h for help"
+keep_editing_on_text_submit = true
+context_menu_enabled = false
+caret_blink = true
+
+[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/HBoxContainer/InputLine" to="." method="_on_input_line_text_submitted"]

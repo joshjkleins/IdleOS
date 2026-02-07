@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://xa7klljmallm"]
+
+[ext_resource type="Script" uid="uid://ube1lnboreqe" path="res://scripts/resource_gain_popup.gd" id="1_ydu23"]
+
+[node name="ResourceGainPopup" type="RichTextLabel"]
+offset_right = 40.0
+offset_bottom = 40.0
+bbcode_enabled = true
+fit_content = true
+horizontal_alignment = 1
+script = ExtResource("1_ydu23")
