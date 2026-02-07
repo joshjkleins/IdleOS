@@ -2,7 +2,7 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS
-# Merge universal commands back in, dont like the look of 2 seperate things
+# Merge universal commands back in
 # Add more juice to purchasing (order received...transfering funds...funds transfered...downloading [item(s)]..purchase complete
 
 #^^^finish above then build credential building module
