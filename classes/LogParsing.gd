@@ -24,7 +24,7 @@ const BASE_REWARD_CHANCE = 0.05
 const REWARD_TABLE = [
 	{ "type": "data", "min": 5, "max": 15, "weight": 40, "color": "yellow" },
 	{ "type": "usernames", "amount": 1, "weight": 15, "color": "cyan" },
-	{ "type": "scrambled passwords", "amount": 1, "weight": 15, "color": "lime" },
+	{ "type": "encrypted passwords", "amount": 1, "weight": 15, "color": "lime" },
 	{ "type": "logs", "amount": 1, "weight": 10, "color": "lime" },
 	{ "type": "passwords", "amount": 1, "weight": 10, "color": "lime" },
 	{ "type": "ip address", "amount": 1, "weight": 8, "color": "orange" },

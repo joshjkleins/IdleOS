@@ -1,11 +1,8 @@
 extends Control
 
 ###NEXT
-# BUG: FIX TYPING COMMANDS DURING WAIT PERIODS
-# Merge universal commands back in
-# Add more juice to purchasing (order received...transfering funds...funds transfered...downloading [item(s)]..purchase complete
+# BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
-#^^^finish above then build credential building module
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -20,12 +17,14 @@ extends Control
 
 @onready var parser = LogParser.new()
 @onready var pw_scram = PasswordCrack.new()
+@onready var cred_match = CredentialMatching.new()
 
 enum Context {
 	ROOT,
 	DATA_MINING,
 	LOG_PARSING,
 	PASSWORD_CRACKING,
+	CRED_MATCHING,
 	DARKWEB,
 	MARKETPLACE
 }
@@ -108,6 +107,8 @@ func _on_input_line_text_submitted(new_text):
 				log_parsing_commands(new_text)
 			Context.PASSWORD_CRACKING:
 				password_unscramble_commands(new_text)
+			Context.CRED_MATCHING:
+				cred_matching_commands(new_text)
 
 	history_index = -1
 	
@@ -127,6 +128,8 @@ func get_context_lead():
 			return "IdleOS/Modules/LogParsing>"
 		Context.PASSWORD_CRACKING:
 			return "IdleOS/Modules/PasswordCracking>"
+		Context.CRED_MATCHING:
+			return "IdleOS/Modules/CredentialMatching>"
 
 #Changes context and updates leading text
 func update_context(new_context: Context):
@@ -134,13 +137,13 @@ func update_context(new_context: Context):
 	lead_text.text = get_context_lead()
 
 func list_help():
-	add_line("""
-[UNIVERSAL COMMANDS]
-list -r                 Lists all resources
-list -m                 List available modules
--h                      View this help message
-quit -s                 Save and quit game
-""")
+	#add_line("""
+#[UNIVERSAL COMMANDS]
+#list -r                 Lists all resources
+#list -m                 List available modules
+#-h                      View this help message
+#quit -s                 Save and quit game
+#""")
 	match current_context:
 		Context.ROOT:
 			add_line("""
@@ -172,7 +175,7 @@ stop                    Stop log parsing process
 root                    Exit back to root
 info                    Log parsing module stats
 """)
-			add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
+			
 		Context.PASSWORD_CRACKING:
 			add_line("""
 [PASSWORD UNSCRAMBLE COMMANDS]
@@ -181,6 +184,21 @@ stop                    Stop password cracking process
 root                    Exit back to root
 info                    Password cracking module stats
 """)
+		Context.CRED_MATCHING:
+			add_line("""
+	[CREDENTIAL MATCHING COMMANDS]
+start                   Start credential matching process
+stop                    Stop credential matching process
+root                    Exit back to root
+info                    Credential matching module stats
+""")
+	
+	add_line("""list -r                 Lists all resources
+list -m                 List available modules
+-h                      View this help message
+quit -s                 Save and quit game
+""")
+	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 	
 
 func universal_commands(text):
@@ -229,6 +247,16 @@ func root_commands(text):
 			add_line(Ascii.pw_unscramble)
 			add_line("Current available scrambled passwords: " + str(Inventory.get_amount("encrypted passwords")))
 			list_help()
+		"load cred-matching":
+			add_line("[ .. ] loading credential matching module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] credential matching module loaded")
+			update_context(Context.CRED_MATCHING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.cred_matching)
+			add_line("Current available usernames & passwords")
+			add_line("Passwords x" + str(Inventory.get_amount("passwords")) + "   Usernames x" + str(Inventory.get_amount("usernames")))
+			list_help()
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
 			await get_tree().create_timer(0.8).timeout
@@ -242,6 +270,71 @@ func root_commands(text):
 			list_help()
 		_:#default
 			add_line("Command not found")
+
+#cred matching context commands
+func cred_matching_commands(text):
+	text = text.to_lower().strip_edges()
+	match text:
+		"start":
+			if !process_running:
+				start_cred_matching()
+			else:
+				add_line("Credential matching already running")
+		"stop":
+			if process_running:
+				add_line("Waiting for current match to finish...")
+			process_running = false
+		"root":
+			if process_running:
+				add_line("Cannot safetly shut down module while process is running")
+				add_line("Stop process to exit module")
+			else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
+		"info":
+			add_line("Module: Credential Matching")
+			add_line("Level:         " + str(Stats.player_stats["Credential Matching"]["level"]))
+			#Level
+			#Experience
+			add_line("Experience:    " + str(Stats.player_stats["Credential Matching"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Credential Matching"]["level"] + 1)))
+			#Effeciency
+			var eff = Stats.player_stats["Credential Matching"]["effeciency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     Increases chance a resource is found.")
+		"-h":
+			list_help()
+		_:
+			add_line("Command not found")
+
+func start_cred_matching():
+
+	if Inventory.get_amount("passwords") < 1 or Inventory.get_amount("usernames") < 1:
+		add_line("You do not have suffecient usernames or passwords")
+		return
+	process_running = true
+	cred_match.usernames = cred_match.get_initial_list()
+	cred_match.highlight_index = 0
+	var match_found = false
+	add_line(cred_match.render_list())
+	var usernames_index = lines.size() - 1
+
+	while process_running and !match_found:
+		cred_match.highlight_index = (cred_match.highlight_index + 1) % min(cred_match.usernames.size(), 20)
+		set_line(usernames_index, cred_match.render_list(), false)
+		await get_tree().create_timer(0.1).timeout
+	
+	#next time
+	#instead of restarting list, create new usernames and keep going down list
+	#add chance to 'match' credentials, when a credential is matched highlight green, remove pw/un and add cred
+	# if more resources are available restart cred matching
+	# confirm 'stopping' works
+	# add summary / header
+	# implement effeciency
+	
+		
+	
 
 #Log parsing context commands
 func log_parsing_commands(text):
@@ -469,7 +562,7 @@ func start_log_stream():
 			if result.reward.size() > 0:
 				apply_reward(result.reward)
 
-			await get_tree().create_timer(0.5).timeout
+			await get_tree().create_timer(0.02).timeout
 		
 		if Inventory.inventory["logs"]["amount"] > 0 and process_running:
 			clear_logs()
@@ -482,21 +575,26 @@ func start_log_stream():
 		add_line("All logs parsed.") 
 		set_line(parse_box_title_line, parser.line("Status: FINISHED   Logs: x" + str(Inventory.get_amount("logs"))))
 	
-	add_line(show_batch_total())
+	#add_line(show_batch_total())
+	show_batch_total()
 	add_line("Process finished")
 
 	process_running = false
 
-func show_batch_total() -> String:
-	add_line("\nResources gained from current parsing job")
-	add_line("---------------------------------------")
+func show_batch_total():
+
 	var output = ""
 	var title_chars = 25
 	for k in batch_totals.keys():
 		if batch_totals[k] > 0:
 			var spaces = 25 - k.length()
-			output += k + " ".repeat(spaces) + str(int(batch_totals[k])) + "\n"
-	return output
+			output += k + " x" + str(int(batch_totals[k])) + "\n"
+	if output != "":
+		add_line("\nResources gained from current parsing job")
+		add_line("---------------------------------------")
+		add_line(output)
+	else:
+		add_line("No resources gained from current parsing job.")
 
 func show_process_summary(process_name: String, amount: int, resource: String):
 	add_line("\nResources gained from recent job")
@@ -526,6 +624,7 @@ func apply_reward(reward:Dictionary):
 	
 	# Add to batch summary
 	if batch_totals.has(reward.type):
+		print(reward.text)
 		batch_totals[reward.type] += reward.amount
 
 #Marketplace context commands
@@ -570,10 +669,22 @@ func handle_buy_command(text: String) -> void:
 	
 	# Validate ID
 	if item_id == -1:
+		add_line("Buy command not recognized")
 		add_line("Usage: buy id=[itemID] a=[amount]")
+		add_line("Example: buy id=4 a=12")
 		return
 	
 	var result = ShopItems.purchase_item(item_id, amount)
+	add_line("Sending order...")
+	await get_tree().create_timer(0.5).timeout
+	add_line("Order received")
+	await get_tree().create_timer(0.5).timeout
+	add_line("Transfering funds")
+	await get_tree().create_timer(0.2).timeout
+	add_line("Funds received")
+	await get_tree().create_timer(0.2).timeout
+	add_line("Downloading items")
+	await get_tree().create_timer(1.0).timeout
 	add_line(result)
 
 #Data mining context commands

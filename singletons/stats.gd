@@ -30,6 +30,15 @@ var player_stats = {
 		"effeciency increase rate": 0.02,
 		"unlocked": true,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords."
+	},
+	"Credential Matching": {
+		"experience": 0,
+		"command": "cred-matching",
+		"level": 1,
+		"effeciency": 0.0,
+		"effeciency increase rate": 0.02,
+		"unlocked": true,
+		"description": "IDK yet"
 	}
 }
 
