@@ -84,16 +84,26 @@ func get_initial_list() -> Array:
 	return list
 
 
-func render_list() -> String:
+func render_list(match_found: bool) -> String:
 	var header_string = "\nID" + " ".repeat(6) + "USERNAMES" + " ".repeat(16) + "PASSWORD STRENGTH" + " ".repeat(3) + "CHANCE TO MATCH\n"
 	var header_sep = "---------------------------------------------------------------------------------------------------------\n"
 
 	var list_output := ""
 	var visible_count = min(usernames.size(), max_visible)
 
+	# if highlight index is greater than visible count, remove the first index and generateusername to add at the end
+	if highlight_index >= visible_count:
+		usernames.remove_at(0)
+		usernames.append(generate_username())
+
 	for i in range(visible_count):
 		var n = usernames[i]
-		var line := str(i)
+		var line_num = ""
+		if highlight_index < visible_count:
+			line_num = str(i)
+		else:
+			line_num = str(i + (highlight_index - visible_count + 1))
+		var line = line_num
 		line += " ".repeat(8 - str(i).length())
 		line += n
 		line += " ".repeat(25 - n.length())
@@ -101,9 +111,22 @@ func render_list() -> String:
 		line += " ".repeat(16)
 		line += "4%"
 
-		if i == highlight_index:
-			list_output += "[bgcolor=#2a5fff][color=white]" + line + "[/color][/bgcolor]\n"
+		
+		if i == highlight_index or (i == max_visible - 1 and highlight_index >= max_visible):
+			if match_found:
+				list_output += "[bgcolor=#2e7533][color=white]" + line + "[/color][/bgcolor]\n"
+			else:
+				list_output += "[bgcolor=#2a5fff][color=white]" + line + "[/color][/bgcolor]\n"
 		else:
 			list_output += line + "\n"
 
 	return header_string + header_sep + list_output
+
+
+func create_creds():
+	if Inventory.get_amount("passwords") < 1 or Inventory.get_amount("usernames") < 1:
+		print("No username or password to transform")
+		
+	Inventory.remove_resource("passwords", 1)
+	Inventory.remove_resource("usernames", 1)
+	Inventory.add_resource("credentials", 1)

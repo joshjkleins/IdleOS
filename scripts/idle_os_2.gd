@@ -313,28 +313,43 @@ func start_cred_matching():
 	if Inventory.get_amount("passwords") < 1 or Inventory.get_amount("usernames") < 1:
 		add_line("You do not have suffecient usernames or passwords")
 		return
+
 	process_running = true
+	
 	cred_match.usernames = cred_match.get_initial_list()
 	cred_match.highlight_index = 0
 	var match_found = false
-	add_line(cred_match.render_list())
+	
+	add_line(cred_match.render_list(false))
 	var usernames_index = lines.size() - 1
-
-	while process_running and !match_found:
-		cred_match.highlight_index = (cred_match.highlight_index + 1) % min(cred_match.usernames.size(), 20)
-		set_line(usernames_index, cred_match.render_list(), false)
+	
+	
+	while Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1:
 		await get_tree().create_timer(0.1).timeout
+		while process_running and !match_found:
+			cred_match.highlight_index += 1
+			if randf() < 0.03:
+				match_found = true
+			set_line(usernames_index, cred_match.render_list(match_found), false)
+			await get_tree().create_timer(0.05).timeout
+
+		if process_running:
+			cred_match.create_creds()
+			await get_tree().create_timer(0.3).timeout
+		
+			if process_running:
+				if Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1:
+					match_found = false
+					cred_match.usernames = cred_match.get_initial_list()
+					cred_match.highlight_index = 0
+					set_line(usernames_index, cred_match.render_list(false), false)
+	if process_running:
+		process_running = false
+	add_line("Credential matching stopped")
 	
 	#next time
-	#instead of restarting list, create new usernames and keep going down list
-	#add chance to 'match' credentials, when a credential is matched highlight green, remove pw/un and add cred
-	# if more resources are available restart cred matching
-	# confirm 'stopping' works
 	# add summary / header
 	# implement effeciency
-	
-		
-	
 
 #Log parsing context commands
 func log_parsing_commands(text):
@@ -562,7 +577,7 @@ func start_log_stream():
 			if result.reward.size() > 0:
 				apply_reward(result.reward)
 
-			await get_tree().create_timer(0.02).timeout
+			await get_tree().create_timer(0.4).timeout
 		
 		if Inventory.inventory["logs"]["amount"] > 0 and process_running:
 			clear_logs()

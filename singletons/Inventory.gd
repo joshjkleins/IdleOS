@@ -23,15 +23,15 @@ var inventory := {
 		"description": "Raw encrypted data used as marketplace currency"
 	},
 	"encrypted passwords": {
-		"amount": 50,
+		"amount": 0,
 		"description": "Encrypted passwords that need cracking"
 	},
 	"passwords": {
-		"amount": 20,
+		"amount": 0,
 		"description": "Decrypted passwords used for account breaches"
 	},
 	"usernames": {
-		"amount": 20,
+		"amount": 0,
 		"description": "Usernames can be combined with an unscrambled password to make a credential"
 	},
 	"credentials": {
@@ -43,7 +43,7 @@ var inventory := {
 		"description": "IP address used to find hacking target"
 	},
 	"logs": {
-		"amount": 100,
+		"amount": 20,
 		"description": "Encrypted log files that can be processed for resources"
 	}
 }
