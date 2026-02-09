@@ -9,7 +9,7 @@ var items = {
 	0: {
 		"id": 0,
 		"name": "Logs",
-		"cost": 10,
+		"cost": 5,
 		"description": "Decrypt logs to gain random resources (data, passwords, usernames, credentials)",
 		"type": ItemType.RESOURCE,
 		"available": true
@@ -17,7 +17,7 @@ var items = {
 	1: {
 		"id": 1,
 		"name": "Log Parsing",
-		"cost": 10,
+		"cost": 15,
 		"description": "Module used to parse through logs for a chance to gain random resources.",
 		"type": ItemType.MODULE,
 		"available": true
@@ -25,8 +25,16 @@ var items = {
 	2: {
 		"id": 2,
 		"name": "Password Cracking",
-		"cost": 50,
+		"cost": 25,
 		"description": "Module used to transform a scrambled password to a valid password used to create credentials.",
+		"type": ItemType.MODULE,
+		"available": true
+	},
+	3: {
+		"id": 3,
+		"name": "Credential Matching",
+		"cost": 40,
+		"description": "Module used to combine usernames and passwords to create usable credentials.",
 		"type": ItemType.MODULE,
 		"available": true
 	}

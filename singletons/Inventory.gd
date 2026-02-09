@@ -19,7 +19,7 @@ extends Node
 
 var inventory := {
 	"data": {
-		"amount": 100,
+		"amount": 500,
 		"description": "Raw encrypted data used as marketplace currency"
 	},
 	"encrypted passwords": {
@@ -27,11 +27,11 @@ var inventory := {
 		"description": "Encrypted passwords that need cracking"
 	},
 	"passwords": {
-		"amount": 0,
+		"amount": 100,
 		"description": "Decrypted passwords used for account breaches"
 	},
 	"usernames": {
-		"amount": 0,
+		"amount": 100,
 		"description": "Usernames can be combined with an unscrambled password to make a credential"
 	},
 	"credentials": {
@@ -43,7 +43,7 @@ var inventory := {
 		"description": "IP address used to find hacking target"
 	},
 	"logs": {
-		"amount": 20,
+		"amount": 0,
 		"description": "Encrypted log files that can be processed for resources"
 	}
 }

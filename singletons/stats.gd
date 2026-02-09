@@ -19,7 +19,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs."
 	},
 	"Password Cracking": {
@@ -28,7 +28,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords."
 	},
 	"Credential Matching": {
@@ -37,7 +37,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "IDK yet"
 	}
 }
