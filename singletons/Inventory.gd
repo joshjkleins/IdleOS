@@ -27,11 +27,11 @@ var inventory := {
 		"description": "Encrypted passwords that need cracking"
 	},
 	"passwords": {
-		"amount": 100,
+		"amount": 3,
 		"description": "Decrypted passwords used for account breaches"
 	},
 	"usernames": {
-		"amount": 100,
+		"amount": 3,
 		"description": "Usernames can be combined with an unscrambled password to make a credential"
 	},
 	"credentials": {

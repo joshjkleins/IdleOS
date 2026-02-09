@@ -20,7 +20,10 @@ class_name CredentialMatching
 
 var usernames = []
 var highlight_index = 0
-var max_visible = 20
+var max_visible = 15
+
+var base_chance_to_find = 0.0
+var increase_per_row = 0.003
 
 const NAMES = [
 	"john","jane","alex","sam","mike","emma","chris","josh","luke",
@@ -79,7 +82,7 @@ func _cursed() -> String:
 
 func get_initial_list() -> Array:
 	var list = []
-	for i in range(20):
+	for i in range(max_visible):
 		list.append(generate_username())
 	return list
 
@@ -100,16 +103,17 @@ func render_list(match_found: bool) -> String:
 		var n = usernames[i]
 		var line_num = ""
 		if highlight_index < visible_count:
-			line_num = str(i)
+			line_num = i
 		else:
-			line_num = str(i + (highlight_index - visible_count + 1))
-		var line = line_num
+			line_num = i + (highlight_index - visible_count + 1)
+		var line = str(line_num)
+		var perc_chance = line_num * (increase_per_row * (1 + Stats.player_stats["Credential Matching"]["effeciency"]))
 		line += " ".repeat(8 - str(i).length())
 		line += n
 		line += " ".repeat(25 - n.length())
 		line += "weak"
 		line += " ".repeat(16)
-		line += "4%"
+		line += "%.2f" % (perc_chance * 100.0)
 
 		
 		if i == highlight_index or (i == max_visible - 1 and highlight_index >= max_visible):

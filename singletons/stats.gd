@@ -11,7 +11,8 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.03,
 		"unlocked": true,
-		"description": "Generates data used for purchasing items from the marketplace."
+		"description": "Generates data used for purchasing items from the marketplace.",
+		"effeciency description": "Increases speed of mining."
 	},
 	"Log Parsing": {
 		"experience": 0,
@@ -19,8 +20,9 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
-		"unlocked": false,
-		"description": "Parses through logs for a chance to gain random resources. Requires Logs."
+		"unlocked": true,
+		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
+		"effeciency description": "Increases chance of finding a resource per row."
 	},
 	"Password Cracking": {
 		"experience": 0,
@@ -28,17 +30,19 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
-		"unlocked": false,
-		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords."
+		"unlocked": true,
+		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
+		"effeciency description": "Increases chance of revealing more than one letter."
 	},
 	"Credential Matching": {
 		"experience": 0,
 		"command": "cred-matching",
 		"level": 1,
 		"effeciency": 0.0,
-		"effeciency increase rate": 0.02,
-		"unlocked": false,
-		"description": "IDK yet"
+		"effeciency increase rate": 0.01,
+		"unlocked": true,
+		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
+		"effeciency description": "Increases chance for a match per row."
 	}
 }
 
@@ -62,12 +66,27 @@ func list_unlocked_processes():
 	#Heading
 	output += "Module" + " ".repeat(first_col - 6) + "Command" + " ".repeat(second_col - 7) + "Description\n"
 	#output += "Module              Command               Description\n"
-	output += "-".repeat(first_col + second_col + 11) + "\n"
+	output += "-".repeat(first_col + second_col + 40) + "\n"
 	
 	for process in player_stats.keys():
 		var proc = player_stats[process]
+		var desc = proc["description"]
+		if desc.length() > 80:
+			var slice = desc.substr(0, 80)
+			var break_index = slice.rfind(" ")
+			if break_index == -1:
+				break_index = 80
+
+			desc = (
+				desc.substr(0, break_index)
+				+ "\n"
+				+ " ".repeat(45)
+				+ desc.substr(break_index + 1)
+			)
+
+
 		if proc.unlocked:
-			output += process + " ".repeat(first_col - process.length()) + proc["command"] + " ".repeat(second_col - proc.command.length()) + proc["description"] + "\n"
+			output += process + " ".repeat(first_col - process.length()) + proc["command"] + " ".repeat(second_col - proc.command.length()) + desc + "\n"
 	
 	return output
 

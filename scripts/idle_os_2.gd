@@ -281,8 +281,6 @@ func cred_matching_commands(text):
 			else:
 				add_line("Credential matching already running")
 		"stop":
-			if process_running:
-				add_line("Waiting for current match to finish...")
 			process_running = false
 		"root":
 			if process_running:
@@ -302,7 +300,7 @@ func cred_matching_commands(text):
 			add_line("Experience:    " + str(Stats.player_stats["Credential Matching"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Credential Matching"]["level"] + 1)))
 			#Effeciency
 			var eff = Stats.player_stats["Credential Matching"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     Increases chance a resource is found.")
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Credential Matching"]["effeciency description"])
 		"-h":
 			list_help()
 		_:
@@ -315,26 +313,35 @@ func start_cred_matching():
 		return
 
 	process_running = true
-	
+	show_module_stats_header("Credential Matching")
 	cred_match.usernames = cred_match.get_initial_list()
 	cred_match.highlight_index = 0
 	var match_found = false
 	
+	
+	var increase_per_line = 0.003
 	add_line(cred_match.render_list(false))
 	var usernames_index = lines.size() - 1
 	
+	var creds_created = 0
 	
-	while Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1:
+	while Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1 and process_running:
+		var chance_to_find_match = 0.0
+		var roll = randf()
 		await get_tree().create_timer(0.1).timeout
 		while process_running and !match_found:
 			cred_match.highlight_index += 1
-			if randf() < 0.03:
+			if roll < chance_to_find_match:
 				match_found = true
 			set_line(usernames_index, cred_match.render_list(match_found), false)
 			await get_tree().create_timer(0.05).timeout
+			chance_to_find_match += increase_per_line * (1 + Stats.player_stats["Credential Matching"]["effeciency"])
 
 		if process_running:
+			Stats.add_xp(Stats.player_stats["Credential Matching"], 450)
+			update_module_stats_header("Credential Matching")
 			cred_match.create_creds()
+			creds_created += 1
 			await get_tree().create_timer(0.3).timeout
 		
 			if process_running:
@@ -345,6 +352,7 @@ func start_cred_matching():
 					set_line(usernames_index, cred_match.render_list(false), false)
 	if process_running:
 		process_running = false
+	show_process_summary("Cred Matching", creds_created, "credentials")
 	add_line("Credential matching stopped")
 	
 	#next time
@@ -382,7 +390,7 @@ func log_parsing_commands(text):
 			add_line("Experience:    " + str(Stats.player_stats["Log Parsing"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Log Parsing"]["level"] + 1)))
 			#Effeciency
 			var eff = Stats.player_stats["Log Parsing"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     Increases chance a resource is found.")
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["effeciency description"])
 		"-h":
 			list_help()
 		_:
@@ -413,7 +421,7 @@ func password_unscramble_commands(text):
 			add_line("Experience:    " + str(Stats.player_stats["Password Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Password Cracking"]["level"] + 1)))
 			#Effeciency
 			var eff = Stats.player_stats["Password Cracking"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     Increases chance to reveal multiple letters.")
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["effeciency description"])
 		"-h":
 			list_help()
 		_:
@@ -731,7 +739,7 @@ func data_mining_commands(text):
 			add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
 			#Effeciency
 			var eff = Stats.player_stats["Data Mining"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     Increases mining speed")
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["effeciency description"])
 		"-h":
 			list_help()
 		_:
