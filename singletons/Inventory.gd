@@ -135,6 +135,9 @@ func pad_text(value, width: int) -> String:
 # Modules
 
 #Hacking:
+# Should be a versus : player vs target
+# using a credential wears down targets 'health'
+
 # Run hacking module
 # Search for target using IP addresses
 # Choose from list of targets, consume credentials to get in

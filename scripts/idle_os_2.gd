@@ -3,6 +3,12 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
+# Planning stage
+# Plan out how hacking fully works
+# Figure out different resources that can be used during a 'hack'
+# load hacking -> can type in commands to browse hacking targets -> each target should give stats/difficulty/drops/drop rates -> commence hacking -> start 'battle' using 
+# resources: Credentials used to 'attack', 'x' used to heal, 
+
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -14,6 +20,9 @@ extends Control
 @onready var lead_text = $Panel/MarginContainer/TerminalRoot/InputLineContainer/LeadText
 @onready var input_line = $Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine
 @onready var scrollback = $Panel/MarginContainer/TerminalRoot/Scrollback
+@onready var loading = $Panel/MarginContainer/Loading
+@onready var terminal_root = $Panel/MarginContainer/TerminalRoot
+@onready var hacking = $Panel/MarginContainer/Hacking
 
 @onready var parser = LogParser.new()
 @onready var pw_scram = PasswordCrack.new()
@@ -25,6 +34,7 @@ enum Context {
 	LOG_PARSING,
 	PASSWORD_CRACKING,
 	CRED_MATCHING,
+	HACKING,
 	DARKWEB,
 	MARKETPLACE
 }
@@ -109,6 +119,8 @@ func _on_input_line_text_submitted(new_text):
 				password_unscramble_commands(new_text)
 			Context.CRED_MATCHING:
 				cred_matching_commands(new_text)
+			Context.HACKING:
+				hacking_commands(new_text)
 
 	history_index = -1
 	
@@ -130,6 +142,8 @@ func get_context_lead():
 			return "IdleOS/Modules/PasswordCracking>"
 		Context.CRED_MATCHING:
 			return "IdleOS/Modules/CredentialMatching>"
+		Context.HACKING:
+			return "IdleOS/Modules/Hacking>"
 
 #Changes context and updates leading text
 func update_context(new_context: Context):
@@ -257,6 +271,17 @@ func root_commands(text):
 			add_line("Current available usernames & passwords")
 			add_line("Passwords x" + str(Inventory.get_amount("passwords")) + "   Usernames x" + str(Inventory.get_amount("usernames")))
 			list_help()
+		"load hacking":
+			var tween = create_tween()
+			tween.tween_property(terminal_root, "modulate:a", 0.0, 1.0)
+			await tween.finished
+			terminal_root.visible = false
+			await loading.show_loading()
+			
+			hacking.modulate.a = 0.0
+			hacking.visible = true
+			var tween2 = create_tween()
+			tween2.tween_property(hacking, "modulate:a", 1.0, 0.5)
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
 			await get_tree().create_timer(0.8).timeout
@@ -270,6 +295,9 @@ func root_commands(text):
 			list_help()
 		_:#default
 			add_line("Command not found")
+
+func hacking_commands(text):
+	pass
 
 #cred matching context commands
 func cred_matching_commands(text):

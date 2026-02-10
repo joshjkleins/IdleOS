@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://jigcp4xroy7d"]
+
+[ext_resource type="Script" uid="uid://dulvogimwy0yv" path="res://scripts/loading.gd" id="1_ir5ef"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yc7uc"]
+bg_color = Color(0.362739, 0.679854, 0.472486, 1)
+
+[node name="Loading" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ir5ef")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="CenterContainer"]
+custom_minimum_size = Vector2(300, 20)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_yc7uc")
+
+[node name="Label" type="Label" parent="CenterContainer/ProgressBar"]
+layout_mode = 0
+offset_top = 24.0
+offset_right = 300.0
+offset_bottom = 47.0
+text = "Loading"
+horizontal_alignment = 1

@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=6 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
+[ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
+[ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -70,5 +72,13 @@ placeholder_text = "type a command or -h for help"
 keep_editing_on_text_submit = true
 context_menu_enabled = false
 caret_blink = true
+
+[node name="Hacking" parent="Panel/MarginContainer" instance=ExtResource("3_wp27s")]
+visible = false
+layout_mode = 2
+
+[node name="Loading" parent="Panel/MarginContainer" instance=ExtResource("4_u0uic")]
+visible = false
+layout_mode = 2
 
 [connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
