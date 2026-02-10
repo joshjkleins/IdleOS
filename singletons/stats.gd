@@ -20,7 +20,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 		"effeciency description": "Increases chance of finding a resource per row."
 	},
@@ -30,7 +30,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
 		"effeciency description": "Increases chance of revealing more than one letter."
 	},
@@ -40,7 +40,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.01,
-		"unlocked": true,
+		"unlocked": false,
 		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
 		"effeciency description": "Increases chance for a match per row."
 	}

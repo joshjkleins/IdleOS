@@ -156,7 +156,6 @@ marketplace -auth       Connects to the marketplace
 [MARKETPLACE COMMANDS]
 list                          List items to purchase
 buy id=[itemID] a=[amount]    Purchase x amount of items (default amount = 1)
-balance                       Show available data
 root                          Disconnect from market
 """)
 		Context.DATA_MINING:
@@ -694,12 +693,43 @@ func handle_buy_command(text: String) -> void:
 	if item_id == -1:
 		add_line("Buy command not recognized")
 		add_line("Usage: buy id=[itemID] a=[amount]")
-		add_line("Example: buy id=4 a=12")
+		add_line("Example: buy id=0 a=12")
 		return
 	
-	var result = ShopItems.purchase_item(item_id, amount)
+	purchase_item(item_id, amount)
+
+
+func purchase_item(id: int, amount: int):
+	# Validate item
+	if not ShopItems.items.has(id):
+		add_line("Item ID not found.")
+		return
+	
+	# Validate amount
+	if amount <= 0:
+		add_line("Invalid purchase amount.")
+		return
+	
+	var item = ShopItems.items[id]
+	
 	add_line("Sending order...")
 	await get_tree().create_timer(0.5).timeout
+	
+	# Check availability
+	if not item.get("available", false):
+		add_line("Item is not available.")
+		return
+	
+	var player_money = Inventory.get_amount("data")
+	var cost_per_item = item["cost"]
+	var total_cost = cost_per_item * amount
+	
+	# Check funds
+	if player_money < total_cost:
+		add_line("Not enough Data. Need " + str(total_cost) + ", you have " + str(player_money) + ".")
+		return
+	
+
 	add_line("Order received")
 	await get_tree().create_timer(0.5).timeout
 	add_line("Transfering funds")
@@ -708,7 +738,17 @@ func handle_buy_command(text: String) -> void:
 	await get_tree().create_timer(0.2).timeout
 	add_line("Downloading items")
 	await get_tree().create_timer(1.0).timeout
-	add_line(result)
+	#
+	# Deduct cost
+	#idk why this is here, this should never be hit if the above statement exists
+	if not Inventory.remove_resource("data", total_cost):
+		add_line("Transaction failed.")
+		return
+	
+	# Grant rewards
+	ShopItems.grant_item_reward(item, amount)
+	
+	add_line("Purchased x" + str(amount) + " " + item["name"] + " for " + str(total_cost) + " Data.")
 
 #Data mining context commands
 func data_mining_commands(text):

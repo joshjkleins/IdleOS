@@ -85,7 +85,7 @@ func grant_item_reward(item: Dictionary, amount: int) -> void:
 			items[2].available = false
 		3:
 			Stats.unlock_module("Credential Matching")
-			items[2].available = false
+			items[3].available = false
 		_:
 			print("No reward logic for item id:", item["id"])
 
