@@ -29,9 +29,5 @@ Logs="*res://singletons/Logs.gd"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-<<<<<<< HEAD
 window/size/mode=2
-=======
-window/size/mode=4
->>>>>>> 3677e18d902f174bcef1666f61662680a6fcd4d1
 window/stretch/mode="canvas_items"
