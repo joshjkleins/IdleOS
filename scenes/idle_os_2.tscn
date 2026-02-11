@@ -39,6 +39,7 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 25
 
@@ -74,7 +75,6 @@ context_menu_enabled = false
 caret_blink = true
 
 [node name="Hacking" parent="Panel/MarginContainer" instance=ExtResource("3_wp27s")]
-visible = false
 layout_mode = 2
 
 [node name="Loading" parent="Panel/MarginContainer" instance=ExtResource("4_u0uic")]

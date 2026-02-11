@@ -79,7 +79,7 @@ var skill_specific_info_index: int
 
 func _ready():
 	update_context(Context.ROOT)
-	input_line.grab_focus()
+	#input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 
 #update previous lines

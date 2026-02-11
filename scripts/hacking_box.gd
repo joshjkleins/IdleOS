@@ -6,4 +6,4 @@ extends Control
 @onready var rtl = $RichTextLabel
 
 func _ready():
-	rtl.text = "[bgcolor=#000000]" + title_text + "[/bgcolor]"
+	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
