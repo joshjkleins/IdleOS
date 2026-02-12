@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bhrvmj4mmd54r"]
+[gd_scene load_steps=6 format=3 uid="uid://bhrvmj4mmd54r"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_a6jn5"]
 [ext_resource type="Script" uid="uid://rradefrf6cm5" path="res://scripts/hacking.gd" id="2_t3qgm"]
 [ext_resource type="PackedScene" uid="uid://cf5bovrtg6c85" path="res://scenes/hacking_box.tscn" id="2_w2lns"]
+[ext_resource type="PackedScene" uid="uid://cwcgukqes7d5o" path="res://scenes/header_hacking_box.tscn" id="3_5i062"]
 [ext_resource type="PackedScene" uid="uid://3mwykxso040t" path="res://scenes/player_hacking_box.tscn" id="3_vbme0"]
 
 [node name="Hacking" type="MarginContainer"]
@@ -22,10 +23,10 @@ script = ExtResource("2_t3qgm")
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="HackingBox" parent="VBoxContainer" instance=ExtResource("2_w2lns")]
+[node name="HeaderHackingBox" parent="VBoxContainer" instance=ExtResource("3_5i062")]
 layout_mode = 2
-size_flags_stretch_ratio = 0.5
-title_text = "Hacking Module v1.0"
+size_flags_stretch_ratio = 0.2
+title_text = "Hacking Info"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -40,3 +41,5 @@ size_flags_stretch_ratio = 0.2
 layout_mode = 2
 size_flags_stretch_ratio = 0.5
 title_text = "Target"
+
+[connection signal="quit_module" from="VBoxContainer/HBoxContainer/PlayerHackingBox" to="." method="_on_player_hacking_box_quit_module"]

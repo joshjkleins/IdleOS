@@ -51,7 +51,14 @@ size_flags_vertical = 3
 mouse_filter = 1
 bbcode_enabled = true
 
-[node name="InputLine" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LeadText" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = ">"
+
+[node name="InputLine" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
@@ -71,4 +78,4 @@ bbcode_enabled = true
 text = "[bgcolor=#0b0e11]Hacking[/bgcolor]"
 fit_content = true
 
-[connection signal="text_submitted" from="PanelContainer/MarginContainer/VBoxContainer/InputLine" to="." method="_on_input_line_text_submitted"]
+[connection signal="text_submitted" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InputLine" to="." method="_on_input_line_text_submitted"]

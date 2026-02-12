@@ -272,15 +272,12 @@ func root_commands(text):
 			list_help()
 		"load hacking":
 			var tween = create_tween()
-			tween.tween_property(terminal_root, "modulate:a", 0.0, 1.0)
+			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
 			await tween.finished
 			terminal_root.visible = false
 			await loading.show_loading()
 			
-			hacking.modulate.a = 0.0
-			hacking.visible = true
-			var tween2 = create_tween()
-			tween2.tween_property(hacking, "modulate:a", 1.0, 0.5)
+			hacking.module_loaded()
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
 			await get_tree().create_timer(0.8).timeout
@@ -826,11 +823,11 @@ func start_data_mining():
 	var progress_bar_index = lines.size() - 1
 	
 	var amount_gained: int = 0
+	var dur_amount = 2.5
+	#var duration = 5.0 / (1 + efficiency)
+	var yield_amount = snapped(1.0 / dur_amount, 0.01)
 	
-	var duration = 5.0 / (1 + efficiency)
-	var yield_amount = snapped(1.0 / duration, 0.01)
-	
-	var data_per_completion = 2.0
+	var data_per_completion = 1.0
 	add_line("\nData per completion: " + str(data_per_completion))
 	add_line("Yield:    +" + str(yield_amount) + " data/sec")
 	var yield_text_index = lines.size() - 1
@@ -841,14 +838,14 @@ func start_data_mining():
 	var total_data_line_index = lines.size() - 1
 	
 	var steps = 20
-	var interval = duration / steps
+	#var interval = duration / steps
 	process_running = true
 	var exp_per_completion = 250
 	
 	while process_running:
 		#calc process length
-		duration = 5.0 / (1 + Stats.player_stats["Data Mining"]["effeciency"])
-		interval = duration / steps
+		var duration = dur_amount / (1 + Stats.player_stats["Data Mining"]["effeciency"])
+		var interval = duration / steps
 		yield_amount = snapped(data_per_completion / duration, 0.01)
 		set_line(yield_text_index, "Yield:    +" + str(yield_amount) + " data/sec")
 		for i in range(1, steps + 1):
@@ -910,3 +907,13 @@ func navigate_history(delta: int):
 	input_line.text = command_history[history_index]
 
 	call_deferred("_move_caret_to_end")
+
+
+func _on_hacking_start_loading() -> void:
+	await loading.show_loading()
+	terminal_root.modulate.a = 0.0
+	terminal_root.visible = true
+	input_line.grab_focus()
+	var tween = create_tween()
+	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
+	await tween.finished

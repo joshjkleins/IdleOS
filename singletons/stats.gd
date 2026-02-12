@@ -43,6 +43,16 @@ var player_stats = {
 		"unlocked": false,
 		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
 		"effeciency description": "Increases chance for a match per row."
+	},
+	"Hacking": {
+		"experience": 0,
+		"command": "hacking",
+		"level": 1,
+		"effeciency": 0.0,
+		"effeciency increase rate": 0.01,
+		"unlocked": false,
+		"description": "Used to hack targets. Requires ip addresses and credentials.",
+		"effeciency description": "IDK yet"
 	}
 }
 

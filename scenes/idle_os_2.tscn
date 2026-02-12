@@ -82,3 +82,4 @@ visible = false
 layout_mode = 2
 
 [connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
+[connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]
