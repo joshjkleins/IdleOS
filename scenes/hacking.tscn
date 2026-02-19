@@ -37,9 +37,9 @@ theme_override_constants/separation = 10
 layout_mode = 2
 size_flags_stretch_ratio = 0.2
 
-[node name="HackingBox3" parent="VBoxContainer/HBoxContainer" instance=ExtResource("2_w2lns")]
+[node name="HackingBox" parent="VBoxContainer/HBoxContainer" instance=ExtResource("2_w2lns")]
 layout_mode = 2
 size_flags_stretch_ratio = 0.5
 title_text = "Target"
 
-[connection signal="quit_module" from="VBoxContainer/HBoxContainer/PlayerHackingBox" to="." method="_on_player_hacking_box_quit_module"]
+[connection signal="command_entered" from="VBoxContainer/HBoxContainer/PlayerHackingBox" to="." method="_on_player_hacking_box_command_entered"]

@@ -56,6 +56,289 @@ var player_stats = {
 	}
 }
 
+var hacking_targets = {
+	"School": {
+		"command": "view school",
+		"name": "School",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Student",
+				"difficulty": "Easy",
+				"command": "hack student",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Administrator",
+				"difficulty": "Easy",
+				"command": "hack administrator",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Vice Principal",
+				"difficulty": "Medium",
+				"command": "hack vice-principal",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Principal",
+				"difficulty": "Medium",
+				"command": "hack principal",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Superintendent",
+				"difficulty": "Hard",
+				"command": "hack superintendent",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/school-ascii.png")
+	}, "Library": {
+		"command": "view library",
+		"name": "Library",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Patreon",
+				"difficulty": "Easy",
+				"command": "hack patreon",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Volunteer",
+				"difficulty": "Easy",
+				"command": "hack volunteer",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Assistant Librarian",
+				"difficulty": "Medium",
+				"command": "hack assistant-librarian",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Head Librarian",
+				"difficulty": "Medium",
+				"command": "hack head-librarian",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Director",
+				"difficulty": "Hard",
+				"command": "hack director",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/library-ascii.png")
+	}, "Small Business": {
+		"command": "view small-business",
+		"name": "Small Business",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Worker",
+				"difficulty": "Easy",
+				"command": "hack worker",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Supervisor",
+				"difficulty": "Easy",
+				"command": "hack supervisor",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Manager",
+				"difficulty": "Medium",
+				"command": "hack manager",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Human Resources",
+				"difficulty": "Medium",
+				"command": "hack human-resources",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Owner",
+				"difficulty": "Hard",
+				"command": "hack owner",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/small-business-ascii.png")
+	}, "University": {
+		"command": "view university",
+		"name": "University",
+		"difficulty": "Moderate",
+		"targets": [
+			{
+				"name": "Teachers Assistant",
+				"difficulty": "Easy",
+				"command": "hack teachers-assistant",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Professor",
+				"difficulty": "Easy",
+				"command": "hack professor",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Department Chair",
+				"difficulty": "Medium",
+				"command": "hack department-chair",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Dean",
+				"difficulty": "Medium",
+				"command": "hack dean",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "University President",
+				"difficulty": "Hard",
+				"command": "hack university-president",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/university-ascii.png")
+	}, "Hospital": {
+		"command": "view hospital",
+		"name": "Hospital",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Receptionist",
+				"difficulty": "Easy",
+				"command": "hack receptionist",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Orderly",
+				"difficulty": "Easy",
+				"command": "hack orderly",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Nurse",
+				"difficulty": "Medium",
+				"command": "hack nurse",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Doctor",
+				"difficulty": "Medium",
+				"command": "hack doctor",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Chief of Medicine",
+				"difficulty": "Hard",
+				"command": "hack chief-medicine",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/hospital-ascii.png")
+	}, "Police Station": {
+		"command": "view police-station",
+		"name": "Police Station",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Secretary",
+				"difficulty": "Easy",
+				"command": "hack secretary",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Cop",
+				"difficulty": "Easy",
+				"command": "hack cop",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Detective",
+				"difficulty": "Medium",
+				"command": "hack detective",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Sergeant",
+				"difficulty": "Medium",
+				"command": "hack sergeant",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Captain",
+				"difficulty": "Hard",
+				"command": "hack captain",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/police-station-ascii.png")
+	}, "Lawfirm": {
+		"command": "view lawfirm",
+		"name": "Lawfirm",
+		"difficulty": "Easy",
+		"targets": [
+			{
+				"name": "Legal Assistant",
+				"difficulty": "Easy",
+				"command": "hack legal-assistant",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Paralegal",
+				"difficulty": "Easy",
+				"command": "hack paralegal",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Associate Attorney",
+				"difficulty": "Medium",
+				"command": "hack associate-attorney",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Lawyer",
+				"difficulty": "Medium",
+				"command": "hack lawyer",
+				"loot": ["logs", "data", "credentials"]
+			},
+			{
+				"name": "Partner",
+				"difficulty": "Hard",
+				"command": "hack partner",
+				"loot": ["logs", "data", "credentials"]
+			}
+		],
+		"art": preload("res://art/lawfirm-ascii.png")
+	}
+}
+
+func get_hacking_target_by_command(command):
+	for target in hacking_targets:
+		for person in hacking_targets[target]["targets"]:
+			if person["command"] == command:
+				return person
+	return null
+
+func get_hacking_location_by_command(command):
+	for target in hacking_targets:
+		if hacking_targets[target]["command"] == command:
+			return hacking_targets[target]
+	return null
+
+#delete
+#func is_valid_hacking_location(command):
+	#for target in hacking_targets:
+		#if hacking_targets[target]["command"] == command:
+			#return true
+	#return false
+
 #unlock module
 func unlock_module(mod_name: String):
 	if not player_stats.has(mod_name):

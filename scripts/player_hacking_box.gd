@@ -1,6 +1,6 @@
 extends Control
 
-signal quit_module
+signal command_entered
 
 @export var title_text: String = "Console"
 @onready var pc = $PanelContainer
@@ -8,11 +8,12 @@ signal quit_module
 @onready var scrollback = $PanelContainer/MarginContainer/VBoxContainer/Scrollback
 @onready var input_line: LineEdit = $PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/InputLine
 
+
+
 var lines: Array[String] = []
 
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
-	
 	input_line.grab_focus() #get rid of this after development of hacking mod
 
 func grab():
@@ -28,11 +29,8 @@ func _on_input_line_text_submitted(new_text):
 	input_line.clear()
 	add_line(">" + new_text)
 	
-
 	var text = new_text.to_lower().strip_edges()
-	match text:
-		"root":
-			go_to_root()
+	command_entered.emit(text)
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = true):
@@ -50,6 +48,3 @@ func update_terminal(scroll_to_line: bool = true):
 	scrollback.text = "\n".join(lines)
 	if scroll_to_line:
 		scrollback.scroll_to_line(scrollback.get_line_count() - 1)
-
-func go_to_root():
-	quit_module.emit()

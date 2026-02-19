@@ -3,10 +3,17 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
+#Laterz: Make modules not work unless purhcased (currently no checking when loading)
+# pw cracking - show effeciency info and how many encrypted pw available
+# cred matching - show how many username/pw available
+# marketplace - hide 'modules' when nothing left to purchase
+
 # Planning stage
-# Plan out how hacking fully works
-# Figure out different resources that can be used during a 'hack'
-# load hacking -> can type in commands to browse hacking targets -> each target should give stats/difficulty/drops/drop rates -> commence hacking -> start 'battle' using 
+#Things hacking mod needs: Info on current skill level/relavant resources
+# Selection and viewing of targets, including loot, exp, difficulty
+# Actual hacking combat (start basic, attack/heal)
+# Loot should be a random drop chance, player receives everything they uncover
+# Victory / repeating
 # resources: Credentials used to 'attack', 'x' used to heal, 
 
 
