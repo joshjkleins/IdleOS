@@ -36,7 +36,6 @@ func reveal_letter():
 	if randf() > chance:
 		revealed_chars += 1
 	else:
-		print('yep!')
 		revealed_chars += 2
 
 func is_word_revealed() -> bool:

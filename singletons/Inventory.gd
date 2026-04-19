@@ -19,7 +19,7 @@ extends Node
 
 var inventory := {
 	"data": {
-		"amount": 0,
+		"amount": 30,
 		"description": "Raw encrypted data used as marketplace currency"
 	},
 	"encrypted passwords": {

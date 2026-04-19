@@ -3,10 +3,9 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
-#Laterz: Make modules not work unless purhcased (currently no checking when loading)
+#Laterz:
 # pw cracking - show effeciency info and how many encrypted pw available
 # cred matching - show how many username/pw available
-# marketplace - hide 'modules' when nothing left to purchase
 
 # Planning stage
 #Things hacking mod needs: Info on current skill level/relavant resources
@@ -86,11 +85,11 @@ var skill_specific_info_index: int
 
 func _ready():
 	update_context(Context.ROOT)
-	#input_line.grab_focus() #uncomment this when not testing hacking module
+	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 
 #update previous lines
-func set_line(index: int, text: String, scroll_to_line: bool = true):
+func set_line(index: int, text: String, scroll_to_line: bool = false):
 	if index < lines.size():
 		lines[index] = text
 	update_terminal(scroll_to_line)
@@ -241,50 +240,65 @@ func root_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"load data-mining":
-			add_line("[ .. ] loading data mining module")
-			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] data mining module loaded")
-			update_context(Context.DATA_MINING)
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.data_mining)
-			add_line("Welcome to the data mining module.")
-			list_help()
+			if Stats.player_stats["Data Mining"].unlocked:
+				add_line("[ .. ] loading data mining module")
+				await get_tree().create_timer(0.8).timeout
+				add_line("[ OK ] data mining module loaded")
+				update_context(Context.DATA_MINING)
+				await get_tree().create_timer(0.5).timeout
+				add_line(Ascii.data_mining)
+				add_line("Welcome to the data mining module.")
+				list_help()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		"load log-parsing":
-			add_line("[ .. ] loading log parsing module")
-			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] log parsing module loaded")
-			update_context(Context.LOG_PARSING)
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.log_parsing)
-			add_line("Current available logs: " + str(Inventory.get_amount("logs")))
-			list_help()
+			if Stats.player_stats["Log Parsing"].unlocked:
+				add_line("[ .. ] loading log parsing module")
+				await get_tree().create_timer(0.8).timeout
+				add_line("[ OK ] log parsing module loaded")
+				update_context(Context.LOG_PARSING)
+				await get_tree().create_timer(0.5).timeout
+				add_line(Ascii.log_parsing)
+				add_line("Current available logs: " + str(Inventory.get_amount("logs")))
+				list_help()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		"load pw-cracking":
-			add_line("[ .. ] loading password cracking module")
-			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] password cracking module loaded")
-			update_context(Context.PASSWORD_CRACKING)
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.pw_unscramble)
-			add_line("Current available scrambled passwords: " + str(Inventory.get_amount("encrypted passwords")))
-			list_help()
+			if Stats.player_stats["Password Cracking"].unlocked:
+				add_line("[ .. ] loading password cracking module")
+				await get_tree().create_timer(0.8).timeout
+				add_line("[ OK ] password cracking module loaded")
+				update_context(Context.PASSWORD_CRACKING)
+				await get_tree().create_timer(0.5).timeout
+				add_line(Ascii.pw_unscramble)
+				add_line("Current available scrambled passwords: " + str(Inventory.get_amount("encrypted passwords")))
+				list_help()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		"load cred-matching":
-			add_line("[ .. ] loading credential matching module")
-			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] credential matching module loaded")
-			update_context(Context.CRED_MATCHING)
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.cred_matching)
-			add_line("Current available usernames & passwords")
-			add_line("Passwords x" + str(Inventory.get_amount("passwords")) + "   Usernames x" + str(Inventory.get_amount("usernames")))
-			list_help()
+			if Stats.player_stats["Credential Matching"].unlocked:
+				add_line("[ .. ] loading credential matching module")
+				await get_tree().create_timer(0.8).timeout
+				add_line("[ OK ] credential matching module loaded")
+				update_context(Context.CRED_MATCHING)
+				await get_tree().create_timer(0.5).timeout
+				add_line(Ascii.cred_matching)
+				add_line("Current available usernames & passwords")
+				add_line("Passwords x" + str(Inventory.get_amount("passwords")) + "   Usernames x" + str(Inventory.get_amount("usernames")))
+				list_help()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		"load hacking":
-			var tween = create_tween()
-			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-			await tween.finished
-			terminal_root.visible = false
-			await loading.show_loading()
-			
-			hacking.module_loaded()
+			if Stats.player_stats["Hacking"].unlocked:
+				var tween = create_tween()
+				tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
+				await tween.finished
+				terminal_root.visible = false
+				await loading.show_loading()
+				
+				hacking.module_loaded()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
 			await get_tree().create_timer(0.8).timeout
@@ -476,7 +490,7 @@ func start_password_unscrambling():
 	var scramble_index = lines.size() - 1
 	##password unscramble loop
 	while Inventory.inventory["encrypted passwords"]["amount"] > 0 and process_running:
-		for i in range(5):
+		for i in range(15):
 			if !process_running:
 				break
 			set_line(scramble_index, pw_scram.get_current_scramble())
@@ -743,7 +757,11 @@ func purchase_item(id: int, amount: int):
 		return
 	
 	var item = ShopItems.items[id]
-	
+	if item["type"] == ShopItems.ItemType.MODULE and amount != 1:
+		amount = 1
+		add_line("Limited to 1 module per purchase. Adjusting amount to 1.")
+		await get_tree().create_timer(0.5).timeout
+		
 	add_line("Sending order...")
 	await get_tree().create_timer(0.5).timeout
 	
@@ -779,8 +797,11 @@ func purchase_item(id: int, amount: int):
 	
 	# Grant rewards
 	ShopItems.grant_item_reward(item, amount)
-	
-	add_line("Purchased x" + str(amount) + " " + item["name"] + " for " + str(total_cost) + " Data.")
+	var output_string = "Purchased x" + str(amount) + " " + item["name"]
+	if item["type"] == ShopItems.ItemType.MODULE:
+		output_string += " module"
+	output_string += " for " + str(total_cost) + " Data."
+	add_line(output_string)
 
 #Data mining context commands
 func data_mining_commands(text):
