@@ -19,8 +19,8 @@ func _ready():
 
 
 func update_header():
-	ip_label.text = "IP addresses: x" + str(Inventory.get_amount("ip address"))
-	credentials_label.text = "Credentials: x" + str(Inventory.get_amount("credentials"))
+	ip_label.text = "IP addresses: x" + str(Inventory.get_amount(Items.IP_ADDRESS))
+	credentials_label.text = "Credentials: x" + str(Inventory.get_amount(Items.CREDENTIALS))
 	
 	var hacking_stats = Stats.player_stats["Hacking"]
 	

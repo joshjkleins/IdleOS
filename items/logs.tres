@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://0clcrm3pt51j"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_sg8x0"]
+
+[resource]
+script = ExtResource("1_sg8x0")
+id = 1
+name = "Logs"
+description = "Logs that can be processed for resources"
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

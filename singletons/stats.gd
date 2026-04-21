@@ -2,7 +2,6 @@ extends Node
 
 const MAX_LEVEL = 99
 
-
 var player_stats = {
 	"Data Mining": {
 		"experience": 0,
@@ -20,7 +19,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
-		"unlocked": false,
+		"unlocked": true,
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 		"effeciency description": "Increases chance of finding a resource per row."
 	},
@@ -66,31 +65,56 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					"logs": {"min": 1, "max": 5, "weight": 50},
+					"data": {"min": 10, "max": 20, "weight": 35},
+					"encrypted passwords": {"min": 3, "max": 5, "weight": 10},
+					"parents credit card": {"min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Administrator",
 				"difficulty": "Easy",
 				"command": "hack administrator",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					"logs": {"min": 1, "max": 5},
+					"data": {"min": 10, "max": 20},
+					"encrypted passwords": {"min": 3, "max": 5},
+					"students grades": {"min": 1, "max": 1}
+				}
 			},
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					"logs": {"min": 1, "max": 5},
+					"data": {"min": 10, "max": 20},
+					"encrypted passwords": {"min": 3, "max": 5},
+					"bus schedules": {"min": 1, "max": 1}
+				}
 			},
 			{
 				"name": "Principal",
 				"difficulty": "Medium",
 				"command": "hack principal",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					"logs": {"min": 1, "max": 5},
+					"data": {"min": 10, "max": 20},
+					"encrypted passwords": {"min": 3, "max": 5},
+					"students personal files": {"min": 1, "max": 1}
+				}
 			},
 			{
 				"name": "Superintendent",
 				"difficulty": "Hard",
 				"command": "hack superintendent",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					"logs": {"min": 1, "max": 5},
+					"data": {"min": 10, "max": 20},
+					"encrypted passwords": {"min": 3, "max": 5},
+					"parents credit card": {"min": 1, "max": 1}
+				}
 			}
 		],
 		"art": preload("res://art/school-ascii.png")
@@ -324,20 +348,14 @@ func get_hacking_target_by_command(command):
 		for person in hacking_targets[target]["targets"]:
 			if person["command"] == command:
 				return person
-	return null
+	return {}
 
 func get_hacking_location_by_command(command):
 	for target in hacking_targets:
 		if hacking_targets[target]["command"] == command:
 			return hacking_targets[target]
-	return null
+	return {}
 
-#delete
-#func is_valid_hacking_location(command):
-	#for target in hacking_targets:
-		#if hacking_targets[target]["command"] == command:
-			#return true
-	#return false
 
 #unlock module
 func unlock_module(mod_name: String):

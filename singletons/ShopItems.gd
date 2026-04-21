@@ -64,7 +64,7 @@ func purchase_item(id: int, amount: int) -> String:
 	if not item.get("available", false):
 		return item["name"] + " is not available."
 	
-	var player_money = Inventory.get_amount("data")
+	var player_money = Inventory.get_amount(Items.DATA)
 	var cost_per_item = item["cost"]
 	var total_cost = cost_per_item * amount
 	
@@ -73,7 +73,7 @@ func purchase_item(id: int, amount: int) -> String:
 		return "Not enough Data. Need " + str(total_cost) + ", you have " + str(player_money) + "."
 	
 	# Deduct cost
-	if not Inventory.remove_resource("data", total_cost):
+	if not Inventory.remove_resource(Items.DATA, total_cost):
 		return "Transaction failed."
 	
 	# Grant rewards
@@ -90,7 +90,7 @@ func purchase_item(id: int, amount: int) -> String:
 func grant_item_reward(item: Dictionary, amount: int) -> void:
 	match item["id"]:
 		0:
-			Inventory.add_resource("logs", amount)
+			Inventory.add_resource(Items.LOGS, amount)
 		10:
 			Stats.unlock_module("Log Parsing")
 			items[10].available = false

@@ -24,10 +24,12 @@ Stats="*res://singletons/stats.gd"
 ShopItems="*res://singletons/ShopItems.gd"
 Modules="*res://singletons/Modules.gd"
 Logs="*res://singletons/Logs.gd"
+Signals="*res://singletons/Signals.gd"
+Items="*res://singletons/Items.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/size/mode=3
+window/size/mode=2
 window/stretch/mode="canvas_items"

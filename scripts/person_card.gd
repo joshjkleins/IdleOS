@@ -21,3 +21,12 @@ func flash_green():
 	var tween2 = create_tween()
 	tween2.tween_property(self, "modulate", Color.WHITE, 0.15)
 	await tween2.finished
+
+func flash_red():
+	var tween = create_tween()
+	tween.tween_property(self, "modulate", Color("#ff5a3d"), 0.15)
+	await tween.finished
+	
+	var tween2 = create_tween()
+	tween2.tween_property(self, "modulate", Color.WHITE, 0.15)
+	await tween2.finished

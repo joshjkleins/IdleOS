@@ -85,7 +85,7 @@ var skill_specific_info_index: int
 
 func _ready():
 	update_context(Context.ROOT)
-	input_line.grab_focus() #uncomment this when not testing hacking module
+	# input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 
 #update previous lines
@@ -259,7 +259,7 @@ func root_commands(text):
 				update_context(Context.LOG_PARSING)
 				await get_tree().create_timer(0.5).timeout
 				add_line(Ascii.log_parsing)
-				add_line("Current available logs: " + str(Inventory.get_amount("logs")))
+				add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
 				list_help()
 			else:
 				add_line("Module not found, must be purchased from the marketplace.")
@@ -271,7 +271,7 @@ func root_commands(text):
 				update_context(Context.PASSWORD_CRACKING)
 				await get_tree().create_timer(0.5).timeout
 				add_line(Ascii.pw_unscramble)
-				add_line("Current available scrambled passwords: " + str(Inventory.get_amount("encrypted passwords")))
+				add_line("Current available scrambled passwords: " + str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS)))
 				list_help()
 			else:
 				add_line("Module not found, must be purchased from the marketplace.")
@@ -284,7 +284,7 @@ func root_commands(text):
 				await get_tree().create_timer(0.5).timeout
 				add_line(Ascii.cred_matching)
 				add_line("Current available usernames & passwords")
-				add_line("Passwords x" + str(Inventory.get_amount("passwords")) + "   Usernames x" + str(Inventory.get_amount("usernames")))
+				add_line("Passwords x" + str(Inventory.get_amount(Items.PASSWORDS)) + "   Usernames x" + str(Inventory.get_amount(Items.USERNAMES)))
 				list_help()
 			else:
 				add_line("Module not found, must be purchased from the marketplace.")
@@ -308,7 +308,7 @@ func root_commands(text):
 			update_context(Context.MARKETPLACE)
 			add_line(Ascii.marketplace)
 			add_line("Welcome to the marketplace.")
-			add_line("\nCurrent balance: " + str(Inventory.get_amount("data")) + " data")
+			add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
 			list_help()
 		_:#default
 			add_line("Command not found")
@@ -353,7 +353,7 @@ func cred_matching_commands(text):
 
 func start_cred_matching():
 
-	if Inventory.get_amount("passwords") < 1 or Inventory.get_amount("usernames") < 1:
+	if Inventory.get_amount(Items.PASSWORDS) < 1 or Inventory.get_amount(Items.USERNAMES) < 1:
 		add_line("You do not have suffecient usernames or passwords")
 		return
 
@@ -370,7 +370,7 @@ func start_cred_matching():
 	
 	var creds_created = 0
 	
-	while Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1 and process_running:
+	while Inventory.get_amount(Items.PASSWORDS) >= 1 and Inventory.get_amount(Items.USERNAMES) >= 1 and process_running:
 		var chance_to_find_match = 0.0
 		var roll = randf()
 		await get_tree().create_timer(0.1).timeout
@@ -390,14 +390,14 @@ func start_cred_matching():
 			await get_tree().create_timer(0.3).timeout
 		
 			if process_running:
-				if Inventory.get_amount("passwords") >= 1 and Inventory.get_amount("usernames") >= 1:
+				if Inventory.get_amount(Items.PASSWORDS) >= 1 and Inventory.get_amount(Items.USERNAMES) >= 1:
 					match_found = false
 					cred_match.usernames = cred_match.get_initial_list()
 					cred_match.highlight_index = 0
 					set_line(usernames_index, cred_match.render_list(false), false)
 	if process_running:
 		process_running = false
-	show_process_summary("Cred Matching", creds_created, "credentials")
+	show_process_summary("Cred Matching", creds_created, Items.CREDENTIALS)
 	add_line("Credential matching stopped")
 	
 	#next time
@@ -476,7 +476,7 @@ func password_unscramble_commands(text):
 func start_password_unscrambling():
 	add_line("Verifying passwords available...")
 	await get_tree().create_timer(0.8).timeout
-	if Inventory.get_amount("encrypted passwords") <= 0:
+	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
 		add_line("No passwords available")
 		return
 	add_line("Starting password cracking process.\n\n")
@@ -489,7 +489,7 @@ func start_password_unscrambling():
 	add_line(pw_scram.get_initial_scrambled_word())
 	var scramble_index = lines.size() - 1
 	##password unscramble loop
-	while Inventory.inventory["encrypted passwords"]["amount"] > 0 and process_running:
+	while Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) > 0 and process_running:
 		for i in range(15):
 			if !process_running:
 				break
@@ -508,20 +508,20 @@ func start_password_unscrambling():
 			Stats.add_xp(Stats.player_stats["Password Cracking"], 200)
 			update_module_stats_header("Password Cracking")
 			
-			if Inventory.inventory["encrypted passwords"]["amount"] <= 0:
+			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
 				process_running = false
 				add_line("No more encrypted passwords.")
 			else:
 				set_line(scramble_index, pw_scram.get_initial_scrambled_word())
 				
 	add_line("Finished process.")
-	show_process_summary("Password Cracking", pw_gained, "Password")
+	show_process_summary("Password Cracking", pw_gained, Items.PASSWORDS)
 			
 
 func start_log_parsing():
 	add_line("Verifying logs available...")
 	await get_tree().create_timer(0.8).timeout
-	if Inventory.get_amount("logs") <= 0:
+	if Inventory.get_amount(Items.LOGS) <= 0:
 		add_line("No logs available")
 		return
 	add_line("Starting log parsing process.\n\n")
@@ -584,7 +584,7 @@ func update_module_stats_header(skill_name: String):
 
 func start_parser_ui():
 	add_line(parser.border("LOG PARSER v1.0"))     # 0
-	add_line(parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount("logs"))))       # 1
+	add_line(parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount(Items.LOGS))))       # 1
 	parse_box_title_line = lines.size() - 1
 	add_line("├" + "─".repeat(parser.INNER_WIDTH) + "┤")  # 2
 
@@ -620,8 +620,8 @@ func push_log_line(new_line:String):
 func start_log_stream():
 	reset_batch_totals()
 	
-	while Inventory.inventory["logs"]["amount"] > 0 and process_running:
-		Inventory.inventory["logs"]["amount"] -= 1
+	while Inventory.get_amount(Items.LOGS) > 0 and process_running:
+		Inventory.remove_resource(Items.LOGS, 1)
 		
 		for i in range(10):
 			var result = parser.generate_log_line(Logs.LOG_LINES)
@@ -632,16 +632,16 @@ func start_log_stream():
 
 			await get_tree().create_timer(0.4).timeout
 		
-		if Inventory.inventory["logs"]["amount"] > 0 and process_running:
+		if Inventory.get_amount(Items.LOGS) > 0 and process_running:
 			clear_logs()
 			
-		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount("logs"))), false)
+		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount(Items.LOGS))), false)
 		Stats.add_xp(Stats.player_stats["Log Parsing"], 500)
 		update_module_stats_header("Log Parsing")
 		
 	if process_running:
 		add_line("All logs parsed.") 
-		set_line(parse_box_title_line, parser.line("Status: FINISHED   Logs: x" + str(Inventory.get_amount("logs"))))
+		set_line(parse_box_title_line, parser.line("Status: FINISHED   Logs: x" + str(Inventory.get_amount(Items.LOGS))))
 	
 	#add_line(show_batch_total())
 	show_batch_total()
@@ -650,24 +650,25 @@ func start_log_stream():
 	process_running = false
 
 func show_batch_total():
-
-	var output = ""
-	var title_chars = 25
-	for k in batch_totals.keys():
-		if batch_totals[k] > 0:
-			var spaces = 25 - k.length()
-			output += k + " x" + str(int(batch_totals[k])) + "\n"
-	if output != "":
-		add_line("\nResources gained from current parsing job")
-		add_line("---------------------------------------")
-		add_line(output)
-	else:
+	if batch_totals.is_empty():
 		add_line("No resources gained from current parsing job.")
+		return
 
-func show_process_summary(process_name: String, amount: int, resource: String):
+	var output := ""
+
+	for item in batch_totals.keys():
+		var amount: int = batch_totals[item]
+		if amount > 0:
+			output += "%s x%d\n" % [item.name, amount]
+
+	add_line("\nResources gained from current parsing job")
+	add_line("---------------------------------------")
+	add_line(output)
+
+func show_process_summary(process_name: String, amount: int, resource: ItemData):
 	add_line("\nResources gained from recent job")
 	add_line("--------------------------------")
-	add_line(resource + " x" + str(int(amount)))
+	add_line(resource.name + " x" + str(int(amount)))
 
 func clear_logs():
 	visible_logs.clear()
@@ -685,15 +686,13 @@ func reset_batch_totals():
 func apply_reward(reward:Dictionary):
 	if reward.is_empty():
 		return
-	# Add to inventory
-	if Inventory.inventory.has(reward.type):
-		Inventory.add_resource(reward.type, reward.amount)
+	Inventory.add_resource(reward.item, reward.amount)
 
-	
 	# Add to batch summary
-	if batch_totals.has(reward.type):
-		print(reward.text)
-		batch_totals[reward.type] += reward.amount
+	if batch_totals.has(reward.item):
+		batch_totals[reward.item] += reward.amount
+	else:
+		batch_totals[reward.item] = reward.amount
 
 #Marketplace context commands
 func marketplace_commands(text):
@@ -707,7 +706,7 @@ func marketplace_commands(text):
 	match text:
 		"list":
 			add_line(ShopItems.list_available_items())
-			add_line("\nCurrent balance: " + str(Inventory.get_amount("data")) + " data")
+			add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
 		
 		"marketplace -auth":
 			add_line("Already connected to marketplace")
@@ -770,7 +769,7 @@ func purchase_item(id: int, amount: int):
 		add_line("Item is not available.")
 		return
 	
-	var player_money = Inventory.get_amount("data")
+	var player_money = Inventory.get_amount(Items.DATA)
 	var cost_per_item = item["cost"]
 	var total_cost = cost_per_item * amount
 	
@@ -791,7 +790,7 @@ func purchase_item(id: int, amount: int):
 	#
 	# Deduct cost
 	#idk why this is here, this should never be hit if the above statement exists
-	if not Inventory.remove_resource("data", total_cost):
+	if not Inventory.remove_resource(Items.DATA, total_cost):
 		add_line("Transaction failed.")
 		return
 	
@@ -862,7 +861,7 @@ func start_data_mining():
 	add_line("Session:  " + str(amount_gained) + " data")
 	var total_gained_index = lines.size() - 1
 	
-	add_line("Total:    " + str(Inventory.get_amount("data")) + " data\n\n\n")
+	add_line("Total:    " + str(Inventory.get_amount(Items.DATA)) + " data\n\n\n")
 	var total_data_line_index = lines.size() - 1
 	
 	var steps = 20
@@ -886,7 +885,7 @@ func start_data_mining():
 					set_line(progress_bar_index, "Progress: [%s>%s] %d%%" % [filled, empty, percent], false)
 		
 		if process_running:
-			Inventory.add_resource("data", data_per_completion)
+			Inventory.add_resource(Items.DATA, data_per_completion)
 			amount_gained += data_per_completion
 			Stats.add_xp(skill, exp_per_completion)
 			
@@ -897,8 +896,8 @@ func start_data_mining():
 			efficiency = skill["effeciency"]
 			update_module_stats_header("Data Mining")
 			set_line(total_gained_index, "Session:  " + str(amount_gained) + " data", false)
-			set_line(total_data_line_index, "Total:    " + str(Inventory.get_amount("data")) + " data\n\n\n", false)
-	show_process_summary("Data Mining", amount_gained, "Data")
+			set_line(total_data_line_index, "Total:    " + str(Inventory.get_amount(Items.DATA)) + " data\n\n\n", false)
+	show_process_summary("Data Mining", amount_gained, Items.DATA)
 
 func get_skill_xp_bar(skill_data: Dictionary, steps:int = 20) -> String:
 	var progress = Stats.get_xp_progress(skill_data)

@@ -17,7 +17,7 @@ var current_context: HackingContext = HackingContext.TARGETS
 func _ready():
 	header_hacking_box.update_header()
 	enemy_hacking_box.update_targets()
-	
+	Signals.end_hacking_signal.connect(stop_hacking_signal)
 
 func module_loaded():
 	header_hacking_box.update_header()
@@ -70,11 +70,14 @@ func _on_player_hacking_box_command_entered(text):
 
 func handle_hack_command(text):
 	var target: Dictionary = Stats.get_hacking_target_by_command(text)
-	if target != null:
-		await enemy_hacking_box.select_person(target)
-		current_context = HackingContext.HACKING
+	if target.is_empty():
+		player_hacking_box.add_line("Not a valid target.")
 	else:
-		print("Not valid view target")
+		if enemy_hacking_box.can_hack_person(target):
+			await enemy_hacking_box.select_person(target)
+			current_context = HackingContext.HACKING
+		else:
+			player_hacking_box.add_line("Not enough resources to hack.")
 
 func handle_back_command():
 	match current_context:
@@ -87,8 +90,13 @@ func handle_back_command():
 
 func handle_view_command(text):
 	var target: Dictionary = Stats.get_hacking_location_by_command(text)
-	if target != null:
+	if target.is_empty():
+		player_hacking_box.add_line("Not a valid location.")
+	else:
 		await enemy_hacking_box.select_target(target)
 		current_context = HackingContext.PERSONS
-	else:
-		print("Not valid view target")
+
+
+func stop_hacking_signal():
+	enemy_hacking_box.end_hack()
+	current_context = HackingContext.PERSONS

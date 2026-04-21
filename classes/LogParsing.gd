@@ -12,31 +12,24 @@ const COL_TIME = 9
 const COL_LEVEL = 7
 const COL_SERVICE = 16
 
-const REWARD_CHANCES = {
-	"INFO": 0.10,
-	"WARN": 0.18,
-	"ALERT": 0.30,
-	"ERR": 0.22
-}
 
 const BASE_REWARD_CHANCE = 0.05
 
 const REWARD_TABLE = [
-	{ "type": "data", "min": 5, "max": 15, "weight": 40, "color": "yellow" },
-	{ "type": "usernames", "amount": 1, "weight": 15, "color": "cyan" },
-	{ "type": "encrypted passwords", "amount": 1, "weight": 15, "color": "lime" },
-	{ "type": "logs", "amount": 1, "weight": 10, "color": "lime" },
-	{ "type": "passwords", "amount": 1, "weight": 10, "color": "lime" },
-	{ "type": "ip address", "amount": 1, "weight": 8, "color": "orange" },
-	{ "type": "credentials", "amount": 1, "weight": 2, "color": "lime" },
+	{ "item": Items.DATA, "min": 5, "max": 15, "weight": 40, "color": "yellow" },
+	{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 15, "color": "cyan" },
+	{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 15, "color": "lime" },
+	{ "item": Items.LOGS, "min": 1, "max": 1, "weight": 10, "color": "lime" },
+	{ "item": Items.PASSWORDS, "min": 1, "max": 1, "weight": 10, "color": "lime" },
+	{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 8, "color": "orange" },
+	{ "item": Items.CREDENTIALS, "min": 1, "max": 1, "weight": 2, "color": "lime" },
 ]
 
 func get_reward_chances() -> String:
 	var output = ""
-	for reward in REWARD_TABLE:
-		output += reward.type + ": " + str(int(reward.weight)) + "%   "
-	output = output.strip_edges()
-	return output
+	for r in REWARD_TABLE:
+		output += "%s: %d%%   " % [r.item.name, r.weight]
+	return output.strip_edges()
 
 func pick_weighted_reward() -> Dictionary:
 	var total_weight := 0
@@ -119,30 +112,22 @@ func colored_log(level:String, service:String, message:String) -> String:
 			return txt
 
 func roll_reward() -> Dictionary:
-	# Flat 5% chance to get ANY reward
 	var chance = BASE_REWARD_CHANCE + Stats.player_stats["Log Parsing"]["effeciency"]
 	if randf() > chance:
 		return {}
 
-	var reward_def = pick_weighted_reward()
-	if reward_def.is_empty():
+	var def = pick_weighted_reward()
+	if def.is_empty():
 		return {}
 
-	if reward_def.type == "data":
-		var amount = randi_range(reward_def.min, reward_def.max)
-		return {
-			"type": "data",
-			"amount": amount,
-			"text": "+%d Data" % amount,
-			"color": reward_def.color
-		}
-	else:
-		return {
-			"type": reward_def.type,
-			"amount": reward_def.amount,
-			"text": "+%d %s" % [reward_def.amount, reward_def.type.capitalize()],
-			"color": reward_def.color
-		}
+	var amount = randi_range(def.min, def.max)
+
+	return {
+		"item": def.item,
+		"amount": amount,
+		"text": "+%d %s" % [amount, def.item.name],
+		"color": def.color
+	}
 
 
 

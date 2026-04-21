@@ -17,59 +17,38 @@ extends Node
 #Pick one: Generate, Convert, Buff, Unlock
 
 
-var inventory := {
-	"data": {
-		"amount": 30,
-		"description": "Raw encrypted data used as marketplace currency"
-	},
-	"encrypted passwords": {
-		"amount": 0,
-		"description": "Encrypted passwords that need cracking"
-	},
-	"passwords": {
-		"amount": 0,
-		"description": "Decrypted passwords used for account breaches"
-	},
-	"usernames": {
-		"amount": 0,
-		"description": "Usernames can be combined with an unscrambled password to make a credential"
-	},
-	"credentials": {
-		"amount": 0,
-		"description": "A combined username and password used to attempt hacks"
-	},
-	"ip address": {
-		"amount": 0,
-		"description": "IP address used to find hacking target"
-	},
-	"logs": {
-		"amount": 0,
-		"description": "Encrypted log files that can be processed for resources"
-	}
-}
+var inventory := {}
 
-func get_amount(resource: String) -> int:
+func _ready():
+	add_resource(Items.DATA, 200)
+	add_resource(Items.LOGS, 10)
+
+func get_amount(resource: ItemData) -> int:
 	if inventory.has(resource):
-		return inventory[resource]["amount"]
+		return inventory[resource]
 	return 0
 
-
-func add_resource(resource: String, amount: int) -> void:
+func add_resource(resource: ItemData, amount):
 	if inventory.has(resource):
-		inventory[resource]["amount"] += amount
+		inventory[resource] += amount
+	else:
+		inventory[resource] = amount
 
-
-func remove_resource(resource: String, amount: int) -> bool:
+func remove_resource(resource: ItemData, amount: int) -> bool:
 	if not inventory.has(resource):
 		return false
-	
-	if inventory[resource]["amount"] < amount:
+	if inventory[resource] < amount:
 		return false
 	
-	inventory[resource]["amount"] -= amount
+	inventory[resource] -= amount
+	
+	if inventory[resource] <= 0:
+		inventory.erase(resource)
+	
 	return true
 
 func list_inventory_items() -> String:
+	print(inventory)
 	var name_width = 25
 	var amount_width = 15
 	
@@ -85,20 +64,18 @@ func list_inventory_items() -> String:
 	output += "-----------\n"
 	
 	for resource in inventory.keys():
-		var data = inventory[resource]
-		var amount = data["amount"]
+		var amount: int = inventory[resource]
 		
 		if amount > 0:
 			has_items = true
-			output += pad_text(resource.capitalize(), name_width)
+			output += pad_text(resource.name, name_width)
 			output += pad_text(amount, amount_width)
-			output += data["description"] + "\n"
+			output += resource.description + "\n"
 	
 	if not has_items:
 		return "You have no resources."
 	
 	return output
-
 
 func pad_text(value, width: int) -> String:
 	var text := str(value)

@@ -41,25 +41,31 @@ layout_mode = 2
 theme_override_constants/separation = 20
 theme_override_styles/separator = SubResource("StyleBoxFlat_cejxg")
 
-[node name="BattleInfo" type="HBoxContainer" parent="."]
+[node name="BattleInfo" type="VBoxContainer" parent="."]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 20
 
-[node name="RichTextLabel" type="RichTextLabel" parent="BattleInfo"]
+[node name="StageOne" type="HBoxContainer" parent="BattleInfo"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="LeftLabel" type="RichTextLabel" parent="BattleInfo/StageOne"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "IP Addresses x 1"
 horizontal_alignment = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="BattleInfo"]
+[node name="VBoxContainer" type="VBoxContainer" parent="BattleInfo/StageOne"]
 layout_mode = 2
 
-[node name="ProgressBar" type="ProgressBar" parent="BattleInfo/VBoxContainer"]
+[node name="ProgressBar" type="ProgressBar" parent="BattleInfo/StageOne/VBoxContainer"]
 custom_minimum_size = Vector2(200, 25)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="SuccessLabel" type="RichTextLabel" parent="BattleInfo/VBoxContainer"]
+[node name="SuccessLabel" type="RichTextLabel" parent="BattleInfo/StageOne/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/normal_font_size = 10
@@ -67,7 +73,75 @@ text = "Success chance: 50%"
 fit_content = true
 horizontal_alignment = 1
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="BattleInfo"]
+[node name="RightLabel" type="RichTextLabel" parent="BattleInfo/StageOne"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Other info"
+text = "Searching for target"
+
+[node name="StageTwo" type="HBoxContainer" parent="BattleInfo"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="LeftLabel" type="RichTextLabel" parent="BattleInfo/StageTwo"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Credential x 1"
+horizontal_alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="BattleInfo/StageTwo"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="BattleInfo/StageTwo/VBoxContainer"]
+custom_minimum_size = Vector2(200, 25)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="SuccessLabel" type="RichTextLabel" parent="BattleInfo/StageTwo/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 10
+text = "Success chance: 50%"
+fit_content = true
+horizontal_alignment = 1
+
+[node name="RightLabel" type="RichTextLabel" parent="BattleInfo/StageTwo"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Target located"
+
+[node name="StageThree" type="HBoxContainer" parent="BattleInfo"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="LeftLabel" type="RichTextLabel" parent="BattleInfo/StageThree"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Credits x 10
+Logs x 2
+IP Address x 1
+Parents Credit Card Numbers x 1"
+horizontal_alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="BattleInfo/StageThree"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="BattleInfo/StageThree/VBoxContainer"]
+custom_minimum_size = Vector2(200, 25)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="SuccessLabel" type="RichTextLabel" parent="BattleInfo/StageThree/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 10
+text = "Success chance: 50%"
+fit_content = true
+horizontal_alignment = 1
+
+[node name="RightLabel" type="RichTextLabel" parent="BattleInfo/StageThree"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Extracting valuables"

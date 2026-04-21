@@ -40,17 +40,32 @@ func select_target(target: Dictionary = {}):
 	await _show_container(persons_container)
 
 func select_person(target: Dictionary = {}):
-	await _green_flash(target, persons_container)
-	await _hide_container(persons_container)
-	hack_container.setup_hack()
-	await _show_container(hack_container)
-	hack_container.begin_hack()
+	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
+		await _green_flash(target, persons_container)
+		await _hide_container(persons_container)
+		hack_container.setup_hack()
+		await _show_container(hack_container)
+		hack_container.target = target
+		hack_container.begin_hack()
+	else:
+		await _red_flash(target, persons_container)
+		#update terminal hacking with text telling whats going on
+
+func can_hack_person(target: Dictionary = {}):
+	#keep target as param because eventually people will have different requirements for hacking
+	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
+		return true
+	return false
 
 func persons_to_targets():
 	await _hide_container(persons_container)
 	await _show_container(targets_container)
 
 func hacking_to_persons():
+	await _show_container(persons_container)
+
+func end_hack():
+	await _hide_container(hack_container)
 	await _show_container(persons_container)
 
 func _hide_container(container):
@@ -74,6 +89,11 @@ func _green_flash(target, container):
 	for tar in container.get_children():
 		if tar.target.name == target.name:
 			await tar.flash_green()
+
+func _red_flash(target, container):
+	for tar in container.get_children():
+		if tar.target.name == target.name:
+			await tar.flash_red()
 
 #lists each person at specific location
 func _update_persons(target_location):

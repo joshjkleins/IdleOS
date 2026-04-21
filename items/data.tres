@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://dfepixu5bs4hq"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_fiddx"]
+
+[resource]
+script = ExtResource("1_fiddx")
+id = 0
+name = "Data"
+description = "Raw encrypted data used as marketplace currency"
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

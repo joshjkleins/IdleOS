@@ -44,8 +44,8 @@ func is_word_revealed() -> bool:
 	return false
 
 func transform_password():
-	if Inventory.get_amount("encrypted passwords") < 1:
+	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) < 1:
 		print("No encrypted passwords to transform")
 		
-	Inventory.remove_resource("encrypted passwords", 1)
-	Inventory.add_resource("passwords", 1)
+	Inventory.remove_resource(Items.ENCRYPTED_PASSWORDS, 1)
+	Inventory.add_resource(Items.PASSWORDS, 1)

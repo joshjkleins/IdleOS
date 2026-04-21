@@ -128,9 +128,9 @@ func render_list(match_found: bool) -> String:
 
 
 func create_creds():
-	if Inventory.get_amount("passwords") < 1 or Inventory.get_amount("usernames") < 1:
+	if Inventory.get_amount(Items.PASSWORDS) < 1 or Inventory.get_amount(Items.USERNAMES) < 1:
 		print("No username or password to transform")
 		
-	Inventory.remove_resource("passwords", 1)
-	Inventory.remove_resource("usernames", 1)
-	Inventory.add_resource("credentials", 1)
+	Inventory.remove_resource(Items.PASSWORDS, 1)
+	Inventory.remove_resource(Items.USERNAMES, 1)
+	Inventory.add_resource(Items.CREDENTIALS, 1)
