@@ -3,18 +3,15 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
+#next:
+#finish overclock feature, add some universal stats (level, duration, upgrades) then implement feature in every module (mining, pw, cred - not needed for hacking)
+#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
+#change how loot works in hacking, should be a cache that can later be decrypted for resources
+#build module for cache decrypting
+
 #Laterz:
 # pw cracking - show effeciency info and how many encrypted pw available
 # cred matching - show how many username/pw available
-
-# Planning stage
-#Things hacking mod needs: Info on current skill level/relavant resources
-# Selection and viewing of targets, including loot, exp, difficulty
-# Actual hacking combat (start basic, attack/heal)
-# Loot should be a random drop chance, player receives everything they uncover
-# Victory / repeating
-# resources: Credentials used to 'attack', 'x' used to heal, 
-
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -33,6 +30,8 @@ extends Control
 @onready var parser = LogParser.new()
 @onready var pw_scram = PasswordCrack.new()
 @onready var cred_match = CredentialMatching.new()
+
+@onready var overclock_box = $Panel/MarginContainer/TerminalRoot/Header/OverclockBox
 
 enum Context {
 	ROOT,
@@ -82,10 +81,12 @@ var skill_xp_nums_index: int
 var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
 
+var LOG_PARSE_SPEED = 0.4
+
 
 func _ready():
 	update_context(Context.ROOT)
-	# input_line.grab_focus() #uncomment this when not testing hacking module
+	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 
 #update previous lines
@@ -438,6 +439,11 @@ func log_parsing_commands(text):
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["effeciency description"])
 		"-h":
 			list_help()
+		"overclock":
+			if !overclock_box.OVERCLOCKING and process_running:
+				overclock_box.use_overclock(Stats.player_stats["Log Parsing"])
+			else:
+				add_line("Cannot overclock right now")
 		_:
 			add_line("Command not found")
 
@@ -630,7 +636,7 @@ func start_log_stream():
 			if result.reward.size() > 0:
 				apply_reward(result.reward)
 
-			await get_tree().create_timer(0.4).timeout
+			await get_tree().create_timer(Stats.player_stats["Log Parsing"]["current speed"]).timeout
 		
 		if Inventory.get_amount(Items.LOGS) > 0 and process_running:
 			clear_logs()

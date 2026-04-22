@@ -132,7 +132,7 @@ func phase_three_setup():
 	phase_three() 
 
 func phase_three():
-	var amount_of_items = randi_range(5, 15)
+	var amount_of_items = randi_range(5, 8)
 	var loot = target["loot"]
 	
 	# Precompute total weight ONCE
@@ -157,7 +157,7 @@ func phase_three():
 			cumulative += entry.weight
 			
 			if roll <= cumulative:
-				chosen_key = key
+				chosen_key = entry.item
 				break
 		
 		var amount = randi_range(entry.min, entry.max)
@@ -171,7 +171,7 @@ func phase_three():
 		current_value = stage_three_progress_bar.value
 		
 		# ---- DISPLAY (NO STACKING) ----
-		stage_three_left_label.text += chosen_key + " x" + str(amount) + "\n"
+		stage_three_left_label.text += chosen_key.name + " x" + str(amount) + "\n"
 		Inventory.add_resource(chosen_key, amount)
 		await get_tree().create_timer(0.2).timeout
 	

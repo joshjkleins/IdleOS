@@ -17,6 +17,9 @@ var player_stats = {
 		"experience": 0,
 		"command": "log-parsing",
 		"level": 1,
+		"base speed": 0.4,
+		"overclock speed": 0.1,
+		"current speed": 0.4,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
 		"unlocked": true,
@@ -29,7 +32,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
-		"unlocked": false,
+		"unlocked": true,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
 		"effeciency description": "Increases chance of revealing more than one letter."
 	},
@@ -39,7 +42,7 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.01,
-		"unlocked": false,
+		"unlocked": true,
 		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
 		"effeciency description": "Increases chance for a match per row."
 	},
@@ -49,11 +52,13 @@ var player_stats = {
 		"level": 1,
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.01,
-		"unlocked": false,
+		"unlocked": true,
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
 		"effeciency description": "IDK yet"
 	}
 }
+
+var overclock_duration = 5.0
 
 var hacking_targets = {
 	"School": {
@@ -66,10 +71,10 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"command": "hack student",
 				"loot": {
-					"logs": {"min": 1, "max": 5, "weight": 50},
-					"data": {"min": 10, "max": 20, "weight": 35},
-					"encrypted passwords": {"min": 3, "max": 5, "weight": 10},
-					"parents credit card": {"min": 1, "max": 1, "weight": 5}
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
 				}
 			},
 			{
@@ -77,10 +82,10 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"command": "hack administrator",
 				"loot": {
-					"logs": {"min": 1, "max": 5},
-					"data": {"min": 10, "max": 20},
-					"encrypted passwords": {"min": 3, "max": 5},
-					"students grades": {"min": 1, "max": 1}
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
 				}
 			},
 			{
@@ -88,10 +93,10 @@ var hacking_targets = {
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
 				"loot": {
-					"logs": {"min": 1, "max": 5},
-					"data": {"min": 10, "max": 20},
-					"encrypted passwords": {"min": 3, "max": 5},
-					"bus schedules": {"min": 1, "max": 1}
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
 				}
 			},
 			{
@@ -99,10 +104,10 @@ var hacking_targets = {
 				"difficulty": "Medium",
 				"command": "hack principal",
 				"loot": {
-					"logs": {"min": 1, "max": 5},
-					"data": {"min": 10, "max": 20},
-					"encrypted passwords": {"min": 3, "max": 5},
-					"students personal files": {"min": 1, "max": 1}
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
 				}
 			},
 			{
@@ -110,10 +115,10 @@ var hacking_targets = {
 				"difficulty": "Hard",
 				"command": "hack superintendent",
 				"loot": {
-					"logs": {"min": 1, "max": 5},
-					"data": {"min": 10, "max": 20},
-					"encrypted passwords": {"min": 3, "max": 5},
-					"parents credit card": {"min": 1, "max": 1}
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
 				}
 			}
 		],
@@ -127,31 +132,56 @@ var hacking_targets = {
 				"name": "Patreon",
 				"difficulty": "Easy",
 				"command": "hack patreon",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Volunteer",
 				"difficulty": "Easy",
 				"command": "hack volunteer",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Assistant Librarian",
 				"difficulty": "Medium",
 				"command": "hack assistant-librarian",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Head Librarian",
 				"difficulty": "Medium",
 				"command": "hack head-librarian",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Director",
 				"difficulty": "Hard",
 				"command": "hack director",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/library-ascii.png")
@@ -164,31 +194,56 @@ var hacking_targets = {
 				"name": "Worker",
 				"difficulty": "Easy",
 				"command": "hack worker",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Supervisor",
 				"difficulty": "Easy",
 				"command": "hack supervisor",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Manager",
 				"difficulty": "Medium",
 				"command": "hack manager",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Human Resources",
 				"difficulty": "Medium",
 				"command": "hack human-resources",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Owner",
 				"difficulty": "Hard",
 				"command": "hack owner",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/small-business-ascii.png")
@@ -201,31 +256,56 @@ var hacking_targets = {
 				"name": "Teachers Assistant",
 				"difficulty": "Easy",
 				"command": "hack teachers-assistant",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Professor",
 				"difficulty": "Easy",
 				"command": "hack professor",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Department Chair",
 				"difficulty": "Medium",
 				"command": "hack department-chair",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Dean",
 				"difficulty": "Medium",
 				"command": "hack dean",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "University President",
 				"difficulty": "Hard",
 				"command": "hack university-president",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/university-ascii.png")
@@ -238,31 +318,56 @@ var hacking_targets = {
 				"name": "Receptionist",
 				"difficulty": "Easy",
 				"command": "hack receptionist",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Orderly",
 				"difficulty": "Easy",
 				"command": "hack orderly",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Nurse",
 				"difficulty": "Medium",
 				"command": "hack nurse",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Doctor",
 				"difficulty": "Medium",
 				"command": "hack doctor",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Chief of Medicine",
 				"difficulty": "Hard",
 				"command": "hack chief-medicine",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/hospital-ascii.png")
@@ -275,31 +380,56 @@ var hacking_targets = {
 				"name": "Secretary",
 				"difficulty": "Easy",
 				"command": "hack secretary",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Cop",
 				"difficulty": "Easy",
 				"command": "hack cop",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Detective",
 				"difficulty": "Medium",
 				"command": "hack detective",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Sergeant",
 				"difficulty": "Medium",
 				"command": "hack sergeant",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Captain",
 				"difficulty": "Hard",
 				"command": "hack captain",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/police-station-ascii.png")
@@ -312,31 +442,56 @@ var hacking_targets = {
 				"name": "Legal Assistant",
 				"difficulty": "Easy",
 				"command": "hack legal-assistant",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Paralegal",
 				"difficulty": "Easy",
 				"command": "hack paralegal",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Associate Attorney",
 				"difficulty": "Medium",
 				"command": "hack associate-attorney",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Lawyer",
 				"difficulty": "Medium",
 				"command": "hack lawyer",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			},
 			{
 				"name": "Partner",
 				"difficulty": "Hard",
 				"command": "hack partner",
-				"loot": ["logs", "data", "credentials"]
+				"loot": {
+					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
+					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
+					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
+					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
+				}
 			}
 		],
 		"art": preload("res://art/lawfirm-ascii.png")

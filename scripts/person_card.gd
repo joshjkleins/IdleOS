@@ -9,8 +9,8 @@ func update_info(info):
 	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
 	
 	var loot_text = ""
-	for loot in info.loot:
-		loot_text += loot + "\n"
+	for loot in info.loot.keys():
+		loot_text += info.loot[loot].item.name + "\n"
 	$MarginContainer/VBoxContainer/VBoxContainer/Loot.text = loot_text
 
 func flash_green():

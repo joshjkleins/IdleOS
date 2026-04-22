@@ -14,7 +14,7 @@ var lines: Array[String] = []
 
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
-	input_line.grab_focus() #get rid of this after development of hacking mod
+	#input_line.grab_focus() #get rid of this after development of hacking mod
 
 func grab():
 	input_line.grab_focus()

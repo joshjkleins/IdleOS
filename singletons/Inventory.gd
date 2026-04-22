@@ -22,6 +22,11 @@ var inventory := {}
 func _ready():
 	add_resource(Items.DATA, 200)
 	add_resource(Items.LOGS, 10)
+	add_resource(Items.ENCRYPTED_PASSWORDS, 10)
+	add_resource(Items.PASSWORDS, 10)
+	add_resource(Items.USERNAMES, 10)
+	add_resource(Items.CREDENTIALS, 10)
+	add_resource(Items.IP_ADDRESS, 10)
 
 func get_amount(resource: ItemData) -> int:
 	if inventory.has(resource):

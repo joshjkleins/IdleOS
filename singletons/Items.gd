@@ -2,13 +2,14 @@
 extends Node
 
 enum ItemType {
-	DATA,
-	LOGS,
-	ENCRYPTED_PASSWORDS,
-	PASSWORDS,
-	USERNAMES,
-	CREDENTIALS,
-	IP_ADDRESS
+	DATA, #0
+	LOGS, #1
+	ENCRYPTED_PASSWORDS, #2
+	PASSWORDS, #3
+	USERNAMES, #4
+	CREDENTIALS, #5
+	IP_ADDRESS, #6
+	PARENTS_CREDIT_CARD, #7
 }
 
 const DATA = preload("res://items/data.tres")
@@ -18,6 +19,7 @@ const PASSWORDS = preload("res://items/passwords.tres")
 const USERNAMES = preload("res://items/usernames.tres")
 const CREDENTIALS = preload("res://items/credentials.tres")
 const IP_ADDRESS = preload("res://items/ip_address.tres")
+const PARENTS_CREDIT_CARD = preload("res://items/parents_credit_card.tres")
  
 const ITEM_MAP = {
 	ItemType.DATA: DATA,
@@ -26,5 +28,6 @@ const ITEM_MAP = {
 	ItemType.PASSWORDS: PASSWORDS,
 	ItemType.USERNAMES: USERNAMES,
 	ItemType.CREDENTIALS: CREDENTIALS,
-	ItemType.IP_ADDRESS: IP_ADDRESS
+	ItemType.IP_ADDRESS: IP_ADDRESS,
+	ItemType.PARENTS_CREDIT_CARD: PARENTS_CREDIT_CARD
 }
