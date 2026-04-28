@@ -10,6 +10,8 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.03,
 		"unlocked": true,
+		"heat": 1,
+		"overclock heat": 3,
 		"description": "Generates data used for purchasing items from the marketplace.",
 		"effeciency description": "Increases speed of mining."
 	},
@@ -23,6 +25,7 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.003,
 		"unlocked": true,
+		"heat": 7,
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 		"effeciency description": "Increases chance of finding a resource per row."
 	},
@@ -33,6 +36,7 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.02,
 		"unlocked": true,
+		"heat": 7,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
 		"effeciency description": "Increases chance of revealing more than one letter."
 	},
@@ -43,6 +47,7 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.01,
 		"unlocked": true,
+		"heat": 14,
 		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
 		"effeciency description": "Increases chance for a match per row."
 	},
@@ -53,12 +58,19 @@ var player_stats = {
 		"effeciency": 0.0,
 		"effeciency increase rate": 0.01,
 		"unlocked": true,
+		"heat": 20,
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
 		"effeciency description": "IDK yet"
 	}
 }
 
-var overclock_duration = 5.0
+var MAX_TEMP = 100
+var MIN_TEMP = 30
+var system_tempature = 30
+var cooling_amount = -1
+var cooling_frequency = 1.0
+var overheated = false
+var overclocked = false
 
 var hacking_targets = {
 	"School": {
@@ -497,6 +509,23 @@ var hacking_targets = {
 		"art": preload("res://art/lawfirm-ascii.png")
 	}
 }
+
+func update_tempature(amount: int):
+	system_tempature += amount
+	if system_tempature >= MAX_TEMP:
+		system_tempature = MAX_TEMP
+	elif system_tempature <= MIN_TEMP:
+		system_tempature = MIN_TEMP
+	
+	
+	
+	if system_tempature <= 50:
+		overheated = false
+	elif system_tempature >= 95:
+		overheated = true
+	elif system_tempature >= 88:
+		overclocked = false
+	Signals.system_temp_updated(system_tempature)
 
 func get_hacking_target_by_command(command):
 	for target in hacking_targets:

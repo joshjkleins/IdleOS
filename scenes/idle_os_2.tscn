@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
-[ext_resource type="Script" uid="uid://c8pf8kcvp2iki" path="res://scripts/overclock_box.gd" id="3_sd1y4"]
+[ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="3_sd1y4"]
 [ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
 [ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
 
@@ -53,36 +53,8 @@ size_flags_horizontal = 3
 text = "IDLE OS v0.1
 ============================"
 
-[node name="OverclockBox" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/Header"]
-custom_minimum_size = Vector2(300, 0)
+[node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
 layout_mode = 2
-size_flags_horizontal = 8
-script = ExtResource("3_sd1y4")
-
-[node name="OverclockTimer" type="Timer" parent="Panel/MarginContainer/TerminalRoot/Header/OverclockBox"]
-wait_time = 10.0
-one_shot = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot/Header/OverclockBox"]
-layout_mode = 2
-theme_override_constants/separation = 30
-
-[node name="Label" type="Label" parent="Panel/MarginContainer/TerminalRoot/Header/OverclockBox/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 8
-text = "Overclock"
-
-[node name="TimeLabel" type="Label" parent="Panel/MarginContainer/TerminalRoot/Header/OverclockBox/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "5.0 seconds"
-horizontal_alignment = 2
-
-[node name="OverclockBar" type="ProgressBar" parent="Panel/MarginContainer/TerminalRoot/Header/OverclockBox"]
-layout_mode = 2
-size_flags_vertical = 2
-max_value = 5.0
-step = 0.001
 
 [node name="Scrollback" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2
@@ -117,7 +89,5 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 
-[connection signal="timeout" from="Panel/MarginContainer/TerminalRoot/Header/OverclockBox/OverclockTimer" to="." method="_on_overclock_timer_timeout"]
-[connection signal="value_changed" from="Panel/MarginContainer/TerminalRoot/Header/OverclockBox/OverclockBar" to="Panel/MarginContainer/TerminalRoot/Header/OverclockBox" method="_on_overclock_bar_value_changed"]
 [connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
 [connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]

@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwx1yr57gd4o8"]
+
+[ext_resource type="Script" uid="uid://c8pf8kcvp2iki" path="res://scripts/overclock_box.gd" id="1_0lmxs"]
+
+[node name="OverclockBox" type="VBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+size_flags_horizontal = 8
+script = ExtResource("1_0lmxs")
+
+[node name="OverclockTimer" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Overclock"
+
+[node name="TimeLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "5.0 seconds"
+horizontal_alignment = 2
+
+[node name="OverclockBar" type="ProgressBar" parent="."]
+layout_mode = 2
+size_flags_vertical = 2
+max_value = 5.0
+step = 0.001
+
+[connection signal="value_changed" from="OverclockBar" to="." method="_on_overclock_bar_value_changed"]

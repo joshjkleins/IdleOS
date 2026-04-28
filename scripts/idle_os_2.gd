@@ -31,7 +31,6 @@ extends Control
 @onready var pw_scram = PasswordCrack.new()
 @onready var cred_match = CredentialMatching.new()
 
-@onready var overclock_box = $Panel/MarginContainer/TerminalRoot/Header/OverclockBox
 
 enum Context {
 	ROOT,
@@ -88,6 +87,7 @@ func _ready():
 	update_context(Context.ROOT)
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+	Signals.system_temp_updated(30)
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -186,6 +186,8 @@ start                   Start mining data
 stop                    Stop mining process
 root                    Exit back to root
 info                    Mining data module stats
+overclock               Overclocks the system to massively increase output, also increases system heat
+overclock -kill         Stops overclocking
 """)
 		Context.LOG_PARSING:
 			add_line("""
@@ -384,6 +386,7 @@ func start_cred_matching():
 			chance_to_find_match += increase_per_line * (1 + Stats.player_stats["Credential Matching"]["effeciency"])
 
 		if process_running:
+			Stats.update_tempature(Stats.player_stats["Credential Matching"]["heat"]) #increase tempature
 			Stats.add_xp(Stats.player_stats["Credential Matching"], 450)
 			update_module_stats_header("Credential Matching")
 			cred_match.create_creds()
@@ -439,11 +442,6 @@ func log_parsing_commands(text):
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["effeciency description"])
 		"-h":
 			list_help()
-		"overclock":
-			if !overclock_box.OVERCLOCKING and process_running:
-				overclock_box.use_overclock(Stats.player_stats["Log Parsing"])
-			else:
-				add_line("Cannot overclock right now")
 		_:
 			add_line("Command not found")
 
@@ -511,6 +509,7 @@ func start_password_unscrambling():
 			await get_tree().create_timer(0.4).timeout
 			pw_scram.transform_password() #removes scrambled, adds password
 			pw_gained += 1
+			Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
 			Stats.add_xp(Stats.player_stats["Password Cracking"], 200)
 			update_module_stats_header("Password Cracking")
 			
@@ -642,6 +641,7 @@ func start_log_stream():
 			clear_logs()
 			
 		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount(Items.LOGS))), false)
+		Stats.update_tempature(Stats.player_stats["Log Parsing"]["heat"]) #increase tempature
 		Stats.add_xp(Stats.player_stats["Log Parsing"], 500)
 		update_module_stats_header("Log Parsing")
 		
@@ -840,6 +840,22 @@ func data_mining_commands(text):
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["effeciency description"])
 		"-h":
 			list_help()
+		"overclock":
+			if !Stats.overclocked and process_running:
+				if Stats.system_tempature < 60:
+					Stats.overclocked = true
+				else:
+					add_line("System tempature needs to cool to below 60°C before overclocking")
+			elif process_running and Stats.overheated:
+				add_line("System has overheated and needs time to cool down.")
+			else:
+				add_line("System is already overclocked.")
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
 		_:
 			add_line("Command not found")
 
@@ -874,15 +890,23 @@ func start_data_mining():
 	#var interval = duration / steps
 	process_running = true
 	var exp_per_completion = 250
+	var interval
 	
 	while process_running:
 		#calc process length
 		var duration = dur_amount / (1 + Stats.player_stats["Data Mining"]["effeciency"])
-		var interval = duration / steps
+		var og_interval = duration / steps
+		var overclock_interval = og_interval / 5
 		yield_amount = snapped(data_per_completion / duration, 0.01)
 		set_line(yield_text_index, "Yield:    +" + str(yield_amount) + " data/sec")
 		for i in range(1, steps + 1):
 			if process_running:
+				if Stats.overheated:
+					interval = 2.0
+				elif Stats.overclocked:
+					interval = overclock_interval
+				else:
+					interval = og_interval
 				await get_tree().create_timer(interval).timeout
 				if process_running:
 					var filled = "=".repeat(i)
@@ -894,6 +918,12 @@ func start_data_mining():
 			Inventory.add_resource(Items.DATA, data_per_completion)
 			amount_gained += data_per_completion
 			Stats.add_xp(skill, exp_per_completion)
+			
+			#increase tempature
+			if Stats.overclocked:
+				Stats.update_tempature(Stats.player_stats["Data Mining"]["overclock heat"])
+			else:
+				Stats.update_tempature(Stats.player_stats["Data Mining"]["heat"])
 			
 			# Refresh live stats
 			var new_xp = skill["experience"]

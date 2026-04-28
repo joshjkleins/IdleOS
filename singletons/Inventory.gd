@@ -21,7 +21,7 @@ var inventory := {}
 
 func _ready():
 	add_resource(Items.DATA, 200)
-	add_resource(Items.LOGS, 10)
+	add_resource(Items.LOGS, 1000)
 	add_resource(Items.ENCRYPTED_PASSWORDS, 10)
 	add_resource(Items.PASSWORDS, 10)
 	add_resource(Items.USERNAMES, 10)

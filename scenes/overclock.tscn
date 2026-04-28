@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3 uid="uid://denbt4caomtn5"]
+
+[ext_resource type="Script" uid="uid://b8ciuls5eu846" path="res://scripts/overclock.gd" id="2_h710b"]
+
+[node name="Overclock" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 72)
+script = ExtResource("2_h710b")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TempName" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "COOL"
+horizontal_alignment = 2
+
+[node name="TempRange" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 10
+text = "< 60C"
+horizontal_alignment = 2
+
+[node name="TempDesc" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Heating up, fans activated"
+horizontal_alignment = 2
+autowrap_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Temp" type="Label" parent="MarginContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "64"
+horizontal_alignment = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/HBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 10
+text = "°C"
+
+[node name="Cooling" type="Timer" parent="."]
+
+[connection signal="timeout" from="Cooling" to="." method="_on_cooling_timeout"]
