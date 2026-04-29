@@ -4,14 +4,20 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #next:
-#finish overclock feature, add some universal stats (level, duration, upgrades) then implement feature in every module (mining, pw, cred - not needed for hacking)
-#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
 #change how loot works in hacking, should be a cache that can later be decrypted for resources
 #build module for cache decrypting
+#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
+#offline progression
+#save/load
 
 #Laterz:
-# pw cracking - show effeciency info and how many encrypted pw available
+# pw cracking - show efficiency info and how many encrypted pw available
 # cred matching - show how many username/pw available
+
+#module ideas:
+#Defragging - takes a long time (30min-1h) gives long term (or even perm) benefits
+#non-idle module: Jailbreak / heist mode: use commands to open/close doors to get someone in and out
+
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -74,7 +80,7 @@ var batch_totals = {
 
 
 #SKILL HEADER VARIABLES#
-var lvl_and_effeciency_index: int
+var lvl_and_efficiency_index: int
 var skill_xp_progress_bar_index: int
 var skill_xp_nums_index: int
 var skill_specific_info_index: int
@@ -330,6 +336,7 @@ func cred_matching_commands(text):
 				add_line("Credential matching already running")
 		"stop":
 			process_running = false
+			Stats.overclocked = false
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -347,10 +354,26 @@ func cred_matching_commands(text):
 			#Experience
 			add_line("Experience:    " + str(Stats.player_stats["Credential Matching"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Credential Matching"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Credential Matching"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Credential Matching"]["effeciency description"])
+			var eff = Stats.player_stats["Credential Matching"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Credential Matching"]["efficiency description"])
 		"-h":
 			list_help()
+		"overclock":
+			if !Stats.overclocked and process_running and !Stats.overheated:
+				if Stats.system_tempature < 60:
+					Stats.overclocked = true
+				else:
+					add_line("System tempature needs to cool to below 60°C before overclocking")
+			elif process_running and Stats.overheated:
+				add_line("System has been overheated, needs to cool to below 40°C.")
+			else:
+				add_line("System is already overclocked.")
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
 		_:
 			add_line("Command not found")
 
@@ -382,11 +405,19 @@ func start_cred_matching():
 			if roll < chance_to_find_match:
 				match_found = true
 			set_line(usernames_index, cred_match.render_list(match_found), false)
-			await get_tree().create_timer(0.05).timeout
-			chance_to_find_match += increase_per_line * (1 + Stats.player_stats["Credential Matching"]["effeciency"])
+			if Stats.overclocked:
+				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["overclock speed"]).timeout
+			elif Stats.overheated:
+				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["overheat speed"]).timeout
+			else:
+				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["speed"]).timeout
+			chance_to_find_match += increase_per_line * (1 + Stats.player_stats["Credential Matching"]["efficiency"])
 
 		if process_running:
-			Stats.update_tempature(Stats.player_stats["Credential Matching"]["heat"]) #increase tempature
+			if Stats.overclocked:
+				Stats.update_tempature(Stats.player_stats["Credential Matching"]["overclock heat"])
+			else:
+				Stats.update_tempature(Stats.player_stats["Credential Matching"]["heat"]) #increase tempature
 			Stats.add_xp(Stats.player_stats["Credential Matching"], 450)
 			update_module_stats_header("Credential Matching")
 			cred_match.create_creds()
@@ -406,7 +437,7 @@ func start_cred_matching():
 	
 	#next time
 	# add summary / header
-	# implement effeciency
+	# implement efficiency
 
 #Log parsing context commands
 func log_parsing_commands(text):
@@ -421,6 +452,7 @@ func log_parsing_commands(text):
 			if process_running:
 				add_line("Waiting for current log to finish...")
 			process_running = false
+			Stats.overclocked = false
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -438,10 +470,26 @@ func log_parsing_commands(text):
 			#Experience
 			add_line("Experience:    " + str(Stats.player_stats["Log Parsing"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Log Parsing"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Log Parsing"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["effeciency description"])
+			var eff = Stats.player_stats["Log Parsing"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["efficiency description"])
 		"-h":
 			list_help()
+		"overclock":
+			if !Stats.overclocked and process_running and !Stats.overheated:
+				if Stats.system_tempature < 60:
+					Stats.overclocked = true
+				else:
+					add_line("System tempature needs to cool to below 60°C before overclocking")
+			elif process_running and Stats.overheated:
+				add_line("System has been overheated, needs to cool to below 40°C.")
+			else:
+				add_line("System is already overclocked.")
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
 		_:
 			add_line("Command not found")
 
@@ -452,6 +500,7 @@ func password_unscramble_commands(text):
 			start_password_unscrambling()
 		"stop":
 			process_running = false
+			Stats.overclocked = false
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -469,10 +518,26 @@ func password_unscramble_commands(text):
 			#Experience
 			add_line("Experience:    " + str(Stats.player_stats["Password Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Password Cracking"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Password Cracking"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["effeciency description"])
+			var eff = Stats.player_stats["Password Cracking"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["efficiency description"])
 		"-h":
 			list_help()
+		"overclock":
+			if !Stats.overclocked and process_running and !Stats.overheated:
+				if Stats.system_tempature < 60:
+					Stats.overclocked = true
+				else:
+					add_line("System tempature needs to cool to below 60°C before overclocking")
+			elif process_running and Stats.overheated:
+				add_line("System has been overheated, needs to cool to below 40°C.")
+			else:
+				add_line("System is already overclocked.")
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
 		_:
 			add_line("Command not found")
 			
@@ -498,18 +563,26 @@ func start_password_unscrambling():
 			if !process_running:
 				break
 			set_line(scramble_index, pw_scram.get_current_scramble())
-			await get_tree().create_timer(0.2).timeout
+			if Stats.overclocked:
+				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overclock speed"]).timeout
+			elif Stats.overheated:
+				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overheat speed"]).timeout
+			else:
+				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["speed"]).timeout
 		if !process_running:
 			break
 		pw_scram.reveal_letter()
-		
+		if Stats.overclocked:
+			Stats.update_tempature(Stats.player_stats["Password Cracking"]["overclock heat"])
+		else:
+			Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
 		#check if word is fully revealed
 		if pw_scram.is_word_revealed():
 			set_line(scramble_index, pw_scram.get_current_scramble())
 			await get_tree().create_timer(0.4).timeout
 			pw_scram.transform_password() #removes scrambled, adds password
 			pw_gained += 1
-			Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
+
 			Stats.add_xp(Stats.player_stats["Password Cracking"], 200)
 			update_module_stats_header("Password Cracking")
 			
@@ -541,13 +614,13 @@ func start_log_parsing():
 func show_module_stats_header(skill_name: String):
 	var skill = Stats.player_stats[skill_name]
 	var level = skill["level"]
-	var efficiency = skill["effeciency"]
+	var efficiency = skill["efficiency"]
 	var xp_current = skill["experience"]
 	var xp_needed = Stats.xp_for_level(level + 1)
 	var xp_percent = int(float(xp_current) / xp_needed * 100)
 	add_line("\n" + "[color=cyan]=== " + skill_name.to_upper() + " MODULE ===[/color]\n")
 	add_line("[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]")
-	lvl_and_effeciency_index = lines.size() - 1
+	lvl_and_efficiency_index = lines.size() - 1
 	
 	# XP BAR
 	add_line(get_skill_xp_bar(skill))
@@ -569,11 +642,11 @@ func show_module_stats_header(skill_name: String):
 func update_module_stats_header(skill_name: String):
 	var skill = Stats.player_stats[skill_name]
 	var level = skill["level"]
-	var efficiency = skill["effeciency"]
+	var efficiency = skill["efficiency"]
 	var xp_current = skill["experience"]
 	var xp_needed = Stats.xp_for_level(level + 1)
 	
-	set_line(lvl_and_effeciency_index, "[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]", false)
+	set_line(lvl_and_efficiency_index, "[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]", false)
 	
 	# XP BAR
 	set_line(skill_xp_progress_bar_index, get_skill_xp_bar(skill), false)
@@ -634,8 +707,14 @@ func start_log_stream():
 
 			if result.reward.size() > 0:
 				apply_reward(result.reward)
-
-			await get_tree().create_timer(Stats.player_stats["Log Parsing"]["current speed"]).timeout
+			
+			if Stats.overclocked:
+				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overclock speed"]).timeout
+			elif Stats.overheated:
+				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overheat speed"]).timeout
+				
+			else:
+				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["base speed"]).timeout
 		
 		if Inventory.get_amount(Items.LOGS) > 0 and process_running:
 			clear_logs()
@@ -819,6 +898,7 @@ func data_mining_commands(text):
 				add_line("Process already running")
 		"stop":
 			process_running = false
+			Stats.overclocked = false
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -836,18 +916,18 @@ func data_mining_commands(text):
 			#Experience
 			add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Data Mining"]["effeciency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["effeciency description"])
+			var eff = Stats.player_stats["Data Mining"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
 		"-h":
 			list_help()
 		"overclock":
-			if !Stats.overclocked and process_running:
+			if !Stats.overclocked and process_running and !Stats.overheated:
 				if Stats.system_tempature < 60:
 					Stats.overclocked = true
 				else:
-					add_line("System tempature needs to cool to below 60°C before overclocking")
+					add_line("System cannot activate overclock unless below 60°C")
 			elif process_running and Stats.overheated:
-				add_line("System has overheated and needs time to cool down.")
+				add_line("System has been overheated, needs to cool to below 40C.")
 			else:
 				add_line("System is already overclocked.")
 		"overclock -kill":
@@ -865,7 +945,7 @@ func start_data_mining():
 	show_module_stats_header("Data Mining")
 	
 	var skill = Stats.player_stats["Data Mining"]
-	var efficiency = skill["effeciency"]
+	var efficiency = skill["efficiency"]
 	
 	add_line("\n" + "--- Process Running ---")
 	add_line("Progress: [                    ] 0%")
@@ -873,7 +953,6 @@ func start_data_mining():
 	
 	var amount_gained: int = 0
 	var dur_amount = 2.5
-	#var duration = 5.0 / (1 + efficiency)
 	var yield_amount = snapped(1.0 / dur_amount, 0.01)
 	
 	var data_per_completion = 1.0
@@ -894,10 +973,9 @@ func start_data_mining():
 	
 	while process_running:
 		#calc process length
-		var duration = dur_amount / (1 + Stats.player_stats["Data Mining"]["effeciency"])
-		var og_interval = duration / steps
+		var og_interval = dur_amount / steps
 		var overclock_interval = og_interval / 5
-		yield_amount = snapped(data_per_completion / duration, 0.01)
+		yield_amount = snapped(data_per_completion / dur_amount, 0.01)
 		set_line(yield_text_index, "Yield:    +" + str(yield_amount) + " data/sec")
 		for i in range(1, steps + 1):
 			if process_running:
@@ -915,8 +993,20 @@ func start_data_mining():
 					set_line(progress_bar_index, "Progress: [%s>%s] %d%%" % [filled, empty, percent], false)
 		
 		if process_running:
-			Inventory.add_resource(Items.DATA, data_per_completion)
-			amount_gained += data_per_completion
+			var eff = Stats.player_stats["Data Mining"]["efficiency"]
+			var quant = 1
+
+			# Guaranteed bonus for each full point of efficiency
+			var guaranteed = int(eff)
+			quant += guaranteed
+			eff -= guaranteed  # leftover fractional part, e.g. 0.5
+
+			# Probabilistic roll for the remaining fraction
+			if eff > 0.0:
+				if randf() <= eff:
+					quant += 1
+			Inventory.add_resource(Items.DATA, data_per_completion * quant)
+			amount_gained += data_per_completion * quant
 			Stats.add_xp(skill, exp_per_completion)
 			
 			#increase tempature
@@ -929,7 +1019,7 @@ func start_data_mining():
 			var new_xp = skill["experience"]
 			var new_needed = Stats.xp_for_level(skill["level"] + 1)
 			
-			efficiency = skill["effeciency"]
+			efficiency = skill["efficiency"]
 			update_module_stats_header("Data Mining")
 			set_line(total_gained_index, "Session:  " + str(amount_gained) + " data", false)
 			set_line(total_data_line_index, "Total:    " + str(Inventory.get_amount(Items.DATA)) + " data\n\n\n", false)

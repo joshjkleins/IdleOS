@@ -7,13 +7,13 @@ var player_stats = {
 		"experience": 0,
 		"command": "data-mining",
 		"level": 1,
-		"effeciency": 0.0,
-		"effeciency increase rate": 0.03,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.08,
 		"unlocked": true,
 		"heat": 1,
 		"overclock heat": 3,
 		"description": "Generates data used for purchasing items from the marketplace.",
-		"effeciency description": "Increases speed of mining."
+		"efficiency description": "Chance to receive multiple data."
 	},
 	"Log Parsing": {
 		"experience": 0,
@@ -21,46 +21,55 @@ var player_stats = {
 		"level": 1,
 		"base speed": 0.4,
 		"overclock speed": 0.1,
-		"current speed": 0.4,
-		"effeciency": 0.0,
-		"effeciency increase rate": 0.003,
+		"overheat speed": 3.0,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.003,
 		"unlocked": true,
 		"heat": 7,
+		"overclock heat": 9,
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-		"effeciency description": "Increases chance of finding a resource per row."
+		"efficiency description": "Increases chance of finding a resource per row."
 	},
 	"Password Cracking": {
 		"experience": 0,
 		"command": "pw-cracking",
 		"level": 1,
-		"effeciency": 0.0,
-		"effeciency increase rate": 0.02,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.02,
 		"unlocked": true,
-		"heat": 7,
+		"heat": 1,
+		"overclock heat": 3,
+		"speed": 0.2,
+		"overclock speed": 0.05,
+		"overheat speed": 1.0,
 		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
-		"effeciency description": "Increases chance of revealing more than one letter."
+		"efficiency description": "Increases chance of revealing more than one letter."
 	},
 	"Credential Matching": {
 		"experience": 0,
 		"command": "cred-matching",
 		"level": 1,
-		"effeciency": 0.0,
-		"effeciency increase rate": 0.01,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.01,
 		"unlocked": true,
 		"heat": 14,
+		"overclock heat": 16,
+		"speed": 0.1,
+		"overclock speed": 0.02,
+		"overheat speed": 1.0,
 		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
-		"effeciency description": "Increases chance for a match per row."
+		"efficiency description": "Increases chance for a match per row."
 	},
 	"Hacking": {
 		"experience": 0,
 		"command": "hacking",
 		"level": 1,
-		"effeciency": 0.0,
-		"effeciency increase rate": 0.01,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.01,
 		"unlocked": true,
 		"heat": 20,
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
-		"effeciency description": "IDK yet"
+		"efficiency description": "IDK yet"
 	}
 }
 
@@ -518,12 +527,12 @@ func update_tempature(amount: int):
 		system_tempature = MIN_TEMP
 	
 	
-	
-	if system_tempature <= 50:
+	#OVERHEAT PARAMETERS
+	if system_tempature <= 40: #if overheated, stops overheat mode when reaching below 40
 		overheated = false
-	elif system_tempature >= 95:
+	elif system_tempature >= 95: #if temp reaches 95 then overheat
 		overheated = true
-	elif system_tempature >= 88:
+	elif system_tempature >= 85: #attempt to auto stop overclock when above 85
 		overclocked = false
 	Signals.system_temp_updated(system_tempature)
 
@@ -619,7 +628,7 @@ func add_xp(skill_data: Dictionary, amount: int):
 		on_level_up(skill_data)
 
 func on_level_up(skill_data: Dictionary):
-	#update effeciency
-	skill_data["effeciency"] += skill_data["effeciency increase rate"]
+	#update efficiency
+	skill_data["efficiency"] += skill_data["efficiency increase rate"]
 	print("Leveled up!")
 	print("Current process" + " is level " + str(int(skill_data.level)))
