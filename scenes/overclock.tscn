@@ -1,6 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://denbt4caomtn5"]
+[gd_scene load_steps=5 format=3 uid="uid://denbt4caomtn5"]
 
+[ext_resource type="Script" uid="uid://dic0elee352so" path="res://scripts/temp_bar_ticks.gd" id="2_7wudt"]
 [ext_resource type="Script" uid="uid://b8ciuls5eu846" path="res://scripts/overclock.gd" id="2_h710b"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hbs7w"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.533333, 0.533333, 0.533333, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7wudt"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="Overclock" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 72)
@@ -9,50 +28,76 @@ script = ExtResource("2_h710b")
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="TempName" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="TempName" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "COOL"
 horizontal_alignment = 2
 
-[node name="TempRange" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="TempRange" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_font_sizes/font_size = 10
 text = "< 60C"
 horizontal_alignment = 2
 
-[node name="TempDesc" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="TempDesc" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Heating up, fans activated"
 horizontal_alignment = 2
-autowrap_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="Temp" type="Label" parent="MarginContainer/HBoxContainer/HBoxContainer"]
+[node name="Temp" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "64"
 horizontal_alignment = 2
 
-[node name="Label2" type="Label" parent="MarginContainer/HBoxContainer/HBoxContainer"]
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 size_flags_vertical = 8
 theme_override_font_sizes/font_size = 10
 text = "°C"
+
+[node name="TempBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(240, 20)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_hbs7w")
+theme_override_styles/fill = SubResource("StyleBoxFlat_7wudt")
+min_value = 30.0
+step = 1.0
+value = 30.0
+show_percentage = false
+indeterminate = true
+editor_preview_indeterminate = false
+
+[node name="Ticks" type="Control" parent="MarginContainer/VBoxContainer/TempBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_7wudt")
 
 [node name="Cooling" type="Timer" parent="."]
 

@@ -2,8 +2,10 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
+# log parsing: if you overheat, you can type "stop" and before it finishes the current log you can return to root and it will still finish log
 
 #next:
+#give hacking some love, 'commands not found', stopping in middle of hack, overclock functionality
 #change how loot works in hacking, should be a cache that can later be decrypted for resources
 #build module for cache decrypting
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold

@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cwcgukqes7d5o"]
+[gd_scene load_steps=4 format=3 uid="uid://cwcgukqes7d5o"]
 
 [ext_resource type="Script" uid="uid://do4kdjtm8ch0u" path="res://scripts/header_hacking_box.gd" id="1_45qip"]
+[ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="2_yc4e7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0tax"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -69,6 +70,10 @@ text = "IP Addresses: x1"
 [node name="CredentialsLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
 layout_mode = 2
 text = "Credentials: x23"
+
+[node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
+layout_mode = 2
+size_flags_horizontal = 10
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 layout_mode = 0

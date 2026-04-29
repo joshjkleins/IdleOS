@@ -112,7 +112,7 @@ func colored_log(level:String, service:String, message:String) -> String:
 			return txt
 
 func roll_reward() -> Dictionary:
-	var chance = BASE_REWARD_CHANCE + Stats.player_stats["Log Parsing"]["effeciency"]
+	var chance = BASE_REWARD_CHANCE + Stats.player_stats["Log Parsing"]["efficiency"]
 	if randf() > chance:
 		return {}
 
