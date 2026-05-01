@@ -6,3 +6,4 @@ extends Resource
 @export var name: String
 @export var description: String
 @export var valuable: bool
+@export var value: int

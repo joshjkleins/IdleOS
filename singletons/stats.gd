@@ -65,11 +65,11 @@ var player_stats = {
 		"command": "hacking",
 		"level": 1,
 		"efficiency": 0.0,
-		"efficiency increase rate": 0.01,
+		"efficiency increase rate": 0.1,
 		"unlocked": true,
 		"heat": 20,
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
-		"efficiency description": "IDK yet"
+		"efficiency description": "Increases chance of successful hacking"
 	}
 }
 
@@ -91,56 +91,56 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Administrator",
 				"difficulty": "Easy",
 				"command": "hack administrator",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Principal",
 				"difficulty": "Medium",
 				"command": "hack principal",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Superintendent",
 				"difficulty": "Hard",
 				"command": "hack superintendent",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/school-ascii.png")
@@ -153,56 +153,56 @@ var hacking_targets = {
 				"name": "Patreon",
 				"difficulty": "Easy",
 				"command": "hack patreon",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Volunteer",
 				"difficulty": "Easy",
 				"command": "hack volunteer",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Assistant Librarian",
 				"difficulty": "Medium",
 				"command": "hack assistant-librarian",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Head Librarian",
 				"difficulty": "Medium",
 				"command": "hack head-librarian",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Director",
 				"difficulty": "Hard",
 				"command": "hack director",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/library-ascii.png")
@@ -215,56 +215,56 @@ var hacking_targets = {
 				"name": "Worker",
 				"difficulty": "Easy",
 				"command": "hack worker",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Supervisor",
 				"difficulty": "Easy",
 				"command": "hack supervisor",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Manager",
 				"difficulty": "Medium",
 				"command": "hack manager",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Human Resources",
 				"difficulty": "Medium",
 				"command": "hack human-resources",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Owner",
 				"difficulty": "Hard",
 				"command": "hack owner",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/small-business-ascii.png")
@@ -277,56 +277,56 @@ var hacking_targets = {
 				"name": "Teachers Assistant",
 				"difficulty": "Easy",
 				"command": "hack teachers-assistant",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Professor",
 				"difficulty": "Easy",
 				"command": "hack professor",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Department Chair",
 				"difficulty": "Medium",
 				"command": "hack department-chair",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Dean",
 				"difficulty": "Medium",
 				"command": "hack dean",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "University President",
 				"difficulty": "Hard",
 				"command": "hack university-president",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/university-ascii.png")
@@ -339,56 +339,56 @@ var hacking_targets = {
 				"name": "Receptionist",
 				"difficulty": "Easy",
 				"command": "hack receptionist",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Orderly",
 				"difficulty": "Easy",
 				"command": "hack orderly",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Nurse",
 				"difficulty": "Medium",
 				"command": "hack nurse",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Doctor",
 				"difficulty": "Medium",
 				"command": "hack doctor",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Chief of Medicine",
 				"difficulty": "Hard",
 				"command": "hack chief-medicine",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/hospital-ascii.png")
@@ -401,56 +401,56 @@ var hacking_targets = {
 				"name": "Secretary",
 				"difficulty": "Easy",
 				"command": "hack secretary",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Cop",
 				"difficulty": "Easy",
 				"command": "hack cop",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Detective",
 				"difficulty": "Medium",
 				"command": "hack detective",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Sergeant",
 				"difficulty": "Medium",
 				"command": "hack sergeant",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Captain",
 				"difficulty": "Hard",
 				"command": "hack captain",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/police-station-ascii.png")
@@ -463,56 +463,56 @@ var hacking_targets = {
 				"name": "Legal Assistant",
 				"difficulty": "Easy",
 				"command": "hack legal-assistant",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Paralegal",
 				"difficulty": "Easy",
 				"command": "hack paralegal",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Associate Attorney",
 				"difficulty": "Medium",
 				"command": "hack associate-attorney",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Lawyer",
 				"difficulty": "Medium",
 				"command": "hack lawyer",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			},
 			{
 				"name": "Partner",
 				"difficulty": "Hard",
 				"command": "hack partner",
-				"loot": {
-					0: {"item": Items.DATA, "min": 1, "max": 5, "weight": 50},
-					1: {"item": Items.LOGS, "min": 10, "max": 20, "weight": 35},
-					2: {"item": Items.ENCRYPTED_PASSWORDS, "min": 3, "max": 5, "weight": 10},
-					3: {"item": Items.PARENTS_CREDIT_CARD, "min": 1, "max": 1, "weight": 5}
-				}
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.STUDENT_CACHE
 			}
 		],
 		"art": preload("res://art/lawfirm-ascii.png")

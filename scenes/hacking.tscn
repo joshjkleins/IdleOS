@@ -25,6 +25,7 @@ theme_override_constants/separation = 10
 
 [node name="HeaderHackingBox" parent="VBoxContainer" instance=ExtResource("3_5i062")]
 layout_mode = 2
+size_flags_vertical = 1
 size_flags_stretch_ratio = 0.2
 title_text = "Hacking Info"
 

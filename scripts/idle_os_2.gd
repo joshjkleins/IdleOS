@@ -2,11 +2,8 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
-# log parsing: if you overheat, you can type "stop" and before it finishes the current log you can return to root and it will still finish log
 
 #next:
-#give hacking some love, 'commands not found', stopping in middle of hack, overclock functionality
-#change how loot works in hacking, should be a cache that can later be decrypted for resources
 #build module for cache decrypting
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
 #offline progression
@@ -15,10 +12,17 @@ extends Control
 #Laterz:
 # pw cracking - show efficiency info and how many encrypted pw available
 # cred matching - show how many username/pw available
+# log parsing - issue when trying to stop while overheated, takes a second for resources gained message to show up
+# log parsing - show players % chance for each resource (40% Data, 29% username etc)
+# hacking - update UI and redo sequencial logic so everything is happening at the same time, making it more 'idle' ish
+# hacking - think through idea of difficulty per person / area
+# think through idea of adding upgrades to process/modules. maybe an item for gaining a level (mastery token esque)
+# take another shot at adding a side screen panel that pops in for messages/item gains, maybe bottom right, above typing box?
 
 #module ideas:
 #Defragging - takes a long time (30min-1h) gives long term (or even perm) benefits
 #non-idle module: Jailbreak / heist mode: use commands to open/close doors to get someone in and out
+# Cache decrypting: extract resources from caches received from hacking
 
 
 #STEPS FOR ADDING NEW MODULE
@@ -34,6 +38,9 @@ extends Control
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
+
+@onready var logparsing_timer = $Timers/LogparsingTimer
+@onready var cooling_timer = $Timers/CoolingTimer
 
 @onready var parser = LogParser.new()
 @onready var pw_scram = PasswordCrack.new()
@@ -93,9 +100,13 @@ var LOG_PARSE_SPEED = 0.4
 
 func _ready():
 	update_context(Context.ROOT)
-	input_line.grab_focus() #uncomment this when not testing hacking module
+	#input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
+	
+	#cooling timer
+	cooling_timer.wait_time = Stats.cooling_frequency
+	cooling_timer.start()
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -166,13 +177,6 @@ func update_context(new_context: Context):
 	lead_text.text = get_context_lead()
 
 func list_help():
-	#add_line("""
-#[UNIVERSAL COMMANDS]
-#list -r                 Lists all resources
-#list -m                 List available modules
-#-h                      View this help message
-#quit -s                 Save and quit game
-#""")
 	match current_context:
 		Context.ROOT:
 			add_line("""
@@ -452,7 +456,7 @@ func log_parsing_commands(text):
 				add_line("Log parsing already running")
 		"stop":
 			if process_running:
-				add_line("Waiting for current log to finish...")
+				add_line("Log parsing process stopped.")
 			process_running = false
 			Stats.overclocked = false
 		"root":
@@ -697,6 +701,7 @@ func push_log_line(new_line:String):
 
 	update_terminal(false)
 
+
 func start_log_stream():
 	reset_batch_totals()
 	
@@ -704,19 +709,19 @@ func start_log_stream():
 		Inventory.remove_resource(Items.LOGS, 1)
 		
 		for i in range(10):
-			var result = parser.generate_log_line(Logs.LOG_LINES)
-			push_log_line(result.text)
+			if process_running:
+				var result = parser.generate_log_line(Logs.LOG_LINES)
+				push_log_line(result.text)
 
-			if result.reward.size() > 0:
-				apply_reward(result.reward)
-			
-			if Stats.overclocked:
-				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overclock speed"]).timeout
-			elif Stats.overheated:
-				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overheat speed"]).timeout
+				if result.reward.size() > 0:
+					apply_reward(result.reward)
 				
-			else:
-				await get_tree().create_timer(Stats.player_stats["Log Parsing"]["base speed"]).timeout
+				if Stats.overclocked:
+					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overclock speed"]).timeout
+				elif Stats.overheated:
+					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overheat speed"]).timeout
+				else:
+					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["base speed"]).timeout
 		
 		if Inventory.get_amount(Items.LOGS) > 0 and process_running:
 			clear_logs()
@@ -1043,11 +1048,12 @@ func _move_caret_to_end():
 
 #handle up/down input for history commands
 func _input(event):
-	if event is InputEventKey and event.pressed:
-		if event.keycode == Key.KEY_UP:
-			navigate_history(-1)
-		elif event.keycode == Key.KEY_DOWN:
-			navigate_history(1)
+	if current_context != Context.HACKING:
+		if event is InputEventKey and event.pressed:
+			if event.keycode == Key.KEY_UP:
+				navigate_history(-1)
+			elif event.keycode == Key.KEY_DOWN:
+				navigate_history(1)
 
 #command history functionality
 func navigate_history(delta: int):
@@ -1072,3 +1078,7 @@ func _on_hacking_start_loading() -> void:
 	var tween = create_tween()
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	await tween.finished
+
+
+func _on_cooling_timer_timeout():
+	Stats.update_tempature(Stats.cooling_amount)

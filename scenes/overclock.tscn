@@ -98,7 +98,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_7wudt")
-
-[node name="Cooling" type="Timer" parent="."]
-
-[connection signal="timeout" from="Cooling" to="." method="_on_cooling_timeout"]

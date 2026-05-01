@@ -8,4 +8,5 @@ id = 7
 name = "Parents credit card"
 description = "Sell on the marketplace for lots of data"
 valuable = true
+value = 200
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

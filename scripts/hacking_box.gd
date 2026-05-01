@@ -14,6 +14,7 @@ const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
 const person_card: PackedScene = preload("res://scenes/person_card.tscn")
 
 func _ready():
+	Signals.end_hacking_signal.connect(end_hack)
 	targets_container.visible = true
 	persons_container.visible = false
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
@@ -22,6 +23,7 @@ func _ready():
 func update_targets():
 	for child in targets_container.get_children():
 		child.queue_free()
+	#await get_tree().process_frame  # wait for frees to process
 	
 	for target in Stats.hacking_targets:
 		var info = Stats.hacking_targets[target]
@@ -32,6 +34,8 @@ func update_targets():
 		
 		#add to ui
 		targets_container.add_child(new_row)
+	
+	
 
 func select_target(target: Dictionary = {}):
 	await _green_flash(target, targets_container)
@@ -49,7 +53,6 @@ func select_person(target: Dictionary = {}):
 		hack_container.begin_hack()
 	else:
 		await _red_flash(target, persons_container)
-		#update terminal hacking with text telling whats going on
 
 func can_hack_person(target: Dictionary = {}):
 	#keep target as param because eventually people will have different requirements for hacking
@@ -65,8 +68,10 @@ func hacking_to_persons():
 	await _show_container(persons_container)
 
 func end_hack():
+	await get_tree().create_timer(1.5).timeout
 	await _hide_container(hack_container)
 	await _show_container(persons_container)
+	Signals.hacking_ended()
 
 func _hide_container(container):
 	if !container.visible:

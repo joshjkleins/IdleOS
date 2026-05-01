@@ -16,6 +16,7 @@ extends Control
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
 	update_header()
+	Signals.update_hacking_header_signal.connect(update_header)
 
 
 func update_header():
@@ -29,4 +30,5 @@ func update_header():
 	
 	h_level.text = "Level " + str(hacking_stats.level)
 	h_exp.text = "Exp: " + str(xp_current) + "/" + str(xp_needed)
+	h_eff.text = "Efficiency: " + str(hacking_stats.efficiency) + "% increased chance of successful hack" 
 	

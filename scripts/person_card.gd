@@ -8,9 +8,16 @@ func update_info(info):
 	$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "Command " + info["command"]
 	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
 	
-	var loot_text = ""
-	for loot in info.loot.keys():
-		loot_text += info.loot[loot].item.name + "\n"
+	var loot_text = info.loot.name + "\n"
+
+	for entry in info.loot.entries:
+		var chance = str(int(entry.drop_chance * 100)) + "%"
+		loot_text += entry.item.name + " - " + chance + "\n"
+
+	for entry in info.loot.rare_pool:
+		var chance = str(int(info.loot.rare_drop_chance * 100)) + "%"
+		loot_text += entry.item.name + " (rare) - " + chance + "\n"
+
 	$MarginContainer/VBoxContainer/VBoxContainer/Loot.text = loot_text
 
 func flash_green():

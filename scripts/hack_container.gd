@@ -23,8 +23,15 @@ extends VBoxContainer
 @onready var battle_info = $BattleInfo
 
 var target
+var hacking_active: bool = false
+var _active_tween: Tween = null
+
+func _ready():
+	Signals.end_hacking_signal.connect(cancel_hack)
 
 func setup_hack():
+	update_header()
+	hacking_active = true
 	#reset to stage 1
 	stage_one_node.visible = true
 	stage_two_node.visible = true
@@ -59,28 +66,39 @@ func begin_hack():
 	phase_one()
 
 func phase_one():
-	var tween = create_tween()
-	tween.tween_property(stage_one_progress_bar, "value", 100.0, 2.0)
-	await tween.finished
+	_active_tween = create_tween()
+	if Stats.overclocked:
+		_active_tween.tween_property(stage_one_progress_bar, "value", 100.0, target["overclock time to hack"])
+	elif Stats.overheated:
+		_active_tween.tween_property(stage_one_progress_bar, "value", 100.0, target["overheat time to hack"])
+	else:
+		_active_tween.tween_property(stage_one_progress_bar, "value", 100.0, target["time to hack"])
+	if not await _tween_wait(_active_tween): return
+	
 	
 	if randf() < 0.1: #fail
+		Stats.update_tempature(target["heat"])
 		_progress_bar_fail(stage_one_progress_bar, stage_one_success_label)
 		Inventory.remove_resource(Items.IP_ADDRESS, 1)
-		await get_tree().create_timer(1.0).timeout
+		update_header()
+		if not await _wait(1.0): return
 		if Inventory.get_amount(Items.IP_ADDRESS) > 0:
 			_reset_progress_bar(stage_one_progress_bar)
 			phase_one()
 		else:
 			stop_hacking()
 	else: #success
+		Stats.update_tempature(target["heat"])
 		_progress_bar_success(stage_one_progress_bar, stage_one_success_label, stage_one_right_label)
 		Inventory.remove_resource(Items.IP_ADDRESS, 1)
-		await get_tree().create_timer(1.0).timeout
-		await end_phase_one()
-		await phase_two_setup()
+		update_header()
+		if not await _wait(1.0): return
+		if not await end_phase_one(): return
+		if not await phase_two_setup(): return
 
 func end_phase_one():
 	await _fade_node_down_out(stage_labels)
+	return hacking_active
 	
 
 func phase_two_setup():
@@ -88,34 +106,45 @@ func phase_two_setup():
 	_update_stage_labels("Stage 2", Ascii.breach)
 	_fade_node_up_in(stage_labels)
 	await _fade_node_up_in(stage_two_node)
+	if not hacking_active: return false
 
 	phase_two()
+	return hacking_active
 
 
 func phase_two():
 	#start progress bar
-	var tween = create_tween()
-	tween.tween_property(stage_two_progress_bar, "value", 100.0, 2.0)
-	await tween.finished
+	_active_tween = create_tween()
+	if Stats.overclocked:
+		_active_tween.tween_property(stage_two_progress_bar, "value", 100.0, target["overclock time to hack"])
+	elif Stats.overheated:
+		_active_tween.tween_property(stage_two_progress_bar, "value", 100.0, target["overheat time to hack"])
+	else:
+		_active_tween.tween_property(stage_two_progress_bar, "value", 100.0, target["time to hack"])
+	if not await _tween_wait(_active_tween): return
 
 	if randf() < 0.1: #fail
+		Stats.update_tempature(target["heat"])
 		stage_two_success_label.text = "Failed"
 		var style = StyleBoxFlat.new()
 		style.bg_color = Color.RED
 		stage_two_progress_bar.add_theme_stylebox_override("fill", style)
 		Inventory.remove_resource(Items.CREDENTIALS, 1)
-		await get_tree().create_timer(1.0).timeout
+		update_header()
+		if not await _wait(1.0): return
 		if Inventory.get_amount(Items.CREDENTIALS) > 0:
 			_reset_progress_bar(stage_two_progress_bar)
 			phase_two()
 		else:
 			stop_hacking()
 	else: #success
+		Stats.update_tempature(target["heat"])
 		stage_two_success_label.text = "Success"
 		stage_two_right_label.text = "I'm in"
 		_update_progress_bar_color(Color.LIME_GREEN, stage_two_progress_bar)
 		Inventory.remove_resource(Items.CREDENTIALS, 1)
-		await get_tree().create_timer(1.0).timeout
+		update_header()
+		if not await _wait(1.0): return
 		await end_phase_two()
 		phase_three_setup()
 
@@ -130,57 +159,85 @@ func phase_three_setup():
 	await _fade_node_up_in(stage_three_node)
 	
 	phase_three() 
+	return hacking_active
 
 func phase_three():
-	var amount_of_items = randi_range(5, 8)
-	var loot = target["loot"]
+	#var amount_of_items = randi_range(5, 8)
+	#var loot = target["loot"]
+	#
+	## Precompute total weight ONCE
+	#var total_weight = 0.0
+	#for item in loot.values():
+		#total_weight += item.weight
+	#
+	#var percentage_of_bar_per_item = 100.0 / amount_of_items
+	#var current_value = stage_three_progress_bar.value
+	#
+	#stage_three_left_label.text = ""  # reset text
+	#
+	#for i in range(amount_of_items):
+		## ---- WEIGHTED ROLL ----
+		#var roll = randf() * total_weight
+		#var cumulative = 0.0
+		#var chosen_key = ""
+		#var entry
+		#
+		#for key in loot.keys():
+			#entry = loot[key]
+			#cumulative += entry.weight
+			#
+			#if roll <= cumulative:
+				#chosen_key = entry.item
+				#break
+		#
+		#var amount = randi_range(entry.min, entry.max)
+		#
+		## ---- PROGRESS BAR ANIMATION ----
+		#var target_percent = current_value - percentage_of_bar_per_item
+		#var tween = create_tween()
+		#if Stats.overclocked:
+			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["overclock time to hack"])
+		#elif Stats.overheated:
+			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["overheat time to hack"])
+		#else:
+			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["time to hack"])
+		#
+		#if not await _tween_wait(tween): return
+		#
+		#current_value = stage_three_progress_bar.value
+		#
+		## ---- DISPLAY (NO STACKING) ----
+		#stage_three_left_label.text += chosen_key.name + " x" + str(amount) + "\n"
+		#Inventory.add_resource(chosen_key, amount)
+		#if not await _wait(0.2): return
 	
-	# Precompute total weight ONCE
-	var total_weight = 0.0
-	for item in loot.values():
-		total_weight += item.weight
 	
-	var percentage_of_bar_per_item = 100.0 / amount_of_items
-	var current_value = stage_three_progress_bar.value
 	
-	stage_three_left_label.text = ""  # reset text
+	#new
+	var tween = create_tween()
+	if Stats.overclocked:
+		tween.tween_property(stage_three_progress_bar, "value", 0.0, target["overclock time to hack"])
+	elif Stats.overheated:
+		tween.tween_property(stage_three_progress_bar, "value", 0.0, target["overheat time to hack"])
+	else:
+		tween.tween_property(stage_three_progress_bar, "value", 0.0, target["time to hack"])
 	
-	for i in range(amount_of_items):
-		# ---- WEIGHTED ROLL ----
-		var roll = randf() * total_weight
-		var cumulative = 0.0
-		var chosen_key = ""
-		var entry
-		
-		for key in loot.keys():
-			entry = loot[key]
-			cumulative += entry.weight
-			
-			if roll <= cumulative:
-				chosen_key = entry.item
-				break
-		
-		var amount = randi_range(entry.min, entry.max)
-		
-		# ---- PROGRESS BAR ANIMATION ----
-		var target_percent = current_value - percentage_of_bar_per_item
-		var tween = create_tween()
-		tween.tween_property(stage_three_progress_bar, "value", target_percent, 0.5)
-		await tween.finished
-		
-		current_value = stage_three_progress_bar.value
-		
-		# ---- DISPLAY (NO STACKING) ----
-		stage_three_left_label.text += chosen_key.name + " x" + str(amount) + "\n"
-		Inventory.add_resource(chosen_key, amount)
-		await get_tree().create_timer(0.2).timeout
+	if not await _tween_wait(tween): return
+	
+	stage_three_left_label.text = target["loot"].name
+	Inventory.add_resource(target["loot"], 1)
+	if not await _wait(0.2): return
+	
 	
 	_update_progress_bar_color(Color.LIME_GREEN, stage_three_progress_bar)
 	stage_three_success_label.text = "Success"
 	stage_three_right_label.text = "Valuables Extracted"
+	Stats.update_tempature(target["heat"])
+	Stats.add_xp(Stats.player_stats["Hacking"], target["exp"])
+	update_header()
 	
 	#check if player has ip addresses and credentials
-	await get_tree().create_timer(1.5).timeout
+	if not await _wait(1.5): return
 
 	_fade_node_down_out(stage_labels)
 	await _fade_node_down_out(battle_info)
@@ -235,7 +292,7 @@ func _fade_node_down_out(n):
 		0.5
 	)
 
-	await tween.finished
+	if not await _tween_wait(tween): return
 	n.position = og_pos
 
 #assumes node is visible with opacity set to 0.0
@@ -258,9 +315,39 @@ func _fade_node_up_in(n):
 		0.5
 	)
 
-	await tween.finished
+	if not await _tween_wait(tween): return
 
 
 func _update_stage_labels(new_stage_number: String, new_stage_name: String):
 	stage_number.text = new_stage_number
 	stage_name.text = new_stage_name
+
+
+func _wait(seconds: float) -> bool:
+	await get_tree().create_timer(seconds).timeout
+	return hacking_active  # false = was cancelled
+
+# use this everywhere instead of if not await _tween_wait(tween): return
+func _tween_wait(tween: Tween) -> bool:
+	while tween.is_running():
+		await get_tree().process_frame
+	return hacking_active
+
+
+func cancel_hack():
+	hacking_active = false
+	Stats.overclocked = false
+	if _active_tween and _active_tween.is_running():
+		_active_tween.kill()
+		update_progress_bars()
+
+func update_progress_bars():
+	_update_progress_bar_color(Color.RED, stage_one_progress_bar)
+	_update_progress_bar_color(Color.RED, stage_two_progress_bar)
+	_active_tween = create_tween()
+	_active_tween.tween_property(stage_one_progress_bar, "value", 0.0, 1.0)
+	_active_tween.parallel().tween_property(stage_two_progress_bar, "value", 0.0, 1.0)
+
+
+func update_header():
+	Signals.update_hacking_header()

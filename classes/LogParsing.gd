@@ -17,12 +17,10 @@ const BASE_REWARD_CHANCE = 0.05
 
 const REWARD_TABLE = [
 	{ "item": Items.DATA, "min": 5, "max": 15, "weight": 40, "color": "yellow" },
-	{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 15, "color": "cyan" },
-	{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 15, "color": "lime" },
-	{ "item": Items.LOGS, "min": 1, "max": 1, "weight": 10, "color": "lime" },
-	{ "item": Items.PASSWORDS, "min": 1, "max": 1, "weight": 10, "color": "lime" },
-	{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 8, "color": "orange" },
-	{ "item": Items.CREDENTIALS, "min": 1, "max": 1, "weight": 2, "color": "lime" },
+	{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 29, "color": "cyan" },
+	{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 29, "color": "lime" },
+	{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 1, "color": "orange" },
+	{ "item": Items.CREDENTIALS, "min": 1, "max": 1, "weight": 1, "color": "lime" },
 ]
 
 func get_reward_chances() -> String:

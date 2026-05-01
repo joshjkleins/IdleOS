@@ -40,6 +40,7 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 25
 
@@ -83,12 +84,20 @@ context_menu_enabled = false
 caret_blink = true
 
 [node name="Hacking" parent="Panel/MarginContainer" instance=ExtResource("3_wp27s")]
-visible = false
 layout_mode = 2
 
 [node name="Loading" parent="Panel/MarginContainer" instance=ExtResource("4_u0uic")]
 visible = false
 layout_mode = 2
 
+[node name="Timers" type="Node2D" parent="."]
+position = Vector2(8, 8)
+
+[node name="LogparsingTimer" type="Timer" parent="Timers"]
+one_shot = true
+
+[node name="CoolingTimer" type="Timer" parent="Timers"]
+
 [connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
 [connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]
+[connection signal="timeout" from="Timers/CoolingTimer" to="." method="_on_cooling_timer_timeout"]

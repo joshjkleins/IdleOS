@@ -1,5 +1,23 @@
 # Items.gd (autoload)
 extends Node
+## ADDING ITEMS ##
+# Add to ItemType enum
+# Remember ID (commented number)
+# create resource in items directory 
+# assign id (same as ItemType)
+# add preload
+# add to ITEM_MAP (order not important here(ithink))
+
+## ADDING VALUABLES ##
+# Same as above but add to valuables directory and check valuable bool in resource
+
+## ADDING CACHE ##
+# Create cache_entry (in appropriate directory) for each item that will be in cache e.g. student_data will be Data and have a min of 1 and max of 10 with a 1.0 (100%) drop chance
+# note: drop chance is independent, not weighted. so if its set to 1.0, it will always drop EXCEPT rare drops, then drop chance is ignored in cache_entry
+# Once they are all created, create a cache_data resource (again in appropriate directory). and drag cache_entry's to appropriate slots (regular drops & rare drops)
+# When creating cache_data resource make sure you follow "ADDING ITEMS" instructions as the ID will matter in ItemType enum
+# Once it is created and assigned in this file, go to Stats.gd and assign to appropriate target
+
 
 enum ItemType {
 	DATA, #0
@@ -10,8 +28,10 @@ enum ItemType {
 	CREDENTIALS, #5
 	IP_ADDRESS, #6
 	PARENTS_CREDIT_CARD, #7
+	STUDENT_CACHE, #8
 }
 
+#items
 const DATA = preload("res://items/data.tres")
 const LOGS = preload("res://items/logs.tres")
 const ENCRYPTED_PASSWORDS = preload("res://items/encrypted_passwords.tres")
@@ -19,8 +39,13 @@ const PASSWORDS = preload("res://items/passwords.tres")
 const USERNAMES = preload("res://items/usernames.tres")
 const CREDENTIALS = preload("res://items/credentials.tres")
 const IP_ADDRESS = preload("res://items/ip_address.tres")
-const PARENTS_CREDIT_CARD = preload("res://items/parents_credit_card.tres")
+
+#valuables
+const PARENTS_CREDIT_CARD = preload("res://items/valuables/parents_credit_card.tres")
  
+#caches
+const STUDENT_CACHE = preload("res://items/cache_data/school/student/student_cache.tres")
+
 const ITEM_MAP = {
 	ItemType.DATA: DATA,
 	ItemType.LOGS: LOGS,
@@ -29,5 +54,6 @@ const ITEM_MAP = {
 	ItemType.USERNAMES: USERNAMES,
 	ItemType.CREDENTIALS: CREDENTIALS,
 	ItemType.IP_ADDRESS: IP_ADDRESS,
-	ItemType.PARENTS_CREDIT_CARD: PARENTS_CREDIT_CARD
+	ItemType.PARENTS_CREDIT_CARD: PARENTS_CREDIT_CARD,
+	ItemType.STUDENT_CACHE: STUDENT_CACHE
 }

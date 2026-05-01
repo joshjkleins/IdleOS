@@ -4,13 +4,10 @@ extends Control
 @onready var temp_range = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempRange
 @onready var temp_desc = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempDesc
 @onready var temp = $MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer/Temp
-@onready var cooling = $Cooling
 @onready var temp_bar = $MarginContainer/VBoxContainer/TempBar
 
 func _ready():
 	Signals.system_temp_updated_signal.connect(update_heat_info)
-	cooling.wait_time = Stats.cooling_frequency
-	cooling.start()
 
 const ZONE_COLORS = [
 	Color("#2d9e75"),  # cool
@@ -99,6 +96,3 @@ func update_progressbar_fill(color: Color) -> void:
 	var stylebox := temp_bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat
 	stylebox.bg_color = color
 	temp_bar.add_theme_stylebox_override("fill", stylebox)
-
-func _on_cooling_timeout():
-	Stats.update_tempature(Stats.cooling_amount)
