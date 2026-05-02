@@ -18,7 +18,7 @@ var history_index = -1
 
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
-	input_line.grab_focus()
+	#input_line.grab_focus() #only when testing hacking mod
 
 func grab():
 	input_line.grab_focus()

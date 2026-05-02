@@ -100,7 +100,7 @@ var LOG_PARSE_SPEED = 0.4
 
 func _ready():
 	update_context(Context.ROOT)
-	#input_line.grab_focus() #uncomment this when not testing hacking module
+	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
 	
@@ -1048,12 +1048,17 @@ func _move_caret_to_end():
 
 #handle up/down input for history commands
 func _input(event):
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_TAB:
+			get_viewport().set_input_as_handled()
+			return
 	if current_context != Context.HACKING:
 		if event is InputEventKey and event.pressed:
 			if event.keycode == Key.KEY_UP:
 				navigate_history(-1)
 			elif event.keycode == Key.KEY_DOWN:
 				navigate_history(1)
+
 
 #command history functionality
 func navigate_history(delta: int):

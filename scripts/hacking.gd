@@ -77,17 +77,17 @@ func _on_player_hacking_box_command_entered(text):
 					player_hacking_box.add_line("Command not found.")
 		HackingContext.HACKING:
 			match text:
-				#"..":
-					#handle_back_command()
-				"-kill":
-					#stop hacking
+				"kill":
 					Signals.end_hacking()
-					#handle_back_command()
+				"kill -s":
+					Signals.end_hacking_safely()
 				"-h":
 					player_hacking_box.add_line(format_command_list("COMMANDS", [
-						["-kill", "Kills current hack attempt"],
+						["kill", "Kills current hack attempt immediately, resources may be lost."],
+						["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
 						["overclock", "Overclocks system to increase speed and heat output"],
-						["overclock -kill", "Stops overclocking"]
+						["overclock -kill", "Stops overclocking"],
+						
 					]))
 				"overclock":
 					if !Stats.overclocked and !Stats.overheated:

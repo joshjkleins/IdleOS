@@ -29,6 +29,8 @@ enum ItemType {
 	IP_ADDRESS, #6
 	PARENTS_CREDIT_CARD, #7
 	STUDENT_CACHE, #8
+	FALSIFIED_TRANSCRIPT_DATABASE, #9
+	ADMIN_CACHE, #10
 }
 
 #items
@@ -42,9 +44,11 @@ const IP_ADDRESS = preload("res://items/ip_address.tres")
 
 #valuables
 const PARENTS_CREDIT_CARD = preload("res://items/valuables/parents_credit_card.tres")
+const FALSIFIED_TRANSCRIPT_DATABASE = preload("res://items/valuables/falsified_transcript_database.tres")
  
 #caches
 const STUDENT_CACHE = preload("res://items/cache_data/school/student/student_cache.tres")
+const ADMIN_CACHE = preload("res://items/cache_data/school/admin/admin_cache.tres")
 
 const ITEM_MAP = {
 	ItemType.DATA: DATA,
@@ -55,5 +59,7 @@ const ITEM_MAP = {
 	ItemType.CREDENTIALS: CREDENTIALS,
 	ItemType.IP_ADDRESS: IP_ADDRESS,
 	ItemType.PARENTS_CREDIT_CARD: PARENTS_CREDIT_CARD,
-	ItemType.STUDENT_CACHE: STUDENT_CACHE
+	ItemType.STUDENT_CACHE: STUDENT_CACHE,
+	ItemType.FALSIFIED_TRANSCRIPT_DATABASE: FALSIFIED_TRANSCRIPT_DATABASE,
+	ItemType.ADMIN_CACHE: ADMIN_CACHE,
 }

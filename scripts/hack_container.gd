@@ -25,9 +25,11 @@ extends VBoxContainer
 var target
 var hacking_active: bool = false
 var _active_tween: Tween = null
+var end_hacking_safely: bool = false
 
 func _ready():
 	Signals.end_hacking_signal.connect(cancel_hack)
+	Signals.end_hacking_safely_signal.connect(end_safely)
 
 func setup_hack():
 	update_header()
@@ -162,58 +164,6 @@ func phase_three_setup():
 	return hacking_active
 
 func phase_three():
-	#var amount_of_items = randi_range(5, 8)
-	#var loot = target["loot"]
-	#
-	## Precompute total weight ONCE
-	#var total_weight = 0.0
-	#for item in loot.values():
-		#total_weight += item.weight
-	#
-	#var percentage_of_bar_per_item = 100.0 / amount_of_items
-	#var current_value = stage_three_progress_bar.value
-	#
-	#stage_three_left_label.text = ""  # reset text
-	#
-	#for i in range(amount_of_items):
-		## ---- WEIGHTED ROLL ----
-		#var roll = randf() * total_weight
-		#var cumulative = 0.0
-		#var chosen_key = ""
-		#var entry
-		#
-		#for key in loot.keys():
-			#entry = loot[key]
-			#cumulative += entry.weight
-			#
-			#if roll <= cumulative:
-				#chosen_key = entry.item
-				#break
-		#
-		#var amount = randi_range(entry.min, entry.max)
-		#
-		## ---- PROGRESS BAR ANIMATION ----
-		#var target_percent = current_value - percentage_of_bar_per_item
-		#var tween = create_tween()
-		#if Stats.overclocked:
-			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["overclock time to hack"])
-		#elif Stats.overheated:
-			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["overheat time to hack"])
-		#else:
-			#tween.tween_property(stage_three_progress_bar, "value", target_percent, target["time to hack"])
-		#
-		#if not await _tween_wait(tween): return
-		#
-		#current_value = stage_three_progress_bar.value
-		#
-		## ---- DISPLAY (NO STACKING) ----
-		#stage_three_left_label.text += chosen_key.name + " x" + str(amount) + "\n"
-		#Inventory.add_resource(chosen_key, amount)
-		#if not await _wait(0.2): return
-	
-	
-	
-	#new
 	var tween = create_tween()
 	if Stats.overclocked:
 		tween.tween_property(stage_three_progress_bar, "value", 0.0, target["overclock time to hack"])
@@ -224,7 +174,7 @@ func phase_three():
 	
 	if not await _tween_wait(tween): return
 	
-	stage_three_left_label.text = target["loot"].name
+	stage_three_left_label.text = "+1 " + target["loot"].name
 	Inventory.add_resource(target["loot"], 1)
 	if not await _wait(0.2): return
 	
@@ -242,11 +192,15 @@ func phase_three():
 	_fade_node_down_out(stage_labels)
 	await _fade_node_down_out(battle_info)
 
-	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
-		setup_hack()
-		begin_hack()
-	else:
+	if end_hacking_safely:
 		stop_hacking()
+		end_hacking_safely = false
+	else:
+		if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
+			setup_hack()
+			begin_hack()
+		else:
+			stop_hacking()
 
 func stop_hacking():
 	Signals.end_hacking()
@@ -351,3 +305,6 @@ func update_progress_bars():
 
 func update_header():
 	Signals.update_hacking_header()
+
+func end_safely():
+	end_hacking_safely = true

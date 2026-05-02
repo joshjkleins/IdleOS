@@ -107,7 +107,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.ADMIN_CACHE
 			},
 			{
 				"name": "Vice Principal",
