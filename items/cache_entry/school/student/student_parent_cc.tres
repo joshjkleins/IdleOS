@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://cnv1kmbjwjhej"]
 
-[ext_resource type="Resource" uid="uid://bfm4jf1xgmqwc" path="res://items/valuables/parents_credit_card.tres" id="1_mbg4n"]
+[ext_resource type="Resource" uid="uid://bfm4jf1xgmqwc" path="res://items/valuables/school/parents_credit_card.tres" id="1_mbg4n"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_s2y21"]
 
 [resource]

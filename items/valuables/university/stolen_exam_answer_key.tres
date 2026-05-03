@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://c7khbfmbw1f1u"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_3mchm"]
+
+[resource]
+script = ExtResource("1_3mchm")
+id = 37
+name = "Stolen exam answer key"
+description = "Sell on the marketplace"
+valuable = true
+value = 1600
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

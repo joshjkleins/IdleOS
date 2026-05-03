@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b4nddpnk5mprv"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_2gcbi"]
+
+[resource]
+script = ExtResource("1_2gcbi")
+id = 12
+name = "School budget embezzlement logs"
+description = "Sell on the marketplace"
+valuable = true
+value = 500
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

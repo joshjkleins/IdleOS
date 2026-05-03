@@ -4,7 +4,9 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #next:
+# update -h (make every flag "-a, -c, -v" underneath initial command so it looks nicer)
 #build module for cache decrypting
+#finish building out cacheEntry's for each hacking target. use what resources are available and can change later
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
 #offline progression
 #save/load
@@ -227,7 +229,10 @@ root                    Exit back to root
 info                    Credential matching module stats
 """)
 	
-	add_line("""list -r                 Lists all resources
+	add_line("""list -a                 Lists all items
+list -r                 List all resources (items with specific uses)
+list -v                 List all valuables (items that are only meant to be sold)
+list -c                 List all caches (items needing decrypting for more items)
 list -m                 List available modules
 -h                      View this help message
 quit -s                 Save and quit game
@@ -239,7 +244,16 @@ func universal_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"list -r":
-			add_line(Inventory.list_inventory_items())
+			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
+			return true
+		"list -a":
+			add_line(Inventory.list_inventory())
+			return true
+		"list -v":
+			add_line(Inventory.list_inventory(Inventory.InventoryFilter.VALUABLES))
+			return true
+		"list -c":
+			add_line(Inventory.list_inventory(Inventory.InventoryFilter.CACHES))
 			return true
 		"list -m": #List processes
 			add_line(Stats.list_unlocked_processes())

@@ -290,6 +290,7 @@ func _tween_wait(tween: Tween) -> bool:
 
 func cancel_hack():
 	hacking_active = false
+	end_hacking_safely = false
 	Stats.overclocked = false
 	if _active_tween and _active_tween.is_running():
 		_active_tween.kill()

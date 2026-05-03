@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://7xahf3p5b4ip"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_jdt6g"]
+
+[resource]
+script = ExtResource("1_jdt6g")
+id = 40
+name = "Admissions bribery records"
+description = "Sell on the marketplace"
+valuable = true
+value = 1900
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://ba2g0r5845mxx"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_mtsq8"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_5s71o"]
+
+[resource]
+script = ExtResource("2_5s71o")
+entries = Array[ExtResource("1_mtsq8")]([])
+rare_pool = Array[ExtResource("1_mtsq8")]([])
+rare_drop_chance = 0.05
+id = 43
+name = "Professor cache"
+description = "Received from hacking a professor. Decrypt for resources."
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

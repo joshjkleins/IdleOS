@@ -16,17 +16,24 @@ extends Node
 #Defining "Process"
 #Pick one: Generate, Convert, Buff, Unlock
 
-
+enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.DATA, 200)
-	add_resource(Items.LOGS, 1000)
-	add_resource(Items.ENCRYPTED_PASSWORDS, 10)
-	add_resource(Items.PASSWORDS, 10)
-	add_resource(Items.USERNAMES, 10)
-	add_resource(Items.CREDENTIALS, 10)
-	add_resource(Items.IP_ADDRESS, 10)
+	for i in Items.ITEM_MAP:
+		add_resource(Items.ITEM_MAP[i], 1)
+	pass
+	#add_resource(Items.DATA, 200)
+	#add_resource(Items.LOGS, 2)
+	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
+	#add_resource(Items.PASSWORDS, 10)
+	#add_resource(Items.USERNAMES, 10)
+	#add_resource(Items.CREDENTIALS, 100)
+	#add_resource(Items.IP_ADDRESS, 100)
+	#add_resource(Items.ADMIN_CACHE, 2)
+	#add_resource(Items.COP_CACHE, 1)
+	#add_resource(Items.BODY_CAM_FOOTAGE_DELETION_LOGS, 2)
+	
 
 func get_amount(resource: ItemData) -> int:
 	if inventory.has(resource):
@@ -52,34 +59,48 @@ func remove_resource(resource: ItemData, amount: int) -> bool:
 	
 	return true
 
-func list_inventory_items() -> String:
-	print(inventory)
-	var name_width = 25
+func _matches_filter(resource, filter: InventoryFilter) -> bool:
+	match filter:
+		InventoryFilter.CACHES:
+			return resource.name.contains("cache")
+		InventoryFilter.VALUABLES:
+			return resource.valuable
+		InventoryFilter.RESOURCES:
+			return !resource.valuable and !resource.name.contains("cache")
+		_:
+			return true
+
+func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 	var amount_width = 15
-	
 	var output = ""
 	var has_items := false
-	
-	output += pad_text("Resource", name_width)
+
+	var max_name_length = 0
+	for resource in inventory.keys():
+		if inventory[resource] > 0 and _matches_filter(resource, filter):
+			if resource.name.length() > max_name_length:
+				max_name_length = resource.name.length()
+
+	var name_width = max_name_length + 4
+
+	output += pad_text("Items", name_width)
 	output += pad_text("Amount", amount_width)
 	output += "Description\n"
-	
 	output += pad_text("--------", name_width)
 	output += pad_text("------", amount_width)
 	output += "-----------\n"
-	
+
 	for resource in inventory.keys():
-		var amount: int = inventory[resource]
-		
-		if amount > 0:
-			has_items = true
-			output += pad_text(resource.name, name_width)
-			output += pad_text(amount, amount_width)
-			output += resource.description + "\n"
-	
+		if _matches_filter(resource, filter):
+			var amount: int = inventory[resource]
+			if amount > 0:
+				has_items = true
+				output += pad_text(resource.name, name_width)
+				output += pad_text(amount, amount_width)
+				output += resource.description + "\n"
+
 	if not has_items:
-		return "You have no resources."
-	
+		return "You have no items."
 	return output
 
 func pad_text(value, width: int) -> String:

@@ -6,7 +6,7 @@
 script = ExtResource("1_3v8dj")
 id = 7
 name = "Parents credit card"
-description = "Sold on the marketplace for data"
+description = "Sell on the marketplace"
 valuable = true
 value = 200
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

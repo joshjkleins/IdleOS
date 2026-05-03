@@ -76,7 +76,7 @@ var player_stats = {
 var MAX_TEMP = 100
 var MIN_TEMP = 30
 var system_tempature = 30
-var cooling_amount = -1
+var cooling_amount = -10
 var cooling_frequency = 1.0
 var overheated = false
 var overclocked = false
@@ -118,7 +118,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
 			{
 				"name": "Principal",
@@ -129,7 +129,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.PRINCIPAL_CACHE
 			},
 			{
 				"name": "Superintendent",
@@ -140,7 +140,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],
 		"art": preload("res://art/school-ascii.png")
@@ -158,7 +158,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.PATRON_CACHE
 			},
 			{
 				"name": "Volunteer",
@@ -169,7 +169,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.VOLUNTEER_CACHE
 			},
 			{
 				"name": "Assistant Librarian",
@@ -180,7 +180,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.ASSISTANT_LIBRARIAN_CACHE
 			},
 			{
 				"name": "Head Librarian",
@@ -191,7 +191,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.HEAD_LIBRARIAN_CACHE
 			},
 			{
 				"name": "Director",
@@ -202,7 +202,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.DIRECTOR_CACHE
 			}
 		],
 		"art": preload("res://art/library-ascii.png")
@@ -220,7 +220,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.WORKER_CACHE
 			},
 			{
 				"name": "Supervisor",
@@ -231,7 +231,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.SUPERVISOR_CACHE
 			},
 			{
 				"name": "Manager",
@@ -242,7 +242,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.MANAGER_CACHE
 			},
 			{
 				"name": "Human Resources",
@@ -253,7 +253,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.HUMAN_RESOURCES_CACHE
 			},
 			{
 				"name": "Owner",
@@ -264,7 +264,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.OWNER_CACHE
 			}
 		],
 		"art": preload("res://art/small-business-ascii.png")
@@ -282,7 +282,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.TEACHERS_ASSISTANT_CACHE
 			},
 			{
 				"name": "Professor",
@@ -293,7 +293,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.PROFESSOR_CACHE
 			},
 			{
 				"name": "Department Chair",
@@ -304,7 +304,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.DEPARTMENT_CHAIR_CACHE
 			},
 			{
 				"name": "Dean",
@@ -315,7 +315,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.DEAN_CACHE
 			},
 			{
 				"name": "University President",
@@ -326,7 +326,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.UNIVERSITY_PRESIDENT_CACHE
 			}
 		],
 		"art": preload("res://art/university-ascii.png")
@@ -344,7 +344,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.RECEPTIONIST_CACHE
 			},
 			{
 				"name": "Orderly",
@@ -355,7 +355,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.ORDERLY_CACHE
 			},
 			{
 				"name": "Nurse",
@@ -366,7 +366,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.NURSE_CACHE
 			},
 			{
 				"name": "Doctor",
@@ -377,7 +377,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.DOCTOR_CACHE
 			},
 			{
 				"name": "Chief of Medicine",
@@ -388,7 +388,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.CHIEF_OF_MEDICINE_CACHE
 			}
 		],
 		"art": preload("res://art/hospital-ascii.png")
@@ -406,7 +406,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.SECRETARY_CACHE
 			},
 			{
 				"name": "Cop",
@@ -417,7 +417,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.COP_CACHE
 			},
 			{
 				"name": "Detective",
@@ -428,7 +428,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.DETECTIVE_CACHE
 			},
 			{
 				"name": "Sergeant",
@@ -439,7 +439,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.SERGEANT_CACHE
 			},
 			{
 				"name": "Captain",
@@ -450,7 +450,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.CAPTAIN_CACHE
 			}
 		],
 		"art": preload("res://art/police-station-ascii.png")
@@ -468,7 +468,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
 			{
 				"name": "Paralegal",
@@ -479,7 +479,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.PARALEGAL_CACHE
 			},
 			{
 				"name": "Associate Attorney",
@@ -490,7 +490,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
 			{
 				"name": "Lawyer",
@@ -501,7 +501,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.LAWYER_CACHE
 			},
 			{
 				"name": "Partner",
@@ -512,7 +512,7 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.STUDENT_CACHE
+				"loot": Items.PARTNER_CACHE
 			}
 		],
 		"art": preload("res://art/lawfirm-ascii.png")

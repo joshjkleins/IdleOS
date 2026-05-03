@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://by1suulbuquqc"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_ml0jq"]
+
+[resource]
+script = ExtResource("1_ml0jq")
+id = 57
+name = "Internal affairs complaint archive"
+description = "Sell on the marketplace"
+valuable = true
+value = 2800
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

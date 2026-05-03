@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dmhhjn756bhg2"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_pbw0r"]
+
+[resource]
+script = ExtResource("1_pbw0r")
+id = 71
+name = "Witness protection address"
+description = "Sell on the marketplace"
+valuable = true
+value = 5500
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

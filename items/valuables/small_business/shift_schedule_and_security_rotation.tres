@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://c0o201qw760wq"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_6up62"]
+
+[resource]
+script = ExtResource("1_6up62")
+id = 28
+name = "Shift schedule and security rotation"
+description = "Sell on the marketplace"
+valuable = true
+value = 1000
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

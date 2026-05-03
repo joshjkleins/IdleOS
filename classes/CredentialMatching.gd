@@ -107,7 +107,7 @@ func render_list(match_found: bool) -> String:
 		else:
 			line_num = i + (highlight_index - visible_count + 1)
 		var line = str(line_num)
-		var perc_chance = line_num * (increase_per_row * (1 + Stats.player_stats["Credential Matching"]["effeciency"]))
+		var perc_chance = line_num * (increase_per_row * (1 + Stats.player_stats["Credential Matching"]["efficiency"]))
 		line += " ".repeat(8 - str(i).length())
 		line += n
 		line += " ".repeat(25 - n.length())

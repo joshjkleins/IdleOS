@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://ds8j63132l7gl"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_s3hnd"]
+
+[resource]
+script = ExtResource("1_s3hnd")
+id = 51
+name = "Falsified drug trial results"
+description = "Sell on the marketplace"
+valuable = true
+value = 2600
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

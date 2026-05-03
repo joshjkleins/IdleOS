@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://d261cn0ge56ti"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_wtwf0"]
+
+[resource]
+script = ExtResource("1_wtwf0")
+id = 31
+name = "Unreleased product prototype"
+description = "Sell on the marketplace"
+valuable = true
+value = 1500
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

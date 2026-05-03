@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://wv05tmcpbuy"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_g4tje"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_a1301"]
+
+[resource]
+script = ExtResource("2_a1301")
+entries = Array[ExtResource("1_g4tje")]([])
+rare_pool = Array[ExtResource("1_g4tje")]([])
+rare_drop_chance = 0.05
+id = 55
+name = "Doctor cache"
+description = "Received from hacking a doctor. Decrypt for resources."
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

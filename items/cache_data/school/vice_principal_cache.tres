@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://0tyaq543vqch"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_08qxt"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_5w02g"]
+
+[resource]
+script = ExtResource("2_5w02g")
+entries = Array[ExtResource("1_08qxt")]([])
+rare_pool = Array[ExtResource("1_08qxt")]([])
+rare_drop_chance = 0.05
+id = 14
+name = "Vice principal cache"
+description = "Received from hacking a the vice principal. Decrypt for resources."
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -6,7 +6,7 @@
 script = ExtResource("1_ah6fy")
 id = 9
 name = "Falsified transcript database"
-description = "Sold on the marketplace for data"
+description = "Sell on the marketplace"
 valuable = true
 value = 300
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

@@ -32,7 +32,7 @@ func get_current_scramble() -> String:
 	return output
 
 func reveal_letter():
-	var chance = 0.05 + Stats.player_stats["Password Cracking"]["effeciency"]
+	var chance = 0.05 + Stats.player_stats["Password Cracking"]["efficiency"]
 	if randf() > chance:
 		revealed_chars += 1
 	else:
