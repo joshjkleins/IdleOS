@@ -70,6 +70,21 @@ var player_stats = {
 		"heat": 20,
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
 		"efficiency description": "Increases chance of successful hacking"
+	},
+	"Cache Decrypting": {
+		"experience": 0,
+		"command": "cache-decrypting",
+		"level": 1,
+		"base speed": 0.4,
+		"overclock speed": 0.1,
+		"overheat speed": 3.0,
+		"efficiency": 0.0,
+		"efficiency increase rate": 0.003,
+		"unlocked": true,
+		"heat": 7,
+		"overclock heat": 9,
+		"description": "Decrypt caches gained from hacking to reveal additional items.",
+		"efficiency description": "Increases chance of finding higher quantity of items."
 	}
 }
 

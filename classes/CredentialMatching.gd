@@ -1,22 +1,4 @@
 class_name CredentialMatching
-#ideas
-#1
-#Set success chance threshold
-#Each created credential has specific success threshold
-# need to figure out hacking module mechanics before this
-
-#AI: "3 viable credential candidates detected."
-#AI: "Recommending pair #2"
-#
-#> jkleins : p@55w0rd?
-#Success Chance: 72%
-#Alert Risk: MEDIUM
-
-
-#2
-#Search for directory of usernames
-#ID | USERNAME | PASSWORD STRENGTH | CHANCE FOR MATCHING PASSWORD
-
 
 var usernames = []
 var highlight_index = 0

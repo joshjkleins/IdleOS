@@ -109,6 +109,18 @@ func pad_text(value, width: int) -> String:
 		return text.substr(0, width)
 	return text + " ".repeat(width - text.length())
 
+func get_cache() -> CacheData:
+	for i in inventory:
+		if i.name.contains("cache"):
+			return i
+	return null #should never hit this
+
+func has_cache() -> bool:
+	for i in inventory:
+		if i.name.contains("cache"):
+			return true
+	return false
+
 # Resources:
 # Data  - main currency resource
 # Encrypted passwords - must use password unscramble module to have usable passwords (weak, medium, strong, impossible)

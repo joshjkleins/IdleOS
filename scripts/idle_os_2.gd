@@ -4,7 +4,6 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #next:
-# update -h (make every flag "-a, -c, -v" underneath initial command so it looks nicer)
 #build module for cache decrypting
 #finish building out cacheEntry's for each hacking target. use what resources are available and can change later
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
@@ -47,6 +46,7 @@ extends Control
 @onready var parser = LogParser.new()
 @onready var pw_scram = PasswordCrack.new()
 @onready var cred_match = CredentialMatching.new()
+@onready var cache_decrypt = CacheDecrypting.new()
 
 
 enum Context {
@@ -57,7 +57,8 @@ enum Context {
 	CRED_MATCHING,
 	HACKING,
 	DARKWEB,
-	MARKETPLACE
+	MARKETPLACE,
+	CACHE_DECRYPTING,
 }
 
 var current_context: Context = Context.ROOT
@@ -147,8 +148,8 @@ func _on_input_line_text_submitted(new_text):
 				password_unscramble_commands(new_text)
 			Context.CRED_MATCHING:
 				cred_matching_commands(new_text)
-			Context.HACKING:
-				hacking_commands(new_text)
+			Context.CACHE_DECRYPTING:
+				cache_decrypting_commands(new_text)
 
 	history_index = -1
 	
@@ -172,6 +173,8 @@ func get_context_lead():
 			return "IdleOS/Modules/CredentialMatching>"
 		Context.HACKING:
 			return "IdleOS/Modules/Hacking>"
+		Context.CACHE_DECRYPTING:
+			return "IdleOS/Modules/CacheDecrypting>"
 
 #Changes context and updates leading text
 func update_context(new_context: Context):
@@ -228,14 +231,29 @@ stop                    Stop credential matching process
 root                    Exit back to root
 info                    Credential matching module stats
 """)
+		Context.CACHE_DECRYPTING:
+			add_line("""
+	[CACHE DECRYPTING COMMANDS]
+start                   Start cache decrypting process
+stop                    Stop cache decrypting process
+root                    Exit back to root
+info                    Cache decrypting module stats
+""")
 	
-	add_line("""list -a                 Lists all items
-list -r                 List all resources (items with specific uses)
-list -v                 List all valuables (items that are only meant to be sold)
-list -c                 List all caches (items needing decrypting for more items)
-list -m                 List available modules
--h                      View this help message
-quit -s                 Save and quit game
+	add_line("""Usage: [command] [flag]
+
+Item Management:
+  list -a               Lists all items
+  list -r               List all resources (items with specific uses)
+  list -v               List all valuables (items only meant to be sold)
+  list -c               List all caches (items needing decrypting for more items)
+
+Module Management:
+  list -m               List available modules
+
+General:
+  -h                    View this help message
+  quit -s               Save and quit game
 """)
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 	
@@ -339,11 +357,95 @@ func root_commands(text):
 			add_line("Welcome to the marketplace.")
 			add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
 			list_help()
+		"load cache-decrypting":
+			if Stats.player_stats["Cache Decrypting"].unlocked:
+				add_line("[ .. ] loading cache decrypting module")
+				await get_tree().create_timer(0.8).timeout
+				add_line("[ OK ] cache decrypting module loaded")
+				update_context(Context.CACHE_DECRYPTING)
+				await get_tree().create_timer(0.5).timeout
+				add_line(Ascii.cache_decrypting)
+				list_help()
+			else:
+				add_line("Module not found, must be purchased from the marketplace.")
 		_:#default
 			add_line("Command not found")
 
-func hacking_commands(text):
-	pass
+#cache decrypting context commands
+func cache_decrypting_commands(text):
+	text = text.to_lower().strip_edges()
+	match text:
+		"start":
+			if !process_running:
+				start_cache_decrypting()
+			else:
+				add_line("Cache decrypting is already running")
+		"stop":
+			process_running = false
+			Stats.overclocked = false
+		"root":
+			if process_running:
+				add_line("Cannot safetly shut down module while process is running")
+				add_line("Stop process to exit module")
+			else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
+		"info":
+			add_line("Module: Cache Decrypting")
+			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
+			#Level
+			#Experience
+			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
+			#Effeciency
+			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
+		"-h":
+			list_help()
+		"overclock":
+			if !Stats.overclocked and process_running and !Stats.overheated:
+				if Stats.system_tempature < 60:
+					Stats.overclocked = true
+				else:
+					add_line("System tempature needs to cool to below 60°C before overclocking")
+			elif process_running and Stats.overheated:
+				add_line("System has been overheated, needs to cool to below 40°C.")
+			else:
+				add_line("System is already overclocked.")
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
+
+func start_cache_decrypting():
+	#here
+	
+	#check for cache
+	if !Inventory.has_cache():
+		add_line("No cache")
+		return
+		
+	
+	show_module_stats_header("Cache Decrypting")
+	var current_cache = Inventory.get_cache()
+	
+	#build body
+	add_line(cache_decrypt.get_starting_dump(current_cache))
+	
+	
+	
+	#build body of hex dump - 3 main columns (0x0000 | 43 35 12 23 | nameOfItem)
+	#number of rows = how many items can be potentially gained from cache
+	#-------------
+	#2 columns - Decoded (each row is name of item and amount gained) : Encrypted Rare slot (maybe try to build suspense if it will 'drop'
+	
+	#
 
 #cred matching context commands
 func cred_matching_commands(text):
