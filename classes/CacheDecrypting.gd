@@ -1,142 +1,121 @@
 class_name CacheDecrypting
 extends RefCounted
 
-#TODO
-# update colors on reveal letters/codes
-# make it a random index of which it gets revealed (maybe if 12 data then 12 lines are revealed 1 data each)
-# maybe make random lettters and words for non-item lines
-
-const DUMP_SIZE: int = 20
-const MAX_ASCII_LEN: int = 13
+const DUMP_SIZE: int = 5 #ROWS IN THE DUMP
+const HEX_CHARACTERS_SIZE: int = 13 #number of ?? in body
 
 var pad_between_cols = "    "
 var hex_body: String = ""
 
 var hd_id = []
-var hd_rows = []       # current display state (starts as all ??)
-var hd_code = []       # current display state (starts as all ...)
-var hd_rows_final = [] # pre-baked resolved version
-var hd_code_final = [] # pre-baked resolved version
+var hd_rows = []
+var hd_code = []
+
+var real_ids = []
+var real_rows = []
+var real_code = []
+
+var dump_info = {}
 
 var current_row: int = 0
 var current_index: int = 0
 var finished: bool = false
 
-func shorten_label(name: String) -> String:
-	if name.length() <= MAX_ASCII_LEN:
-		return name
-	var parts = name.split("_") if "_" in name else name.split(" ")
-	if parts.size() > 1:
-		var joined = ""
-		for p in parts:
-			joined += p.substr(0, 4) + "_"
-		return joined.rstrip("_").substr(0, MAX_ASCII_LEN)
-	return name.substr(0, MAX_ASCII_LEN - 2) + ".."
+#order
+# in build dump also build what the real arrays will be
+# first get loot from cache, roll how many items and quantity of each will drop
+# once that is determined - determine which rows they will appear on (maybe bring dump down to just 5 lines?)
+# this way the background can be set when building the original array, will also need to set in |..| array
+#determine if each iteration is an item pull, or not, and update colors acordingly
+# when an item is revealed, add it to bottom and add it to player inventory. Consume cache at start.
 
+var thing = {
+	"left": ["0x0000", "0x0010"],
+	"codes": {
+		0: [{"hex": "F8", "char": "D"}, {"hex": "14", "char": "A"}, {"hex": "A4", "char": "T"}, {"hex": "14", "char": "A"}]
+	}
+}
+
+#when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
 func build_dump(cache: CacheData):
-	var all_entries: Array = []
-	for entry in cache.entries:
-		all_entries.append(entry)
-	for entry in cache.rare_pool:
-		all_entries.append(entry)
-
-	# pre-bake final resolved rows for each item
-	var item_finals = {}
-	for idx in range(all_entries.size()):
-		var entry = all_entries[idx]
-		var label = shorten_label(entry.item.name)
-		var bytes = label.to_utf8_buffer()
-		var max_offset = 13 - bytes.size()
-		var col_offset = randi_range(0, max(0, max_offset))
-
-		# build the final resolved hex row
-		var final_row = []
-		for col in range(13):
-			var byte_index = col - col_offset
-			if byte_index >= 0 and byte_index < bytes.size():
-				final_row.append("%02X" % bytes[byte_index])
-			else:
-				final_row.append("%02X" % ((idx * 13 + col) % 256))
-
-		# build the final resolved code row
-		var final_code = []
-		final_code.append("|")
-		for col in range(13):
-			var byte_index = col - col_offset
-			var ascii_pos = col * 2
-			var c1 = "."
-			var c2 = "."
-			if byte_index >= 0 and byte_index < label.length():
-				if byte_index * 2 < label.length():
-					c1 = label.substr(byte_index * 2, 1)
-				if byte_index * 2 + 1 < label.length():
-					c2 = label.substr(byte_index * 2 + 1, 1)
-			final_code.append(c1)
-			final_code.append(c2)
-		final_code.append("|")
-
-		item_finals[idx] = { "row": final_row, "code": final_code }
-
-	# now build all display rows
-	for i in range(DUMP_SIZE):
-		hd_id.append("0x%04d" % (10 * i))
-
-		# unresolved starting state
-		var c_row = []
-		for j in range(13):
-			c_row.append("??")
-		hd_rows.append(c_row)
-
-		var code_row = ["|"]
-		for k in range(24):
-			code_row.append(".")
-		code_row.append("|")
-		hd_code.append(code_row)
-
-		# resolved final state (item row or fake hex)
-		if item_finals.has(i):
-			hd_rows_final.append(item_finals[i]["row"])
-			hd_code_final.append(item_finals[i]["code"])
-		else:
-			var fake_row = []
-			for col in range(13):
-				fake_row.append("%02X" % ((i * 13 + col) % 256))
-			hd_rows_final.append(fake_row)
-			var fake_code = ["|"]
-			for k in range(24):
-				fake_code.append(".")
-			fake_code.append("|")
-			hd_code_final.append(fake_code)
-
-func update_dump() -> bool:
-	# resolve current cell from pre-baked final
-	hd_rows[current_row][current_index] = hd_rows_final[current_row][current_index]
+	dump_info = {}
+	var loot = get_potential_items(cache)
 	
-	# resolve the two ascii chars this hex col maps to
-	var ascii_pos = 1 + (current_index * 2)
-	if ascii_pos <= 24:
-		hd_code[current_row][ascii_pos] = hd_code_final[current_row][ascii_pos]
-	if ascii_pos + 1 <= 24:
-		hd_code[current_row][ascii_pos + 1] = hd_code_final[current_row][ascii_pos + 1]
+	var id_array = []
+	for i in range(DUMP_SIZE): #how many rows total (roughly 5 ish)
+		var hex_start = 10 * i
+		var formatted_str: String = "0x%04d" % hex_start
+		id_array.append(formatted_str)
+	dump_info["left"] = id_array
+	
+	dump_info["codes"] = {}
+	for i in range(DUMP_SIZE):
+		var codes_array = get_random_hexes(HEX_CHARACTERS_SIZE)
+		dump_info["codes"][i] = codes_array
 
-	current_index += 1
-	if current_index >= 13:
-		current_index = 0
-		current_row += 1
-		if current_row >= DUMP_SIZE:
-			finished = true
-			return false
 
-	# highlight next cell
-	hd_rows[current_row][current_index] = "[bgcolor=#1a2a1a]%s[/bgcolor]" % hd_rows_final[current_row][current_index]
-	return true
-
+#builds entire hex dump based on a combination of placeholder data and real data
 func render_dump() -> String:
 	hex_body = ""
-	#build all rows
 	for i in range(DUMP_SIZE):
 		if i > current_row:
 			break
-		hex_body += hd_id[i] + pad_between_cols + " ".join(hd_rows[i]) + pad_between_cols + "".join(hd_code[i]) + "\n"
 		
+		#ID
+		hex_body += dump_info["left"][i] + pad_between_cols
+
+		#HEX COLS
+		var row = ""
+		for j in range (dump_info["codes"][i].size()):
+			if current_index > j or current_row > i:
+				row += dump_info["codes"][i][j]["hex"]
+			else:
+				row += "??"
+			row += " "
+		row.strip_edges()
+
+		hex_body += row + "\n"
+
 	return hex_body
+
+#calling this updates the current index (column) and row, iteration through the entire dump
+func update_dump() -> bool:
+	current_index += 1
+
+	if current_index > dump_info["codes"][current_row].size():
+		current_index = 1
+		current_row += 1
+
+		if current_row >= dump_info["codes"].size():
+			return false
+
+	return true
+
+func get_potential_items(cache: CacheData) -> Dictionary:
+	var loot = {}
+	for item in cache.entries:
+		if randf() <= item.drop_chance:
+			var quant = randi_range(item.min_quantity, item.max_quantity)
+			loot[item.item] = quant
+	##DO RARE ITEMS NEXT
+	#not current conditions if loot is empty
+	return loot
+	
+func string_to_hex(s: String) -> String:
+	var bytes = s.to_utf8_buffer()
+	return " ".join(bytes.map(func(b): return "%02X" % b))
+
+
+func get_random_hexes(num: int) -> Array:
+	var result: Array = []
+	
+	for i in range(num):
+		var byte_value = randi_range(0, 255)
+		var hex_value = char(byte_value)
+		result.append({
+			"hex": "%02X" % byte_value,
+			"char": hex_value
+		})
+
+	return result
+		

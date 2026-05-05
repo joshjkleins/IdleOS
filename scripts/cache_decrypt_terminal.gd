@@ -19,7 +19,7 @@ extends Control
 @onready var cache_decrypt = CacheDecrypting.new()
 @onready var hex_display = $PanelContainer/MarginContainer/VBoxContainer/Control/HexDisplay
 
-const TIME_PER_INDEX = 0.08
+const TIME_PER_INDEX = 0.5
 
 func _ready():
 	start_decrypting()
@@ -36,7 +36,7 @@ func start_decrypting():
 	
 	hex_display.text = cache_decrypt.render_dump()
 	
-	var times_to_update = cache_decrypt.hd_rows[0].size() * cache_decrypt.hd_rows.size()
+	var times_to_update = cache_decrypt.HEX_CHARACTERS_SIZE * cache_decrypt.DUMP_SIZE
 	for i in range(times_to_update):
 		cache_decrypt.update_dump()
 		hex_display.text = cache_decrypt.render_dump()
