@@ -7,19 +7,10 @@ const HEX_CHARACTERS_SIZE: int = 13 #number of ?? in body
 var pad_between_cols = "    "
 var hex_body: String = ""
 
-var hd_id = []
-var hd_rows = []
-var hd_code = []
-
-var real_ids = []
-var real_rows = []
-var real_code = []
-
 var dump_info = {}
 
 var current_row: int = 0
 var current_index: int = 0
-var finished: bool = false
 
 #order
 # in build dump also build what the real arrays will be
@@ -35,6 +26,10 @@ var finished: bool = false
 # 		0: [{"hex": "F8", "char": "D"}, {"hex": "14", "char": "A"}, {"hex": "A4", "char": "T"}, {"hex": "14", "char": "A"}]
 # 	}
 # }
+
+func reset():
+	current_row = 0
+	current_index = 0
 
 #when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
 func build_dump(cache: CacheData):
@@ -111,7 +106,7 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 	##DO RARE ITEMS NEXT
 	#not current conditions if loot is empty
 	return loot
-	
+
 func string_to_hex(s: String) -> String:
 	var bytes = s.to_utf8_buffer()
 	return " ".join(bytes.map(func(b): return "%02X" % b))
@@ -120,9 +115,12 @@ func string_to_hex(s: String) -> String:
 func get_random_hexes(num: int) -> Array:
 	var result: Array = []
 	
+	#10% chance of blank row
 	if randf() < 0.1:
 		for i in range(num):
 			var byte_value = randi_range(32, 126)
+			while byte_value == 91 or byte_value == 93:
+				byte_value = randi_range(32, 126)
 			var hex_value = char(byte_value)
 			result.append({
 				"hex": "00",
@@ -131,6 +129,8 @@ func get_random_hexes(num: int) -> Array:
 	else:
 		for i in range(num):
 			var byte_value = randi_range(32, 126)
+			while byte_value == 91 or byte_value == 93:
+				byte_value = randi_range(32, 126)
 			var hex_value = char(byte_value)
 			result.append({
 				"hex": "%02X" % byte_value,

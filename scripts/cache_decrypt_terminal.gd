@@ -25,21 +25,24 @@ func _ready():
 	start_decrypting()
 
 func start_decrypting():
-	if !Inventory.has_cache():
-		print("No cache")
-		return
+	while Inventory.has_cache():
+		cache_decrypt.reset()
+		if !Inventory.has_cache():
+			print("No cache")
+			return
+			
+		var current_cache = Inventory.get_cache()
+		cache_name.text = current_cache.name
+		#build body
+		cache_decrypt.build_dump(current_cache)
 		
-	var current_cache = Inventory.get_cache()
-	cache_name.text = current_cache.name
-	#build body
-	cache_decrypt.build_dump(current_cache)
-	
-	hex_display.text = cache_decrypt.render_dump()
-	
-	var times_to_update = cache_decrypt.HEX_CHARACTERS_SIZE * cache_decrypt.DUMP_SIZE
-	for i in range(times_to_update):
-		cache_decrypt.update_dump()
 		hex_display.text = cache_decrypt.render_dump()
-		await get_tree().create_timer(TIME_PER_INDEX).timeout
 		
-	print("Done decrypting")
+		var times_to_update = cache_decrypt.HEX_CHARACTERS_SIZE * cache_decrypt.DUMP_SIZE
+		for i in range(times_to_update):
+			cache_decrypt.update_dump()
+			hex_display.text = cache_decrypt.render_dump()
+			await get_tree().create_timer(TIME_PER_INDEX).timeout
+			
+		print("Done decrypting")
+		Inventory.remove_resource(current_cache, 1)
