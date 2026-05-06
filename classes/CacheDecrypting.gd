@@ -26,15 +26,15 @@ var finished: bool = false
 # first get loot from cache, roll how many items and quantity of each will drop
 # once that is determined - determine which rows they will appear on (maybe bring dump down to just 5 lines?)
 # this way the background can be set when building the original array, will also need to set in |..| array
-#determine if each iteration is an item pull, or not, and update colors acordingly
+# determine if each iteration is an item pull, or not, and update colors acordingly
 # when an item is revealed, add it to bottom and add it to player inventory. Consume cache at start.
 
-var thing = {
-	"left": ["0x0000", "0x0010"],
-	"codes": {
-		0: [{"hex": "F8", "char": "D"}, {"hex": "14", "char": "A"}, {"hex": "A4", "char": "T"}, {"hex": "14", "char": "A"}]
-	}
-}
+# var example dump_info = {
+# 	"left": ["0x0000", "0x0010"],
+# 	"codes": {
+# 		0: [{"hex": "F8", "char": "D"}, {"hex": "14", "char": "A"}, {"hex": "A4", "char": "T"}, {"hex": "14", "char": "A"}]
+# 	}
+# }
 
 #when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
 func build_dump(cache: CacheData):
@@ -66,15 +66,26 @@ func render_dump() -> String:
 
 		#HEX COLS
 		var row = ""
-		for j in range (dump_info["codes"][i].size()):
+		var words = "|"
+		for j in range(dump_info["codes"][i].size()):
 			if current_index > j or current_row > i:
-				row += dump_info["codes"][i][j]["hex"]
+				if current_index == (j + 1) and current_row == i:
+					row += "[bgcolor=#4ec994]" + dump_info["codes"][i][j]["hex"] + "[/bgcolor]"
+					words += dump_info["codes"][i][j]["char"]
+				else:
+					row += dump_info["codes"][i][j]["hex"]
+					words += dump_info["codes"][i][j]["char"]
 			else:
 				row += "??"
+				words += "."
 			row += " "
 		row.strip_edges()
 
-		hex_body += row + "\n"
+		hex_body += row + pad_between_cols
+		words += "|"
+		hex_body += words + "\n"
+
+
 
 	return hex_body
 
@@ -109,13 +120,22 @@ func string_to_hex(s: String) -> String:
 func get_random_hexes(num: int) -> Array:
 	var result: Array = []
 	
-	for i in range(num):
-		var byte_value = randi_range(0, 255)
-		var hex_value = char(byte_value)
-		result.append({
-			"hex": "%02X" % byte_value,
-			"char": hex_value
-		})
+	if randf() < 0.1:
+		for i in range(num):
+			var byte_value = randi_range(32, 126)
+			var hex_value = char(byte_value)
+			result.append({
+				"hex": "00",
+				"char": "."
+			})
+	else:
+		for i in range(num):
+			var byte_value = randi_range(32, 126)
+			var hex_value = char(byte_value)
+			result.append({
+				"hex": "%02X" % byte_value,
+				"char": hex_value
+			})
 
 	return result
 		
