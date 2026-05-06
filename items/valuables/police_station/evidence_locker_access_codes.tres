@@ -6,6 +6,7 @@
 script = ExtResource("1_nwwav")
 id = 60
 name = "Evidence locker access codes"
+shortened_name = "Evidence codes"
 description = "Sell on the marketplace"
 valuable = true
 value = 3400

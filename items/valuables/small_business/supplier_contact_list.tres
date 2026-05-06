@@ -6,6 +6,7 @@
 script = ExtResource("1_pogvl")
 id = 29
 name = "Supplier contact list"
+shortened_name = "Supplier list"
 description = "Sell on the marketplace"
 valuable = true
 value = 1200

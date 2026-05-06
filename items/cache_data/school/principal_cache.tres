@@ -1,15 +1,20 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://bg5hc1qg7qjyy"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=7 format=3 uid="uid://bg5hc1qg7qjyy"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_vpfdq"]
+[ext_resource type="Resource" uid="uid://bbvxwnw404luf" path="res://items/cache_entry/school/student/student_data.tres" id="2_al2ra"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_emixn"]
+[ext_resource type="Resource" uid="uid://c1fdvurvkmgnj" path="res://items/cache_entry/school/student/student_logs.tres" id="3_q0ug3"]
+[ext_resource type="Resource" uid="uid://clgxgdhmiqv12" path="res://items/cache_entry/school/admin/admin_usernames.tres" id="4_37l2a"]
+[ext_resource type="Resource" uid="uid://cuv468vper0nq" path="res://items/cache_entry/school/principal/principal_embezz_logs.tres" id="5_8gwpr"]
 
 [resource]
 script = ExtResource("2_emixn")
-entries = Array[ExtResource("1_vpfdq")]([])
-rare_pool = Array[ExtResource("1_vpfdq")]([])
+entries = Array[ExtResource("1_vpfdq")]([ExtResource("2_al2ra"), ExtResource("3_q0ug3"), ExtResource("4_37l2a")])
+rare_pool = Array[ExtResource("1_vpfdq")]([ExtResource("5_8gwpr")])
 rare_drop_chance = 0.05
 id = 15
 name = "Principal cache"
+shortened_name = ""
 description = "Received from hacking a principal. Decrypt for resources."
 valuable = false
 value = 0

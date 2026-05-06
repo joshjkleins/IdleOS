@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://ye81u0wk7eoa"]
+
+[ext_resource type="Resource" uid="uid://bi1bqam1rrmkk" path="res://items/valuables/lawfirm/sealed_case_files.tres" id="1_r5dwt"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_yhxwv"]
+
+[resource]
+script = ExtResource("1_yhxwv")
+item = ExtResource("1_r5dwt")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

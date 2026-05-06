@@ -6,6 +6,7 @@
 script = ExtResource("1_pbw0r")
 id = 71
 name = "Witness protection address"
+shortened_name = "Witness protect addr"
 description = "Sell on the marketplace"
 valuable = true
 value = 5500

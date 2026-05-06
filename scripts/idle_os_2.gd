@@ -2,6 +2,10 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
+# BUG: too many lines in scrollback (richtextlabel) cause massive slowdown (to recreate, add all items to inventory, then just "list -a" a bunch of times and there will be slowdown)
+# FIX: for above bug: when a certain threshold is crossed, create a new richtextlabel, dump all previous stuff in there, and load a new one. Also limit the amount of richtextlabels to like 5, if more then just remove top one and append new one.
+# FIX: this is also kind of a feature, to manage what will be modules loaded in as seperate ie cache-decrypting for example needs things inputted after starting it to show up underneath
+
 
 #next:
 #build module for cache decrypting
@@ -35,10 +39,10 @@ extends Control
 
 @onready var lead_text = $Panel/MarginContainer/TerminalRoot/InputLineContainer/LeadText
 @onready var input_line = $Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine
-@onready var scrollback = $Panel/MarginContainer/TerminalRoot/Scrollback
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
+@onready var scrollback = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer/Scrollback
 
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
@@ -48,6 +52,11 @@ extends Control
 @onready var cred_match = CredentialMatching.new()
 @onready var cache_decrypt = CacheDecrypting.new()
 
+@onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+
+
+@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/TerminalBody
+@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer
 
 enum Context {
 	ROOT,
@@ -127,6 +136,8 @@ func update_terminal(scroll_to_line: bool = true):
 	scrollback.text = "\n".join(lines)
 	if scroll_to_line:
 		scrollback.scroll_to_line(scrollback.get_line_count() - 1)
+	
+		_scroll_to_bottom()
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
@@ -433,19 +444,11 @@ func start_cache_decrypting():
 		
 	
 	show_module_stats_header("Cache Decrypting")
-	var current_cache = Inventory.get_cache()
 	
-	#build body
-	add_line(cache_decrypt.get_starting_dump(current_cache))
-	
-	
-	
-	#build body of hex dump - 3 main columns (0x0000 | 43 35 12 23 | nameOfItem)
-	#number of rows = how many items can be potentially gained from cache
-	#-------------
-	#2 columns - Decoded (each row is name of item and amount gained) : Encrypted Rare slot (maybe try to build suspense if it will 'drop'
-	
-	#
+	#instantiate cache decrypt terminal
+	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
+	terminal_body_container.add_child(new_cache_decrypt_terminal)
+	new_cache_decrypt_terminal.start_decrypting()
 
 #cred matching context commands
 func cred_matching_commands(text):
@@ -1203,3 +1206,8 @@ func _on_hacking_start_loading() -> void:
 
 func _on_cooling_timer_timeout():
 	Stats.update_tempature(Stats.cooling_amount)
+
+func _scroll_to_bottom():
+	#await get_tree().process_frame #if youre finding one frame is not enough uncomment this
+	await get_tree().process_frame
+	terminal_body.set_deferred("scroll_vertical", terminal_body.get_v_scroll_bar().max_value)

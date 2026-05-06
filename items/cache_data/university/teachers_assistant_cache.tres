@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://b0qu1vcido0dm"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://b0qu1vcido0dm"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_iwjaw"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_8nu6e"]
+[ext_resource type="Resource" uid="uid://cmxpcysjk88o2" path="res://items/cache_entry/university/teacher_assist/teacher_assist_exam_answer.tres" id="2_ho0n3"]
 
 [resource]
 script = ExtResource("2_8nu6e")
 entries = Array[ExtResource("1_iwjaw")]([])
-rare_pool = Array[ExtResource("1_iwjaw")]([])
+rare_pool = Array[ExtResource("1_iwjaw")]([ExtResource("2_ho0n3")])
 rare_drop_chance = 0.05
 id = 42
 name = "Teachers assist. cache"
+shortened_name = ""
 description = "Received from hacking a teachers assistant. Decrypt for resources."
 valuable = false
 value = 0

@@ -6,6 +6,7 @@
 script = ExtResource("1_yxpnl")
 id = 41
 name = "Endowment fund access codes"
+shortened_name = "Endowment codes"
 description = "Sell on the marketplace"
 valuable = true
 value = 2000

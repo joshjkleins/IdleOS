@@ -6,6 +6,7 @@
 script = ExtResource("1_wtwf0")
 id = 31
 name = "Unreleased product prototype"
+shortened_name = "Product prototype"
 description = "Sell on the marketplace"
 valuable = true
 value = 1500

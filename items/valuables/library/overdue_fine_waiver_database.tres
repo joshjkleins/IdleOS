@@ -6,6 +6,7 @@
 script = ExtResource("1_0gs5m")
 id = 20
 name = "Overdue fine waiver database"
+shortened_name = "Fine waiver db"
 description = "Sell on the marketplace"
 valuable = true
 value = 800

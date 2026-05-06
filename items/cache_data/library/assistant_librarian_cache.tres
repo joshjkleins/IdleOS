@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://cgewvql34vmvq"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://cgewvql34vmvq"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_v137k"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_6haws"]
+[ext_resource type="Resource" uid="uid://bdwfy7x1g3a03" path="res://items/cache_entry/library/assistant_lib/asisst_lib_book_scan.tres" id="2_m4y0w"]
 
 [resource]
 script = ExtResource("2_6haws")
 entries = Array[ExtResource("1_v137k")]([])
-rare_pool = Array[ExtResource("1_v137k")]([])
+rare_pool = Array[ExtResource("1_v137k")]([ExtResource("2_m4y0w")])
 rare_drop_chance = 0.05
 id = 24
 name = "Assist. librarian cache"
+shortened_name = ""
 description = "Received from hacking a assistant libarian. Decrypt for resources."
 valuable = false
 value = 0

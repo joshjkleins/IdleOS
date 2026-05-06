@@ -6,6 +6,7 @@
 script = ExtResource("1_jdt6g")
 id = 40
 name = "Admissions bribery records"
+shortened_name = "Admis bribe records"
 description = "Sell on the marketplace"
 valuable = true
 value = 1900

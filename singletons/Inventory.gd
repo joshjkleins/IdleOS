@@ -23,7 +23,7 @@ func _ready():
 	for i in Items.ITEM_MAP:
 		add_resource(Items.ITEM_MAP[i], 1)
 	pass
-	#add_resource(Items.DATA, 200)
+	add_resource(Items.STUDENT_CACHE, 40)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
 	#add_resource(Items.PASSWORDS, 10)

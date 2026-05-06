@@ -6,6 +6,7 @@
 script = ExtResource("1_t600i")
 id = 59
 name = "Confidential informant registry"
+shortened_name = "Informant registry"
 description = "Sell on the marketplace"
 valuable = true
 value = 3200

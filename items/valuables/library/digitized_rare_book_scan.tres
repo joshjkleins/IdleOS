@@ -6,6 +6,7 @@
 script = ExtResource("1_gjhfj")
 id = 19
 name = "Digitized rare book scan"
+shortened_name = "Rare book scan"
 description = "Sell on the marketplace"
 valuable = true
 value = 800

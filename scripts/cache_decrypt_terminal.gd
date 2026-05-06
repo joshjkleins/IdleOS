@@ -1,38 +1,33 @@
 extends Control
 
+@onready var cache_name = $MarginContainer/VBoxContainer/CacheName
+@onready var hex_display = $MarginContainer/VBoxContainer/Control/HexDisplay
+@onready var labels_container = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LabelsContainer
 
-#func add_line_success(text: String):
-	#add_line("[color=#4ec994]" + text + "[/color]")  # green
-#
-#func add_line_error(text: String):
-	#add_line("[color=#e24b4a]" + text + "[/color]")  # red
-#
-#func add_line_warning(text: String):
-	#add_line("[color=#ef9f27]" + text + "[/color]")  # amber
-#
-#func add_line_system(text: String):
-	#add_line("[color=#888888]" + text + "[/color]")  # muted gray
-#
-#func add_line_highlight(text: String):
-	#add_line("[color=#7f77dd]" + text + "[/color]")  # purple
-@onready var cache_name = $PanelContainer/MarginContainer/VBoxContainer/CacheName
 @onready var cache_decrypt = CacheDecrypting.new()
-@onready var hex_display = $PanelContainer/MarginContainer/VBoxContainer/Control/HexDisplay
+
+var items_from_session = {} #reference for labels
+
+var item_label = preload("res://scenes/cache_item_label.tscn")
 
 const TIME_PER_INDEX = 0.05
 
 func _ready():
-	start_decrypting()
+	Signals.item_found_in_cache_signal.connect(update_items_gained)
 
 func start_decrypting():
+	clear_labels()
+	items_from_session = {}
 	while Inventory.has_cache():
+		
 		cache_decrypt.reset()
 		if !Inventory.has_cache():
 			print("No cache")
 			return
 			
 		var current_cache = Inventory.get_cache()
-		cache_name.text = current_cache.name
+		cache_name.text = current_cache.name + " x" + str(Inventory.get_amount(current_cache))
+		Inventory.remove_resource(current_cache, 1)
 		#build body
 		cache_decrypt.build_dump(current_cache)
 		
@@ -43,6 +38,23 @@ func start_decrypting():
 			cache_decrypt.update_dump()
 			hex_display.text = cache_decrypt.render_dump()
 			await get_tree().create_timer(TIME_PER_INDEX).timeout
-			
-		print("Done decrypting")
-		Inventory.remove_resource(current_cache, 1)
+
+func clear_labels():
+	for n in labels_container.get_children():
+		n.queue_free()
+
+func update_items_gained(item, amount):
+	if items_from_session.has(item.name):
+		items_from_session[item.name] += amount
+	else:
+		items_from_session[item.name] = amount
+	
+	#rebuild
+	clear_labels()
+	
+	for i in items_from_session.keys():
+		var new_label = item_label.instantiate()
+		new_label.update(i, items_from_session[i])
+		labels_container.add_child(new_label)
+	
+	Inventory.add_resource(item, amount)

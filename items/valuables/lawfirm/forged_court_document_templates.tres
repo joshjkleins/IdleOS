@@ -6,6 +6,7 @@
 script = ExtResource("1_r3qn3")
 id = 68
 name = "Forged court document templates"
+shortened_name = "Forged court docs"
 description = "Sell on the marketplace"
 valuable = true
 value = 4700

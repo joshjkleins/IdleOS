@@ -6,6 +6,7 @@
 script = ExtResource("1_6up62")
 id = 28
 name = "Shift schedule and security rotation"
+shortened_name = "Shift sec rotation"
 description = "Sell on the marketplace"
 valuable = true
 value = 1000

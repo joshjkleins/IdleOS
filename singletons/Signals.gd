@@ -5,6 +5,7 @@ signal system_temp_updated_signal
 signal hacking_ended_signal
 signal update_hacking_header_signal
 signal end_hacking_safely_signal
+signal item_found_in_cache_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -25,3 +26,6 @@ func end_hacking_safely():
 #hack_container.gd - called when exp, lvl, efficiency, resources etc. are updated
 func update_hacking_header():
 	update_hacking_header_signal.emit()
+
+func item_found_in_cache(item, amount):
+	item_found_in_cache_signal.emit(item, amount)

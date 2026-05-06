@@ -6,6 +6,7 @@
 script = ExtResource("1_2gcbi")
 id = 12
 name = "School budget embezzlement logs"
+shortened_name = "Budget embezzle logs"
 description = "Sell on the marketplace"
 valuable = true
 value = 500

@@ -6,6 +6,7 @@
 script = ExtResource("1_c3ep1")
 id = 21
 name = "Censored books archive"
+shortened_name = "Censored book arch"
 description = "Sell on the marketplace"
 valuable = true
 value = 900

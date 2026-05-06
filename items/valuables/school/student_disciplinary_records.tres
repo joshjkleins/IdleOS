@@ -6,6 +6,7 @@
 script = ExtResource("1_lerud")
 id = 11
 name = "Student disciplinary records"
+shortened_name = "Student disc records"
 description = "Sell on the marketplace"
 valuable = true
 value = 400

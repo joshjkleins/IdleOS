@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://d4h14xvvcapq"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_o45ix"]
+[ext_resource type="Resource" uid="uid://ds8j63132l7gl" path="res://items/valuables/hospital/falsified_drug_trial_results.tres" id="1_qv12m"]
+
+[resource]
+script = ExtResource("1_o45ix")
+item = ExtResource("1_qv12m")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

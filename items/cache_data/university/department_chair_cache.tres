@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://c2o1y52piuf1c"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://c2o1y52piuf1c"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_14rau"]
+[ext_resource type="Resource" uid="uid://bta7pm6b0e2dh" path="res://items/cache_entry/university/dept_chair/dep_chair_grant_fraud.tres" id="2_a628t"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_r5qtl"]
 
 [resource]
 script = ExtResource("2_r5qtl")
 entries = Array[ExtResource("1_14rau")]([])
-rare_pool = Array[ExtResource("1_14rau")]([])
+rare_pool = Array[ExtResource("1_14rau")]([ExtResource("2_a628t")])
 rare_drop_chance = 0.05
 id = 44
 name = "Department chair cache"
+shortened_name = ""
 description = "Received from hacking a department chair. Decrypt for resources."
 valuable = false
 value = 0

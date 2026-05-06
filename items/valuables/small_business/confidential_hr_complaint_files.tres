@@ -6,6 +6,7 @@
 script = ExtResource("1_2xxjb")
 id = 30
 name = "Confidential HR complaint files"
+shortened_name = "HR complaint files"
 description = "Sell on the marketplace"
 valuable = true
 value = 1400

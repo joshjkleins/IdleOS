@@ -6,6 +6,7 @@
 script = ExtResource("1_7n50v")
 id = 39
 name = "Grant fraud documentation"
+shortened_name = "Grant docs"
 description = "Sell on the marketplace"
 valuable = true
 value = 1800

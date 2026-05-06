@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://d1l7swshwpqwg"]
+
+[ext_resource type="Resource" uid="uid://7xahf3p5b4ip" path="res://items/valuables/university/admissions_bribery_records.tres" id="1_0bnt6"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_6pv7a"]
+
+[resource]
+script = ExtResource("1_6pv7a")
+item = ExtResource("1_0bnt6")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

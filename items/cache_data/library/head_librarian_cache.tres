@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://dp3j8asxq44l7"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://dp3j8asxq44l7"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_fwy7x"]
+[ext_resource type="Resource" uid="uid://blfbrrknhtulr" path="res://items/cache_entry/library/head_lib/head_lib_overdue_waiver.tres" id="2_q0o8v"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_xulcw"]
 
 [resource]
 script = ExtResource("2_xulcw")
 entries = Array[ExtResource("1_fwy7x")]([])
-rare_pool = Array[ExtResource("1_fwy7x")]([])
+rare_pool = Array[ExtResource("1_fwy7x")]([ExtResource("2_q0o8v")])
 rare_drop_chance = 0.05
 id = 25
 name = "Head librarian cache"
+shortened_name = ""
 description = "Received from hacking a head librarian. Decrypt for resources."
 valuable = false
 value = 0

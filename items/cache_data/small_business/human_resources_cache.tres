@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://bpqx1olulqjvg"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://bpqx1olulqjvg"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_s5mhc"]
+[ext_resource type="Resource" uid="uid://dfy5fm45omlwl" path="res://items/cache_entry/small_business/hr/hr_complaint_files.tres" id="2_tdka4"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_ygwbc"]
 
 [resource]
 script = ExtResource("2_ygwbc")
 entries = Array[ExtResource("1_s5mhc")]([])
-rare_pool = Array[ExtResource("1_s5mhc")]([])
+rare_pool = Array[ExtResource("1_s5mhc")]([ExtResource("2_tdka4")])
 rare_drop_chance = 0.05
 id = 35
 name = "Human resources cache"
+shortened_name = ""
 description = "Received from hacking human resources. Decrypt for resources."
 valuable = false
 value = 0

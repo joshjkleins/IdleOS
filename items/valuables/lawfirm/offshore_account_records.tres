@@ -6,6 +6,7 @@
 script = ExtResource("1_2l1ju")
 id = 70
 name = "Offshore account records"
+shortened_name = "Offshore accts"
 description = "Sell on the marketplace"
 valuable = true
 value = 5200

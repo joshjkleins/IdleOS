@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://djnm8ubgvufek"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://djnm8ubgvufek"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_g1ewa"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_0vccb"]
+[ext_resource type="Resource" uid="uid://28xf8k18sale" path="res://items/cache_entry/lawfirm/legal_assist/legal_assist_deposition.tres" id="2_ai4bs"]
 
 [resource]
 script = ExtResource("2_0vccb")
 entries = Array[ExtResource("1_g1ewa")]([])
-rare_pool = Array[ExtResource("1_g1ewa")]([])
+rare_pool = Array[ExtResource("1_g1ewa")]([ExtResource("2_ai4bs")])
 rare_drop_chance = 0.05
 id = 72
 name = "Legal assistant cache"
+shortened_name = ""
 description = "Received from hacking a legal assistant. Decrypt for resources."
 valuable = false
 value = 0

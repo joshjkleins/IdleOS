@@ -6,6 +6,7 @@
 script = ExtResource("1_s3hnd")
 id = 51
 name = "Falsified drug trial results"
+shortened_name = "Fake trial results"
 description = "Sell on the marketplace"
 valuable = true
 value = 2600

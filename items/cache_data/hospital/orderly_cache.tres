@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://bh42kmsevp3bm"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://bh42kmsevp3bm"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_qismf"]
+[ext_resource type="Resource" uid="uid://bs103l063aecf" path="res://items/cache_entry/hospital/orderly/orderly_keycard_clone.tres" id="2_8tnno"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_bh5mi"]
 
 [resource]
 script = ExtResource("2_bh5mi")
 entries = Array[ExtResource("1_qismf")]([])
-rare_pool = Array[ExtResource("1_qismf")]([])
+rare_pool = Array[ExtResource("1_qismf")]([ExtResource("2_8tnno")])
 rare_drop_chance = 0.05
 id = 53
 name = "Orderly cache"
+shortened_name = ""
 description = "Received from hacking a orderly. Decrypt for resources."
 valuable = false
 value = 0

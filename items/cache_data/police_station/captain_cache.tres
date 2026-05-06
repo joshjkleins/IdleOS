@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://dup2hdmqe85i0"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://dup2hdmqe85i0"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_ec61r"]
+[ext_resource type="Resource" uid="uid://86fhv81x2tcs" path="res://items/cache_entry/police_station/captain/captain_corruption.tres" id="2_bxbi7"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_jeso4"]
 
 [resource]
 script = ExtResource("2_jeso4")
 entries = Array[ExtResource("1_ec61r")]([])
-rare_pool = Array[ExtResource("1_ec61r")]([])
+rare_pool = Array[ExtResource("1_ec61r")]([ExtResource("2_bxbi7")])
 rare_drop_chance = 0.05
 id = 66
 name = "Captain cache"
+shortened_name = ""
 description = "Received from hacking a captain. Decrypt for resources."
 valuable = false
 value = 0

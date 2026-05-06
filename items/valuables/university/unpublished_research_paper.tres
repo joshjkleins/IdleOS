@@ -6,6 +6,7 @@
 script = ExtResource("1_pdv01")
 id = 38
 name = "Unpublished research paper"
+shortened_name = "Unpub research paper"
 description = "Sell on the marketplace"
 valuable = true
 value = 1800

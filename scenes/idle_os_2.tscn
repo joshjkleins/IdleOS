@@ -57,12 +57,24 @@ text = "IDLE OS v0.1
 [node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
 layout_mode = 2
 
-[node name="Scrollback" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot"]
+[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/TerminalBody"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Scrollback" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
 bbcode_enabled = true
+fit_content = true
+scroll_active = false
 
 [node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2

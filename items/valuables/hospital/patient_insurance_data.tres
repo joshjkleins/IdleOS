@@ -6,6 +6,7 @@
 script = ExtResource("1_g34ab")
 id = 49
 name = "Patient insurance data"
+shortened_name = "Insurance data"
 description = "Sell on the marketplace"
 valuable = true
 value = 2400

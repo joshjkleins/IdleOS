@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://d2qlrgltp8mfb"]
+
+[ext_resource type="Resource" uid="uid://cktgsvacylwr7" path="res://items/valuables/small_business/employee_payroll_data.tres" id="1_beery"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_f5h1t"]
+
+[resource]
+script = ExtResource("1_f5h1t")
+item = ExtResource("1_beery")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://dafe44q7r80y3"]
+
+[ext_resource type="Resource" uid="uid://g5w5e8s60ahl" path="res://items/valuables/small_business/supplier_contact_list.tres" id="1_fpbpj"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_ylyht"]
+
+[resource]
+script = ExtResource("1_ylyht")
+item = ExtResource("1_fpbpj")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

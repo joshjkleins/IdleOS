@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://dhjha5wcj0jro"]
+
+[ext_resource type="Resource" uid="uid://cadhmyku51m74" path="res://items/valuables/hospital/prescription_pad_credentials.tres" id="1_34d8a"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_ol2ii"]
+
+[resource]
+script = ExtResource("1_ol2ii")
+item = ExtResource("1_34d8a")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

@@ -6,6 +6,7 @@
 script = ExtResource("1_j17cd")
 id = 61
 name = "Corruption payout ledger"
+shortened_name = "Payout ledger"
 description = "Sell on the marketplace"
 valuable = true
 value = 4000

@@ -6,6 +6,7 @@
 script = ExtResource("1_3v8dj")
 id = 7
 name = "Parents credit card"
+shortened_name = "Parents CC"
 description = "Sell on the marketplace"
 valuable = true
 value = 200

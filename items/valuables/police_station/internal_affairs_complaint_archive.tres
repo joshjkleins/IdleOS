@@ -6,6 +6,7 @@
 script = ExtResource("1_ml0jq")
 id = 57
 name = "Internal affairs complaint archive"
+shortened_name = "IA complaint arch"
 description = "Sell on the marketplace"
 valuable = true
 value = 2800

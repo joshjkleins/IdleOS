@@ -6,6 +6,7 @@
 script = ExtResource("1_3hftm")
 id = 58
 name = "Body cam footage deletion logs"
+shortened_name = "Bodycam del logs"
 description = "Sell on the marketplace"
 valuable = true
 value = 3000

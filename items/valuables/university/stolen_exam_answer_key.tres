@@ -6,6 +6,7 @@
 script = ExtResource("1_3mchm")
 id = 37
 name = "Stolen exam answer key"
+shortened_name = "Exam answer key"
 description = "Sell on the marketplace"
 valuable = true
 value = 1600

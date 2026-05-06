@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://bpo6b8tuse4q5"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://bpo6b8tuse4q5"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_drm0d"]
+[ext_resource type="Resource" uid="uid://bojg1pikdcgga" path="res://items/cache_entry/lawfirm/paralegal/paralegal_court_doc.tres" id="2_0gfcb"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_flffm"]
 
 [resource]
 script = ExtResource("2_flffm")
 entries = Array[ExtResource("1_drm0d")]([])
-rare_pool = Array[ExtResource("1_drm0d")]([])
+rare_pool = Array[ExtResource("1_drm0d")]([ExtResource("2_0gfcb")])
 rare_drop_chance = 0.05
 id = 73
 name = "Paralegal cache"
+shortened_name = ""
 description = "Received from hacking a paralegal. Decrypt for resources."
 valuable = false
 value = 0

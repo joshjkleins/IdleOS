@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=3 format=3 uid="uid://cmlalywof0isq"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://cmlalywof0isq"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_gyp6e"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_nesxr"]
+[ext_resource type="Resource" uid="uid://ye81u0wk7eoa" path="res://items/cache_entry/lawfirm/assoc_attorney/associate_attorney_sealed_case.tres" id="2_nqs8o"]
 
 [resource]
 script = ExtResource("2_nesxr")
 entries = Array[ExtResource("1_gyp6e")]([])
-rare_pool = Array[ExtResource("1_gyp6e")]([])
+rare_pool = Array[ExtResource("1_gyp6e")]([ExtResource("2_nqs8o")])
 rare_drop_chance = 0.05
 id = 74
 name = "Associate attorney cache"
+shortened_name = ""
 description = "Received from hacking an associate attorney. Decrypt for resources."
 valuable = false
 value = 0

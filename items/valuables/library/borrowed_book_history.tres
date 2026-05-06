@@ -6,6 +6,7 @@
 script = ExtResource("1_fmjh6")
 id = 17
 name = "Borrowed book history"
+shortened_name = "Borrowed book hist"
 description = "Sell on the marketplace"
 valuable = true
 value = 400

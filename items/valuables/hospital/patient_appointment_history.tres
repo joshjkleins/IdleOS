@@ -6,6 +6,7 @@
 script = ExtResource("1_c8nee")
 id = 47
 name = "Patient appointment history"
+shortened_name = "Patient appt hist"
 description = "Sell on the marketplace"
 valuable = true
 value = 2100

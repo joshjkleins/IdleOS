@@ -6,6 +6,7 @@
 script = ExtResource("1_y5krx")
 id = 27
 name = "Employee payroll data"
+shortened_name = "Payroll data"
 description = "Sell on the marketplace"
 valuable = true
 value = 900

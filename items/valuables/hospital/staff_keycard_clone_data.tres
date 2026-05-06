@@ -6,6 +6,7 @@
 script = ExtResource("1_e66un")
 id = 48
 name = "Staff keycard clone data"
+shortened_name = "Keycard clone data"
 description = "Sell on the marketplace"
 valuable = true
 value = 2300
