@@ -75,14 +75,15 @@ var player_stats = {
 		"experience": 0,
 		"command": "cache-decrypting",
 		"level": 1,
-		"base speed": 0.4,
-		"overclock speed": 0.1,
-		"overheat speed": 3.0,
+		"base speed": 0.2,
+		"overclock speed": 0.05,
+		"overheat speed": 1.0,
 		"efficiency": 0.0,
 		"efficiency increase rate": 0.003,
 		"unlocked": true,
 		"heat": 7,
-		"overclock heat": 9,
+		"overclock heat": 25,
+		"overheat heat": 2,
 		"description": "Decrypt caches gained from hacking to reveal additional items.",
 		"efficiency description": "Increases chance of finding higher quantity of items."
 	}
@@ -91,8 +92,8 @@ var player_stats = {
 var MAX_TEMP = 100
 var MIN_TEMP = 30
 var system_tempature = 30
-var cooling_amount = -10
-var cooling_frequency = 1.0
+var cooling_amount = -1 #reduces temp by 1
+var cooling_frequency = 1.0 #every 1 second
 var overheated = false
 var overclocked = false
 

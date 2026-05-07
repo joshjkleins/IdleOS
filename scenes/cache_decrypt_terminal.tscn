@@ -25,34 +25,32 @@ theme_override_constants/separation = 25
 layout_mode = 2
 text = "Student cache"
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
-clip_contents = true
-custom_minimum_size = Vector2(0, 138)
+[node name="HexDisplay" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
-
-[node name="HexDisplay" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Control"]
-layout_mode = 2
-offset_top = 4.0
-offset_right = 1264.0
-offset_bottom = 147.0
-grow_horizontal = 2
-grow_vertical = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_constants/line_separation = 5
 bbcode_enabled = true
 text = "0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
 0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
+0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
+0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
 0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|"
 scroll_following = true
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
+visible = false
+clip_contents = true
+custom_minimum_size = Vector2(0, 138)
+layout_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 150)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]

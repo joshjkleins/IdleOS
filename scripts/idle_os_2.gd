@@ -2,10 +2,10 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
-# BUG: too many lines in scrollback (richtextlabel) cause massive slowdown (to recreate, add all items to inventory, then just "list -a" a bunch of times and there will be slowdown)
-# FIX: for above bug: when a certain threshold is crossed, create a new richtextlabel, dump all previous stuff in there, and load a new one. Also limit the amount of richtextlabels to like 5, if more then just remove top one and append new one.
-# FIX: this is also kind of a feature, to manage what will be modules loaded in as seperate ie cache-decrypting for example needs things inputted after starting it to show up underneath
 
+#with new scrollback appending system: i believe set_line is frigged?
+#move update_header into each individual module OR move info from update header to header of gamelines.size()
+#break modules into their own scenes (like cache-decrypting)
 
 #next:
 #build module for cache decrypting
@@ -42,7 +42,7 @@ extends Control
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
-@onready var scrollback = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer/Scrollback
+@onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer/Scrollback
 
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
@@ -53,6 +53,7 @@ extends Control
 @onready var cache_decrypt = CacheDecrypting.new()
 
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+@onready var scrollback = preload("res://scenes/scrollback.tscn")
 
 
 @onready var terminal_body = $Panel/MarginContainer/TerminalRoot/TerminalBody
@@ -70,7 +71,9 @@ enum Context {
 	CACHE_DECRYPTING,
 }
 
+var current_scrollback
 var current_context: Context = Context.ROOT
+var current_process
 var lines: Array[String] = []
 
 #past commands using up/down
@@ -108,17 +111,22 @@ var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
 
 var LOG_PARSE_SPEED = 0.4
-
+var RICHTEXT_LABEL_LINE_LIMIT = 10 #lines per richtextlabel (aka terminal read) before creating a new one
+var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
 
 func _ready():
+	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
 	
+	Signals.update_module_header_signal.connect(update_module_stats_header)
+	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
+	
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -133,11 +141,32 @@ func add_line(text: String):
 
 #apply updates to line or new line
 func update_terminal(scroll_to_line: bool = true):
-	scrollback.text = "\n".join(lines)
+	current_scrollback.text = "\n".join(lines)
 	if scroll_to_line:
-		scrollback.scroll_to_line(scrollback.get_line_count() - 1)
+		current_scrollback.scroll_to_line(current_scrollback.get_line_count() - 1)
 	
 		_scroll_to_bottom()
+	
+	if lines.size() > RICHTEXT_LABEL_LINE_LIMIT:
+		add_new_scrollback()
+
+func bring_process_to_bottom():
+	if current_process:
+		terminal_body_container.move_child(current_process, -1)
+		add_new_scrollback()
+
+func add_new_scrollback():
+	lines.clear()
+	var ns = scrollback.instantiate()
+	terminal_body_container.add_child(ns)
+	current_scrollback = ns
+	
+	var terminals_active = terminal_body_container.get_child_count()
+
+	if terminals_active > RICHTEXT_LABEL_LIMIT:
+		var label_to_remove = terminal_body_container.get_child(0)
+		label_to_remove.queue_free()
+	
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
@@ -247,6 +276,7 @@ info                    Credential matching module stats
 	[CACHE DECRYPTING COMMANDS]
 start                   Start cache decrypting process
 stop                    Stop cache decrypting process
+focus                   Bring current process into view
 root                    Exit back to root
 info                    Cache decrypting module stats
 """)
@@ -393,7 +423,15 @@ func cache_decrypting_commands(text):
 				add_line("Cache decrypting is already running")
 		"stop":
 			process_running = false
+			if current_process:
+				current_process.stop()
+				current_process = null
 			Stats.overclocked = false
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -435,20 +473,20 @@ func cache_decrypting_commands(text):
 			add_line("Command not found")
 
 func start_cache_decrypting():
-	#here
-	
 	#check for cache
 	if !Inventory.has_cache():
 		add_line("No cache")
 		return
-		
 	
-	show_module_stats_header("Cache Decrypting")
+	#show_module_stats_header("Cache Decrypting")
 	
 	#instantiate cache decrypt terminal
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
+	process_running = true
+	current_process = new_cache_decrypt_terminal
 	new_cache_decrypt_terminal.start_decrypting()
+	add_new_scrollback()
 
 #cred matching context commands
 func cred_matching_commands(text):

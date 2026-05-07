@@ -13,6 +13,7 @@ rare_pool = Array[ExtResource("1_3uaf6")]([ExtResource("4_jtq2p")])
 rare_drop_chance = 0.05
 id = 8
 name = "Student cache"
+shortened_name = ""
 description = "Received from hacking a student. Decrypt for resources."
 valuable = false
 value = 0

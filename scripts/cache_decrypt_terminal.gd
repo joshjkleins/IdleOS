@@ -1,16 +1,17 @@
 extends Control
 
 @onready var cache_name = $MarginContainer/VBoxContainer/CacheName
-@onready var hex_display = $MarginContainer/VBoxContainer/Control/HexDisplay
+#@onready var hex_display = $MarginContainer/VBoxContainer/Control/HexDisplay
 @onready var labels_container = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LabelsContainer
+@onready var hex_display = $MarginContainer/VBoxContainer/HexDisplay
 
 @onready var cache_decrypt = CacheDecrypting.new()
 
 var items_from_session = {} #reference for labels
+var running: bool = false
+var can_apply_heat: bool = true
 
 var item_label = preload("res://scenes/cache_item_label.tscn")
-
-const TIME_PER_INDEX = 0.05
 
 func _ready():
 	Signals.item_found_in_cache_signal.connect(update_items_gained)
@@ -18,9 +19,10 @@ func _ready():
 func start_decrypting():
 	clear_labels()
 	items_from_session = {}
-	while Inventory.has_cache():
-		
+	running = true
+	while Inventory.has_cache() and running:
 		cache_decrypt.reset()
+		can_apply_heat = true
 		if !Inventory.has_cache():
 			print("No cache")
 			return
@@ -34,10 +36,44 @@ func start_decrypting():
 		hex_display.text = cache_decrypt.render_dump()
 		
 		var times_to_update = cache_decrypt.HEX_CHARACTERS_SIZE * cache_decrypt.DUMP_SIZE
+		
+		var overclocked_this_cache = Stats.overclocked
 		for i in range(times_to_update):
+			if !running:
+				apply_heat(overclocked_this_cache)
+				break
 			cache_decrypt.update_dump()
 			hex_display.text = cache_decrypt.render_dump()
-			await get_tree().create_timer(TIME_PER_INDEX).timeout
+			var speed
+			var heat
+			if Stats.overclocked:
+				speed = Stats.player_stats["Cache Decrypting"]["overclock speed"]
+				overclocked_this_cache = true
+			elif Stats.overheated:
+				speed = Stats.player_stats["Cache Decrypting"]["overheat speed"]
+			else:
+				speed = Stats.player_stats["Cache Decrypting"]["base speed"]
+			await get_tree().create_timer(speed).timeout
+		if !running:
+			apply_heat(overclocked_this_cache)
+			break
+		
+		#finished with a single cache
+		apply_heat(overclocked_this_cache)
+		Stats.add_xp(Stats.player_stats["Cache Decrypting"], 500)
+		Signals.update_module_header("Cache Decrypting")
+
+func apply_heat(overclocked_this_cache):
+	if can_apply_heat:
+		can_apply_heat = false
+		var heat
+		if overclocked_this_cache:
+			heat = Stats.player_stats["Cache Decrypting"]["overclock heat"]
+		elif Stats.overheated:
+			heat = Stats.player_stats["Cache Decrypting"]["overheat heat"]
+		else:
+			heat = Stats.player_stats["Cache Decrypting"]["heat"]
+		Stats.update_tempature(heat)
 
 func clear_labels():
 	for n in labels_container.get_children():
@@ -58,3 +94,6 @@ func update_items_gained(item, amount):
 		labels_container.add_child(new_label)
 	
 	Inventory.add_resource(item, amount)
+
+func stop():
+	running = false
