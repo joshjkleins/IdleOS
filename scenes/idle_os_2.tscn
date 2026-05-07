@@ -71,31 +71,6 @@ theme_override_constants/separation = 0
 
 [node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
 layout_mode = 2
-text = "asdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdfasdf
-asdf
-asdf
-asdf"
 
 [node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2

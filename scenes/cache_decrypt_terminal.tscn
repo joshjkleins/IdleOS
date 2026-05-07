@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://q2tgcsn1orl0"]
+[gd_scene load_steps=3 format=3 uid="uid://q2tgcsn1orl0"]
 
 [ext_resource type="Script" uid="uid://d3jeq5vmjchkm" path="res://scripts/cache_decrypt_terminal.gd" id="1_4hfe2"]
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_ytqtf"]
 
 [node name="CacheDecryptTerminal" type="PanelContainer"]
 anchors_preset = 15
@@ -8,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_ytqtf")
 script = ExtResource("1_4hfe2")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -38,12 +40,6 @@ text = "0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |................
 0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
 0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|"
 scroll_following = true
-
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
-visible = false
-clip_contents = true
-custom_minimum_size = Vector2(0, 138)
-layout_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

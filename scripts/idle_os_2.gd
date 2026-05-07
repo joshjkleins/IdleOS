@@ -3,13 +3,18 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
-#with new scrollback appending system: i believe set_line is frigged?
+#with new scrollback appending system: i believe set_line is frigged? It seems a lot of things are frigged, need to recreate all processes in there own scene
+# finish data_mining_terminal: play with switching color scheme back to white/grey. blue seems out of place
+# ^^ add overclock, exp, gaining resource
 #move update_header into each individual module OR move info from update header to header of gamelines.size()
+
 #break modules into their own scenes (like cache-decrypting)
+#data mining
+#log parsing
+#pw cracking
+#cred matching
 
 #next:
-#build module for cache decrypting
-#finish building out cacheEntry's for each hacking target. use what resources are available and can change later
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
 #offline progression
 #save/load
@@ -53,6 +58,7 @@ extends Control
 @onready var cache_decrypt = CacheDecrypting.new()
 
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+@onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 
 
@@ -478,9 +484,6 @@ func start_cache_decrypting():
 		add_line("No cache")
 		return
 	
-	#show_module_stats_header("Cache Decrypting")
-	
-	#instantiate cache decrypt terminal
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
 	process_running = true
@@ -703,7 +706,6 @@ func password_unscramble_commands(text):
 			Stats.overclocked = false
 		_:
 			add_line("Command not found")
-			
 
 func start_password_unscrambling():
 	add_line("Verifying passwords available...")
@@ -757,7 +759,6 @@ func start_password_unscrambling():
 				
 	add_line("Finished process.")
 	show_process_summary("Password Cracking", pw_gained, Items.PASSWORDS)
-			
 
 func start_log_parsing():
 	add_line("Verifying logs available...")
@@ -857,7 +858,6 @@ func push_log_line(new_line:String):
 		lines[line_index] = text
 
 	update_terminal(false)
-
 
 func start_log_stream():
 	reset_batch_totals()
@@ -1063,6 +1063,12 @@ func data_mining_commands(text):
 		"stop":
 			process_running = false
 			Stats.overclocked = false
+			current_process.stop()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -1104,90 +1110,15 @@ func data_mining_commands(text):
 			add_line("Command not found")
 
 func start_data_mining():
-	add_line("Initializing Data Mining module...")
-	await get_tree().create_timer(0.6).timeout
-	show_module_stats_header("Data Mining")
+	#add_line("Initializing Data Mining module...")
+	#await get_tree().create_timer(0.6).timeout
 	
-	var skill = Stats.player_stats["Data Mining"]
-	var efficiency = skill["efficiency"]
-	
-	add_line("\n" + "--- Process Running ---")
-	add_line("Progress: [                    ] 0%")
-	var progress_bar_index = lines.size() - 1
-	
-	var amount_gained: int = 0
-	var dur_amount = 2.5
-	var yield_amount = snapped(1.0 / dur_amount, 0.01)
-	
-	var data_per_completion = 1.0
-	add_line("\nData per completion: " + str(data_per_completion))
-	add_line("Yield:    +" + str(yield_amount) + " data/sec")
-	var yield_text_index = lines.size() - 1
-	add_line("Session:  " + str(amount_gained) + " data")
-	var total_gained_index = lines.size() - 1
-	
-	add_line("Total:    " + str(Inventory.get_amount(Items.DATA)) + " data\n\n\n")
-	var total_data_line_index = lines.size() - 1
-	
-	var steps = 20
-	#var interval = duration / steps
+	var new_data_mining_terminal = data_mining_scene.instantiate()
+	terminal_body_container.add_child(new_data_mining_terminal)
 	process_running = true
-	var exp_per_completion = 250
-	var interval
-	
-	while process_running:
-		#calc process length
-		var og_interval = dur_amount / steps
-		var overclock_interval = og_interval / 5
-		yield_amount = snapped(data_per_completion / dur_amount, 0.01)
-		set_line(yield_text_index, "Yield:    +" + str(yield_amount) + " data/sec")
-		for i in range(1, steps + 1):
-			if process_running:
-				if Stats.overheated:
-					interval = 2.0
-				elif Stats.overclocked:
-					interval = overclock_interval
-				else:
-					interval = og_interval
-				await get_tree().create_timer(interval).timeout
-				if process_running:
-					var filled = "=".repeat(i)
-					var empty = " ".repeat(steps - i)
-					var percent = int(float(i) / steps * 100)
-					set_line(progress_bar_index, "Progress: [%s>%s] %d%%" % [filled, empty, percent], false)
-		
-		if process_running:
-			var eff = Stats.player_stats["Data Mining"]["efficiency"]
-			var quant = 1
-
-			# Guaranteed bonus for each full point of efficiency
-			var guaranteed = int(eff)
-			quant += guaranteed
-			eff -= guaranteed  # leftover fractional part, e.g. 0.5
-
-			# Probabilistic roll for the remaining fraction
-			if eff > 0.0:
-				if randf() <= eff:
-					quant += 1
-			Inventory.add_resource(Items.DATA, data_per_completion * quant)
-			amount_gained += data_per_completion * quant
-			Stats.add_xp(skill, exp_per_completion)
-			
-			#increase tempature
-			if Stats.overclocked:
-				Stats.update_tempature(Stats.player_stats["Data Mining"]["overclock heat"])
-			else:
-				Stats.update_tempature(Stats.player_stats["Data Mining"]["heat"])
-			
-			# Refresh live stats
-			var new_xp = skill["experience"]
-			var new_needed = Stats.xp_for_level(skill["level"] + 1)
-			
-			efficiency = skill["efficiency"]
-			update_module_stats_header("Data Mining")
-			set_line(total_gained_index, "Session:  " + str(amount_gained) + " data", false)
-			set_line(total_data_line_index, "Total:    " + str(Inventory.get_amount(Items.DATA)) + " data\n\n\n", false)
-	show_process_summary("Data Mining", amount_gained, Items.DATA)
+	current_process = new_data_mining_terminal
+	new_data_mining_terminal.start_data_mining()
+	add_new_scrollback()
 
 func get_skill_xp_bar(skill_data: Dictionary, steps:int = 20) -> String:
 	var progress = Stats.get_xp_progress(skill_data)

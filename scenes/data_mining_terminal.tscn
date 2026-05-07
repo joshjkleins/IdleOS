@@ -1,0 +1,173 @@
+[gd_scene load_steps=5 format=3 uid="uid://ft8lxgvpacva"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_e8udk"]
+[ext_resource type="Script" uid="uid://107ect2ynb4x" path="res://scripts/data_mining_terminal.gd" id="2_hudn3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e8udk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hudn3"]
+border_width_top = 1
+border_color = Color(0.101961, 0.290196, 0.415686, 1)
+
+[node name="DataMiningTerminal" type="PanelContainer"]
+custom_minimum_size = Vector2(700, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+theme = ExtResource("1_e8udk")
+script = ExtResource("2_hudn3")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 25
+
+[node name="FirstRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Breadcrumbs" type="Label" parent="MarginContainer/VBoxContainer/FirstRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "PROC_0X04  /  THREAD_01  /  SUBNET_07"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/FirstRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="RunningLabel" type="Label" parent="MarginContainer/VBoxContainer/FirstRow/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "RUNNING"
+
+[node name="SecondRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/SecondRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "DATA MINING"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SecondRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Tier" type="Label" parent="MarginContainer/VBoxContainer/SecondRow/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "TIER I | BASIC"
+
+[node name="ProgressRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/ProgressRow"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_e8udk")
+
+[node name="FourthRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Mining" type="Label" parent="MarginContainer/VBoxContainer/FourthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "MINING..."
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/FourthRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="PercentLabel" type="Label" parent="MarginContainer/VBoxContainer/FourthRow/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "0%"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxFlat_hudn3")
+
+[node name="InfoRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 35
+
+[node name="DataCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/DataCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "DATA YIELD"
+
+[node name="DataYield" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/DataCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="RateCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/RateCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "RATE"
+
+[node name="DataRate" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/RateCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.2 D/s"
+
+[node name="CyclesCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/CyclesCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "CYCLES"
+
+[node name="Cycles" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/CyclesCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "000"
+
+[node name="TimeCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/TimeCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "TIME ELAPSED"
+
+[node name="Time" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/TimeCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "000"
+
+[node name="BlinkingTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="BlinkingTimer" to="." method="_on_blinking_timer_timeout"]

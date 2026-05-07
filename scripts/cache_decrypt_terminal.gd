@@ -1,4 +1,4 @@
-extends Control
+extends PanelContainer
 
 @onready var cache_name = $MarginContainer/VBoxContainer/CacheName
 #@onready var hex_display = $MarginContainer/VBoxContainer/Control/HexDisplay
