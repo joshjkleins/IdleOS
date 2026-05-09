@@ -5,18 +5,24 @@ const MAX_LEVEL = 99
 var player_stats = {
 	"Data Mining": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "data-mining",
 		"level": 1,
 		"efficiency": 0.0,
 		"efficiency increase rate": 0.08,
 		"unlocked": true,
+		"base speed": 0.25,
+		"overclock speed": 0.0625,
+		"overheat speed": 1.0,
 		"heat": 1,
-		"overclock heat": 3,
+		"overclock heat": 80,
+		"overheat heat": 1,
 		"description": "Generates data used for purchasing items from the marketplace.",
 		"efficiency description": "Chance to receive multiple data."
 	},
 	"Log Parsing": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "log-parsing",
 		"level": 1,
 		"base speed": 0.4,
@@ -32,6 +38,7 @@ var player_stats = {
 	},
 	"Password Cracking": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "pw-cracking",
 		"level": 1,
 		"efficiency": 0.0,
@@ -47,6 +54,7 @@ var player_stats = {
 	},
 	"Credential Matching": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "cred-matching",
 		"level": 1,
 		"efficiency": 0.0,
@@ -62,6 +70,7 @@ var player_stats = {
 	},
 	"Hacking": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "hacking",
 		"level": 1,
 		"efficiency": 0.0,
@@ -73,6 +82,7 @@ var player_stats = {
 	},
 	"Cache Decrypting": {
 		"experience": 0,
+		"exp per level": 200,
 		"command": "cache-decrypting",
 		"level": 1,
 		"base speed": 0.2,
@@ -547,6 +557,7 @@ func update_tempature(amount: int):
 	if system_tempature <= 40: #if overheated, stops overheat mode when reaching below 40
 		overheated = false
 	elif system_tempature >= 95: #if temp reaches 95 then overheat
+		overclocked = false
 		overheated = true
 	elif system_tempature >= 85: #attempt to auto stop overclock when above 85
 		overclocked = false
@@ -633,10 +644,14 @@ func get_xp_progress(skill_data: Dictionary) -> float:
 	var next_level_xp = xp_for_level(skill_data["level"] + 1)
 	return float(skill_data["experience"] - current_level_xp) / float(next_level_xp - current_level_xp)
 
-func add_xp(skill_data: Dictionary, amount: int):
+func add_xp(skill_data: Dictionary, amount: int = 0): #recently updated skill dictionaries to have exp per level, use that instead of 2nd argument
 	if skill_data["level"] >= MAX_LEVEL:
 		return
-	skill_data["experience"] += amount
+	if amount > 0:
+		print("Gained xp from specified amount") #if this is hit make sure it only comes from hacking target. otherwise it means its not using the ["exp per level"] key/value
+		skill_data["experience"] += amount
+	else:
+		skill_data["experience"] += skill_data["exp per level"]
 	var new_level = get_level_from_xp(skill_data["experience"])
 	
 	if new_level > skill_data["level"]:

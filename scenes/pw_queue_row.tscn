@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://6pej8csr4nwk"]
+
+[ext_resource type="Script" uid="uid://rl1wtg75nyxv" path="res://scripts/pw_queue_row.gd" id="1_e7b1g"]
+[ext_resource type="Texture2D" uid="uid://cl6wa1implfne" path="res://art/icons/lock-keyhole(1).png" id="2_e7b1g"]
+[ext_resource type="Texture2D" uid="uid://b4mffee60ksrb" path="res://art/icons/loader(2).png" id="3_55mu5"]
+[ext_resource type="Texture2D" uid="uid://dn14lnc70ev8y" path="res://art/icons/lock-keyhole-open(1).png" id="4_yje7f"]
+
+[node name="PwQueueRow" type="HBoxContainer"]
+script = ExtResource("1_e7b1g")
+icon_queued = ExtResource("2_e7b1g")
+icon_cracking = ExtResource("3_55mu5")
+icon_cracked = ExtResource("4_yje7f")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusIcon" type="TextureRect" parent="HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("3_55mu5")
+expand_mode = 2
+
+[node name="EncryptedPw" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 12
+text = "53da:54a5:934b"
+
+[node name="CrackedStatus" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 12
+text = "QUEUED"
+horizontal_alignment = 2

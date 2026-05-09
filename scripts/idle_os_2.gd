@@ -48,7 +48,8 @@ extends Control
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
 @onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer/Scrollback
-
+@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/TerminalBody
+@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
 
@@ -57,13 +58,13 @@ extends Control
 @onready var cred_match = CredentialMatching.new()
 @onready var cache_decrypt = CacheDecrypting.new()
 
-@onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
-@onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
-
-
-@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/TerminalBody
-@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer
+@onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
+@onready var log_parsing_scene = preload("res://scenes/log_parsing_terminal.tscn")
+@onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
+# cred matching
+# maybe hacking
+@onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 
 enum Context {
 	ROOT,
@@ -91,24 +92,6 @@ var history_index = -1
 var module_running: bool = false
 var process_running: bool = false
 
-#LOG PARSING SPECIFIC
-var log_start_index : int
-var max_log_lines := 10
-var visible_logs : Array[String] = []
-var parse_box_title_line: int
-var batch_totals = {
-	"data": 0,
-	"logs": 0,
-	"encrypted passwords": 0,
-	"passwords": 0,
-	"usernames": 0,
-	"credentials": 0,
-	"ip address": 0
-}
-
-#END LOG PARSING SPECIFIC
-
-
 #SKILL HEADER VARIABLES#
 var lvl_and_efficiency_index: int
 var skill_xp_progress_bar_index: int
@@ -116,8 +99,7 @@ var skill_xp_nums_index: int
 var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
 
-var LOG_PARSE_SPEED = 0.4
-var RICHTEXT_LABEL_LINE_LIMIT = 10 #lines per richtextlabel (aka terminal read) before creating a new one
+var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) before creating a new one
 var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
 
 func _ready():
@@ -128,6 +110,7 @@ func _ready():
 	Signals.system_temp_updated(30)
 	
 	Signals.update_module_header_signal.connect(update_module_stats_header)
+	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -172,7 +155,6 @@ func add_new_scrollback():
 	if terminals_active > RICHTEXT_LABEL_LIMIT:
 		var label_to_remove = terminal_body_container.get_child(0)
 		label_to_remove.queue_free()
-	
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
@@ -198,7 +180,6 @@ func _on_input_line_text_submitted(new_text):
 				cache_decrypting_commands(new_text)
 
 	history_index = -1
-	
 
 #return text before command
 func get_context_lead():
@@ -290,7 +271,7 @@ info                    Cache decrypting module stats
 	add_line("""Usage: [command] [flag]
 
 Item Management:
-  list -a               Lists all items
+  list -a               List all items
   list -r               List all resources (items with specific uses)
   list -v               List all valuables (items only meant to be sold)
   list -c               List all caches (items needing decrypting for more items)
@@ -584,7 +565,7 @@ func start_cred_matching():
 				Stats.update_tempature(Stats.player_stats["Credential Matching"]["overclock heat"])
 			else:
 				Stats.update_tempature(Stats.player_stats["Credential Matching"]["heat"]) #increase tempature
-			Stats.add_xp(Stats.player_stats["Credential Matching"], 450)
+			Stats.add_xp(Stats.player_stats["Credential Matching"])
 			update_module_stats_header("Credential Matching")
 			cred_match.create_creds()
 			creds_created += 1
@@ -615,10 +596,19 @@ func log_parsing_commands(text):
 			else:
 				add_line("Log parsing already running")
 		"stop":
-			if process_running:
-				add_line("Log parsing process stopped.")
 			process_running = false
+			if current_process:
+				current_process.stop()
+				current_process = null
 			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current log...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -658,6 +648,19 @@ func log_parsing_commands(text):
 			Stats.overclocked = false
 		_:
 			add_line("Command not found")
+
+func start_log_parsing():
+	var new_log_parsing_terminal = log_parsing_scene.instantiate()
+	terminal_body_container.add_child(new_log_parsing_terminal)
+	process_running = true
+	current_process = new_log_parsing_terminal
+	new_log_parsing_terminal.start()
+	add_new_scrollback()
+
+func log_parsing_ended_safely():
+	process_running = false
+	Stats.overclocked = false
+	add_line("Log parsing safely exited.")
 
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
@@ -708,71 +711,64 @@ func password_unscramble_commands(text):
 			add_line("Command not found")
 
 func start_password_unscrambling():
-	add_line("Verifying passwords available...")
-	await get_tree().create_timer(0.8).timeout
-	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-		add_line("No passwords available")
-		return
-	add_line("Starting password cracking process.\n\n")
-	var pw_gained: int = 0
-	await get_tree().create_timer(0.8).timeout
+	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
+	terminal_body_container.add_child(new_pw_cracking_terminal)
 	process_running = true
-	show_module_stats_header("Password Cracking")
+	current_process = new_pw_cracking_terminal
+	new_pw_cracking_terminal.start()
+	add_new_scrollback()
 	
-	add_line("Cracking Password")
-	add_line(pw_scram.get_initial_scrambled_word())
-	var scramble_index = lines.size() - 1
-	##password unscramble loop
-	while Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) > 0 and process_running:
-		for i in range(15):
-			if !process_running:
-				break
-			set_line(scramble_index, pw_scram.get_current_scramble())
-			if Stats.overclocked:
-				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overclock speed"]).timeout
-			elif Stats.overheated:
-				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overheat speed"]).timeout
-			else:
-				await get_tree().create_timer(Stats.player_stats["Password Cracking"]["speed"]).timeout
-		if !process_running:
-			break
-		pw_scram.reveal_letter()
-		if Stats.overclocked:
-			Stats.update_tempature(Stats.player_stats["Password Cracking"]["overclock heat"])
-		else:
-			Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
-		#check if word is fully revealed
-		if pw_scram.is_word_revealed():
-			set_line(scramble_index, pw_scram.get_current_scramble())
-			await get_tree().create_timer(0.4).timeout
-			pw_scram.transform_password() #removes scrambled, adds password
-			pw_gained += 1
-
-			Stats.add_xp(Stats.player_stats["Password Cracking"], 200)
-			update_module_stats_header("Password Cracking")
-			
-			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-				process_running = false
-				add_line("No more encrypted passwords.")
-			else:
-				set_line(scramble_index, pw_scram.get_initial_scrambled_word())
-				
-	add_line("Finished process.")
-	show_process_summary("Password Cracking", pw_gained, Items.PASSWORDS)
-
-func start_log_parsing():
-	add_line("Verifying logs available...")
-	await get_tree().create_timer(0.8).timeout
-	if Inventory.get_amount(Items.LOGS) <= 0:
-		add_line("No logs available")
-		return
-	add_line("Starting log parsing process.\n\n")
-	await get_tree().create_timer(0.8).timeout
-	process_running = true
-	show_module_stats_header("Log Parsing")
-	start_parser_ui()
-	clear_logs()
-	start_log_stream()
+	#add_line("Verifying passwords available...")
+	#await get_tree().create_timer(0.8).timeout
+	#if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+		#add_line("No passwords available")
+		#return
+	#add_line("Starting password cracking process.\n\n")
+	#var pw_gained: int = 0
+	#await get_tree().create_timer(0.8).timeout
+	#process_running = true
+	#show_module_stats_header("Password Cracking")
+	#
+	#add_line("Cracking Password")
+	#add_line(pw_scram.get_initial_scrambled_word())
+	#var scramble_index = lines.size() - 1
+	###password unscramble loop
+	#while Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) > 0 and process_running:
+		#for i in range(15):
+			#if !process_running:
+				#break
+			#set_line(scramble_index, pw_scram.get_current_scramble())
+			#if Stats.overclocked:
+				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overclock speed"]).timeout
+			#elif Stats.overheated:
+				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overheat speed"]).timeout
+			#else:
+				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["speed"]).timeout
+		#if !process_running:
+			#break
+		#pw_scram.reveal_letter()
+		#if Stats.overclocked:
+			#Stats.update_tempature(Stats.player_stats["Password Cracking"]["overclock heat"])
+		#else:
+			#Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
+		##check if word is fully revealed
+		#if pw_scram.is_word_revealed():
+			#set_line(scramble_index, pw_scram.get_current_scramble())
+			#await get_tree().create_timer(0.4).timeout
+			#pw_scram.transform_password() #removes scrambled, adds password
+			#pw_gained += 1
+#
+			#Stats.add_xp(Stats.player_stats["Password Cracking"])
+			#update_module_stats_header("Password Cracking")
+			#
+			#if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+				#process_running = false
+				#add_line("No more encrypted passwords.")
+			#else:
+				#set_line(scramble_index, pw_scram.get_initial_scrambled_word())
+				#
+	#add_line("Finished process.")
+	#show_process_summary("Password Cracking", pw_gained, Items.PASSWORDS)
 
 #Builds header for module running 
 func show_module_stats_header(skill_name: String):
@@ -824,124 +820,10 @@ func update_module_stats_header(skill_name: String):
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
 			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)
 
-func start_parser_ui():
-	add_line(parser.border("LOG PARSER v1.0"))     # 0
-	add_line(parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount(Items.LOGS))))       # 1
-	parse_box_title_line = lines.size() - 1
-	add_line("├" + "─".repeat(parser.INNER_WIDTH) + "┤")  # 2
-
-	log_start_index = lines.size()  # First log line will go here
-
-	# Fill empty space initially
-	for i in range(max_log_lines):
-		add_line(parser.line(""))   # placeholder log lines
-
-	add_line(parser.bottom())        # bottom border stays LAST
-
-func push_log_line(new_line:String):
-	# Add to buffer
-	visible_logs.append(new_line)
-
-	# Keep buffer size fixed
-	if visible_logs.size() > max_log_lines:
-		visible_logs.pop_front()
-
-	# Rewrite only the log area
-	for i in range(max_log_lines):
-		var line_index = log_start_index + i
-		var text = ""
-		if i < visible_logs.size():
-			text = visible_logs[i]
-		else:
-			text = parser.line("")
-
-		lines[line_index] = text
-
-	update_terminal(false)
-
-func start_log_stream():
-	reset_batch_totals()
-	
-	while Inventory.get_amount(Items.LOGS) > 0 and process_running:
-		Inventory.remove_resource(Items.LOGS, 1)
-		
-		for i in range(10):
-			if process_running:
-				var result = parser.generate_log_line(Logs.LOG_LINES)
-				push_log_line(result.text)
-
-				if result.reward.size() > 0:
-					apply_reward(result.reward)
-				
-				if Stats.overclocked:
-					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overclock speed"]).timeout
-				elif Stats.overheated:
-					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["overheat speed"]).timeout
-				else:
-					await get_tree().create_timer(Stats.player_stats["Log Parsing"]["base speed"]).timeout
-		
-		if Inventory.get_amount(Items.LOGS) > 0 and process_running:
-			clear_logs()
-			
-		set_line(parse_box_title_line, parser.line("Status: RUNNING   Logs: x" + str(Inventory.get_amount(Items.LOGS))), false)
-		Stats.update_tempature(Stats.player_stats["Log Parsing"]["heat"]) #increase tempature
-		Stats.add_xp(Stats.player_stats["Log Parsing"], 500)
-		update_module_stats_header("Log Parsing")
-		
-	if process_running:
-		add_line("All logs parsed.") 
-		set_line(parse_box_title_line, parser.line("Status: FINISHED   Logs: x" + str(Inventory.get_amount(Items.LOGS))))
-	
-	#add_line(show_batch_total())
-	show_batch_total()
-	add_line("Process finished")
-
-	process_running = false
-
-func show_batch_total():
-	if batch_totals.is_empty():
-		add_line("No resources gained from current parsing job.")
-		return
-
-	var output := ""
-
-	for item in batch_totals.keys():
-		var amount: int = batch_totals[item]
-		if amount > 0:
-			output += "%s x%d\n" % [item.name, amount]
-
-	add_line("\nResources gained from current parsing job")
-	add_line("---------------------------------------")
-	add_line(output)
-
 func show_process_summary(process_name: String, amount: int, resource: ItemData):
 	add_line("\nResources gained from recent job")
 	add_line("--------------------------------")
 	add_line(resource.name + " x" + str(int(amount)))
-
-func clear_logs():
-	visible_logs.clear()
-
-	for i in range(max_log_lines):
-		var line_index = log_start_index + i
-		lines[line_index] = parser.line("")
-
-	update_terminal(false)
-
-func reset_batch_totals():
-	for k in batch_totals.keys():
-		batch_totals[k] = 0
-
-func apply_reward(reward:Dictionary):
-	if reward.is_empty():
-		return
-	Inventory.add_resource(reward.item, reward.amount)
-
-	# Add to batch summary
-	if batch_totals.has(reward.item):
-		batch_totals[reward.item] += reward.amount
-	else:
-		batch_totals[reward.item] = reward.amount
 
 #Marketplace context commands
 func marketplace_commands(text):
@@ -991,7 +873,6 @@ func handle_buy_command(text: String) -> void:
 		return
 	
 	purchase_item(item_id, amount)
-
 
 func purchase_item(id: int, amount: int):
 	# Validate item
@@ -1062,8 +943,10 @@ func data_mining_commands(text):
 				add_line("Process already running")
 		"stop":
 			process_running = false
+			if current_process:
+				current_process.stop()
+				current_process = null
 			Stats.overclocked = false
-			current_process.stop()
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
@@ -1143,13 +1026,12 @@ func _input(event):
 	if current_context != Context.HACKING:
 		if event is InputEventKey and event.pressed:
 			if event.keycode == Key.KEY_UP:
-				navigate_history(-1)
+				_navigate_history(-1)
 			elif event.keycode == Key.KEY_DOWN:
-				navigate_history(1)
-
+				_navigate_history(1)
 
 #command history functionality
-func navigate_history(delta: int):
+func _navigate_history(delta: int):
 	if command_history.size() == 0:
 		return
 	
@@ -1162,7 +1044,6 @@ func navigate_history(delta: int):
 
 	call_deferred("_move_caret_to_end")
 
-
 func _on_hacking_start_loading() -> void:
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
@@ -1172,11 +1053,10 @@ func _on_hacking_start_loading() -> void:
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	await tween.finished
 
-
 func _on_cooling_timer_timeout():
 	Stats.update_tempature(Stats.cooling_amount)
 
 func _scroll_to_bottom():
-	#await get_tree().process_frame #if youre finding one frame is not enough uncomment this
+	await get_tree().process_frame #if youre finding one frame is not enough uncomment this
 	await get_tree().process_frame
 	terminal_body.set_deferred("scroll_vertical", terminal_body.get_v_scroll_bar().max_value)

@@ -1,7 +1,6 @@
 extends PanelContainer
 
 @onready var cache_name = $MarginContainer/VBoxContainer/CacheName
-#@onready var hex_display = $MarginContainer/VBoxContainer/Control/HexDisplay
 @onready var labels_container = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LabelsContainer
 @onready var hex_display = $MarginContainer/VBoxContainer/HexDisplay
 
@@ -60,7 +59,7 @@ func start_decrypting():
 		
 		#finished with a single cache
 		apply_heat(overclocked_this_cache)
-		Stats.add_xp(Stats.player_stats["Cache Decrypting"], 500)
+		Stats.add_xp(Stats.player_stats["Cache Decrypting"])
 		Signals.update_module_header("Cache Decrypting")
 
 func apply_heat(overclocked_this_cache):

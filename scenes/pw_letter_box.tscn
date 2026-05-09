@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3 uid="uid://d130lhrjmllgq"]
+
+[ext_resource type="Script" uid="uid://bnxhjc5xwn1tc" path="res://scripts/pw_letter_box.gd" id="1_6bcoj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i1kg8"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.233159, 0.559625, 0.409743, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="PwLetterBox" type="Panel"]
+custom_minimum_size = Vector2(40, 40)
+theme_override_styles/panel = SubResource("StyleBoxFlat_i1kg8")
+script = ExtResource("1_6bcoj")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Letter" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "A"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrambleTimer" type="Timer" parent="."]
+wait_time = 0.1
+
+[connection signal="timeout" from="ScrambleTimer" to="." method="_on_scramble_timer_timeout"]

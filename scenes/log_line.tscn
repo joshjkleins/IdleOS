@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfw6rdf11qhhq"]
+
+[ext_resource type="Script" uid="uid://rl6kryjss3v1" path="res://scripts/log_line.gd" id="1_lkc2j"]
+
+[node name="LogLine" type="PanelContainer"]
+offset_right = 721.0
+offset_bottom = 23.0
+script = ExtResource("1_lkc2j")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="MarginContainer"]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/Panel"]
+layout_mode = 2
+offset_right = 721.0
+offset_bottom = 23.0
+theme_override_constants/separation = 30
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "13:05:21 (currentTime)"
+
+[node name="CategoryLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "INFO"
+
+[node name="CodeLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "metrics.agent"
+
+[node name="MessageLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Port scan suspected from 185.22.91.7"
+
+[node name="RewardLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "	"

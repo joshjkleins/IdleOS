@@ -1,0 +1,116 @@
+[gd_scene load_steps=5 format=3 uid="uid://vhsgyl2acgih"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_348qk"]
+[ext_resource type="PackedScene" uid="uid://dfw6rdf11qhhq" path="res://scenes/log_line.tscn" id="2_8ep3h"]
+[ext_resource type="Script" uid="uid://deh5dg1eb5aou" path="res://scripts/log_parsing_terminal.gd" id="2_ne5va"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_348qk"]
+color = Color(0.290196, 0.290196, 0.290196, 1)
+
+[node name="LogParsingTerminal" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 345)
+offset_right = 745.0
+offset_bottom = 345.0
+theme = ExtResource("1_348qk")
+script = ExtResource("2_ne5va")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer2"]
+layout_mode = 2
+text = "-------------LOG PARSER-------------"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_348qk")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.289741, 0.289741, 0.289741, 1)
+theme_override_font_sizes/font_size = 12
+text = "STATUS"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "RUNNING"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "LOGS"
+
+[node name="AmountLabel" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "x34"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_348qk")
+
+[node name="MarginContainer3" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="LogsContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer3"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LogLine" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine2" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine3" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine4" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine5" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine6" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine7" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine8" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine9" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2
+
+[node name="LogLine10" parent="MarginContainer/VBoxContainer/MarginContainer3/LogsContainer" instance=ExtResource("2_8ep3h")]
+layout_mode = 2

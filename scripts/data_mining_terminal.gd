@@ -12,6 +12,8 @@ extends PanelContainer
 @onready var data_rate_label = $MarginContainer/VBoxContainer/InfoRow/RateCol/DataRate
 @onready var cycles_label = $MarginContainer/VBoxContainer/InfoRow/CyclesCol/Cycles
 @onready var time_label = $MarginContainer/VBoxContainer/InfoRow/TimeCol/Time
+@onready var efficiency_label = $MarginContainer/VBoxContainer/InfoRow/EffeciencyCol/EfficiencyLabel
+@onready var level_label = $MarginContainer/VBoxContainer/InfoRow/LevelCol/LevelLabel
 
 
 
@@ -45,7 +47,6 @@ const COLOR_DIVIDER         = Color("#0e1e30")
 const COLOR_DIVIDER_LOG     = Color("#0a1820")
 
 const SEGMENTS = 20
-const TIME_PER_SEGMENT = 0.1
 
 var styleEmpty    : StyleBoxFlat
 var styleFilled   : StyleBoxFlat
@@ -63,10 +64,6 @@ var session_time: float = 0.0
 
 
 #to finish
-#add overclock
-#add add_resource
-#implement effeciency
-#update player_stats[Data Mining] with appropriate speed variables (instead of using TIME_PER_SEGMENT)
 #update color scheme to white / grey
 
 func _process(delta):
@@ -76,36 +73,87 @@ func _process(delta):
 
 func start_data_mining():
 	process_running = true
-	reset_info()
+	_reset_info()
 	_create_progress_row()
 	blinking_timer.start()
 	while process_running:
+		var overclocked = false
+		var overheated = false
 		for i in range(SEGMENTS):
 			_set_progress(i)
-			await get_tree().create_timer(TIME_PER_SEGMENT).timeout
-		cycle_complete()
+			
+			_update_rate_label()
+			if Stats.overheated:
+				await get_tree().create_timer(Stats.player_stats["Data Mining"]["overheat speed"]).timeout
+				overheated = true
+			elif Stats.overclocked:
+				await get_tree().create_timer(Stats.player_stats["Data Mining"]["overclock speed"]).timeout
+				overclocked = true
+			else:
+				await get_tree().create_timer(Stats.player_stats["Data Mining"]["base speed"]).timeout
+			if !process_running:
+				break
+		if process_running:
+			_cycle_complete(overclocked, overheated)
 
 func stop():
 	process_running = false
 	blinking_timer.stop()
 
-func cycle_complete():
-	session_cycle += 1
-	session_yield += 1
+func _cycle_complete(overclocked: bool, overheated: bool):
+	if overheated:
+		Stats.update_tempature(Stats.player_stats["Data Mining"]["overheat heat"])
+	elif overclocked:
+		Stats.update_tempature(Stats.player_stats["Data Mining"]["overclock heat"])
+	else:
+		Stats.update_tempature(Stats.player_stats["Data Mining"]["heat"])
 	
+	var data_quantity_gained = _get_data_quantity()
+	Inventory.add_resource(Items.DATA, data_quantity_gained)
+	
+	Stats.add_xp(Stats.player_stats["Data Mining"])
+	session_cycle += 1
+	session_yield += data_quantity_gained
 	cycles_label.text = str(session_cycle)
 	data_yield_label.text = str(session_yield)
+	efficiency_label.text = str(Stats.player_stats["Data Mining"]["efficiency"]  * 100.0) + "%"
+	level_label.text = str(Stats.player_stats["Data Mining"]["level"])
 
-func reset_info():
+func _get_data_quantity() -> int:
+	var eff = Stats.player_stats["Data Mining"]["efficiency"]
+	var quant = 1
+
+	# Guaranteed bonus for each full point of efficiency
+	var guaranteed = int(eff)
+	quant += guaranteed
+	eff -= guaranteed  # leftover fractional part, e.g. 0.5
+
+	# Probabilistic roll for the remaining fraction
+	if eff > 0.0:
+		if randf() <= eff:
+			quant += 1
+	
+	return quant
+
+func _reset_info():
 	blink_on = false
 	session_yield = 0
 	session_rate = 0.0
 	session_cycle = 0
 	session_time = 0.0
 	_update_rate_label()
+	efficiency_label.text = str(Stats.player_stats["Data Mining"]["efficiency"]  * 100.0) + "%"
+	level_label.text = str(Stats.player_stats["Data Mining"]["level"])
 
 func _update_rate_label():
-	var yr = 1.0 / (float(SEGMENTS) * float(TIME_PER_SEGMENT))
+	var speed
+	if Stats.overheated:
+		speed = Stats.player_stats["Data Mining"]["overheat speed"]
+	elif Stats.overclocked:
+		speed = Stats.player_stats["Data Mining"]["overclock speed"]
+	else:
+		speed = Stats.player_stats["Data Mining"]["base speed"]
+	var yr = 1.0 / (float(SEGMENTS) * float(speed))
 	data_rate_label.text = str(yr).pad_decimals(2) + " D/s"
 
 func _on_blinking_timer_timeout():

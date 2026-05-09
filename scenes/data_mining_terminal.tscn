@@ -168,6 +168,36 @@ theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "000"
 
+[node name="EffeciencyCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/EffeciencyCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "EFFECIENCY"
+
+[node name="EfficiencyLabel" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/EffeciencyCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "0%"
+
+[node name="LevelCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/LevelCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
+theme_override_font_sizes/font_size = 10
+text = "LEVEL"
+
+[node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/LevelCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "1"
+
 [node name="BlinkingTimer" type="Timer" parent="."]
 
 [connection signal="timeout" from="BlinkingTimer" to="." method="_on_blinking_timer_timeout"]

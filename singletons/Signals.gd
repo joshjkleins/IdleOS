@@ -7,6 +7,7 @@ signal update_hacking_header_signal
 signal end_hacking_safely_signal
 signal item_found_in_cache_signal
 signal update_module_header_signal
+signal end_log_parsing_safely_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -33,3 +34,6 @@ func item_found_in_cache(item, amount):
 
 func update_module_header(process_name: String): #Log Parsing, Cache Decrypting, etc
 	update_module_header_signal.emit(process_name)
+
+func end_log_parsing_safely():
+	end_log_parsing_safely_signal.emit()
