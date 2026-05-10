@@ -8,6 +8,8 @@ signal end_hacking_safely_signal
 signal item_found_in_cache_signal
 signal update_module_header_signal
 signal end_log_parsing_safely_signal
+signal end_pw_cracking_safely_signal
+signal end_cache_decrypting_safely_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -37,3 +39,9 @@ func update_module_header(process_name: String): #Log Parsing, Cache Decrypting,
 
 func end_log_parsing_safely():
 	end_log_parsing_safely_signal.emit()
+
+func end_pw_cracking_safely():
+	end_pw_cracking_safely_signal.emit()
+
+func end_cache_decrypting_safely():
+	end_cache_decrypting_safely_signal.emit()

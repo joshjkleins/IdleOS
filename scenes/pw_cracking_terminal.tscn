@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://biauakcu547sa"]
+[gd_scene load_steps=7 format=3 uid="uid://biauakcu547sa"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_i1kg8"]
 [ext_resource type="Script" uid="uid://y24h6wrbrtbb" path="res://scripts/pw_cracking_terminal.gd" id="1_ykkfa"]
@@ -8,13 +8,18 @@
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_0pvuf"]
 color = Color(0.419608, 0.419608, 0.470588, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ji0gw"]
+bg_color = Color(0.188235, 0.631373, 0.305882, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [node name="PwCrackingTerminal" type="PanelContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -784.0
-grow_horizontal = 2
-grow_vertical = 2
+custom_minimum_size = Vector2(500, 0)
+offset_right = 255.0
+offset_bottom = 309.0
+size_flags_horizontal = 0
 theme = ExtResource("1_i1kg8")
 script = ExtResource("1_ykkfa")
 pw_row = ExtResource("3_ji0gw")
@@ -97,14 +102,17 @@ custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-value = 30.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_ji0gw")
+value = 10.0
 show_percentage = false
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/PwRow/HBoxContainer"]
+[node name="ProgressBarLabel" type="Label" parent="MarginContainer/VBoxContainer/PwRow/HBoxContainer"]
+custom_minimum_size = Vector2(29, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
 theme_override_font_sizes/font_size = 12
-text = "30%"
+text = "100%"
+horizontal_alignment = 2
 
 [node name="CrackingCurrentStatus" type="Label" parent="MarginContainer/VBoxContainer/PwRow"]
 layout_mode = 2
@@ -147,3 +155,5 @@ text = "REMAINING"
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "9"
+
+[connection signal="value_changed" from="MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBar" to="." method="_on_progress_bar_value_changed"]

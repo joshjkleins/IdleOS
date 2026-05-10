@@ -3,16 +3,8 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
-#with new scrollback appending system: i believe set_line is frigged? It seems a lot of things are frigged, need to recreate all processes in there own scene
-# finish data_mining_terminal: play with switching color scheme back to white/grey. blue seems out of place
-# ^^ add overclock, exp, gaining resource
-#move update_header into each individual module OR move info from update header to header of gamelines.size()
-
-#break modules into their own scenes (like cache-decrypting)
-#data mining
-#log parsing
-#pw cracking
-#cred matching
+#cred matching into own scene/script
+#HEADER - make universal and update per module
 
 #next:
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
@@ -20,19 +12,12 @@ extends Control
 #save/load
 
 #Laterz:
-# pw cracking - show efficiency info and how many encrypted pw available
-# cred matching - show how many username/pw available
-# log parsing - issue when trying to stop while overheated, takes a second for resources gained message to show up
-# log parsing - show players % chance for each resource (40% Data, 29% username etc)
 # hacking - update UI and redo sequencial logic so everything is happening at the same time, making it more 'idle' ish
-# hacking - think through idea of difficulty per person / area
-# think through idea of adding upgrades to process/modules. maybe an item for gaining a level (mastery token esque)
-# take another shot at adding a side screen panel that pops in for messages/item gains, maybe bottom right, above typing box?
 
 #module ideas:
 #Defragging - takes a long time (30min-1h) gives long term (or even perm) benefits
+# Phishing - way to maybe get IP addresses or usernames or PW? 
 #non-idle module: Jailbreak / heist mode: use commands to open/close doors to get someone in and out
-# Cache decrypting: extract resources from caches received from hacking
 
 
 #STEPS FOR ADDING NEW MODULE
@@ -111,6 +96,8 @@ func _ready():
 	
 	Signals.update_module_header_signal.connect(update_module_stats_header)
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
+	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
+	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -399,20 +386,25 @@ func root_commands(text):
 		_:#default
 			add_line("Command not found")
 
-#cache decrypting context commands
-func cache_decrypting_commands(text):
+
+###################################################
+################### DATA MINING ###################
+###################################################
+func data_mining_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"start":
 			if !process_running:
-				start_cache_decrypting()
+				start_data_mining()
 			else:
-				add_line("Cache decrypting is already running")
+				add_line("Process already running")
 		"stop":
 			process_running = false
 			if current_process:
 				current_process.stop()
 				current_process = null
+			else:
+				add_line("No active process to stop.")
 			Stats.overclocked = false
 		"focus":
 			if current_process:
@@ -430,26 +422,18 @@ func cache_decrypting_commands(text):
 				add_line(Ascii.root)
 				list_help()
 		"info":
-			add_line("Module: Cache Decrypting")
-			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
+			add_line("Module: Data Mining")
+			add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
 			#Level
 			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
+			add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
+			var eff = Stats.player_stats["Data Mining"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
 		"-h":
 			list_help()
 		"overclock":
-			if !Stats.overclocked and process_running and !Stats.overheated:
-				if Stats.system_tempature < 60:
-					Stats.overclocked = true
-				else:
-					add_line("System tempature needs to cool to below 60°C before overclocking")
-			elif process_running and Stats.overheated:
-				add_line("System has been overheated, needs to cool to below 40°C.")
-			else:
-				add_line("System is already overclocked.")
+			overclock_logic()
 		"overclock -kill":
 			if !Stats.overclocked:
 				add_line("Not currently overclocking.")
@@ -459,20 +443,176 @@ func cache_decrypting_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_cache_decrypting():
-	#check for cache
-	if !Inventory.has_cache():
-		add_line("No cache")
-		return
+func start_data_mining():
+	#add_line("Initializing Data Mining module...")
+	#await get_tree().create_timer(0.6).timeout
 	
-	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
-	terminal_body_container.add_child(new_cache_decrypt_terminal)
+	var new_data_mining_terminal = data_mining_scene.instantiate()
+	terminal_body_container.add_child(new_data_mining_terminal)
 	process_running = true
-	current_process = new_cache_decrypt_terminal
-	new_cache_decrypt_terminal.start_decrypting()
+	current_process = new_data_mining_terminal
+	new_data_mining_terminal.start_data_mining()
 	add_new_scrollback()
 
-#cred matching context commands
+###################################################
+################### LOG PARSING ###################
+###################################################
+func log_parsing_commands(text):
+	text = text.to_lower().strip_edges()
+	match text:
+		"start":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.LOGS) <= 0:
+				add_line("No logs found.")
+				return
+			
+			start_log_parsing()
+		"stop":
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current log...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+		"root":
+			if process_running:
+				add_line("Cannot safetly shut down module while process is running")
+				add_line("Stop process to exit module")
+			else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
+		"info":
+			add_line("Module: Log Parsing")
+			add_line("Level:         " + str(Stats.player_stats["Log Parsing"]["level"]))
+			#Level
+			#Experience
+			add_line("Experience:    " + str(Stats.player_stats["Log Parsing"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Log Parsing"]["level"] + 1)))
+			#Effeciency
+			var eff = Stats.player_stats["Log Parsing"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["efficiency description"])
+		"-h":
+			list_help()
+		"overclock":
+			overclock_logic()
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
+
+func start_log_parsing():
+	var new_log_parsing_terminal = log_parsing_scene.instantiate()
+	terminal_body_container.add_child(new_log_parsing_terminal)
+	process_running = true
+	current_process = new_log_parsing_terminal
+	new_log_parsing_terminal.start()
+	add_new_scrollback()
+
+func log_parsing_ended_safely():
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Log parsing safely finished.")
+
+###################################################
+################### PW CRACKING ###################
+###################################################
+func password_unscramble_commands(text):
+	text = text.to_lower().strip_edges()
+	match text:
+		"start":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+				add_line("No encrypted passwords found.")
+				return
+			
+			start_password_unscrambling()
+		"stop":
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current password...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+		"root":
+			if process_running:
+				add_line("Cannot safetly shut down module while process is running")
+				add_line("Stop process to exit module")
+			else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
+		"info":
+			add_line("Module: Password Cracking")
+			add_line("Level:         " + str(Stats.player_stats["Password Cracking"]["level"]))
+			#Level
+			#Experience
+			add_line("Experience:    " + str(Stats.player_stats["Password Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Password Cracking"]["level"] + 1)))
+			#Effeciency
+			var eff = Stats.player_stats["Password Cracking"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["efficiency description"])
+		"-h":
+			list_help()
+		"overclock":
+			overclock_logic()
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
+
+func start_password_unscrambling():
+	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
+	terminal_body_container.add_child(new_pw_cracking_terminal)
+	process_running = true
+	current_process = new_pw_cracking_terminal
+	new_pw_cracking_terminal.start()
+	add_new_scrollback()
+
+func password_cracking_ended_safely():
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Password cracking safely finished.")
+
+###################################################
+################### CRED MATCHING #################
+###################################################
 func cred_matching_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
@@ -506,15 +646,7 @@ func cred_matching_commands(text):
 		"-h":
 			list_help()
 		"overclock":
-			if !Stats.overclocked and process_running and !Stats.overheated:
-				if Stats.system_tempature < 60:
-					Stats.overclocked = true
-				else:
-					add_line("System tempature needs to cool to below 60°C before overclocking")
-			elif process_running and Stats.overheated:
-				add_line("System has been overheated, needs to cool to below 40°C.")
-			else:
-				add_line("System is already overclocked.")
+			overclock_logic()
 		"overclock -kill":
 			if !Stats.overclocked:
 				add_line("Not currently overclocking.")
@@ -525,7 +657,6 @@ func cred_matching_commands(text):
 			add_line("Command not found")
 
 func start_cred_matching():
-
 	if Inventory.get_amount(Items.PASSWORDS) < 1 or Inventory.get_amount(Items.USERNAMES) < 1:
 		add_line("You do not have suffecient usernames or passwords")
 		return
@@ -581,28 +712,33 @@ func start_cred_matching():
 		process_running = false
 	show_process_summary("Cred Matching", creds_created, Items.CREDENTIALS)
 	add_line("Credential matching stopped")
-	
-	#next time
-	# add summary / header
-	# implement efficiency
 
-#Log parsing context commands
-func log_parsing_commands(text):
+###################################################
+############### CACHE DECRYPTING ##################
+###################################################
+func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"start":
-			if !process_running:
-				start_log_parsing()
-			else:
-				add_line("Log parsing already running")
+			if process_running:
+				add_line("Process already running.")
+				return
+			if !Inventory.has_cache():
+				add_line("No caches found.")
+				return
+			
+			start_cache_decrypting()
 		"stop":
 			process_running = false
 			if current_process:
+				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+			else:
+				add_line("No active process to stop.")
 			Stats.overclocked = false
 		"stop -s":
-			add_line("Finishing current log...")
+			add_line("Finishing current cache...")
 			current_process.stop_safely()
 		"focus":
 			if current_process:
@@ -620,26 +756,18 @@ func log_parsing_commands(text):
 				add_line(Ascii.root)
 				list_help()
 		"info":
-			add_line("Module: Log Parsing")
-			add_line("Level:         " + str(Stats.player_stats["Log Parsing"]["level"]))
+			add_line("Module: Cache Decrypting")
+			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
 			#Level
 			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Log Parsing"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Log Parsing"]["level"] + 1)))
+			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Log Parsing"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["efficiency description"])
+			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
 		"-h":
 			list_help()
 		"overclock":
-			if !Stats.overclocked and process_running and !Stats.overheated:
-				if Stats.system_tempature < 60:
-					Stats.overclocked = true
-				else:
-					add_line("System tempature needs to cool to below 60°C before overclocking")
-			elif process_running and Stats.overheated:
-				add_line("System has been overheated, needs to cool to below 40°C.")
-			else:
-				add_line("System is already overclocked.")
+			overclock_logic()
 		"overclock -kill":
 			if !Stats.overclocked:
 				add_line("Not currently overclocking.")
@@ -649,126 +777,34 @@ func log_parsing_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_log_parsing():
-	var new_log_parsing_terminal = log_parsing_scene.instantiate()
-	terminal_body_container.add_child(new_log_parsing_terminal)
+func start_cache_decrypting():
+	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
+	terminal_body_container.add_child(new_cache_decrypt_terminal)
 	process_running = true
-	current_process = new_log_parsing_terminal
-	new_log_parsing_terminal.start()
+	current_process = new_cache_decrypt_terminal
+	new_cache_decrypt_terminal.start_decrypting()
 	add_new_scrollback()
 
-func log_parsing_ended_safely():
+func cache_decrypting_ended_safely():
+	current_process = null
 	process_running = false
 	Stats.overclocked = false
-	add_line("Log parsing safely exited.")
+	add_line("Cache decrypting safely finished.")
 
-func password_unscramble_commands(text):
-	text = text.to_lower().strip_edges()
-	match text:
-		"start":
-			start_password_unscrambling()
-		"stop":
-			process_running = false
-			Stats.overclocked = false
-		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
-		"info":
-			add_line("Module: Password Cracking")
-			add_line("Level:         " + str(Stats.player_stats["Password Cracking"]["level"]))
-			#Level
-			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Password Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Password Cracking"]["level"] + 1)))
-			#Effeciency
-			var eff = Stats.player_stats["Password Cracking"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["efficiency description"])
-		"-h":
-			list_help()
-		"overclock":
-			if !Stats.overclocked and process_running and !Stats.overheated:
-				if Stats.system_tempature < 60:
-					Stats.overclocked = true
-				else:
-					add_line("System tempature needs to cool to below 60°C before overclocking")
-			elif process_running and Stats.overheated:
-				add_line("System has been overheated, needs to cool to below 40°C.")
-			else:
-				add_line("System is already overclocked.")
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			add_line("Command not found")
-
-func start_password_unscrambling():
-	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
-	terminal_body_container.add_child(new_pw_cracking_terminal)
-	process_running = true
-	current_process = new_pw_cracking_terminal
-	new_pw_cracking_terminal.start()
-	add_new_scrollback()
-	
-	#add_line("Verifying passwords available...")
-	#await get_tree().create_timer(0.8).timeout
-	#if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-		#add_line("No passwords available")
-		#return
-	#add_line("Starting password cracking process.\n\n")
-	#var pw_gained: int = 0
-	#await get_tree().create_timer(0.8).timeout
-	#process_running = true
-	#show_module_stats_header("Password Cracking")
-	#
-	#add_line("Cracking Password")
-	#add_line(pw_scram.get_initial_scrambled_word())
-	#var scramble_index = lines.size() - 1
-	###password unscramble loop
-	#while Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) > 0 and process_running:
-		#for i in range(15):
-			#if !process_running:
-				#break
-			#set_line(scramble_index, pw_scram.get_current_scramble())
-			#if Stats.overclocked:
-				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overclock speed"]).timeout
-			#elif Stats.overheated:
-				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["overheat speed"]).timeout
-			#else:
-				#await get_tree().create_timer(Stats.player_stats["Password Cracking"]["speed"]).timeout
-		#if !process_running:
-			#break
-		#pw_scram.reveal_letter()
-		#if Stats.overclocked:
-			#Stats.update_tempature(Stats.player_stats["Password Cracking"]["overclock heat"])
-		#else:
-			#Stats.update_tempature(Stats.player_stats["Password Cracking"]["heat"])
-		##check if word is fully revealed
-		#if pw_scram.is_word_revealed():
-			#set_line(scramble_index, pw_scram.get_current_scramble())
-			#await get_tree().create_timer(0.4).timeout
-			#pw_scram.transform_password() #removes scrambled, adds password
-			#pw_gained += 1
-#
-			#Stats.add_xp(Stats.player_stats["Password Cracking"])
-			#update_module_stats_header("Password Cracking")
-			#
-			#if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-				#process_running = false
-				#add_line("No more encrypted passwords.")
-			#else:
-				#set_line(scramble_index, pw_scram.get_initial_scrambled_word())
-				#
-	#add_line("Finished process.")
-	#show_process_summary("Password Cracking", pw_gained, Items.PASSWORDS)
+func overclock_logic():
+	if !process_running: #no process running
+		add_line("No process running to overclock")
+		return
+	if Stats.overclocked: #already overclocked
+		add_line("System is already overclocked")
+		return
+	if Stats.overheated: #overheated - still recovering
+		add_line("System has been overheated, needs to cool to below 40°C.")
+		return
+	if Stats.system_tempature >= 60: #cant overclock above 60
+		add_line("System tempature needs to cool to below 60°C before overclocking")
+		return
+	Stats.overclocked = true
 
 #Builds header for module running 
 func show_module_stats_header(skill_name: String):
@@ -931,77 +967,6 @@ func purchase_item(id: int, amount: int):
 		output_string += " module"
 	output_string += " for " + str(total_cost) + " Data."
 	add_line(output_string)
-
-#Data mining context commands
-func data_mining_commands(text):
-	text = text.to_lower().strip_edges()
-	match text:
-		"start":
-			if !process_running:
-				start_data_mining()
-			else:
-				add_line("Process already running")
-		"stop":
-			process_running = false
-			if current_process:
-				current_process.stop()
-				current_process = null
-			Stats.overclocked = false
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
-		"info":
-			add_line("Module: Data Mining")
-			add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
-			#Level
-			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
-			#Effeciency
-			var eff = Stats.player_stats["Data Mining"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
-		"-h":
-			list_help()
-		"overclock":
-			if !Stats.overclocked and process_running and !Stats.overheated:
-				if Stats.system_tempature < 60:
-					Stats.overclocked = true
-				else:
-					add_line("System cannot activate overclock unless below 60°C")
-			elif process_running and Stats.overheated:
-				add_line("System has been overheated, needs to cool to below 40C.")
-			else:
-				add_line("System is already overclocked.")
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			add_line("Command not found")
-
-func start_data_mining():
-	#add_line("Initializing Data Mining module...")
-	#await get_tree().create_timer(0.6).timeout
-	
-	var new_data_mining_terminal = data_mining_scene.instantiate()
-	terminal_body_container.add_child(new_data_mining_terminal)
-	process_running = true
-	current_process = new_data_mining_terminal
-	new_data_mining_terminal.start_data_mining()
-	add_new_scrollback()
 
 func get_skill_xp_bar(skill_data: Dictionary, steps:int = 20) -> String:
 	var progress = Stats.get_xp_progress(skill_data)

@@ -24,8 +24,8 @@ func _ready():
 		#add_resource(Items.ITEM_MAP[i], 1)
 	#pass
 	add_resource(Items.STUDENT_CACHE, 40)
-	add_resource(Items.LOGS, 40)
-	add_resource(Items.ENCRYPTED_PASSWORDS, 6)
+	add_resource(Items.LOGS, 2)
+	add_resource(Items.ENCRYPTED_PASSWORDS, 21)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
 	#add_resource(Items.PASSWORDS, 10)

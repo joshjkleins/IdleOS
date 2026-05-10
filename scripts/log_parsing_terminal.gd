@@ -122,8 +122,12 @@ func start():
 					break
 			if process_running:
 				_finished_log(heat_used)
+	#finishes naturally
+	if process_running:
+		Signals.end_log_parsing_safely()
 
 func stop():
+	end_safely = false
 	process_running = false
 
 func stop_safely():

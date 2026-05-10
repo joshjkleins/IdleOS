@@ -9,6 +9,7 @@ extends PanelContainer
 var items_from_session = {} #reference for labels
 var running: bool = false
 var can_apply_heat: bool = true
+var safe_stop: bool = false
 
 var item_label = preload("res://scenes/cache_item_label.tscn")
 
@@ -19,7 +20,11 @@ func start_decrypting():
 	clear_labels()
 	items_from_session = {}
 	running = true
+	safe_stop = false
 	while Inventory.has_cache() and running:
+		if safe_stop:
+			Signals.end_cache_decrypting_safely()
+			break
 		cache_decrypt.reset()
 		can_apply_heat = true
 		if !Inventory.has_cache():
@@ -95,4 +100,8 @@ func update_items_gained(item, amount):
 	Inventory.add_resource(item, amount)
 
 func stop():
+	safe_stop = false
 	running = false
+
+func stop_safely():
+	safe_stop = true
