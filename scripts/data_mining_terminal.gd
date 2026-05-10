@@ -62,6 +62,7 @@ var session_rate: float = 0.0
 var session_cycle: int = 0
 var session_time: float = 0.0
 
+var end_safely: bool = false
 
 #to finish
 #update color scheme to white / grey
@@ -76,7 +77,12 @@ func start_data_mining():
 	_reset_info()
 	_create_progress_row()
 	blinking_timer.start()
+	end_safely = false
 	while process_running:
+		if end_safely:
+			Signals.end_data_mining_safely()
+			stop()
+			break
 		var overclocked = false
 		var overheated = false
 		for i in range(SEGMENTS):
@@ -99,6 +105,9 @@ func start_data_mining():
 func stop():
 	process_running = false
 	blinking_timer.stop()
+
+func stop_safely():
+	end_safely = true
 
 func _cycle_complete(overclocked: bool, overheated: bool):
 	if overheated:

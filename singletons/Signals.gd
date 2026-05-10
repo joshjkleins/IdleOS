@@ -10,6 +10,7 @@ signal update_module_header_signal
 signal end_log_parsing_safely_signal
 signal end_pw_cracking_safely_signal
 signal end_cache_decrypting_safely_signal
+signal end_data_mining_safely_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -45,3 +46,6 @@ func end_pw_cracking_safely():
 
 func end_cache_decrypting_safely():
 	end_cache_decrypting_safely_signal.emit()
+
+func end_data_mining_safely():
+	end_data_mining_safely_signal.emit()

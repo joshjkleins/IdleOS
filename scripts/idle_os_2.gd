@@ -3,6 +3,7 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
+#TODO
 #cred matching into own scene/script
 #HEADER - make universal and update per module
 
@@ -98,11 +99,11 @@ func _ready():
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
+	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
-	
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -136,12 +137,13 @@ func add_new_scrollback():
 	var ns = scrollback.instantiate()
 	terminal_body_container.add_child(ns)
 	current_scrollback = ns
-	
+	print("adding new scrollback")
 	var terminals_active = terminal_body_container.get_child_count()
 
 	if terminals_active > RICHTEXT_LABEL_LIMIT:
 		var label_to_remove = terminal_body_container.get_child(0)
 		label_to_remove.queue_free()
+		print('removing old scrollback')
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
@@ -386,7 +388,6 @@ func root_commands(text):
 		_:#default
 			add_line("Command not found")
 
-
 ###################################################
 ################### DATA MINING ###################
 ###################################################
@@ -406,6 +407,9 @@ func data_mining_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current data mine...")
+			current_process.stop_safely()
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
@@ -453,6 +457,12 @@ func start_data_mining():
 	current_process = new_data_mining_terminal
 	new_data_mining_terminal.start_data_mining()
 	add_new_scrollback()
+
+func data_mining_ended_safely():
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Data mining safely finished.")
 
 ###################################################
 ################### LOG PARSING ###################
