@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://l8t0cwv56jcu"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_jph6o"]
+color = Color(0.243569, 0.243569, 0.243569, 1)
+
+[node name="CredSeparator" type="HSeparator"]
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("StyleBoxLine_jph6o")

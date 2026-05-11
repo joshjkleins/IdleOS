@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=3 uid="uid://ddg7ka5ocuebl"]
+
+[ext_resource type="Script" uid="uid://cv0n3b7k7jdj" path="res://scripts/cred_match_target_row.gd" id="1_t8tsy"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t8tsy"]
+bg_color = Color(0.641934, 0.641934, 0.641934, 1)
+
+[node name="TargetRow" type="PanelContainer"]
+offset_right = 444.0
+offset_bottom = 20.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_t8tsy")
+script = ExtResource("1_t8tsy")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CandidateLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "admin@test.com"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 50
+
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 10.0
+show_percentage = false
+
+[node name="UserLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "15"
+
+[node name="PwLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "92"
+
+[node name="EntLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "43"
+
+[node name="StateLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "FAIL"

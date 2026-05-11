@@ -79,7 +79,6 @@ var LOG_LINES = [
 	{"level":"ERR","service":"archive.reader","message":"Gzip footer mismatch","tags":["corrupted"]}
 ]
 
-
 func start():
 	end_safely = false
 	_reset_logs()

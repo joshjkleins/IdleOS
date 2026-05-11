@@ -48,6 +48,7 @@ extends Control
 @onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
 @onready var log_parsing_scene = preload("res://scenes/log_parsing_terminal.tscn")
 @onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
+@onready var cred_matching_scene = preload("res://scenes/cred_matching_terminal.tscn")
 # cred matching
 # maybe hacking
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
@@ -627,13 +628,34 @@ func cred_matching_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"start":
-			if !process_running:
-				start_cred_matching()
-			else:
-				add_line("Credential matching already running")
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.USERNAMES) <= 0:
+				add_line("No usernames found.")
+				return
+			if Inventory.get_amount(Items.PASSWORDS) <= 0:
+				add_line("No passwords found.")
+				return
+			
+			start_cred_matching()
 		"stop":
 			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
 			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current credential match...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
 		"root":
 			if process_running:
 				add_line("Cannot safetly shut down module while process is running")
@@ -667,61 +689,12 @@ func cred_matching_commands(text):
 			add_line("Command not found")
 
 func start_cred_matching():
-	if Inventory.get_amount(Items.PASSWORDS) < 1 or Inventory.get_amount(Items.USERNAMES) < 1:
-		add_line("You do not have suffecient usernames or passwords")
-		return
-
+	var new_cred_matching_terminal = cred_matching_scene.instantiate()
+	terminal_body_container.add_child(new_cred_matching_terminal)
 	process_running = true
-	show_module_stats_header("Credential Matching")
-	cred_match.usernames = cred_match.get_initial_list()
-	cred_match.highlight_index = 0
-	var match_found = false
-	
-	
-	var increase_per_line = 0.003
-	add_line(cred_match.render_list(false))
-	var usernames_index = lines.size() - 1
-	
-	var creds_created = 0
-	
-	while Inventory.get_amount(Items.PASSWORDS) >= 1 and Inventory.get_amount(Items.USERNAMES) >= 1 and process_running:
-		var chance_to_find_match = 0.0
-		var roll = randf()
-		await get_tree().create_timer(0.1).timeout
-		while process_running and !match_found:
-			cred_match.highlight_index += 1
-			if roll < chance_to_find_match:
-				match_found = true
-			set_line(usernames_index, cred_match.render_list(match_found), false)
-			if Stats.overclocked:
-				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["overclock speed"]).timeout
-			elif Stats.overheated:
-				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["overheat speed"]).timeout
-			else:
-				await get_tree().create_timer(Stats.player_stats["Credential Matching"]["speed"]).timeout
-			chance_to_find_match += increase_per_line * (1 + Stats.player_stats["Credential Matching"]["efficiency"])
-
-		if process_running:
-			if Stats.overclocked:
-				Stats.update_tempature(Stats.player_stats["Credential Matching"]["overclock heat"])
-			else:
-				Stats.update_tempature(Stats.player_stats["Credential Matching"]["heat"]) #increase tempature
-			Stats.add_xp(Stats.player_stats["Credential Matching"])
-			update_module_stats_header("Credential Matching")
-			cred_match.create_creds()
-			creds_created += 1
-			await get_tree().create_timer(0.3).timeout
-		
-			if process_running:
-				if Inventory.get_amount(Items.PASSWORDS) >= 1 and Inventory.get_amount(Items.USERNAMES) >= 1:
-					match_found = false
-					cred_match.usernames = cred_match.get_initial_list()
-					cred_match.highlight_index = 0
-					set_line(usernames_index, cred_match.render_list(false), false)
-	if process_running:
-		process_running = false
-	show_process_summary("Cred Matching", creds_created, Items.CREDENTIALS)
-	add_line("Credential matching stopped")
+	current_process = new_cred_matching_terminal
+	new_cred_matching_terminal.start()
+	add_new_scrollback()
 
 ###################################################
 ############### CACHE DECRYPTING ##################

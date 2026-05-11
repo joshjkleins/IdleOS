@@ -1,0 +1,391 @@
+[gd_scene load_steps=11 format=3 uid="uid://bred34s63bit5"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_04tvn"]
+[ext_resource type="Script" uid="uid://dx0jgscv1ocqj" path="res://scripts/cred_matching_terminal.gd" id="2_jph6o"]
+[ext_resource type="Texture2D" uid="uid://u8vkay12jumf" path="res://art/icons/user.png" id="3_tvsdj"]
+[ext_resource type="Texture2D" uid="uid://bld73v5cecyh0" path="res://art/icons/lock-keyhole(2).png" id="4_145jr"]
+[ext_resource type="Texture2D" uid="uid://ddxysihivx8bc" path="res://art/icons/save.png" id="4_tvsdj"]
+[ext_resource type="Texture2D" uid="uid://uf22fursegu2" path="res://art/icons/arrow-right(3).png" id="5_sksop"]
+[ext_resource type="Texture2D" uid="uid://cl6wa1implfne" path="res://art/icons/lock-keyhole(1).png" id="6_jph6o"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_udol3"]
+bg_color = Color(0.115694, 0.135986, 0.156281, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.231373, 0.560784, 0.407843, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_04tvn"]
+bg_color = Color(0.117647, 0.137255, 0.156863, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.298967, 0.336936, 0.374939, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jph6o"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.298039, 0.337255, 0.376471, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="CredMatchingTerminal" type="PanelContainer"]
+offset_right = 1168.0
+offset_bottom = 172.0
+theme = ExtResource("1_04tvn")
+script = ExtResource("2_jph6o")
+lock_image = ExtResource("6_jph6o")
+cred_image = ExtResource("4_tvsdj")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 25
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="FirstCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="UsernameBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol"]
+custom_minimum_size = Vector2(275, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_udol3")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("3_tvsdj")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
+theme_override_font_sizes/font_size = 12
+text = "USERNAME"
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "j_kleinstine_1"
+
+[node name="PasswordBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol"]
+custom_minimum_size = Vector2(275, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_udol3")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("4_145jr")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
+theme_override_font_sizes/font_size = 12
+text = "PASSWORD"
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "**************"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+texture = ExtResource("5_sksop")
+stretch_mode = 3
+
+[node name="SecondCol" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow"]
+custom_minimum_size = Vector2(530, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_04tvn")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "MATCHING ENGINE"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "fuzzy correlator"
+horizontal_alignment = 1
+
+[node name="TagContainer" type="HFlowContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="Tag" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
+theme_override_font_sizes/font_size = 10
+text = "levenshtein"
+
+[node name="Tag2" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag2"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag2/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
+theme_override_font_sizes/font_size = 10
+text = "hash match"
+
+[node name="Tag3" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag3"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag3/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
+theme_override_font_sizes/font_size = 10
+text = "entropy"
+
+[node name="Tag4" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag4"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag4/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.703349, 0.703661, 0.748833, 1)
+theme_override_font_sizes/font_size = 10
+text = "token split"
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+texture = ExtResource("5_sksop")
+stretch_mode = 3
+
+[node name="ThirdCol" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow"]
+custom_minimum_size = Vector2(275, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_04tvn")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StatusImage" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+texture = ExtResource("6_jph6o")
+stretch_mode = 3
+
+[node name="StatusTitle" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 12
+text = "AWAITING MATCH"
+horizontal_alignment = 1
+
+[node name="StatusUsername" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "-"
+horizontal_alignment = 1
+
+[node name="StatusPw" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "-"
+horizontal_alignment = 1
+
+[node name="MainBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 100.0
+show_percentage = false
+
+[node name="StatusProgressBar" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+text = "success chance: -"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="BottomRow" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="StatusUpdater" type="Label" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "SIGNAL CORRELATION - X CANDIDATES SCANNED"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+
+[node name="HeadingRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="CandidateLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "CANDIDATE"
+
+[node name="SignalLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "SIGNAL"
+
+[node name="LSHLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "LSH"
+
+[node name="HMLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "HM"
+
+[node name="ENTLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "ENT"
+
+[node name="TSLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 14
+text = "TS"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="UserRowContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[connection signal="value_changed" from="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar" to="." method="_on_main_bar_value_changed"]
