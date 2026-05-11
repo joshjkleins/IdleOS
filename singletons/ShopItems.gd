@@ -48,7 +48,7 @@ var items = {
 	},
 	14: {
 		"id": 14,
-		"name": "Hacking",
+		"name": "Cache Decrypting",
 		"cost": 250,
 		"description": "Module used to decrypt caches for various items.",
 		"type": ItemType.MODULE,
@@ -112,7 +112,7 @@ func grant_item_reward(item: Dictionary, amount: int) -> void:
 			Stats.unlock_module("Hacking")
 			items[13].available = false
 		14:
-			Stats.unlock_module("Cache Decrpyting")
+			Stats.unlock_module("Cache Decrypting")
 			items[14].available = false
 		_:
 			print("No reward logic for item id:", item["id"])
