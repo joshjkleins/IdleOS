@@ -9,6 +9,8 @@ extends PanelContainer
 @onready var status_username = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusUsername
 @onready var status_pw = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusPw
 @onready var status_updater = $MarginContainer/VBoxContainer/BottomRow/StatusUpdater
+@onready var userbox_name_label = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/UserboxNameLabel
+@onready var third_col = $MarginContainer/VBoxContainer/TopRow/ThirdCol
 
 @export var lock_image: Texture2D
 @export var cred_image: Texture2D
@@ -19,108 +21,484 @@ var separator = preload("res://scenes/separator_cred.tscn")
 var USER_ROWS: int = 5
 
 var process_running: bool = false
+var safely_stop: bool = false
 var current_progress: int = 0
 var current_iteration: int = 0
 var fill = [10, 25, 35, 65, 100]
 
+var tween: Tween
 
 var green = Color("#3b8f68")
 var grey = Color("#6b6b78")
+var d_border_col = Color("#1e2328")
+var s_border_col = Color("#3b8f68")
+var f_border_col = Color("#c85660")
 
 var u_name = "j_kleinstine_1"
 
 var highest_roll: int = 0
 
-##NEXT TIME
-# add stop features
-# add overclock
-# add actual stats stuff
-# make it looks a bit nicer with colors and better visual clarity
-# add 'focus'
-# make remove/add resources
-# add heat
-# add more randomly generated usernames and variations of said usernames
-# refactor code??
+var TIME_TO_ROLL: float = 2.0
+var TIME_PER_METHOD: float = 0.65
 
-#func _ready():
-	#start()
+var sb
+const RANDOM_USERNAMES := [
+	"byteRunner77",
+	"neonTiger",
+	"silentProxy",
+	"darkKernel",
+	"pixelRaider",
+	"ghostCipher",
+	"ironSpectre",
+	"lunarSyntax",
+	"zeroDayFox",
+	"voidCrawler",
+	"turboHydra",
+	"omegaPulse",
+	"echoVector",
+	"rapidDelta",
+	"nightAssembler",
+	"hexCrawler",
+	"frostByte",
+	"alphaCircuit",
+	"gammaNode",
+	"dataMantis",
+	"vortexDrive",
+	"silentCrate",
+	"quantumPixel",
+	"binaryLancer",
+	"crimsonPacket",
+	"shadowSocket",
+	"omegaClaw",
+	"nightSignal",
+	"ravenUpload",
+	"staticHunter",
+	"deltaMachine",
+	"hyperBreach",
+	"nanoRunner",
+	"vaporKernel",
+	"electricNomad",
+	"stormCache",
+	"glitchNova",
+	"radarGhost",
+	"iceProtocol",
+	"pixelNomad",
+	"lunarSignal",
+	"vectorShadow",
+	"solarRogue",
+	"rapidSocket",
+	"bytePirate",
+	"frozenRoot",
+	"turboHex",
+	"crashOverride",
+	"steelCrawler",
+	"silentOverflow",
+	"toxicMatrix",
+	"omegaTrace",
+	"voidHunter",
+	"quantumEcho",
+	"cyberAnchor",
+	"blackoutNode",
+	"phantomByte",
+	"novaSignal",
+	"darkPacket",
+	"hexRaider",
+	"pixelDrifter",
+	"cyberNova",
+	"binaryFang",
+	"terminalGhost",
+	"echoCrawler",
+	"nightPulse",
+	"lunarNode",
+	"staticCipher",
+	"rapidHex",
+	"stormRunner",
+	"hyperThread",
+	"crimsonRoot",
+	"shadowOverride",
+	"voidPacket",
+	"alphaMantis",
+	"vaporSignal",
+	"gammaGhost",
+	"electricFox",
+	"zeroSpectre",
+	"silentThread",
+	"turboTrace",
+	"pixelPulse",
+	"quantumSocket",
+	"binaryDrifter",
+	"novaKernel",
+	"omegaRoot",
+	"stormHex",
+	"darkSyntax",
+	"ravenCipher",
+	"nightSocket",
+	"frostSignal",
+	"vectorHydra",
+	"phantomProxy",
+	"cyberMantis",
+	"dataNomad",
+	"rapidCrawler",
+	"blackoutPulse",
+	"shadowKernel",
+	"electricPacket",
+	"silentRogue",
+	"voidTrace",
+	"omegaByte",
+	"hyperGhost",
+	"vaporFox",
+	"crimsonHex",
+	"novaDrive",
+	"ghostThread",
+	"staticRaider",
+	"binaryPulse",
+	"echoSocket",
+	"frozenCipher",
+	"nightKernel",
+	"pixelHunter",
+	"stormProxy",
+	"darkRoot",
+	"quantumTrace",
+	"vectorSignal",
+	"alphaPacket",
+	"cyberDrive",
+	"silentMantis",
+	"lunarHex",
+	"rapidGhost",
+	"turboCipher",
+	"vaporNode",
+	"shadowFox",
+	"zeroRunner",
+	"blackoutCrawler",
+	"novaByte",
+	"ghostSocket",
+	"frostOverride",
+	"binaryTrace",
+	"nightRaider",
+	"electricSignal",
+	"echoHydra",
+	"stormDrifter",
+	"pixelKernel",
+	"crimsonProxy",
+	"staticThread",
+	"voidCipher",
+	"hyperPulse",
+	"alphaFox",
+	"quantumRunner",
+	"cyberSocket",
+	"shadowSignal",
+	"vaporHex",
+	"novaMantis",
+	"darkPacket77",
+	"silentNova",
+	"lunarCipher",
+	"frozenDrive",
+	"rapidByte",
+	"turboGhost",
+	"stormSocket",
+	"binaryNomad",
+	"omegaCrawler",
+	"nightTrace",
+	"pixelOverride",
+	"vectorRaider",
+	"electricKernel",
+	"echoPacket",
+	"cyberRoot",
+	"blackoutFox",
+	"crimsonSignal",
+	"voidHydra",
+	"ghostProxy",
+	"alphaTrace",
+	"staticNomad",
+	"hyperByte",
+	"shadowPulse",
+	"frostSocket",
+	"novaHex",
+	"binaryHunter",
+	"rapidKernel",
+	"silentPacket",
+	"vaporThread",
+	"darkCrawler",
+	"turboRunner",
+	"nightCipher",
+	"pixelFox",
+	"vectorDrive",
+	"echoGhost",
+	"stormOverride",
+	"quantumKernel",
+	"cyberRaider",
+	"zeroSignal",
+	"shadowTrace",
+	"alphaSocket",
+	"ghostByte",
+	"binaryHydra",
+	"staticRunner",
+	"omegaSignal",
+	"novaThread",
+	"rapidPulse",
+	"silentFox",
+	"lunarRoot",
+	"frostKernel",
+	"hyperNomad",
+	"darkSocket",
+	"stormByte",
+	"pixelCipher",
+	"cyberGhost",
+	"vectorPacket",
+	"voidSignal",
+	"turboRoot",
+	"electricTrace",
+	"echoRunner",
+	"binarySocket",
+	"novaProxy",
+	"shadowKernelX",
+	"nightHydra",
+	"rapidSignal",
+	"silentTrace",
+	"frostPulse",
+	"vaporRaider",
+	"ghostNomad",
+	"crimsonSocket",
+	"omegaThread",
+	"pixelByte",
+	"stormCrawler",
+	"darkProxy",
+	"quantumSignal",
+	"alphaGhost",
+	"hyperRoot",
+	"binaryCipher",
+	"vectorPulse",
+	"cyberThread",
+	"zeroKernel",
+	"electricSocket",
+	"silentHydra",
+	"novaSignalX",
+	"voidRunner",
+	"pixelTrace",
+	"nightProxy",
+	"frostNomad",
+	"shadowByte",
+	"echoSignal",
+	"stormGhost",
+	"rapidThread",
+	"turboPacket",
+	"cyberCipher",
+	"binaryRoot",
+	"omegaRunner",
+	"vectorKernel",
+	"lunarTrace",
+	"ghostSignal",
+	"hyperSocket",
+	"darkHydra",
+	"silentKernel",
+	"novaPacket",
+	"pixelRunner",
+	"frozenSignal",
+	"alphaOverride",
+	"cyberPulse",
+	"shadowNomad",
+	"rapidSocketX",
+	"stormKernelX",
+	"voidGhost",
+	"electricByte"
+]
+
+var TAG_COLORS = [
+	Color("#3B82F6"),
+	Color("#10B981"),
+	Color("#F59E0B"),
+	Color("#8B5CF6")
+]
 
 func start():
 	process_running = true
+	safely_stop = false
+	sb = third_col.get_theme_stylebox("panel")
 	_reset_rows()
 	_build_rows()
+	if Inventory.get_amount(Items.PASSWORDS) <= 0 or Inventory.get_amount(Items.USERNAMES) <= 0:
+		_finished()
+		return
+	if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
+		Inventory.remove_resource(Items.PASSWORDS, 1)
+	if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
+		Inventory.remove_resource(Items.USERNAMES, 1)
 	_begin_matching()
 
-func _begin_matching():
-	#get current_row
-	var current_row = _get_current_row()
+func stop():
+	process_running = false
+	safely_stop = false
+	_cancel_tweens()
 
-	if current_row != null:
-		#highlight tag
-		status_updater.text = "FINDING CLOSES MATCHING ALGORITHM"
-		var current_tag = 0
-		current_row.fade_in()
-		current_row.update_state(current_row.MATCH_STATE.ATTEMPTING)
-		var tags = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer.get_children()
-		var rolls = []
-		for i in range(4):
-			rolls.append(randi_range(1, 80))
-		#rolls.sort()
-		for n in tags:
-			tags[0].remove_theme_stylebox_override("panel")
-			tags[1].remove_theme_stylebox_override("panel")
-			tags[2].remove_theme_stylebox_override("panel")
-			tags[3].remove_theme_stylebox_override("panel")
-			
-			var sb = n.get_theme_stylebox("panel").duplicate()
-			sb.bg_color = Color("#2e2e2e")
-			tags[current_tag].add_theme_stylebox_override("panel", sb)
-			
-			var roll = rolls[current_tag]
-			await current_row.start_progress(roll, 0.65)
-			if roll > highest_roll:
-				highest_roll = roll
-				status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
-			current_row.update_label_chances(current_tag, roll)
-			current_tag += 1
-		#await current_row.start_progress(highest_roll, 0.65)
-		current_row.update_state(current_row.MATCH_STATE.LOCKED)
+func stop_safely():
+	safely_stop = true
+
+func _repeat_loop():
+	if Inventory.get_amount(Items.PASSWORDS) <= 0 or Inventory.get_amount(Items.USERNAMES) <= 0:
+		_finished()
+		return
+	if process_running:
+		if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
+			Inventory.remove_resource(Items.PASSWORDS, 1)
+		if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
+			Inventory.remove_resource(Items.USERNAMES, 1)
+		_reset_rows()
+		_build_rows()
 		_begin_matching()
-	else: #finished looping through 5 rows
-		#loop through rows to find highest chance and highlight
-		var highest_chance = 0
-		var t_row = null
-		for n in user_row_container.get_children():
-			if n is PanelContainer:
-				if n.highest_chance > highest_chance:
-					highest_chance = n.highest_chance
-					t_row = n
-					
-		t_row.highlight()
-		await prepare_cred_roll(t_row.highest_chance)
-		await get_tree().create_timer(1.0).timeout
-		start()
+	else:
+		_finished()
 
-func prepare_cred_roll(chance: int):
-	status_updater.text = "USING HIGHEST CHANCE"
+func _cancel_tweens():
+	if tween:
+		tween.kill()
+	for n in user_row_container.get_children():
+		if n is PanelContainer:
+				n.cancel()
+
+func _finished():
+	process_running = false
+	safely_stop = false
+	Signals.end_cred_matching_safely()
+
+func _begin_matching():
+	if process_running:
+		#get current_row
+		third_col.add_theme_stylebox_override("panel", sb)
+		var current_row = _get_current_row()
+		if current_row != null:
+			#highlight tag
+			status_updater.text = "FINDING CLOSEST MATCHING ALGORITHM"
+			var current_tag = 0
+			current_row.fade_in()
+			current_row.update_state(current_row.MATCH_STATE.ATTEMPTING)
+			var tags = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer.get_children()
+			var rolls = []
+			for i in range(4):
+				rolls.append(randi_range(1, 100))
+			#rolls.sort()
+			for n in tags:
+				tags[0].remove_theme_stylebox_override("panel")
+				tags[1].remove_theme_stylebox_override("panel")
+				tags[2].remove_theme_stylebox_override("panel")
+				tags[3].remove_theme_stylebox_override("panel")
+				
+				var sb = n.get_theme_stylebox("panel").duplicate()
+				sb.bg_color = TAG_COLORS[current_tag]
+				tags[current_tag].add_theme_stylebox_override("panel", sb)
+				
+				var roll = rolls[current_tag]
+				
+				if !process_running:
+					_finished()
+					return
+				var speed
+				var heat
+				if Stats.overclocked:
+					speed = Stats.player_stats["Credential Matching"]["overclock speed"]
+					heat = Stats.player_stats["Credential Matching"]["overclock heat"]
+				elif Stats.overheated:
+					speed = Stats.player_stats["Credential Matching"]["overheat speed"]
+					heat = Stats.player_stats["Credential Matching"]["overheat heat"]
+				else:
+					speed = Stats.player_stats["Credential Matching"]["base speed"]
+					heat = Stats.player_stats["Credential Matching"]["heat"]
+				#if roll > highest_roll:
+					#highest_roll = roll
+					#status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
+				current_row.update_label_chances(current_tag, roll, TAG_COLORS[current_tag])
+				await current_row.start_progress(roll, speed)
+				Stats.update_tempature(heat)
+				if !process_running:
+					_finished()
+					return
+				if roll > highest_roll:
+					highest_roll = roll
+					status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
+				#current_row.update_label_chances(current_tag, roll, TAG_COLORS[current_tag])
+				current_tag += 1
+				
+			current_row.set_highest_color()
+			#await current_row.start_progress(highest_roll, 0.65)
+			current_row.update_state(current_row.MATCH_STATE.LOCKED)
+			if !process_running:
+				_finished()
+				return
+			_begin_matching()
+		else: #finished looping through 5 rows
+			#loop through rows to find highest chance and highlight
+			if !process_running:
+				_finished()
+				return
+			var highest_chance = 0
+			var t_row = null
+			for n in user_row_container.get_children():
+				if n is PanelContainer:
+					if n.highest_chance > highest_chance:
+						highest_chance = n.highest_chance
+						t_row = n
+						
+			t_row.highlight()
+			if !process_running:
+				_finished()
+				return
+			
+			await prepare_cred_roll(t_row.highest_chance, t_row.u_name)
+			if !process_running:
+				_finished()
+				return
+			await get_tree().create_timer(1.0).timeout
+			if !process_running:
+				_finished()
+				return
+			if !safely_stop:
+				_repeat_loop()
+			else:
+				_finished()
+
+func prepare_cred_roll(chance: int, u_name: String):
+	if !process_running:
+		return
+	status_updater.text = "ATTEMPTING MATCH USING HIGHEST CHANCE"
 	status_title.text = "ATTEMPING MATCH"
 	status_username.text = u_name
 	status_pw.text = "****"
-	#status_progress_bar.text = "success chance: " + str(chance) + "%"
 	
-	var tween = create_tween()
-	tween.tween_property(main_bar, "value", 100, 2.0)
+	var speed
+	var heat
+	if Stats.overclocked:
+		speed = Stats.player_stats["Credential Matching"]["overclock speed"]
+		heat = Stats.player_stats["Credential Matching"]["overclock heat"]
+	elif Stats.overheated:
+		speed = Stats.player_stats["Credential Matching"]["overheat speed"]
+		heat = Stats.player_stats["Credential Matching"]["overheat heat"]
+	else:
+		speed = Stats.player_stats["Credential Matching"]["base speed"]
+		heat = Stats.player_stats["Credential Matching"]["heat"]
+		
+	tween = create_tween()
+	tween.tween_property(main_bar, "value", 100, speed * 3)
 	await tween.finished
+	if !process_running:
+		return
 	
-	var roll = randi_range(1, 99)
+	var roll = randi_range(1, 100)
 	if roll > chance:
 		#fail
 		status_title.text = "FAILED"
+		var og_box = third_col.get_theme_stylebox("panel").duplicate()
+		og_box.border_color = f_border_col
+		third_col.add_theme_stylebox_override("panel", og_box)
 	else:
+		Inventory.add_resource(Items.CREDENTIALS, 1)
 		status_title.text = "CREDENTIAL ASSEMBLED"
 		status_image.texture = cred_image
+		var og_box = third_col.get_theme_stylebox("panel").duplicate()
+		og_box.border_color = s_border_col
+		third_col.add_theme_stylebox_override("panel", og_box)
 		
-	
+	Stats.update_tempature(heat + 4)
+	Stats.add_xp(Stats.player_stats["Credential Matching"])
+	Signals.update_hud(Stats.player_stats["Credential Matching"])
 
 func _reset_rows():
 	highest_roll = 0
@@ -136,10 +514,13 @@ func _reset_rows():
 			n.queue_free()
 
 func _build_rows():
+	var random_user = RANDOM_USERNAMES.pick_random()
+	userbox_name_label.text = random_user
+	var variations = generate_username_variations(random_user)
 	for i in range(USER_ROWS):
 		var r = target_row.instantiate()
 		var s = separator.instantiate()
-		r.update("j_kleinstine_1")
+		r.update(variations[i])
 		r._hide()
 		user_row_container.add_child(r)
 		
@@ -152,3 +533,46 @@ func _get_current_row():
 			if n.current_state == n.MATCH_STATE.WAITING:
 				return n
 	return null
+
+
+func generate_username_variations(base_username: String) -> Array[String]:
+	var variations: Array[String] = []
+
+	# Remove common separators for parsing
+	var cleaned = base_username.replace("@", "_")
+	cleaned = cleaned.replace(".", "_")
+	cleaned = cleaned.replace("-", "_")
+
+	var parts = cleaned.split("_", false)
+
+	var first := ""
+	var last := ""
+	var number := ""
+
+	# Try extracting name pieces + ending number
+	for part in parts:
+		if part.is_valid_int():
+			number = part
+		elif first == "":
+			first = part
+		else:
+			last += part
+
+	if last == "":
+		last = first
+
+	var first_initial := first.substr(0, 1)
+
+	# Generate variations
+	variations.append("%s_%s" % [first_initial, last])
+	variations.append("%s%s@admin" % [first_initial, last])
+	variations.append("%s_%s@admin" % [first_initial, last])
+
+	if number != "":
+		variations.append("%s_%s_%s" % [last, first, number])
+	else:
+		variations.append("%s_%s" % [last, first])
+
+	variations.append("%s%s%s" % [first_initial, last, number])
+
+	return variations

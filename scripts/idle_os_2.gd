@@ -4,20 +4,17 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-#cred matching into own scene/script
-#HEADER - make universal and update per module
-
-#next:
-#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
-#offline progression
-#save/load
-
-#Laterz:
+# HEADER - add labels when getting an item, add "Root" version of header
 # hacking - update UI and redo sequencial logic so everything is happening at the same time, making it more 'idle' ish
+#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
+# add logic that makes terminal like hacking (ie sequential so its easier to follow)
+# Phishing - way to maybe get IP addresses or usernames or PW? 
+
+#save/load
+#offline progression
 
 #module ideas:
 #Defragging - takes a long time (30min-1h) gives long term (or even perm) benefits
-# Phishing - way to maybe get IP addresses or usernames or PW? 
 #non-idle module: Jailbreak / heist mode: use commands to open/close doors to get someone in and out
 
 
@@ -101,6 +98,7 @@ func _ready():
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
 	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
+	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -143,6 +141,8 @@ func add_new_scrollback():
 
 	if terminals_active > RICHTEXT_LABEL_LIMIT:
 		var label_to_remove = terminal_body_container.get_child(0)
+		if label_to_remove == current_process: #prevents removing currently running process
+			label_to_remove = terminal_body_container.get_child(1)
 		label_to_remove.queue_free()
 		print('removing old scrollback')
 
@@ -175,22 +175,28 @@ func _on_input_line_text_submitted(new_text):
 func get_context_lead():
 	match current_context:
 		Context.ROOT:
+			#Signals.update_hud(Stats.player_stats["Default"])
 			return "IdleOS>"
 		Context.DARKWEB:
 			return "IdleOS/Darkweb>"
 		Context.MARKETPLACE:
 			return "IdleOS/Marketplace>"
 		Context.DATA_MINING:
+			Signals.update_hud(Stats.player_stats["Data Mining"])
 			return "IdleOS/Modules/DataMining>"
 		Context.LOG_PARSING:
+			Signals.update_hud(Stats.player_stats["Log Parsing"])
 			return "IdleOS/Modules/LogParsing>"
 		Context.PASSWORD_CRACKING:
+			Signals.update_hud(Stats.player_stats["Password Cracking"])
 			return "IdleOS/Modules/PasswordCracking>"
 		Context.CRED_MATCHING:
+			Signals.update_hud(Stats.player_stats["Credential Matching"])
 			return "IdleOS/Modules/CredentialMatching>"
 		Context.HACKING:
 			return "IdleOS/Modules/Hacking>"
 		Context.CACHE_DECRYPTING:
+			Signals.update_hud(Stats.player_stats["Cache Decrypting"])
 			return "IdleOS/Modules/CacheDecrypting>"
 
 #Changes context and updates leading text
@@ -449,9 +455,6 @@ func data_mining_commands(text):
 			add_line("Command not found")
 
 func start_data_mining():
-	#add_line("Initializing Data Mining module...")
-	#await get_tree().create_timer(0.6).timeout
-	
 	var new_data_mining_terminal = data_mining_scene.instantiate()
 	terminal_body_container.add_child(new_data_mining_terminal)
 	process_running = true
@@ -631,13 +634,12 @@ func cred_matching_commands(text):
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.USERNAMES) <= 0:
-				add_line("No usernames found.")
+			if Inventory.get_amount(Items.USERNAMES) <= 0 or Inventory.get_amount(Items.PASSWORDS) <= 0:
+				if Inventory.get_amount(Items.USERNAMES) <= 0:
+					add_line("Required resource: Usernames")
+				if Inventory.get_amount(Items.PASSWORDS) <= 0:
+					add_line("Required resource: Passwords")
 				return
-			if Inventory.get_amount(Items.PASSWORDS) <= 0:
-				add_line("No passwords found.")
-				return
-			
 			start_cred_matching()
 		"stop":
 			process_running = false
@@ -695,6 +697,13 @@ func start_cred_matching():
 	current_process = new_cred_matching_terminal
 	new_cred_matching_terminal.start()
 	add_new_scrollback()
+
+func cred_matching_ended_safely():
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Credential matching safely finished.")
+	
 
 ###################################################
 ############### CACHE DECRYPTING ##################

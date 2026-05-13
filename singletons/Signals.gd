@@ -2,6 +2,7 @@ extends Node
 
 signal end_hacking_signal
 signal system_temp_updated_signal
+signal heat_added_signal
 signal hacking_ended_signal
 signal update_hacking_header_signal
 signal end_hacking_safely_signal
@@ -11,6 +12,8 @@ signal end_log_parsing_safely_signal
 signal end_pw_cracking_safely_signal
 signal end_cache_decrypting_safely_signal
 signal end_data_mining_safely_signal
+signal end_cred_matching_safely_signal
+signal update_hud_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -21,6 +24,9 @@ func end_hacking():
 
 func system_temp_updated(temp: int):
 	system_temp_updated_signal.emit(temp)
+
+func heat_added(heat: int):
+	heat_added_signal.emit(heat)
 
 func hacking_ended():
 	hacking_ended_signal.emit()
@@ -49,3 +55,9 @@ func end_cache_decrypting_safely():
 
 func end_data_mining_safely():
 	end_data_mining_safely_signal.emit()
+
+func end_cred_matching_safely():
+	end_cred_matching_safely_signal.emit()
+
+func update_hud(skill: Dictionary):
+	update_hud_signal.emit(skill)

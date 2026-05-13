@@ -20,16 +20,16 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	#for i in Items.ITEM_MAP:
-		#add_resource(Items.ITEM_MAP[i], 10)
+	for i in Items.ITEM_MAP:
+		add_resource(Items.ITEM_MAP[i], 100)
 	pass
 	add_resource(Items.DATA, 500)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 21)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
-	add_resource(Items.PASSWORDS, 10)
-	add_resource(Items.USERNAMES, 10)
+	add_resource(Items.PASSWORDS, 30)
+	add_resource(Items.USERNAMES, 30)
 	#add_resource(Items.CREDENTIALS, 100)
 	#add_resource(Items.IP_ADDRESS, 100)
 	#add_resource(Items.ADMIN_CACHE, 2)

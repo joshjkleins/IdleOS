@@ -121,6 +121,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	Inventory.add_resource(Items.DATA, data_quantity_gained)
 	
 	Stats.add_xp(Stats.player_stats["Data Mining"])
+	Signals.update_hud(Stats.player_stats["Data Mining"])
 	session_cycle += 1
 	session_yield += data_quantity_gained
 	cycles_label.text = str(session_cycle)

@@ -65,38 +65,42 @@ func start():
 			var current_word = random_four_digit_words.pick_random()
 			
 			var max_heat_used: int = 0
-			for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
-				if process_running:
-					if Stats.overheated:
-						var speed = Stats.player_stats["Password Cracking"]["overheat speed"]
-						var heat = Stats.player_stats["Password Cracking"]["overheat heat"]
-						if heat > max_heat_used:
-							max_heat_used = heat
-						_update_progress_bar(i, speed)
-						await get_tree().create_timer(speed).timeout
-					elif Stats.overclocked:
-						var speed = Stats.player_stats["Password Cracking"]["overclock speed"]
-						var heat = Stats.player_stats["Password Cracking"]["overclock heat"]
-						if heat > max_heat_used:
-							max_heat_used = heat
-						_update_progress_bar(i, speed)
-						await get_tree().create_timer(speed).timeout
-					else:
-						var speed = Stats.player_stats["Password Cracking"]["base speed"]
-						var heat = Stats.player_stats["Password Cracking"]["heat"]
-						if heat > max_heat_used:
-							max_heat_used = speed
-						_update_progress_bar(i, speed)
-						await get_tree().create_timer(speed).timeout
-					if !process_running:
-						break
-					_reveal_letter(i,current_word[i])
+			if randf() < Stats.player_stats["Password Cracking"]["efficiency"]:
+				_end_current_crack(current_word)
+				_successful_crack(max_heat_used)
+			else:
+				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
+					if process_running:
+						if Stats.overheated:
+							var speed = Stats.player_stats["Password Cracking"]["overheat speed"]
+							var heat = Stats.player_stats["Password Cracking"]["overheat heat"]
+							if heat > max_heat_used:
+								max_heat_used = heat
+							_update_progress_bar(i, speed)
+							await get_tree().create_timer(speed).timeout
+						elif Stats.overclocked:
+							var speed = Stats.player_stats["Password Cracking"]["overclock speed"]
+							var heat = Stats.player_stats["Password Cracking"]["overclock heat"]
+							if heat > max_heat_used:
+								max_heat_used = heat
+							_update_progress_bar(i, speed)
+							await get_tree().create_timer(speed).timeout
+						else:
+							var speed = Stats.player_stats["Password Cracking"]["base speed"]
+							var heat = Stats.player_stats["Password Cracking"]["heat"]
+							if heat > max_heat_used:
+								max_heat_used = speed
+							_update_progress_bar(i, speed)
+							await get_tree().create_timer(speed).timeout
+						if !process_running:
+							break
+						_reveal_letter(i,current_word[i])
 				
-			if !process_running:
-					break
-			_end_current_crack(current_word)
-			_successful_crack(max_heat_used)
-			progress_bar.value = 0
+				if !process_running:
+						break
+				_end_current_crack(current_word)
+				_successful_crack(max_heat_used)
+				progress_bar.value = 0
 	
 	if process_running:
 		_finished()
@@ -168,6 +172,7 @@ func _successful_crack(heat: int):
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Stats.add_xp(Stats.player_stats["Password Cracking"])
+	Signals.update_hud(Stats.player_stats["Password Cracking"])
 	
 	remaining_label.text = str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS))
 	cracked_label.text = str(amount_cracked)

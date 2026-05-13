@@ -65,7 +65,9 @@ func start_decrypting():
 		#finished with a single cache
 		apply_heat(overclocked_this_cache)
 		Stats.add_xp(Stats.player_stats["Cache Decrypting"])
-		Signals.update_module_header("Cache Decrypting")
+		
+		Signals.update_hud(Stats.player_stats["Cache Decrypting"])
+		#Signals.update_module_header("Cache Decrypting")
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:

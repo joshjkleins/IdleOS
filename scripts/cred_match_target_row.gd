@@ -11,21 +11,46 @@ enum MATCH_STATE {
 
 var current_state = MATCH_STATE.WAITING
 var highest_chance: int = 0
+var highest_color: Color
+var tween: Tween
+var u_name: String
+var current_active_label
 
-func update_label_chances(index: int, chance: int):
+func update_label_chances(index: int, chance: int, color: Color):
 	if chance > highest_chance:
 		highest_chance = chance
+		highest_color = color
+		
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = color
+	$MarginContainer/HBoxContainer/MarginContainer/ProgressBar.add_theme_stylebox_override("fill", sb)
+	
 	match index:
 		0: #levenshtein
+			current_active_label = $MarginContainer/HBoxContainer/LSHLabel
 			$MarginContainer/HBoxContainer/LSHLabel.text = str(chance) + "%"
+			$MarginContainer/HBoxContainer/LSHLabel.add_theme_color_override("font_color", color)
 		1: #levenshtein
+			current_active_label = $MarginContainer/HBoxContainer/HMLabel
 			$MarginContainer/HBoxContainer/HMLabel.text = str(chance) + "%"
+			$MarginContainer/HBoxContainer/HMLabel.add_theme_color_override("font_color", color)
 		2: #levenshtein
+			current_active_label = $MarginContainer/HBoxContainer/EntLabel
 			$MarginContainer/HBoxContainer/EntLabel.text = str(chance) + "%"
+			$MarginContainer/HBoxContainer/EntLabel.add_theme_color_override("font_color", color)
 		3: #levenshtein
+			current_active_label = $MarginContainer/HBoxContainer/TSLabel
 			$MarginContainer/HBoxContainer/TSLabel.text = str(chance) + "%"
+			$MarginContainer/HBoxContainer/TSLabel.add_theme_color_override("font_color", color)
+
+func set_highest_color():
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = highest_color
+	$MarginContainer/HBoxContainer/MarginContainer/ProgressBar.add_theme_stylebox_override("fill", sb)
+	$MarginContainer/HBoxContainer/MarginContainer/ProgressBar.value = highest_chance
 
 func update(candidate_username: String):
+	u_name = candidate_username
 	$MarginContainer/HBoxContainer/MarginContainer/ProgressBar.value = 0
 	$MarginContainer/HBoxContainer/CandidateLabel.text = candidate_username
 	$MarginContainer/HBoxContainer/LSHLabel.text = "0%"
@@ -67,7 +92,7 @@ func update_state(state: MATCH_STATE):
 			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.GREEN)
 
 func start_progress(fill, time):
-	var tween = create_tween()
+	tween = create_tween()
 	tween.tween_property($MarginContainer/HBoxContainer/MarginContainer/ProgressBar, "value", fill, time).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 
@@ -81,13 +106,8 @@ func highlight():
 	add_theme_stylebox_override("panel", style_box)
 
 func _on_progress_bar_value_changed(value):
-	var sb = StyleBoxFlat.new()
-	
-	# Map value (0-100) to Hue (0 is Red, 0.33 is Green)
-	var ratio = value / 100.0
-	sb.bg_color = Color.from_hsv(ratio * 0.33, 0.8, 0.9)
-	
-	$MarginContainer/HBoxContainer/MarginContainer/ProgressBar.add_theme_stylebox_override("fill", sb)
+	if current_active_label:
+		current_active_label.text = str(int(value)) + "%"
 
 func _hide():
 	self.modulate.a = 0.0
@@ -100,3 +120,8 @@ func fade_in():
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
 	await tween.finished
+
+
+func cancel():
+	if tween:
+		tween.kill()

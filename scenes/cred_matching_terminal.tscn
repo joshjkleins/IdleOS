@@ -69,6 +69,7 @@ theme_override_constants/separation = 5
 [node name="FirstCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow"]
 layout_mode = 2
 theme_override_constants/separation = 10
+alignment = 1
 
 [node name="UsernameBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/FirstCol"]
 custom_minimum_size = Vector2(275, 0)
@@ -100,7 +101,7 @@ theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
 theme_override_font_sizes/font_size = 12
 text = "USERNAME"
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer"]
+[node name="UserboxNameLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "j_kleinstine_1"
 
@@ -136,7 +137,7 @@ text = "PASSWORD"
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "**************"
+text = "****"
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow"]
 layout_mode = 2
@@ -339,7 +340,7 @@ theme_override_constants/margin_left = 15
 layout_mode = 2
 
 [node name="CandidateLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
 theme_override_font_sizes/font_size = 14

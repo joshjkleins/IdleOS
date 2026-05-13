@@ -8,6 +8,7 @@ extends Control
 
 func _ready():
 	Signals.system_temp_updated_signal.connect(update_heat_info)
+	Signals.heat_added_signal.connect(heat_added_label)
 
 const ZONE_COLORS = [
 	Color("#2d9e75"),  # cool
@@ -53,31 +54,34 @@ func update_heat_info(tempature: int) -> void:
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[0]["color"])
 		update_progressbar_fill(HEAT_INFO[0]["color"])
 		temp_name.text = HEAT_INFO[0]["name"]
-		temp_range.text = HEAT_INFO[0]["range"]
-		if !Stats.overheated:
-			temp_desc.text = HEAT_INFO[0]["description"]
-		else:
-			temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
+		temp_range.text = "-1° C/s"
+		#temp_range.text = HEAT_INFO[0]["range"]
+		#if !Stats.overheated:
+			#temp_desc.text = HEAT_INFO[0]["description"]
+		#else:
+			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 60 and tempature < 85:
 		temp.add_theme_color_override("font_color", HEAT_INFO[1]["color"])
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[1]["color"])
 		update_progressbar_fill(HEAT_INFO[1]["color"])
 		temp_name.text = HEAT_INFO[1]["name"]
-		temp_range.text = HEAT_INFO[1]["range"]
-		if !Stats.overheated:
-			temp_desc.text = HEAT_INFO[1]["description"]
-		else:
-			temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
+		temp_range.text = "-1° C/s"
+		#temp_range.text = HEAT_INFO[1]["range"]
+		#if !Stats.overheated:
+			#temp_desc.text = HEAT_INFO[1]["description"]
+		#else:
+			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 85 and tempature < 95:
 		temp.add_theme_color_override("font_color", HEAT_INFO[2]["color"])
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[2]["color"])
 		update_progressbar_fill(HEAT_INFO[2]["color"])
 		temp_name.text = HEAT_INFO[2]["name"]
-		temp_range.text = HEAT_INFO[2]["range"]
-		if !Stats.overheated:
-			temp_desc.text = HEAT_INFO[2]["description"]
-		else:
-			temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
+		temp_range.text = "-1° C/s"
+		#temp_range.text = HEAT_INFO[2]["range"]
+		#if !Stats.overheated:
+			#temp_desc.text = HEAT_INFO[2]["description"]
+		#else:
+			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 95:
 		if Stats.overheated:
 			temp_bar.indeterminate = true
@@ -85,14 +89,35 @@ func update_heat_info(tempature: int) -> void:
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[3]["color"])
 		update_progressbar_fill(HEAT_INFO[3]["color"])
 		temp_name.text = HEAT_INFO[3]["name"]
-		temp_range.text = HEAT_INFO[3]["range"]
-		if !Stats.overheated:
-			temp_desc.text = HEAT_INFO[3]["description"]
-		else:
-			temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
-
+		temp_range.text = "-1° C/s"
+		#temp_range.text = HEAT_INFO[3]["range"]
+		#if !Stats.overheated:
+			#temp_desc.text = HEAT_INFO[3]["description"]
+		#else:
+			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 
 func update_progressbar_fill(color: Color) -> void:
 	var stylebox := temp_bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat
 	stylebox.bg_color = color
 	temp_bar.add_theme_stylebox_override("fill", stylebox)
+
+func heat_added_label(temp: int):
+	temp_desc.text = "+" + str(temp) + "°C"
+	await _fade_in(temp_desc)
+	await get_tree().create_timer(0.5).timeout
+	await _fade_out(temp_desc)
+
+func _fade_in(label: Label):
+	label.modulate.a = 0.0
+	
+	var tween = create_tween()
+	tween.tween_property(label, "modulate:a", 1.0, 0.3)
+	await tween.finished
+
+
+func _fade_out(label: Label):
+	label.modulate.a = 1.0
+	
+	var tween = create_tween()
+	tween.tween_property(label, "modulate:a", 0.0, 0.3)
+	await tween.finished

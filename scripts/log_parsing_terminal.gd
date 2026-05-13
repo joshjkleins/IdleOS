@@ -134,6 +134,7 @@ func stop_safely():
 
 func _finished_log(heat_used: int):
 	Stats.add_xp(Stats.player_stats["Log Parsing"])
+	Signals.update_hud(Stats.player_stats["Log Parsing"])
 	Stats.update_tempature(heat_used)
 	if Inventory.get_amount(Items.LOGS) > 0 and !end_safely:
 		_reset_logs()

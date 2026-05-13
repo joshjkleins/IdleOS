@@ -1,9 +1,12 @@
 extends Node
 
+signal gained_xp_signal
+
 const MAX_LEVEL = 99
 
 var player_stats = {
 	"Data Mining": {
+		"name": "Data mining",
 		"experience": 0,
 		"exp per level": 200,
 		"command": "data-mining",
@@ -17,10 +20,12 @@ var player_stats = {
 		"heat": 1,
 		"overclock heat": 3,
 		"overheat heat": 1,
+		"requirements": [],
 		"description": "Generates data used for purchasing items from the marketplace.",
 		"efficiency description": "Chance to receive multiple data."
 	},
 	"Log Parsing": {
+		"name": "Log parsing",
 		"experience": 0,
 		"exp per level": 200,
 		"command": "log-parsing",
@@ -29,20 +34,22 @@ var player_stats = {
 		"overclock speed": 0.1,
 		"overheat speed": 3.0,
 		"efficiency": 0.0,
-		"efficiency increase rate": 0.003,
+		"efficiency increase rate": 0.01,
 		"unlocked": true,
 		"heat": 4,
 		"overclock heat": 7,
+		"requirements": [Items.LOGS],
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 		"efficiency description": "Increases chance of finding a resource per row."
 	},
 	"Password Cracking": {
+		"name": "Password cracking",
 		"experience": 0,
-		"exp per level": 200,
+		"exp per level": 900,
 		"command": "pw-cracking",
 		"level": 1,
 		"efficiency": 0.0,
-		"efficiency increase rate": 0.02,
+		"efficiency increase rate": 0.002,
 		"unlocked": true,
 		"heat": 3,
 		"overclock heat": 13,
@@ -50,26 +57,31 @@ var player_stats = {
 		"base speed": 3.0,
 		"overclock speed": 1.0,
 		"overheat speed": 9.0,
-		"description": "Cracks passwords to be used in credentials. Requires scrambled passwords.",
-		"efficiency description": "Increases chance of revealing more than one letter."
+		"requirements": [Items.ENCRYPTED_PASSWORDS],
+		"description": "Cracks encrypted passwords, turning them into Passwords that can be used in credential matching.",
+		"efficiency description": "Chance to instantly crack password."
 	},
 	"Credential Matching": {
+		"name": "Credential matching",
 		"experience": 0,
-		"exp per level": 200,
+		"exp per level": 1100,
 		"command": "cred-matching",
 		"level": 1,
 		"efficiency": 0.0,
-		"efficiency increase rate": 0.01,
+		"efficiency increase rate": 0.002,
 		"unlocked": true,
-		"heat": 14,
-		"overclock heat": 16,
-		"speed": 0.1,
-		"overclock speed": 0.02,
-		"overheat speed": 1.0,
-		"description": "Combines passwords and usernames to create a credential. Requires cracked passwords and usernames.",
-		"efficiency description": "Increases chance for a match per row."
+		"heat": 1,
+		"overclock heat": 2,
+		"overheat heat": 1,
+		"base speed": 1.0,
+		"overclock speed": 0.33,
+		"overheat speed": 3.0,
+		"requirements": [Items.USERNAMES, Items.PASSWORDS],
+		"description": "Creates credentials using passwords & usernames.",
+		"efficiency description": "Chance to not consume a username or password."
 	},
 	"Hacking": {
+		"name": "Hacking",
 		"experience": 0,
 		"exp per level": 200,
 		"command": "hacking",
@@ -78,25 +90,28 @@ var player_stats = {
 		"efficiency increase rate": 0.1,
 		"unlocked": true,
 		"heat": 20,
+		"requirements": [Items.IP_ADDRESS, Items.CREDENTIALS],
 		"description": "Used to hack targets. Requires ip addresses and credentials.",
 		"efficiency description": "Increases chance of successful hacking"
 	},
 	"Cache Decrypting": {
+		"name": "Cache decrypting",
 		"experience": 0,
-		"exp per level": 200,
+		"exp per level": 2000,
 		"command": "cache-decrypting",
 		"level": 1,
 		"base speed": 0.2,
 		"overclock speed": 0.05,
 		"overheat speed": 1.0,
-		"efficiency": 0.0,
-		"efficiency increase rate": 0.003,
+		"efficiency": 0.03,
+		"efficiency increase rate": 0.001,
 		"unlocked": true,
 		"heat": 7,
 		"overclock heat": 25,
 		"overheat heat": 2,
+		"requirements": ["Any type of cache"],
 		"description": "Decrypt caches gained from hacking to reveal additional items.",
-		"efficiency description": "Increases chance of finding higher quantity of items."
+		"efficiency description": "Chance to find rare item."
 	}
 }
 
@@ -563,6 +578,9 @@ func update_tempature(amount: int):
 	elif system_tempature >= 85: #attempt to auto stop overclock when above 85
 		overclocked = false
 	Signals.system_temp_updated(system_tempature)
+	
+	if amount > 0:
+		Signals.heat_added(amount)
 
 func get_hacking_target_by_command(command):
 	for target in hacking_targets:
@@ -622,6 +640,31 @@ func list_unlocked_processes():
 	
 	return output
 
+
+func get_xp_display(skill_data: Dictionary) -> Dictionary:
+	var level = skill_data["level"]
+	
+	# Cap at max level
+	if level >= MAX_LEVEL:
+		return {
+			"progress": 1.0,
+			"current": 0,
+			"needed": 0,
+			"display": "MAX"
+		}
+	
+	var current_level_xp = xp_for_level(level)        # XP threshold for current level
+	var next_level_xp    = xp_for_level(level + 1)    # XP threshold for next level
+	var xp_into_level    = skill_data["experience"] - current_level_xp
+	var xp_needed        = next_level_xp - current_level_xp  # = xp_to_new_level(level)
+	
+	return {
+		"progress": float(xp_into_level) / float(xp_needed),  # 0.0–1.0
+		"current":  xp_into_level,   # shown left of slash
+		"needed":   xp_needed,       # shown right of slash
+		"display":  "%d/%d" % [xp_into_level, xp_needed]
+	}
+
 #returns experience needed provided level
 func xp_for_level(lvl: int) -> int:
 	if lvl <= 1:
@@ -645,19 +688,26 @@ func get_xp_progress(skill_data: Dictionary) -> float:
 	var next_level_xp = xp_for_level(skill_data["level"] + 1)
 	return float(skill_data["experience"] - current_level_xp) / float(next_level_xp - current_level_xp)
 
-func add_xp(skill_data: Dictionary, amount: int = 0): #recently updated skill dictionaries to have exp per level, use that instead of 2nd argument
+func add_xp(skill_data: Dictionary, amount: int = 0):
 	if skill_data["level"] >= MAX_LEVEL:
 		return
+
 	if amount > 0:
-		print("Gained xp from specified amount") #if this is hit make sure it only comes from hacking target. otherwise it means its not using the ["exp per level"] key/value
+		print("Gained xp from specified amount")
 		skill_data["experience"] += amount
 	else:
+		gained_xp_signal.emit(skill_data["exp per level"])
 		skill_data["experience"] += skill_data["exp per level"]
+
 	var new_level = get_level_from_xp(skill_data["experience"])
-	
-	if new_level > skill_data["level"]:
-		skill_data["level"] = new_level
+
+	while skill_data["level"] < new_level:
+		skill_data["level"] += 1
 		on_level_up(skill_data)
+
+		if skill_data["level"] >= MAX_LEVEL:
+			skill_data["level"] = MAX_LEVEL
+			break
 
 func on_level_up(skill_data: Dictionary):
 	#update efficiency
