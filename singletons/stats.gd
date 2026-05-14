@@ -123,6 +123,10 @@ var cooling_frequency = 1.0 #every 1 second
 var overheated = false
 var overclocked = false
 
+#hacking
+var current_anon = 100
+var max_anon = 100
+
 var hacking_targets = {
 	"School": {
 		"command": "view school",
@@ -133,11 +137,10 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
-				"heat": 10,
+				"heat": 1,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 100,
+				"counter": 5,
 				"loot": Items.STUDENT_CACHE
 			},
 			{

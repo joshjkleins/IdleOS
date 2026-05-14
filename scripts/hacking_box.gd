@@ -7,7 +7,8 @@ extends Control
 
 @onready var targets_container = $PanelContainer/MarginContainer/TargetsContainer
 @onready var persons_container = $PanelContainer/MarginContainer/PersonsContainer
-@onready var hack_container = $PanelContainer/MarginContainer/HackContainer
+#@onready var hack_container = $PanelContainer/MarginContainer/HackContainer
+@onready var hacking_game = $PanelContainer/MarginContainer/HackingGame
 
 
 const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
@@ -17,6 +18,7 @@ func _ready():
 	Signals.end_hacking_signal.connect(end_hack)
 	targets_container.visible = true
 	persons_container.visible = false
+	hacking_game.visible = false
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
 	update_targets()
 
@@ -34,8 +36,6 @@ func update_targets():
 		
 		#add to ui
 		targets_container.add_child(new_row)
-	
-	
 
 func select_target(target: Dictionary = {}):
 	await _green_flash(target, targets_container)
@@ -47,10 +47,14 @@ func select_person(target: Dictionary = {}):
 	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
 		await _green_flash(target, persons_container)
 		await _hide_container(persons_container)
-		hack_container.setup_hack()
-		await _show_container(hack_container)
-		hack_container.target = target
-		hack_container.begin_hack()
+		#hack_container.setup_hack()
+		#await _show_container(hack_container)
+		#hack_container.target = target
+		#hack_container.begin_hack()
+		hacking_game.setup(target)
+		await _show_container(hacking_game)
+		await get_tree().create_timer(5.0).timeout
+		hacking_game.start_hack()
 	else:
 		await _red_flash(target, persons_container)
 
@@ -69,7 +73,9 @@ func hacking_to_persons():
 
 func end_hack():
 	await get_tree().create_timer(1.5).timeout
-	await _hide_container(hack_container)
+	#await _hide_container(hack_container)
+	hacking_game.stop()
+	await _hide_container(hacking_game)
 	await _show_container(persons_container)
 	Signals.hacking_ended()
 

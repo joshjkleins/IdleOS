@@ -87,8 +87,6 @@ min_value = 30.0
 step = 1.0
 value = 30.0
 show_percentage = false
-indeterminate = true
-editor_preview_indeterminate = false
 
 [node name="Ticks" type="Control" parent="MarginContainer/VBoxContainer/TempBar"]
 layout_mode = 1

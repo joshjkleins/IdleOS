@@ -89,7 +89,7 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
-	input_line.grab_focus() #uncomment this when not testing hacking module
+	#input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
 	

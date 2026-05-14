@@ -97,6 +97,8 @@ enum ItemType {
 	ASSOCIATE_ATTORNEY_CACHE, #74
 	LAWYER_CACHE, #75
 	PARTNER_CACHE, #76
+	SQL_INJECTOR, #77
+	PACKET_SPOOF, #78
 }
 
 #items
@@ -107,6 +109,8 @@ const PASSWORDS = preload("res://items/passwords.tres")
 const USERNAMES = preload("res://items/usernames.tres")
 const CREDENTIALS = preload("res://items/credentials.tres")
 const IP_ADDRESS = preload("res://items/ip_address.tres")
+const SQL_INJECTOR = preload("res://items/sql_injector.tres")
+const PACKET_SPOOF = preload("res://items/packet_spoof.tres")
 
 ### VALUABLES ###
 #school
@@ -281,4 +285,6 @@ const ITEM_MAP = {
 	ItemType.ASSOCIATE_ATTORNEY_CACHE: ASSOCIATE_ATTORNEY_CACHE,
 	ItemType.LAWYER_CACHE: LAWYER_CACHE,
 	ItemType.PARTNER_CACHE: PARTNER_CACHE,
+	ItemType.SQL_INJECTOR: SQL_INJECTOR,
+	ItemType.PACKET_SPOOF: PACKET_SPOOF
 }

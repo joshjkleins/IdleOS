@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cwcgukqes7d5o"]
+[gd_scene load_steps=5 format=3 uid="uid://cwcgukqes7d5o"]
 
 [ext_resource type="Script" uid="uid://do4kdjtm8ch0u" path="res://scripts/header_hacking_box.gd" id="1_45qip"]
+[ext_resource type="PackedScene" uid="uid://b6nkkejp764vy" path="res://scenes/header_info.tscn" id="2_t63x0"]
 [ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="2_yc4e7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0tax"]
@@ -45,7 +46,11 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_constants/separation = 50
 
+[node name="HUD" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_t63x0")]
+layout_mode = 2
+
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 0
 
@@ -62,6 +67,7 @@ layout_mode = 2
 text = "Efficiency: 2%"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 0
 

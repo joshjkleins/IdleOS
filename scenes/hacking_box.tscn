@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b653v15af03ax" path="res://scripts/hacking_box.gd" id="1_r0tax"]
 [ext_resource type="PackedScene" uid="uid://0p6doepjcjw2" path="res://scenes/target_card.tscn" id="2_3f8mw"]
 [ext_resource type="PackedScene" uid="uid://bcqnb6ti2stem" path="res://scenes/person_card.tscn" id="3_84vjy"]
-[ext_resource type="PackedScene" uid="uid://bkihh0ts7l5gf" path="res://scenes/hack_container.tscn" id="4_84no8"]
+[ext_resource type="PackedScene" uid="uid://bddkjsdik6vmd" path="res://scenes/hacking_game.tscn" id="4_84no8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0tax"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -35,10 +35,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_r0tax")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
-size_flags_vertical = 0
 theme_override_constants/margin_top = 20
 
 [node name="TargetsContainer" type="GridContainer" parent="PanelContainer/MarginContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
@@ -48,6 +48,7 @@ columns = 4
 layout_mode = 2
 
 [node name="PersonsContainer" type="GridContainer" parent="PanelContainer/MarginContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
@@ -68,8 +69,7 @@ layout_mode = 2
 [node name="PersonCard5" parent="PanelContainer/MarginContainer/PersonsContainer" instance=ExtResource("3_84vjy")]
 layout_mode = 2
 
-[node name="HackContainer" parent="PanelContainer/MarginContainer" instance=ExtResource("4_84no8")]
-visible = false
+[node name="HackingGame" parent="PanelContainer/MarginContainer" instance=ExtResource("4_84no8")]
 layout_mode = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]

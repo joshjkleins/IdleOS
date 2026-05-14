@@ -1,0 +1,421 @@
+[gd_scene load_steps=21 format=3 uid="uid://bddkjsdik6vmd"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_p8dkt"]
+[ext_resource type="Script" uid="uid://bm3gcvjs27vdg" path="res://scripts/hacking_game.gd" id="2_c44vy"]
+[ext_resource type="Texture2D" uid="uid://c1usanayalt08" path="res://art/icons/circle-user.png" id="3_kelsw"]
+[ext_resource type="Texture2D" uid="uid://bn7ehxs7nvgio" path="res://art/icons/rows-3.png" id="4_8rbb1"]
+[ext_resource type="Texture2D" uid="uid://n3vkjn6lsqi1" path="res://art/icons/zap.png" id="5_8tddg"]
+[ext_resource type="Texture2D" uid="uid://ggjb14ikvr87" path="res://art/icons/shield.png" id="6_5lwk8"]
+[ext_resource type="Texture2D" uid="uid://r240aj7r1ln7" path="res://art/icons/shell.png" id="7_is8ts"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c44vy"]
+bg_color = Color(0.203922, 0.203922, 0.203922, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7oyxj"]
+bg_color = Color(0.164706, 0.603922, 0.352941, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5dcew"]
+bg_color = Color(0.203922, 0.203922, 0.203922, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5lwk8"]
+bg_color = Color(0.156863, 0.470588, 0.784314, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8rbb1"]
+bg_color = Color(0.203922, 0.203922, 0.203922, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kelsw"]
+bg_color = Color(0.847059, 0.25098, 0.25098, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8tddg"]
+bg_color = Color(0.752941, 0.501961, 0.12549, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u6kly"]
+bg_color = Color(0.202723, 0.202723, 0.202723, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_is8ts"]
+bg_color = Color(0.0445579, 0.0445579, 0.0445578, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f2w7f"]
+bg_color = Color(0.164706, 0.603922, 0.352941, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yi84"]
+bg_color = Color(0.156863, 0.470588, 0.784314, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7o2ew"]
+bg_color = Color(0.847059, 0.25098, 0.25098, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwu3l"]
+bg_color = Color(0.111197, 0.111197, 0.111197, 1)
+border_width_top = 1
+border_width_bottom = 1
+border_color = Color(0.203922, 0.203922, 0.203922, 1)
+
+[node name="HackingGame" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme = ExtResource("1_p8dkt")
+script = ExtResource("2_c44vy")
+
+[node name="TitleRow" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TitleRow"]
+layout_mode = 2
+
+[node name="TargetName" type="Label" parent="TitleRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "School-student"
+
+[node name="StatusLabel" type="Label" parent="TitleRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "hacking"
+horizontal_alignment = 2
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="StatsRow" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="StatsRow"]
+layout_mode = 2
+theme_override_constants/separation = 100
+
+[node name="PlayerSide" type="VBoxContainer" parent="StatsRow/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="StatsRow/HBoxContainer2/PlayerSide"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="StatsRow/HBoxContainer2/PlayerSide/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("3_kelsw")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="StatsRow/HBoxContainer2/PlayerSide/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "you"
+
+[node name="AnonLabel" type="Label" parent="StatsRow/HBoxContainer2/PlayerSide"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
+theme_override_font_sizes/font_size = 10
+text = "anonymity 60%"
+
+[node name="AnonBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/PlayerSide"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_c44vy")
+theme_override_styles/fill = SubResource("StyleBoxFlat_7oyxj")
+value = 60.0
+show_percentage = false
+
+[node name="BandLabel" type="Label" parent="StatsRow/HBoxContainer2/PlayerSide"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
+theme_override_font_sizes/font_size = 10
+text = "bandwidth 88%"
+
+[node name="BandBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/PlayerSide"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_5dcew")
+theme_override_styles/fill = SubResource("StyleBoxFlat_5lwk8")
+value = 28.0
+show_percentage = false
+
+[node name="EnemySide" type="VBoxContainer" parent="StatsRow/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="StatsRow/HBoxContainer2/EnemySide"]
+layout_mode = 2
+alignment = 2
+
+[node name="TargetLabel2" type="Label" parent="StatsRow/HBoxContainer2/EnemySide/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "student"
+
+[node name="TextureRect" type="TextureRect" parent="StatsRow/HBoxContainer2/EnemySide/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("4_8rbb1")
+expand_mode = 2
+
+[node name="IntegLabel" type="Label" parent="StatsRow/HBoxContainer2/EnemySide"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
+theme_override_font_sizes/font_size = 10
+text = "integrity 6%"
+horizontal_alignment = 2
+
+[node name="IntegBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/EnemySide"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_8rbb1")
+theme_override_styles/fill = SubResource("StyleBoxFlat_kelsw")
+value = 30.0
+fill_mode = 1
+show_percentage = false
+
+[node name="StrengthLabel" type="Label" parent="StatsRow/HBoxContainer2/EnemySide"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
+theme_override_font_sizes/font_size = 10
+text = "ICE strength 61%"
+horizontal_alignment = 2
+
+[node name="StrengthBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/EnemySide"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_8rbb1")
+theme_override_styles/fill = SubResource("StyleBoxFlat_8tddg")
+value = 10.0
+fill_mode = 1
+show_percentage = false
+
+[node name="HSeparator2" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="AttacksRow" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AttacksRow"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PanelContainer" type="PanelContainer" parent="AttacksRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_u6kly")
+
+[node name="MarginContainer" type="MarginContainer" parent="AttacksRow/HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("5_8tddg")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "sql_inject lv1"
+
+[node name="AttackAmountLabel" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.892034, 0.892034, 0.892034, 1)
+theme_override_font_sizes/font_size = 10
+text = "x12"
+horizontal_alignment = 2
+
+[node name="AttackBar" type="ProgressBar" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_is8ts")
+theme_override_styles/fill = SubResource("StyleBoxFlat_f2w7f")
+value = 50.0
+show_percentage = false
+
+[node name="PanelContainer2" type="PanelContainer" parent="AttacksRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_u6kly")
+
+[node name="MarginContainer" type="MarginContainer" parent="AttacksRow/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("6_5lwk8")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "packet_spoof"
+
+[node name="DefenseAmountLabel" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.892034, 0.892034, 0.892034, 1)
+theme_override_font_sizes/font_size = 10
+text = "x12"
+horizontal_alignment = 2
+
+[node name="DefenseBar" type="ProgressBar" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_is8ts")
+theme_override_styles/fill = SubResource("StyleBoxFlat_5yi84")
+step = 0.001
+value = 50.0
+show_percentage = false
+
+[node name="PanelContainer3" type="PanelContainer" parent="AttacksRow/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_u6kly")
+
+[node name="MarginContainer" type="MarginContainer" parent="AttacksRow/HBoxContainer/PanelContainer3"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer3/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("7_is8ts")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "countermeasures"
+
+[node name="CounterBar" type="ProgressBar" parent="AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_is8ts")
+theme_override_styles/fill = SubResource("StyleBoxFlat_7o2ew")
+value = 50.0
+show_percentage = false
+
+[node name="BattleInfo" type="PanelContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_vwu3l")
+
+[node name="MarginContainer" type="MarginContainer" parent="BattleInfo"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="ScrollContainer" type="ScrollContainer" parent="BattleInfo/MarginContainer"]
+layout_mode = 2
+follow_focus = true
+
+[node name="LabelsContainer" type="VBoxContainer" parent="BattleInfo/MarginContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BottomRow" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="BottomRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="BottomRow/HBoxContainer"]
+layout_mode = 2
+text = "yield: cache x 1"
+
+[connection signal="value_changed" from="StatsRow/HBoxContainer2/PlayerSide/AnonBar" to="." method="_on_anon_bar_value_changed"]
+[connection signal="value_changed" from="StatsRow/HBoxContainer2/PlayerSide/BandBar" to="." method="_on_band_bar_value_changed"]
+[connection signal="value_changed" from="StatsRow/HBoxContainer2/EnemySide/IntegBar" to="." method="_on_integ_bar_value_changed"]
+[connection signal="value_changed" from="StatsRow/HBoxContainer2/EnemySide/StrengthBar" to="." method="_on_strength_bar_value_changed"]
