@@ -83,15 +83,19 @@ var player_stats = {
 	"Hacking": {
 		"name": "Hacking",
 		"experience": 0,
-		"exp per level": 200,
 		"command": "hacking",
 		"level": 1,
-		"efficiency": 0.0,
-		"efficiency increase rate": 0.1,
+		"base speed": 0.2,
+		"overclock speed": 0.05,
+		"overheat speed": 1.0,
+		"efficiency": 0.05,
+		"efficiency increase rate": 0.0025,
 		"unlocked": true,
-		"heat": 20,
+		"heat": 7,
+		"overclock heat": 25,
+		"overheat heat": 2,
 		"requirements": [Items.IP_ADDRESS, Items.CREDENTIALS],
-		"description": "Used to hack targets. Requires ip addresses and credentials.",
+		"description": "Hack targets and extract caches for valuable items.",
 		"efficiency description": "Increases chance of successful hacking"
 	},
 	"Cache Decrypting": {
@@ -137,7 +141,7 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
-				"heat": 1,
+				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
 				"counter": 5,
@@ -698,9 +702,10 @@ func add_xp(skill_data: Dictionary, amount: int = 0):
 	if amount > 0:
 		print("Gained xp from specified amount")
 		skill_data["experience"] += amount
+		gained_xp_signal.emit(amount)
 	else:
-		gained_xp_signal.emit(skill_data["exp per level"])
 		skill_data["experience"] += skill_data["exp per level"]
+		gained_xp_signal.emit(skill_data["exp per level"])
 
 	var new_level = get_level_from_xp(skill_data["experience"])
 

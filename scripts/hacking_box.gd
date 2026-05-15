@@ -15,7 +15,7 @@ const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
 const person_card: PackedScene = preload("res://scenes/person_card.tscn")
 
 func _ready():
-	Signals.end_hacking_signal.connect(end_hack)
+	#Signals.end_hacking_signal.connect(end_hack)
 	targets_container.visible = true
 	persons_container.visible = false
 	hacking_game.visible = false
@@ -47,13 +47,9 @@ func select_person(target: Dictionary = {}):
 	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
 		await _green_flash(target, persons_container)
 		await _hide_container(persons_container)
-		#hack_container.setup_hack()
-		#await _show_container(hack_container)
-		#hack_container.target = target
-		#hack_container.begin_hack()
 		hacking_game.setup(target)
 		await _show_container(hacking_game)
-		await get_tree().create_timer(5.0).timeout
+		await hacking_game.prepare()
 		hacking_game.start_hack()
 	else:
 		await _red_flash(target, persons_container)
@@ -69,15 +65,16 @@ func persons_to_targets():
 	await _show_container(targets_container)
 
 func hacking_to_persons():
-	await _show_container(persons_container)
-
-func end_hack():
-	await get_tree().create_timer(1.5).timeout
-	#await _hide_container(hack_container)
-	hacking_game.stop()
 	await _hide_container(hacking_game)
 	await _show_container(persons_container)
-	Signals.hacking_ended()
+
+#func end_hack():
+	##await get_tree().create_timer(1.5).timeout
+	###await _hide_container(hack_container)
+	##hacking_game.stop()
+	#await _hide_container(hacking_game)
+	#await _show_container(persons_container)
+	#Signals.hacking_ended()
 
 func _hide_container(container):
 	if !container.visible:

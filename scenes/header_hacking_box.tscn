@@ -49,36 +49,6 @@ theme_override_constants/separation = 50
 [node name="HUD" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_t63x0")]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 0
-
-[node name="HLevel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-text = "Level 1"
-
-[node name="HExp" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-text = "Experience: 100/20448"
-
-[node name="HEff" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-text = "Efficiency: 2%"
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 0
-
-[node name="IPLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "IP Addresses: x1"
-
-[node name="CredentialsLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Credentials: x23"
-
 [node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
 layout_mode = 2
 size_flags_horizontal = 10

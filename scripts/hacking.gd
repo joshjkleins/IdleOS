@@ -15,11 +15,12 @@ enum HackingContext {
 var current_context: HackingContext = HackingContext.TARGETS
 
 func _ready():
-	header_hacking_box.update_header()
+	#header_hacking_box.update_header()
 	#enemy_hacking_box.update_targets()
-	Signals.hacking_ended_signal.connect(stop_hacking_signal)
+	Signals.hacking_ended_signal.connect(hacking_ended)
 
 func module_loaded():
+	header_hacking_box.update_header()
 	#header_hacking_box.update_header()
 	#enemy_hacking_box.update_targets()
 	
@@ -138,9 +139,10 @@ func handle_view_command(text):
 		current_context = HackingContext.PERSONS
 
 
-func stop_hacking_signal():
+func hacking_ended():
 	#enemy_hacking_box.end_hack()
 	current_context = HackingContext.PERSONS
+	await enemy_hacking_box.hacking_to_persons()
 
 
 func format_command_list(title: String, commands: Array) -> String:

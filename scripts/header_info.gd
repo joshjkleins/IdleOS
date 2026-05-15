@@ -18,7 +18,7 @@ func _ready():
 func show_added_exp(amount: int):
 	exp_add_label.text = "+" + str(amount)
 	await _fade_up_in(exp_add_label)
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(1.0).timeout
 	await _fade_up_out(exp_add_label)
 
 func _fade_up_in(label: Label):

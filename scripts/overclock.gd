@@ -1,8 +1,12 @@
 extends Control
 
-@onready var temp_name = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempName
-@onready var temp_range = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempRange
-@onready var temp_desc = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempDesc
+@onready var temp_desc = $MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/TempDesc
+@onready var temp_name = $MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/TempName
+@onready var temp_range = $MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer/TempRange
+
+#@onready var temp_name = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempName
+#@onready var temp_range = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempRange
+#@onready var temp_desc = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempDesc
 @onready var temp = $MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer/Temp
 @onready var temp_bar = $MarginContainer/VBoxContainer/TempBar
 
