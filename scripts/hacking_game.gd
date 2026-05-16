@@ -62,12 +62,16 @@ var reward_amount: int = 0
 #TODO:
 #change sql injector from item to skill (sql injector = 1h wep, something else = 2h wep etc)
 #think about adding more clarity on how much damage/defense is happening 
+# make sure overclock is being stopped when "kill" command given (bug)
+# add actual checks for ip & credentials when resetting after defeating enemy
+# add repurcusions to losing
 
 #figure out: 
 #efficiency
 #bandwidth (or second bar) idea: bandwidth needs to be larger than ice strength? if ice strength is larger then sql injection goes super slow
 #ICE strength (second enemy bar)
 #how to obtain packet spoofers
+# how to recoup anon (passively? actively?)
 
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)

@@ -15,6 +15,7 @@ signal end_data_mining_safely_signal
 signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
+signal item_added_signal
 
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
@@ -65,3 +66,6 @@ func update_hud(skill: Dictionary):
 
 func update_hud_root():
 	update_hud_root_signal.emit()
+
+func item_added(item: ItemData, amount: int):
+	item_added_signal.emit(item, amount)

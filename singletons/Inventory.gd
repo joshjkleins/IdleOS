@@ -24,7 +24,7 @@ func _ready():
 		#add_resource(Items.ITEM_MAP[i], 100)
 	#pass
 	add_resource(Items.DATA, 25)
-	add_resource(Items.LOGS, 2)
+	add_resource(Items.LOGS, 200)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 21)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
@@ -49,6 +49,8 @@ func add_resource(resource: ItemData, amount):
 		inventory[resource] += amount
 	else:
 		inventory[resource] = amount
+	
+	Signals.item_added(resource, amount)
 
 func remove_resource(resource: ItemData, amount: int) -> bool:
 	if not inventory.has(resource):

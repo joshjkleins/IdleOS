@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bx5rkb1nhvxlj"]
+
+[ext_resource type="Script" uid="uid://dwaaj31yqrogr" path="res://scripts/item_added_label.gd" id="1_emgsj"]
+
+[node name="ItemAddedLabel" type="Label"]
+theme_override_colors/font_color = Color(0.164706, 0.603922, 0.352941, 1)
+theme_override_font_sizes/font_size = 14
+text = "+1 Data"
+horizontal_alignment = 2
+script = ExtResource("1_emgsj")

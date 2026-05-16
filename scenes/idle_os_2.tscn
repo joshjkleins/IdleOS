@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=10 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
 [ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
+[ext_resource type="Script" uid="uid://dbkqk0s6tx2x3" path="res://scripts/item_added_container.gd" id="8_h30m8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -103,6 +104,30 @@ position = Vector2(8, 8)
 one_shot = true
 
 [node name="CoolingTimer" type="Timer" parent="Timers"]
+
+[node name="ItemAdded" type="Control" parent="."]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ItemAddedContainer" type="VBoxContainer" parent="ItemAdded"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = -34.0
+offset_top = -51.0
+offset_right = 143.0
+offset_bottom = -7.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("8_h30m8")
 
 [connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
 [connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]

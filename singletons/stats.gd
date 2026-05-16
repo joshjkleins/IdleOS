@@ -33,7 +33,7 @@ var player_stats = {
 		"base speed": 0.4,
 		"overclock speed": 0.1,
 		"overheat speed": 3.0,
-		"efficiency": 0.0,
+		"efficiency": 0.5,
 		"efficiency increase rate": 0.01,
 		"unlocked": true,
 		"heat": 3,

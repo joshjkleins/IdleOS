@@ -4,8 +4,8 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# HEADER - add labels when getting an item
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
+#finish hacking TODO's
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
 # Phishing - way to maybe get IP addresses or usernames or PW? 
 
@@ -41,6 +41,7 @@ extends Control
 @onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
 @onready var cred_matching_scene = preload("res://scenes/cred_matching_terminal.tscn")
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+
 
 enum Context {
 	ROOT,
