@@ -2,8 +2,9 @@ extends VBoxContainer
 
 @onready var target_name_label = $TitleRow/HBoxContainer/TargetName
 @onready var target_label_2 = $StatsRow/HBoxContainer2/EnemySide/HBoxContainer/TargetLabel2
+@onready var status_label_box: PanelContainer = $TitleRow/HBoxContainer/StatusLabelBox
+@onready var status_label: Label = $TitleRow/HBoxContainer/StatusLabelBox/MarginContainer/StatusLabel
 
-@onready var status_label = $TitleRow/HBoxContainer/StatusLabel
 @onready var attack_amount_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AttackAmountLabel
 @onready var defense_amount_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer/DefenseAmountLabel
 
@@ -58,11 +59,8 @@ var target_name
 
 var reward_amount: int = 0
 
-var a: int = 0
 #TODO:
 #change sql injector from item to skill (sql injector = 1h wep, something else = 2h wep etc)
-#update 'hacking''completed''lost' badges in top right
-#update target titles to show location + target
 #think about adding more clarity on how much damage/defense is happening 
 
 #figure out: 
@@ -80,7 +78,7 @@ func _process(delta):
 		if Stats.overclocked:
 			OVERCLOCK_VALUE = 2.0
 			OVERHEAT_VALUE = 1.0
-			NEXT_HEAT_APPLICATION = 2.0
+			NEXT_HEAT_APPLICATION = 2
 		elif Stats.overheated:
 			OVERCLOCK_VALUE = 0.5
 			OVERHEAT_VALUE = 2.0
@@ -116,7 +114,9 @@ func setup(target: Dictionary):
 	#set target
 	target_name_label.text = "-"
 	target_label_2.text = "-"
-	status_label.text = "finding target"
+	integ_label.text = "--/--"
+	#status_label.text = "finding target"
+	update_status_label_badge("finding target", c_yellow)
 	#update # of sql injectors (attacks) and packet spoofer (heal)
 	attack_amount_label.text = "x" + str(Inventory.get_amount(Items.SQL_INJECTOR))
 	defense_amount_label.text = "x" + str(Inventory.get_amount(Items.PACKET_SPOOF))
@@ -208,9 +208,12 @@ func reset():
 	attack_bar.value = 0
 	defense_bar.value = 0
 	counter_bar.value = 0
-	await prepare()
+	
 	integ_bar.max_value = INTEGRITY_AMOUNT
-	integ_bar.value = INTEGRITY_AMOUNT
+	integ_label.text = "--/--"
+	await prepare()
+	#integ_bar.max_value = INTEGRITY_AMOUNT
+	#integ_bar.value = INTEGRITY_AMOUNT
 	start_hack()
 
 func start_hack():
@@ -255,7 +258,8 @@ func prepare():
 	await get_tree().create_timer(1.0).timeout
 	_update_info_panel("target found", c_white)
 	await get_tree().create_timer(0.3).timeout
-	status_label.text = "gaining access"
+	#status_label.text = "gaining access"
+	update_status_label_badge("gaining access", c_blue)
 	await get_tree().create_timer(0.3).timeout
 	target_name_label.text = target_name
 	target_label_2.text = target_name
@@ -275,20 +279,22 @@ func prepare():
 	await tween.finished
 	await get_tree().create_timer(0.2).timeout
 	_update_info_panel("starting hack", c_white)
-	status_label.text = "hacking"
+	#status_label.text = "hacking"
+	update_status_label_badge("hacking", c_green)
 	
 
 func _on_anon_bar_value_changed(value):
-	var percent = value / anon_bar.max_value * 100
-	anon_label.text = "anonymity " + str(int(percent)) + "%"
+	#var percent = value / anon_bar.max_value * 100 #percentage
+	
+	anon_label.text = "anonymity " + str(int(value)) + "/" + str(Stats.max_anon)
 
 func _on_band_bar_value_changed(value):
 	var percent = value / band_bar.max_value * 100
 	band_label.text = "bandwidth " + str(int(percent)) + "%"
 
 func _on_integ_bar_value_changed(value):
-	var percent = value / integ_bar.max_value * 100
-	integ_label.text = "integrity " + str(int(percent)) + "%"
+	#var percent = value / integ_bar.max_value * 100 #percent
+	integ_label.text = "integrity " + str(int(value)) + "/" + str(int(integ_bar.max_value))
 
 func _on_strength_bar_value_changed(value):
 	var percent = value / strength_bar.max_value * 100
@@ -309,3 +315,9 @@ func update_bottom_row():
 func _on_safe_exit_timer_timeout():
 	end()
 	Signals.hacking_ended()
+
+func update_status_label_badge(text: String, color: Color):
+	var b = status_label_box.get_theme_stylebox("panel").duplicate()
+	b.bg_color = color
+	status_label.text = text
+	status_label_box.add_theme_stylebox_override("panel", b)

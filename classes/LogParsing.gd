@@ -59,15 +59,17 @@ func attach_reward(box_line:String, reward_text:String, color:String, total_widt
 
 	return box_line + " ".repeat(spacing) + reward_bb
 
-func border(title:String="") -> String:
-	if title == "":
-		return "┌" + "─".repeat(INNER_WIDTH) + "┐"
+#func border(title:String=""):
+	#if title == "":
+		#return "┌" + "─".repeat(INNER_WIDTH) + "┐"
 
-	var t = " " + title + " "
-	var remaining = INNER_WIDTH - t.length()
-	var left = int(remaining / 2)
-	var right = remaining - left
-	return "┌" + "─".repeat(left) + t + "─".repeat(right) + "┐"
+	#var t = " " + title + " "
+	#if you ever use this script again uncomment this
+	#only commenting to get rid of debug warning
+	#var remaining = INNER_WIDTH - t.length()
+	#var left = int(remaining / 2) 
+	#var right = remaining - left
+	#return "┌" + "─".repeat(left) + t + "─".repeat(right) + "┐"
 
 
 func bottom() -> String:

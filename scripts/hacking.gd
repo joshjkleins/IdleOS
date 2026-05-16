@@ -119,7 +119,10 @@ func handle_hack_command(text):
 			await enemy_hacking_box.select_person(target)
 			current_context = HackingContext.HACKING
 		else:
-			player_hacking_box.add_line_error("Not enough resources to hack.")
+			if Inventory.get_amount(Items.IP_ADDRESS) <= 0:
+				player_hacking_box.add_line_error("No IP Addresses")
+			if Inventory.get_amount(Items.CREDENTIALS) <= 0:
+				player_hacking_box.add_line_error("No Credentials")
 
 func handle_back_command():
 	match current_context:

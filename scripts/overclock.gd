@@ -105,8 +105,8 @@ func update_progressbar_fill(color: Color) -> void:
 	stylebox.bg_color = color
 	temp_bar.add_theme_stylebox_override("fill", stylebox)
 
-func heat_added_label(temp: int):
-	temp_desc.text = "+" + str(temp) + "°C"
+func heat_added_label(temp_n: int):
+	temp_desc.text = "+" + str(temp_n) + "°C"
 	await _fade_in(temp_desc)
 	await get_tree().create_timer(0.5).timeout
 	await _fade_out(temp_desc)

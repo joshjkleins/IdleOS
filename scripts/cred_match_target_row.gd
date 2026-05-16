@@ -113,13 +113,13 @@ func _hide():
 	self.modulate.a = 0.0
 
 func _fade_out():
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, 0.5)
+	var n_tween = create_tween()
+	n_tween.tween_property(self, "modulate:a", 0.0, 0.5)
 
 func fade_in():
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 1.0, 0.5)
-	await tween.finished
+	var n_tween = create_tween()
+	n_tween.tween_property(self, "modulate:a", 1.0, 0.5)
+	await n_tween.finished
 
 
 func cancel():

@@ -49,7 +49,6 @@ func start_decrypting():
 			cache_decrypt.update_dump()
 			hex_display.text = cache_decrypt.render_dump()
 			var speed
-			var heat
 			if Stats.overclocked:
 				speed = Stats.player_stats["Cache Decrypting"]["overclock speed"]
 				overclocked_this_cache = true

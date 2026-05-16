@@ -117,23 +117,23 @@ func get_item_hexes(item, amount) -> Array:
 	var item_hex_array: Array = []
 	
 	for i in range(n_length):
-		var char = n[i]
+		var n_char = n[i]
 		var is_final = (i == n_length - 1)
 		
-		var hex_value = "%02X" % char.unicode_at(0)
+		var hex_value = "%02X" % n_char.unicode_at(0)
 
 		
 		if is_final:
 			item_hex_array.append({
 				"hex": "[color=#dd9426]" + hex_value + "[/color]",
-				"char": "[color=#dd9426]" + char + "[/color]",
+				"char": "[color=#dd9426]" + n_char + "[/color]",
 				"item": item,
 				"amount": amount
 			})
 		else:
 			item_hex_array.append({
 				"hex": "[color=#dd9426]" + hex_value + "[/color]",
-				"char": "[color=#dd9426]" + char + "[/color]"
+				"char": "[color=#dd9426]" + n_char + "[/color]"
 			})
 		
 		

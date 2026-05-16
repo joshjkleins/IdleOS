@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bddkjsdik6vmd"]
+[gd_scene load_steps=22 format=3 uid="uid://bddkjsdik6vmd"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_p8dkt"]
 [ext_resource type="Script" uid="uid://bm3gcvjs27vdg" path="res://scripts/hacking_game.gd" id="2_c44vy"]
@@ -7,6 +7,12 @@
 [ext_resource type="Texture2D" uid="uid://n3vkjn6lsqi1" path="res://art/icons/zap.png" id="5_8tddg"]
 [ext_resource type="Texture2D" uid="uid://ggjb14ikvr87" path="res://art/icons/shield.png" id="6_5lwk8"]
 [ext_resource type="Texture2D" uid="uid://r240aj7r1ln7" path="res://art/icons/shell.png" id="7_is8ts"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l3q62"]
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c44vy"]
 bg_color = Color(0.203922, 0.203922, 0.203922, 1)
@@ -121,9 +127,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "School-student"
 
-[node name="StatusLabel" type="Label" parent="TitleRow/HBoxContainer"]
+[node name="StatusLabelBox" type="PanelContainer" parent="TitleRow/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_l3q62")
+
+[node name="MarginContainer" type="MarginContainer" parent="TitleRow/HBoxContainer/StatusLabelBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 3
+
+[node name="StatusLabel" type="Label" parent="TitleRow/HBoxContainer/StatusLabelBox/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
 text = "hacking"
 horizontal_alignment = 2
 
@@ -171,6 +189,7 @@ layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_c44vy")
 theme_override_styles/fill = SubResource("StyleBoxFlat_7oyxj")
 value = 60.0
+rounded = true
 show_percentage = false
 
 [node name="BandLabel" type="Label" parent="StatsRow/HBoxContainer2/PlayerSide"]
@@ -185,6 +204,7 @@ layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_5dcew")
 theme_override_styles/fill = SubResource("StyleBoxFlat_5lwk8")
 value = 28.0
+rounded = true
 show_percentage = false
 
 [node name="EnemySide" type="VBoxContainer" parent="StatsRow/HBoxContainer2"]
@@ -210,7 +230,7 @@ expand_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
 theme_override_font_sizes/font_size = 10
-text = "integrity 6%"
+text = "--/--"
 horizontal_alignment = 2
 
 [node name="IntegBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/EnemySide"]
@@ -219,6 +239,7 @@ layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_8rbb1")
 theme_override_styles/fill = SubResource("StyleBoxFlat_kelsw")
 value = 30.0
+rounded = true
 fill_mode = 1
 show_percentage = false
 
@@ -235,6 +256,7 @@ layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_8rbb1")
 theme_override_styles/fill = SubResource("StyleBoxFlat_8tddg")
 value = 10.0
+rounded = true
 fill_mode = 1
 show_percentage = false
 

@@ -54,7 +54,7 @@ func select_person(target: Dictionary = {}):
 	else:
 		await _red_flash(target, persons_container)
 
-func can_hack_person(target: Dictionary = {}):
+func can_hack_person(_target: Dictionary = {}):
 	#keep target as param because eventually people will have different requirements for hacking
 	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
 		return true

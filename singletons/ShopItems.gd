@@ -49,7 +49,7 @@ var items = {
 	14: {
 		"id": 14,
 		"name": "Cache Decrypting",
-		"cost": 250,
+		"cost": 100,
 		"description": "Module used to decrypt caches for various items.",
 		"type": ItemType.MODULE,
 		"available": true

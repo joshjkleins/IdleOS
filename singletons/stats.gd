@@ -36,8 +36,8 @@ var player_stats = {
 		"efficiency": 0.0,
 		"efficiency increase rate": 0.01,
 		"unlocked": true,
-		"heat": 4,
-		"overclock heat": 7,
+		"heat": 3,
+		"overclock heat": 4,
 		"requirements": [Items.LOGS],
 		"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 		"efficiency description": "Increases chance of finding a resource per row."
@@ -52,7 +52,7 @@ var player_stats = {
 		"efficiency increase rate": 0.002,
 		"unlocked": true,
 		"heat": 3,
-		"overclock heat": 13,
+		"overclock heat": 8,
 		"overheat heat": 1,
 		"base speed": 3.0,
 		"overclock speed": 1.0,
@@ -71,7 +71,7 @@ var player_stats = {
 		"efficiency increase rate": 0.002,
 		"unlocked": true,
 		"heat": 1,
-		"overclock heat": 2,
+		"overclock heat": 1,
 		"overheat heat": 1,
 		"base speed": 1.0,
 		"overclock speed": 0.33,
@@ -110,12 +110,33 @@ var player_stats = {
 		"efficiency": 0.03,
 		"efficiency increase rate": 0.001,
 		"unlocked": true,
-		"heat": 7,
-		"overclock heat": 25,
+		"heat": 5,
+		"overclock heat": 10,
 		"overheat heat": 2,
 		"requirements": ["Any type of cache"],
 		"description": "Decrypt caches gained from hacking to reveal additional items.",
 		"efficiency description": "Chance to find rare item."
+	}
+}
+
+var combat_stats = {
+	"SQL Injection": {
+		"name": "SQL injection",
+		"experience": 0,
+		"exp per level": 200,
+		"level": 1,
+		"damage": 0.0,
+		"efficiency increase rate": 0.01,
+		"unlocked": true,
+		"base speed": 0.25,
+		"overclock speed": 0.0625,
+		"overheat speed": 1.0,
+		"heat": 1,
+		"overclock heat": 3,
+		"overheat heat": 1,
+		"requirements": [],
+		"description": "Generates data used for purchasing items from the marketplace.",
+		"efficiency description": "Chance to receive multiple data."
 	}
 }
 
@@ -156,6 +177,8 @@ var hacking_targets = {
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
+				"integrity": 100,
+				"counter": 5,
 				"loot": Items.ADMIN_CACHE
 			},
 			{
@@ -165,6 +188,8 @@ var hacking_targets = {
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
+				"integrity": 100,
+				"counter": 5,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
 				"loot": Items.VICE_PRINCIPAL_CACHE

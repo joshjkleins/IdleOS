@@ -34,8 +34,6 @@ var d_border_col = Color("#1e2328")
 var s_border_col = Color("#3b8f68")
 var f_border_col = Color("#c85660")
 
-var u_name = "j_kleinstine_1"
-
 var highest_roll: int = 0
 
 var TIME_TO_ROLL: float = 2.0
@@ -382,9 +380,9 @@ func _begin_matching():
 				tags[2].remove_theme_stylebox_override("panel")
 				tags[3].remove_theme_stylebox_override("panel")
 				
-				var sb = n.get_theme_stylebox("panel").duplicate()
-				sb.bg_color = TAG_COLORS[current_tag]
-				tags[current_tag].add_theme_stylebox_override("panel", sb)
+				var sb_n = n.get_theme_stylebox("panel").duplicate()
+				sb_n.bg_color = TAG_COLORS[current_tag]
+				tags[current_tag].add_theme_stylebox_override("panel", sb_n)
 				
 				var roll = rolls[current_tag]
 				

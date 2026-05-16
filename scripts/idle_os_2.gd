@@ -4,8 +4,7 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# HEADER - add labels when getting an item, add "Root" version of header
-# hacking - update UI and redo sequencial logic so everything is happening at the same time, making it more 'idle' ish
+# HEADER - add labels when getting an item
 #add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
 # Phishing - way to maybe get IP addresses or usernames or PW? 
@@ -36,18 +35,11 @@ extends Control
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
 
-@onready var parser = LogParser.new()
-@onready var pw_scram = PasswordCrack.new()
-@onready var cred_match = CredentialMatching.new()
-@onready var cache_decrypt = CacheDecrypting.new()
-
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
 @onready var log_parsing_scene = preload("res://scenes/log_parsing_terminal.tscn")
 @onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
 @onready var cred_matching_scene = preload("res://scenes/cred_matching_terminal.tscn")
-# cred matching
-# maybe hacking
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 
 enum Context {
@@ -175,7 +167,7 @@ func _on_input_line_text_submitted(new_text):
 func get_context_lead():
 	match current_context:
 		Context.ROOT:
-			#Signals.update_hud(Stats.player_stats["Default"])
+			Signals.update_hud_root()
 			return "IdleOS>"
 		Context.DARKWEB:
 			return "IdleOS/Darkweb>"
@@ -805,7 +797,6 @@ func show_module_stats_header(skill_name: String):
 	var efficiency = skill["efficiency"]
 	var xp_current = skill["experience"]
 	var xp_needed = Stats.xp_for_level(level + 1)
-	var xp_percent = int(float(xp_current) / xp_needed * 100)
 	add_line("\n" + "[color=cyan]=== " + skill_name.to_upper() + " MODULE ===[/color]\n")
 	add_line("[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]")
 	lvl_and_efficiency_index = lines.size() - 1
@@ -847,11 +838,6 @@ func update_module_stats_header(skill_name: String):
 			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
 			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)
-
-func show_process_summary(process_name: String, amount: int, resource: ItemData):
-	add_line("\nResources gained from recent job")
-	add_line("--------------------------------")
-	add_line(resource.name + " x" + str(int(amount)))
 
 #Marketplace context commands
 func marketplace_commands(text):
