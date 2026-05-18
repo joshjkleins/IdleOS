@@ -4,7 +4,11 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-#add ability to sell stuff in store (ie parents credit card item), maybe give everything a value that can be sold
+# Finish implementing new idea of generalizing modules (cracking/matching/decryption left)
+# Marketplace overhaul
+#    -Ability to sell valuables
+#    -Create contracts and make available w/ algo on when/what appears
+#    -Contract types: Hack specific target x times, looking for 3 of x item, will pay inflated value, take 50 encrypted passwords and decrypt them to return them 
 #finish hacking TODO's
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
 # Phishing - way to maybe get IP addresses or usernames or PW? 
@@ -12,9 +16,21 @@ extends Control
 #save/load
 #offline progression
 
-#module ideas:
-#Defragging - takes a long time (30min-1h) gives long term (or even perm) benefits
-#non-idle module: Jailbreak / heist mode: use commands to open/close doors to get someone in and out
+
+#item ideas:
+#ONE TIME USES
+#Virtual machine tokens - consume to open a new window to run a process for x amount of time
+#Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
+#Packet spoofers - restores anonymity during hack
+#Hardware accelerators - use to rapidly cool CPU for 10 second
+#
+
+##Ideas for generalizing modules and adding unlocks at certain levels
+#MINING LVL1: Data, LVL10: Logs, LVL20: Quality Data, LVL40: Quality Logs
+#PARSING LVL1: Logs (data, pw), LVL10: Logs (username, IP), LVL 20: Quality Logs (Quality Data, pw, un, ip), LVL 30: Specific parsing (only data/pw/un/ip/ found, no longer random mix)
+#CRACKING LVL1: Password (encrypted > regular), LVL 30: IP Address (change how they work, uncracked IP address = random hack target, cracked = you know who it is?)
+#MATCHING LVL1: Credentials (pw + un = cred), LVL 10: Logs (8 logs = dense log)
+#DECRYPTION LVL 1: Caches (decrypt for resource drops), LVL 10: Valuable cache (much slower, no non-rare drops, doubles chance of rare drops), LVL 20: Resource cache (slower, no rare drops, higher quantity of regular drops)
 
 
 #STEPS FOR ADDING NEW MODULE
@@ -36,7 +52,7 @@ extends Control
 @onready var cooling_timer = $Timers/CoolingTimer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
-@onready var data_mining_scene = preload("res://scenes/data_mining_terminal.tscn")
+@onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
 @onready var log_parsing_scene = preload("res://scenes/log_parsing_terminal.tscn")
 @onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
 @onready var cred_matching_scene = preload("res://scenes/cred_matching_terminal.tscn")
@@ -45,8 +61,8 @@ extends Control
 
 enum Context {
 	ROOT,
-	DATA_MINING,
-	LOG_PARSING,
+	MINING,
+	PARSING,
 	PASSWORD_CRACKING,
 	CRED_MATCHING,
 	HACKING,
@@ -151,9 +167,9 @@ func _on_input_line_text_submitted(new_text):
 				root_commands(new_text)
 			Context.MARKETPLACE:
 				marketplace_commands(new_text)
-			Context.DATA_MINING:
-				data_mining_commands(new_text)
-			Context.LOG_PARSING:
+			Context.MINING:
+				mining_commands(new_text)
+			Context.PARSING:
 				log_parsing_commands(new_text)
 			Context.PASSWORD_CRACKING:
 				password_unscramble_commands(new_text)
@@ -174,12 +190,12 @@ func get_context_lead():
 			return "IdleOS/Darkweb>"
 		Context.MARKETPLACE:
 			return "IdleOS/Marketplace>"
-		Context.DATA_MINING:
-			Signals.update_hud(Stats.player_stats["Data Mining"])
-			return "IdleOS/Modules/DataMining>"
-		Context.LOG_PARSING:
-			Signals.update_hud(Stats.player_stats["Log Parsing"])
-			return "IdleOS/Modules/LogParsing>"
+		Context.MINING:
+			Signals.update_hud(Mining)
+			return "IdleOS/Modules/Mining>"
+		Context.PARSING:
+			Signals.update_hud(Parsing)
+			return "IdleOS/Modules/Parsing>"
 		Context.PASSWORD_CRACKING:
 			Signals.update_hud(Stats.player_stats["Password Cracking"])
 			return "IdleOS/Modules/PasswordCracking>"
@@ -202,7 +218,7 @@ func list_help():
 		Context.ROOT:
 			add_line("""
 [ROOT COMMANDS]
-load [module name]      Load a module (example: "load data-mining")
+load [module name]      Load a module (example: "load mining")
 marketplace -auth       Connects to the marketplace
 """)
 		Context.MARKETPLACE:
@@ -212,7 +228,7 @@ list                          List items to purchase
 buy id=[itemID] a=[amount]    Purchase x amount of items (default amount = 1)
 root                          Disconnect from market
 """)
-		Context.DATA_MINING:
+		Context.MINING:
 			add_line("""
 [DATA MINING COMMANDS]
 start                   Start mining data
@@ -222,9 +238,9 @@ info                    Mining data module stats
 overclock               Overclocks the system to massively increase output, also increases system heat
 overclock -kill         Stops overclocking
 """)
-		Context.LOG_PARSING:
+		Context.PARSING:
 			add_line("""
-[LOG PARSING COMMANDS]
+[PARSING COMMANDS]
 start                   Start log parsing process
 stop                    Stop log parsing process
 root                    Exit back to root
@@ -303,30 +319,22 @@ func universal_commands(text):
 func root_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"load data-mining":
-			if Stats.player_stats["Data Mining"].unlocked:
-				add_line("[ .. ] loading data mining module")
-				await get_tree().create_timer(0.8).timeout
-				add_line("[ OK ] data mining module loaded")
-				update_context(Context.DATA_MINING)
-				await get_tree().create_timer(0.5).timeout
-				add_line(Ascii.data_mining)
-				add_line("Welcome to the data mining module.")
-				list_help()
-			else:
-				add_line("Module not found, must be purchased from the marketplace.")
-		"load log-parsing":
-			if Stats.player_stats["Log Parsing"].unlocked:
-				add_line("[ .. ] loading log parsing module")
-				await get_tree().create_timer(0.8).timeout
-				add_line("[ OK ] log parsing module loaded")
-				update_context(Context.LOG_PARSING)
-				await get_tree().create_timer(0.5).timeout
-				add_line(Ascii.log_parsing)
-				add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
-				list_help()
-			else:
-				add_line("Module not found, must be purchased from the marketplace.")
+		"load mining":
+			add_line("[ .. ] loading data mining module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] data mining module loaded")
+			update_context(Context.MINING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.mining)
+			add_line("Welcome to the mining module.")
+		"load parsing":
+			add_line("[ .. ] loading parsing module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] parsing module loaded")
+			update_context(Context.PARSING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.parsing)
+			add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
 		"load pw-cracking":
 			if Stats.player_stats["Password Cracking"].unlocked:
 				add_line("[ .. ] loading password cracking module")
@@ -338,7 +346,7 @@ func root_commands(text):
 				add_line("Current available scrambled passwords: " + str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS)))
 				list_help()
 			else:
-				add_line("Module not found, must be purchased from the marketplace.")
+				add_line("Module not found.")
 		"load cred-matching":
 			if Stats.player_stats["Credential Matching"].unlocked:
 				add_line("[ .. ] loading credential matching module")
@@ -351,7 +359,7 @@ func root_commands(text):
 				add_line("Passwords x" + str(Inventory.get_amount(Items.PASSWORDS)) + "   Usernames x" + str(Inventory.get_amount(Items.USERNAMES)))
 				list_help()
 			else:
-				add_line("Module not found, must be purchased from the marketplace.")
+				add_line("Module not found.")
 		"load hacking":
 			if Stats.player_stats["Hacking"].unlocked:
 				var tween = create_tween()
@@ -362,18 +370,18 @@ func root_commands(text):
 				
 				hacking.module_loaded()
 			else:
-				add_line("Module not found, must be purchased from the marketplace.")
-		"marketplace -auth": #Go to marketplace
-			add_line("[ .. ] requesting permissions")
-			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] permission granted")
-			await get_tree().create_timer(0.5).timeout
-			add_line("Connected to online marketplace")
-			update_context(Context.MARKETPLACE)
-			add_line(Ascii.marketplace)
-			add_line("Welcome to the marketplace.")
-			add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
-			list_help()
+				add_line("Module not found.")
+		#"marketplace -auth": #Go to marketplace
+			#add_line("[ .. ] requesting permissions")
+			#await get_tree().create_timer(0.8).timeout
+			#add_line("[ OK ] permission granted")
+			#await get_tree().create_timer(0.5).timeout
+			#add_line("Connected to online marketplace")
+			#update_context(Context.MARKETPLACE)
+			#add_line(Ascii.marketplace)
+			#add_line("Welcome to the marketplace.")
+			#add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
+			#list_help()
 		"load cache-decrypting":
 			if Stats.player_stats["Cache Decrypting"].unlocked:
 				add_line("[ .. ] loading cache decrypting module")
@@ -384,19 +392,24 @@ func root_commands(text):
 				add_line(Ascii.cache_decrypting)
 				list_help()
 			else:
-				add_line("Module not found, must be purchased from the marketplace.")
+				add_line("Module not found.")
 		_:#default
 			add_line("Command not found")
 
 ###################################################
 ################### DATA MINING ###################
 ###################################################
-func data_mining_commands(text):
+func mining_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
 		"start":
 			if !process_running:
 				start_data_mining()
+			else:
+				add_line("Process already running")
+		"start -log":
+			if !process_running:
+				start_log_mining()
 			else:
 				add_line("Process already running")
 		"stop":
@@ -448,12 +461,25 @@ func data_mining_commands(text):
 			add_line("Command not found")
 
 func start_data_mining():
-	var new_data_mining_terminal = data_mining_scene.instantiate()
+	var new_data_mining_terminal = mining_scene.instantiate()
 	terminal_body_container.add_child(new_data_mining_terminal)
+	new_data_mining_terminal.set_mine_type(Mining.DATA)
 	process_running = true
 	current_process = new_data_mining_terminal
 	new_data_mining_terminal.start_data_mining()
 	add_new_scrollback()
+
+func start_log_mining():
+	if Mining.LOGS.unlocked:
+		var new_data_mining_terminal = mining_scene.instantiate()
+		terminal_body_container.add_child(new_data_mining_terminal)
+		new_data_mining_terminal.set_mine_type(Mining.LOGS)
+		process_running = true
+		current_process = new_data_mining_terminal
+		new_data_mining_terminal.start_data_mining()
+		add_new_scrollback()
+	else:
+		add_line("Log mining is not unlocked yet.")
 
 func data_mining_ended_safely():
 	current_process = null
@@ -504,14 +530,14 @@ func log_parsing_commands(text):
 				add_line(Ascii.root)
 				list_help()
 		"info":
-			add_line("Module: Log Parsing")
-			add_line("Level:         " + str(Stats.player_stats["Log Parsing"]["level"]))
+			add_line("Module: Parsing")
+			add_line("Level:         " + str(Parsing["level"]))
 			#Level
 			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Log Parsing"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Log Parsing"]["level"] + 1)))
+			add_line("Experience:    " + str(Parsing["experience"]) + " / " + str(Stats.xp_for_level(Parsing["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Log Parsing"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Log Parsing"]["efficiency description"])
+			var eff = Parsing["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Parsing["efficiency description"])
 		"-h":
 			list_help()
 		"overclock":
@@ -528,6 +554,7 @@ func log_parsing_commands(text):
 func start_log_parsing():
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
 	terminal_body_container.add_child(new_log_parsing_terminal)
+	new_log_parsing_terminal.set_parse_type(Parsing.LOGS)
 	process_running = true
 	current_process = new_log_parsing_terminal
 	new_log_parsing_terminal.start()
@@ -537,7 +564,7 @@ func log_parsing_ended_safely():
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
-	add_line("Log parsing safely finished.")
+	add_line("Parsing safely finished.")
 
 ###################################################
 ################### PW CRACKING ###################
@@ -812,7 +839,7 @@ func show_module_stats_header(skill_name: String):
 	skill_xp_nums_index = lines.size() - 1
 	
 	match skill_name:
-		"Log Parsing":
+		"Parsing":
 			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
 			add_line("Chance to extract resource: " + str(chance) + "%\n")
@@ -835,7 +862,7 @@ func update_module_stats_header(skill_name: String):
 	
 	#Skill specific text, if any
 	match skill_name:
-		"Log Parsing":
+		"Parsing":
 			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
 			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)

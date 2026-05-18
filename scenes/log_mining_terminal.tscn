@@ -1,7 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://ft8lxgvpacva"]
+[gd_scene load_steps=5 format=3 uid="uid://s87anwmifyhx"]
 
-[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_e8udk"]
-[ext_resource type="Script" uid="uid://107ect2ynb4x" path="res://scripts/data_mining_terminal.gd" id="2_hudn3"]
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_axf4h"]
+[ext_resource type="Script" uid="uid://bou2c71vlitle" path="res://scripts/log_mining_terminal.gd" id="2_axf4h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e8udk"]
 
@@ -9,7 +9,7 @@
 border_width_top = 1
 border_color = Color(0.101961, 0.290196, 0.415686, 1)
 
-[node name="DataMiningTerminal" type="PanelContainer"]
+[node name="LogMiningTerminal" type="PanelContainer"]
 custom_minimum_size = Vector2(700, 0)
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,8 +17,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 0
-theme = ExtResource("1_e8udk")
-script = ExtResource("2_hudn3")
+theme = ExtResource("1_axf4h")
+script = ExtResource("2_axf4h")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -60,7 +60,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.498039, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "MINING"
+text = "LOG MINING"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SecondRow"]
 layout_mode = 2
@@ -70,7 +70,7 @@ size_flags_horizontal = 10
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
 theme_override_font_sizes/font_size = 10
-text = "TIER I | DATA"
+text = "TIER I | BASIC"
 
 [node name="ProgressRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -111,11 +111,11 @@ theme_override_constants/separation = 35
 [node name="DataCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
 layout_mode = 2
 
-[node name="YieldTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/DataCol"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/DataCol"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.101961, 0.290196, 0.415686, 1)
 theme_override_font_sizes/font_size = 10
-text = "DATA YIELD"
+text = "LOG YIELD"
 
 [node name="DataYield" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/DataCol"]
 layout_mode = 2
@@ -124,7 +124,6 @@ theme_override_font_sizes/font_size = 14
 text = "0"
 
 [node name="RateCol" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
-visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/RateCol"]

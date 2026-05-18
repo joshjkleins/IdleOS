@@ -38,118 +38,88 @@ theme_override_constants/margin_bottom = 5
 [node name="SpecificProcess" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess"]
+[node name="MajorSkill" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess"]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_uwlax")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 4
 
-[node name="Contents" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer/MarginContainer"]
+[node name="Contents" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="ProcessName" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer/MarginContainer/Contents"]
+[node name="ProcessName" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer/MarginContainer/Contents"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "DATA MINING"
 
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer/MarginContainer/Contents"]
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer/MarginContainer/Contents"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "LVL"
 vertical_alignment = 1
 
-[node name="ProcessLevel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer/MarginContainer/Contents"]
+[node name="ProcessLevel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer/MarginContainer/Contents"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "2"
 
-[node name="VSeparator" type="VSeparator" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer"]
+[node name="ExpAddLabelContainer" type="Control" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer"]
+custom_minimum_size = Vector2(35, 0)
+layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer"]
+[node name="PanelContainer3" type="PanelContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_uwlax")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3"]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer3"]
 layout_mode = 2
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 4
 
-[node name="Contents" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer"]
+[node name="Contents" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer3/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer/Contents"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer3/MarginContainer/Contents"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "XP"
 
-[node name="ProgressBar" type="ProgressBar" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer/Contents"]
+[node name="ProgressBar" type="ProgressBar" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer3/MarginContainer/Contents"]
 custom_minimum_size = Vector2(110, 8)
 layout_mode = 2
 size_flags_vertical = 4
 max_value = 1.0
 show_percentage = false
 
-[node name="ExpLabel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer/Contents"]
+[node name="ExpLabel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill/PanelContainer3/MarginContainer/Contents"]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "20/1000000"
 horizontal_alignment = 2
 
-[node name="Control" type="Control" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer"]
-custom_minimum_size = Vector2(35, 0)
-layout_mode = 2
-
-[node name="ExpAddLabel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/PanelContainer3/MarginContainer/Control"]
-layout_mode = 0
-offset_top = 33.0
-offset_right = 49.0
-offset_bottom = 52.0
-theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
-theme_override_font_sizes/font_size = 10
-horizontal_alignment = 1
-
-[node name="VSeparator3" type="VSeparator" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer"]
+[node name="VSeparator3" type="VSeparator" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer"]
+[node name="MinorSkills" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/MajorSkill"]
 layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 30
-
-[node name="EfficiencyLabel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(135, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "EFFICIENCY 10%"
-
-[node name="RequirementLabel" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "REQUIREMENTS: Caches"
-
-[node name="EfficiencyDesc" type="Label" parent="PanelContainer/MarginContainer/SpecificProcess/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Increases chance of finding higher quantity of items"
 
 [node name="RootProcessContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer"]
 visible = false

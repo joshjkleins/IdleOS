@@ -3,6 +3,16 @@ extends Node
 signal gained_xp_signal
 
 const MAX_LEVEL = 99
+var SKILLS
+func _ready():
+	SKILLS = {
+		"Mining": Mining.SKILL,
+		"Parsing": Parsing.SKILL
+	}
+
+#var SKILLS = {
+	#"Mining": Mining.SKILL
+#}
 
 var player_stats = {
 	"Data Mining": {

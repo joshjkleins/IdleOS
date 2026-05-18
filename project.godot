@@ -26,6 +26,9 @@ Modules="*res://singletons/Modules.gd"
 Logs="*res://singletons/Logs.gd"
 Signals="*res://singletons/Signals.gd"
 Items="*res://singletons/Items.gd"
+Mining="*res://singletons/Mining.gd"
+Exp="*res://singletons/Exp.gd"
+Parsing="*res://singletons/Parsing.gd"
 
 [display]
 

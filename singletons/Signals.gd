@@ -61,7 +61,7 @@ func end_data_mining_safely():
 func end_cred_matching_safely():
 	end_cred_matching_safely_signal.emit()
 
-func update_hud(skill: Dictionary):
+func update_hud(skill): #SINGLTON AS PARAM
 	update_hud_signal.emit(skill)
 
 func update_hud_root():
