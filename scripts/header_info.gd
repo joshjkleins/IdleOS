@@ -30,7 +30,6 @@ func show_added_exp(amount: int):
 	new_label.text = "+" + str(amount)
 	exp_add_label_container.add_child(new_label)
 
-
 func _fade_up_in(label: Label):
 	label.modulate.a = 0.0
 	label.position.y = 10.0

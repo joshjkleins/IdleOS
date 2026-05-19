@@ -29,6 +29,7 @@ Items="*res://singletons/Items.gd"
 Mining="*res://singletons/Mining.gd"
 Exp="*res://singletons/Exp.gd"
 Parsing="*res://singletons/Parsing.gd"
+Cracking="*res://singletons/Cracking.gd"
 
 [display]
 

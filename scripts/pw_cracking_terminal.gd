@@ -22,19 +22,14 @@ var current_crack_line
 var prog_bar_tween: Tween
 var end_safely: bool = false
 
-var random_four_digit_words: Array = [
-	"acid", "back", "band", "base", "beam", "bell", "bird", "blue", 
-	"boat", "bold", "bone", "book", "born", "cake", "camp", "card", 
-	"case", "city", "cold", "dark", "data", "deck", "door", "dust", 
-	"echo", "edge", "face", "fact", "fair", "fast", "fire", "fish", 
-	"flow", "free", "frog", "fuel", "game", "gate", "gift", "glow", 
-	"gold", "gray", "grid", "hand", "hard", "help", "high", "hill", 
-	"hope", "icon"
-]
+var type: Dictionary
+
+func set_parse_type(p_type: Dictionary):
+	type = p_type
 
 func start():
 	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
-	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+	if Inventory.get_amount(type["requirements"]) <= 0:
 		return #no encrypted passwords
 	
 	#SETUP
@@ -42,11 +37,11 @@ func start():
 	end_safely = false
 	progress_bar.value = 0
 	amount_cracked = 0
-	remaining_label.text = str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS))
+	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
 	cracked_label.text = str(amount_cracked)
-	while Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) > 0 and process_running:
+	while Inventory.get_amount(type["requirements"]) > 0 and process_running:
 		_clean_queue()
-		var pw_per_page = clamp(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS), 0, 10)
+		var pw_per_page = clamp(Inventory.get_amount(type["requirements"]), 0, 10)
 		queue_info.text = "ENCRYPTED PASSWORDS - QUEUE (" + str(pw_per_page) + ")"
 		for i in range(pw_per_page):
 			_generate_initial_queue()
@@ -62,32 +57,32 @@ func start():
 				break
 			_start_next_crack()
 			_start_scrambling()
-			var current_word = random_four_digit_words.pick_random()
+			var current_word = Cracking.random_four_digit_words.pick_random()
 			
 			var max_heat_used: int = 0
-			if randf() < Stats.player_stats["Password Cracking"]["efficiency"]:
+			if randf() < type["efficiency"]:
 				_end_current_crack(current_word)
 				_successful_crack(max_heat_used)
 			else:
 				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
 					if process_running:
 						if Stats.overheated:
-							var speed = Stats.player_stats["Password Cracking"]["overheat speed"]
-							var heat = Stats.player_stats["Password Cracking"]["overheat heat"]
+							var speed = type["overheat speed"]
+							var heat = type["overheat heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
 							_update_progress_bar(i, speed)
 							await get_tree().create_timer(speed).timeout
 						elif Stats.overclocked:
-							var speed = Stats.player_stats["Password Cracking"]["overclock speed"]
-							var heat = Stats.player_stats["Password Cracking"]["overclock heat"]
+							var speed = type["overclock speed"]
+							var heat = type["overclock heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
 							_update_progress_bar(i, speed)
 							await get_tree().create_timer(speed).timeout
 						else:
-							var speed = Stats.player_stats["Password Cracking"]["base speed"]
-							var heat = Stats.player_stats["Password Cracking"]["heat"]
+							var speed = type["base speed"]
+							var heat = type["heat"]
 							if heat > max_heat_used:
 								max_heat_used = speed
 							_update_progress_bar(i, speed)
@@ -126,7 +121,7 @@ func _update_progress_bar(fill: int, time: float):
 		prog_bar_tween.tween_property(progress_bar, "value", target_fill, time - 0.1)
 
 func _finished():
-	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+	if Inventory.get_amount(type["requirements"]) <= 0:
 		cracking_current_status.text = "All passwords cracked."
 	
 	if Stats.overclocked:
@@ -167,14 +162,14 @@ func _start_next_crack() -> void:
 			return
 
 func _successful_crack(heat: int):
-	Inventory.remove_resource(Items.ENCRYPTED_PASSWORDS, 1)
-	Inventory.add_resource(Items.PASSWORDS, 1)
+	Inventory.remove_resource(type["requirements"], 1)
+	Inventory.add_resource(type["resource gained"], 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
-	Stats.add_xp(Stats.player_stats["Password Cracking"])
-	Signals.update_hud(Stats.player_stats["Password Cracking"])
+	Exp.add_xp(Cracking, type, type["experience per level"])
+	Signals.update_hud(Cracking)
 	
-	remaining_label.text = str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS))
+	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
 	cracked_label.text = str(amount_cracked)
 
 func _on_progress_bar_value_changed(value):

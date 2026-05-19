@@ -25,7 +25,7 @@ func _ready():
 	#pass
 	add_resource(Items.DATA, 25)
 	add_resource(Items.LOGS, 200)
-	#add_resource(Items.ENCRYPTED_PASSWORDS, 21)
+	add_resource(Items.ENCRYPTED_PASSWORDS, 21)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
 	#add_resource(Items.PASSWORDS, 30)

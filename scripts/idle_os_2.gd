@@ -4,12 +4,12 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# Finish implementing new idea of generalizing modules (cracking/matching/decryption left)
+# Finish implementing new idea of generalizing modules (matching/decryption left)
 # Marketplace overhaul
 #    -Ability to sell valuables
 #    -Create contracts and make available w/ algo on when/what appears
 #    -Contract types: Hack specific target x times, looking for 3 of x item, will pay inflated value, take 50 encrypted passwords and decrypt them to return them 
-#finish hacking TODO's
+# finish hacking TODO's
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
 # Phishing - way to maybe get IP addresses or usernames or PW? 
 
@@ -17,19 +17,26 @@ extends Control
 #offline progression
 
 
-#item ideas:
-#ONE TIME USES
-#Virtual machine tokens - consume to open a new window to run a process for x amount of time
-#Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
-#Packet spoofers - restores anonymity during hack
-#Hardware accelerators - use to rapidly cool CPU for 10 second
+########item ideas:
+## Resouces ##
+# Ecrypted PIN
+# PIN
+# Account numbers
+# (Account) Access token
+# 
+
+## ONE TIME USES ##
+# Virtual machine tokens - consume to open a new window to run a process for x amount of time
+# Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
+# Packet spoofers - restores anonymity during hack
+# Hardware accelerators - use to rapidly cool CPU for 10 second
 #
 
 ##Ideas for generalizing modules and adding unlocks at certain levels
 #MINING LVL1: Data, LVL10: Logs, LVL20: Quality Data, LVL40: Quality Logs
 #PARSING LVL1: Logs (data, pw), LVL10: Logs (username, IP), LVL 20: Quality Logs (Quality Data, pw, un, ip), LVL 30: Specific parsing (only data/pw/un/ip/ found, no longer random mix)
-#CRACKING LVL1: Password (encrypted > regular), LVL 30: IP Address (change how they work, uncracked IP address = random hack target, cracked = you know who it is?)
-#MATCHING LVL1: Credentials (pw + un = cred), LVL 10: Logs (8 logs = dense log)
+#CRACKING LVL1: Password (encrypted > regular), LVL20: PIN (encrypted > regular, used in combination with account # in Matching)
+#MATCHING LVL1: Credentials (pw + un = cred), LVL 20: Accounts (PIN + account # = account access token)
 #DECRYPTION LVL 1: Caches (decrypt for resource drops), LVL 10: Valuable cache (much slower, no non-rare drops, doubles chance of rare drops), LVL 20: Resource cache (slower, no rare drops, higher quantity of regular drops)
 
 
@@ -63,7 +70,7 @@ enum Context {
 	ROOT,
 	MINING,
 	PARSING,
-	PASSWORD_CRACKING,
+	CRACKING,
 	CRED_MATCHING,
 	HACKING,
 	DARKWEB,
@@ -171,7 +178,7 @@ func _on_input_line_text_submitted(new_text):
 				mining_commands(new_text)
 			Context.PARSING:
 				log_parsing_commands(new_text)
-			Context.PASSWORD_CRACKING:
+			Context.CRACKING:
 				password_unscramble_commands(new_text)
 			Context.CRED_MATCHING:
 				cred_matching_commands(new_text)
@@ -196,9 +203,9 @@ func get_context_lead():
 		Context.PARSING:
 			Signals.update_hud(Parsing)
 			return "IdleOS/Modules/Parsing>"
-		Context.PASSWORD_CRACKING:
-			Signals.update_hud(Stats.player_stats["Password Cracking"])
-			return "IdleOS/Modules/PasswordCracking>"
+		Context.CRACKING:
+			Signals.update_hud(Cracking)
+			return "IdleOS/Modules/Cracking>"
 		Context.CRED_MATCHING:
 			Signals.update_hud(Stats.player_stats["Credential Matching"])
 			return "IdleOS/Modules/CredentialMatching>"
@@ -247,9 +254,9 @@ root                    Exit back to root
 info                    Log parsing module stats
 """)
 			
-		Context.PASSWORD_CRACKING:
+		Context.CRACKING:
 			add_line("""
-[PASSWORD UNSCRAMBLE COMMANDS]
+[CRACKING COMMANDS]
 start                   Start password cracking process
 stop                    Stop password cracking process
 root                    Exit back to root
@@ -336,17 +343,13 @@ func root_commands(text):
 			add_line(Ascii.parsing)
 			add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
 		"load pw-cracking":
-			if Stats.player_stats["Password Cracking"].unlocked:
-				add_line("[ .. ] loading password cracking module")
-				await get_tree().create_timer(0.8).timeout
-				add_line("[ OK ] password cracking module loaded")
-				update_context(Context.PASSWORD_CRACKING)
-				await get_tree().create_timer(0.5).timeout
-				add_line(Ascii.pw_unscramble)
-				add_line("Current available scrambled passwords: " + str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS)))
-				list_help()
-			else:
-				add_line("Module not found.")
+			add_line("[ .. ] loading password cracking module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] password cracking module loaded")
+			update_context(Context.CRACKING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.cracking)
+			add_line("Current available scrambled passwords: " + str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS)))
 		"load cred-matching":
 			if Stats.player_stats["Credential Matching"].unlocked:
 				add_line("[ .. ] loading credential matching module")
@@ -572,7 +575,7 @@ func log_parsing_ended_safely():
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"start":
+		"start pw":
 			if process_running:
 				add_line("Process already running.")
 				return
@@ -580,7 +583,16 @@ func password_unscramble_commands(text):
 				add_line("No encrypted passwords found.")
 				return
 			
-			start_password_unscrambling()
+			start_password_cracking()
+		"start pin":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+				add_line("No encrypted passwords found.")
+				return
+			
+			start_pin_cracking()
 		"stop":
 			process_running = false
 			if current_process:
@@ -609,14 +621,14 @@ func password_unscramble_commands(text):
 				add_line(Ascii.root)
 				list_help()
 		"info":
-			add_line("Module: Password Cracking")
-			add_line("Level:         " + str(Stats.player_stats["Password Cracking"]["level"]))
+			add_line("Module: Cracking")
+			add_line("Level:         " + str(Stats.player_stats["Cracking"]["level"]))
 			#Level
 			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Password Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Password Cracking"]["level"] + 1)))
+			add_line("Experience:    " + str(Stats.player_stats["Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cracking"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Password Cracking"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Password Cracking"]["efficiency description"])
+			var eff = Stats.player_stats["Cracking"]["efficiency"]
+			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cracking"]["efficiency description"])
 		"-h":
 			list_help()
 		"overclock":
@@ -630,9 +642,19 @@ func password_unscramble_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_password_unscrambling():
+func start_password_cracking():
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
+	new_pw_cracking_terminal.set_parse_type(Cracking.PASSWORD)
+	process_running = true
+	current_process = new_pw_cracking_terminal
+	new_pw_cracking_terminal.start()
+	add_new_scrollback()
+
+func start_pin_cracking():
+	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
+	terminal_body_container.add_child(new_pw_cracking_terminal)
+	new_pw_cracking_terminal.set_parse_type(Cracking.PIN)
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()

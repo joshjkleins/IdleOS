@@ -7,7 +7,8 @@ var SKILLS
 func _ready():
 	SKILLS = {
 		"Mining": Mining.SKILL,
-		"Parsing": Parsing.SKILL
+		"Parsing": Parsing.SKILL,
+		"Cracking": Cracking.SKILL,
 	}
 
 #var SKILLS = {
