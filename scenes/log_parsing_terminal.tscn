@@ -72,6 +72,76 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "x34"
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "CHANCE PER LINE"
+
+[node name="ChancePerLineLabel" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "5%"
+
+[node name="ItemFindContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "USERNAME"
+
+[node name="ItemsToFind" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "50%"
+
+[node name="ItemFindContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "DATA "
+
+[node name="ItemsToFind" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "50%"
+
+[node name="ItemFindContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "DATA "
+
+[node name="ItemsToFind" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "50%"
+
+[node name="ItemFindContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer4"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+theme_override_font_sizes/font_size = 12
+text = "DATA "
+
+[node name="ItemsToFind" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "50%"
+
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_348qk")

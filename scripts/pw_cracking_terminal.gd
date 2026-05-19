@@ -11,6 +11,7 @@ extends Control
 @onready var cracking_current_status = $MarginContainer/VBoxContainer/PwRow/CrackingCurrentStatus
 @onready var progress_bar = $MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBar
 @onready var progress_bar_label = $MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBarLabel
+@onready var title_label = $MarginContainer/VBoxContainer/TitleRow/TitleLabel
 
 @export var pw_row: PackedScene
 
@@ -24,11 +25,20 @@ var end_safely: bool = false
 
 var type: Dictionary
 
-func set_parse_type(p_type: Dictionary):
+func set_cracking_type(p_type: Dictionary):
 	type = p_type
+	
+	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
+
+func set_pw():
+	for i in letter_boxes:
+		i.is_pin = false
+
+func set_pin():
+	for i in letter_boxes:
+		i.is_pin = true
 
 func start():
-	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
 	if Inventory.get_amount(type["requirements"]) <= 0:
 		return #no encrypted passwords
 	
@@ -39,10 +49,11 @@ func start():
 	amount_cracked = 0
 	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
 	cracked_label.text = str(amount_cracked)
+	title_label.text = type["name"] + " Cracking"
 	while Inventory.get_amount(type["requirements"]) > 0 and process_running:
 		_clean_queue()
 		var pw_per_page = clamp(Inventory.get_amount(type["requirements"]), 0, 10)
-		queue_info.text = "ENCRYPTED PASSWORDS - QUEUE (" + str(pw_per_page) + ")"
+		queue_info.text = "ENCRYPTED " + type["name"].to_upper() + " - QUEUE (" + str(pw_per_page) + ")"
 		for i in range(pw_per_page):
 			_generate_initial_queue()
 		#END SETUP
@@ -57,7 +68,13 @@ func start():
 				break
 			_start_next_crack()
 			_start_scrambling()
-			var current_word = Cracking.random_four_digit_words.pick_random()
+			var current_word
+			if letter_boxes[0].is_pin:
+				var random_number = randi() % 10000
+				current_word = "%04d" % random_number
+			else:
+				current_word = Cracking.random_four_digit_words.pick_random()
+			
 			
 			var max_heat_used: int = 0
 			if randf() < type["efficiency"]:

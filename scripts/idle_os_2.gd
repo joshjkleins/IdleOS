@@ -4,14 +4,8 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# Finish implementing new idea of generalizing modules (matching/decryption left)
-# Marketplace overhaul
-#    -Ability to sell valuables
-#    -Create contracts and make available w/ algo on when/what appears
-#    -Contract types: Hack specific target x times, looking for 3 of x item, will pay inflated value, take 50 encrypted passwords and decrypt them to return them 
 # finish hacking TODO's
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
-# Phishing - way to maybe get IP addresses or usernames or PW? 
 
 #save/load
 #offline progression
@@ -19,26 +13,31 @@ extends Control
 
 ########item ideas:
 ## Resouces ##
-# Ecrypted PIN
-# PIN
-# Account numbers
-# (Account) Access token
-# 
+#
 
 ## ONE TIME USES ##
 # Virtual machine tokens - consume to open a new window to run a process for x amount of time
 # Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
 # Packet spoofers - restores anonymity during hack
 # Hardware accelerators - use to rapidly cool CPU for 10 second
-#
+
+######## PROCESSES ##
+# Phishing - send out phishing emails, etc. and after 30 min - 1h get random assortment if emails/usernames/passwords/pins back
+# Defragging - passive? Cost random stuff (huge data sink, maybe other resources) over time gives perm increase to anonymity
 
 ##Ideas for generalizing modules and adding unlocks at certain levels
 #MINING LVL1: Data, LVL10: Logs, LVL20: Quality Data, LVL40: Quality Logs
 #PARSING LVL1: Logs (data, pw), LVL10: Logs (username, IP), LVL 20: Quality Logs (Quality Data, pw, un, ip), LVL 30: Specific parsing (only data/pw/un/ip/ found, no longer random mix)
-#CRACKING LVL1: Password (encrypted > regular), LVL20: PIN (encrypted > regular, used in combination with account # in Matching)
-#MATCHING LVL1: Credentials (pw + un = cred), LVL 20: Accounts (PIN + account # = account access token)
-#DECRYPTION LVL 1: Caches (decrypt for resource drops), LVL 10: Valuable cache (much slower, no non-rare drops, doubles chance of rare drops), LVL 20: Resource cache (slower, no rare drops, higher quantity of regular drops)
 
+######## MARKETPLACE
+# Contracts - Randomly available - can either purchase one for data to complete work (i need 10 Parents CCs) for bloated amount of money
+# Contracts - Randomly available - can be posting to look for work. You pay 5k data and provide 200 encrypted passwords and they will return 200 passwords ie do idle for you
+# Contracts - Hacking target - buy, hack x target x times - get reward
+# Valuable - Can sell valuables (only purpose)
+
+####### MODULE UPGRADES INSTALL
+# Each skill has 2 slots (speed slot and efficiency slot) applies to all minor skills within
+# Everything to be purchased from marketplace
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -71,11 +70,11 @@ enum Context {
 	MINING,
 	PARSING,
 	CRACKING,
-	CRED_MATCHING,
+	MATCHING,
 	HACKING,
 	DARKWEB,
 	MARKETPLACE,
-	CACHE_DECRYPTING,
+	DECODING,
 }
 
 var current_scrollback
@@ -180,9 +179,9 @@ func _on_input_line_text_submitted(new_text):
 				log_parsing_commands(new_text)
 			Context.CRACKING:
 				password_unscramble_commands(new_text)
-			Context.CRED_MATCHING:
+			Context.MATCHING:
 				cred_matching_commands(new_text)
-			Context.CACHE_DECRYPTING:
+			Context.DECODING:
 				cache_decrypting_commands(new_text)
 
 	history_index = -1
@@ -206,14 +205,14 @@ func get_context_lead():
 		Context.CRACKING:
 			Signals.update_hud(Cracking)
 			return "IdleOS/Modules/Cracking>"
-		Context.CRED_MATCHING:
-			Signals.update_hud(Stats.player_stats["Credential Matching"])
-			return "IdleOS/Modules/CredentialMatching>"
+		Context.MATCHING:
+			Signals.update_hud(Matching)
+			return "IdleOS/Modules/Matching>"
 		Context.HACKING:
 			return "IdleOS/Modules/Hacking>"
-		Context.CACHE_DECRYPTING:
-			Signals.update_hud(Stats.player_stats["Cache Decrypting"])
-			return "IdleOS/Modules/CacheDecrypting>"
+		Context.DECODING:
+			Signals.update_hud(Decoding)
+			return "IdleOS/Modules/Decoding>"
 
 #Changes context and updates leading text
 func update_context(new_context: Context):
@@ -262,15 +261,15 @@ stop                    Stop password cracking process
 root                    Exit back to root
 info                    Password cracking module stats
 """)
-		Context.CRED_MATCHING:
+		Context.MATCHING:
 			add_line("""
-	[CREDENTIAL MATCHING COMMANDS]
-start                   Start credential matching process
-stop                    Stop credential matching process
+	[MATCHING COMMANDS]
+start                   Start matching process
+stop                    Stop matching process
 root                    Exit back to root
-info                    Credential matching module stats
+info                    Matching module stats
 """)
-		Context.CACHE_DECRYPTING:
+		Context.DECODING:
 			add_line("""
 	[CACHE DECRYPTING COMMANDS]
 start                   Start cache decrypting process
@@ -342,27 +341,20 @@ func root_commands(text):
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.parsing)
 			add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
-		"load pw-cracking":
-			add_line("[ .. ] loading password cracking module")
+		"load cracking":
+			add_line("[ .. ] loading cracking module")
 			await get_tree().create_timer(0.8).timeout
-			add_line("[ OK ] password cracking module loaded")
+			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.cracking)
-			add_line("Current available scrambled passwords: " + str(Inventory.get_amount(Items.ENCRYPTED_PASSWORDS)))
-		"load cred-matching":
-			if Stats.player_stats["Credential Matching"].unlocked:
-				add_line("[ .. ] loading credential matching module")
-				await get_tree().create_timer(0.8).timeout
-				add_line("[ OK ] credential matching module loaded")
-				update_context(Context.CRED_MATCHING)
-				await get_tree().create_timer(0.5).timeout
-				add_line(Ascii.cred_matching)
-				add_line("Current available usernames & passwords")
-				add_line("Passwords x" + str(Inventory.get_amount(Items.PASSWORDS)) + "   Usernames x" + str(Inventory.get_amount(Items.USERNAMES)))
-				list_help()
-			else:
-				add_line("Module not found.")
+		"load matching":
+			add_line("[ .. ] loading matching module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] matching module loaded")
+			update_context(Context.MATCHING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.matching)
 		"load hacking":
 			if Stats.player_stats["Hacking"].unlocked:
 				var tween = create_tween()
@@ -385,22 +377,18 @@ func root_commands(text):
 			#add_line("Welcome to the marketplace.")
 			#add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
 			#list_help()
-		"load cache-decrypting":
-			if Stats.player_stats["Cache Decrypting"].unlocked:
-				add_line("[ .. ] loading cache decrypting module")
-				await get_tree().create_timer(0.8).timeout
-				add_line("[ OK ] cache decrypting module loaded")
-				update_context(Context.CACHE_DECRYPTING)
-				await get_tree().create_timer(0.5).timeout
-				add_line(Ascii.cache_decrypting)
-				list_help()
-			else:
-				add_line("Module not found.")
+		"load decoding":
+			add_line("[ .. ] loading decoding module")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] decoding module loaded")
+			update_context(Context.DECODING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.decoding)
 		_:#default
 			add_line("Command not found")
 
 ###################################################
-################### DATA MINING ###################
+################### MINING ########################
 ###################################################
 func mining_commands(text):
 	text = text.to_lower().strip_edges()
@@ -491,7 +479,7 @@ func data_mining_ended_safely():
 	add_line("Data mining safely finished.")
 
 ###################################################
-################### LOG PARSING ###################
+################### PARSING #######################
 ###################################################
 func log_parsing_commands(text):
 	text = text.to_lower().strip_edges()
@@ -505,6 +493,15 @@ func log_parsing_commands(text):
 				return
 			
 			start_log_parsing()
+		"start -creds":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.LOGS) <= 0:
+				add_line("No logs found.")
+				return
+			
+			start_log_cred_parsing()
 		"stop":
 			process_running = false
 			if current_process:
@@ -563,6 +560,15 @@ func start_log_parsing():
 	new_log_parsing_terminal.start()
 	add_new_scrollback()
 
+func start_log_cred_parsing():
+	var new_log_parsing_terminal = log_parsing_scene.instantiate()
+	terminal_body_container.add_child(new_log_parsing_terminal)
+	new_log_parsing_terminal.set_parse_type(Parsing.CRED_LOGS)
+	process_running = true
+	current_process = new_log_parsing_terminal
+	new_log_parsing_terminal.start()
+	add_new_scrollback()
+
 func log_parsing_ended_safely():
 	current_process = null
 	process_running = false
@@ -570,7 +576,7 @@ func log_parsing_ended_safely():
 	add_line("Parsing safely finished.")
 
 ###################################################
-################### PW CRACKING ###################
+#################### CRACKING #####################
 ###################################################
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
@@ -643,18 +649,26 @@ func password_unscramble_commands(text):
 			add_line("Command not found")
 
 func start_password_cracking():
+	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+		add_line("Encrypted passwords not found")
+		return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_parse_type(Cracking.PASSWORD)
+	new_pw_cracking_terminal.set_cracking_type(Cracking.PASSWORD)
+	new_pw_cracking_terminal.set_pw()
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()
 	add_new_scrollback()
 
 func start_pin_cracking():
+	if Inventory.get_amount(Items.ENCRYPTED_PINS) <= 0:
+		add_line("Encrypted pins not found")
+		return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_parse_type(Cracking.PIN)
+	new_pw_cracking_terminal.set_cracking_type(Cracking.PINS)
+	new_pw_cracking_terminal.set_pin()
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()
@@ -672,7 +686,7 @@ func password_cracking_ended_safely():
 func cred_matching_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"start":
+		"start -cred":
 			if process_running:
 				add_line("Process already running.")
 				return
@@ -683,6 +697,17 @@ func cred_matching_commands(text):
 					add_line("Required resource: Passwords")
 				return
 			start_cred_matching()
+		"start -account":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if Inventory.get_amount(Items.PINS) <= 0 or Inventory.get_amount(Items.ACCOUNT_NUMBERS) <= 0:
+				if Inventory.get_amount(Items.PINS) <= 0:
+					add_line("Required resource: PINS")
+				if Inventory.get_amount(Items.ACCOUNT_NUMBERS) <= 0:
+					add_line("Required resource: Account numbers")
+				return
+			start_account_matching()
 		"stop":
 			process_running = false
 			if current_process:
@@ -693,7 +718,7 @@ func cred_matching_commands(text):
 				add_line("No active process to stop.")
 			Stats.overclocked = false
 		"stop -s":
-			add_line("Finishing current credential match...")
+			add_line("Finishing current match...")
 			current_process.stop_safely()
 		"focus":
 			if current_process:
@@ -711,7 +736,7 @@ func cred_matching_commands(text):
 				add_line(Ascii.root)
 				list_help()
 		"info":
-			add_line("Module: Credential Matching")
+			add_line("Module: Matching")
 			add_line("Level:         " + str(Stats.player_stats["Credential Matching"]["level"]))
 			#Level
 			#Experience
@@ -735,6 +760,16 @@ func cred_matching_commands(text):
 func start_cred_matching():
 	var new_cred_matching_terminal = cred_matching_scene.instantiate()
 	terminal_body_container.add_child(new_cred_matching_terminal)
+	new_cred_matching_terminal.set_cred(Matching.CREDENTIAL)
+	process_running = true
+	current_process = new_cred_matching_terminal
+	new_cred_matching_terminal.start()
+	add_new_scrollback()
+
+func start_account_matching():
+	var new_cred_matching_terminal = cred_matching_scene.instantiate()
+	terminal_body_container.add_child(new_cred_matching_terminal)
+	new_cred_matching_terminal.set_account(Matching.ACCOUNT)
 	process_running = true
 	current_process = new_cred_matching_terminal
 	new_cred_matching_terminal.start()
@@ -744,7 +779,7 @@ func cred_matching_ended_safely():
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
-	add_line("Credential matching safely finished.")
+	add_line("Matching safely finished.")
 	
 
 ###################################################
@@ -814,6 +849,7 @@ func cache_decrypting_commands(text):
 func start_cache_decrypting():
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
+	new_cache_decrypt_terminal.set_cache_type(Decoding.CACHE)
 	process_running = true
 	current_process = new_cache_decrypt_terminal
 	new_cache_decrypt_terminal.start_decrypting()

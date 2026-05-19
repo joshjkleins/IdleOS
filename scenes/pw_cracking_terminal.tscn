@@ -44,9 +44,9 @@ theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
 theme_override_font_sizes/font_size = 12
 text = "Level 1"
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/TitleRow"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TitleRow"]
 layout_mode = 2
-text = "Password Cracking"
+text = "Cracking"
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

@@ -30,6 +30,9 @@ Mining="*res://singletons/Mining.gd"
 Exp="*res://singletons/Exp.gd"
 Parsing="*res://singletons/Parsing.gd"
 Cracking="*res://singletons/Cracking.gd"
+Matching="*res://singletons/Matching.gd"
+Decoding="*res://singletons/Decoding.gd"
+Hacking="*res://singletons/Hacking.gd"
 
 [display]
 

@@ -97,6 +97,7 @@ func set_mine_type(type: Dictionary):
 	EFFICIENCY_RATE = type["efficiency rate"]
 	tier.text = type["tier name"]
 	yield_title_label.text = type["name"].to_upper() + " YIELD"
+	title.text = "MINING " + type["name"].to_upper()
 
 func start_data_mining():
 	process_running = true

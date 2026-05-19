@@ -30,9 +30,9 @@ var PASSWORD = {
 	"efficiency description": "Chance to instantly crack password"
 }
 
-var PIN = {
-	"name": "Pin",
-	"tier name": "TIER I | PIN",
+var PINS = {
+	"name": "PIN",
+	"tier name": "TIER I | PINS",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -46,16 +46,16 @@ var PIN = {
 	"heat": 3,
 	"overclock heat": 8,
 	"overheat heat": 1,
-	"requirements": Items.ENCRYPTED_PASSWORDS,
-	"resource gained": Items.CREDENTIALS,
+	"requirements": Items.ENCRYPTED_PINS,
+	"resource gained": Items.PINS,
 	"resource amount gained": 1,
-	"description": "Cracks encrypted PINS.",
-	"efficiency description": "Chance to instantly crack PIN"
+	"description": "Cracks encrypted PINS, transforming them into PINS",
+	"efficiency description": "Chance to instantly crack PINS"
 }
 
 var minor_processes = [
 	PASSWORD,
-	PIN
+	PINS
 ]
 
 func add_xp(amount: int, type: Dictionary):

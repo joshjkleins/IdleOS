@@ -20,7 +20,7 @@ func _ready():
 	Signals.hacking_ended_signal.connect(hacking_ended)
 
 func module_loaded():
-	header_hacking_box.update_header()
+	#header_hacking_box.update_header()
 	#header_hacking_box.update_header()
 	#enemy_hacking_box.update_targets()
 	

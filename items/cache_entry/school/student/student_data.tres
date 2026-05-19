@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://bbvxwnw404luf"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_g4bgt"]
-[ext_resource type="Resource" uid="uid://dfepixu5bs4hq" path="res://items/data.tres" id="1_nml4j"]
+[ext_resource type="Resource" uid="uid://dfepixu5bs4hq" path="res://items/resources/data.tres" id="1_nml4j"]
 
 [resource]
 script = ExtResource("1_g4bgt")

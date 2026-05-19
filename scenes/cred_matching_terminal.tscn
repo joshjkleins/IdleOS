@@ -95,7 +95,7 @@ layout_mode = 2
 texture = ExtResource("3_tvsdj")
 expand_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="ResourceOneTitle" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
 theme_override_font_sizes/font_size = 12
@@ -129,7 +129,7 @@ layout_mode = 2
 texture = ExtResource("4_145jr")
 expand_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="ResourceTwoTitle" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
 theme_override_font_sizes/font_size = 12

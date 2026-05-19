@@ -12,6 +12,9 @@ extends PanelContainer
 @onready var userbox_name_label = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/UserboxNameLabel
 @onready var third_col = $MarginContainer/VBoxContainer/TopRow/ThirdCol
 
+@onready var resource_one_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceOneTitle
+@onready var resource_two_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceTwoTitle
+
 @export var lock_image: Texture2D
 @export var cred_image: Texture2D
 
@@ -308,19 +311,39 @@ var TAG_COLORS = [
 	Color("#8B5CF6")
 ]
 
+var type
+
+enum MatchType {CREDENTIAL, ACCOUNT}
+var current_type: MatchType
+
+func set_cred(p_type: Dictionary):
+	type = p_type
+	current_type = MatchType.CREDENTIAL
+	resource_one_title.text = "USERNAME"
+	resource_two_title.text = "PASSWORD"
+
+func set_account(p_type: Dictionary):
+	type = p_type
+	current_type = MatchType.ACCOUNT
+	resource_one_title.text = "ACCOUNT #"
+	resource_two_title.text = "PIN"
+
 func start():
 	process_running = true
 	safely_stop = false
 	sb = third_col.get_theme_stylebox("panel")
 	_reset_rows()
 	_build_rows()
-	if Inventory.get_amount(Items.PASSWORDS) <= 0 or Inventory.get_amount(Items.USERNAMES) <= 0:
-		_finished()
-		return
-	if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
-		Inventory.remove_resource(Items.PASSWORDS, 1)
-	if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
-		Inventory.remove_resource(Items.USERNAMES, 1)
+	#check if player has required amounts
+	for item in type["requirements"]:
+		if Inventory.get_amount(item) <= 0:
+			_finished()
+			return
+	
+	#roll of efficiency and remove items
+	for item in type["requirements"]:
+		if randf() > type["efficiency"]:
+			Inventory.remove_resource(item, 1)
 	_begin_matching()
 
 func stop():
@@ -332,14 +355,15 @@ func stop_safely():
 	safely_stop = true
 
 func _repeat_loop():
-	if Inventory.get_amount(Items.PASSWORDS) <= 0 or Inventory.get_amount(Items.USERNAMES) <= 0:
-		_finished()
-		return
+	for item in type["requirements"]:
+		if Inventory.get_amount(item) <= 0:
+			_finished()
+			return
 	if process_running:
-		if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
-			Inventory.remove_resource(Items.PASSWORDS, 1)
-		if randf() > Stats.player_stats["Credential Matching"]["efficiency"]:
-			Inventory.remove_resource(Items.USERNAMES, 1)
+		#roll of efficiency and remove items
+		for item in type["requirements"]:
+			if randf() > type["efficiency"]:
+				Inventory.remove_resource(item, 1)
 		_reset_rows()
 		_build_rows()
 		_begin_matching()
@@ -392,14 +416,14 @@ func _begin_matching():
 				var speed
 				var heat
 				if Stats.overclocked:
-					speed = Stats.player_stats["Credential Matching"]["overclock speed"]
-					heat = Stats.player_stats["Credential Matching"]["overclock heat"]
+					speed = type["overclock speed"]
+					heat = type["overclock heat"]
 				elif Stats.overheated:
-					speed = Stats.player_stats["Credential Matching"]["overheat speed"]
-					heat = Stats.player_stats["Credential Matching"]["overheat heat"]
+					speed = type["overheat speed"]
+					heat = type["overheat heat"]
 				else:
-					speed = Stats.player_stats["Credential Matching"]["base speed"]
-					heat = Stats.player_stats["Credential Matching"]["heat"]
+					speed = type["base speed"]
+					heat = type["heat"]
 				#if roll > highest_roll:
 					#highest_roll = roll
 					#status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
@@ -464,14 +488,14 @@ func prepare_cred_roll(chance: int, u_name: String):
 	var speed
 	var heat
 	if Stats.overclocked:
-		speed = Stats.player_stats["Credential Matching"]["overclock speed"]
-		heat = Stats.player_stats["Credential Matching"]["overclock heat"]
+		speed = type["overclock speed"]
+		heat = type["overclock heat"]
 	elif Stats.overheated:
-		speed = Stats.player_stats["Credential Matching"]["overheat speed"]
-		heat = Stats.player_stats["Credential Matching"]["overheat heat"]
+		speed = type["overheat speed"]
+		heat = type["overheat heat"]
 	else:
-		speed = Stats.player_stats["Credential Matching"]["base speed"]
-		heat = Stats.player_stats["Credential Matching"]["heat"]
+		speed = type["base speed"]
+		heat = type["heat"]
 		
 	tween = create_tween()
 	tween.tween_property(main_bar, "value", 100, speed * 3)
@@ -487,16 +511,17 @@ func prepare_cred_roll(chance: int, u_name: String):
 		og_box.border_color = f_border_col
 		third_col.add_theme_stylebox_override("panel", og_box)
 	else:
-		Inventory.add_resource(Items.CREDENTIALS, 1)
-		status_title.text = "CREDENTIAL ASSEMBLED"
+		Inventory.add_resource(type["resource gained"], 1)
+		status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
 		status_image.texture = cred_image
 		var og_box = third_col.get_theme_stylebox("panel").duplicate()
 		og_box.border_color = s_border_col
 		third_col.add_theme_stylebox_override("panel", og_box)
 		
-	Stats.update_tempature(heat + 4)
-	Stats.add_xp(Stats.player_stats["Credential Matching"])
-	Signals.update_hud(Stats.player_stats["Credential Matching"])
+	Stats.update_tempature(heat)
+
+	Exp.add_xp(Matching, type, type["experience per level"])
+	Signals.update_hud(Matching)
 
 func _reset_rows():
 	highest_roll = 0

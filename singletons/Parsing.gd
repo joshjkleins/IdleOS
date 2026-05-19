@@ -15,7 +15,7 @@ var LOGS = {
 	"experience per level": 200,
 	"command": "data-mining",
 	"efficiency": 0.05,
-	"efficiency rate": 0.01,
+	"efficiency rate": 0.0012,
 	"unlocked": true,
 	"base speed": 0.4,
 	"overclock speed": 0.1,

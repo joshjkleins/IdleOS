@@ -60,18 +60,22 @@ var target_name
 var reward_amount: int = 0
 
 #TODO:
-#change sql injector from item to skill (sql injector = 1h wep, something else = 2h wep etc)
-#think about adding more clarity on how much damage/defense is happening 
+#add bandwidth cost to combat items resource script
+#just changed packet spoof and sql injector to 'combat items'
+#also changed progress bar updates for bandwidth and firewall (update ICE strength to firewall in labels next)
+#implement combat logic for bandwidth and firewall.
+#implement efficiency (critical strike)
+
+
 # make sure overclock is being stopped when "kill" command given (bug)
 # add actual checks for ip & credentials when resetting after defeating enemy
+# update HUD with exp
 # add repurcusions to losing
 
-#figure out: 
-#efficiency
-#bandwidth (or second bar) idea: bandwidth needs to be larger than ice strength? if ice strength is larger then sql injection goes super slow
-#ICE strength (second enemy bar)
-#how to obtain packet spoofers
-# how to recoup anon (passively? actively?)
+# Attack as items (SQL Injectors, Cross site scripts, malware, ransomware, exploit, DDOS)
+# Bandwidth as mana (10, injectors require 1) passively restores, attacks still fire if not enough bandwidth but goes really slow or does reduced dmg
+# Enemy defense as defense (attack - enemy defense = dmg, then lower enemy defense) passively restores slowly
+# EFFICIENCY: critical strike chance
 
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
@@ -80,12 +84,12 @@ func _ready():
 func _process(delta):
 	if is_hacking:
 		if Stats.overclocked:
-			OVERCLOCK_VALUE = 2.0
+			OVERCLOCK_VALUE = 2.0 #x2 speed
 			OVERHEAT_VALUE = 1.0
 			NEXT_HEAT_APPLICATION = 2
 		elif Stats.overheated:
-			OVERCLOCK_VALUE = 0.5
-			OVERHEAT_VALUE = 2.0
+			OVERCLOCK_VALUE = 0.5 #1/2 speed
+			OVERHEAT_VALUE = 2.0 #2x speed for enemy
 		else:
 			OVERCLOCK_VALUE = 1.0
 			OVERHEAT_VALUE = 1.0
@@ -115,6 +119,9 @@ func setup(target: Dictionary):
 	#set integrity
 	integ_bar.max_value = target.integrity
 	integ_bar.value = 0
+	#bandwidth
+	band_bar.max_value = Hacking.max_bandwidth
+	band_bar.value = Hacking.current_bandwidth
 	#set target
 	target_name_label.text = "-"
 	target_label_2.text = "-"
@@ -288,21 +295,16 @@ func prepare():
 	
 
 func _on_anon_bar_value_changed(value):
-	#var percent = value / anon_bar.max_value * 100 #percentage
-	
 	anon_label.text = "anonymity " + str(int(value)) + "/" + str(Stats.max_anon)
 
 func _on_band_bar_value_changed(value):
-	var percent = value / band_bar.max_value * 100
-	band_label.text = "bandwidth " + str(int(percent)) + "%"
+	band_label.text = "bandwidth " + str(int(value)) + "/" + str(int(band_bar.max_value))
 
 func _on_integ_bar_value_changed(value):
-	#var percent = value / integ_bar.max_value * 100 #percent
 	integ_label.text = "integrity " + str(int(value)) + "/" + str(int(integ_bar.max_value))
 
 func _on_strength_bar_value_changed(value):
-	var percent = value / strength_bar.max_value * 100
-	strength_label.text = "strength " + str(int(percent)) + "%"
+	strength_label.text = "firewall " + str(int(value)) + "/" + str(int(strength_bar.max_value))
 
 func update_bottom_row():
 	if reward_amount > 0:

@@ -13,5 +13,5 @@ func _ready():
 	Signals.update_hacking_header_signal.connect(update_header)
 
 func update_header():
-	var hacking_stats = Stats.player_stats["Hacking"]
-	hud.update_hud_info(hacking_stats)
+	#var hacking_stats = Stats.player_stats["Hacking"]
+	hud.update_hud_info(Hacking)

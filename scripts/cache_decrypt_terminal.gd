@@ -13,6 +13,15 @@ var safe_stop: bool = false
 
 var item_label = preload("res://scenes/cache_item_label.tscn")
 
+var type
+
+enum DecodingType { CACHE }
+var current_type: DecodingType
+
+func set_cache_type(p_type: Dictionary):
+	type = p_type
+	current_type = DecodingType.CACHE
+
 func _ready():
 	Signals.item_found_in_cache_signal.connect(update_items_gained)
 
@@ -50,12 +59,12 @@ func start_decrypting():
 			hex_display.text = cache_decrypt.render_dump()
 			var speed
 			if Stats.overclocked:
-				speed = Stats.player_stats["Cache Decrypting"]["overclock speed"]
+				speed = type["overclock speed"]
 				overclocked_this_cache = true
 			elif Stats.overheated:
-				speed = Stats.player_stats["Cache Decrypting"]["overheat speed"]
+				speed = type["overheat speed"]
 			else:
-				speed = Stats.player_stats["Cache Decrypting"]["base speed"]
+				speed = type["base speed"]
 			await get_tree().create_timer(speed).timeout
 		if !running:
 			apply_heat(overclocked_this_cache)
@@ -63,21 +72,21 @@ func start_decrypting():
 		
 		#finished with a single cache
 		apply_heat(overclocked_this_cache)
-		Stats.add_xp(Stats.player_stats["Cache Decrypting"])
+		Exp.add_xp(Decoding, type, type["experience per level"])
+		Signals.update_hud(Decoding)
 		
-		Signals.update_hud(Stats.player_stats["Cache Decrypting"])
 		#Signals.update_module_header("Cache Decrypting")
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:
 		can_apply_heat = false
 		var heat
-		if overclocked_this_cache:
-			heat = Stats.player_stats["Cache Decrypting"]["overclock heat"]
-		elif Stats.overheated:
-			heat = Stats.player_stats["Cache Decrypting"]["overheat heat"]
+		if Stats.overheated:
+			heat = type["overheat heat"]
+		elif overclocked_this_cache:
+			heat = type["overclock heat"]
 		else:
-			heat = Stats.player_stats["Cache Decrypting"]["heat"]
+			heat = type["heat"]
 		Stats.update_tempature(heat)
 
 func clear_labels():

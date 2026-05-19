@@ -99,18 +99,26 @@ enum ItemType {
 	PARTNER_CACHE, #76
 	SQL_INJECTOR, #77
 	PACKET_SPOOF, #78
+	PINS, #79
+	ENCRYPTED_PINS, #80
+	ACCOUNT_NUMBERS, #81
+	ACCOUNT_ACCESS_TOKENS, #82
 }
 
 #items
-const DATA = preload("res://items/data.tres")
-const LOGS = preload("res://items/logs.tres")
-const ENCRYPTED_PASSWORDS = preload("res://items/encrypted_passwords.tres")
-const PASSWORDS = preload("res://items/passwords.tres")
-const USERNAMES = preload("res://items/usernames.tres")
-const CREDENTIALS = preload("res://items/credentials.tres")
-const IP_ADDRESS = preload("res://items/ip_address.tres")
-const SQL_INJECTOR = preload("res://items/sql_injector.tres")
-const PACKET_SPOOF = preload("res://items/packet_spoof.tres")
+const DATA = preload("res://items/resources/data.tres")
+const LOGS = preload("res://items/resources/logs.tres")
+const ENCRYPTED_PASSWORDS = preload("res://items/resources/encrypted_passwords.tres")
+const PASSWORDS = preload("res://items/resources/passwords.tres")
+const USERNAMES = preload("res://items/resources/usernames.tres")
+const CREDENTIALS = preload("res://items/resources/credentials.tres")
+const IP_ADDRESS = preload("res://items/resources/ip_address.tres")
+const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
+const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
+const ENCRYPTED_PINS = preload("res://items/resources/encrypted_pins.tres")
+const PINS = preload("res://items/resources/pins.tres")
+const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
+const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
 
 ### VALUABLES ###
 #school
@@ -286,5 +294,9 @@ const ITEM_MAP = {
 	ItemType.LAWYER_CACHE: LAWYER_CACHE,
 	ItemType.PARTNER_CACHE: PARTNER_CACHE,
 	ItemType.SQL_INJECTOR: SQL_INJECTOR,
-	ItemType.PACKET_SPOOF: PACKET_SPOOF
+	ItemType.PACKET_SPOOF: PACKET_SPOOF,
+	ItemType.PINS: PINS,
+	ItemType.ENCRYPTED_PINS: ENCRYPTED_PINS,
+	ItemType.ACCOUNT_NUMBERS: ACCOUNT_NUMBERS,
+	ItemType.ACCOUNT_ACCESS_TOKENS: ACCOUNT_ACCESS_TOKENS,
 }

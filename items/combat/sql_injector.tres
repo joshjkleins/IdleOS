@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CombatItem" load_steps=2 format=3 uid="uid://btjjhl0l0geno"]
+
+[ext_resource type="Script" uid="uid://c7r65t2y40b2d" path="res://resource_scripts/item_combat.gd" id="1_tr1om"]
+
+[resource]
+script = ExtResource("1_tr1om")
+amount = 30
+speed = 5.5
+type = "Attack"
+id = 77
+name = "SQL Injector"
+shortened_name = ""
+description = "Used in hacking to damage target integrity"
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://c7r65t2y40b2d"

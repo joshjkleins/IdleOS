@@ -9,6 +9,9 @@ func _ready():
 		"Mining": Mining.SKILL,
 		"Parsing": Parsing.SKILL,
 		"Cracking": Cracking.SKILL,
+		"Matching": Matching.SKILL,
+		"Decoding": Decoding.SKILL,
+		"Hacking": Hacking.SKILL,
 	}
 
 #var SKILLS = {
