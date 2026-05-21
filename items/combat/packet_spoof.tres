@@ -4,13 +4,15 @@
 
 [resource]
 script = ExtResource("1_gqeqw")
-amount = 25
-speed = 8.0
-type = "Defend"
+damage = 0
+heal = 15
+speed = 15.0
+bandwidth_cost = 3
+type = "Heal"
 id = 78
 name = "Packet Spoof"
 shortened_name = ""
-description = "Increases anonymity by 25 while hacking."
+description = "Increases anonymity by 15 while hacking."
 valuable = false
 value = 0
 metadata/_custom_type_script = "uid://c7r65t2y40b2d"

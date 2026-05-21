@@ -8,7 +8,9 @@ extends Control
 #@onready var temp_range = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempRange
 #@onready var temp_desc = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/TempDesc
 @onready var temp = $MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer/Temp
-@onready var temp_bar = $MarginContainer/VBoxContainer/TempBar
+#@onready var temp_bar = $MarginContainer/VBoxContainer/TempBar
+@onready var temp_bar = $MarginContainer/VBoxContainer/HBoxContainer2/TempBar
+@onready var status_label = $MarginContainer/VBoxContainer/HBoxContainer2/StatusLabel
 
 func _ready():
 	Signals.system_temp_updated_signal.connect(update_heat_info)
@@ -51,6 +53,15 @@ const HEAT_INFO = {
 func update_heat_info(tempature: int) -> void:
 	temp.text = str(tempature)
 	temp_bar.value = tempature
+	if Stats.overclocked:
+		status_label.text = 'OVERCLOCKED'
+		status_label.visible = true
+	elif Stats.overheated:
+		status_label.text = "OVERHEATED"
+		status_label.visible = true
+	else:
+		status_label.text = ""
+		status_label.visible = false
 	if tempature < 60:
 		if !Stats.overheated:
 			temp_bar.indeterminate = false
@@ -59,33 +70,18 @@ func update_heat_info(tempature: int) -> void:
 		update_progressbar_fill(HEAT_INFO[0]["color"])
 		temp_name.text = HEAT_INFO[0]["name"]
 		temp_range.text = "-1° C/s"
-		#temp_range.text = HEAT_INFO[0]["range"]
-		#if !Stats.overheated:
-			#temp_desc.text = HEAT_INFO[0]["description"]
-		#else:
-			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 60 and tempature < 85:
 		temp.add_theme_color_override("font_color", HEAT_INFO[1]["color"])
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[1]["color"])
 		update_progressbar_fill(HEAT_INFO[1]["color"])
 		temp_name.text = HEAT_INFO[1]["name"]
 		temp_range.text = "-1° C/s"
-		#temp_range.text = HEAT_INFO[1]["range"]
-		#if !Stats.overheated:
-			#temp_desc.text = HEAT_INFO[1]["description"]
-		#else:
-			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 85 and tempature < 95:
 		temp.add_theme_color_override("font_color", HEAT_INFO[2]["color"])
 		temp_name.add_theme_color_override("font_color", HEAT_INFO[2]["color"])
 		update_progressbar_fill(HEAT_INFO[2]["color"])
 		temp_name.text = HEAT_INFO[2]["name"]
 		temp_range.text = "-1° C/s"
-		#temp_range.text = HEAT_INFO[2]["range"]
-		#if !Stats.overheated:
-			#temp_desc.text = HEAT_INFO[2]["description"]
-		#else:
-			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 	elif tempature >= 95:
 		if Stats.overheated:
 			temp_bar.indeterminate = true
@@ -94,11 +90,6 @@ func update_heat_info(tempature: int) -> void:
 		update_progressbar_fill(HEAT_INFO[3]["color"])
 		temp_name.text = HEAT_INFO[3]["name"]
 		temp_range.text = "-1° C/s"
-		#temp_range.text = HEAT_INFO[3]["range"]
-		#if !Stats.overheated:
-			#temp_desc.text = HEAT_INFO[3]["description"]
-		#else:
-			#temp_desc.text = "OVERHEATED: SYSTEM SLOWED UNTIL 40°C"
 
 func update_progressbar_fill(color: Color) -> void:
 	var stylebox := temp_bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat

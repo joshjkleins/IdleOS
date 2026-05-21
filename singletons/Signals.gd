@@ -16,7 +16,7 @@ signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
 signal item_added_signal
-
+signal update_console_signal #used from hacking_game to update main console in hack module
 #FILES WHERE end_hacking IS CONNECTED
 #hacking.gd - updates current context from HACKING to PERSONS
 #hacking_box.gd - handles changing screen from hacking process to list of persons at location
@@ -69,3 +69,7 @@ func update_hud_root():
 
 func item_added(item: ItemData, amount: int):
 	item_added_signal.emit(item, amount)
+
+#message: you lost, #type: "Error", "Success"
+func update_hack_console(message: String):
+	update_console_signal.emit(message)

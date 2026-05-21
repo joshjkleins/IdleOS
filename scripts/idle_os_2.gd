@@ -4,22 +4,36 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# finish hacking TODO's
+# update hacking 'target' screen UI (show counterattack damage, speed, item requirements(ip/creds), integrity and better view of loot)
+# update HUD ui (how skills are laid out, overclock meter needs a refresh)
+# Do marketplace upgrades (sells valuables, contracts mechanic)
+# Add Phishing and Defragging 
+# Add installable modules for each major skill
+# add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
+# then after above is done, add more combat items to test with
 # add logic that makes terminal like hacking (ie sequential so its easier to follow)
-
 #save/load
-#offline progression
+#offline progression - cap at 24 hours?
 
+#stop adding to above, once finished to a balance patch, and play through game
 
 ########item ideas:
 ## Resouces ##
 #
-
 ## ONE TIME USES ##
 # Virtual machine tokens - consume to open a new window to run a process for x amount of time
 # Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
-# Packet spoofers - restores anonymity during hack
 # Hardware accelerators - use to rapidly cool CPU for 10 second
+
+#combat
+# SQL Injector - deals integrity damage
+# Cross site script - deals integ damage
+# Malware - deals integ damage
+# Ransomeware - deals integ damage
+# Exploits = deals integ damage
+# DDoS = deals integ damage
+# Packet spoofers - restores anonymity during hack
+# VPN Token - restores anonymity
 
 ######## PROCESSES ##
 # Phishing - send out phishing emails, etc. and after 30 min - 1h get random assortment if emails/usernames/passwords/pins back

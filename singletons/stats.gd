@@ -179,7 +179,9 @@ var hacking_targets = {
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
-				"counter": 5,
+				"firewall": 10,
+				"counter": 10,
+				"counter speed": 5.0,
 				"loot": Items.STUDENT_CACHE
 			},
 			{

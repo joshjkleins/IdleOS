@@ -32,9 +32,38 @@ layout_mode = 2
 layout_mode = 2
 theme_override_constants/separation = 0
 
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "overclocked"
+
+[node name="TempBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(240, 20)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_hbs7w")
+theme_override_styles/fill = SubResource("StyleBoxFlat_7wudt")
+min_value = 30.0
+step = 1.0
+value = 30.0
+show_percentage = false
+
+[node name="Ticks" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer2/TempBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_7wudt")
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 11
+theme_override_constants/separation = 8
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -43,13 +72,6 @@ theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/MarginContainer"]
 layout_mode = 2
-
-[node name="TempDesc" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.784314, 0.337255, 0.376471, 1)
-theme_override_font_sizes/font_size = 12
-horizontal_alignment = 2
 
 [node name="TempName" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -64,9 +86,16 @@ theme_override_font_sizes/font_size = 10
 text = "< 60C"
 horizontal_alignment = 2
 
+[node name="TempDesc" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.337255, 0.376471, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 2
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 
 [node name="Temp" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -81,24 +110,3 @@ layout_mode = 2
 size_flags_vertical = 8
 theme_override_font_sizes/font_size = 10
 text = "°C"
-
-[node name="TempBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(240, 20)
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 4
-theme_override_styles/background = SubResource("StyleBoxFlat_hbs7w")
-theme_override_styles/fill = SubResource("StyleBoxFlat_7wudt")
-min_value = 30.0
-step = 1.0
-value = 30.0
-show_percentage = false
-
-[node name="Ticks" type="Control" parent="MarginContainer/VBoxContainer/TempBar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("2_7wudt")

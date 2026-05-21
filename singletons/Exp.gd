@@ -54,27 +54,30 @@ func get_xp_progress(skill_data: Dictionary) -> float:
 func add_xp(major, minor, amount: int = 0): #singleton as param
 	if amount > 0:
 		major.SKILL["experience"] += amount
-		minor["experience"] += amount
 		gained_xp_signal.emit(amount)
 		
 	var major_new_level = get_level_from_xp(major.SKILL["experience"])
-	var minor_new_level = get_level_from_xp(minor["experience"])
 	
 	#MAJOR LEVEL UPDATES
 	while major.SKILL["level"] < major_new_level:
 		major.SKILL["level"] += 1
+		if major.SKILL.has("efficiency"):
+			major.SKILL["efficiency"] += major.SKILL["efficiency rate"]
 
 		if major.SKILL["level"] >= MAX_LEVEL:
 			major.SKILL["level"] = MAX_LEVEL
 			break
 	
-	#MINOR LEVEL UPDATES
-	while minor["level"] < minor_new_level:
-		minor["level"] += 1
-		minor["efficiency"] += minor["efficiency rate"]
-		if minor["level"] >= MAX_LEVEL:
-			minor["level"] = MAX_LEVEL
-			break
+	if minor != null:
+		minor["experience"] += amount
+		var minor_new_level = get_level_from_xp(minor["experience"])
+		#MINOR LEVEL UPDATES
+		while minor["level"] < minor_new_level:
+			minor["level"] += 1
+			minor["efficiency"] += minor["efficiency rate"]
+			if minor["level"] >= MAX_LEVEL:
+				minor["level"] = MAX_LEVEL
+				break
 
 
 func on_level_up(skill_data: Dictionary):

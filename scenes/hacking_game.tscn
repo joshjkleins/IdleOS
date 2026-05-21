@@ -243,14 +243,14 @@ rounded = true
 fill_mode = 1
 show_percentage = false
 
-[node name="StrengthLabel" type="Label" parent="StatsRow/HBoxContainer2/EnemySide"]
+[node name="FirewallLabel" type="Label" parent="StatsRow/HBoxContainer2/EnemySide"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.468777, 0.468777, 0.468777, 1)
 theme_override_font_sizes/font_size = 10
-text = "ICE strength 61%"
+text = "--/--"
 horizontal_alignment = 2
 
-[node name="StrengthBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/EnemySide"]
+[node name="FirewallBar" type="ProgressBar" parent="StatsRow/HBoxContainer2/EnemySide"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_8rbb1")
@@ -297,7 +297,7 @@ layout_mode = 2
 texture = ExtResource("5_8tddg")
 expand_mode = 2
 
-[node name="Label" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="OffensiveItemLabel" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 12
@@ -342,7 +342,7 @@ layout_mode = 2
 texture = ExtResource("6_5lwk8")
 expand_mode = 2
 
-[node name="Label" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="DefensiveItemLabel" type="Label" parent="AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 12
@@ -491,8 +491,11 @@ horizontal_alignment = 2
 wait_time = 5.0
 one_shot = true
 
+[node name="BandwidthTimer" type="Timer" parent="."]
+
 [connection signal="value_changed" from="StatsRow/HBoxContainer2/PlayerSide/AnonBar" to="." method="_on_anon_bar_value_changed"]
 [connection signal="value_changed" from="StatsRow/HBoxContainer2/PlayerSide/BandBar" to="." method="_on_band_bar_value_changed"]
 [connection signal="value_changed" from="StatsRow/HBoxContainer2/EnemySide/IntegBar" to="." method="_on_integ_bar_value_changed"]
-[connection signal="value_changed" from="StatsRow/HBoxContainer2/EnemySide/StrengthBar" to="." method="_on_strength_bar_value_changed"]
+[connection signal="value_changed" from="StatsRow/HBoxContainer2/EnemySide/FirewallBar" to="." method="_on_firewall_bar_value_changed"]
 [connection signal="timeout" from="SafeExitTimer" to="." method="_on_safe_exit_timer_timeout"]
+[connection signal="timeout" from="BandwidthTimer" to="." method="_on_bandwidth_timer_timeout"]

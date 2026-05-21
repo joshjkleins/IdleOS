@@ -43,11 +43,15 @@ func select_target(target: Dictionary = {}):
 	_update_persons(target)
 	await _show_container(persons_container)
 
-func select_person(target: Dictionary = {}):
+func select_person(target: Dictionary = {}, loadout: Dictionary = {}):
 	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
 		await _green_flash(target, persons_container)
 		await _hide_container(persons_container)
-		hacking_game.setup(target)
+		loadout = {
+			"offensive": Items.SQL_INJECTOR,
+			"defensive": Items.PACKET_SPOOF
+		}
+		hacking_game.setup(target, loadout)
 		await _show_container(hacking_game)
 		await hacking_game.prepare()
 		hacking_game.start_hack()

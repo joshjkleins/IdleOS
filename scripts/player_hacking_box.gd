@@ -92,7 +92,6 @@ func add_line_highlight(text: String):
 func add_separator():
 	add_line("[color=#333333]" + "─".repeat(30) + "[/color]")
 
-
 func _input(event):
 	if visible:
 		if event is InputEventKey and event.pressed:
