@@ -21,7 +21,7 @@ var LOGS = {
 	"overclock speed": 0.1,
 	"overheat speed": 3.0,
 	"heat": 3,
-	"overclock heat": 120,
+	"overclock heat": 3,
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [

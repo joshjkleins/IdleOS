@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3 uid="uid://fk428w5i4mnu"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_1lln8"]
+[ext_resource type="Script" uid="uid://c528h0rxpri18" path="res://scripts/major_skill_hud.gd" id="2_n86kk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1lln8"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_top = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n86kk"]
+bg_color = Color(0.190762, 0.190762, 0.190762, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MajorSkill" type="PanelContainer"]
+custom_minimum_size = Vector2(90, 0)
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("1_1lln8")
+theme_override_styles/panel = SubResource("StyleBoxFlat_1lln8")
+script = ExtResource("2_n86kk")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="SkillLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Mining"
+
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_n86kk")
+value = 50.0
+show_percentage = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "LVL"
+
+[node name="LevelNumberLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "1"
+horizontal_alignment = 2

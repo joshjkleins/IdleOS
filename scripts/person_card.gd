@@ -4,21 +4,28 @@ var target
 
 func update_info(info):
 	target = info
-	$MarginContainer/VBoxContainer/VBoxContainer/Title.text = info["name"]
-	$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "Command " + info["command"]
-	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
+	$MarginContainer/VBoxContainer/RowOne/TargetName.text = info.name
+	$MarginContainer/VBoxContainer/RowOne/PanelContainer/MarginContainer/Difficulty.text = info.difficulty
+	$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = info.command
+	$MarginContainer/VBoxContainer/GridContainer/IntegrityBox/MarginContainer/VBoxContainer/IntegrityAmount.text = str(info.integrity)
+	$MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/FirewallAmount.text = str(info.firewall)
+	$MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/CounterAmount.text = str(info.counter)
+	$MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox/MarginContainer/VBoxContainer/SpeedAmount.text = str(info["counter speed"])
 	
-	var loot_text = info.loot.name + "\n"
-
-	for entry in info.loot.entries:
-		var chance = str(int(entry.drop_chance * 100)) + "%"
-		loot_text += entry.item.name + " - " + chance + "\n"
-
-	for entry in info.loot.rare_pool:
-		var chance = str(int(info.loot.rare_drop_chance * 100)) + "%"
-		loot_text += entry.item.name + " (rare) - " + chance + "\n"
-
-	$MarginContainer/VBoxContainer/VBoxContainer/Loot.text = loot_text
+	if $MarginContainer/VBoxContainer/LootContainer.get_children().size() > 0:
+		for n in $MarginContainer/VBoxContainer/LootContainer.get_children():
+			n.queue_free()
+	
+	var loot_row = load("res://scenes/loot_row.tscn")
+	for loot in info.loot.entries:
+		var new_row = loot_row.instantiate()
+		new_row.update_info(loot)
+		$MarginContainer/VBoxContainer/LootContainer.add_child(new_row)
+	for loot in info.loot.rare_pool:
+		var new_row = loot_row.instantiate()
+		new_row.update_info(loot, true)
+		$MarginContainer/VBoxContainer/LootContainer.add_child(new_row)
+	
 
 func flash_green():
 	var tween = create_tween()

@@ -10,7 +10,6 @@ extends Control
 #@onready var hack_container = $PanelContainer/MarginContainer/HackContainer
 @onready var hacking_game = $PanelContainer/MarginContainer/HackingGame
 
-
 const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
 const person_card: PackedScene = preload("res://scenes/person_card.tscn")
 
@@ -36,6 +35,7 @@ func update_targets():
 		
 		#add to ui
 		targets_container.add_child(new_row)
+		break
 
 func select_target(target: Dictionary = {}):
 	await _green_flash(target, targets_container)
@@ -117,3 +117,4 @@ func _update_persons(target_location):
 		new_card.update_info(target)
 		
 		persons_container.add_child(new_card)
+		break

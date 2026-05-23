@@ -4,6 +4,7 @@ signal gained_xp_signal
 
 const MAX_LEVEL = 99
 var SKILLS
+
 func _ready():
 	SKILLS = {
 		"Mining": Mining.SKILL,
@@ -13,10 +14,6 @@ func _ready():
 		"Decoding": Decoding.SKILL,
 		"Hacking": Hacking.SKILL,
 	}
-
-#var SKILLS = {
-	#"Mining": Mining.SKILL
-#}
 
 var player_stats = {
 	"Data Mining": {
@@ -188,48 +185,48 @@ var hacking_targets = {
 				"name": "Administrator",
 				"difficulty": "Easy",
 				"command": "hack administrator",
-				"heat": 10,
+				"heat": 5,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
 				"integrity": 100,
-				"counter": 5,
+				"firewall": 10,
+				"counter": 10,
+				"counter speed": 5.0,
 				"loot": Items.ADMIN_CACHE
 			},
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
-				"heat": 10,
+				"heat": 5,
 				"exp": 600,
-				"time to hack": 2.0,
 				"integrity": 100,
-				"counter": 5,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"firewall": 10,
+				"counter": 10,
+				"counter speed": 5.0,
 				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
 			{
 				"name": "Principal",
 				"difficulty": "Medium",
 				"command": "hack principal",
-				"heat": 10,
+				"heat": 5,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 100,
+				"firewall": 10,
+				"counter": 10,
+				"counter speed": 5.0,
 				"loot": Items.PRINCIPAL_CACHE
 			},
 			{
 				"name": "Superintendent",
 				"difficulty": "Hard",
 				"command": "hack superintendent",
-				"heat": 10,
+				"heat": 5,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 100,
+				"firewall": 10,
+				"counter": 10,
+				"counter speed": 5.0,
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],

@@ -4,8 +4,7 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# update hacking 'target' screen UI (show counterattack damage, speed, item requirements(ip/creds), integrity and better view of loot)
-# update HUD ui (how skills are laid out, overclock meter needs a refresh)
+# hacking 'target' screen: play with sizing to make everything fit. maybe make header row smaller so right side can take up whole screen?
 # Do marketplace upgrades (sells valuables, contracts mechanic)
 # Add Phishing and Defragging 
 # Add installable modules for each major skill
@@ -60,16 +59,24 @@ extends Control
 #4. ADD TO ROOT COMMAND CONTEXT
 #5. ADD LIST HELP CONTEXT
 
-@onready var lead_text = $Panel/MarginContainer/TerminalRoot/InputLineContainer/LeadText
-@onready var input_line = $Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine
+#colors
+# exp green #2a9a5a
+# icons #bbbbbb
+
+@onready var lead_text = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/LeadText
+@onready var input_line = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/InputLine
+
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
-@onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer/Scrollback
-@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/TerminalBody
-@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
+@onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer/Scrollback
+@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody
+@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer
+
+#@onready var header = $Panel/MarginContainer/TerminalRoot/HEADER
+@onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -118,6 +125,7 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
+	header.update_header()
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
@@ -342,6 +350,7 @@ func root_commands(text):
 		"load mining":
 			add_line("[ .. ] loading data mining module")
 			await get_tree().create_timer(0.8).timeout
+			header.update_header(Mining)
 			add_line("[ OK ] data mining module loaded")
 			update_context(Context.MINING)
 			await get_tree().create_timer(0.5).timeout
@@ -350,6 +359,7 @@ func root_commands(text):
 		"load parsing":
 			add_line("[ .. ] loading parsing module")
 			await get_tree().create_timer(0.8).timeout
+			header.update_header(Parsing)
 			add_line("[ OK ] parsing module loaded")
 			update_context(Context.PARSING)
 			await get_tree().create_timer(0.5).timeout
@@ -358,6 +368,7 @@ func root_commands(text):
 		"load cracking":
 			add_line("[ .. ] loading cracking module")
 			await get_tree().create_timer(0.8).timeout
+			header.update_header(Cracking)
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			await get_tree().create_timer(0.5).timeout
@@ -365,6 +376,7 @@ func root_commands(text):
 		"load matching":
 			add_line("[ .. ] loading matching module")
 			await get_tree().create_timer(0.8).timeout
+			header.update_header(Matching)
 			add_line("[ OK ] matching module loaded")
 			update_context(Context.MATCHING)
 			await get_tree().create_timer(0.5).timeout
@@ -394,6 +406,7 @@ func root_commands(text):
 		"load decoding":
 			add_line("[ .. ] loading decoding module")
 			await get_tree().create_timer(0.8).timeout
+			header.update_header(Decoding)
 			add_line("[ OK ] decoding module loaded")
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
@@ -440,6 +453,7 @@ func mining_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
+				header.update_header()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -540,6 +554,7 @@ func log_parsing_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
+				header.update_header()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -637,6 +652,7 @@ func password_unscramble_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
+				header.update_header()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -746,6 +762,7 @@ func cred_matching_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
+				header.update_header()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -835,6 +852,7 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
+				header.update_header()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -958,6 +976,7 @@ func marketplace_commands(text):
 		"-h":
 			list_help()
 		"root":
+			header.update_header()
 			update_context(Context.ROOT)
 			add_line("Saftely exiting marketplace")
 			await get_tree().create_timer(0.8).timeout

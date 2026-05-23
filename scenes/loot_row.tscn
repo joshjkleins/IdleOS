@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://brc6hvjqdg4ms"]
+
+[ext_resource type="Script" uid="uid://c45cu75bhqbk2" path="res://scripts/loot_row.gd" id="1_n4h70"]
+
+[node name="LootRow" type="HBoxContainer"]
+script = ExtResource("1_n4h70")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ItemName" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Data"
+
+[node name="ItemChance" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "100%"
+
+[node name="ItemQuantity" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "10-20"
+horizontal_alignment = 2

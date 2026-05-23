@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=11 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
 [ext_resource type="PackedScene" uid="uid://b6nkkejp764vy" path="res://scenes/header_info.tscn" id="3_drh3h"]
+[ext_resource type="PackedScene" uid="uid://cawbutc5qs2ck" path="res://scenes/hud_2.tscn" id="3_h30m8"]
 [ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="3_sd1y4"]
 [ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
@@ -37,8 +38,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
@@ -50,37 +49,49 @@ theme_override_constants/separation = 25
 layout_mode = 2
 
 [node name="HeaderInfo" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_drh3h")]
+visible = false
 layout_mode = 2
 size_flags_vertical = 0
+
+[node name="HEADER" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_h30m8")]
+layout_mode = 2
 
 [node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot"]
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
+layout_mode = 2
+
+[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/TerminalBody"]
+[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
+[node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
 layout_mode = 2
 
-[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
+[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
 focus_mode = 2
 
-[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/InputLineContainer"]
+[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer"]
 layout_mode = 2
 text = "IdleOS> "
 
-[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/InputLineContainer"]
+[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
@@ -129,6 +140,6 @@ grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("8_h30m8")
 
-[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
+[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
 [connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]
 [connection signal="timeout" from="Timers/CoolingTimer" to="." method="_on_cooling_timer_timeout"]

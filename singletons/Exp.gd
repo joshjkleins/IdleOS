@@ -1,6 +1,7 @@
 extends Node
 
 signal gained_xp_signal
+signal exp_updated_signal
 
 const MAX_LEVEL: int = 99
 
@@ -78,6 +79,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 			if minor["level"] >= MAX_LEVEL:
 				minor["level"] = MAX_LEVEL
 				break
+	exp_updated_signal.emit(amount, minor)
 
 
 func on_level_up(skill_data: Dictionary):

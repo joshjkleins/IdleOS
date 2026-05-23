@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://cawbutc5qs2ck"]
+
+[ext_resource type="Script" uid="uid://cn0uvlqd55klv" path="res://scripts/header.gd" id="1_q1nc5"]
+[ext_resource type="PackedScene" uid="uid://fk428w5i4mnu" path="res://scenes/major_skill.tscn" id="2_jvmy4"]
+[ext_resource type="PackedScene" uid="uid://grk5ff0dcb16" path="res://scenes/skill_details.tscn" id="3_67toa"]
+
+[node name="HEADER" type="PanelContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_q1nc5")
+h_color_grey = Color(0.289741, 0.289741, 0.289741, 1)
+
+[node name="MajorSkills" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MajorSkill" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+h_color = Color(0.113725, 0.619608, 0.458824, 1)
+
+[node name="MajorSkill2" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 1
+h_color = Color(0.498039, 0.466667, 0.866667, 1)
+
+[node name="MajorSkill3" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 2
+h_color = Color(0.937255, 0.623529, 0.152941, 1)
+
+[node name="MajorSkill4" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 3
+h_color = Color(0.831373, 0.32549, 0.494118, 1)
+
+[node name="MajorSkill5" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 4
+h_color = Color(0.215686, 0.541176, 0.866667, 1)
+
+[node name="MajorSkill6" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 5
+h_color = Color(0, 0.8, 0.333333, 1)
+
+[node name="SkillDetails" parent="." instance=ExtResource("3_67toa")]
+visible = false
+layout_mode = 2

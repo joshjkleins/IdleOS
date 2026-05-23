@@ -1,0 +1,85 @@
+[gd_scene load_steps=4 format=3 uid="uid://grk5ff0dcb16"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_vtp5t"]
+[ext_resource type="Script" uid="uid://co1d4dcfi6s0p" path="res://scripts/skill_details_hud.gd" id="2_ey22j"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vtp5t"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 4
+border_color = Color(0.461343, 0.920856, 0.476665, 1)
+
+[node name="SkillDetails" type="PanelContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("1_vtp5t")
+theme_override_styles/panel = SubResource("StyleBoxFlat_vtp5t")
+script = ExtResource("2_ey22j")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MainSkill" type="MarginContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/MainSkill"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+
+[node name="MainSkillCol" type="VBoxContainer" parent="HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillName" type="Label" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Mining"
+
+[node name="SkillLevel" type="Label" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "LVL 2"
+horizontal_alignment = 2
+
+[node name="SkillExpBar" type="ProgressBar" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+value = 40.0
+show_percentage = false
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillExpLabel" type="Label" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 / 240"
+
+[node name="ExpAddedLabel" type="Label" parent="HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.164706, 0.603922, 0.352941, 1)
+theme_override_font_sizes/font_size = 12
+text = "+120"
+horizontal_alignment = 2
+
+[node name="MinorContainer" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ExpLabelTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="ExpLabelTimer" to="." method="_on_exp_label_timer_timeout"]

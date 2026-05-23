@@ -441,19 +441,25 @@ func update_status_label_badge(text: String, color: Color):
 func _on_bandwidth_timer_timeout():
 	if is_hacking:
 		Hacking.current_bandwidth += Hacking.bandwidth_recovery_rate
+		
 		if Hacking.current_bandwidth > Hacking.max_bandwidth:
 			Hacking.current_bandwidth = Hacking.max_bandwidth
+			
 		band_bar.value = Hacking.current_bandwidth
 		
-		var remove_at = []
-		#check combat queue
-		if COMBAT_QUEUE.size() > 0:
-			for i in range(COMBAT_QUEUE.size()):
-				if COMBAT_QUEUE[i].type == "Attack" and COMBAT_QUEUE[i].bandwidth_cost <= Hacking.current_bandwidth:
-					remove_at.append(i)
-					attack()
-				if COMBAT_QUEUE[i].type == "Heal" and COMBAT_QUEUE[i].bandwidth_cost <= Hacking.current_bandwidth:
-					remove_at.append(i)
-					defense()
-			for i in remove_at:
-				COMBAT_QUEUE.remove_at(i)
+		# Process queue in order
+		while COMBAT_QUEUE.size() > 0:
+			var queued_action = COMBAT_QUEUE[0]
+			
+			# Stop if not enough bandwidth yet
+			if queued_action.bandwidth_cost > Hacking.current_bandwidth:
+				break
+			
+			# Execute
+			if queued_action.type == "Attack":
+				attack()
+			elif queued_action.type == "Heal":
+				defense()
+			
+			# Remove processed action
+			COMBAT_QUEUE.remove_at(0)
