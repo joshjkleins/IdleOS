@@ -75,7 +75,7 @@ func start_decrypting():
 		Exp.add_xp(Decoding, type, type["experience per level"])
 		Signals.update_hud(Decoding)
 		
-		#Signals.update_module_header("Cache Decrypting")
+	Signals.end_cache_decrypting_safely()
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:

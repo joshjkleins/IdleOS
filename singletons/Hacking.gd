@@ -13,7 +13,7 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"efficiency": 0.05,
-	"efficiency rate": 0.001
+	"efficiency rate": 0.0015
 }
 
 

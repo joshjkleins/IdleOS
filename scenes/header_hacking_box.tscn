@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cwcgukqes7d5o"]
+[gd_scene load_steps=6 format=3 uid="uid://cwcgukqes7d5o"]
 
 [ext_resource type="Script" uid="uid://do4kdjtm8ch0u" path="res://scripts/header_hacking_box.gd" id="1_45qip"]
-[ext_resource type="PackedScene" uid="uid://b6nkkejp764vy" path="res://scenes/header_info.tscn" id="2_t63x0"]
 [ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="2_yc4e7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0tax"]
@@ -10,6 +9,19 @@ border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yc4e7"]
+bg_color = Color(0, 0.8, 0.333333, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_yc4e7"]
+color = Color(0.427493, 0.427493, 0.427493, 1)
+grow_begin = -11.0
+grow_end = -13.0
+vertical = true
 
 [node name="HeaderHackingBox" type="Control"]
 custom_minimum_size = Vector2(0, 117)
@@ -37,17 +49,132 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_r0tax")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 5
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 50
 
-[node name="HUD" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_t63x0")]
+[node name="MainSkill" type="MarginContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="MainSkillCol" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillName" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0.333333, 1)
+theme_override_font_sizes/font_size = 16
+text = "Hacking"
+
+[node name="SkillLevel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "LVL 2"
+horizontal_alignment = 2
+
+[node name="SkillExpBar" type="ProgressBar" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_yc4e7")
+value = 40.0
+show_percentage = false
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillExpLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 / 240"
+
+[node name="ExpAddedLabel" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.164706, 0.603922, 0.352941, 1)
+theme_override_font_sizes/font_size = 12
+text = "+120"
+horizontal_alignment = 2
+
+[node name="VSeparator" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ResourceCol" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="IPAddressAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol"]
+layout_mode = 2
+text = "12"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "IP Address"
+
+[node name="ResourceCol2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CredAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2"]
+layout_mode = 2
+text = "4"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "Credentials"
+
+[node name="VSeparator2" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Efficiency" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "12%"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.592157, 0.592157, 0.592157, 1)
+theme_override_font_sizes/font_size = 10
+text = "EFFICIENCY"
 
 [node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
 layout_mode = 2
@@ -56,9 +183,14 @@ size_flags_horizontal = 10
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 layout_mode = 0
 offset_left = 15.0
-offset_top = -9.0
+offset_top = -7.75816
 offset_right = 769.0
-offset_bottom = 14.0
+offset_bottom = 15.2418
 bbcode_enabled = true
 text = "[bgcolor=#0b0e11]Hacking[/bgcolor]"
 fit_content = true
+
+[node name="ExpLabelTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="ExpLabelTimer" to="." method="_on_exp_label_timer_timeout"]

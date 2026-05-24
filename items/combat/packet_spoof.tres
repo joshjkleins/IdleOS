@@ -6,8 +6,8 @@
 script = ExtResource("1_gqeqw")
 damage = 0
 heal = 15
-speed = 15.0
-bandwidth_cost = 3
+speed = 8.0
+bandwidth_cost = 2
 type = "Heal"
 id = 78
 name = "Packet Spoof"

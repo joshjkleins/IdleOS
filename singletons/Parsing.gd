@@ -26,7 +26,14 @@ var LOGS = {
 	"requirements": Items.LOGS,
 	"item pool": [
 		{ "item": Items.DATA, "min": 10, "max": 20 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1 },
+		{ "item": Items.PASSWORDS, "min": 1, "max": 5 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 5 },
+		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 5 },
+		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 5 },
+		{ "item": Items.CREDENTIALS, "min": 1, "max": 5 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 5 },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 5 },
+		{ "item": Items.IP_ADDRESS, "min": 1, "max": 5 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row."

@@ -4,7 +4,6 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
 #TODO
-# hacking 'target' screen: play with sizing to make everything fit. maybe make header row smaller so right side can take up whole screen?
 # Do marketplace upgrades (sells valuables, contracts mechanic)
 # Add Phishing and Defragging 
 # Add installable modules for each major skill
@@ -97,6 +96,15 @@ enum Context {
 	MARKETPLACE,
 	DECODING,
 }
+
+enum MarketContext {
+	MAIN,
+	CONTRACT,
+	VALUABLES,
+	BLACK_MARKET,
+}
+
+var current_marketplace_context = MarketContext.MAIN
 
 var current_scrollback
 var current_context: Context = Context.ROOT
@@ -217,7 +225,11 @@ func get_context_lead():
 		Context.DARKWEB:
 			return "IdleOS/Darkweb>"
 		Context.MARKETPLACE:
-			return "IdleOS/Marketplace>"
+			match current_marketplace_context:
+				MarketContext.MAIN:
+					return "IdleOS/Marketplace>"
+				MarketContext.VALUABLES:
+					return "IdleOS/Marketplace/Valuables>"
 		Context.MINING:
 			Signals.update_hud(Mining)
 			return "IdleOS/Modules/Mining>"
@@ -236,9 +248,15 @@ func get_context_lead():
 			Signals.update_hud(Decoding)
 			return "IdleOS/Modules/Decoding>"
 
+
+
 #Changes context and updates leading text
 func update_context(new_context: Context):
 	current_context = new_context
+	lead_text.text = get_context_lead()
+
+func update_market_context(new_context: MarketContext):
+	current_marketplace_context = new_context
 	lead_text.text = get_context_lead()
 
 func list_help():
@@ -388,21 +406,17 @@ func root_commands(text):
 				await tween.finished
 				terminal_root.visible = false
 				await loading.show_loading()
-				
 				hacking.module_loaded()
 			else:
 				add_line("Module not found.")
-		#"marketplace -auth": #Go to marketplace
-			#add_line("[ .. ] requesting permissions")
-			#await get_tree().create_timer(0.8).timeout
-			#add_line("[ OK ] permission granted")
-			#await get_tree().create_timer(0.5).timeout
-			#add_line("Connected to online marketplace")
-			#update_context(Context.MARKETPLACE)
-			#add_line(Ascii.marketplace)
-			#add_line("Welcome to the marketplace.")
-			#add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
-			#list_help()
+		"marketplace -auth": #Go to marketplace
+			add_line("[ .. ] requesting permissions")
+			await get_tree().create_timer(0.8).timeout
+			add_line("[ OK ] permission granted")
+			await get_tree().create_timer(0.5).timeout
+			add_line("Connected to online marketplace")
+			update_context(Context.MARKETPLACE)
+			add_line(Marketplace.marketplace_welcome())
 		"load decoding":
 			add_line("[ .. ] loading decoding module")
 			await get_tree().create_timer(0.8).timeout
@@ -957,7 +971,9 @@ func update_module_stats_header(skill_name: String):
 			chance = snapped(chance, 0.1) # rounds to 1 decimal place
 			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)
 
-#Marketplace context commands
+###################################################
+################# MARKETPLACE #####################
+###################################################
 func marketplace_commands(text):
 	text = text.to_lower().strip_edges()
 	
@@ -965,25 +981,47 @@ func marketplace_commands(text):
 	if text.begins_with("buy"):
 		handle_buy_command(text)
 		return
-		
+	
+	match current_marketplace_context:
+		MarketContext.MAIN:
+			marketplace_main_commands(text)
+		MarketContext.VALUABLES:
+			marketplace_valuable_commands(text)
+
+func marketplace_main_commands(text):
 	match text:
+		"2":
+			if !Inventory.has_valuables():
+				add_line("No valuables found")
+				return
+			update_market_context(MarketContext.VALUABLES)
+			add_line(Marketplace.maretplace_valuables_main())
 		"list":
-			add_line(ShopItems.list_available_items())
-			add_line("\nCurrent balance: " + str(Inventory.get_amount(Items.DATA)) + " data")
-		
-		"marketplace -auth":
-			add_line("Already connected to marketplace")
-		"-h":
-			list_help()
-		"root":
+			add_line(Marketplace.marketplace_welcome())
+		"exit":
 			header.update_header()
 			update_context(Context.ROOT)
+			update_market_context(MarketContext.MAIN)
 			add_line("Saftely exiting marketplace")
-			await get_tree().create_timer(0.8).timeout
+			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.root)
 			list_help()
 		_:#default
 			add_line("Command not found")
+
+func marketplace_valuable_commands(text):
+	if text.is_valid_int():
+		if Inventory.has_item_by_id(int(text)):
+			add_line(Marketplace.view_valuable_item(int(text)))
+		else:
+			add_line("No item found with that ID")
+	else:
+		match text:
+			"sell -a":
+				add_line(Marketplace.sell_all_valuables())
+			"back":
+				update_market_context(MarketContext.MAIN)
+				add_line(Marketplace.marketplace_welcome())
 
 #Marketplace buy command
 func handle_buy_command(text: String) -> void:
@@ -1107,6 +1145,7 @@ func _navigate_history(delta: int):
 	call_deferred("_move_caret_to_end")
 
 func _on_hacking_start_loading() -> void:
+	header.update_header()
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true

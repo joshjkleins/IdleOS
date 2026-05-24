@@ -69,6 +69,8 @@ var offensive_item
 var defensive_item
 var COMBAT_QUEUE = []
 
+var stop_hacking: bool = false
+
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
 	Signals.end_hacking_signal.connect(kill_hack)
@@ -123,6 +125,7 @@ func queue_defense(item):
 	COMBAT_QUEUE.append(item)
 
 func setup(target: Dictionary, loadout: Dictionary = {}):
+	stop_hacking = false
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
 	ATTACK_AMOUNT = offensive_item.damage
@@ -152,6 +155,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	target_name_label.text = "-"
 	target_label_2.text = "-"
 	integ_label.text = "--/--"
+	
 	#status_label.text = "finding target"
 	update_status_label_badge("finding target", c_yellow)
 	#update # of sql injectors (attacks) and packet spoofer (heal)
@@ -302,8 +306,10 @@ func win():
 	reward_amount += 1
 	update_bottom_row()
 	_update_info_panel("target successfully hacked. +1 " + target_reward.name, c_blue)
+	_update_info_panel("-----------------------------------------------", c_white)
 	Exp.add_xp(Hacking, null, EXP_AMOUNT)
-	Signals.update_hud(Hacking)
+	Signals.update_hacking_header()
+	#Signals.update_hud(Hacking)
 	reset()
 
 func reset():
@@ -351,10 +357,12 @@ func kill_hack_safely():
 	_update_info_panel("Attempting to exit safely in approx. 6 second", c_yellow)
 
 func end():
+	bandwidth_timer.stop()
 	attacking = false
 	defending = false
 	is_hacking = false
-	bandwidth_timer.stop()
+	stop_hacking = true
+	reward_amount = 0
 
 func prepare():
 	if Inventory.get_amount(Items.IP_ADDRESS) <= 0 or Inventory.get_amount(Items.CREDENTIALS) <= 0:
@@ -378,12 +386,15 @@ func prepare():
 		await get_tree().create_timer(0.3).timeout
 		_update_info_panel("using IP Address and Credentials to gain access", c_white)
 		await get_tree().create_timer(0.2).timeout
+		if stop_hacking:
+			return
 		_update_info_panel("-1 credential", c_blue)
 		_update_info_panel("-1 ip address", c_blue)
 		update_bottom_row()
 		await get_tree().create_timer(0.5).timeout
 		Inventory.remove_resource(Items.IP_ADDRESS, 1)
 		Inventory.remove_resource(Items.CREDENTIALS, 1)
+		Signals.update_hacking_header()
 		update_bottom_row()
 		_update_info_panel("access granted", c_green)
 		var tween = create_tween()
@@ -402,6 +413,8 @@ func prepare():
 		integ_bar.value = INTEGRITY_AMOUNT
 		firewall_bar.max_value = FIREWALL_AMOUNT
 		firewall_bar.value = FIREWALL_AMOUNT
+		if stop_hacking:
+			return
 		start_hack()
 
 func _on_anon_bar_value_changed(value):
@@ -447,19 +460,31 @@ func _on_bandwidth_timer_timeout():
 			
 		band_bar.value = Hacking.current_bandwidth
 		
-		# Process queue in order
+		#slop
 		while COMBAT_QUEUE.size() > 0:
-			var queued_action = COMBAT_QUEUE[0]
-			
-			# Stop if not enough bandwidth yet
+			var queued_action = COMBAT_QUEUE.pop_front()
+
 			if queued_action.bandwidth_cost > Hacking.current_bandwidth:
+				COMBAT_QUEUE.push_front(queued_action)
 				break
-			
-			# Execute
+
 			if queued_action.type == "Attack":
 				attack()
 			elif queued_action.type == "Heal":
 				defense()
-			
-			# Remove processed action
-			COMBAT_QUEUE.remove_at(0)
+		## Process queue in order
+		#while COMBAT_QUEUE.size() > 0:
+			#var queued_action = COMBAT_QUEUE[0]
+			#
+			## Stop if not enough bandwidth yet
+			#if queued_action.bandwidth_cost > Hacking.current_bandwidth:
+				#break
+			#
+			## Execute
+			#if queued_action.type == "Attack":
+				#attack()
+			#elif queued_action.type == "Heal":
+				#defense()
+			#
+			## Remove processed action
+			#COMBAT_QUEUE.remove_at(0)

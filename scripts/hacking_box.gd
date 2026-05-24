@@ -1,20 +1,17 @@
 extends Control
 
-
 @export var title_text: String = "Hacking"
 @onready var pc = $PanelContainer
 @onready var rtl = $RichTextLabel
 
 @onready var targets_container = $PanelContainer/MarginContainer/TargetsContainer
 @onready var persons_container = $PanelContainer/MarginContainer/PersonsContainer
-#@onready var hack_container = $PanelContainer/MarginContainer/HackContainer
 @onready var hacking_game = $PanelContainer/MarginContainer/HackingGame
 
 const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
 const person_card: PackedScene = preload("res://scenes/person_card.tscn")
 
 func _ready():
-	#Signals.end_hacking_signal.connect(end_hack)
 	targets_container.visible = true
 	persons_container.visible = false
 	hacking_game.visible = false
@@ -24,7 +21,6 @@ func _ready():
 func update_targets():
 	for child in targets_container.get_children():
 		child.queue_free()
-	#await get_tree().process_frame  # wait for frees to process
 	
 	for target in Stats.hacking_targets:
 		var info = Stats.hacking_targets[target]
@@ -117,4 +113,3 @@ func _update_persons(target_location):
 		new_card.update_info(target)
 		
 		persons_container.add_child(new_card)
-		break

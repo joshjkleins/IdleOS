@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_a6jn5")
 theme_override_constants/margin_left = 3
-theme_override_constants/margin_top = 3
+theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 3
 script = ExtResource("2_t3qgm")
@@ -27,7 +27,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 size_flags_vertical = 1
 size_flags_stretch_ratio = 0.2
-title_text = "Hacking Info"
+title_text = "Info"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2

@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1_tr1om")
-damage = 60
+damage = 55
 heal = 0
-speed = 13.5
-bandwidth_cost = 3
+speed = 20.0
+bandwidth_cost = 2
 type = "Attack"
 id = 77
 name = "SQL Injector"

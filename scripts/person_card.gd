@@ -11,7 +11,8 @@ func update_info(info):
 	$MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/FirewallAmount.text = str(info.firewall)
 	$MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/CounterAmount.text = str(info.counter)
 	$MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox/MarginContainer/VBoxContainer/SpeedAmount.text = str(info["counter speed"])
-	
+	$MarginContainer/VBoxContainer/HBoxContainer/Reward.text = info.loot.name
+
 	if $MarginContainer/VBoxContainer/LootContainer.get_children().size() > 0:
 		for n in $MarginContainer/VBoxContainer/LootContainer.get_children():
 			n.queue_free()

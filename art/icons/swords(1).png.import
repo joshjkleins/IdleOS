@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dif838gcsge0m"
-path="res://.godot/imported/zap(1).png-a8fe6f34eadd386ab7f909e1db707fe0.ctex"
+uid="uid://dmsfev40ft8fo"
+path="res://.godot/imported/swords(1).png-b7fbf990a28fb486c3eeb194a172259e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/zap(1).png"
-dest_files=["res://.godot/imported/zap(1).png-a8fe6f34eadd386ab7f909e1db707fe0.ctex"]
+source_file="res://art/icons/swords(1).png"
+dest_files=["res://.godot/imported/swords(1).png-b7fbf990a28fb486c3eeb194a172259e.ctex"]
 
 [params]
 

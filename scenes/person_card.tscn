@@ -1,14 +1,21 @@
-[gd_scene load_steps=13 format=3 uid="uid://bcqnb6ti2stem"]
+[gd_scene load_steps=14 format=3 uid="uid://bcqnb6ti2stem"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_qknx8"]
 [ext_resource type="Script" uid="uid://bygridhph58m8" path="res://scripts/person_card.gd" id="2_qknx8"]
-[ext_resource type="Texture2D" uid="uid://c26uykmpajwaj" path="res://art/icons/square-terminal.png" id="3_dhuag"]
-[ext_resource type="Texture2D" uid="uid://b26b7qsds5vx3" path="res://art/icons/heart.png" id="4_1frw8"]
-[ext_resource type="Texture2D" uid="uid://d04raoc3xoiue" path="res://art/icons/shield(1).png" id="5_kc5ps"]
-[ext_resource type="Texture2D" uid="uid://dadwo8xev7h5j" path="res://art/icons/swords.png" id="6_qjvit"]
-[ext_resource type="Texture2D" uid="uid://dif838gcsge0m" path="res://art/icons/zap(1).png" id="7_dhpb3"]
-[ext_resource type="Texture2D" uid="uid://docb27kwj7j70" path="res://art/icons/database.png" id="8_kif2g"]
+[ext_resource type="Texture2D" uid="uid://cnaiug4ini8aw" path="res://art/icons/square-terminal(1).png" id="3_dhuag"]
+[ext_resource type="Texture2D" uid="uid://8cvqdiqlio2r" path="res://art/icons/heart(1).png" id="4_dhuag"]
+[ext_resource type="Texture2D" uid="uid://bnlodq7xyly1t" path="res://art/icons/shield(2).png" id="5_dhuag"]
+[ext_resource type="Texture2D" uid="uid://dmsfev40ft8fo" path="res://art/icons/swords(1).png" id="5_eihd4"]
+[ext_resource type="Texture2D" uid="uid://b712d0t6cf8rx" path="res://art/icons/zap(2).png" id="6_eihd4"]
+[ext_resource type="Texture2D" uid="uid://c6qeo4af1kt41" path="res://art/icons/database(1).png" id="7_dhuag"]
 [ext_resource type="PackedScene" uid="uid://brc6hvjqdg4ms" path="res://scenes/loot_row.tscn" id="9_1frw8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1frw8"]
+bg_color = Color(0.239216, 0.541176, 0.239216, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oirho"]
 bg_color = Color(0.160784, 0.160784, 0.160784, 1)
@@ -39,7 +46,7 @@ corner_radius_bottom_left = 5
 [node name="PersonCard" type="PanelContainer"]
 custom_minimum_size = Vector2(200, 0)
 offset_right = 234.0
-offset_bottom = 300.0
+offset_bottom = 276.0
 size_flags_horizontal = 3
 theme = ExtResource("1_qknx8")
 script = ExtResource("2_qknx8")
@@ -55,59 +62,29 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-visible = false
-layout_mode = 2
-
-[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-text = "Student"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Difficulty" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "DIFFICULTY [x] [ ] [ ] [ ] [ ]"
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Command" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Command: hack student"
-
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="LootTitle" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Loot"
-
-[node name="Loot" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Loot"
-
 [node name="RowOne" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="TargetName" type="Label" parent="MarginContainer/VBoxContainer/RowOne"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Student"
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/RowOne"]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 10
+theme_override_styles/panel = SubResource("StyleBoxFlat_1frw8")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/RowOne/PanelContainer"]
 layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 0
 
 [node name="Difficulty" type="Label" parent="MarginContainer/VBoxContainer/RowOne/PanelContainer/MarginContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "easy"
 horizontal_alignment = 2
 
@@ -126,10 +103,11 @@ theme_override_constants/margin_bottom = 4
 layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 texture = ExtResource("3_dhuag")
-stretch_mode = 4
+expand_mode = 2
 
 [node name="Command" type="Label" parent="MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer"]
 layout_mode = 2
@@ -146,6 +124,7 @@ columns = 2
 [node name="IntegrityBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_qknx8")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/IntegrityBox"]
@@ -163,7 +142,7 @@ layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/IntegrityBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("4_1frw8")
+texture = ExtResource("4_dhuag")
 expand_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/IntegrityBox/MarginContainer/VBoxContainer/HBoxContainer"]
@@ -179,6 +158,7 @@ text = "100"
 [node name="FirewallBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_rl8lx")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/FirewallBox"]
@@ -196,7 +176,7 @@ layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("5_kc5ps")
+texture = ExtResource("5_dhuag")
 expand_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/HBoxContainer"]
@@ -212,6 +192,7 @@ text = "100"
 [node name="CounterattackBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_rl8lx")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/CounterattackBox"]
@@ -229,7 +210,7 @@ layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("6_qjvit")
+texture = ExtResource("5_eihd4")
 expand_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/HBoxContainer"]
@@ -245,6 +226,7 @@ text = "100"
 [node name="AttackSpeedBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_rl8lx")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox"]
@@ -262,7 +244,7 @@ layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("7_dhpb3")
+texture = ExtResource("6_eihd4")
 expand_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox/MarginContainer/VBoxContainer/HBoxContainer"]
@@ -275,34 +257,38 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "100"
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "LOOT"
-
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "REWARD"
+
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("8_kif2g")
+texture = ExtResource("7_dhuag")
 expand_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Reward" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Student cache"
 
 [node name="LootContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="LootRow" parent="MarginContainer/VBoxContainer/LootContainer" instance=ExtResource("9_1frw8")]
 layout_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]

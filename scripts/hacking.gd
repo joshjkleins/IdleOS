@@ -19,7 +19,7 @@ func _ready():
 	Signals.update_console_signal.connect(message_from_hack_game)
 
 func module_loaded():
-	header_hacking_box.update_header()
+	header_hacking_box.update_hacking_header()
 	modulate.a = 0.0
 	visible = true
 	player_hacking_box.grab()
@@ -27,8 +27,6 @@ func module_loaded():
 	var tween2 = create_tween()
 	tween2.tween_property(self, "modulate:a", 1.0, 0.5)
 	await tween2.finished
-	
-	#header_hacking_box.update_header()
 	enemy_hacking_box.update_targets()
 
 func go_to_root() -> void:

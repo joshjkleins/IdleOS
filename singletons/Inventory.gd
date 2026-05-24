@@ -20,9 +20,12 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
+	pass
 	#for i in Items.ITEM_MAP:
 		#add_resource(Items.ITEM_MAP[i], 10)
 	#pass
+	add_resource(Items.PARENTS_CREDIT_CARD, 3)
+	add_resource(Items.ADMISSIONS_BRIBERY_RECORDS, 1)
 	#add_resource(Items.DATA, 25)
 	#add_resource(Items.LOGS, 200)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 21)
@@ -31,17 +34,23 @@ func _ready():
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 4)
 	#add_resource(Items.PASSWORDS, 30)
 	#add_resource(Items.USERNAMES, 30)
-	#add_resource(Items.STUDENT_CACHE, 100)
+	add_resource(Items.STUDENT_CACHE, 2)
 	#add_resource(Items.PINS, 30)
 	#add_resource(Items.ACCOUNT_NUMBERS, 30)
-	add_resource(Items.CREDENTIALS, 1)
-	add_resource(Items.IP_ADDRESS, 1)
-	add_resource(Items.SQL_INJECTOR, 100)
-	add_resource(Items.PACKET_SPOOF, 100)
+	#add_resource(Items.CREDENTIALS, 1)
+	#add_resource(Items.IP_ADDRESS, 1)
+	#add_resource(Items.SQL_INJECTOR, 100)
+	#add_resource(Items.PACKET_SPOOF, 100)
 	#add_resource(Items.ADMIN_CACHE, 2)
 	#add_resource(Items.COP_CACHE, 1)
 	#add_resource(Items.BODY_CAM_FOOTAGE_DELETION_LOGS, 2)
 	
+
+func has_item_by_id(id: int) -> bool:
+	for i in inventory:
+		if i.id == id:
+			return true
+	return false
 
 func get_amount(resource: ItemData) -> int:
 	if inventory.has(resource):
@@ -130,3 +139,18 @@ func has_cache() -> bool:
 		if i.name.contains("cache"):
 			return true
 	return false
+
+func has_valuables() -> bool:
+	for i in inventory:
+		if i.valuable:
+			return true
+	return false
+
+func get_all_valuables() -> Array:
+	if !has_valuables():
+		return []
+	var vals = []
+	for i in inventory:
+		if i.valuable:
+			vals.append(i)
+	return vals
