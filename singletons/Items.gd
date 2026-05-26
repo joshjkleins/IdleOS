@@ -103,6 +103,7 @@ enum ItemType {
 	ENCRYPTED_PINS, #80
 	ACCOUNT_NUMBERS, #81
 	ACCOUNT_ACCESS_TOKENS, #82
+	DDOS, #83
 }
 
 #items
@@ -119,6 +120,7 @@ const ENCRYPTED_PINS = preload("res://items/resources/encrypted_pins.tres")
 const PINS = preload("res://items/resources/pins.tres")
 const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
 const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
+const DDOS = preload("res://items/combat/ddos.tres")
 
 ### VALUABLES ###
 #school
@@ -299,4 +301,5 @@ const ITEM_MAP = {
 	ItemType.ENCRYPTED_PINS: ENCRYPTED_PINS,
 	ItemType.ACCOUNT_NUMBERS: ACCOUNT_NUMBERS,
 	ItemType.ACCOUNT_ACCESS_TOKENS: ACCOUNT_ACCESS_TOKENS,
+	ItemType.DDOS: DDOS,
 }

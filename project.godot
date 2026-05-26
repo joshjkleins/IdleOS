@@ -34,6 +34,7 @@ Matching="*res://singletons/Matching.gd"
 Decoding="*res://singletons/Decoding.gd"
 Hacking="*res://singletons/Hacking.gd"
 Marketplace="*res://singletons/Marketplace.gd"
+ContractsManager="*res://singletons/ContractsManager.gd"
 
 [display]
 

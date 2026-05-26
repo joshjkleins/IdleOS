@@ -76,9 +76,6 @@ var EXP_PER_COMPLETION: int = 0
 var EFFICIENCY_RATE: float = 0.0
 var TYPE: Dictionary
 
-#to finish
-#update color scheme to white / grey
-
 func _process(delta):
 	if process_running:
 		session_time += delta
@@ -146,7 +143,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
-	
+	TYPE.signal.emit(reward_quantity_gained)
 	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION)
 	Signals.update_hud(Mining)
 	session_cycle += 1

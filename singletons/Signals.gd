@@ -1,5 +1,6 @@
 extends Node
 
+signal contract_finished_signal
 signal end_hacking_signal
 signal system_temp_updated_signal
 signal heat_added_signal

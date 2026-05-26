@@ -19,7 +19,7 @@ func update(skill: Dictionary):
 	Exp.exp_updated_signal.connect(exp_updated)
 
 #updates progress bar and 10/100 label and level label
-func update_exp(amount: int):
+func update_exp(_amount: int):
 	if current_skill:
 		$MarginContainer2/VBoxContainer/HBoxContainer/SkillLevel.text = str(current_skill.level) + "/99"
 		

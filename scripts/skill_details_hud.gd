@@ -39,7 +39,7 @@ func update(skill: Node, color: Color): #pass singleton ie Mining, Parsing, Deco
 		skill_scene.update(s)
 		minor_container.add_child(skill_scene)
 
-func exp_updated(amount: int, minor: Dictionary):
+func exp_updated(amount: int, _minor: Dictionary):
 	var experience = Exp.get_xp_display(current_skill.SKILL)
 	skill_level.text = "LVL " + str(current_skill.SKILL.level)
 	skill_exp_bar.max_value = experience["needed"]

@@ -2,22 +2,27 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
+# BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
+
+#WHERE U AT: working on marketplace rebuild - add utility item (no functionality yet, just to get labels and logic finished up)
+# add contracts: #add UI visuals for contracts (top right, small lines indicating contracts (max of 3). #add commands to finish contracts (universal)
+# work on algo for generation of contracts after x time (or maybe just a refresh token or data to refresh?)
+# possibly permanent upgrade section? IE increase bandwidth, anonymity, cooling rate, Skill upgrades?
+# change NETWORK EXCHANGE to perm upgrades, figure out perm upgrade stuff
 
 #TODO
 # Do marketplace upgrades (sells valuables, contracts mechanic)
 # Add Phishing and Defragging 
 # Add installable modules for each major skill
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
-# then after above is done, add more combat items to test with
-# add logic that makes terminal like hacking (ie sequential so its easier to follow)
+# then after above is done, add more combat items to test with (utility items), and one time use items
+# add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
 #save/load
 #offline progression - cap at 24 hours?
 
-#stop adding to above, once finished to a balance patch, and play through game
+#stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
 
 ########item ideas:
-## Resouces ##
-#
 ## ONE TIME USES ##
 # Virtual machine tokens - consume to open a new window to run a process for x amount of time
 # Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
@@ -47,6 +52,18 @@ extends Control
 # Contracts - Hacking target - buy, hack x target x times - get reward
 # Valuable - Can sell valuables (only purpose)
 
+#CONTRACTS: can only have 3 at one time
+# [1] AVAILABLE JOBS
+#		[1] MINING
+#			[1] cost: 500 data - Mine 200 data: reward: Mining/data exp: 5,000, +25 logs
+#			[2] cost: 800 data - Mine 100 logs: reward: Mining/Logs exp: 5,000, +500 data
+#		[2] PARSING
+#		[3] CRACKING
+#		[4] MATCHING
+#		[5] DECODING
+# [2] REQUEST JOBS
+# [3] HACKING REQUESTS
+
 ####### MODULE UPGRADES INSTALL
 # Each skill has 2 slots (speed slot and efficiency slot) applies to all minor skills within
 # Everything to be purchased from marketplace
@@ -64,7 +81,6 @@ extends Control
 
 @onready var lead_text = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/LeadText
 @onready var input_line = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/InputLine
-
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
@@ -73,8 +89,6 @@ extends Control
 @onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer/Scrollback
 @onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody
 @onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer
-
-#@onready var header = $Panel/MarginContainer/TerminalRoot/HEADER
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
@@ -101,7 +115,14 @@ enum MarketContext {
 	MAIN,
 	CONTRACT,
 	VALUABLES,
+	VALUABLES_DETAILS,
 	BLACK_MARKET,
+	BLACK_MARKET_OFFENSIVE,
+	BLACK_MARKET_OFFENSIVE_DETAILS,
+	BLACK_MARKET_DEFENSIVE,
+	BLACK_MARKET_DEFENSIVE_DETAILS,
+	BLACK_MARKET_UTILITY,
+	BLACK_MARKET_UTILITY_DETAILS
 }
 
 var current_marketplace_context = MarketContext.MAIN
@@ -138,7 +159,6 @@ func _ready():
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
 	
-	Signals.update_module_header_signal.connect(update_module_stats_header)
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
@@ -230,6 +250,22 @@ func get_context_lead():
 					return "IdleOS/Marketplace>"
 				MarketContext.VALUABLES:
 					return "IdleOS/Marketplace/Valuables>"
+				MarketContext.VALUABLES_DETAILS:
+					return "IdleOS/Marketplace/Valuables>"
+				MarketContext.BLACK_MARKET:
+					return "IdleOS/Marketplace/BlackMarket>"
+				MarketContext.BLACK_MARKET_OFFENSIVE:
+					return "IdleOS/Marketplace/BlackMarket/Offensive>"
+				MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS:
+					return "IdleOS/Marketplace/BlackMarket/Offensive>"
+				MarketContext.BLACK_MARKET_DEFENSIVE:
+					return "IdleOS/Marketplace/BlackMarket/Defensive>"
+				MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
+					return "IdleOS/Marketplace/BlackMarket/Defensive>"
+				MarketContext.BLACK_MARKET_UTILITY:
+					return "IdleOS/Marketplace/BlackMarket/Utility>"
+				MarketContext.BLACK_MARKET_UTILITY_DETAILS:
+					return "IdleOS/Marketplace/BlackMarket/Utility>"
 		Context.MINING:
 			Signals.update_hud(Mining)
 			return "IdleOS/Modules/Mining>"
@@ -425,6 +461,10 @@ func root_commands(text):
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.decoding)
+		"create contract":
+			ContractsManager.create_contract()
+		"show contracts":
+			add_line(ContractsManager.show_contracts())
 		_:#default
 			add_line("Command not found")
 
@@ -922,55 +962,6 @@ func overclock_logic():
 		return
 	Stats.overclocked = true
 
-#Builds header for module running 
-func show_module_stats_header(skill_name: String):
-	var skill = Stats.player_stats[skill_name]
-	var level = skill["level"]
-	var efficiency = skill["efficiency"]
-	var xp_current = skill["experience"]
-	var xp_needed = Stats.xp_for_level(level + 1)
-	add_line("\n" + "[color=cyan]=== " + skill_name.to_upper() + " MODULE ===[/color]\n")
-	add_line("[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]")
-	lvl_and_efficiency_index = lines.size() - 1
-	
-	# XP BAR
-	add_line(get_skill_xp_bar(skill))
-	skill_xp_progress_bar_index = lines.size() - 1
-	
-	add_line(
-		"[color=#aaaaaa]XP:[/color] [color=yellow]" + str(xp_current) + "[/color] / " + "[color=yellow]" + str(xp_needed) + "[/color]"
-	)
-	skill_xp_nums_index = lines.size() - 1
-	
-	match skill_name:
-		"Parsing":
-			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
-			chance = snapped(chance, 0.1) # rounds to 1 decimal place
-			add_line("Chance to extract resource: " + str(chance) + "%\n")
-			skill_specific_info_index = lines.size() - 1
-
-#Updates built header for module running
-func update_module_stats_header(skill_name: String):
-	var skill = Stats.player_stats[skill_name]
-	var level = skill["level"]
-	var efficiency = skill["efficiency"]
-	var xp_current = skill["experience"]
-	var xp_needed = Stats.xp_for_level(level + 1)
-	
-	set_line(lvl_and_efficiency_index, "[color=#aaaaaa]Level:[/color] [color=lime]" + str(level) + "[/color]      " + "[color=#aaaaaa]Efficiency:[/color] [color=lime]+" + str(float(efficiency * 100)) + "%[/color]", false)
-	
-	# XP BAR
-	set_line(skill_xp_progress_bar_index, get_skill_xp_bar(skill), false)
-	
-	set_line(skill_xp_nums_index, "[color=#aaaaaa]XP:[/color] [color=yellow]" + str(xp_current) + "[/color] / " + "[color=yellow]" + str(xp_needed) + "[/color]", false)
-	
-	#Skill specific text, if any
-	match skill_name:
-		"Parsing":
-			var chance = (LogParser.BASE_REWARD_CHANCE + efficiency) * 100.0
-			chance = snapped(chance, 0.1) # rounds to 1 decimal place
-			set_line(skill_specific_info_index, "Chance to extract resource: " + str(chance) + "%\n", false)
-
 ###################################################
 ################# MARKETPLACE #####################
 ###################################################
@@ -978,16 +969,33 @@ func marketplace_commands(text):
 	text = text.to_lower().strip_edges()
 	
 	# --- BUY COMMAND PARSING ---
-	if text.begins_with("buy"):
-		handle_buy_command(text)
-		return
+	#if text.begins_with("buy"):
+		#handle_buy_command(text)
+		#return
 	
-	match current_marketplace_context:
-		MarketContext.MAIN:
-			marketplace_main_commands(text)
-		MarketContext.VALUABLES:
-			marketplace_valuable_commands(text)
+	if text == "exit":
+		header.update_header()
+		update_context(Context.ROOT)
+		update_market_context(MarketContext.MAIN)
+		Marketplace.viewing_item = null
+		add_line("Saftely exiting marketplace")
+		await get_tree().create_timer(0.5).timeout
+		add_line(Ascii.root)
+	else:
+		match current_marketplace_context:
+			MarketContext.MAIN:
+				marketplace_main_commands(text)
+			MarketContext.VALUABLES:
+				marketplace_valuable_commands(text)
+			MarketContext.VALUABLES_DETAILS:
+				marketplace_valuable_details_commands(text)
+			MarketContext.BLACK_MARKET:
+				marketplace_black_market_main_commands(text)
+			MarketContext.BLACK_MARKET_OFFENSIVE, MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS, MarketContext.BLACK_MARKET_DEFENSIVE, MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
+				marketplace_black_market_offensive_commands(text)
+				
 
+#current_market_context == MarketContext.MAIN
 func marketplace_main_commands(text):
 	match text:
 		"2":
@@ -996,122 +1004,129 @@ func marketplace_main_commands(text):
 				return
 			update_market_context(MarketContext.VALUABLES)
 			add_line(Marketplace.maretplace_valuables_main())
+		"3":
+			update_market_context(MarketContext.BLACK_MARKET)
+			add_line(Marketplace.black_market_main())
 		"list":
 			add_line(Marketplace.marketplace_welcome())
-		"exit":
-			header.update_header()
-			update_context(Context.ROOT)
-			update_market_context(MarketContext.MAIN)
-			add_line("Saftely exiting marketplace")
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.root)
-			list_help()
 		_:#default
 			add_line("Command not found")
 
+#current_market_context == MarketContext.BLACK_MARKET
+func marketplace_black_market_main_commands(text):
+	match text:
+		"1": #[1] OFFENSIVE ITEMS
+			add_line(Marketplace.black_market_items("offensive"))
+			update_market_context(MarketContext.BLACK_MARKET_OFFENSIVE)
+		"2": #[2] DEFENSIVE ITEMS
+			add_line(Marketplace.black_market_items("defensive"))
+			update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE)
+		#"3": #[3] UTILITY ITEMS
+			#add_line(Marketplace.black_market_utility())
+			#update_market_context(MarketContext.BLACK_MARKET_UTILITY)
+		"back":
+			update_market_context(MarketContext.MAIN)
+			add_line(Marketplace.marketplace_welcome())
+		_:#default
+			add_line("Command not found")
+
+func marketplace_black_market_offensive_commands(text):
+	match current_marketplace_context:
+		#VIEWING ALL OFFENSIVE ITEMS
+		MarketContext.BLACK_MARKET_OFFENSIVE:
+			if text.is_valid_int():
+				add_line(Marketplace.black_market_item_details(int(text), "offensive"))
+				if Marketplace.viewing_item:
+					update_market_context(MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS)
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_main())
+						update_market_context(MarketContext.BLACK_MARKET)
+					_:#default
+						add_line("Command not found")
+		MarketContext.BLACK_MARKET_DEFENSIVE:
+			if text.is_valid_int():
+				add_line(Marketplace.black_market_item_details(int(text), "defensive"))
+				if Marketplace.viewing_item:
+					update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS)
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_main())
+						update_market_context(MarketContext.BLACK_MARKET)
+					_:#default
+						add_line("Command not found")
+			
+		#VIEWING SPECIFIC DEFENSIVE ITEM
+		MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS:
+			if text.begins_with("buy"):
+				add_line(Marketplace.handle_black_market_buy_command(text))
+				if Marketplace.viewing_item == null: #successful because viewing_item was bought and set to null
+					update_market_context(MarketContext.BLACK_MARKET_OFFENSIVE)
+					add_line(Marketplace.black_market_items("offensive"))
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_items("offensive"))
+						update_market_context(MarketContext.BLACK_MARKET_OFFENSIVE)
+					_:#default
+						add_line("Command not found")
+		MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
+			if text.begins_with("buy"):
+				add_line(Marketplace.handle_black_market_buy_command(text))
+				if Marketplace.viewing_item == null: #successful because viewing_item was bought and set to null
+					update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE)
+					add_line(Marketplace.black_market_items("defensive"))
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_items("defensive"))
+						update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE)
+					_:#default
+						add_line("Command not found")
+
+#current_market_context == MarketContext.VALUABLES_DETAILS
+func marketplace_valuable_details_commands(text):
+	if text.is_valid_int() and Marketplace.viewing_item:
+		add_line(Marketplace.handle_valuable_details_sell(int(text)))
+		if Marketplace.viewing_item == null: #null means a sale was made
+			update_market_context(MarketContext.VALUABLES)
+			add_line(Marketplace.maretplace_valuables_main())
+		
+	else:
+		match text:
+			#selling all of a specific valuable
+			"all":
+				add_line(Marketplace.handle_valuable_details_sell_all())
+				update_market_context(MarketContext.VALUABLES)
+				add_line(Marketplace.maretplace_valuables_main())
+			"back":
+				update_market_context(MarketContext.VALUABLES)
+				add_line(Marketplace.maretplace_valuables_main())
+			_:#default
+				add_line("Command not found")
+
+#current_market_context == MarketContext.VALUABLES
 func marketplace_valuable_commands(text):
 	if text.is_valid_int():
 		if Inventory.has_item_by_id(int(text)):
 			add_line(Marketplace.view_valuable_item(int(text)))
+			update_market_context(MarketContext.VALUABLES_DETAILS)
 		else:
 			add_line("No item found with that ID")
 	else:
 		match text:
 			"sell -a":
 				add_line(Marketplace.sell_all_valuables())
+				add_line("Returning to main menu")
+				update_market_context(MarketContext.MAIN)
+				add_line(Marketplace.marketplace_welcome())
 			"back":
 				update_market_context(MarketContext.MAIN)
 				add_line(Marketplace.marketplace_welcome())
-
-#Marketplace buy command
-func handle_buy_command(text: String) -> void:
-	var parts = text.split(" ")
-	
-	var item_id := -1
-	var amount := 1 # default
-	
-	for part in parts:
-		if part.begins_with("id="):
-			item_id = int(part.trim_prefix("id="))
-		elif part.begins_with("a="):
-			amount = int(part.trim_prefix("a="))
-	
-	# Validate ID
-	if item_id == -1:
-		add_line("Buy command not recognized")
-		add_line("Usage: buy id=[itemID] a=[amount]")
-		add_line("Example: buy id=0 a=12")
-		return
-	
-	purchase_item(item_id, amount)
-
-func purchase_item(id: int, amount: int):
-	# Validate item
-	if not ShopItems.items.has(id):
-		add_line("Item ID not found.")
-		return
-	
-	# Validate amount
-	if amount <= 0:
-		add_line("Invalid purchase amount.")
-		return
-	
-	var item = ShopItems.items[id]
-	if item["type"] == ShopItems.ItemType.MODULE and amount != 1:
-		amount = 1
-		add_line("Limited to 1 module per purchase. Adjusting amount to 1.")
-		await get_tree().create_timer(0.5).timeout
-		
-	add_line("Sending order...")
-	await get_tree().create_timer(0.5).timeout
-	
-	# Check availability
-	if not item.get("available", false):
-		add_line("Item is not available.")
-		return
-	
-	var player_money = Inventory.get_amount(Items.DATA)
-	var cost_per_item = item["cost"]
-	var total_cost = cost_per_item * amount
-	
-	# Check funds
-	if player_money < total_cost:
-		add_line("Not enough Data. Need " + str(total_cost) + ", you have " + str(player_money) + ".")
-		return
-	
-
-	add_line("Order received")
-	await get_tree().create_timer(0.5).timeout
-	add_line("Transfering funds")
-	await get_tree().create_timer(0.2).timeout
-	add_line("Funds received")
-	await get_tree().create_timer(0.2).timeout
-	add_line("Downloading items")
-	await get_tree().create_timer(1.0).timeout
-	#
-	# Deduct cost
-	#idk why this is here, this should never be hit if the above statement exists
-	if not Inventory.remove_resource(Items.DATA, total_cost):
-		add_line("Transaction failed.")
-		return
-	
-	# Grant rewards
-	ShopItems.grant_item_reward(item, amount)
-	var output_string = "Purchased x" + str(amount) + " " + item["name"]
-	if item["type"] == ShopItems.ItemType.MODULE:
-		output_string += " module"
-	output_string += " for " + str(total_cost) + " Data."
-	add_line(output_string)
-
-func get_skill_xp_bar(skill_data: Dictionary, steps:int = 20) -> String:
-	var progress = Stats.get_xp_progress(skill_data)
-	var filled_steps = int(progress * steps)
-
-	var filled = "=".repeat(filled_steps)
-	var empty = " ".repeat(steps - filled_steps)
-	var percent = int(progress * 100)
-
-	return "[%s>%s] %d%%" % [filled, empty, percent]
+			_:#default
+				add_line("Command not found")
 
 #used when navigating past commands with up/down arrows
 func _move_caret_to_end():

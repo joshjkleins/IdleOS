@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CombatItem" load_steps=2 format=3 uid="uid://j1bvex7d3svr"]
+
+[ext_resource type="Script" uid="uid://c7r65t2y40b2d" path="res://resource_scripts/item_combat.gd" id="1_f2rgn"]
+
+[resource]
+script = ExtResource("1_f2rgn")
+damage = 65
+heal = 0
+speed = 17.0
+speed_name = "MEDIUM"
+bandwidth_cost = 5
+data_cost = 150
+firewall_damage = 3
+type = "Attack"
+id = 83
+name = "DDoS"
+shortened_name = ""
+description = "Attacking hack"
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://c7r65t2y40b2d"

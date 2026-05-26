@@ -4,15 +4,18 @@
 
 [resource]
 script = ExtResource("1_tr1om")
-damage = 55
+damage = 20
 heal = 0
 speed = 20.0
+speed_name = "MEDIUM"
 bandwidth_cost = 2
+data_cost = 15
+firewall_damage = 1
 type = "Attack"
 id = 77
 name = "SQL Injector"
 shortened_name = ""
-description = "Deals 15 integrity damage"
+description = "Basic attacking hack."
 valuable = false
 value = 0
 metadata/_custom_type_script = "uid://c7r65t2y40b2d"

@@ -1,5 +1,8 @@
 extends Node
 
+signal data_cycle_completed
+signal log_cycle_completed
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Mining",
@@ -27,7 +30,8 @@ var DATA = {
 	"resource gained": Items.DATA,
 	"resource amount gained": 1,
 	"description": "Generates data. Used as the main currency.",
-	"efficiency description": "Chance to receive multiple data."
+	"efficiency description": "Chance to receive multiple data.",
+	"signal": data_cycle_completed
 }
 
 var LOGS = {
@@ -50,7 +54,8 @@ var LOGS = {
 	"resource gained": Items.LOGS,
 	"resource amount gained": 1,
 	"description": "Finds logs that can be parsed for a random assortment of items.",
-	"efficiency description": "Chance to receive multiple logs."
+	"efficiency description": "Chance to receive multiple logs.",
+	"signal": log_cycle_completed
 }
 
 var minor_processes = [
