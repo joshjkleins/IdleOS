@@ -5,6 +5,7 @@ var SKILL = {
 	"name": "Matching",
 	"level": 1,
 	"experience": 0,
+	"color": Color("#D4537E"),
 }
 
 var CREDENTIAL = {

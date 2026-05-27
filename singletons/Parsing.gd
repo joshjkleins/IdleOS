@@ -5,6 +5,7 @@ var SKILL = {
 	"name": "Parsing",
 	"level": 1,
 	"experience": 0,
+	"color": Color("#7F77DD")
 }
 
 var LOGS = {

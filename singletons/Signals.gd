@@ -1,6 +1,8 @@
 extends Node
 
 signal contract_finished_signal
+signal contract_added_signal
+signal contracts_removed_signal
 signal end_hacking_signal
 signal system_temp_updated_signal
 signal heat_added_signal
@@ -74,3 +76,6 @@ func item_added(item: ItemData, amount: int):
 #message: you lost, #type: "Error", "Success"
 func update_hack_console(message: String):
 	update_console_signal.emit(message)
+
+func contract_added(contract: Contract):
+	contract_added_signal.emit(contract)

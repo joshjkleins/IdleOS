@@ -68,14 +68,6 @@ func hacking_to_persons():
 	await _hide_container(hacking_game)
 	await _show_container(persons_container)
 
-#func end_hack():
-	##await get_tree().create_timer(1.5).timeout
-	###await _hide_container(hack_container)
-	##hacking_game.stop()
-	#await _hide_container(hacking_game)
-	#await _show_container(persons_container)
-	#Signals.hacking_ended()
-
 func _hide_container(container):
 	if !container.visible:
 		return

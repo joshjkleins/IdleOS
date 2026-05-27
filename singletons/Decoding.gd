@@ -5,6 +5,7 @@ var SKILL = {
 	"name": "Decoding",
 	"level": 1,
 	"experience": 0,
+	"color": Color("#378ADD"),
 }
 
 var CACHE = {

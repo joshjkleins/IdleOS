@@ -3,10 +3,11 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
+# BUG: weird color matching issue with MINING contracts (not the right green?)
+# BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#WHERE U AT: working on marketplace rebuild - add utility item (no functionality yet, just to get labels and logic finished up)
-# add contracts: #add UI visuals for contracts (top right, small lines indicating contracts (max of 3). #add commands to finish contracts (universal)
-# work on algo for generation of contracts after x time (or maybe just a refresh token or data to refresh?)
+#WHERE U AT:
+# work on algo for generation of contracts for marketplace. can be refreshed with a refresh token
 # possibly permanent upgrade section? IE increase bandwidth, anonymity, cooling rate, Skill upgrades?
 # change NETWORK EXCHANGE to perm upgrades, figure out perm upgrade stuff
 
@@ -90,6 +91,7 @@ extends Control
 @onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody
 @onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
+@onready var contracts_container = $Panel/ContractsContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -465,6 +467,12 @@ func root_commands(text):
 			ContractsManager.create_contract()
 		"show contracts":
 			add_line(ContractsManager.show_contracts())
+		"open contracts":
+			contracts_container.open_contracts()
+		"close contracts":
+			contracts_container.min_contracts()
+		"complete -c":
+			add_line(ContractsManager.complete_contracts())
 		_:#default
 			add_line("Command not found")
 
@@ -991,8 +999,8 @@ func marketplace_commands(text):
 				marketplace_valuable_details_commands(text)
 			MarketContext.BLACK_MARKET:
 				marketplace_black_market_main_commands(text)
-			MarketContext.BLACK_MARKET_OFFENSIVE, MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS, MarketContext.BLACK_MARKET_DEFENSIVE, MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
-				marketplace_black_market_offensive_commands(text)
+			MarketContext.BLACK_MARKET_OFFENSIVE, MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS, MarketContext.BLACK_MARKET_DEFENSIVE, MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS, MarketContext.BLACK_MARKET_UTILITY, MarketContext.BLACK_MARKET_UTILITY_DETAILS:
+				marketplace_black_market_category_commands(text)
 				
 
 #current_market_context == MarketContext.MAIN
@@ -1021,16 +1029,16 @@ func marketplace_black_market_main_commands(text):
 		"2": #[2] DEFENSIVE ITEMS
 			add_line(Marketplace.black_market_items("defensive"))
 			update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE)
-		#"3": #[3] UTILITY ITEMS
-			#add_line(Marketplace.black_market_utility())
-			#update_market_context(MarketContext.BLACK_MARKET_UTILITY)
+		"3": #[3] UTILITY ITEMS
+			add_line(Marketplace.black_market_items("utility"))
+			update_market_context(MarketContext.BLACK_MARKET_UTILITY)
 		"back":
 			update_market_context(MarketContext.MAIN)
 			add_line(Marketplace.marketplace_welcome())
 		_:#default
 			add_line("Command not found")
 
-func marketplace_black_market_offensive_commands(text):
+func marketplace_black_market_category_commands(text):
 	match current_marketplace_context:
 		#VIEWING ALL OFFENSIVE ITEMS
 		MarketContext.BLACK_MARKET_OFFENSIVE:
@@ -1050,6 +1058,18 @@ func marketplace_black_market_offensive_commands(text):
 				add_line(Marketplace.black_market_item_details(int(text), "defensive"))
 				if Marketplace.viewing_item:
 					update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS)
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_main())
+						update_market_context(MarketContext.BLACK_MARKET)
+					_:#default
+						add_line("Command not found")
+		MarketContext.BLACK_MARKET_UTILITY:
+			if text.is_valid_int():
+				add_line(Marketplace.black_market_item_details(int(text), "utility"))
+				if Marketplace.viewing_item:
+					update_market_context(MarketContext.BLACK_MARKET_UTILITY_DETAILS)
 			else:
 				match text:
 					"back":
@@ -1083,6 +1103,19 @@ func marketplace_black_market_offensive_commands(text):
 					"back":
 						add_line(Marketplace.black_market_items("defensive"))
 						update_market_context(MarketContext.BLACK_MARKET_DEFENSIVE)
+					_:#default
+						add_line("Command not found")
+		MarketContext.BLACK_MARKET_UTILITY_DETAILS:
+			if text.begins_with("buy"):
+				add_line(Marketplace.handle_black_market_buy_command(text))
+				if Marketplace.viewing_item == null: #successful because viewing_item was bought and set to null
+					update_market_context(MarketContext.BLACK_MARKET_UTILITY)
+					add_line(Marketplace.black_market_items("utility"))
+			else:
+				match text:
+					"back":
+						add_line(Marketplace.black_market_items("utility"))
+						update_market_context(MarketContext.BLACK_MARKET_UTILITY)
 					_:#default
 						add_line("Command not found")
 

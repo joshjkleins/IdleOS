@@ -13,7 +13,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"efficiency": 0.05,
-	"efficiency rate": 0.0015
+	"efficiency rate": 0.0015,
+	"color": Color("#00CC55"),
 }
 
 

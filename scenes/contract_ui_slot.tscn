@@ -1,0 +1,95 @@
+[gd_scene load_steps=3 format=3 uid="uid://bh66w6s2k5cx8"]
+
+[ext_resource type="Script" uid="uid://ft45gnrigqxh" path="res://scripts/contract_ui_slot.gd" id="1_0eayv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0cmq3"]
+bg_color = Color(0.361209, 0.252225, 0.0703572, 1)
+
+[node name="ContractUISlot" type="PanelContainer"]
+custom_minimum_size = Vector2(3, 15)
+theme_override_styles/panel = SubResource("StyleBoxFlat_0cmq3")
+script = ExtResource("1_0eayv")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="ProgressBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Major" type="Label" parent="MarginContainer/ProgressBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "MINING"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/ProgressBox"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ProgressBox"]
+layout_mode = 2
+
+[node name="Desc" type="Label" parent="MarginContainer/ProgressBox/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Mine 200 data"
+
+[node name="Progress" type="Label" parent="MarginContainer/ProgressBox/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "0/25"
+horizontal_alignment = 2
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ProgressBox"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Reward" type="Label" parent="MarginContainer/ProgressBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "+5000 exp, +50 logs"
+
+[node name="FinishedBox" type="VBoxContainer" parent="MarginContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="CompleteTitle" type="Label" parent="MarginContainer/FinishedBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "MINING CONTRACT COMPLETE"
+horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/FinishedBox"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/FinishedBox"]
+layout_mode = 2
+
+[node name="Progress" type="Label" parent="MarginContainer/FinishedBox/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "200/200"
+
+[node name="Reward" type="Label" parent="MarginContainer/FinishedBox/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "+5000 exp, +50 logs"
+horizontal_alignment = 2
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/FinishedBox"]
+layout_mode = 2
+
+[node name="Command" type="Label" parent="MarginContainer/FinishedBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "complete -c"
+horizontal_alignment = 1

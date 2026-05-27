@@ -5,6 +5,7 @@ var SKILL = {
 	"name": "Cracking",
 	"level": 1,
 	"experience": 0,
+	"color": Color("#EF9F27"),
 }
 
 var PASSWORD = {

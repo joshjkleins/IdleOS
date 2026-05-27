@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=11 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
 [ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
 [ext_resource type="Script" uid="uid://dbkqk0s6tx2x3" path="res://scripts/item_added_container.gd" id="8_h30m8"]
+[ext_resource type="PackedScene" uid="uid://6ja6vpe80pfb" path="res://scenes/contracts_container.tscn" id="8_hvrtx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -101,6 +102,12 @@ layout_mode = 2
 [node name="Loading" parent="Panel/MarginContainer" instance=ExtResource("4_u0uic")]
 visible = false
 layout_mode = 2
+
+[node name="ContractsContainer" parent="Panel" instance=ExtResource("8_hvrtx")]
+offset_left = 1271.0
+offset_top = 90.0
+offset_right = 1326.0
+offset_bottom = 198.0
 
 [node name="Timers" type="Node2D" parent="."]
 position = Vector2(8, 8)

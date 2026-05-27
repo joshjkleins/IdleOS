@@ -28,6 +28,14 @@ var available_defensive_items = {
 	}
 }
 
+var available_utility_items = {
+	1: {
+		"id": 1,
+		"item": Items.PACKET_SPOOF,
+		"available": true
+	}
+}
+
 func marketplace_welcome() -> String:
 	return Ascii.marketplace +  """
 ============================================================
@@ -184,6 +192,10 @@ func black_market_items(type: String) -> String:
 		"defensive":
 			stock = available_defensive_items
 			title = 'DEFENSIVE'
+		"utility":
+			stock = available_utility_items
+			title = 'UTILITY'
+			
 	if stock == null:
 		return "Nothing found...oops."
 	var return_string = ""
@@ -216,7 +228,10 @@ func black_market_items(type: String) -> String:
 					col_four = _pad_text("SPD: " + str(item.item.speed_name), col_stats)
 				"defensive":
 					col_one = _pad_text("ANON: " + str(item.item.heal), col_stats)
-					#col_two = _pad_text("FW: " + str(item.item.firewall_damage), col_stats)
+					col_three = _pad_text("BW: " + str(item.item.bandwidth_cost), col_stats)
+					col_four = _pad_text("SPD: " + str(item.item.speed_name), col_stats)
+				"utility":
+					col_one = _pad_text("ANON: " + str(item.item.heal), col_stats)
 					col_three = _pad_text("BW: " + str(item.item.bandwidth_cost), col_stats)
 					col_four = _pad_text("SPD: " + str(item.item.speed_name), col_stats)
 					
@@ -241,6 +256,8 @@ func black_market_item_details(item_num: int, type: String) -> String:
 			stock = available_offensive_items
 		"defensive":
 			stock = available_defensive_items
+		"utility":
+			stock = available_utility_items
 	if stock == null:
 		return "Nothing in stock, oops."
 			
@@ -258,6 +275,11 @@ Firewall Damage     """ + _pad_text(str(viewing_item.firewall_damage), 10) + """
 Bandwidth Cost      """ + _pad_text(str(viewing_item.bandwidth_cost), 10) + """ Item use consumes bandwidth. Bandwidth constantly regenerates.
 Attack Speed        """ + _pad_text(viewing_item.speed_name, 10) 
 		"defensive":
+			stats = """
+Anonymity Heal      """ + _pad_text(str(viewing_item.heal), 10) + """ Having your anonymity brought to 0 will expose you and fail the hack attempt.
+Bandwidth Cost      """ + _pad_text(str(viewing_item.bandwidth_cost), 10) + """ Item use consumes bandwidth. Bandwidth constantly regenerates.
+Attack Speed        """ + _pad_text(viewing_item.speed_name, 10)
+		"utility":
 			stats = """
 Anonymity Heal      """ + _pad_text(str(viewing_item.heal), 10) + """ Having your anonymity brought to 0 will expose you and fail the hack attempt.
 Bandwidth Cost      """ + _pad_text(str(viewing_item.bandwidth_cost), 10) + """ Item use consumes bandwidth. Bandwidth constantly regenerates.

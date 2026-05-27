@@ -8,6 +8,7 @@ var SKILL = {
 	"name": "Mining",
 	"level": 1,
 	"experience": 0,
+	"color": Color("#1d9e75")
 }
 
 var DATA = {
