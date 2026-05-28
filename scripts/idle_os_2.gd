@@ -7,13 +7,12 @@ extends Control
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
 #WHERE U AT:
-# contract generation. generates 5 random contracts total
 # possibly permanent upgrade section? IE increase bandwidth, anonymity, cooling rate, Skill upgrades?
 # change NETWORK EXCHANGE to perm upgrades, figure out perm upgrade stuff
 
 #TODO
 # Do marketplace upgrades (sells valuables, contracts mechanic)
-# Add Phishing and Defragging 
+# Add Phishing and Defragging and update Matching
 # Add installable modules for each major skill
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
@@ -267,7 +266,7 @@ func get_context_lead():
 				MarketContext.BLACK_MARKET_UTILITY_DETAILS:
 					return "IdleOS/Marketplace/BlackMarket/Utility>"
 				MarketContext.CONTRACTS:
-					return "IdleOS/Marketplace/BlackMarket/Contracts>"
+					return "IdleOS/Marketplace/Contracts>"
 		Context.MINING:
 			Signals.update_hud(Mining)
 			return "IdleOS/Modules/Mining>"
@@ -393,6 +392,18 @@ func universal_commands(text):
 		"list -m": #List processes
 			add_line(Stats.list_unlocked_processes())
 			return true
+		"show contracts":
+			add_line(ContractsManager.show_contracts())
+			return true
+		"open contracts":
+			contracts_container.open_contracts()
+			return true
+		"close contracts":
+			contracts_container.min_contracts()
+			return true
+		"complete -c":
+			add_line(ContractsManager.complete_contracts())
+			return true
 		"-h":
 			list_help()
 			return true
@@ -463,16 +474,6 @@ func root_commands(text):
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.decoding)
-		"create contract":
-			ContractsManager.create_contract()
-		"show contracts":
-			add_line(ContractsManager.show_contracts())
-		"open contracts":
-			contracts_container.open_contracts()
-		"close contracts":
-			contracts_container.min_contracts()
-		"complete -c":
-			add_line(ContractsManager.complete_contracts())
 		_:#default
 			add_line("Command not found")
 
@@ -976,11 +977,6 @@ func overclock_logic():
 func marketplace_commands(text):
 	text = text.to_lower().strip_edges()
 	
-	# --- BUY COMMAND PARSING ---
-	#if text.begins_with("buy"):
-		#handle_buy_command(text)
-		#return
-	
 	if text == "exit":
 		header.update_header()
 		update_context(Context.ROOT)
@@ -1025,23 +1021,29 @@ func marketplace_main_commands(text):
 		_:#default
 			add_line("Command not found")
 
+#CONTRACTS
 func marketplace_contract_commands(text):
-	match text:
-		"1":
-			add_line(Marketplace.purchase_contract(1))
-		"2":
-			add_line(Marketplace.purchase_contract(2))
-		"3":
-			add_line(Marketplace.purchase_contract(3))
-		"4":
-			add_line(Marketplace.purchase_contract(4))
-		"5":
-			add_line(Marketplace.purchase_contract(5))
-		"back":
-			update_market_context(MarketContext.MAIN)
-			add_line(Marketplace.marketplace_welcome())
-		_:#default
-			add_line("Command not found")
+	if text.is_valid_int():
+		var purchase_attempt = Marketplace.purchase_contract(int(text))
+		add_line(purchase_attempt["message"])
+		if purchase_attempt["purchased"]:
+			add_line(Marketplace.contracts())
+	else:
+		match text:
+			"refresh":
+				var refresh_attempt = Marketplace.refresh_contracts()
+				if refresh_attempt['successful']:
+					add_line(refresh_attempt["message"])
+					await get_tree().create_timer(1.0).timeout
+					add_line(Marketplace.contracts())
+					add_line("Contracts refreshed")
+				else:
+					add_line(refresh_attempt["message"])
+			"back":
+				update_market_context(MarketContext.MAIN)
+				add_line(Marketplace.marketplace_welcome())
+			_:#default
+				add_line("Command not found")
 			
 
 #current_market_context == MarketContext.BLACK_MARKET

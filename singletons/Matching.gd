@@ -1,5 +1,8 @@
 extends Node
 
+signal cred_cycle_completed
+signal account_cycle_completed
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Matching",
@@ -28,7 +31,8 @@ var CREDENTIAL = {
 	"resource gained": Items.CREDENTIALS,
 	"resource amount gained": 1,
 	"description": "Creates credentials using passwords & usernames.",
-	"efficiency description": "Chance to not consume a username or password."
+	"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
 }
 
 var ACCOUNT = {
@@ -51,7 +55,8 @@ var ACCOUNT = {
 	"resource gained": Items.ACCOUNT_ACCESS_TOKENS,
 	"resource amount gained": 1,
 	"description": "Creates account access token using PINs & Account numbers.",
-	"efficiency description": "Chance to not consume a PIN or Account number."
+	"efficiency description": "Chance to not consume a PIN or Account number.",
+	"signal": account_cycle_completed
 }
 
 var minor_processes = [

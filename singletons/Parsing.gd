@@ -1,5 +1,8 @@
 extends Node
 
+signal basic_cycle_completed
+signal cred_cycle_complete
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Parsing",
@@ -9,7 +12,7 @@ var SKILL = {
 }
 
 var LOGS = {
-	"name": "Log parsing",
+	"name": "Basic",
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
@@ -26,22 +29,18 @@ var LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.DATA, "min": 10, "max": 20 },
-		{ "item": Items.PASSWORDS, "min": 1, "max": 5 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 5 },
-		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 5 },
-		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 5 },
-		{ "item": Items.CREDENTIALS, "min": 1, "max": 5 },
-		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 5 },
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 5 },
-		{ "item": Items.IP_ADDRESS, "min": 1, "max": 5 },
+		{ "item": Items.DATA, "min": 5, "max": 25 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
+		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 2 },
+		{ "item": Items.REFRESH_TOKEN, "min": 1, "max": 2 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-	"efficiency description": "Increases chance of finding a resource per row."
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
 }
 
 var CRED_LOGS = {
-	"name": "Credential parsing",
+	"name": "Credential",
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
@@ -58,11 +57,14 @@ var CRED_LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.USERNAMES, "min": 1, "max": 1 },
-		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 2 },
+		{ "item": Items.PINS, "min": 1, "max": 2 },
+		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 2 },
+		{ "item": Items.PASSWORDS, "min": 1, "max": 2 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-	"efficiency description": "Increases chance of finding a resource per row."
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": cred_cycle_complete
 }
 
 var minor_processes = [
@@ -73,8 +75,6 @@ var minor_processes = [
 func add_xp(amount: int, type: Dictionary):
 	SKILL["experience"] += amount
 	type["experience"] += amount
-
-
 
 var LOG_LINES = [
 	# ---------------- INFO ----------------

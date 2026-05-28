@@ -104,9 +104,11 @@ enum ItemType {
 	ACCOUNT_NUMBERS, #81
 	ACCOUNT_ACCESS_TOKENS, #82
 	DDOS, #83
+	REFRESH_TOKEN, #84
 }
 
 #items
+### RESOURCES ###
 const DATA = preload("res://items/resources/data.tres")
 const LOGS = preload("res://items/resources/logs.tres")
 const ENCRYPTED_PASSWORDS = preload("res://items/resources/encrypted_passwords.tres")
@@ -114,13 +116,18 @@ const PASSWORDS = preload("res://items/resources/passwords.tres")
 const USERNAMES = preload("res://items/resources/usernames.tres")
 const CREDENTIALS = preload("res://items/resources/credentials.tres")
 const IP_ADDRESS = preload("res://items/resources/ip_address.tres")
-const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
-const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
 const ENCRYPTED_PINS = preload("res://items/resources/encrypted_pins.tres")
 const PINS = preload("res://items/resources/pins.tres")
 const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
 const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
+
+### COMBAT ###
 const DDOS = preload("res://items/combat/ddos.tres")
+const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
+const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
+
+### REFRESH TOKENS ###
+const REFRESH_TOKEN = preload("res://items/refresh_tokens/refresh_token.tres")
 
 ### VALUABLES ###
 #school
@@ -302,4 +309,5 @@ const ITEM_MAP = {
 	ItemType.ACCOUNT_NUMBERS: ACCOUNT_NUMBERS,
 	ItemType.ACCOUNT_ACCESS_TOKENS: ACCOUNT_ACCESS_TOKENS,
 	ItemType.DDOS: DDOS,
+	ItemType.REFRESH_TOKEN: REFRESH_TOKEN,
 }

@@ -66,21 +66,48 @@ func contracts() -> String:
 CONTRACTS
 ================================================================\n"""
 	var contract_text = ""
-	for i in range(ContractsManager.mining_contracts.size()):
-		var contract = ContractsManager.mining_contracts[i]
-		var first_line = "[" + str(i + 1) + "] " + contract.major_skill.SKILL.name + " / " + contract.goal_item.name 
-		contract_text += _pad_text(first_line, 40) + "COST: " + str(contract.cost) + " DATA\n"
+	for i in range(ContractsManager.available_contracts.size()):
+		var contract = ContractsManager.available_contracts[i]
+		
+		var cost = ""
+		if contract.available:
+			cost = "COST: " + str(contract.cost) + " DATA"
+		else:
+			cost = "[color=green]PURCHASED[/color]"
+		var first_line = "[" + str(i + 1) + "] " + contract.major_skill.SKILL.name + " / " + contract.minor_skill.name
+		contract_text += _pad_text(first_line, 40) + cost + "\n"
 		contract_text += "    " + _pad_text(contract.description, 40) + "REWARD: +" + str(contract.reward_exp) + " exp, +" + str(contract.reward_item_amount) + " " + contract.reward_item.name + "\n\n"
 	
 	var foot = "------------------------------------------------------------\n"
-	foot += "[back] BACK"
+	foot += "[back] BACK\n"
 	return head + contract_text + foot
 
-func purchase_contract(num: int) -> String:
-	if num > 0 and num <= ContractsManager.mining_contracts.size():
-		return ContractsManager.add_active_contract(ContractsManager.mining_contracts[num - 1])
-	else:
-		return "Not valid number"
+func purchase_contract(num: int) -> Dictionary:
+	if num <= 0 or num > ContractsManager.available_contracts.size():
+		return { "message": "Not valid number", "purchased": false }
+	
+	var target_contract = ContractsManager.available_contracts[num - 1]
+	
+	if !target_contract.available:
+		return { "message": "Contract has already been purchased.", "purchased": false }
+		
+	#is player contract inventory full
+	if !ContractsManager.can_add_contract():
+		return { "message": "Only 3 contracts can be active at once.", "purchased": false }
+	
+	if target_contract.cost > Inventory.get_amount(Items.DATA):
+		return { "message": "Not enough data.", "purchased": false }
+	
+	Inventory.remove_resource(Items.DATA, target_contract.cost)
+	return { "message": ContractsManager.add_active_contract(target_contract), "purchased": true }
+
+func refresh_contracts():
+	if Inventory.get_amount(Items.REFRESH_TOKEN) <= 0:
+		return { "message": "No refresh tokens.", "successful": false }
+	
+	Inventory.remove_resource(Items.REFRESH_TOKEN, 1)
+	ContractsManager.refresh_token_used()
+	return { "message": "Getting new contracts.", "successful": true }
 
 func maretplace_valuables_main() -> String:
 	var vals = Inventory.get_all_valuables()
@@ -325,7 +352,7 @@ PURCHASE OPTIONS:
 buy a=[amount] : BUY x AMOUNT            [color=#888888]example purchase of 10: a=10[/color]
 buy d=[amount] : SPEND x AMOUNT OF DATA  [color=#888888]example purchase of 100 data worth: d=500[/color]
 
-
+[back] BACK
 """
 
 func handle_black_market_buy_command(text: String) -> String:

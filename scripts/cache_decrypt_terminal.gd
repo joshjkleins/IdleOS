@@ -72,6 +72,8 @@ func start_decrypting():
 		
 		#finished with a single cache
 		apply_heat(overclocked_this_cache)
+		
+		type.signal.emit(1)
 		Exp.add_xp(Decoding, type, type["experience per level"])
 		Signals.update_hud(Decoding)
 		

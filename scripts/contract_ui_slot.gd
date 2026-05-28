@@ -16,10 +16,10 @@ func update_info(contract: Contract):
 	$MarginContainer/ProgressBox/Major.text = contract.major_skill.SKILL.name
 	$MarginContainer/ProgressBox/HBoxContainer/Desc.text = contract.description
 	$MarginContainer/ProgressBox/HBoxContainer/Progress.text = str(contract.progress) + "/" + str(contract.goal_amount)
-	$MarginContainer/ProgressBox/Reward.text = "+" + str(contract.reward_exp) + ", +" + str(contract.reward_item_amount) + " " + contract.reward_item.name
+	$MarginContainer/ProgressBox/Reward.text = "+" + str(contract.reward_exp) + " exp, +" + str(contract.reward_item_amount) + " " + contract.reward_item.name
 	
 	$MarginContainer/FinishedBox/HBoxContainer/Progress.text = str(contract.progress) + "/" + str(contract.goal_amount)
-	$MarginContainer/FinishedBox/HBoxContainer/Reward.text = "+" + str(contract.reward_exp) + ", +" + str(contract.reward_item_amount) + " " + contract.reward_item.name
+	$MarginContainer/FinishedBox/HBoxContainer/Reward.text = "+" + str(contract.reward_exp) + " exp, +" + str(contract.reward_item_amount) + " " + contract.reward_item.name
 	$MarginContainer/FinishedBox/CompleteTitle.text = contract.major_skill.SKILL.name.to_upper() + " CONTRACT COMPLETE"
 
 func connect_contract(contract: Contract):

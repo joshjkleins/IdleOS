@@ -18,6 +18,7 @@ var complete: bool = false
 var reward_exp: int
 var reward_item: ItemData
 var reward_item_amount: int
+var available: bool
 
 func connect_progress():
 	minor_skill.signal.connect(update_progress)
@@ -36,7 +37,6 @@ func update_progress(amount):
 func contract_fullfilled():
 	complete = true
 	progress_complete_signal.emit()
-	print("contract has been fullfilled, complete for rewards")
 
 #this function should only be called when player manually completes finished contracts
 func contract_finished():

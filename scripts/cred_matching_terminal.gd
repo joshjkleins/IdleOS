@@ -519,7 +519,7 @@ func prepare_cred_roll(chance: int, u_name: String):
 		third_col.add_theme_stylebox_override("panel", og_box)
 		
 	Stats.update_tempature(heat)
-
+	type.signal.emit(1)
 	Exp.add_xp(Matching, type, type["experience per level"])
 	Signals.update_hud(Matching)
 

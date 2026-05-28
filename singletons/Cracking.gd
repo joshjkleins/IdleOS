@@ -1,5 +1,8 @@
 extends Node
 
+signal pw_cycle_completed
+signal pin_cycle_completed
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Cracking",
@@ -28,7 +31,8 @@ var PASSWORD = {
 	"resource gained": Items.PASSWORDS,
 	"resource amount gained": 1,
 	"description": "Cracks encrypted passwords, transforming them into passwords",
-	"efficiency description": "Chance to instantly crack password"
+	"efficiency description": "Chance to instantly crack password",
+	"signal": pw_cycle_completed
 }
 
 var PINS = {
@@ -51,7 +55,8 @@ var PINS = {
 	"resource gained": Items.PINS,
 	"resource amount gained": 1,
 	"description": "Cracks encrypted PINS, transforming them into PINS",
-	"efficiency description": "Chance to instantly crack PINS"
+	"efficiency description": "Chance to instantly crack PINS",
+	"signal": pin_cycle_completed
 }
 
 var minor_processes = [

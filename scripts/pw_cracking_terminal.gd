@@ -179,6 +179,7 @@ func _start_next_crack() -> void:
 			return
 
 func _successful_crack(heat: int):
+	type.signal.emit(1)
 	Inventory.remove_resource(type["requirements"], 1)
 	Inventory.add_resource(type["resource gained"], 1)
 	amount_cracked += 1

@@ -26,12 +26,12 @@ func set_parse_type(p_type: Dictionary):
 	var item_chance = int(100.0 / type["item pool"].size())
 	for i in item_labels:
 		i.visible = false
-	#for i in range(type["item pool"].size()):
-		#var cont = item_labels[i]
-		#var item = type["item pool"][i]
-		#cont.get_child(0).text = item["item"]["name"].to_upper()
-		#cont.get_child(1).text = str(item_chance) + "%"
-		#item_labels[i].visible = true
+	for i in range(type["item pool"].size()):
+		var cont = item_labels[i]
+		var item = type["item pool"][i]
+		cont.get_child(0).text = item["item"]["name"].to_upper()
+		cont.get_child(1).text = str(item_chance) + "%"
+		item_labels[i].visible = true
 	chance_per_line_label.text = "%.1f%%" % (type["efficiency"] * 100)
 
 func start():
@@ -89,6 +89,7 @@ func stop_safely():
 	end_safely = true
 
 func _finished_log(heat_used: int):
+	type.signal.emit(1)
 	Exp.add_xp(Parsing, type, type["experience per level"])
 	Signals.update_hud(Parsing)
 	chance_per_line_label.text = "%.1f%%" % (type["efficiency"] * 100)

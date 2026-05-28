@@ -1,5 +1,7 @@
 extends Node
 
+signal decode_cycle_completed
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Decoding",
@@ -26,7 +28,8 @@ var CACHE = {
 	"overheat heat": 2,
 	"requirements": "cache",
 	"description": "Decrypt caches gained from hacking to reveal additional items.",
-	"efficiency description": "Chance to find rare item."
+	"efficiency description": "Chance to find rare item.",
+	"signal": decode_cycle_completed
 }
 
 

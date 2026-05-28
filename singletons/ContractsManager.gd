@@ -3,54 +3,139 @@ extends Node
 var current_contracts: Array[Contract]
 var MAX_CONTRACTS: int = 3
 
-var mining_contracts = []
+var available_contracts = []
+var contract_reward_pool = [
+	Items.LOGS,
+	Items.IP_ADDRESS,
+	Items.CREDENTIALS,
+	Items.PASSWORDS,
+	Items.ENCRYPTED_PASSWORDS,
+	Items.SQL_INJECTOR,
+	Items.PACKET_SPOOF,
+	Items.USERNAMES,
+]
 
 func _ready():
 	Signals.contract_finished_signal.connect(remove_contract)
-	mining_contracts = create_mining_contracts(5)
+	available_contracts = create_available_contracts(5)
 
-func create_contract():
-	var contract = Contract.new()
-
-	contract.major_skill = Mining
-	contract.minor_skill = Mining.DATA
-	contract.cost = 500
-	contract.goal_amount = randi_range(10, 15)
-	contract.goal_item = Items.DATA
-	contract.progress = 0
-	contract.reward_exp = randi_range(1000, 10000)
-	contract.reward_item = Items.LOGS
-	contract.reward_item_amount = randi_range(10, 50)
-	contract.description = "Mine " + str(contract.goal_amount) + " data"
-	contract.active = true
-	contract.connect_progress()
-	
-	return contract
-
-func create_mining_contracts(amount: int) -> Array[Contract]:
+func create_available_contracts(amount: int) -> Array[Contract]:
 	var contracts: Array[Contract]
+	var contract_types = [create_mining_contract, create_parsing_contract, create_cracking_contract, create_matching_contract, create_decoding_contract]
 	for i in range(amount):
-		var contract = Contract.new()
-		
-		contract.major_skill = Mining
-		var skills_unlocked = []
-		for skill in Mining.minor_processes:
-			if skill.unlocked:
-				skills_unlocked.append(skill)
-		contract.minor_skill = skills_unlocked.pick_random()
-		contract.cost = randi_range(500, 1000)
-		contract.goal_amount = randi_range(80, 200)
-		contract.goal_item = contract.minor_skill["resource gained"]
-		contract.progress = 0
-		contract.reward_exp = randi_range(1000, 10000)
-		contract.reward_item = Items.LOGS
-		contract.reward_item_amount = randi_range(10, 100)
-		contract.description = "Mine " + str(contract.goal_amount) + " " + contract.goal_item.name
-		contract.active = false
-		
+		var contract = contract_types.pick_random().call()
 		contracts.append(contract)
 	
 	return contracts
+
+func refresh_token_used():
+	available_contracts.clear()
+	available_contracts = create_available_contracts(5)
+
+func create_mining_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Mining
+	var skills_unlocked = []
+	for skill in Mining.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Mining.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	contract.goal_item = contract.minor_skill["resource gained"]
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(40, 65))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(3, 8))
+	contract.description = "Mine " + str(contract.goal_amount) + " " + contract.goal_item.name
+	contract.active = false
+	contract.available = true
+	return contract
+
+func create_parsing_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Parsing
+	var skills_unlocked = []
+	for skill in Parsing.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Parsing.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	contract.goal_item = Items.LOGS
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(40, 65))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(3, 8))
+	contract.description = contract.minor_skill.name + " parse " + str(contract.goal_amount) + " " + contract.goal_item.name
+	contract.active = false
+	contract.available = true
+	return contract
+
+func create_cracking_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Cracking
+	var skills_unlocked = []
+	for skill in Cracking.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Cracking.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	contract.goal_item = contract.minor_skill["resource gained"]
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(40, 65))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(3, 8))
+	contract.description = "Crack " + str(contract.goal_amount) + " " + contract.goal_item.name
+	contract.active = false
+	contract.available = true
+	return contract
+
+func create_matching_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Matching
+	var skills_unlocked = []
+	for skill in Matching.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Matching.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	contract.goal_item = contract.minor_skill["resource gained"]
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(40, 65))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(3, 8))
+	contract.description = "Match " + str(contract.goal_amount) + " " + contract.goal_item.name
+	contract.active = false
+	contract.available = true
+	return contract
+
+func create_decoding_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Decoding
+	var skills_unlocked = []
+	for skill in Decoding.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Decoding.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	#contract.goal_item = contract.minor_skill["resource gained"]
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(40, 65))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(3, 8))
+	contract.description = "Decode " + str(contract.goal_amount) + " caches"
+	contract.active = false
+	contract.available = true
+	return contract
 
 func remove_contract(contract):
 	if current_contracts.has(contract):
@@ -108,9 +193,10 @@ func show_contracts():
 
 func add_active_contract(contract: Contract):
 	if current_contracts.size() >= MAX_CONTRACTS:
-		return "You own too many contracts"
+		return "You own too many contracts, but this should have been checked earlier...oops"
 	
 	contract.active = true
+	contract.available = false
 	contract.connect_progress()
 	current_contracts.append(contract)
 	Signals.contract_added(contract)
@@ -131,8 +217,13 @@ func complete_contracts() -> String:
 	for contract in contracts_to_remove:
 		return_string += contract.major_skill.SKILL.name + " contract completed.\n"
 		return_string += "---------------------\n"
-		return_string += "+" + str(contract.reward_exp) + ", +" + str(contract.reward_item_amount) + " " + contract.reward_item.name + "\n\n"
+		return_string += "+" + str(contract.reward_exp) + " exp, +" + str(contract.reward_item_amount) + " " + contract.reward_item.name + "\n\n"
 		contract.contract_finished()
 		current_contracts.erase(contract)
 		
 	return return_string
+
+func can_add_contract() -> bool:
+	if current_contracts.size() >= MAX_CONTRACTS:
+		return false
+	return true
