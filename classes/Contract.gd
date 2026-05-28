@@ -11,7 +11,6 @@ var minor_skill: Dictionary
 var cost: int
 var goal_amount: int
 var goal_item: ItemData
-var goal_source: Dictionary
 var progress: int
 var description: String
 var active: bool

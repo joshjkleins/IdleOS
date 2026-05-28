@@ -7,7 +7,7 @@ extends Control
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
 #WHERE U AT:
-# work on algo for generation of contracts for marketplace. can be refreshed with a refresh token
+# contract generation. generates 5 random contracts total
 # possibly permanent upgrade section? IE increase bandwidth, anonymity, cooling rate, Skill upgrades?
 # change NETWORK EXCHANGE to perm upgrades, figure out perm upgrade stuff
 
@@ -115,7 +115,7 @@ enum Context {
 
 enum MarketContext {
 	MAIN,
-	CONTRACT,
+	CONTRACTS,
 	VALUABLES,
 	VALUABLES_DETAILS,
 	BLACK_MARKET,
@@ -203,7 +203,6 @@ func add_new_scrollback():
 	var ns = scrollback.instantiate()
 	terminal_body_container.add_child(ns)
 	current_scrollback = ns
-	print("adding new scrollback")
 	var terminals_active = terminal_body_container.get_child_count()
 
 	if terminals_active > RICHTEXT_LABEL_LIMIT:
@@ -211,7 +210,6 @@ func add_new_scrollback():
 		if label_to_remove == current_process: #prevents removing currently running process
 			label_to_remove = terminal_body_container.get_child(1)
 		label_to_remove.queue_free()
-		print('removing old scrollback')
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
@@ -268,6 +266,8 @@ func get_context_lead():
 					return "IdleOS/Marketplace/BlackMarket/Utility>"
 				MarketContext.BLACK_MARKET_UTILITY_DETAILS:
 					return "IdleOS/Marketplace/BlackMarket/Utility>"
+				MarketContext.CONTRACTS:
+					return "IdleOS/Marketplace/BlackMarket/Contracts>"
 		Context.MINING:
 			Signals.update_hud(Mining)
 			return "IdleOS/Modules/Mining>"
@@ -993,6 +993,8 @@ func marketplace_commands(text):
 		match current_marketplace_context:
 			MarketContext.MAIN:
 				marketplace_main_commands(text)
+			MarketContext.CONTRACTS:
+				marketplace_contract_commands(text)
 			MarketContext.VALUABLES:
 				marketplace_valuable_commands(text)
 			MarketContext.VALUABLES_DETAILS:
@@ -1006,6 +1008,9 @@ func marketplace_commands(text):
 #current_market_context == MarketContext.MAIN
 func marketplace_main_commands(text):
 	match text:
+		"1":
+			update_market_context(MarketContext.CONTRACTS)
+			add_line(Marketplace.contracts())
 		"2":
 			if !Inventory.has_valuables():
 				add_line("No valuables found")
@@ -1019,6 +1024,25 @@ func marketplace_main_commands(text):
 			add_line(Marketplace.marketplace_welcome())
 		_:#default
 			add_line("Command not found")
+
+func marketplace_contract_commands(text):
+	match text:
+		"1":
+			add_line(Marketplace.purchase_contract(1))
+		"2":
+			add_line(Marketplace.purchase_contract(2))
+		"3":
+			add_line(Marketplace.purchase_contract(3))
+		"4":
+			add_line(Marketplace.purchase_contract(4))
+		"5":
+			add_line(Marketplace.purchase_contract(5))
+		"back":
+			update_market_context(MarketContext.MAIN)
+			add_line(Marketplace.marketplace_welcome())
+		_:#default
+			add_line("Command not found")
+			
 
 #current_market_context == MarketContext.BLACK_MARKET
 func marketplace_black_market_main_commands(text):

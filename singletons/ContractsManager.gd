@@ -3,9 +3,11 @@ extends Node
 var current_contracts: Array[Contract]
 var MAX_CONTRACTS: int = 3
 
+var mining_contracts = []
+
 func _ready():
 	Signals.contract_finished_signal.connect(remove_contract)
-	#add_active_contract(create_contract())
+	mining_contracts = create_mining_contracts(5)
 
 func create_contract():
 	var contract = Contract.new()
@@ -14,7 +16,6 @@ func create_contract():
 	contract.minor_skill = Mining.DATA
 	contract.cost = 500
 	contract.goal_amount = randi_range(10, 15)
-	contract.goal_source = Mining.DATA
 	contract.goal_item = Items.DATA
 	contract.progress = 0
 	contract.reward_exp = randi_range(1000, 10000)
@@ -24,8 +25,32 @@ func create_contract():
 	contract.active = true
 	contract.connect_progress()
 	
-	add_active_contract(contract)
-	#return contract
+	return contract
+
+func create_mining_contracts(amount: int) -> Array[Contract]:
+	var contracts: Array[Contract]
+	for i in range(amount):
+		var contract = Contract.new()
+		
+		contract.major_skill = Mining
+		var skills_unlocked = []
+		for skill in Mining.minor_processes:
+			if skill.unlocked:
+				skills_unlocked.append(skill)
+		contract.minor_skill = skills_unlocked.pick_random()
+		contract.cost = randi_range(500, 1000)
+		contract.goal_amount = randi_range(80, 200)
+		contract.goal_item = contract.minor_skill["resource gained"]
+		contract.progress = 0
+		contract.reward_exp = randi_range(1000, 10000)
+		contract.reward_item = Items.LOGS
+		contract.reward_item_amount = randi_range(10, 100)
+		contract.description = "Mine " + str(contract.goal_amount) + " " + contract.goal_item.name
+		contract.active = false
+		
+		contracts.append(contract)
+	
+	return contracts
 
 func remove_contract(contract):
 	if current_contracts.has(contract):
@@ -82,11 +107,14 @@ func show_contracts():
 	return "\n".join(lines)
 
 func add_active_contract(contract: Contract):
-	if current_contracts.size() < MAX_CONTRACTS:
-		current_contracts.append(contract)
-		Signals.contract_added(contract)
-	else:
-		print("Too many contracts")
+	if current_contracts.size() >= MAX_CONTRACTS:
+		return "You own too many contracts"
+	
+	contract.active = true
+	contract.connect_progress()
+	current_contracts.append(contract)
+	Signals.contract_added(contract)
+	return "Contract purchased for " + str(contract.cost) + " Data"
 
 func complete_contracts() -> String:
 	if current_contracts.is_empty():

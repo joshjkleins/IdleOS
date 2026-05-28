@@ -60,6 +60,28 @@ DATA:        """ + str(Inventory.get_amount(Items.DATA)) + """
 ------------------------------------------------------------
 """
 
+func contracts() -> String:
+	var head = """
+================================================================
+CONTRACTS
+================================================================\n"""
+	var contract_text = ""
+	for i in range(ContractsManager.mining_contracts.size()):
+		var contract = ContractsManager.mining_contracts[i]
+		var first_line = "[" + str(i + 1) + "] " + contract.major_skill.SKILL.name + " / " + contract.goal_item.name 
+		contract_text += _pad_text(first_line, 40) + "COST: " + str(contract.cost) + " DATA\n"
+		contract_text += "    " + _pad_text(contract.description, 40) + "REWARD: +" + str(contract.reward_exp) + " exp, +" + str(contract.reward_item_amount) + " " + contract.reward_item.name + "\n\n"
+	
+	var foot = "------------------------------------------------------------\n"
+	foot += "[back] BACK"
+	return head + contract_text + foot
+
+func purchase_contract(num: int) -> String:
+	if num > 0 and num <= ContractsManager.mining_contracts.size():
+		return ContractsManager.add_active_contract(ContractsManager.mining_contracts[num - 1])
+	else:
+		return "Not valid number"
+
 func maretplace_valuables_main() -> String:
 	var vals = Inventory.get_all_valuables()
 	if vals.is_empty():
