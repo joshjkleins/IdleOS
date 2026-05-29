@@ -1,6 +1,7 @@
 extends Node
 
 var viewing_item = null
+var viewing_skill = null
 
 var val_col_size_id = 5
 var val_col_size_name = 30
@@ -209,6 +210,81 @@ func handle_valuable_details_sell(amount: int) -> String:
 	
 	return "Sold " + item_name + " x" + str(amount) + " for " + str(items_worth) + " data"
 
+func upgrades_main():
+	viewing_skill = null
+	return """
+================================================================================
+OS UPGRADES
+================================================================================
+[1] MINING
+[2] PARSING
+[3] CRACKING
+[4] MATCHING
+[5] HACKING
+[6] DECODING
+
+--------------------------------------------------------------------------------
+
+[back] BACK
+"""
+
+func upgrades_details(skill: Node) -> String:
+	var header = """
+================================================================================
+""" + skill.SKILL.name + """ upgrades
+================================================================================
+"""
+	var body = ""
+	for up in skill.process_upgrades.keys():
+		var p = skill.process_upgrades[up]
+		var key = _pad_text("[" + str(p.id) + "]", 5)
+		var cost = "COST: " + str(skill.get_upgrade_cost(up)) + " DATA\n"
+		var upgrade_text = ""
+		var title = ""
+		if p.id == 4: #offline progression
+			title = _pad_text(p.name, 30)
+			upgrade_text = "     " + minutes_to_hours_text(p["amount"]) + " -> " +  minutes_to_hours_text(p["amount"] + p["increase per level"]) + "\n\n"
+		else:
+			title = _pad_text(p.name + " bonus", 30) 
+			upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"
+		body += key + title + cost + upgrade_text 
+	var footer = """
+
+--------------------------------------------------------------------------------
+
+[back] BACK
+"""
+	viewing_skill = skill
+	return header + body + footer
+
+func purchase_upgrade(num: int) -> Dictionary:
+	if num <= 0 or num > 4:
+		return { "message": "Not valid number", "purchased": false }
+	
+	var upgrade = null
+	var cost = 0
+	for upgrade_type in viewing_skill.process_upgrades.keys():
+		if viewing_skill.process_upgrades[upgrade_type]["id"] == num:
+			upgrade = viewing_skill.process_upgrades[upgrade_type]
+			cost = viewing_skill.get_upgrade_cost(upgrade_type)
+	if upgrade == null or cost <= 0:
+		return { "message": "Not valid number", "purchased": false }
+	
+	if cost > Inventory.get_amount(Items.DATA):
+		return { "message": "Not enough data.", "purchased": false }
+	
+	Inventory.remove_resource(Items.DATA, cost)
+	viewing_skill.upgraded(upgrade)
+	return { "message": "Upgrade purchased", "purchased": true }
+
+
+func percent_format(value: float) -> String:
+	var percent = (value - 1.0) * 100.0
+	return "%d%%" % round(percent)
+
+func minutes_to_hours_text(minutes: int) -> String:
+	var hours = minutes / 60
+	return "%d hour%s" % [hours, "" if hours == 1 else "s"]
 
 func black_market_main() -> String:
 	return """

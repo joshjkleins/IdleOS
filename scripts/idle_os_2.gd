@@ -7,8 +7,8 @@ extends Control
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
 #WHERE U AT:
-# possibly permanent upgrade section? IE increase bandwidth, anonymity, cooling rate, Skill upgrades?
-# change NETWORK EXCHANGE to perm upgrades, figure out perm upgrade stuff
+# add upgrade dictionary/funcs to each major skill
+# implement upgrade stats into each process
 
 #TODO
 # Do marketplace upgrades (sells valuables, contracts mechanic)
@@ -123,7 +123,9 @@ enum MarketContext {
 	BLACK_MARKET_DEFENSIVE,
 	BLACK_MARKET_DEFENSIVE_DETAILS,
 	BLACK_MARKET_UTILITY,
-	BLACK_MARKET_UTILITY_DETAILS
+	BLACK_MARKET_UTILITY_DETAILS,
+	UPGRADES,
+	UPGRADES_DETAILS
 }
 
 var current_marketplace_context = MarketContext.MAIN
@@ -267,6 +269,11 @@ func get_context_lead():
 					return "IdleOS/Marketplace/BlackMarket/Utility>"
 				MarketContext.CONTRACTS:
 					return "IdleOS/Marketplace/Contracts>"
+				MarketContext.UPGRADES:
+					return "IdleOS/Marketplace/Upgrades>"
+				MarketContext.UPGRADES_DETAILS:
+					return "IdleOS/Marketplace/Upgrades/Details>"
+				
 		Context.MINING:
 			Signals.update_hud(Mining)
 			return "IdleOS/Modules/Mining>"
@@ -982,6 +989,7 @@ func marketplace_commands(text):
 		update_context(Context.ROOT)
 		update_market_context(MarketContext.MAIN)
 		Marketplace.viewing_item = null
+		Marketplace .viewing_skill = null
 		add_line("Saftely exiting marketplace")
 		await get_tree().create_timer(0.5).timeout
 		add_line(Ascii.root)
@@ -999,6 +1007,10 @@ func marketplace_commands(text):
 				marketplace_black_market_main_commands(text)
 			MarketContext.BLACK_MARKET_OFFENSIVE, MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS, MarketContext.BLACK_MARKET_DEFENSIVE, MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS, MarketContext.BLACK_MARKET_UTILITY, MarketContext.BLACK_MARKET_UTILITY_DETAILS:
 				marketplace_black_market_category_commands(text)
+			MarketContext.UPGRADES:
+				marketplace_upgrades_commands(text)
+			MarketContext.UPGRADES_DETAILS:
+				marketplace_upgrades_details_commands(text)
 				
 
 #current_market_context == MarketContext.MAIN
@@ -1016,6 +1028,9 @@ func marketplace_main_commands(text):
 		"3":
 			update_market_context(MarketContext.BLACK_MARKET)
 			add_line(Marketplace.black_market_main())
+		"4":
+			update_market_context(MarketContext.UPGRADES)
+			add_line(Marketplace.upgrades_main())
 		"list":
 			add_line(Marketplace.marketplace_welcome())
 		_:#default
@@ -1044,7 +1059,43 @@ func marketplace_contract_commands(text):
 				add_line(Marketplace.marketplace_welcome())
 			_:#default
 				add_line("Command not found")
+
+func marketplace_upgrades_commands(text):
+	match text:
+		"1": #Mining
+			add_line(Marketplace.upgrades_details(Mining))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"2": #Parsing
+			add_line(Marketplace.upgrades_details(Parsing))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"3": #Cracking
+			add_line(Marketplace.upgrades_details(Cracking))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"4": #Matching
+			add_line(Marketplace.upgrades_details(Matching))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"5": #Hacking
+			add_line(Marketplace.upgrades_details(Hacking))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"6": #Decoding
+			add_line(Marketplace.upgrades_details(Decoding))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"back":
+			update_market_context(MarketContext.MAIN)
+			add_line(Marketplace.marketplace_welcome())
 			
+
+func marketplace_upgrades_details_commands(text):
+	if text.is_valid_int():
+		var purchase_attempt = Marketplace.purchase_upgrade(int(text))
+		add_line(purchase_attempt["message"])
+		if purchase_attempt["purchased"]:
+			add_line(Marketplace.upgrades_details(Marketplace.viewing_skill))
+	else:
+		match text:
+			"back":
+				update_market_context(MarketContext.UPGRADES)
+				add_line(Marketplace.upgrades_main())
 
 #current_market_context == MarketContext.BLACK_MARKET
 func marketplace_black_market_main_commands(text):
