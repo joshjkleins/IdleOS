@@ -21,14 +21,12 @@ var inventory := {}
 
 func _ready():
 	pass
-	for i in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[i], 40)
 	#pass
 	#add_resource(Items.PARENTS_CREDIT_CARD, 3)
 	#add_resource(Items.ADMISSIONS_BRIBERY_RECORDS, 1)
 	#add_resource(Items.DATA, 25)
 	#add_resource(Items.LOGS, 200)
-	#add_resource(Items.ENCRYPTED_PASSWORDS, 21)
+	#add_resource(Items.ENCRYPTED_PASSWORDS, 25)
 	#add_resource(Items.ENCRYPTED_PINS, 25)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 20)

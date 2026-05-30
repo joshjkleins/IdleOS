@@ -83,15 +83,15 @@ func _process(delta):
 
 func set_mine_type(type: Dictionary):
 	TYPE = type
-	BASE_SPEED = type["base speed"]
-	OVERCLOCK_SPEED = type["overclock speed"]
-	OVERHEAT_SPEED = type["overheat speed"]
+	BASE_SPEED = type["base speed"] / Mining.process_upgrades["speed"]["amount"]
+	OVERCLOCK_SPEED = type["overclock speed"] / Mining.process_upgrades["speed"]["amount"]
+	OVERHEAT_SPEED = type["overheat speed"] / Mining.process_upgrades["speed"]["amount"]
 	HEAT = type["heat"]
 	OVERCLOCK_HEAT = type["overclock heat"]
 	OVERHEAT_HEAT = type["overheat heat"]
 	RESOURCE_GAIN = type["resource gained"]
 	EXP_PER_COMPLETION = type["experience per level"]
-	EFFICIENCY_RATE = type["efficiency rate"]
+	EFFICIENCY_RATE = type["efficiency rate"] + (Mining.process_upgrades["efficiency"]["amount"] - 1.0)
 	tier.text = type["tier name"]
 	yield_title_label.text = type["name"].to_upper() + " YIELD"
 	title.text = "MINING " + type["name"].to_upper()
@@ -144,7 +144,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
 	TYPE.signal.emit(reward_quantity_gained)
-	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION)
+	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION  * Mining.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Mining)
 	session_cycle += 1
 	session_yield += reward_quantity_gained

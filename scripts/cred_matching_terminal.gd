@@ -342,7 +342,7 @@ func start():
 	
 	#roll of efficiency and remove items
 	for item in type["requirements"]:
-		if randf() > type["efficiency"]:
+		if randf() > type["efficiency"] + (Matching.process_upgrades["efficiency"]["amount"] - 1.0):
 			Inventory.remove_resource(item, 1)
 	_begin_matching()
 
@@ -362,7 +362,7 @@ func _repeat_loop():
 	if process_running:
 		#roll of efficiency and remove items
 		for item in type["requirements"]:
-			if randf() > type["efficiency"]:
+			if randf() > type["efficiency"] + (Matching.process_upgrades["efficiency"]["amount"] - 1.0):
 				Inventory.remove_resource(item, 1)
 		_reset_rows()
 		_build_rows()
@@ -416,13 +416,13 @@ func _begin_matching():
 				var speed
 				var heat
 				if Stats.overclocked:
-					speed = type["overclock speed"]
+					speed = type["overclock speed"] / Matching.process_upgrades["speed"]["amount"]
 					heat = type["overclock heat"]
 				elif Stats.overheated:
-					speed = type["overheat speed"]
+					speed = type["overheat speed"] / Matching.process_upgrades["speed"]["amount"]
 					heat = type["overheat heat"]
 				else:
-					speed = type["base speed"]
+					speed = type["base speed"] / Matching.process_upgrades["speed"]["amount"]
 					heat = type["heat"]
 				#if roll > highest_roll:
 					#highest_roll = roll
@@ -520,7 +520,7 @@ func prepare_cred_roll(chance: int, u_name: String):
 		
 	Stats.update_tempature(heat)
 	type.signal.emit(1)
-	Exp.add_xp(Matching, type, type["experience per level"])
+	Exp.add_xp(Matching, type, type["experience per level"] * Matching.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Matching)
 
 func _reset_rows():

@@ -25,6 +25,8 @@ var end_safely: bool = false
 
 var type: Dictionary
 
+var first_crack: bool = false #this forces first crack to process so it doesnt instantly process a billion
+
 func set_cracking_type(p_type: Dictionary):
 	type = p_type
 	
@@ -59,6 +61,8 @@ func start():
 		#END SETUP
 		
 		#PW LOOP
+		
+		first_crack = true
 		for j in range(pw_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
 			if end_safely:
 				process_running = false
@@ -77,28 +81,29 @@ func start():
 			
 			
 			var max_heat_used: int = 0
-			if randf() < type["efficiency"]:
+			if randf() < type["efficiency"] + (Cracking.process_upgrades["efficiency"]["amount"] - 1.0) and !first_crack:
 				_end_current_crack(current_word)
 				_successful_crack(max_heat_used)
 			else:
+				first_crack = false
 				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
 					if process_running:
 						if Stats.overheated:
-							var speed = type["overheat speed"]
+							var speed = type["overheat speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["overheat heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
 							_update_progress_bar(i, speed)
 							await get_tree().create_timer(speed).timeout
 						elif Stats.overclocked:
-							var speed = type["overclock speed"]
+							var speed = type["overclock speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["overclock heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
 							_update_progress_bar(i, speed)
 							await get_tree().create_timer(speed).timeout
 						else:
-							var speed = type["base speed"]
+							var speed = type["base speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["heat"]
 							if heat > max_heat_used:
 								max_heat_used = speed
@@ -184,7 +189,7 @@ func _successful_crack(heat: int):
 	Inventory.add_resource(type["resource gained"], 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
-	Exp.add_xp(Cracking, type, type["experience per level"])
+	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Cracking)
 	
 	remaining_label.text = str(Inventory.get_amount(type["requirements"]))

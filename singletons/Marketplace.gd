@@ -241,7 +241,7 @@ func upgrades_details(skill: Node) -> String:
 		var cost = "COST: " + str(skill.get_upgrade_cost(up)) + " DATA\n"
 		var upgrade_text = ""
 		var title = ""
-		if p.id == 4: #offline progression
+		if p.name == "Offline progression": #offline progression
 			title = _pad_text(p.name, 30)
 			upgrade_text = "     " + minutes_to_hours_text(p["amount"]) + " -> " +  minutes_to_hours_text(p["amount"] + p["increase per level"]) + "\n\n"
 		else:

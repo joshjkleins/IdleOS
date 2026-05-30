@@ -76,6 +76,20 @@ func add_xp(amount: int, type: Dictionary):
 	SKILL["experience"] += amount
 	type["experience"] += amount
 
+var process_upgrades = {
+	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 1.0, "increase per level": 0.15 },
+	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
+}
+
+func get_upgrade_cost(upgrade_stat: String) -> int:
+	return process_upgrades[upgrade_stat]["level"] * 800 + 100
+
+func upgraded(upgrade_stat: Dictionary):
+	upgrade_stat["level"] += 1
+	upgrade_stat["amount"] += upgrade_stat["increase per level"]
+
 var LOG_LINES = [
 	# ---------------- INFO ----------------
 	{"level":"INFO","service":"auth.service","message":"Login attempt from 172.16.4.23","tags":[]},

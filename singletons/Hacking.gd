@@ -22,3 +22,17 @@ func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
 
 const minor_processes = []
+
+var process_upgrades = {
+	"anonymity": { "id": 1, "name": "Anonymity", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"max bandwidth": { "id": 1, "name": "Max bandwidth", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"bandwidth regen": { "id": 1, "name": "Bandwidth regen rate", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+}
+
+func get_upgrade_cost(upgrade_stat: String) -> int:
+	return process_upgrades[upgrade_stat]["level"] * 800 + 100
+
+func upgraded(upgrade_stat: Dictionary):
+	upgrade_stat["level"] += 1
+	upgrade_stat["amount"] += upgrade_stat["increase per level"]

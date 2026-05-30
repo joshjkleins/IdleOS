@@ -6,13 +6,9 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#WHERE U AT:
-# add upgrade dictionary/funcs to each major skill
-# implement upgrade stats into each process
-
 #TODO
-# Do marketplace upgrades (sells valuables, contracts mechanic)
 # Add Phishing and Defragging and update Matching
+# Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Add installable modules for each major skill
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
@@ -492,14 +488,14 @@ func mining_commands(text):
 	match text:
 		"start":
 			if !process_running:
-				start_data_mining()
-			else:
-				add_line("Process already running")
-		"start -log":
-			if !process_running:
 				start_log_mining()
 			else:
 				add_line("Process already running")
+		#"start -log":
+			#if !process_running:
+				#start_log_mining()
+			#else:
+				#add_line("Process already running")
 		"stop":
 			process_running = false
 			if current_process:
@@ -552,7 +548,7 @@ func mining_commands(text):
 func start_data_mining():
 	var new_data_mining_terminal = mining_scene.instantiate()
 	terminal_body_container.add_child(new_data_mining_terminal)
-	new_data_mining_terminal.set_mine_type(Mining.DATA)
+	new_data_mining_terminal.set_mine_type(Mining.LOGS)
 	process_running = true
 	current_process = new_data_mining_terminal
 	new_data_mining_terminal.start_data_mining()
