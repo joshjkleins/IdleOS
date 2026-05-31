@@ -43,6 +43,11 @@ layout_mode = 2
 skill_type = 5
 h_color = Color(0, 0.8, 0.333333, 1)
 
+[node name="MajorSkill7" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 6
+h_color = Color(0, 0.8, 0.333333, 1)
+
 [node name="SkillDetails" parent="." instance=ExtResource("3_67toa")]
 visible = false
 layout_mode = 2

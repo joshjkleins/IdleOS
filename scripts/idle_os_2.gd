@@ -6,6 +6,8 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
+#now: Phishing: show what group of people notice was sent out to, show time remaining, show type of phishing scam sent
+
 #TODO
 # Add Phishing and Defragging and update Matching
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
@@ -106,6 +108,7 @@ enum Context {
 	DARKWEB,
 	MARKETPLACE,
 	DECODING,
+	PHISHING,
 }
 
 enum MarketContext {
@@ -230,6 +233,8 @@ func _on_input_line_text_submitted(new_text):
 				cred_matching_commands(new_text)
 			Context.DECODING:
 				cache_decrypting_commands(new_text)
+			Context.PHISHING:
+				phishing_commands(new_text)
 
 	history_index = -1
 
@@ -287,6 +292,9 @@ func get_context_lead():
 		Context.DECODING:
 			Signals.update_hud(Decoding)
 			return "IdleOS/Modules/Decoding>"
+		Context.PHISHING:
+			Signals.update_hud(Phishing)
+			return "IdleOS/Modules/Phishing>"
 
 
 
@@ -477,6 +485,15 @@ func root_commands(text):
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.decoding)
+		"load phishing":
+			add_line("[ .. ] loading phishing module")
+			await get_tree().create_timer(0.8).timeout
+			header.update_header(Phishing)
+			add_line("[ OK ] phishing module loaded")
+			update_context(Context.PHISHING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.phishing)
+			
 		_:#default
 			add_line("Command not found")
 
@@ -975,6 +992,28 @@ func overclock_logic():
 	Stats.overclocked = true
 
 ###################################################
+################### PHISHING ######################
+###################################################
+func phishing_commands(text):
+	match text:
+		"cast":
+			if process_running:
+				add_line("Process already running.")
+				return
+			
+			cast_line()
+
+func cast_line():
+	var new_line = load("res://scenes/phishing_line.tscn")
+	var line_added = Phishing.add_line(new_line)
+	if line_added:
+		new_line.setup()
+		terminal_body_container.add_child(new_line)
+		new_line.start()
+	else:
+		add_line("too many phishing attemps active")
+
+###################################################
 ################# MARKETPLACE #####################
 ###################################################
 func marketplace_commands(text):
@@ -1007,7 +1046,6 @@ func marketplace_commands(text):
 				marketplace_upgrades_commands(text)
 			MarketContext.UPGRADES_DETAILS:
 				marketplace_upgrades_details_commands(text)
-				
 
 #current_market_context == MarketContext.MAIN
 func marketplace_main_commands(text):
@@ -1079,7 +1117,6 @@ func marketplace_upgrades_commands(text):
 		"back":
 			update_market_context(MarketContext.MAIN)
 			add_line(Marketplace.marketplace_welcome())
-			
 
 func marketplace_upgrades_details_commands(text):
 	if text.is_valid_int():

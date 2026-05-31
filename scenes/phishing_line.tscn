@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3 uid="uid://co36v7fipbafk"]
+
+[ext_resource type="Script" uid="uid://dix88udy66bvf" path="res://scripts/phishing_line.gd" id="1_wrtrc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b75l1"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e5suw"]
+bg_color = Color(0.258596, 0.528815, 0.546821, 1)
+
+[node name="PhishingLine" type="HBoxContainer"]
+offset_right = 324.0
+offset_bottom = 23.0
+theme_override_constants/separation = 20
+alignment = 1
+script = ExtResource("1_wrtrc")
+
+[node name="Method" type="Label" parent="."]
+layout_mode = 2
+text = "Spear phishing"
+
+[node name="Status" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.633757, 0.633757, 0.633757, 1)
+theme_override_font_sizes/font_size = 12
+text = "sending attempt"
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(230, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/background = SubResource("StyleBoxFlat_b75l1")
+theme_override_styles/fill = SubResource("StyleBoxFlat_e5suw")
+value = 20.0
+show_percentage = false
+
+[node name="TimeRemaining" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.431373, 0.431373, 0.431373, 1)
+text = "00:15:00"
+horizontal_alignment = 2

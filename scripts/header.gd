@@ -35,6 +35,8 @@ func update_header(skill: Node = null): #pass singleton
 			h_col = h_color_hacking
 		Decoding:
 			h_col = h_color_decoding
+		Phishing:
+			h_col = h_color_decoding
 	skill_details.update(skill, h_col)
 	major_skills.visible = false
 	skill_details.visible = true

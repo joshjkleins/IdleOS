@@ -1,0 +1,52 @@
+[gd_scene load_steps=5 format=3 uid="uid://0cmq27dk1l1n"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_gw1tx"]
+[ext_resource type="Script" uid="uid://bkaxiyf2ueyj5" path="res://scripts/phishing_terminal.gd" id="2_4mroc"]
+[ext_resource type="Texture2D" uid="uid://bl57b6nxyr7rt" path="res://art/icons/fishing-rod(1).png" id="2_kniys"]
+[ext_resource type="PackedScene" uid="uid://co36v7fipbafk" path="res://scenes/phishing_line.tscn" id="4_lj21v"]
+
+[node name="PhishingTerminal" type="VBoxContainer"]
+custom_minimum_size = Vector2(600, 0)
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("1_gw1tx")
+script = ExtResource("2_4mroc")
+
+[node name="ActiveLines" type="PanelContainer" parent="."]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ActiveLines"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ActiveLines/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleRow" type="HBoxContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PhishingIcon" type="TextureRect" parent="ActiveLines/MarginContainer/VBoxContainer/TitleRow"]
+layout_mode = 2
+texture = ExtResource("2_kniys")
+expand_mode = 2
+
+[node name="Title" type="Label" parent="ActiveLines/MarginContainer/VBoxContainer/TitleRow"]
+layout_mode = 2
+text = "Active lines"
+
+[node name="SlotsLabel" type="Label" parent="ActiveLines/MarginContainer/VBoxContainer/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.431373, 0.431373, 0.431373, 1)
+text = "1/2 slots used"
+horizontal_alignment = 2
+
+[node name="ActiveLinesContainer" type="VBoxContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ActiveLine" parent="ActiveLines/MarginContainer/VBoxContainer/ActiveLinesContainer" instance=ExtResource("4_lj21v")]
+layout_mode = 2
