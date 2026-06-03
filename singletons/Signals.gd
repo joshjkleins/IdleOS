@@ -18,6 +18,7 @@ signal end_data_mining_safely_signal
 signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
+signal end_phishing_safely_signal
 signal item_added_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
 #FILES WHERE end_hacking IS CONNECTED
@@ -57,6 +58,9 @@ func end_pw_cracking_safely():
 
 func end_cache_decrypting_safely():
 	end_cache_decrypting_safely_signal.emit()
+
+func end_phishing_safely():
+	end_phishing_safely_signal.emit()
 
 func end_data_mining_safely():
 	end_data_mining_safely_signal.emit()

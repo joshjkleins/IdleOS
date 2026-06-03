@@ -9,7 +9,10 @@ extends PanelContainer
 @export var h_color_matching: Color = Color("#D4537E")
 @export var h_color_decoding: Color = Color("#378ADD")
 @export var h_color_hacking: Color = Color("#00CC55")
+@export var h_color_phishing: Color = Color("#00CC55")
+@export var h_color_defragging: Color = Color("#cf0000")
 @export var h_color_grey: Color = Color("#00CC55")
+
 
 func update_header(skill: Node = null): #pass singleton
 	#Root (show all major skills)
@@ -36,7 +39,9 @@ func update_header(skill: Node = null): #pass singleton
 		Decoding:
 			h_col = h_color_decoding
 		Phishing:
-			h_col = h_color_decoding
+			h_col = h_color_phishing
+		Defragging:
+			h_col = h_color_defragging
 	skill_details.update(skill, h_col)
 	major_skills.visible = false
 	skill_details.visible = true

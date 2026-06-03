@@ -21,7 +21,7 @@ var SKILL = {
 func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
 
-const minor_processes = []
+var minor_processes = []
 
 var process_upgrades = {
 	"anonymity": { "id": 1, "name": "Anonymity", "level": 0, "amount": 1.0, "increase per level": 0.05 },

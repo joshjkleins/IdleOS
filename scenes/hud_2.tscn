@@ -8,6 +8,9 @@
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_q1nc5")
+h_color_mining = Color(0.662745, 0.486275, 0.329412, 1)
+h_color_decoding = Color(0.713726, 0.486275, 0.937255, 1)
+h_color_phishing = Color(0.215686, 0.541176, 0.866667, 1)
 h_color_grey = Color(0.289741, 0.289741, 0.289741, 1)
 
 [node name="MajorSkills" type="HBoxContainer" parent="."]
@@ -16,7 +19,7 @@ theme_override_constants/separation = 0
 
 [node name="MajorSkill" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
 layout_mode = 2
-h_color = Color(0.113725, 0.619608, 0.458824, 1)
+h_color = Color(0.661493, 0.485354, 0.328822, 1)
 
 [node name="MajorSkill2" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
 layout_mode = 2
@@ -36,7 +39,7 @@ h_color = Color(0.831373, 0.32549, 0.494118, 1)
 [node name="MajorSkill5" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
 layout_mode = 2
 skill_type = 4
-h_color = Color(0.215686, 0.541176, 0.866667, 1)
+h_color = Color(0.713401, 0.488209, 0.939082, 1)
 
 [node name="MajorSkill6" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
 layout_mode = 2
@@ -46,7 +49,12 @@ h_color = Color(0, 0.8, 0.333333, 1)
 [node name="MajorSkill7" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
 layout_mode = 2
 skill_type = 6
-h_color = Color(0, 0.8, 0.333333, 1)
+h_color = Color(0.215686, 0.541176, 0.866667, 1)
+
+[node name="MajorSkill8" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+layout_mode = 2
+skill_type = 7
+h_color = Color(0.812723, 1.53056e-05, 9.52989e-06, 1)
 
 [node name="SkillDetails" parent="." instance=ExtResource("3_67toa")]
 visible = false

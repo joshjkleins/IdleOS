@@ -11,32 +11,45 @@ bg_color = Color(0.258596, 0.528815, 0.546821, 1)
 [node name="PhishingLine" type="HBoxContainer"]
 offset_right = 324.0
 offset_bottom = 23.0
-theme_override_constants/separation = 20
-alignment = 1
+theme_override_constants/separation = 10
 script = ExtResource("1_wrtrc")
 
 [node name="Method" type="Label" parent="."]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-text = "Spear phishing"
-
-[node name="Status" type="Label" parent="."]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.633757, 0.633757, 0.633757, 1)
-theme_override_font_sizes/font_size = 12
-text = "sending attempt"
+size_flags_horizontal = 0
+text = "Spear"
 
 [node name="ProgressBar" type="ProgressBar" parent="."]
-custom_minimum_size = Vector2(230, 20)
+custom_minimum_size = Vector2(180, 15)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
+size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_b75l1")
 theme_override_styles/fill = SubResource("StyleBoxFlat_e5suw")
 value = 20.0
 show_percentage = false
 
-[node name="TimeRemaining" type="Label" parent="."]
+[node name="TimeRemaining" type="Label" parent="ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "00:15:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Status" type="RichTextLabel" parent="."]
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.431373, 0.431373, 0.431373, 1)
-text = "00:15:00"
-horizontal_alignment = 2
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "sending attempt"
+vertical_alignment = 1
+
+[connection signal="value_changed" from="ProgressBar" to="." method="_on_progress_bar_value_changed"]

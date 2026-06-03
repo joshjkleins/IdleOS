@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://da5f7ockut7gu"]
+
+[ext_resource type="Script" uid="uid://bt6a88uucyke" path="res://scripts/defrag_panel.gd" id="1_5xx6s"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xiyyg"]
+bg_color = Color(0.791999, 0.791999, 0.791999, 1)
+
+[node name="DefragPanel" type="Panel"]
+custom_minimum_size = Vector2(15, 15)
+theme_override_styles/panel = SubResource("StyleBoxFlat_xiyyg")
+script = ExtResource("1_5xx6s")

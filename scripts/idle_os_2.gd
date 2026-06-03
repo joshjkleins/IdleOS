@@ -6,17 +6,22 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#now: Phishing: show what group of people notice was sent out to, show time remaining, show type of phishing scam sent
+#where u at: Defragging, add overclock maybe minor skills, figure out what you want it to do ideas below
+# takes a moderate time (5-10 min) and gives a 60 min boost to something (faster cooling / more exp / better hacking / maybe can defrag specific modules?)
+# Defrag specific mods as minor skills: Mining defrag: effciency increased by 200% for 60 min, Parsing: double quantity of resources found for 60 min, Cracking: 
+#update HUD so defragging is different, no experience or levels in this skill
 
 #TODO
-# Add Phishing and Defragging and update Matching
+# Add Defragging and update Matching
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
-# Add installable modules for each major skill
+# Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
+#simplify run commands (run/start/cast) in tandem with above updates
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
 # add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
 #save/load
 #offline progression - cap at 24 hours?
+#export to desktop and play through
 
 #stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
 
@@ -96,6 +101,8 @@ extends Control
 @onready var pw_cracking_scene = preload("res://scenes/pw_cracking_terminal.tscn")
 @onready var cred_matching_scene = preload("res://scenes/cred_matching_terminal.tscn")
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+@onready var phishing_scene = preload("res://scenes/phishing_terminal.tscn")
+@onready var defrag_scene = preload("res://scenes/defrag_terminal.tscn")
 
 
 enum Context {
@@ -109,6 +116,7 @@ enum Context {
 	MARKETPLACE,
 	DECODING,
 	PHISHING,
+	DEFRAGGING
 }
 
 enum MarketContext {
@@ -164,6 +172,7 @@ func _ready():
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
+	Signals.end_phishing_safely_signal.connect(phishing_ended_safely)
 	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
 	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
 	
@@ -235,6 +244,8 @@ func _on_input_line_text_submitted(new_text):
 				cache_decrypting_commands(new_text)
 			Context.PHISHING:
 				phishing_commands(new_text)
+			Context.DEFRAGGING:
+				defragging_commands(new_text)
 
 	history_index = -1
 
@@ -295,7 +306,9 @@ func get_context_lead():
 		Context.PHISHING:
 			Signals.update_hud(Phishing)
 			return "IdleOS/Modules/Phishing>"
-
+		Context.DEFRAGGING:
+			Signals.update_hud(Defragging)
+			return "IdleOS/Modules/Defragging>"
 
 
 #Changes context and updates leading text
@@ -493,6 +506,14 @@ func root_commands(text):
 			update_context(Context.PHISHING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.phishing)
+		"load defragging":
+			add_line("[ .. ] loading defragging module")
+			await get_tree().create_timer(0.8).timeout
+			header.update_header(Defragging)
+			add_line("[ OK ] defragging module loaded")
+			update_context(Context.DEFRAGGING)
+			await get_tree().create_timer(0.5).timeout
+			add_line(Ascii.defragging)
 			
 		_:#default
 			add_line("Command not found")
@@ -995,23 +1016,160 @@ func overclock_logic():
 ################### PHISHING ######################
 ###################################################
 func phishing_commands(text):
+	if text.begins_with("cast"):
+		if Phishing.current_lines.size() >= Phishing.max_lines:
+			add_line("At max phishing attempts.")
+			return
+			
+		text = text.strip_edges().to_lower()
+		var split = text.split(" ")
+		var p_type
+		var lines_num = 0
+		for type in Phishing.minor_processes:
+			if split[1] == type.name.to_lower():
+				p_type = type
+				if split[2].is_valid_int():
+					if int(split[2]) > 0:
+						lines_num = int(split[2])
+				elif split[2] == "max" or split[2] == "all":
+					lines_num = -1 # -1 means all or max
+				else:
+					lines_num = split[2]
+				break
+		if lines_num == 0:
+			add_line("Amount not valid")
+			return
+		if lines_num > Phishing.max_lines - Phishing.current_lines.size():
+			add_line("Unable to cast that many lines, clear some first.")
+			return
+		if p_type == null:
+			add_line("Phishing type not found")
+			return
+		
+		cast_line(p_type, lines_num)
+	else:
+		match text:
+			"stop":
+				process_running = false
+				if current_process:
+					add_line("Killing process immediately")
+					current_process.stop()
+					current_process = null
+				else:
+					add_line("No active process to stop.")
+				Stats.overclocked = false
+			"stop -s":
+				add_line("Finishing current phishing attempt...")
+				current_process.stop_safely()
+			"focus":
+				if current_process:
+					bring_process_to_bottom()
+				else:
+					add_line("No process found to focus")
+			"root":
+				if process_running:
+					add_line("Cannot safetly shut down module while process is running")
+					add_line("Stop process to exit module")
+				else:
+					add_line("Safetly shutting down module")
+					await get_tree().create_timer(0.8).timeout
+					header.update_header()
+					update_context(Context.ROOT)
+					add_line(Ascii.root)
+					list_help()
+			"info":
+				add_line("Module: Phishing")
+			"-h":
+				list_help()
+			"overclock":
+				overclock_logic()
+			"overclock -kill":
+				if !Stats.overclocked:
+					add_line("Not currently overclocking.")
+				if Stats.overclocked and process_running:
+					add_line("Killing overclock.")
+				Stats.overclocked = false
+			_:
+				add_line("Command not found")
+
+func cast_line(type: Dictionary, lines: int):
+	if current_process is PhishingTerminal:
+		current_process.cast_lines(type, lines)
+	else:
+		var new_phishing_terminal = phishing_scene.instantiate()
+		terminal_body_container.add_child(new_phishing_terminal)
+		process_running = true
+		current_process = new_phishing_terminal
+		new_phishing_terminal.cast_lines(type, lines)
+		add_new_scrollback()
+
+func phishing_ended_safely():
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Phishing process finished.")
+
+
+###################################################
+################### DEFRAGGING ####################
+###################################################
+func defragging_commands(text):
+	text = text.to_lower().strip_edges()
 	match text:
-		"cast":
+		"start":
 			if process_running:
 				add_line("Process already running.")
 				return
 			
-			cast_line()
+			start_defragging()
+		"stop":
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+		"root":
+			if process_running:
+				add_line("Cannot safetly shut down module while process is running")
+				add_line("Stop process to exit module")
+			else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				header.update_header()
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
+		"info":
+			add_line("???")
+		"-h":
+			list_help()
+		"overclock":
+			overclock_logic()
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
 
-func cast_line():
-	var new_line = load("res://scenes/phishing_line.tscn")
-	var line_added = Phishing.add_line(new_line)
-	if line_added:
-		new_line.setup()
-		terminal_body_container.add_child(new_line)
-		new_line.start()
-	else:
-		add_line("too many phishing attemps active")
+func start_defragging():
+	var new_defrag_terminal = defrag_scene.instantiate()
+	terminal_body_container.add_child(new_defrag_terminal)
+	process_running = true
+	current_process = new_defrag_terminal
+	new_defrag_terminal.start()
+	add_new_scrollback()
+
 
 ###################################################
 ################# MARKETPLACE #####################
@@ -1114,6 +1272,10 @@ func marketplace_upgrades_commands(text):
 		"6": #Decoding
 			add_line(Marketplace.upgrades_details(Decoding))
 			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"7": #Phishing
+			add_line(Marketplace.upgrades_details(Phishing))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
+			
 		"back":
 			update_market_context(MarketContext.MAIN)
 			add_line(Marketplace.marketplace_welcome())

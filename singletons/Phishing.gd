@@ -1,6 +1,7 @@
 extends Node
 
 signal spear_cycle_completed
+signal whale_cycle_completed
 
 var max_lines: int = 3
 var current_lines = []
@@ -14,47 +15,75 @@ var SKILL = {
 }
 
 var SPEAR = {
-	"name": "Spear phishing",
+	"name": "Spear",
 	"tier name": "TIER I | SPEAR",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
 	"command": "spear-phishing",
-	"efficiency": 0.0,
-	"efficiency rate": 0.003,
+	"efficiency": 0.3,
+	"efficiency rate": 0.005,
 	"unlocked": true,
-	"base speed": 8.0,
-	"overclock speed": 5.0,
-	"overheat speed": 25.0,
-	"heat": 1,
-	"overclock heat": 3,
+	"wait time min": 5.0,
+	"wait time max": 10.0,
+	"download time": 7.5,
+	"overclocked download time": 3.75,
+	"overheated download time": 22.5,
+	"heat": 2,
+	"overclock heat": 5,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.USERNAMES, Items.PASSWORDS],
+	"resource gained": [Items.USERNAMES, Items.ENCRYPTED_PASSWORDS],
 	"resource amount gained": 1,
-	"description": "Send out email to targeted persons in an attempt to get usernames and passwords",
-	"efficiency description": "Chance for successful attempt",
+	"description": "Send out emails in an attempt to get usernames and passwords",
+	"efficiency description": "Chance for successful bite",
 	"signal": spear_cycle_completed
 }
 
+var WHALING = {
+	"name": "Whaling",
+	"tier name": "TIER I | WHALING",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "whale-phishing",
+	"efficiency": 0.2,
+	"efficiency rate": 0.003,
+	"unlocked": true,
+	"wait time min": 6.0,
+	"wait time max": 12.0,
+	"download time": 9.5,
+	"overclocked download time": 5.0,
+	"overheated download time": 25.5,
+	"heat": 4,
+	"overclock heat": 7,
+	"overheat heat": 1,
+	"requirements": [],
+	"resource gained": [Items.ACCOUNT_NUMBERS, Items.ENCRYPTED_PINS],
+	"resource amount gained": 1,
+	"description": "Targets high level individuals for a chance to extract PINs and account numbers",
+	"efficiency description": "Chance for successful bite",
+	"signal": whale_cycle_completed
+}
+
 var minor_processes = [
-	SPEAR
+	SPEAR,
+	WHALING
 ]
 
-func add_line(line: Dictionary) -> bool:
-	if current_lines.size() >= max_lines:
-		return false
-	
+func add_line(line):
 	current_lines.append(line)
-	return true
 
+func remove_line(line):
+	if current_lines.has(line):
+		current_lines.erase(line)
 
 func add_xp(amount: int, type: Dictionary):
 	SKILL["experience"] += amount
 	type["experience"] += amount
 
 var process_upgrades = {
-	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	"max lines": { "id": 1, "name": "Max lines", "level": 0, "amount": 0, "increase per level": 1 },
 	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 1.0, "increase per level": 0.15 },
 	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
 	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },

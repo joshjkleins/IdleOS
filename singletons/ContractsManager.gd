@@ -21,7 +21,7 @@ func _ready():
 
 func create_available_contracts(amount: int) -> Array[Contract]:
 	var contracts: Array[Contract]
-	var contract_types = [create_mining_contract, create_parsing_contract, create_cracking_contract, create_matching_contract, create_decoding_contract]
+	var contract_types = [create_mining_contract, create_parsing_contract, create_cracking_contract, create_matching_contract, create_decoding_contract, create_phishing_contract]
 	for i in range(amount):
 		var contract = contract_types.pick_random().call()
 		contracts.append(contract)
@@ -30,7 +30,7 @@ func create_available_contracts(amount: int) -> Array[Contract]:
 
 func refresh_token_used():
 	available_contracts.clear()
-	available_contracts = create_available_contracts(5)
+	available_contracts = create_available_contracts(50)
 
 func create_mining_contract() -> Contract:
 	var contract = Contract.new()
@@ -133,6 +133,27 @@ func create_decoding_contract() -> Contract:
 	contract.reward_item = contract_reward_pool.pick_random()
 	contract.reward_item_amount = int(lvl * randi_range(3, 8))
 	contract.description = "Decode " + str(contract.goal_amount) + " caches"
+	contract.active = false
+	contract.available = true
+	return contract
+
+func create_phishing_contract() -> Contract:
+	var contract = Contract.new()
+	contract.major_skill = Phishing
+	var skills_unlocked = []
+	for skill in Phishing.minor_processes:
+		if skill.unlocked:
+			skills_unlocked.append(skill)
+	contract.minor_skill = skills_unlocked.pick_random()
+	var lvl = Phishing.SKILL.level
+	contract.cost = int(lvl * randi_range(10, 15))
+	contract.goal_amount = int(lvl * randi_range(10, 25))
+	#contract.goal_item = contract.minor_skill["resource gained"]
+	contract.progress = 0
+	contract.reward_exp = int(lvl * randi_range(200, 400))
+	contract.reward_item = contract_reward_pool.pick_random()
+	contract.reward_item_amount = int(lvl * randi_range(5, 22))
+	contract.description = contract.minor_skill.name + " phish " + str(contract.goal_amount) + " times"
 	contract.active = false
 	contract.available = true
 	return contract

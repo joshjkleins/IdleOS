@@ -222,6 +222,7 @@ OS UPGRADES
 [4] MATCHING
 [5] HACKING
 [6] DECODING
+[7] PHISHING
 
 --------------------------------------------------------------------------------
 
@@ -244,6 +245,9 @@ func upgrades_details(skill: Node) -> String:
 		if p.name == "Offline progression": #offline progression
 			title = _pad_text(p.name, 30)
 			upgrade_text = "     " + minutes_to_hours_text(p["amount"]) + " -> " +  minutes_to_hours_text(p["amount"] + p["increase per level"]) + "\n\n"
+		elif p.name == "Max lines":
+			title = _pad_text(p.name + " increase", 30) 
+			upgrade_text = "     " + str(p["amount"]) + " -> " +  str(p["amount"] + p["increase per level"]) + "\n\n"
 		else:
 			title = _pad_text(p.name + " bonus", 30) 
 			upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"

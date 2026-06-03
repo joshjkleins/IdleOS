@@ -7,7 +7,8 @@ enum SkillType {
 	MATCHING,
 	DECODING,
 	HACKING,
-	PHISHING
+	PHISHING,
+	DEFRAGGING
 }
 
 @export var skill_type: SkillType
@@ -48,6 +49,10 @@ func update():
 			update_colors()
 			update_text(Phishing.SKILL)
 			current_skill = Phishing
+		SkillType.DEFRAGGING:
+			update_colors()
+			update_text(Defragging.SKILL)
+			current_skill = Defragging
 
 func update_text(skill: Dictionary):
 	$MarginContainer/VBoxContainer/SkillLabel.text = skill.name

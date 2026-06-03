@@ -37,6 +37,7 @@ Marketplace="*res://singletons/Marketplace.gd"
 ContractsManager="*res://singletons/ContractsManager.gd"
 Phishing="*res://singletons/Phishing.gd"
 Palette="*res://singletons/Palette.gd"
+Defragging="*res://singletons/Defragging.gd"
 
 [display]
 
