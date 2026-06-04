@@ -60,33 +60,33 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 8
 
-[node name="TerminalGrandparent" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
 layout_mode = 2
 
-[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent"]
+[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody"]
+[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
+[node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
 layout_mode = 2
 
-[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent"]
+[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
 focus_mode = 2
 
-[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
+[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer"]
 layout_mode = 2
 text = "IdleOS> "
 
-[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
+[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
@@ -141,6 +141,6 @@ grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("8_h30m8")
 
-[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
+[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
 [connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]
 [connection signal="timeout" from="Timers/CoolingTimer" to="." method="_on_cooling_timer_timeout"]

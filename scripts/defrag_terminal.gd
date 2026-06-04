@@ -9,6 +9,7 @@ var red_panels: Array = []
 var sweep_index: int = 1
 var sweep_timer: Timer
 var terminal_text: Array[String]
+var active: bool = false
 
 const SECTOR_SPEED = {
 	Color.RED:    3.0,
@@ -22,9 +23,18 @@ const SECTOR_SPEED = {
 const COLOR_ORDER = [Color.GREEN, Color.BLUE, Color.ORANGE, Color.BLACK]
 
 func start():
+	active = true
 	setup_sweep_timer.wait_time = 0.05
 	build_panels()
 	setup_sweep()
+
+func stop():
+	active = false
+	if !setup_sweep_timer.is_stopped():
+		setup_sweep_timer.stop()
+	if !main_sweep_timer.is_stopped():
+		main_sweep_timer.stop()
+	Signals.defrag_finished()
 
 func update_mini_terminal(text: String):
 	terminal_text.append(text)
@@ -77,30 +87,35 @@ func setup_sweep_finished():
 	main_sweep_timer.start()
 
 func _on_main_sweep_timer_timeout():
-	if red_panels.size() > 0:
-		var cp = red_panels.pick_random()
-		cp.color = Color.GREEN
-		await swap_panel_color(cp, 1.0)
-		red_panels.erase(cp)
-		main_sweep_timer.start()
-	else:
-		_on_defrag_complete()
+	if active:
+		if red_panels.size() > 0:
+			var cp = red_panels.pick_random()
+			cp.color = Color.GREEN
+			await swap_panel_color(cp, 1.0)
+			red_panels.erase(cp)
+			main_sweep_timer.start()
+		else:
+			_on_defrag_complete()
 
 func _on_defrag_complete():
-	sweep_index = 0
-	organize_panels()
+	if active:
+		sweep_index = 0
+		organize_panels()
 
 func organize_panels():
-	update_mini_terminal("Organizing and optimizing memory")
 	var sorted: Array = []
-	for color in COLOR_ORDER:
-		for panel in all_panels:
-			if panel.color == color:
-				sorted.append(panel)
+	if active:
+		update_mini_terminal("Organizing and optimizing memory")
+		for color in COLOR_ORDER:
+			for panel in all_panels:
+				if panel.color == color:
+					sorted.append(panel)
 
-	await all_white(sorted)
-	await all_colored(sorted)
-	finished()
+	if active:
+		await all_white(sorted)
+	if active:
+		await all_colored(sorted)
+		finished()
 
 func all_white(sorted):
 	sweep_index = sorted.size() - 1
@@ -120,3 +135,5 @@ func all_colored(sorted: Array):
 
 func finished():
 	update_mini_terminal("Defragging finished, +100000 something")
+	active = false
+	Signals.defrag_finished()

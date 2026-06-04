@@ -75,13 +75,15 @@ var RESOURCE_GAIN: ItemData
 var EXP_PER_COMPLETION: int = 0
 var EFFICIENCY_RATE: float = 0.0
 var TYPE: Dictionary
+var is_window: bool = false
 
 func _process(delta):
 	if process_running:
 		session_time += delta
 		time_label.text = _format_time(session_time)
 
-func set_mine_type(type: Dictionary):
+func set_mine_type(type: Dictionary, window: bool = false):
+	is_window = window
 	TYPE = type
 	BASE_SPEED = type["base speed"] / Mining.process_upgrades["speed"]["amount"]
 	OVERCLOCK_SPEED = type["overclock speed"] / Mining.process_upgrades["speed"]["amount"]
@@ -116,7 +118,7 @@ func start_data_mining():
 			if Stats.overheated:
 				await get_tree().create_timer(OVERHEAT_SPEED).timeout
 				overheated = true
-			elif Stats.overclocked:
+			elif Stats.overclocked and !is_window:
 				await get_tree().create_timer(OVERCLOCK_SPEED).timeout
 				overclocked = true
 			else:
@@ -136,7 +138,7 @@ func stop_safely():
 func _cycle_complete(overclocked: bool, overheated: bool):
 	if overheated:
 		Stats.update_tempature(OVERHEAT_HEAT)
-	elif overclocked:
+	elif overclocked and !is_window:
 		Stats.update_tempature(OVERCLOCK_HEAT)
 	else:
 		Stats.update_tempature(HEAT)

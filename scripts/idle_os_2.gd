@@ -6,16 +6,13 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#where u at: Defragging, add overclock maybe minor skills, figure out what you want it to do ideas below
-# takes a moderate time (5-10 min) and gives a 60 min boost to something (faster cooling / more exp / better hacking / maybe can defrag specific modules?)
-# Defrag specific mods as minor skills: Mining defrag: effciency increased by 200% for 60 min, Parsing: double quantity of resources found for 60 min, Cracking: 
-#update HUD so defragging is different, no experience or levels in this skill
+
 
 #TODO
-# Add Defragging and update Matching
+# finish defragging, update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
-#simplify run commands (run/start/cast) in tandem with above updates
+#simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
 # add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
@@ -82,18 +79,19 @@ extends Control
 # exp green #2a9a5a
 # icons #bbbbbb
 
-@onready var lead_text = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/LeadText
-@onready var input_line = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/InputLineContainer/InputLine
+@onready var lead_text = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/LeadText
+@onready var input_line = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/InputLine
 @onready var loading = $Panel/MarginContainer/Loading
 @onready var terminal_root = $Panel/MarginContainer/TerminalRoot
 @onready var hacking = $Panel/MarginContainer/Hacking
 @onready var logparsing_timer = $Timers/LogparsingTimer
 @onready var cooling_timer = $Timers/CoolingTimer
-@onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer/Scrollback
-@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody
-@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/VBoxContainer/TerminalBody/TerminalBodyContainer
+@onready var original_scrollback = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody/TerminalBodyContainer/Scrollback
+@onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody
+@onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody/TerminalBodyContainer
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 @onready var contracts_container = $Panel/ContractsContainer
+@onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -175,6 +173,7 @@ func _ready():
 	Signals.end_phishing_safely_signal.connect(phishing_ended_safely)
 	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
 	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
+	Signals.defrag_finished_signal.connect(defrag_finished)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -431,6 +430,21 @@ func universal_commands(text):
 		"-h":
 			list_help()
 			return true
+		"vm token":
+			vm_token_used()
+			return true
+		"sticky":
+			if current_process != null:
+				sticky_current_process()
+			else:
+				add_line("No process running")
+			return true
+		"unsticky":
+			if current_process != null:
+				unstick_current_process()
+			else:
+				add_line("No process running")
+			return true
 		"quit -s":
 			get_tree().quit()
 
@@ -517,6 +531,56 @@ func root_commands(text):
 			
 		_:#default
 			add_line("Command not found")
+
+func sticky_current_process():
+	current_process.reparent(terminal_grandparent, false)
+	terminal_grandparent.call_deferred("move_child", current_process, 0)
+	add_line("Stick")
+
+func unstick_current_process():
+	current_process.reparent(terminal_body_container, false)
+	add_new_scrollback()
+	#terminal_body_container.call_deferred("move_child", current_process, 0)
+	add_line("Unstick")
+
+func vm_token_used():
+	var content_instance = mining_scene.instantiate()
+	
+	var new_window = Window.new()
+	new_window.title = "my title"
+	new_window.size = Vector2i(650, 260)
+	new_window.min_size = Vector2(650, 260)
+	new_window.wrap_controls = true
+	
+	var con = Control.new()
+	con.set_anchors_preset(Control.PRESET_FULL_RECT)
+	con.add_child(content_instance)
+	new_window.add_child(con)
+	
+	new_window.close_requested.connect(func(): new_window.queue_free())
+	
+	# 1. ENFORCE FLAGS BEFORE ADDING TO THE TREE
+	new_window.transient = false
+	new_window.always_on_top = true
+
+	add_child(new_window)
+	
+	# 2. MANUAL CENTERING (Replaces popup_centered)
+	var parent_window = get_window()
+	var center_pos = parent_window.position + (parent_window.size / 2) - (new_window.size / 2)
+	new_window.position = center_pos
+	new_window.show() # Shows the window without forcing transience
+
+	content_instance.set_mine_type(Mining.LOGS)
+	content_instance.start_data_mining()
+	add_line("Vm token used")
+	
+	get_tree().create_timer(30.0, false).timeout.connect(func():
+		if is_instance_valid(new_window):
+			add_line("closing virtual machine window...")
+			new_window.queue_free()
+	)
+
 
 ###################################################
 ################### MINING ########################
@@ -1170,6 +1234,12 @@ func start_defragging():
 	new_defrag_terminal.start()
 	add_new_scrollback()
 
+
+func defrag_finished():
+	process_running = false
+	current_process = null
+	Stats.overclocked = false
+	add_line("Defragging process ended.")
 
 ###################################################
 ################# MARKETPLACE #####################

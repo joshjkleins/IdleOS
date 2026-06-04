@@ -7,6 +7,7 @@ signal end_hacking_signal
 signal system_temp_updated_signal
 signal heat_added_signal
 signal hacking_ended_signal
+signal defrag_finished_signal
 signal update_hacking_header_signal
 signal end_hacking_safely_signal
 signal item_found_in_cache_signal
@@ -83,3 +84,6 @@ func update_hack_console(message: String):
 
 func contract_added(contract: Contract):
 	contract_added_signal.emit(contract)
+
+func defrag_finished():
+	defrag_finished_signal.emit()
