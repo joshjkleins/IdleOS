@@ -82,9 +82,12 @@ func update_colors():
 
 func update_exp():
 	if current_skill:
-		if current_skill.has_bonus():
-			$MarginContainer/VBoxContainer/Defragged.text = Mining.get_bonus_time_text()
+		if Stats.has_bonus(current_skill):
+			$MarginContainer/VBoxContainer/Defragged.text = Stats.get_bonus_time_text(current_skill)
 			$MarginContainer/VBoxContainer/Defragged.visible = true
+			#create timer
+			$DefragBonusTimer.wait_time = 1.0
+			$DefragBonusTimer.start()
 		else:
 			$MarginContainer/VBoxContainer/Defragged.visible = false
 		$MarginContainer/VBoxContainer/HBoxContainer/LevelNumberLabel.text = str(current_skill.SKILL.level)
@@ -92,3 +95,12 @@ func update_exp():
 		var experience = Exp.get_xp_display(current_skill.SKILL)
 		$MarginContainer/VBoxContainer/ProgressBar.max_value = experience["needed"]
 		$MarginContainer/VBoxContainer/ProgressBar.value = experience["current"]
+
+
+func _on_defrag_bonus_timer_timeout():
+	if current_skill:
+		if Stats.has_bonus(current_skill):
+			$MarginContainer/VBoxContainer/Defragged.text = Stats.get_bonus_time_text(current_skill)
+		else:
+			$MarginContainer/VBoxContainer/Defragged.visible = false
+			$DefragBonusTimer.stop()

@@ -6,7 +6,7 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-
+#whereuat: defrag: add actual increases in each terminal, add exp/efficiency to defrag mod (idk what eff will be yet)
 
 #TODO
 # finish defragging, update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
@@ -1180,12 +1180,19 @@ func phishing_ended_safely():
 func defragging_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"start":
+		"start -mining":
 			if process_running:
 				add_line("Process already running.")
 				return
 			
-			start_defragging()
+			start_defragging(Defragging.MINING)
+		"start -parsing":
+			if process_running:
+				add_line("Process already running.")
+				return
+			
+			start_defragging(Defragging.PARSING)
+			
 		"stop":
 			process_running = false
 			if current_process:
@@ -1226,14 +1233,13 @@ func defragging_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_defragging():
+func start_defragging(minor_skill: Dictionary):
 	var new_defrag_terminal = defrag_scene.instantiate()
 	terminal_body_container.add_child(new_defrag_terminal)
 	process_running = true
 	current_process = new_defrag_terminal
-	new_defrag_terminal.start()
+	new_defrag_terminal.start(minor_skill)
 	add_new_scrollback()
-
 
 func defrag_finished():
 	process_running = false

@@ -43,7 +43,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 25
+theme_override_constants/separation = 5
 
 [node name="Header" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2

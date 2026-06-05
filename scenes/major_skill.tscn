@@ -66,3 +66,7 @@ theme_override_font_sizes/normal_font_size = 8
 text = "defragged 29:13
 x2 efficiency"
 fit_content = true
+
+[node name="DefragBonusTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="DefragBonusTimer" to="." method="_on_defrag_bonus_timer_timeout"]

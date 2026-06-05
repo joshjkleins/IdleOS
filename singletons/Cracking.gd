@@ -6,24 +6,6 @@ signal pin_cycle_completed
 # When the player earns the bonus
 var bonus_expires_at: int
 
-func grant_bonus():
-	var now = Time.get_unix_time_from_system()
-	bonus_expires_at = now + (30 * 60) # 30 minutes from now
-
-func has_bonus() -> bool:
-	return Time.get_unix_time_from_system() < bonus_expires_at
-
-func get_bonus_time_remaining() -> int:
-	return max(0, bonus_expires_at - Time.get_unix_time_from_system())
-
-func get_bonus_time_text() -> String:
-	var remaining = get_bonus_time_remaining()
-
-	var minutes = remaining / 60
-	var seconds = remaining % 60
-
-	return "%02d:%02d" % [minutes, seconds]
-
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Cracking",

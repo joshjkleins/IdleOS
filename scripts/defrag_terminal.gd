@@ -10,6 +10,7 @@ var sweep_index: int = 1
 var sweep_timer: Timer
 var terminal_text: Array[String]
 var active: bool = false
+var type
 
 const SECTOR_SPEED = {
 	Color.RED:    3.0,
@@ -22,7 +23,8 @@ const SECTOR_SPEED = {
 # target order: green first, then blue, then yellow, then black at end
 const COLOR_ORDER = [Color.GREEN, Color.BLUE, Color.ORANGE, Color.BLACK]
 
-func start():
+func start(minor_skill: Dictionary):
+	type = minor_skill
 	finished()
 	#active = true
 	#setup_sweep_timer.wait_time = 0.05
@@ -135,7 +137,8 @@ func all_colored(sorted: Array):
 		await get_tree().create_timer(0.01).timeout
 
 func finished():
-	update_mini_terminal("Defragging finished, Mining efficiency x2 for 30 minutes")
-	Mining.grant_bonus()
+	update_mini_terminal("Defragging of " + type.skill.name + " complete")
+	update_mini_terminal(type.description)
+	Stats.grant_bonus(type.skill)
 	active = false
 	Signals.defrag_finished()

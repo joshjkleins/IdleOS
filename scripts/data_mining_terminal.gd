@@ -153,7 +153,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	cycles_label.text = str(session_cycle)
 	data_yield_label.text = str(session_yield)
 	var eff_label_text = ""
-	if Mining.has_bonus():
+	if Stats.has_bonus(Mining):
 		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0 * 2.0) + "%"
 	else:
 		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
@@ -162,7 +162,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 
 func _get_reward_quantity() -> int:
 	var eff
-	if Mining.has_bonus():
+	if Stats.has_bonus(Mining):
 		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE * 2.0)
 	else:
 		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE)
@@ -188,7 +188,10 @@ func _reset_info():
 	session_cycle = 0
 	session_time = 0.0
 	#_update_rate_label()
-	efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
+	if Stats.has_bonus(Mining):
+		efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0 * 2.0) + "%"
+	else:
+		efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
 	level_label.text = str(Mining.SKILL["level"])
 
 func _on_blinking_timer_timeout():

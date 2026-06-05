@@ -7,6 +7,8 @@ extends PanelContainer
 @onready var exp_added_label = $HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2/ExpAddedLabel
 @onready var skill_exp_label = $HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2/SkillExpLabel
 @onready var exp_label_timer = $ExpLabelTimer
+@onready var defragged = $HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/Defragged
+@onready var defrag_label_timer = $DefragLabelTimer
 
 var m_skill_scene = preload("res://scenes/minor_skill.tscn")
 var current_skill
@@ -28,6 +30,13 @@ func update(skill: Node, color: Color): #pass singleton ie Mining, Parsing, Deco
 	skill_exp_bar.max_value = experience["needed"]
 	skill_exp_bar.value = experience["current"]
 	skill_exp_label.text = str(experience["display"])
+	if Stats.has_bonus(current_skill):
+		defragged.text = "2x efficiency " + Stats.get_bonus_time_text(current_skill)
+		defragged.visible = true
+		defrag_label_timer.start()
+	else:
+		defragged.text = ""
+		defragged.visible = false
 	
 	#cleanup
 	if minor_container.get_children().size() > 0:
@@ -90,3 +99,11 @@ func _cancel_tweens():
 
 func _on_exp_label_timer_timeout():
 	await _fade_out(exp_added_label)
+
+func _on_defrag_label_timer_timeout():
+	if Stats.has_bonus(current_skill):
+		defragged.text = "2x efficiency " + Stats.get_bonus_time_text(current_skill)
+	else:
+		defragged.text = ""
+		defragged.visible = false
+		defrag_label_timer.stop()
