@@ -53,6 +53,8 @@ func update():
 			update_colors()
 			update_text(Defragging.SKILL)
 			current_skill = Defragging
+	
+
 
 func update_text(skill: Dictionary):
 	$MarginContainer/VBoxContainer/SkillLabel.text = skill.name
@@ -80,6 +82,11 @@ func update_colors():
 
 func update_exp():
 	if current_skill:
+		if current_skill.has_bonus():
+			$MarginContainer/VBoxContainer/Defragged.text = Mining.get_bonus_time_text()
+			$MarginContainer/VBoxContainer/Defragged.visible = true
+		else:
+			$MarginContainer/VBoxContainer/Defragged.visible = false
 		$MarginContainer/VBoxContainer/HBoxContainer/LevelNumberLabel.text = str(current_skill.SKILL.level)
 		#progress bar
 		var experience = Exp.get_xp_display(current_skill.SKILL)

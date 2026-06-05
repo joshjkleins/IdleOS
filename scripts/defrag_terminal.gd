@@ -23,10 +23,11 @@ const SECTOR_SPEED = {
 const COLOR_ORDER = [Color.GREEN, Color.BLUE, Color.ORANGE, Color.BLACK]
 
 func start():
-	active = true
-	setup_sweep_timer.wait_time = 0.05
-	build_panels()
-	setup_sweep()
+	finished()
+	#active = true
+	#setup_sweep_timer.wait_time = 0.05
+	#build_panels()
+	#setup_sweep()
 
 func stop():
 	active = false
@@ -134,6 +135,7 @@ func all_colored(sorted: Array):
 		await get_tree().create_timer(0.01).timeout
 
 func finished():
-	update_mini_terminal("Defragging finished, +100000 something")
+	update_mini_terminal("Defragging finished, Mining efficiency x2 for 30 minutes")
+	Mining.grant_bonus()
 	active = false
 	Signals.defrag_finished()

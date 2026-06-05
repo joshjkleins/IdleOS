@@ -152,11 +152,21 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	session_yield += reward_quantity_gained
 	cycles_label.text = str(session_cycle)
 	data_yield_label.text = str(session_yield)
-	efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
+	var eff_label_text = ""
+	if Mining.has_bonus():
+		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0 * 2.0) + "%"
+	else:
+		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
+	efficiency_label.text = eff_label_text
 	level_label.text = str(Mining.SKILL["level"])
 
 func _get_reward_quantity() -> int:
-	var eff = (Mining.SKILL["level"] * EFFICIENCY_RATE)
+	var eff
+	if Mining.has_bonus():
+		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE * 2.0)
+	else:
+		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE)
+		
 	var quant = 1
 
 	# Guaranteed bonus for each full point of efficiency
