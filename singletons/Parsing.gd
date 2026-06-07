@@ -34,8 +34,6 @@ var LOGS = {
 	"item pool": [
 		{ "item": Items.DATA, "min": 5, "max": 25 },
 		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
-		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 2 },
-		{ "item": Items.REFRESH_TOKEN, "min": 1, "max": 2 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",

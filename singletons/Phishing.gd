@@ -36,7 +36,7 @@ var SPEAR = {
 	"overclock heat": 5,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.USERNAMES, Items.ENCRYPTED_PASSWORDS],
+	"resource gained": [Items.USERNAMES, Items.IP_ADDRESS],
 	"resource amount gained": 1,
 	"description": "Send out emails in an attempt to get usernames and passwords",
 	"efficiency description": "Chance for successful bite",

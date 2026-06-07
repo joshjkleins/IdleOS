@@ -32,7 +32,8 @@ func set_parse_type(p_type: Dictionary):
 		cont.get_child(0).text = item["item"]["name"].to_upper()
 		cont.get_child(1).text = str(item_chance) + "%"
 		item_labels[i].visible = true
-	chance_per_line_label.text = "%.1f%%" % ((type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0)) * 100)
+	var frag_bonus = 2.0 if Stats.has_bonus(Parsing) else 1.0
+	chance_per_line_label.text = "%.1f%%" % ((type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0)) * frag_bonus * 100)
 
 func start():
 	end_safely = false
@@ -54,7 +55,10 @@ func start():
 				var new_log_line = log_line_scene.instantiate()
 				var item = null
 				var amount = 0
-				if randf() < type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0):
+				var frag_bonus = 2.0 if Stats.has_bonus(Parsing) else 1.0
+				var eff = (type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0)) * frag_bonus
+				
+				if randf() < eff:
 					var item_info = type["item pool"].pick_random()
 					item = item_info["item"]
 					amount = randi_range(item_info["min"], item_info["max"])
@@ -92,7 +96,9 @@ func _finished_log(heat_used: int):
 	type.signal.emit(1)
 	Exp.add_xp(Parsing, type, type["experience per level"] * Parsing.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Parsing)
-	chance_per_line_label.text = "%.1f%%" % ((type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0)) * 100)
+	var frag_bonus = 2.0 if Stats.has_bonus(Parsing) else 1.0
+	var eff = ((type["efficiency"] + (Parsing.process_upgrades["efficiency"]["amount"] - 1.0)) * frag_bonus * 100)
+	chance_per_line_label.text = "%.1f%%" % eff
 	Stats.update_tempature(heat_used)
 	if Inventory.get_amount(type["requirements"]) > 0 and !end_safely:
 		_reset_logs()

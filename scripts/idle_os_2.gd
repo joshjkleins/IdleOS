@@ -8,6 +8,9 @@ extends Control
 
 #whereuat: defrag: add actual increases in each terminal, add exp/efficiency to defrag mod (idk what eff will be yet)
 
+#random playthough: check for sticky when stopping or ended process
+#add track command : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
+
 #TODO
 # finish defragging, update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
@@ -487,15 +490,12 @@ func root_commands(text):
 			await get_tree().create_timer(0.5).timeout
 			add_line(Ascii.matching)
 		"load hacking":
-			if Stats.player_stats["Hacking"].unlocked:
-				var tween = create_tween()
-				tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-				await tween.finished
-				terminal_root.visible = false
-				await loading.show_loading()
-				hacking.module_loaded()
-			else:
-				add_line("Module not found.")
+			var tween = create_tween()
+			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
+			await tween.finished
+			terminal_root.visible = false
+			await loading.show_loading()
+			hacking.module_loaded()
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
 			await get_tree().create_timer(0.8).timeout

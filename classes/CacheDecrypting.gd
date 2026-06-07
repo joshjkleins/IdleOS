@@ -97,7 +97,7 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 			var quant = randi_range(item.min_quantity, item.max_quantity)
 			loot[item.item] = quant
 	#rare items
-	if randf() < Stats.player_stats["Cache Decrypting"]["efficiency"] + (Decoding.process_upgrades["efficiency"]["amount"] - 1.0):
+	if randf() < Decoding.CACHE["efficiency"] + (Decoding.process_upgrades["efficiency"]["amount"] - 1.0):
 		var item = cache.rare_pool.pick_random()
 		loot[item.item] = 1
 	#not current conditions if loot is empty
