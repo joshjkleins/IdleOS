@@ -81,7 +81,9 @@ func start():
 			
 			
 			var max_heat_used: int = 0
-			if randf() < type["efficiency"] + (Cracking.process_upgrades["efficiency"]["amount"] - 1.0) and !first_crack:
+			var defrag_bonus = 2.0 if Stats.has_bonus(Cracking) else 1.0
+			var eff = (type["efficiency"] + (Cracking.process_upgrades["efficiency"]["amount"] - 1.0)) * defrag_bonus
+			if randf() < eff and !first_crack:
 				_end_current_crack(current_word)
 				_successful_crack(max_heat_used)
 			else:

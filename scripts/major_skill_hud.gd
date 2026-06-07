@@ -90,8 +90,8 @@ func update_exp():
 			$DefragBonusTimer.start()
 		else:
 			$MarginContainer/VBoxContainer/Defragged.visible = false
-		$MarginContainer/VBoxContainer/HBoxContainer/LevelNumberLabel.text = str(current_skill.SKILL.level)
 		#progress bar
+		$MarginContainer/VBoxContainer/HBoxContainer/LevelNumberLabel.text = str(current_skill.SKILL.level)
 		var experience = Exp.get_xp_display(current_skill.SKILL)
 		$MarginContainer/VBoxContainer/ProgressBar.max_value = experience["needed"]
 		$MarginContainer/VBoxContainer/ProgressBar.value = experience["current"]

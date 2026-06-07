@@ -19,10 +19,41 @@ var fade_out_tween: Tween
 func _ready():
 	Exp.exp_updated_signal.connect(exp_updated)
 
+func update_defrag_hud(skill: Node, color: Color):
+	current_skill = skill
+	_update_border(color)
+	skill_name.text = skill.SKILL.name
+	skill_name.add_theme_color_override("font_color", color)
+	skill_level.visible = false
+	skill_exp_bar.visible = false
+	skill_exp_label.visible = false
+	
+	if Defragging.on_cooldown():
+		defragged.text = "Unavailable " + Defragging.get_cd_time_text()
+		defragged.visible = true
+		defrag_label_timer.start()
+	else:
+		defragged.text = ""
+		defragged.visible = false
+	
+	#cleanup
+	if minor_container.get_children().size() > 0:
+		for n in minor_container.get_children():
+			n.queue_free()
+	
+	for s in skill.minor_processes:
+		var skill_scene = m_skill_scene.instantiate()
+		skill_scene.update_defrag(s)
+		skill_scene.custom_minimum_size.x = 80.0
+		minor_container.add_child(skill_scene)
+
 func update(skill: Node, color: Color): #pass singleton ie Mining, Parsing, Decoding, Matching, Cracking, Hacking
 	current_skill = skill
 	_update_border(color)
-	#main skill
+	#main skill\
+	skill_level.visible = true
+	skill_exp_bar.visible = true
+	skill_exp_label.visible = true
 	skill_name.text = skill.SKILL.name
 	skill_name.add_theme_color_override("font_color", color)
 	var experience = Exp.get_xp_display(skill.SKILL)
@@ -49,7 +80,7 @@ func update(skill: Node, color: Color): #pass singleton ie Mining, Parsing, Deco
 		minor_container.add_child(skill_scene)
 
 func exp_updated(amount: int, _minor: Dictionary):
-	if current_skill:
+	if current_skill and current_skill != Defragging:
 		var experience = Exp.get_xp_display(current_skill.SKILL)
 		skill_level.text = "LVL " + str(current_skill.SKILL.level)
 		skill_exp_bar.max_value = experience["needed"]
@@ -101,9 +132,18 @@ func _on_exp_label_timer_timeout():
 	await _fade_out(exp_added_label)
 
 func _on_defrag_label_timer_timeout():
-	if Stats.has_bonus(current_skill):
-		defragged.text = "2x efficiency " + Stats.get_bonus_time_text(current_skill)
+	if current_skill == Defragging:
+		if Defragging.on_cooldown():
+			defragged.text = "Unavailable " + Defragging.get_cd_time_text()
+		else:
+			defragged.text = ""
+			defragged.visible = false
+			defrag_label_timer.stop()
 	else:
-		defragged.text = ""
-		defragged.visible = false
-		defrag_label_timer.stop()
+		if Stats.has_bonus(current_skill):
+			defragged.text = "2x efficiency " + Stats.get_bonus_time_text(current_skill)
+		else:
+			defragged.text = ""
+			defragged.visible = false
+			defrag_label_timer.stop()
+		

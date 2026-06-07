@@ -223,6 +223,7 @@ OS UPGRADES
 [5] HACKING
 [6] DECODING
 [7] PHISHING
+[8] DEFRAGGING
 
 --------------------------------------------------------------------------------
 
@@ -236,22 +237,29 @@ func upgrades_details(skill: Node) -> String:
 ================================================================================
 """
 	var body = ""
-	for up in skill.process_upgrades.keys():
-		var p = skill.process_upgrades[up]
-		var key = _pad_text("[" + str(p.id) + "]", 5)
-		var cost = "COST: " + str(skill.get_upgrade_cost(up)) + " DATA\n"
-		var upgrade_text = ""
-		var title = ""
-		if p.name == "Offline progression": #offline progression
-			title = _pad_text(p.name, 30)
-			upgrade_text = "     " + minutes_to_hours_text(p["amount"]) + " -> " +  minutes_to_hours_text(p["amount"] + p["increase per level"]) + "\n\n"
-		elif p.name == "Max lines":
-			title = _pad_text(p.name + " increase", 30) 
-			upgrade_text = "     " + str(p["amount"]) + " -> " +  str(p["amount"] + p["increase per level"]) + "\n\n"
-		else:
-			title = _pad_text(p.name + " bonus", 30) 
-			upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"
-		body += key + title + cost + upgrade_text 
+	if skill == Defragging:
+		var id = 0
+		for ms in skill.minor_processes:
+			var cost = "[color=GREEN]INSTALLED[/color]\n" if ms.unlocked else str(ms["unlock cost"]) + " DATA\n" 
+			body += _pad_text("[" + str(id) + "]", 5) + _pad_text(ms.name, 30) + "COST: " + cost
+			id += 1
+	else:
+		for up in skill.process_upgrades.keys():
+			var p = skill.process_upgrades[up]
+			var key = _pad_text("[" + str(p.id) + "]", 5)
+			var cost = "COST: " + str(skill.get_upgrade_cost(up)) + " DATA\n"
+			var upgrade_text = ""
+			var title = ""
+			if p.name == "Offline progression": #offline progression
+				title = _pad_text(p.name, 30)
+				upgrade_text = "     " + minutes_to_hours_text(p["amount"]) + " -> " +  minutes_to_hours_text(p["amount"] + p["increase per level"]) + "\n\n"
+			elif p.name == "Max lines":
+				title = _pad_text(p.name + " increase", 30) 
+				upgrade_text = "     " + str(p["amount"]) + " -> " +  str(p["amount"] + p["increase per level"]) + "\n\n"
+			else:
+				title = _pad_text(p.name + " bonus", 30) 
+				upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"
+			body += key + title + cost + upgrade_text 
 	var footer = """
 
 --------------------------------------------------------------------------------
@@ -262,24 +270,45 @@ func upgrades_details(skill: Node) -> String:
 	return header + body + footer
 
 func purchase_upgrade(num: int) -> Dictionary:
-	if num <= 0 or num > 4:
-		return { "message": "Not valid number", "purchased": false }
-	
-	var upgrade = null
-	var cost = 0
-	for upgrade_type in viewing_skill.process_upgrades.keys():
-		if viewing_skill.process_upgrades[upgrade_type]["id"] == num:
-			upgrade = viewing_skill.process_upgrades[upgrade_type]
-			cost = viewing_skill.get_upgrade_cost(upgrade_type)
-	if upgrade == null or cost <= 0:
-		return { "message": "Not valid number", "purchased": false }
-	
-	if cost > Inventory.get_amount(Items.DATA):
-		return { "message": "Not enough data.", "purchased": false }
-	
-	Inventory.remove_resource(Items.DATA, cost)
-	viewing_skill.upgraded(upgrade)
-	return { "message": "Upgrade purchased", "purchased": true }
+	if viewing_skill == Defragging:
+		if num < 0 or num > 6:
+			return { "message": "Not valid number", "purchased": false }
+		
+		var minor_skill_upgrade = Defragging.minor_processes[num]
+		var cost = minor_skill_upgrade["unlock cost"]
+		
+		if minor_skill_upgrade == null or cost <= 0:
+			return { "message": "Not valid number", "purchased": false }
+		
+		if minor_skill_upgrade["unlocked"]:
+			return { "message": "Already unlocked", "purchased": false }
+		
+		if cost > Inventory.get_amount(Items.DATA):
+			return { "message": "Not enough data.", "purchased": false }
+		
+		Inventory.remove_resource(Items.DATA, cost)
+		minor_skill_upgrade.unlocked = true
+		return { "message": "Upgrade purchased", "purchased": true }
+		
+	else:
+		if num <= 0 or num > 4:
+			return { "message": "Not valid number", "purchased": false }
+		
+		var upgrade = null
+		var cost = 0
+		for upgrade_type in viewing_skill.process_upgrades.keys():
+			if viewing_skill.process_upgrades[upgrade_type]["id"] == num:
+				upgrade = viewing_skill.process_upgrades[upgrade_type]
+				cost = viewing_skill.get_upgrade_cost(upgrade_type)
+		if upgrade == null or cost <= 0:
+			return { "message": "Not valid number", "purchased": false }
+		
+		if cost > Inventory.get_amount(Items.DATA):
+			return { "message": "Not enough data.", "purchased": false }
+		
+		Inventory.remove_resource(Items.DATA, cost)
+		viewing_skill.upgraded(upgrade)
+		return { "message": "Upgrade purchased", "purchased": true }
 
 
 func percent_format(value: float) -> String:

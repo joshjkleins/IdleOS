@@ -28,20 +28,27 @@ func update_header(skill: Node = null): #pass singleton
 	match skill:
 		Mining:
 			h_col = h_color_mining
+			skill_details.update(skill, h_col)
 		Parsing:
 			h_col = h_color_parsing
+			skill_details.update(skill, h_col)
 		Cracking:
 			h_col = h_color_cracking
+			skill_details.update(skill, h_col)
 		Matching:
 			h_col = h_color_matching
+			skill_details.update(skill, h_col)
 		Hacking:
 			h_col = h_color_hacking
+			skill_details.update(skill, h_col)
 		Decoding:
 			h_col = h_color_decoding
+			skill_details.update(skill, h_col)
 		Phishing:
 			h_col = h_color_phishing
+			skill_details.update(skill, h_col)
 		Defragging:
 			h_col = h_color_defragging
-	skill_details.update(skill, h_col)
+			skill_details.update_defrag_hud(skill, h_col)
 	major_skills.visible = false
 	skill_details.visible = true

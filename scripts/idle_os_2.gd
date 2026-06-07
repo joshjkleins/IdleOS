@@ -6,7 +6,17 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#whereuat: defrag: add actual increases in each terminal, add exp/efficiency to defrag mod (idk what eff will be yet)
+#DEFRAG: not skill with levels, skill with no levels but with a cooldown (20min). should take roughly 5 min to complete. can defrag each other minor process
+# Player will have to unlock defrag modules for each other process in store under perm upgrades
+# Mining: Efficiency x 2 (20 min)
+# Parsing: Efficiency x 2 (20 min)
+# Cracking: Efficiency x 2 (20 min)
+# Matching: Efficiency x 2 (20 min)
+# Hacking: increase bandwidth generation (20 min)
+# Phishing: Efficiency x 2 (20 min)
+# Decoding: Efficiency x 2 (20 min)
+
+#whereu at : rebuild HUD so defragging isnt so defrigged
 
 #random playthough: check for sticky when stopping or ended process
 #add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
@@ -1193,11 +1203,16 @@ func defragging_commands(text):
 			if process_running:
 				add_line("Process already running.")
 				return
-			
+			if !Defragging.MINING.unlocked:
+				add_line("Mining defragging not unlocked. Purchase from marketplace.")
+				return
 			start_defragging(Defragging.MINING)
 		"start -parsing":
 			if process_running:
 				add_line("Process already running.")
+				return
+			if !Defragging.PARSING.unlocked:
+				add_line("Parsing defragging not unlocked. Purchase from marketplace.")
 				return
 			
 			start_defragging(Defragging.PARSING)
@@ -1205,14 +1220,47 @@ func defragging_commands(text):
 			if process_running:
 				add_line("Process already running.")
 				return
+			if !Defragging.CRACKING.unlocked:
+				add_line("Cracking defragging not unlocked. Purchase from marketplace.")
+				return
 			
 			start_defragging(Defragging.CRACKING)
 		"start -matching":
 			if process_running:
 				add_line("Process already running.")
 				return
+			if !Defragging.MATCHING.unlocked:
+				add_line("Matching defragging not unlocked. Purchase from marketplace.")
+				return
 			
 			start_defragging(Defragging.MATCHING)
+		"start -phishing":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if !Defragging.PHISHING.unlocked:
+				add_line("Phishing defragging not unlocked. Purchase from marketplace.")
+				return
+			
+			start_defragging(Defragging.PHISHING)
+		"start -hacking":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if !Defragging.HACKING.unlocked:
+				add_line("Hacking defragging not unlocked. Purchase from marketplace.")
+				return
+			
+			start_defragging(Defragging.HACKING)
+		"start -decoding":
+			if process_running:
+				add_line("Process already running.")
+				return
+			if !Defragging.DECODING.unlocked:
+				add_line("Decoding defragging not unlocked. Purchase from marketplace.")
+				return
+			
+			start_defragging(Defragging.DECODING)
 		"stop":
 			process_running = false
 			if current_process:
@@ -1365,6 +1413,9 @@ func marketplace_upgrades_commands(text):
 		"7": #Phishing
 			add_line(Marketplace.upgrades_details(Phishing))
 			update_market_context(MarketContext.UPGRADES_DETAILS)
+		"8": #DEFRAGGING
+			add_line(Marketplace.upgrades_details(Defragging))
+			update_market_context(MarketContext.UPGRADES_DETAILS)
 			
 		"back":
 			update_market_context(MarketContext.MAIN)
@@ -1381,6 +1432,8 @@ func marketplace_upgrades_details_commands(text):
 			"back":
 				update_market_context(MarketContext.UPGRADES)
 				add_line(Marketplace.upgrades_main())
+			_:
+				add_line("Command not found")
 
 #current_market_context == MarketContext.BLACK_MARKET
 func marketplace_black_market_main_commands(text):

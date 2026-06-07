@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cawbutc5qs2ck"]
+[gd_scene load_steps=5 format=3 uid="uid://cawbutc5qs2ck"]
 
 [ext_resource type="Script" uid="uid://cn0uvlqd55klv" path="res://scripts/header.gd" id="1_q1nc5"]
 [ext_resource type="PackedScene" uid="uid://fk428w5i4mnu" path="res://scenes/major_skill.tscn" id="2_jvmy4"]
 [ext_resource type="PackedScene" uid="uid://grk5ff0dcb16" path="res://scenes/skill_details.tscn" id="3_67toa"]
+[ext_resource type="PackedScene" uid="uid://cc6y5qb3dy1ga" path="res://scenes/defrag_major_skill_hud.tscn" id="3_en2g2"]
 
 [node name="HEADER" type="PanelContainer"]
 offset_right = 40.0
@@ -51,10 +52,10 @@ layout_mode = 2
 skill_type = 6
 h_color = Color(0.215686, 0.541176, 0.866667, 1)
 
-[node name="MajorSkill8" parent="MajorSkills" instance=ExtResource("2_jvmy4")]
+[node name="DefragMajorSkillHUD" parent="MajorSkills" instance=ExtResource("3_en2g2")]
 layout_mode = 2
 skill_type = 7
-h_color = Color(0.812723, 1.53056e-05, 9.52989e-06, 1)
+h_color = Color(0.8, 0, 0, 1)
 
 [node name="SkillDetails" parent="." instance=ExtResource("3_67toa")]
 visible = false
