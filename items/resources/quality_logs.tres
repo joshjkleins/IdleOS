@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://e0w04lo8ttxq"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_hykus"]
+
+[resource]
+script = ExtResource("1_hykus")
+id = 85
+name = "Quality logs"
+shortened_name = ""
+description = "Logs that can be parsed for rare resources"
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

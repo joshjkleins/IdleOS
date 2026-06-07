@@ -2,6 +2,7 @@ extends Node
 
 signal basic_cycle_completed
 signal cred_cycle_complete
+signal quality_cycle_completed
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -40,6 +41,32 @@ var LOGS = {
 	"signal": basic_cycle_completed
 }
 
+var QUALITY_LOGS = {
+	"name": "Quality",
+	"tier name": "TIER I | LOGS",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "data-mining",
+	"efficiency": 0.05,
+	"efficiency rate": 0.0012,
+	"unlocked": true,
+	"base speed": 0.8,
+	"overclock speed": 0.25,
+	"overheat speed": 3.0,
+	"heat": 4,
+	"overclock heat": 5,
+	"overheat heat": 1,
+	"requirements": Items.QUALITY_LOGS,
+	"item pool": [
+		{ "item": Items.DATA, "min": 5, "max": 25 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
+	],
+	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": quality_cycle_completed
+}
+
 var CRED_LOGS = {
 	"name": "Credential",
 	"tier name": "TIER I | LOGS",
@@ -70,6 +97,7 @@ var CRED_LOGS = {
 
 var minor_processes = [
 	LOGS,
+	QUALITY_LOGS,
 	CRED_LOGS
 ]
 

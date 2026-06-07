@@ -1,6 +1,7 @@
 extends Node
 
 signal log_cycle_completed
+signal quality_log_cycle_completed
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -37,32 +38,33 @@ var LOGS = {
 	"signal": log_cycle_completed
 }
 
-#var LOGS = {
-	#"name": "Logs",
-	#"tier name": "TIER II | LOGS",
-	#"level": 1,
-	#"experience": 0,
-	#"experience per level": 725,
-	#"command": "log-mining",
-	#"efficiency": 0.0,
-	#"efficiency rate": 0.02,
-	#"unlocked": true,
-	#"base speed": 0.6,
-	#"overclock speed": 0.2,
-	#"overheat speed": 2.4,
-	#"heat": 3,
-	#"overclock heat": 7,
-	#"overheat heat": 1,
-	#"requirements": [],
-	#"resource gained": Items.LOGS,
-	#"resource amount gained": 1,
-	#"description": "Finds logs that can be parsed for a random assortment of items.",
-	#"efficiency description": "Chance to receive multiple logs.",
-	#"signal": log_cycle_completed
-#}
+var QUALITY_LOGS = {
+	"name": "Quality logs",
+	"tier name": "TIER II | QUALITY LOGS",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 725,
+	"command": "log-mining",
+	"efficiency": 0.0,
+	"efficiency rate": 0.02,
+	"unlocked": true,
+	"base speed": 0.9,
+	"overclock speed": 0.4,
+	"overheat speed": 2.9,
+	"heat": 5,
+	"overclock heat": 11,
+	"overheat heat": 1,
+	"requirements": [],
+	"resource gained": Items.QUALITY_LOGS,
+	"resource amount gained": 1,
+	"description": "Finds logs that can be parsed for a random assortment of items.",
+	"efficiency description": "Chance to receive multiple logs.",
+	"signal": quality_log_cycle_completed
+}
 
 var minor_processes = [
-	LOGS
+	LOGS,
+	QUALITY_LOGS
 ]
 
 func add_xp(amount: int, type: Dictionary):

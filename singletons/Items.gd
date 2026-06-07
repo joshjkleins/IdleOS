@@ -105,6 +105,7 @@ enum ItemType {
 	ACCOUNT_ACCESS_TOKENS, #82
 	DDOS, #83
 	REFRESH_TOKEN, #84
+	QUALITY_LOGS, #85
 }
 
 #items
@@ -120,6 +121,8 @@ const ENCRYPTED_PINS = preload("res://items/resources/encrypted_pins.tres")
 const PINS = preload("res://items/resources/pins.tres")
 const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
 const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
+const QUALITY_LOGS = preload("res://items/resources/quality_logs.tres")
+
 
 ### COMBAT ###
 const DDOS = preload("res://items/combat/ddos.tres")
@@ -310,4 +313,5 @@ const ITEM_MAP = {
 	ItemType.ACCOUNT_ACCESS_TOKENS: ACCOUNT_ACCESS_TOKENS,
 	ItemType.DDOS: DDOS,
 	ItemType.REFRESH_TOKEN: REFRESH_TOKEN,
+	ItemType.QUALITY_LOGS: QUALITY_LOGS,
 }

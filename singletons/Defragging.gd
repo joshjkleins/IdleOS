@@ -37,7 +37,33 @@ var PARSING = {
 	"description": "Efficiency doubled for 30 minutes."
 }
 
+
+var CRACKING = {
+	"name": "Cracking",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"skill": Cracking,
+	"bonus time": 30,
+	"description": "Efficiency doubled for 30 minutes."
+}
+
+
+var MATCHING = {
+	"name": "Matching",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"skill": Matching,
+	"bonus time": 30,
+	"description": "Efficiency doubled for 30 minutes."
+}
+
 func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
 
-var minor_processes = [MINING, PARSING]
+var minor_processes = [MINING, PARSING, CRACKING, MATCHING]

@@ -9,7 +9,7 @@ extends Control
 #whereuat: defrag: add actual increases in each terminal, add exp/efficiency to defrag mod (idk what eff will be yet)
 
 #random playthough: check for sticky when stopping or ended process
-#add track command : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
+#add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
 
 #TODO
 # finish defragging, update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
@@ -590,7 +590,7 @@ func mining_commands(text):
 	match text:
 		"start":
 			if !process_running:
-				start_log_mining()
+				start_log_mining(Mining.LOGS)
 			else:
 				add_line("Process already running")
 		#"start -log":
@@ -598,6 +598,12 @@ func mining_commands(text):
 				#start_log_mining()
 			#else:
 				#add_line("Process already running")
+		"start -quality":
+			if !process_running:
+				start_log_mining(Mining.QUALITY_LOGS)
+			else:
+				add_line("Process already running")
+			
 		"stop":
 			process_running = false
 			if current_process:
@@ -656,17 +662,17 @@ func start_data_mining():
 	new_data_mining_terminal.start_data_mining()
 	add_new_scrollback()
 
-func start_log_mining():
-	if Mining.LOGS.unlocked:
+func start_log_mining(minor_process: Dictionary):
+	if minor_process.unlocked:
 		var new_data_mining_terminal = mining_scene.instantiate()
 		terminal_body_container.add_child(new_data_mining_terminal)
-		new_data_mining_terminal.set_mine_type(Mining.LOGS)
+		new_data_mining_terminal.set_mine_type(minor_process)
 		process_running = true
 		current_process = new_data_mining_terminal
 		new_data_mining_terminal.start_data_mining()
 		add_new_scrollback()
 	else:
-		add_line("Log mining is not unlocked yet.")
+		add_line(minor_process.name + " is not unlocked.")
 
 func data_mining_ended_safely():
 	current_process = null
@@ -680,24 +686,24 @@ func data_mining_ended_safely():
 func log_parsing_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"start":
+		"start -logs":
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.LOGS) <= 0:
-				add_line("No logs found.")
-				return
 			
-			start_log_parsing()
+			start_log_parsing(Parsing.LOGS)
 		"start -creds":
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.LOGS) <= 0:
-				add_line("No logs found.")
+			
+			start_log_parsing(Parsing.CRED_LOGS)
+		"start -quality":
+			if process_running:
+				add_line("Process already running.")
 				return
 			
-			start_log_cred_parsing()
+			start_log_parsing(Parsing.QUALITY_LOGS)
 		"stop":
 			process_running = false
 			if current_process:
@@ -748,23 +754,26 @@ func log_parsing_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_log_parsing():
+func start_log_parsing(minor_process: Dictionary):
+	if Inventory.get_amount(minor_process["requirements"]) <= 0:
+		add_line("No logs found.")
+		return
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
 	terminal_body_container.add_child(new_log_parsing_terminal)
-	new_log_parsing_terminal.set_parse_type(Parsing.LOGS)
+	new_log_parsing_terminal.set_parse_type(minor_process)
 	process_running = true
 	current_process = new_log_parsing_terminal
 	new_log_parsing_terminal.start()
 	add_new_scrollback()
 
-func start_log_cred_parsing():
-	var new_log_parsing_terminal = log_parsing_scene.instantiate()
-	terminal_body_container.add_child(new_log_parsing_terminal)
-	new_log_parsing_terminal.set_parse_type(Parsing.CRED_LOGS)
-	process_running = true
-	current_process = new_log_parsing_terminal
-	new_log_parsing_terminal.start()
-	add_new_scrollback()
+#func start_log_cred_parsing():
+	#var new_log_parsing_terminal = log_parsing_scene.instantiate()
+	#terminal_body_container.add_child(new_log_parsing_terminal)
+	#new_log_parsing_terminal.set_parse_type(Parsing.CRED_LOGS)
+	#process_running = true
+	#current_process = new_log_parsing_terminal
+	#new_log_parsing_terminal.start()
+	#add_new_scrollback()
 
 func log_parsing_ended_safely():
 	current_process = null
@@ -1192,7 +1201,18 @@ func defragging_commands(text):
 				return
 			
 			start_defragging(Defragging.PARSING)
+		"start -cracking":
+			if process_running:
+				add_line("Process already running.")
+				return
 			
+			start_defragging(Defragging.CRACKING)
+		"start -matching":
+			if process_running:
+				add_line("Process already running.")
+				return
+			
+			start_defragging(Defragging.MATCHING)
 		"stop":
 			process_running = false
 			if current_process:
@@ -1223,13 +1243,7 @@ func defragging_commands(text):
 		"-h":
 			list_help()
 		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
+			add_line("Overclock not available for defragging.")
 		_:
 			add_line("Command not found")
 

@@ -1,20 +1,4 @@
 extends Node
-#game info
-#Idle game
-#Skills (as seens in traditional idle games) = Modules
-
-#important design rules for this game
-#every process should do one of the following, and clearly
-#Generate a resource
-#Convert a resource
-#Buffs other processes (short term or permenant)
-#unlock new systems
-
-#random ideas
-#defrag disk: long process, everything is slow during it, but once done a perm speed bonus to everything
-
-#Defining "Process"
-#Pick one: Generate, Convert, Buff, Unlock
 
 enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
@@ -32,7 +16,7 @@ func _ready():
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 20)
 	#add_resource(Items.PASSWORDS, 30)
 	#add_resource(Items.USERNAMES, 30)
-	add_resource(Items.STUDENT_CACHE, 20)
+	#add_resource(Items.STUDENT_CACHE, 20)
 	#add_resource(Items.PINS, 30)
 	#add_resource(Items.ACCOUNT_NUMBERS, 30)
 	#add_resource(Items.REFRESH_TOKEN, 500)
