@@ -4,21 +4,7 @@ var current_skill
 @onready var fade_in_tween: Tween
 @onready var fade_out_tween: Tween
 
-func update_defrag(skill: Dictionary):
-	current_skill = skill
-	$MarginContainer2/VBoxContainer/HBoxContainer/SkillName.text = skill.name
-	$MarginContainer2/VBoxContainer/HBoxContainer/SkillLevel.visible = false
-	
-	#var experience = Exp.get_xp_display(skill)
-	$MarginContainer2/VBoxContainer/SkillExpBar.visible = false
-	$MarginContainer2/VBoxContainer/HBoxContainer2/SkillExpLabel.visible = false
-	
-	$ExpLabelTimer.timeout.connect(exp_timeout)
-	
-	Exp.exp_updated_signal.connect(exp_updated)
-	
-
-func update(skill: Dictionary):
+func update(skill: Dictionary): #minor
 	current_skill = skill
 	$MarginContainer2/VBoxContainer/HBoxContainer/SkillName.text = skill.name
 	$MarginContainer2/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/99"
@@ -44,6 +30,7 @@ func update_exp(_amount: int):
 
 #shows +100 exp label
 func exp_updated(amount, minor):
+	update_exp(amount)
 	if current_skill == minor:
 		_cancel_tweens()
 		$MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel.modulate.a = 0.0

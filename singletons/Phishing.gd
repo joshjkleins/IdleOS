@@ -2,6 +2,7 @@ extends Node
 
 signal spear_cycle_completed
 signal whale_cycle_completed
+signal xp_gained
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -81,9 +82,8 @@ func remove_line(line):
 	if current_lines.has(line):
 		current_lines.erase(line)
 
-func add_xp(amount: int, type: Dictionary):
-	SKILL["experience"] += amount
-	type["experience"] += amount
+func signal_exp(amount: int):
+	xp_gained.emit()
 
 var process_upgrades = {
 	"max lines": { "id": 1, "name": "Max lines", "level": 0, "amount": 0, "increase per level": 1 },

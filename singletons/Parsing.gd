@@ -3,6 +3,7 @@ extends Node
 signal basic_cycle_completed
 signal cred_cycle_complete
 signal quality_cycle_completed
+signal xp_gained
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -100,6 +101,9 @@ var minor_processes = [
 	QUALITY_LOGS,
 	CRED_LOGS
 ]
+
+func signal_exp(amount: int):
+	xp_gained.emit()
 
 func add_xp(amount: int, type: Dictionary):
 	SKILL["experience"] += amount

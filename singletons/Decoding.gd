@@ -1,6 +1,7 @@
 extends Node
 
 signal decode_cycle_completed
+signal xp_gained
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -40,9 +41,8 @@ var minor_processes = [
 	CACHE
 ]
 
-func add_xp(amount: int, type: Dictionary):
-	SKILL["experience"] += amount
-	type["experience"] += amount
+func signal_exp(amount: int):
+	xp_gained.emit()
 
 var process_upgrades = {
 	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },

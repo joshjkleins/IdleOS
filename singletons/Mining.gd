@@ -2,6 +2,7 @@ extends Node
 
 signal log_cycle_completed
 signal quality_log_cycle_completed
+signal xp_gained
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -11,7 +12,7 @@ var SKILL = {
 	"name": "Mining",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#1d9e75")
+	"color": Color("#a97c54")
 }
 
 var LOGS = {
@@ -67,9 +68,8 @@ var minor_processes = [
 	QUALITY_LOGS
 ]
 
-func add_xp(amount: int, type: Dictionary):
-	SKILL["experience"] += amount
-	type["experience"] += amount
+func signal_exp(amount: int):
+	xp_gained.emit()
 
 var process_upgrades = {
 	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },

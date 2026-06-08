@@ -53,6 +53,7 @@ func get_xp_progress(skill_data: Dictionary) -> float:
 	return float(skill_data["experience"] - current_level_xp) / float(next_level_xp - current_level_xp)
 
 func add_xp(major, minor, amount: int = 0): #singleton as param
+	
 	if amount > 0:
 		major.SKILL["experience"] += amount
 		gained_xp_signal.emit(amount)
@@ -81,6 +82,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 				break
 
 		exp_updated_signal.emit(amount, minor)
+	major.signal_exp(amount)
 
 
 func on_level_up(skill_data: Dictionary):

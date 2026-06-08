@@ -16,7 +16,7 @@ extends Control
 # Phishing: Efficiency x 2 (20 min)
 # Decoding: Efficiency x 2 (20 min)
 
-#whereu at : rebuild HUD so defragging isnt so defrigged
+#whereu at : rebuilding HUD
 
 #random playthough: check for sticky when stopping or ended process
 #add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
@@ -175,7 +175,8 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
-	header.update_header()
+	#header.update_header()
+	header.update()
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	Signals.system_temp_updated(30)
@@ -468,7 +469,8 @@ func root_commands(text):
 		"load mining":
 			add_line("[ .. ] loading data mining module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Mining)
+			#header.update_header(Mining)
+			header.display_skill(Mining)
 			add_line("[ OK ] data mining module loaded")
 			update_context(Context.MINING)
 			await get_tree().create_timer(0.5).timeout
@@ -477,7 +479,8 @@ func root_commands(text):
 		"load parsing":
 			add_line("[ .. ] loading parsing module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Parsing)
+			#header.update_header(Parsing)
+			header.display_skill(Parsing)
 			add_line("[ OK ] parsing module loaded")
 			update_context(Context.PARSING)
 			await get_tree().create_timer(0.5).timeout
@@ -486,7 +489,8 @@ func root_commands(text):
 		"load cracking":
 			add_line("[ .. ] loading cracking module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Cracking)
+			#header.update_header(Cracking)
+			header.display_skill(Cracking)
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			await get_tree().create_timer(0.5).timeout
@@ -494,7 +498,8 @@ func root_commands(text):
 		"load matching":
 			add_line("[ .. ] loading matching module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Matching)
+			#header.update_header(Matching)
+			header.display_skill(Matching)
 			add_line("[ OK ] matching module loaded")
 			update_context(Context.MATCHING)
 			await get_tree().create_timer(0.5).timeout
@@ -517,7 +522,8 @@ func root_commands(text):
 		"load decoding":
 			add_line("[ .. ] loading decoding module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Decoding)
+			#header.update_header(Decoding)
+			header.display_skill(Decoding)
 			add_line("[ OK ] decoding module loaded")
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
@@ -525,7 +531,8 @@ func root_commands(text):
 		"load phishing":
 			add_line("[ .. ] loading phishing module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Phishing)
+			#header.update_header(Phishing)
+			header.display_skill(Phishing)
 			add_line("[ OK ] phishing module loaded")
 			update_context(Context.PHISHING)
 			await get_tree().create_timer(0.5).timeout
@@ -533,7 +540,7 @@ func root_commands(text):
 		"load defragging":
 			add_line("[ .. ] loading defragging module")
 			await get_tree().create_timer(0.8).timeout
-			header.update_header(Defragging)
+			#header.update_header(Defragging)
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
 			await get_tree().create_timer(0.5).timeout
@@ -637,7 +644,8 @@ func mining_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -738,7 +746,8 @@ func log_parsing_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -839,7 +848,8 @@ func password_unscramble_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -949,7 +959,8 @@ func cred_matching_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -1039,7 +1050,8 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -1156,7 +1168,8 @@ func phishing_commands(text):
 				else:
 					add_line("Safetly shutting down module")
 					await get_tree().create_timer(0.8).timeout
-					header.update_header()
+					#header.update_header()
+					header.update()
 					update_context(Context.ROOT)
 					add_line(Ascii.root)
 					list_help()
@@ -1282,7 +1295,8 @@ func defragging_commands(text):
 			else:
 				add_line("Safetly shutting down module")
 				await get_tree().create_timer(0.8).timeout
-				header.update_header()
+				#header.update_header()
+				header.update()
 				update_context(Context.ROOT)
 				add_line(Ascii.root)
 				list_help()
@@ -1316,7 +1330,8 @@ func marketplace_commands(text):
 	text = text.to_lower().strip_edges()
 	
 	if text == "exit":
-		header.update_header()
+		#header.update_header()
+		header.update()
 		update_context(Context.ROOT)
 		update_market_context(MarketContext.MAIN)
 		Marketplace.viewing_item = null
@@ -1608,7 +1623,8 @@ func _navigate_history(delta: int):
 	call_deferred("_move_caret_to_end")
 
 func _on_hacking_start_loading() -> void:
-	header.update_header()
+	#header.update_header()
+	header.update()
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true

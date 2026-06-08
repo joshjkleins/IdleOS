@@ -1,5 +1,7 @@
 extends Node
 
+signal xp_gained
+
 var current_anon = 100
 var max_anon = 100
 var current_bandwidth = 10
@@ -39,8 +41,8 @@ var SKILL = {
 }
 
 
-func add_xp(amount: int, _type: Dictionary):
-	SKILL["experience"] += amount
+func signal_exp(amount: int):
+	xp_gained.emit()
 
 var minor_processes = []
 
