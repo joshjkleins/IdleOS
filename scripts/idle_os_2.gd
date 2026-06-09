@@ -6,23 +6,12 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 # BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-#DEFRAG: not skill with levels, skill with no levels but with a cooldown (20min). should take roughly 5 min to complete. can defrag each other minor process
-# Player will have to unlock defrag modules for each other process in store under perm upgrades
-# Mining: Efficiency x 2 (20 min)
-# Parsing: Efficiency x 2 (20 min)
-# Cracking: Efficiency x 2 (20 min)
-# Matching: Efficiency x 2 (20 min)
-# Hacking: increase bandwidth generation (20 min)
-# Phishing: Efficiency x 2 (20 min)
-# Decoding: Efficiency x 2 (20 min)
-
-#whereu at : rebuilding HUD
 
 #random playthough: check for sticky when stopping or ended process
 #add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
 
 #TODO
-# finish defragging, update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
+# update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
 #simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
@@ -541,6 +530,7 @@ func root_commands(text):
 			add_line("[ .. ] loading defragging module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Defragging)
+			header.display_defragging()
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
 			await get_tree().create_timer(0.5).timeout
@@ -1218,6 +1208,9 @@ func defragging_commands(text):
 				return
 			if !Defragging.MINING.unlocked:
 				add_line("Mining defragging not unlocked. Purchase from marketplace.")
+				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
 				return
 			start_defragging(Defragging.MINING)
 		"start -parsing":

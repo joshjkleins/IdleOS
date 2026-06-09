@@ -608,9 +608,9 @@ var hacking_targets = {
 ##############################
 ######## DEFRAG BONUS ########
 ##############################
-func grant_bonus(skill: Node): #Mining, Parsing etc
+func grant_bonus(skill: Dictionary): #Mining, Parsing etc
 	var now = Time.get_unix_time_from_system()
-	skill.bonus_expires_at = now + (30 * 60) #30 min
+	skill.skill.bonus_expires_at = now + (skill["bonus time"] * 60)
 
 func has_bonus(skill: Node) -> bool:
 	return Time.get_unix_time_from_system() < skill.bonus_expires_at

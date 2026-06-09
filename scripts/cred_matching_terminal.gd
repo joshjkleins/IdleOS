@@ -1,6 +1,6 @@
 extends PanelContainer
 
-@onready var user_row_container = $MarginContainer/VBoxContainer/BottomRow/VBoxContainer/UserRowContainer
+#@onready var user_row_container = $MarginContainer/VBoxContainer/BottomRow/VBoxContainer/UserRowContainer
 @onready var main_bar = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar
 @onready var status_progress_bar = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusProgressBar
 
@@ -8,15 +8,59 @@ extends PanelContainer
 @onready var status_title = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusTitle
 @onready var status_username = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusUsername
 @onready var status_pw = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/StatusPw
-@onready var status_updater = $MarginContainer/VBoxContainer/BottomRow/StatusUpdater
+#@onready var status_updater = $MarginContainer/VBoxContainer/BottomRow/StatusUpdater
 @onready var userbox_name_label = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/UserboxNameLabel
 @onready var third_col = $MarginContainer/VBoxContainer/TopRow/ThirdCol
 
 @onready var resource_one_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceOneTitle
 @onready var resource_two_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceTwoTitle
+@onready var tag_1 = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag/MarginContainer/Tag1
+@onready var tag_2 = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag2/MarginContainer/Tag2
+@onready var tag_3 = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag3/MarginContainer/Tag3
+@onready var tag_4 = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag4/MarginContainer/Tag4
 
 @export var lock_image: Texture2D
 @export var cred_image: Texture2D
+@onready var terminal_scroll = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll
+@onready var terminal_label = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll/VBoxContainer/TerminalLabel
+
+var db_lookup_messages: Array[String] = [
+	"[color=#555555][DB] [/color] [color=#79c0ff]QUERY    [/color] Scanning user index... [color=#bc8cff]0x4F2A[/color]",
+	"[color=#555555][DB] [/color] [color=#79c0ff]FETCH    [/color] Resolving uid -> record match",
+	"[color=#555555][DB] [/color] [color=#d29922]CACHE    [/color] Entry found in L2 cache — loading",
+	"[color=#555555][DB] [/color] [color=#3fb950]HIT      [/color] Username located: [color=#bc8cff]usr_7741[/color]",
+	"[color=#555555][DB] [/color] [color=#3fb950]OK       [/color] Record integrity check passed",
+	"[color=#555555][DB] [/color] [color=#79c0ff]SYNC     [/color] Replicating metadata to session buffer",
+]
+ 
+var auth_messages: Array[String] = [
+	"[color=#555555][AUTH][/color] [color=#79c0ff]INIT     [/color] Spawning bcrypt worker thread",
+	"[color=#555555][AUTH][/color] [color=#d29922]HASH     [/color] Salting input — rounds: [color=#bc8cff]12[/color]",
+	"[color=#555555][AUTH][/color] [color=#79c0ff]COMPARE  [/color] Matching digest against stored hash",
+	"[color=#555555][AUTH][/color] [color=#d29922]VERIFY   [/color] Checking entropy threshold...",
+	"[color=#555555][AUTH][/color] [color=#3fb950]PASS     [/color] Hash comparison successful",
+	"[color=#555555][AUTH][/color] [color=#3fb950]TOKEN    [/color] Session token issued — ttl: [color=#bc8cff]3600s[/color]",
+]
+ 
+var pentest_messages: Array[String] = [
+	"[color=#555555][PEN] [/color] [color=#79c0ff]PROBE    [/color] Initiating port sweep [color=#bc8cff]192.168.x.x[/color]",
+	"[color=#555555][PEN] [/color] [color=#d29922]INJECT   [/color] Testing SQLi vectors on endpoint [color=#bc8cff]/api[/color]",
+	"[color=#555555][PEN] [/color] [color=#f85149]ANOMALY  [/color] Unexpected response on port [color=#bc8cff]8443[/color]",
+	"[color=#555555][PEN] [/color] [color=#79c0ff]FUZZ     [/color] Sending [color=#bc8cff]512[/color] malformed payloads...",
+	"[color=#555555][PEN] [/color] [color=#f85149]EXPOSE   [/color] CVE-2024-1337 — potential XSS vector",
+	"[color=#555555][PEN] [/color] [color=#3fb950]PATCH    [/color] Exploit confirmed — logging to report",
+]
+ 
+var credential_messages: Array[String] = [
+	"[color=#555555][CRED][/color] [color=#79c0ff]CHECK    [/color] Cross-referencing against ACL table",
+	"[color=#555555][CRED][/color] [color=#d29922]SCOPE    [/color] Evaluating permission set: [color=#bc8cff]read+exec[/color]",
+	"[color=#555555][CRED][/color] [color=#79c0ff]MFA      [/color] Second factor binding... TOTP valid",
+	"[color=#555555][CRED][/color] [color=#3fb950]GRANT    [/color] Access level confirmed: [color=#bc8cff]OPERATOR[/color]",
+	"[color=#555555][CRED][/color] [color=#3fb950]BIND     [/color] Credentials committed to active session",
+	"[color=#555555][CRED][/color] [color=#3fb950]READY    [/color] System access unlocked",
+]
+
+var terminal_messages = [db_lookup_messages, auth_messages, pentest_messages, credential_messages]
 
 var target_row = preload("res://scenes/cred_match_target_row.tscn")
 var separator = preload("res://scenes/separator_cred.tscn")
@@ -317,23 +361,28 @@ enum MatchType {CREDENTIAL, ACCOUNT}
 var current_type: MatchType
 
 func set_cred(p_type: Dictionary):
+	update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
 	type = p_type
 	current_type = MatchType.CREDENTIAL
 	resource_one_title.text = "USERNAME"
 	resource_two_title.text = "PASSWORD"
 
 func set_account(p_type: Dictionary):
+	update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
 	type = p_type
 	current_type = MatchType.ACCOUNT
 	resource_one_title.text = "ACCOUNT #"
 	resource_two_title.text = "PIN"
 
+func update_tags(tag_names: Array[String]):
+	var tags = [tag_1, tag_2, tag_3, tag_4]
+	for i in range(tags.size()):
+		tags[i].text = tag_names[i]
+
 func start():
 	process_running = true
 	safely_stop = false
 	sb = third_col.get_theme_stylebox("panel")
-	_reset_rows()
-	_build_rows()
 	#check if player has required amounts
 	for item in type["requirements"]:
 		if Inventory.get_amount(item) <= 0:
@@ -341,8 +390,9 @@ func start():
 			return
 	
 	#roll of efficiency and remove items
+	var defrag_bonus = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 0.0
 	for item in type["requirements"]:
-		if randf() > type["efficiency"] + (Matching.process_upgrades["efficiency"]["amount"] - 1.0):
+		if randf() > type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"] + defrag_bonus:
 			Inventory.remove_resource(item, 1)
 	_begin_matching()
 
@@ -361,11 +411,10 @@ func _repeat_loop():
 			return
 	if process_running:
 		#roll of efficiency and remove items
+		var defrag_bonus = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 0.0
 		for item in type["requirements"]:
-			if randf() > type["efficiency"] + (Matching.process_upgrades["efficiency"]["amount"] - 1.0):
+			if randf() > type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"] + defrag_bonus:
 				Inventory.remove_resource(item, 1)
-		_reset_rows()
-		_build_rows()
 		_begin_matching()
 	else:
 		_finished()
@@ -373,9 +422,6 @@ func _repeat_loop():
 func _cancel_tweens():
 	if tween:
 		tween.kill()
-	for n in user_row_container.get_children():
-		if n is PanelContainer:
-				n.cancel()
 
 func _finished():
 	process_running = false
@@ -386,101 +432,41 @@ func _begin_matching():
 	if process_running:
 		#get current_row
 		third_col.add_theme_stylebox_override("panel", sb)
-		var current_row = _get_current_row()
-		if current_row != null:
-			#highlight tag
-			status_updater.text = "FINDING CLOSEST MATCHING ALGORITHM"
-			var current_tag = 0
-			current_row.fade_in()
-			current_row.update_state(current_row.MATCH_STATE.ATTEMPTING)
-			var tags = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer.get_children()
-			var rolls = []
-			for i in range(4):
-				rolls.append(randi_range(1, 100))
-			#rolls.sort()
-			for n in tags:
-				tags[0].remove_theme_stylebox_override("panel")
-				tags[1].remove_theme_stylebox_override("panel")
-				tags[2].remove_theme_stylebox_override("panel")
-				tags[3].remove_theme_stylebox_override("panel")
-				
-				var sb_n = n.get_theme_stylebox("panel").duplicate()
-				sb_n.bg_color = TAG_COLORS[current_tag]
-				tags[current_tag].add_theme_stylebox_override("panel", sb_n)
-				
-				var roll = rolls[current_tag]
-				
-				if !process_running:
-					_finished()
-					return
-				var speed
-				var heat
-				if Stats.overclocked:
-					speed = type["overclock speed"] / Matching.process_upgrades["speed"]["amount"]
-					heat = type["overclock heat"]
-				elif Stats.overheated:
-					speed = type["overheat speed"] / Matching.process_upgrades["speed"]["amount"]
-					heat = type["overheat heat"]
-				else:
-					speed = type["base speed"] / Matching.process_upgrades["speed"]["amount"]
-					heat = type["heat"]
-				#if roll > highest_roll:
-					#highest_roll = roll
-					#status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
-				current_row.update_label_chances(current_tag, roll, TAG_COLORS[current_tag])
-				await current_row.start_progress(roll, speed)
-				Stats.update_tempature(heat)
-				if !process_running:
-					_finished()
-					return
-				if roll > highest_roll:
-					highest_roll = roll
-					status_progress_bar.text = "success chance: " + str(highest_roll) + "%"
-				#current_row.update_label_chances(current_tag, roll, TAG_COLORS[current_tag])
-				current_tag += 1
-				
-			current_row.set_highest_color()
-			#await current_row.start_progress(highest_roll, 0.65)
-			current_row.update_state(current_row.MATCH_STATE.LOCKED)
-			if !process_running:
-				_finished()
-				return
-			_begin_matching()
-		else: #finished looping through 5 rows
-			#loop through rows to find highest chance and highlight
-			if !process_running:
-				_finished()
-				return
-			var highest_chance = 0
-			var t_row = null
-			for n in user_row_container.get_children():
-				if n is PanelContainer:
-					if n.highest_chance > highest_chance:
-						highest_chance = n.highest_chance
-						t_row = n
-						
-			t_row.highlight()
-			if !process_running:
-				_finished()
-				return
+		#loop through tags
+		var tags = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer.get_children()
+		terminal_label.text = ""
+		for i in range(tags.size()):
+			tags[0].remove_theme_stylebox_override("panel")
+			tags[1].remove_theme_stylebox_override("panel")
+			tags[2].remove_theme_stylebox_override("panel")
+			tags[3].remove_theme_stylebox_override("panel")
+			var tag = tags[i]
+			tag.remove_theme_stylebox_override("panel")
+			var sb_n = tag.get_theme_stylebox("panel").duplicate()
+			sb_n.bg_color = TAG_COLORS[i]
+			tag.add_theme_stylebox_override("panel", sb_n)
 			
-			await prepare_cred_roll(t_row.highest_chance, t_row.u_name)
-			if !process_running:
-				_finished()
-				return
-			await get_tree().create_timer(1.0).timeout
-			if !process_running:
-				_finished()
-				return
-			if !safely_stop:
-				_repeat_loop()
-			else:
-				_finished()
+			for message in terminal_messages[i]:
+				await get_tree().create_timer(randf_range(0.1, 1.5)).timeout
+				terminal_label.text += message + "\n"
+				terminal_scroll.scroll_vertical = terminal_scroll.get_v_scroll_bar().max_value
+			
+		await prepare_cred_roll(100, "IDK")
+		if !process_running:
+			_finished()
+			return
+		await get_tree().create_timer(1.0).timeout
+		if !process_running:
+			_finished()
+			return
+		if !safely_stop:
+			_repeat_loop()
+		else:
+			_finished()
 
 func prepare_cred_roll(chance: int, u_name: String):
 	if !process_running:
 		return
-	status_updater.text = "ATTEMPTING MATCH USING HIGHEST CHANCE"
 	status_title.text = "ATTEMPING MATCH"
 	status_username.text = u_name
 	status_pw.text = "****"
@@ -522,41 +508,6 @@ func prepare_cred_roll(chance: int, u_name: String):
 	type.signal.emit(1)
 	Exp.add_xp(Matching, type, type["experience per level"] * Matching.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Matching)
-
-func _reset_rows():
-	highest_roll = 0
-	current_iteration = 0
-	main_bar.value = 0
-	status_image.texture = lock_image
-	status_title.text = "AWAITING MATCH"
-	status_username.text = "-"
-	status_pw.text = "-"
-	status_progress_bar.text = "success chance: -"
-	if user_row_container.get_children().size() > 0:
-		for n in user_row_container.get_children():
-			n.queue_free()
-
-func _build_rows():
-	var random_user = RANDOM_USERNAMES.pick_random()
-	userbox_name_label.text = random_user
-	var variations = generate_username_variations(random_user)
-	for i in range(USER_ROWS):
-		var r = target_row.instantiate()
-		var s = separator.instantiate()
-		r.update(variations[i])
-		r._hide()
-		user_row_container.add_child(r)
-		
-		if i != USER_ROWS - 1:
-			user_row_container.add_child(s)
-
-func _get_current_row():
-	for n in user_row_container.get_children():
-		if n is PanelContainer:
-			if n.current_state == n.MATCH_STATE.WAITING:
-				return n
-	return null
-
 
 func generate_username_variations(base_username: String) -> Array[String]:
 	var variations: Array[String] = []

@@ -153,20 +153,17 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	cycles_label.text = str(session_cycle)
 	data_yield_label.text = str(session_yield)
 	var eff_label_text = ""
-	if Stats.has_bonus(Mining):
-		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0 * 2.0) + "%"
-	else:
-		eff_label_text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
+	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 0.0
+
+	eff_label_text = str((TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"] + frag_bonus)  * 100.0) + "%"
+
 	efficiency_label.text = eff_label_text
 	level_label.text = str(Mining.SKILL["level"])
 
 func _get_reward_quantity() -> int:
-	var eff
-	if Stats.has_bonus(Mining):
-		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE * 2.0)
-	else:
-		eff = (Mining.SKILL["level"] * EFFICIENCY_RATE)
-		
+	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 0.0
+	var eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"] + frag_bonus
+	
 	var quant = 1
 
 	# Guaranteed bonus for each full point of efficiency
@@ -188,10 +185,10 @@ func _reset_info():
 	session_cycle = 0
 	session_time = 0.0
 	#_update_rate_label()
-	if Stats.has_bonus(Mining):
-		efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0 * 2.0) + "%"
-	else:
-		efficiency_label.text = str((Mining.SKILL["level"] * EFFICIENCY_RATE)  * 100.0) + "%"
+	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 0.0
+
+	efficiency_label.text = str((TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"] + frag_bonus)  * 100.0) + "%"
+
 	level_label.text = str(Mining.SKILL["level"])
 
 func _on_blinking_timer_timeout():

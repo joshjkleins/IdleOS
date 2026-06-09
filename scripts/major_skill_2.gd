@@ -1,14 +1,23 @@
 extends VBoxContainer
-
+#root view
 @onready var skill_label: Label = $MajorSkillContainer/ContentBox/VBoxContainer/SkillLabel
 @onready var progress_bar: ProgressBar = $MajorSkillContainer/ContentBox/VBoxContainer/ProgressBar
 @onready var level_label: Label = $MajorSkillContainer/ContentBox/VBoxContainer/HBoxContainer/LevelLabel
 @onready var level_number_label: Label = $MajorSkillContainer/ContentBox/VBoxContainer/HBoxContainer/LevelNumberLabel
 @onready var defragged: RichTextLabel = $MajorSkillContainer/ContentBox/VBoxContainer/Defragged
-@onready var defrag_bonus_timer: Timer = $MajorSkillContainer/DefragBonusTimer
 @onready var content_box: MarginContainer = $MajorSkillContainer/ContentBox
 @onready var minor_skill_container: HBoxContainer = $MinorSkillContainer
 @onready var major_skill_container: PanelContainer = $MajorSkillContainer
+@onready var major_details = $MinorSkillContainer/MajorDetails
+@onready var defrag_bonus_timer = $DefragBonusTimer
+
+#details view
+@onready var skill_name = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer/SkillName
+@onready var skill_level = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer/SkillLevel
+@onready var skill_exp_bar = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/SkillExpBar
+@onready var skill_exp_label = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2/SkillExpLabel
+@onready var exp_added_label = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2/ExpAddedLabel
+@onready var defragged_details = $MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/DefraggedDetails
 
 @onready var minor_skill = preload("res://scenes/minor_skill.tscn")
 
@@ -50,10 +59,27 @@ func _ready():
 	minor_skill_container.visible = false
 	major_skill_container.visible = true
 
-func defrag_start():
-	pass
-
 func build_minor_skills():
+	#Update first container with accurate exp/lvl/name/color
+	skill_name.text = skill.SKILL.name
+	skill_name.add_theme_color_override("font_color", skill.SKILL.color)
+	skill_level.text = "lvl " + str(skill.SKILL.level)
+	
+	#experience bar
+	var experience = Exp.get_xp_display(skill.SKILL)
+	skill_exp_bar.max_value = experience["needed"]
+	skill_exp_bar.value = experience["current"]
+	skill_exp_label.text = experience["display"]
+	
+	#defrag bonus labels
+	if Stats.has_bonus(skill):
+		defragged_details.text = Stats.get_bonus_time_text(skill)
+		defragged_details.visible = true
+		defrag_bonus_timer.start()
+	else:
+		defragged_details.visible = false
+	
+	#build container for each minor process in skill Singleton
 	for s in skill.minor_processes:
 		var new_box = minor_skill.instantiate()
 		new_box.update(s)
@@ -68,6 +94,10 @@ func update_colors():
 	sb.border_color = skill.SKILL.color
 	major_skill_container.add_theme_stylebox_override("panel", sb)
 
+	var sb2 = major_details.get_theme_stylebox("panel").duplicate()
+	sb2.border_color = skill.SKILL.color
+	major_details.add_theme_stylebox_override("panel", sb2)
+
 func update():
 	skill_label.text = skill.SKILL.name
 	level_number_label.text = str(skill.SKILL.level)
@@ -77,19 +107,27 @@ func update():
 	progress_bar.value = experience["current"]
 	
 	if Stats.has_bonus(skill):
-		defragged.text = Stats.get_bonus_time_text(skill)
+		var time_text = Stats.get_bonus_time_text(skill)
+		defragged.text = time_text
 		defragged.visible = true
+		defragged_details.text = time_text
+		defragged_details.visible = true
 		defrag_bonus_timer.start()
 	else:
 		defragged.visible = false
-	fade_out_minor()
+		defragged_details.visible = false
+	await fade_out_minor()
 	fade_in_major()
+
 
 func _on_defrag_bonus_timer_timeout() -> void:
 	if Stats.has_bonus(skill):
-		defragged.text = Stats.get_bonus_time_text(skill)
+		var time_text = Stats.get_bonus_time_text(skill)
+		defragged.text = time_text
+		defragged_details.text = time_text
 	else:
 		defragged.visible = false
+		defragged_details.visible = false
 		defrag_bonus_timer.stop()
 
 func xp_gained():
@@ -97,6 +135,11 @@ func xp_gained():
 	progress_bar.max_value = experience["needed"]
 	progress_bar.value = experience["current"]
 	level_number_label.text = str(skill.SKILL.level)
+
+	skill_exp_bar.max_value = experience["needed"]
+	skill_exp_bar.value = experience["current"]
+	skill_level.text = "lvl " + str(skill.SKILL.level)
+	skill_exp_label.text = experience["display"]
 
 func fade_out_major():
 	var tween = create_tween()

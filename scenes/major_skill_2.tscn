@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://dfuopx8mx2056"]
+[gd_scene load_steps=6 format=3 uid="uid://dfuopx8mx2056"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_y1y7u"]
 [ext_resource type="Script" uid="uid://dewnos2yonx5" path="res://scripts/major_skill_2.gd" id="2_uvpc6"]
-[ext_resource type="PackedScene" uid="uid://iidue2htx3v6" path="res://scenes/minor_skill.tscn" id="3_uvpc6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1lln8"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -17,7 +16,7 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1y7u"]
-bg_color = Color(0, 0, 0, 1)
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
 border_width_left = 3
 border_color = Color(0.568627, 0.8, 0.32549, 1)
 
@@ -28,7 +27,6 @@ offset_bottom = 81.0
 script = ExtResource("2_uvpc6")
 
 [node name="MajorSkillContainer" type="PanelContainer" parent="."]
-visible = false
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme = ExtResource("1_y1y7u")
@@ -82,61 +80,60 @@ text = "defragged 29:13
 x2 efficiency"
 fit_content = true
 
-[node name="DefragBonusTimer" type="Timer" parent="MajorSkillContainer"]
-
 [node name="MinorSkillContainer" type="HBoxContainer" parent="."]
+visible = false
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="MinorSkillContainer"]
+[node name="MajorDetails" type="PanelContainer" parent="MinorSkillContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y1y7u")
 
-[node name="MarginContainer" type="MarginContainer" parent="MinorSkillContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="MinorSkillContainer/MajorDetails"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 5
 
-[node name="MainSkillCol" type="VBoxContainer" parent="MinorSkillContainer/PanelContainer/MarginContainer"]
+[node name="MainSkillCol" type="VBoxContainer" parent="MinorSkillContainer/MajorDetails/MarginContainer"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer"]
 layout_mode = 2
 
-[node name="SkillName" type="Label" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+[node name="SkillName" type="Label" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "Mining"
 
-[node name="SkillLevel" type="Label" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+[node name="SkillLevel" type="Label" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "LVL 2"
 horizontal_alignment = 2
 
-[node name="SkillExpBar" type="ProgressBar" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer"]
+[node name="SkillExpBar" type="ProgressBar" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer"]
 layout_mode = 2
 value = 40.0
 show_percentage = false
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer"]
 layout_mode = 2
 
-[node name="SkillExpLabel" type="Label" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+[node name="SkillExpLabel" type="Label" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "0 / 240"
 
-[node name="ExpAddedLabel" type="Label" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
+[node name="ExpAddedLabel" type="Label" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer2"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
@@ -145,14 +142,13 @@ theme_override_font_sizes/font_size = 12
 text = "+120"
 horizontal_alignment = 2
 
-[node name="Defragged" type="RichTextLabel" parent="MinorSkillContainer/PanelContainer/MarginContainer/MainSkillCol"]
+[node name="DefraggedDetails" type="RichTextLabel" parent="MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol"]
 layout_mode = 2
 theme_override_colors/default_color = Color(0, 0.866667, 0, 1)
 theme_override_font_sizes/normal_font_size = 10
 text = "defragged 29:13"
 fit_content = true
 
-[node name="MinorSkill" parent="MinorSkillContainer" instance=ExtResource("3_uvpc6")]
-layout_mode = 2
+[node name="DefragBonusTimer" type="Timer" parent="."]
 
-[connection signal="timeout" from="MajorSkillContainer/DefragBonusTimer" to="MajorSkillContainer" method="_on_defrag_bonus_timer_timeout"]
+[connection signal="timeout" from="DefragBonusTimer" to="." method="_on_defrag_bonus_timer_timeout"]

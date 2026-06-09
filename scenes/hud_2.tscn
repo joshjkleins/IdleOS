@@ -1,8 +1,19 @@
-[gd_scene load_steps=4 format=3 uid="uid://cawbutc5qs2ck"]
+[gd_scene load_steps=7 format=3 uid="uid://cawbutc5qs2ck"]
 
 [ext_resource type="Script" uid="uid://cn0uvlqd55klv" path="res://scripts/header.gd" id="1_q1nc5"]
 [ext_resource type="PackedScene" uid="uid://dfuopx8mx2056" path="res://scenes/major_skill_2.tscn" id="2_67toa"]
-[ext_resource type="PackedScene" uid="uid://grk5ff0dcb16" path="res://scenes/skill_details.tscn" id="3_67toa"]
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="3_67toa"]
+[ext_resource type="Script" uid="uid://cd7nfnfgyd5e8" path="res://scripts/defrag_hud.gd" id="3_en2g2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_en2g2"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_top = 2
+border_color = Color(0.811765, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_67toa"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 3
+border_color = Color(0.811765, 0, 0, 1)
 
 [node name="HEADER" type="PanelContainer"]
 offset_right = 40.0
@@ -13,37 +24,115 @@ h_color_decoding = Color(0.713726, 0.486275, 0.937255, 1)
 h_color_phishing = Color(0.215686, 0.541176, 0.866667, 1)
 h_color_grey = Color(0.289741, 0.289741, 0.289741, 1)
 
-[node name="MajorSkills" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Mining" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="MajorSkills" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Mining" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 
-[node name="Parsing" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Parsing" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 1
 
-[node name="Cracking" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Cracking" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 2
 
-[node name="Matching" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Matching" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 3
 
-[node name="Phishing" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Phishing" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 6
 
-[node name="Hacking" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Hacking" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 5
 
-[node name="Decoding" parent="MajorSkills" instance=ExtResource("2_67toa")]
+[node name="Decoding" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
 layout_mode = 2
 skill_type = 4
 
-[node name="SkillDetails" parent="." instance=ExtResource("3_67toa")]
+[node name="Defragging" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+script = ExtResource("3_en2g2")
+
+[node name="MajorSkillContainer" type="PanelContainer" parent="HBoxContainer/Defragging"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme = ExtResource("3_67toa")
+theme_override_styles/panel = SubResource("StyleBoxFlat_en2g2")
+
+[node name="ContentBox" type="MarginContainer" parent="HBoxContainer/Defragging/MajorSkillContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/Defragging/MajorSkillContainer/ContentBox"]
+layout_mode = 2
+
+[node name="SkillLabel" type="Label" parent="HBoxContainer/Defragging/MajorSkillContainer/ContentBox/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.811765, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "Defragging"
+
+[node name="DefraggingStatus" type="RichTextLabel" parent="HBoxContainer/Defragging/MajorSkillContainer/ContentBox/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/default_color = Color(0, 0.866667, 0, 1)
+theme_override_font_sizes/normal_font_size = 8
+text = "Available"
+fit_content = true
+horizontal_alignment = 1
+
+[node name="MinorSkillContainer" type="HBoxContainer" parent="HBoxContainer/Defragging"]
 visible = false
 layout_mode = 2
+
+[node name="MajorDetails" type="PanelContainer" parent="HBoxContainer/Defragging/MinorSkillContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_67toa")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 5
+
+[node name="MainSkillCol" type="VBoxContainer" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillName" type="Label" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.811765, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "Defragging"
+
+[node name="DefraggingStatusDetails" type="RichTextLabel" parent="HBoxContainer/Defragging/MinorSkillContainer/MajorDetails/MarginContainer/MainSkillCol"]
+layout_mode = 2
+theme_override_colors/default_color = Color(0, 0.866667, 0, 1)
+theme_override_font_sizes/normal_font_size = 10
+text = "Available"
+fit_content = true
+
+[node name="DefragCooldown" type="Timer" parent="HBoxContainer/Defragging"]
+
+[connection signal="timeout" from="HBoxContainer/Defragging/DefragCooldown" to="HBoxContainer/Defragging" method="_on_defrag_cooldown_timeout"]

@@ -139,7 +139,7 @@ func all_colored(sorted: Array):
 func finished():
 	update_mini_terminal("Defragging of " + type.skill.name + " complete")
 	update_mini_terminal(type.description)
-	Stats.grant_bonus(type.skill)
+	Stats.grant_bonus(type)
 	Defragging.activate_cooldown()
 	active = false
 	Signals.defrag_finished()

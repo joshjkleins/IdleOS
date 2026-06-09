@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bred34s63bit5"]
+[gd_scene load_steps=12 format=3 uid="uid://bred34s63bit5"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_04tvn"]
 [ext_resource type="Script" uid="uid://dx0jgscv1ocqj" path="res://scripts/cred_matching_terminal.gd" id="2_jph6o"]
@@ -44,9 +44,14 @@ corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tvsdj"]
+bg_color = Color(0, 0, 0, 1)
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
 [node name="CredMatchingTerminal" type="PanelContainer"]
-offset_right = 1168.0
-offset_bottom = 172.0
+offset_right = 1008.0
+offset_bottom = 219.0
 theme = ExtResource("1_04tvn")
 script = ExtResource("2_jph6o")
 lock_image = ExtResource("6_jph6o")
@@ -54,13 +59,13 @@ cred_image = ExtResource("4_tvsdj")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 25
-theme_override_constants/margin_top = 25
-theme_override_constants/margin_right = 25
-theme_override_constants/margin_bottom = 25
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
+size_flags_horizontal = 0
 
 [node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -145,20 +150,17 @@ texture = ExtResource("5_sksop")
 stretch_mode = 3
 
 [node name="SecondCol" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow"]
-custom_minimum_size = Vector2(530, 0)
+custom_minimum_size = Vector2(370, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_04tvn")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol"]
 layout_mode = 2
-theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 5
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -170,90 +172,120 @@ horizontal_alignment = 1
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "fuzzy correlator"
+text = "confirmation algorithm"
 horizontal_alignment = 1
 
-[node name="TagContainer" type="HFlowContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(280, 0)
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 2
+
+[node name="TagContainer" type="HFlowContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
 alignment = 1
 
-[node name="Tag" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+[node name="Tag" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag"]
 layout_mode = 2
 theme_override_constants/margin_left = 7
 theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 7
 theme_override_constants/margin_bottom = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag/MarginContainer"]
+[node name="Tag1" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag/MarginContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
 theme_override_font_sizes/font_size = 10
-text = "levenshtein"
+text = "username DB lookup"
 
-[node name="Tag2" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+[node name="Tag2" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag2"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag2"]
 layout_mode = 2
 theme_override_constants/margin_left = 7
 theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 7
 theme_override_constants/margin_bottom = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag2/MarginContainer"]
+[node name="Tag2" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag2/MarginContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
 theme_override_font_sizes/font_size = 10
-text = "hash match"
+text = "authenticating password"
 
-[node name="Tag3" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+[node name="Tag3" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag3"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag3"]
 layout_mode = 2
 theme_override_constants/margin_left = 7
 theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 7
 theme_override_constants/margin_bottom = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag3/MarginContainer"]
+[node name="Tag3" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag3/MarginContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.701961, 0.701961, 0.74902, 1)
 theme_override_font_sizes/font_size = 10
-text = "entropy"
+text = "pen testing"
 
-[node name="Tag4" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer"]
+[node name="Tag4" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_jph6o")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag4"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag4"]
 layout_mode = 2
 theme_override_constants/margin_left = 7
 theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 7
 theme_override_constants/margin_bottom = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/TagContainer/Tag4/MarginContainer"]
+[node name="Tag4" type="Label" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag4/MarginContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.703349, 0.703661, 0.748833, 1)
 theme_override_font_sizes/font_size = 10
-text = "token split"
+text = "credential confirmation"
+
+[node name="Terminal" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 67)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tvsdj")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 2
+
+[node name="TerminalScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer"]
+layout_mode = 2
+follow_focus = true
+vertical_scroll_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TerminalLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 8
+bbcode_enabled = true
+fit_content = true
+scroll_following = true
 
 [node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow"]
 layout_mode = 2
@@ -261,7 +293,7 @@ texture = ExtResource("5_sksop")
 stretch_mode = 3
 
 [node name="ThirdCol" type="PanelContainer" parent="MarginContainer/VBoxContainer/TopRow"]
-custom_minimum_size = Vector2(275, 0)
+custom_minimum_size = Vector2(245, 0)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_04tvn")
@@ -312,81 +344,5 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
 text = "success chance: -"
 horizontal_alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 30
-
-[node name="BottomRow" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="StatusUpdater" type="Label" parent="MarginContainer/VBoxContainer/BottomRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "SIGNAL CORRELATION - X CANDIDATES SCANNED"
-horizontal_alignment = 1
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-
-[node name="HeadingRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer"]
-layout_mode = 2
-
-[node name="CandidateLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(250, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "CANDIDATE"
-
-[node name="SignalLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "SIGNAL"
-
-[node name="LSHLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(40, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "LSH"
-
-[node name="HMLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(40, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "HM"
-
-[node name="ENTLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(40, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "ENT"
-
-[node name="TSLabel" type="Label" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer/MarginContainer/HeadingRow"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 14
-text = "TS"
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="UserRowContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomRow/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 0
 
 [connection signal="value_changed" from="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar" to="." method="_on_main_bar_value_changed"]

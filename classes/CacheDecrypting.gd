@@ -97,7 +97,9 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 			var quant = randi_range(item.min_quantity, item.max_quantity)
 			loot[item.item] = quant
 	#rare items
-	if randf() < Decoding.CACHE["efficiency"] + (Decoding.process_upgrades["efficiency"]["amount"] - 1.0):
+	
+	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 0.0
+	if randf() < Decoding.CACHE["efficiency"] + Decoding.process_upgrades["efficiency"]["amount"] + defrag_bonus:
 		var item = cache.rare_pool.pick_random()
 		loot[item.item] = 1
 	#not current conditions if loot is empty

@@ -69,7 +69,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 		if major.SKILL["level"] >= MAX_LEVEL:
 			major.SKILL["level"] = MAX_LEVEL
 			break
-	
+	major.signal_exp(amount)
 	if minor != null:
 		minor["experience"] += amount
 		var minor_new_level = get_level_from_xp(minor["experience"])
@@ -82,7 +82,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 				break
 
 		exp_updated_signal.emit(amount, minor)
-	major.signal_exp(amount)
+	
 
 
 func on_level_up(skill_data: Dictionary):

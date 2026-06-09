@@ -28,13 +28,15 @@ func begin(p_type):
 		return
 	
 	add_heat()
-	var eff_text = str((type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"] - 1.0) * 100).pad_decimals(1) 
+	
+	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 0.0
+	var eff_text = str((type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"] + defrag_bonus) * 100).pad_decimals(1) 
 	$Status.text = "waiting for response   " + "[color=#888888]" + eff_text + "% chance of success[/color]"
 	await get_tree().create_timer(randf_range(type["wait time min"], type["wait time max"])).timeout
 	if !active:
 		return
-	
-	if randf() <= type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"] - 1.0: #success
+	var eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"] + defrag_bonus
+	if randf() <= eff: #success
 		$ProgressBar/TimeRemaining.visible = true
 		$Status.text = "attempt successful, downloading information"
 		

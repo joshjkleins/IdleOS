@@ -7,6 +7,43 @@ var max_visible = 15
 var base_chance_to_find = 0.0
 var increase_per_row = 0.003
 
+var db_lookup_messages: Array[String] = [
+	"[color=#555555][DB] [/color] [color=#79c0ff]QUERY    [/color] Scanning user index... [color=#bc8cff]0x4F2A[/color]",
+	"[color=#555555][DB] [/color] [color=#79c0ff]FETCH    [/color] Resolving uid -> record match",
+	"[color=#555555][DB] [/color] [color=#d29922]CACHE    [/color] Entry found in L2 cache — loading",
+	"[color=#555555][DB] [/color] [color=#3fb950]HIT      [/color] Username located: [color=#bc8cff]usr_7741[/color]",
+	"[color=#555555][DB] [/color] [color=#3fb950]OK       [/color] Record integrity check passed",
+	"[color=#555555][DB] [/color] [color=#79c0ff]SYNC     [/color] Replicating metadata to session buffer",
+]
+ 
+var auth_messages: Array[String] = [
+	"[color=#555555][AUTH][/color] [color=#79c0ff]INIT     [/color] Spawning bcrypt worker thread",
+	"[color=#555555][AUTH][/color] [color=#d29922]HASH     [/color] Salting input — rounds: [color=#bc8cff]12[/color]",
+	"[color=#555555][AUTH][/color] [color=#79c0ff]COMPARE  [/color] Matching digest against stored hash",
+	"[color=#555555][AUTH][/color] [color=#d29922]VERIFY   [/color] Checking entropy threshold...",
+	"[color=#555555][AUTH][/color] [color=#3fb950]PASS     [/color] Hash comparison successful",
+	"[color=#555555][AUTH][/color] [color=#3fb950]TOKEN    [/color] Session token issued — ttl: [color=#bc8cff]3600s[/color]",
+]
+ 
+var pentest_messages: Array[String] = [
+	"[color=#555555][PEN] [/color] [color=#79c0ff]PROBE    [/color] Initiating port sweep [color=#bc8cff]192.168.x.x[/color]",
+	"[color=#555555][PEN] [/color] [color=#d29922]INJECT   [/color] Testing SQLi vectors on endpoint [color=#bc8cff]/api[/color]",
+	"[color=#555555][PEN] [/color] [color=#f85149]ANOMALY  [/color] Unexpected response on port [color=#bc8cff]8443[/color]",
+	"[color=#555555][PEN] [/color] [color=#79c0ff]FUZZ     [/color] Sending [color=#bc8cff]512[/color] malformed payloads...",
+	"[color=#555555][PEN] [/color] [color=#f85149]EXPOSE   [/color] CVE-2024-1337 — potential XSS vector",
+	"[color=#555555][PEN] [/color] [color=#3fb950]PATCH    [/color] Exploit confirmed — logging to report",
+]
+ 
+var credential_messages: Array[String] = [
+	"[color=#555555][CRED][/color] [color=#79c0ff]CHECK    [/color] Cross-referencing against ACL table",
+	"[color=#555555][CRED][/color] [color=#d29922]SCOPE    [/color] Evaluating permission set: [color=#bc8cff]read+exec[/color]",
+	"[color=#555555][CRED][/color] [color=#79c0ff]MFA      [/color] Second factor binding... TOTP valid",
+	"[color=#555555][CRED][/color] [color=#3fb950]GRANT    [/color] Access level confirmed: [color=#bc8cff]OPERATOR[/color]",
+	"[color=#555555][CRED][/color] [color=#3fb950]BIND     [/color] Credentials committed to active session",
+	"[color=#555555][CRED][/color] [color=#3fb950]READY    [/color] System access unlocked",
+]
+
+
 const NAMES = [
 	"john","jane","alex","sam","mike","emma","chris","josh","luke",
 	"sarah","ben","lucas","nick","dave","kevin","amy","zoe","kate"

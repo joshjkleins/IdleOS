@@ -64,32 +64,20 @@ func update_state(state: MATCH_STATE):
 		MATCH_STATE.FAIL:
 			current_state = state
 			remove_highlight()
-			#$MarginContainer/HBoxContainer/StateLabel.text = "fail"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.RED)
 		MATCH_STATE.PARTIAL:
 			current_state = state
 			remove_highlight()
-			#$MarginContainer/HBoxContainer/StateLabel.text = "partial"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.YELLOW)
 		MATCH_STATE.LOCKED:
 			current_state = state
 			remove_highlight()
-			#$MarginContainer/HBoxContainer/StateLabel.text = "locked"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.CADET_BLUE)
 		MATCH_STATE.WAITING:
 			current_state = state
-			#$MarginContainer/HBoxContainer/StateLabel.text = "waiting"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.DIM_GRAY)
 		MATCH_STATE.ATTEMPTING:
 			current_state = state
 			highlight()
-			#$MarginContainer/HBoxContainer/StateLabel.text = "attempting"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.GREEN)
 		MATCH_STATE.SUCCESS:
 			current_state = state
 			remove_highlight()
-			#$MarginContainer/HBoxContainer/StateLabel.text = "success"
-			#$MarginContainer/HBoxContainer/StateLabel.add_theme_color_override("font_color", Color.GREEN)
 
 func start_progress(fill, time):
 	tween = create_tween()
