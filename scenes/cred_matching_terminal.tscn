@@ -51,7 +51,7 @@ corner_radius_bottom_left = 5
 
 [node name="CredMatchingTerminal" type="PanelContainer"]
 offset_right = 1008.0
-offset_bottom = 219.0
+offset_bottom = 193.0
 theme = ExtResource("1_04tvn")
 script = ExtResource("2_jph6o")
 lock_image = ExtResource("6_jph6o")
