@@ -106,6 +106,14 @@ theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
 theme_override_font_sizes/font_size = 12
 text = "USERNAME"
 
+[node name="ResourceAmountOne" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 10
+text = "x200"
+horizontal_alignment = 2
+
 [node name="UserboxNameLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "j_kleinstine_1"
@@ -139,6 +147,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.231373, 0.560784, 0.407843, 1)
 theme_override_font_sizes/font_size = 12
 text = "PASSWORD"
+
+[node name="ResourceAmountTwo" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 10
+text = "x12"
+horizontal_alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -307,7 +323,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="StatusImage" type="TextureRect" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -323,11 +339,13 @@ horizontal_alignment = 1
 
 [node name="StatusUsername" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "-"
 horizontal_alignment = 1
 
 [node name="StatusPw" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "-"
 horizontal_alignment = 1
 
@@ -342,7 +360,15 @@ show_percentage = false
 [node name="StatusProgressBar" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-text = "success chance: -"
+theme_override_font_sizes/font_size = 12
+text = "0%"
+horizontal_alignment = 1
+
+[node name="EfficiencyLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 10
+text = "chance for extra: 2%"
 horizontal_alignment = 1
 
 [connection signal="value_changed" from="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar" to="." method="_on_main_bar_value_changed"]

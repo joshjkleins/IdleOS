@@ -4,17 +4,18 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
 # BUG: weird color matching issue with MINING contracts (not the right green?)
-# BUG: when exp is added in 'root' make sure it updates header (probs just need to trigger signal)
 
-
-#random playthough: check for sticky when stopping or ended process
 #add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
+#TOKENS - VM Token : Consumed on use : Specific token for each process : Different levels
+# Token items example: 
+#lvl 1 vm mining token - can mine in a different screen for 2 minutes : type -r to continue use and use another one : cmd example: vm token lvl=1 -mining -logs -r
+#lvl 2 vm parsing token - can parse in different screen for 7 min : type -r to recursively use
+#lvl 3 vm cracking token - can crack in diff screen for 20 min : type -r to recursively use
 
 #TODO
-# update matching, finish vm tokens (add item, specific item for each major skill, consume on use, upgrade skill to make them last longer (default 1 min)
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
-#simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
+# simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
 # add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
@@ -24,51 +25,7 @@ extends Control
 
 #stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
 
-########item ideas:
-## ONE TIME USES ##
-# Virtual machine tokens - consume to open a new window to run a process for x amount of time
-# Efficiency token - consume to increase efficiency of process by 2x for 30 seconds
-# Hardware accelerators - use to rapidly cool CPU for 10 second
 
-#combat
-# SQL Injector - deals integrity damage
-# Cross site script - deals integ damage
-# Malware - deals integ damage
-# Ransomeware - deals integ damage
-# Exploits = deals integ damage
-# DDoS = deals integ damage
-# Packet spoofers - restores anonymity during hack
-# VPN Token - restores anonymity
-
-######## PROCESSES ##
-# Phishing - send out phishing emails, etc. and after 30 min - 1h get random assortment if emails/usernames/passwords/pins back
-# Defragging - passive? Cost random stuff (huge data sink, maybe other resources) over time gives perm increase to anonymity
-
-##Ideas for generalizing modules and adding unlocks at certain levels
-#MINING LVL1: Data, LVL10: Logs, LVL20: Quality Data, LVL40: Quality Logs
-#PARSING LVL1: Logs (data, pw), LVL10: Logs (username, IP), LVL 20: Quality Logs (Quality Data, pw, un, ip), LVL 30: Specific parsing (only data/pw/un/ip/ found, no longer random mix)
-
-######## MARKETPLACE
-# Contracts - Randomly available - can either purchase one for data to complete work (i need 10 Parents CCs) for bloated amount of money
-# Contracts - Randomly available - can be posting to look for work. You pay 5k data and provide 200 encrypted passwords and they will return 200 passwords ie do idle for you
-# Contracts - Hacking target - buy, hack x target x times - get reward
-# Valuable - Can sell valuables (only purpose)
-
-#CONTRACTS: can only have 3 at one time
-# [1] AVAILABLE JOBS
-#		[1] MINING
-#			[1] cost: 500 data - Mine 200 data: reward: Mining/data exp: 5,000, +25 logs
-#			[2] cost: 800 data - Mine 100 logs: reward: Mining/Logs exp: 5,000, +500 data
-#		[2] PARSING
-#		[3] CRACKING
-#		[4] MATCHING
-#		[5] DECODING
-# [2] REQUEST JOBS
-# [3] HACKING REQUESTS
-
-####### MODULE UPGRADES INSTALL
-# Each skill has 2 slots (speed slot and efficiency slot) applies to all minor skills within
-# Everything to be purchased from marketplace
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -76,10 +33,6 @@ extends Control
 #3. ADD TO INPUT_LINE_SUBMITTED & ADD RELEVENT FUNCTION
 #4. ADD TO ROOT COMMAND CONTEXT
 #5. ADD LIST HELP CONTEXT
-
-#colors
-# exp green #2a9a5a
-# icons #bbbbbb
 
 @onready var lead_text = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/LeadText
 @onready var input_line = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/InputLine
@@ -436,6 +389,16 @@ func universal_commands(text):
 		"vm token":
 			vm_token_used()
 			return true
+		"stop":
+			process_running = false
+			unstick_current_process()
+			if current_process:
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+			
 		"sticky":
 			if current_process != null:
 				sticky_current_process()
@@ -545,13 +508,14 @@ func sticky_current_process():
 	add_line("Stick")
 
 func unstick_current_process():
-	current_process.reparent(terminal_body_container, false)
-	add_new_scrollback()
-	#terminal_body_container.call_deferred("move_child", current_process, 0)
-	add_line("Unstick")
+	if current_process:
+		current_process.reparent(terminal_body_container, false)
+		add_new_scrollback()
+		add_line("Unstick")
 
 func vm_token_used():
-	var content_instance = mining_scene.instantiate()
+	#var content_instance = mining_scene.instantiate()
+	var content_instance = log_parsing_scene.instantiate()
 	
 	var new_window = Window.new()
 	new_window.title = "my title"
@@ -572,14 +536,18 @@ func vm_token_used():
 
 	add_child(new_window)
 	
+
 	# 2. MANUAL CENTERING (Replaces popup_centered)
 	var parent_window = get_window()
-	var center_pos = parent_window.position + (parent_window.size / 2) - (new_window.size / 2)
+	#var center_pos = parent_window.position + (parent_window.size / 2) - (new_window.size / 2)
+	var center_pos = parent_window.position + parent_window.size - new_window.size
 	new_window.position = center_pos
 	new_window.show() # Shows the window without forcing transience
 
-	content_instance.set_mine_type(Mining.LOGS)
-	content_instance.start_data_mining()
+	#content_instance.set_mine_type(Mining.LOGS)
+	#content_instance.start_data_mining()
+	content_instance.set_parse_type(Parsing.LOGS)
+	content_instance.start()
 	add_line("Vm token used")
 	
 	get_tree().create_timer(30.0, false).timeout.connect(func():
@@ -600,19 +568,14 @@ func mining_commands(text):
 				start_log_mining(Mining.LOGS)
 			else:
 				add_line("Process already running")
-		#"start -log":
-			#if !process_running:
-				#start_log_mining()
-			#else:
-				#add_line("Process already running")
 		"start -quality":
 			if !process_running:
 				start_log_mining(Mining.QUALITY_LOGS)
 			else:
 				add_line("Process already running")
-			
 		"stop":
 			process_running = false
+			unstick_current_process()
 			if current_process:
 				current_process.stop()
 				current_process = null
@@ -628,17 +591,17 @@ func mining_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while process is running")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("Module: Data Mining")
 			add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
@@ -683,6 +646,7 @@ func start_log_mining(minor_process: Dictionary):
 		add_line(minor_process.name + " is not unlocked.")
 
 func data_mining_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -714,6 +678,7 @@ func log_parsing_commands(text):
 			start_log_parsing(Parsing.QUALITY_LOGS)
 		"stop":
 			process_running = false
+			unstick_current_process()
 			if current_process:
 				add_line("Killing process immediately")
 				current_process.stop()
@@ -785,6 +750,7 @@ func start_log_parsing(minor_process: Dictionary):
 	#add_new_scrollback()
 
 func log_parsing_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -815,6 +781,7 @@ func password_unscramble_commands(text):
 			
 			start_pin_cracking()
 		"stop":
+			unstick_current_process()
 			process_running = false
 			if current_process:
 				add_line("Killing process immediately")
@@ -892,6 +859,7 @@ func start_pin_cracking():
 	add_new_scrollback()
 
 func password_cracking_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -926,6 +894,7 @@ func cred_matching_commands(text):
 				return
 			start_account_matching()
 		"stop":
+			unstick_current_process()
 			process_running = false
 			if current_process:
 				add_line("Killing process immediately")
@@ -995,6 +964,7 @@ func start_account_matching():
 	add_new_scrollback()
 
 func cred_matching_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -1017,6 +987,7 @@ func cache_decrypting_commands(text):
 			
 			start_cache_decrypting()
 		"stop":
+			unstick_current_process()
 			process_running = false
 			if current_process:
 				add_line("Killing process immediately")
@@ -1077,6 +1048,7 @@ func start_cache_decrypting():
 	add_new_scrollback()
 
 func cache_decrypting_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -1135,6 +1107,7 @@ func phishing_commands(text):
 	else:
 		match text:
 			"stop":
+				unstick_current_process()
 				process_running = false
 				if current_process:
 					add_line("Killing process immediately")
@@ -1190,6 +1163,7 @@ func cast_line(type: Dictionary, lines: int):
 		add_new_scrollback()
 
 func phishing_ended_safely():
+	unstick_current_process()
 	current_process = null
 	process_running = false
 	Stats.overclocked = false
@@ -1268,6 +1242,7 @@ func defragging_commands(text):
 			
 			start_defragging(Defragging.DECODING)
 		"stop":
+			unstick_current_process()
 			process_running = false
 			if current_process:
 				add_line("Killing process immediately")
@@ -1311,6 +1286,7 @@ func start_defragging(minor_skill: Dictionary):
 	add_new_scrollback()
 
 func defrag_finished():
+	unstick_current_process()
 	process_running = false
 	current_process = null
 	Stats.overclocked = false
