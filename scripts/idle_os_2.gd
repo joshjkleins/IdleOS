@@ -12,6 +12,12 @@ extends Control
 #lvl 2 vm parsing token - can parse in different screen for 7 min : type -r to recursively use
 #lvl 3 vm cracking token - can crack in diff screen for 20 min : type -r to recursively use
 
+#steps: 
+#1) add lvl 1-3 tokens for each process this will be available for (mining, parsing, cracking, matching, decoding, phishing)
+#2) figure out and implement commands for each, as well as safeguards (1 running at a time, upgradable?)
+#2.5) figure out pop up screens (location, sizing for each, etc)
+#3) add to cache drops
+
 #TODO
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
