@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://y7cfa0st0xu8"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://y7cfa0st0xu8"]
 
 [ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_nrdqy"]
 
@@ -6,5 +6,9 @@
 script = ExtResource("1_nrdqy")
 id = 6
 name = "IP address"
+shortened_name = ""
 description = "IP address used to find hacking target"
+valuable = false
+value = 0
+color_type = 6
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

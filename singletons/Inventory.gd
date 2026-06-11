@@ -4,23 +4,25 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
+	#for i in Items.ITEM_MAP:
+		#add_resource(Items.ITEM_MAP[i], 1)
 	pass
 	#pass
 	#add_resource(Items.PARENTS_CREDIT_CARD, 3)
 	#add_resource(Items.ADMISSIONS_BRIBERY_RECORDS, 1)
-	add_resource(Items.DATA, 2500)
+	#add_resource(Items.DATA, 2500)
 	#add_resource(Items.LOGS, 200)
-	add_resource(Items.ENCRYPTED_PASSWORDS, 25)
+	#add_resource(Items.ENCRYPTED_PASSWORDS, 25)
 	#add_resource(Items.ENCRYPTED_PINS, 25)
 	#add_resource(Items.LOGS, 2)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 20)
-	add_resource(Items.PASSWORDS, 300)
-	add_resource(Items.USERNAMES, 300)
+	#add_resource(Items.PASSWORDS, 300)
+	#add_resource(Items.USERNAMES, 300)
 	#add_resource(Items.STUDENT_CACHE, 20)
-	add_resource(Items.PINS, 3)
-	add_resource(Items.ACCOUNT_NUMBERS, 3)
-	add_resource(Items.VM_MINING_TOKEN, 1)
-	add_resource(Items.VM_PARSING_TOKEN, 1)
+	#add_resource(Items.PINS, 3)
+	#add_resource(Items.ACCOUNT_NUMBERS, 3)
+	#add_resource(Items.VM_MINING_TOKEN, 3)
+	#add_resource(Items.VM_PARSING_TOKEN, 6)
 	#add_resource(Items.REFRESH_TOKEN, 500)
 	#add_resource(Items.IP_ADDRESS, 1)
 	#add_resource(Items.SQL_INJECTOR, 100)
@@ -72,39 +74,92 @@ func _matches_filter(resource, filter: InventoryFilter) -> bool:
 			return !resource.valuable and !resource.name.contains("cache")
 		_:
 			return true
-
 func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 	var amount_width = 15
 	var output = ""
 	var has_items := false
 
 	var max_name_length = 0
+	var resources := []
+
 	for resource in inventory.keys():
 		if inventory[resource] > 0 and _matches_filter(resource, filter):
+			resources.append(resource)
+
 			if resource.name.length() > max_name_length:
 				max_name_length = resource.name.length()
 
-	var name_width = max_name_length + 4
+	resources.sort_custom(func(a, b):
+		if a.color_type == b.color_type:
+			return a.name.nocasecmp_to(b.name) < 0
+		return a.color_type < b.color_type
+	)
 
-	output += pad_text("Items", name_width)
+	var name_width = max_name_length + 5
+
+	output += pad_text("Items", name_width + 1)
 	output += pad_text("Amount", amount_width)
 	output += "Description\n"
-	output += pad_text("--------", name_width)
+	output += pad_text("--------", name_width + 1)
 	output += pad_text("------", amount_width)
 	output += "-----------\n"
 
-	for resource in inventory.keys():
-		if _matches_filter(resource, filter):
-			var amount: int = inventory[resource]
-			if amount > 0:
-				has_items = true
-				output += pad_text(resource.name, name_width)
-				output += pad_text(amount, amount_width)
-				output += resource.description + "\n"
+	for resource in resources:
+		var amount: int = inventory[resource]
+
+		var c = Palette.get_color(resource.color_type)
+		var hex = c.to_html(false)
+
+		has_items = true
+		var temp_name = pad_text(resource.name, name_width)
+
+		output += "[color=%s]▍[/color]" % hex
+		output += temp_name
+		output += pad_text(str(amount), amount_width)
+		output += resource.description + "\n"
 
 	if not has_items:
 		return "You have no items."
+
 	return output
+#func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
+	#var amount_width = 15
+	#var output = ""
+	#var has_items := false
+#
+	#var max_name_length = 0
+	#for resource in inventory.keys():
+		#if inventory[resource] > 0 and _matches_filter(resource, filter):
+			#if resource.name.length() > max_name_length:
+				#max_name_length = resource.name.length()
+#
+	#var name_width = max_name_length + 5
+#
+	#output += pad_text("Items", name_width + 1)
+	#output += pad_text("Amount", amount_width)
+	#output += "Description\n"
+	#output += pad_text("--------", name_width + 1)
+	#output += pad_text("------", amount_width)
+	#output += "-----------\n"
+#
+	#for resource in inventory.keys():
+		#if _matches_filter(resource, filter):
+			#var amount: int = inventory[resource]
+			#if amount > 0:
+				#var c = Palette.get_color(resource.color_type)
+				#var hex = c.to_html(false)
+				#
+				#has_items = true
+				#var temp_name = pad_text(resource.name, name_width)
+				#
+				#output += "[color=%s]▍[/color]" % hex
+				#output += temp_name
+				#output += pad_text(str(amount), amount_width)
+				#output += resource.description + "\n"
+#
+	#if not has_items:
+		#return "You have no items."
+	#return output
 
 func pad_text(value, width: int) -> String:
 	var text := str(value)

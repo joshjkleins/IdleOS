@@ -106,7 +106,8 @@ func start_data_mining():
 	end_safely = false
 	while process_running:
 		if end_safely:
-			Signals.end_data_mining_safely()
+			if !is_window:
+				Signals.end_data_mining_safely()
 			stop()
 			break
 		var overclocked = false
@@ -131,6 +132,9 @@ func start_data_mining():
 func stop():
 	process_running = false
 	blinking_timer.stop()
+	if is_window:
+		Mining.CURRENT_VMS -= 1
+		get_parent().queue_free()
 
 func stop_safely():
 	end_safely = true

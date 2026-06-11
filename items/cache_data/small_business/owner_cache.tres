@@ -15,4 +15,5 @@ shortened_name = ""
 description = "Received from hacking a business owner. Decrypt for resources."
 valuable = false
 value = 0
+color_type = 7
 metadata/_custom_type_script = "uid://vtttl3aisfpi"

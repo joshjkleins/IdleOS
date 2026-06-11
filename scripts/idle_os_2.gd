@@ -5,20 +5,12 @@ extends Control
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 
-#add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
-#TOKENS - VM Token : Consumed on use : Specific token for each process : Different levels
-# Token items example: 
-#lvl 1 vm mining token - can mine in a different screen for 2 minutes : type -r to continue use and use another one : cmd example: vm token lvl=1 -mining -logs -r
-#lvl 2 vm parsing token - can parse in different screen for 7 min : type -r to recursively use
-#lvl 3 vm cracking token - can crack in diff screen for 20 min : type -r to recursively use
-
-#steps: 
-#1) add lvl 1-3 tokens for each process this will be available for (mining, parsing, cracking, matching, decoding, phishing)
-#2) figure out and implement commands for each, as well as safeguards (1 running at a time, upgradable?)
-#2.5) figure out pop up screens (location, sizing for each, etc)
-#3) add to cache drops
+# VM TOKENS todo
+# add recursive functionality
+# add upgradable options in each Major skill ie process_upgrades -> windows 1-2 = 500, max at 5? | Time for each window 1min > 3min, max at 10 ish min
 
 #TODO
+# IDK about this one, might be a larger issue with how inventory is shown? maybe seperate window? idk -> add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
 # simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
@@ -404,7 +396,13 @@ func universal_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-			
+			return true
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+			return true
 		"sticky":
 			if current_process != null:
 				sticky_current_process()
@@ -538,10 +536,35 @@ func handle_vm_token_commands(text):
 		add_line(target_process.name + " process not recognized")
 		return
 	
-	if Inventory.get_amount(target_process.vm_token) > 0:
-		print("has item")
-	else:
-		print('no item')
+	if Inventory.get_amount(target_process.vm_token) <= 0:
+		add_line("VM Token for " + target_process.name + " not found.")
+		return
+	
+	#check # of vm processes running
+	if target_process.CURRENT_VMS >= target_process.MAX_VMS:
+		add_line("Maximum virtual machines running.")
+		return
+	
+	Inventory.remove_resource(target_process.vm_token, 1)
+	var new_window = target_process.create_vm_window(target_minor_process)
+
+	add_child(new_window)
+	
+	var parent_window = get_window()
+	var center_pos = parent_window.position + parent_window.size - new_window.size
+	new_window.position = center_pos
+	new_window.popup()
+	new_window.transient = false
+	new_window.always_on_top = true
+	get_tree().create_timer(10.0, false).timeout.connect(func():
+		if is_instance_valid(new_window):
+			new_window.get_child(0).stop_safely()
+	)
+	
+	await get_tree().process_frame
+	get_window().grab_focus()
+	input_line.grab_focus()
+	
 
 func sticky_current_process():
 	current_process.reparent(terminal_grandparent, false)
@@ -553,50 +576,6 @@ func unstick_current_process():
 		current_process.reparent(terminal_body_container, false)
 		add_new_scrollback()
 		add_line("Unstick")
-
-func vm_token_used():
-	#var content_instance = mining_scene.instantiate()
-	var content_instance = log_parsing_scene.instantiate()
-	
-	var new_window = Window.new()
-	new_window.title = "my title"
-	new_window.size = Vector2i(650, 260)
-	new_window.min_size = Vector2(650, 260)
-	new_window.wrap_controls = true
-	
-	var con = Control.new()
-	con.set_anchors_preset(Control.PRESET_FULL_RECT)
-	con.add_child(content_instance)
-	new_window.add_child(con)
-	
-	new_window.close_requested.connect(func(): new_window.queue_free())
-	
-	# 1. ENFORCE FLAGS BEFORE ADDING TO THE TREE
-	new_window.transient = false
-	new_window.always_on_top = true
-
-	add_child(new_window)
-	
-
-	# 2. MANUAL CENTERING (Replaces popup_centered)
-	var parent_window = get_window()
-	#var center_pos = parent_window.position + (parent_window.size / 2) - (new_window.size / 2)
-	var center_pos = parent_window.position + parent_window.size - new_window.size
-	new_window.position = center_pos
-	new_window.show() # Shows the window without forcing transience
-
-	#content_instance.set_mine_type(Mining.LOGS)
-	#content_instance.start_data_mining()
-	content_instance.set_parse_type(Parsing.LOGS)
-	content_instance.start()
-	add_line("Vm token used")
-	
-	get_tree().create_timer(30.0, false).timeout.connect(func():
-		if is_instance_valid(new_window):
-			add_line("closing virtual machine window...")
-			new_window.queue_free()
-	)
-
 
 ###################################################
 ################### MINING ########################

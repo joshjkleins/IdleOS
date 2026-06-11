@@ -10,4 +10,5 @@ shortened_name = "Borrowed book hist"
 description = "Sell on the marketplace"
 valuable = true
 value = 400
+color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

@@ -10,4 +10,5 @@ shortened_name = "Admis bribe records"
 description = "Sell on the marketplace"
 valuable = true
 value = 1900
+color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

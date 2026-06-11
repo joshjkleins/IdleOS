@@ -6,7 +6,9 @@
 script = ExtResource("1_rdqh3")
 id = 69
 name = "Sealed case files"
+shortened_name = ""
 description = "Sell on the marketplace"
 valuable = true
 value = 5000
+color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

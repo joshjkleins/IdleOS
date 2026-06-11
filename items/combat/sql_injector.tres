@@ -18,4 +18,5 @@ shortened_name = ""
 description = "Basic attacking hack."
 valuable = false
 value = 0
+color_type = 6
 metadata/_custom_type_script = "uid://c7r65t2y40b2d"

@@ -10,4 +10,5 @@ shortened_name = "Grant docs"
 description = "Sell on the marketplace"
 valuable = true
 value = 1800
+color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

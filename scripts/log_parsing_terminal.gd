@@ -16,11 +16,13 @@ const MAX_LOG_LINES = 10
 
 var process_running: bool = false
 var end_safely: bool = false
+var is_window: bool = false
 
 var type: Dictionary
 
-func set_parse_type(p_type: Dictionary):
+func set_parse_type(p_type: Dictionary, i_window = false):
 	type = p_type
+	is_window = i_window
 	
 	var item_labels = [item_find_container, item_find_container_2, item_find_container_3, item_find_container_4]
 	var item_chance = int(100.0 / type["item pool"].size())
@@ -44,6 +46,7 @@ func start():
 		if end_safely:
 			process_running = false
 			Signals.end_log_parsing_safely()
+			stop()
 			break
 		else:
 			Inventory.remove_resource(type["requirements"], 1)
@@ -88,6 +91,9 @@ func start():
 func stop():
 	end_safely = false
 	process_running = false
+	if is_window:
+		Parsing.CURRENT_VMS -= 1
+		get_parent().queue_free()
 
 func stop_safely():
 	end_safely = true
