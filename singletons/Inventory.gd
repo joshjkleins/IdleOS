@@ -19,6 +19,8 @@ func _ready():
 	#add_resource(Items.STUDENT_CACHE, 20)
 	add_resource(Items.PINS, 3)
 	add_resource(Items.ACCOUNT_NUMBERS, 3)
+	add_resource(Items.VM_MINING_TOKEN, 1)
+	add_resource(Items.VM_PARSING_TOKEN, 1)
 	#add_resource(Items.REFRESH_TOKEN, 500)
 	#add_resource(Items.IP_ADDRESS, 1)
 	#add_resource(Items.SQL_INJECTOR, 100)

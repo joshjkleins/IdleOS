@@ -7,6 +7,7 @@ signal xp_gained
 
 # When the player earns the bonus
 var bonus_expires_at: int
+var vm_token = Items.VM_PARSING_TOKEN
 
 #GENERAL MODULE DATA
 var SKILL = {

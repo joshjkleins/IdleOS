@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dvkf3gc7jbxof"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_0mpmn"]
+
+[resource]
+script = ExtResource("1_0mpmn")
+id = 86
+name = "VM mining token"
+shortened_name = ""
+description = "Runs a mining process in a separate window"
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

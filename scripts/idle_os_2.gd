@@ -361,6 +361,9 @@ General:
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
+	if text.begins_with("vm"):
+		handle_vm_token_commands(text)
+		return true
 	match text:
 		"list -r":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
@@ -391,9 +394,6 @@ func universal_commands(text):
 			return true
 		"-h":
 			list_help()
-			return true
-		"vm token":
-			vm_token_used()
 			return true
 		"stop":
 			process_running = false
@@ -507,6 +507,41 @@ func root_commands(text):
 			
 		_:#default
 			add_line("Command not found")
+
+
+##VM TOKENS
+#command vm [process] [minor process] [optional flag -r]
+#command example: vm mining basic -r
+func handle_vm_token_commands(text):
+	var commands = text.split(" ")
+	#confirm commands size
+	if commands.size() < 3 or commands.size() > 4:
+		add_line("VM command not recognized, missing components")
+		return
+	
+	#find major process
+	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding]
+	var target_process = null
+	for p in processes:
+		if p.SKILL.name.to_lower() == commands[1]:
+			target_process = p
+	if target_process == null:
+		add_line("process not recognized")
+		return
+	
+	#find minor process
+	var target_minor_process = null
+	for mp in target_process.minor_processes:
+		if commands[2] == mp.name.to_lower():
+			target_minor_process = mp
+	if target_minor_process == null:
+		add_line(target_process.name + " process not recognized")
+		return
+	
+	if Inventory.get_amount(target_process.vm_token) > 0:
+		print("has item")
+	else:
+		print('no item')
 
 func sticky_current_process():
 	current_process.reparent(terminal_grandparent, false)

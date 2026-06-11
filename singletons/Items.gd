@@ -106,6 +106,12 @@ enum ItemType {
 	DDOS, #83
 	REFRESH_TOKEN, #84
 	QUALITY_LOGS, #85
+	VM_MINING_TOKEN, #86
+	VM_PARSING_TOKEN, #87
+	VM_CRACKING_TOKEN, #88
+	VM_MATCHING_TOKEN, #89
+	VM_PHISHING_TOKEN, #90
+	VM_DECODING_TOKEN, #91
 }
 
 #items
@@ -129,8 +135,17 @@ const DDOS = preload("res://items/combat/ddos.tres")
 const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
 const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
 
-### REFRESH TOKENS ###
-const REFRESH_TOKEN = preload("res://items/refresh_tokens/refresh_token.tres")
+### TOKENS ###
+#VMs
+const VM_MINING_TOKEN = preload("res://items/tokens/mining/vm_mining_token.tres")
+const VM_PARSING_TOKEN = preload("res://items/tokens/parsing/vm_parsing_token.tres")
+const VM_CRACKING_TOKEN = preload("res://items/tokens/cracking/vm_cracking_token.tres")
+const VM_MATCHING_TOKEN = preload("res://items/tokens/matching/vm_matching_token.tres")
+const VM_PHISHING_TOKEN = preload("res://items/tokens/phishing/vm_phishing_token.tres")
+const VM_DECODING_TOKEN = preload("res://items/tokens/decoding/vm_decoding_token.tres")
+
+#REFRESH
+const REFRESH_TOKEN = preload("res://items/tokens/refresh/refresh_token.tres")
 
 ### VALUABLES ###
 #school
@@ -314,4 +329,10 @@ const ITEM_MAP = {
 	ItemType.DDOS: DDOS,
 	ItemType.REFRESH_TOKEN: REFRESH_TOKEN,
 	ItemType.QUALITY_LOGS: QUALITY_LOGS,
+	ItemType.VM_MINING_TOKEN: VM_MINING_TOKEN,
+	ItemType.VM_PARSING_TOKEN: VM_PARSING_TOKEN,
+	ItemType.VM_CRACKING_TOKEN: VM_CRACKING_TOKEN,
+	ItemType.VM_MATCHING_TOKEN: VM_MATCHING_TOKEN,
+	ItemType.VM_PHISHING_TOKEN: VM_PHISHING_TOKEN,
+	ItemType.VM_DECODING_TOKEN: VM_DECODING_TOKEN,
 }

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bqmxor6j5u88q"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_mcknn"]
+
+[resource]
+script = ExtResource("1_mcknn")
+id = 87
+name = "VM parsing token"
+shortened_name = ""
+description = "Runs a parsing process in a separate window"
+valuable = false
+value = 0
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"
