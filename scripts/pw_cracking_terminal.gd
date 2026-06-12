@@ -22,13 +22,20 @@ var PW_LENGTH: int = 4
 var current_crack_line
 var prog_bar_tween: Tween
 var end_safely: bool = false
+var is_window: bool
 
 var type: Dictionary
 
 var first_crack: bool = false #this forces first crack to process so it doesnt instantly process a billion
 
-func set_cracking_type(p_type: Dictionary):
+func set_cracking_type(p_type: Dictionary, window: bool = false):
+	is_window = window
 	type = p_type
+	match type.name.to_lower():
+		"password":
+			set_pw()
+		"pin":
+			set_pin()
 	
 	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
 
@@ -66,7 +73,10 @@ func start():
 		for j in range(pw_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
 			if end_safely:
 				process_running = false
-				Signals.end_pw_cracking_safely()
+				if is_window:
+					stop()
+				else:
+					Signals.end_pw_cracking_safely()
 				break
 			if !process_running:
 				break
@@ -132,6 +142,9 @@ func stop():
 	progress_bar.value = 0
 	for n in letter_boxes:
 		n.stop_scramble()
+	if is_window:
+		Cracking.CURRENT_VMS -= 1
+		get_parent().queue_free()
 
 func stop_safely():
 	end_safely = true
@@ -145,8 +158,11 @@ func _update_progress_bar(fill: int, time: float):
 		prog_bar_tween.tween_property(progress_bar, "value", target_fill, time - 0.1)
 
 func _finished():
+	if is_window:
+		stop()
+		return
 	if Inventory.get_amount(type["requirements"]) <= 0:
-		cracking_current_status.text = "All passwords cracked."
+		cracking_current_status.text = "All " + type["requirements"].name + " cracked."
 	
 	if Stats.overclocked:
 		Stats.overclocked = false

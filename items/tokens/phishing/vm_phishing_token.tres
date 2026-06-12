@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_0yjmb")
 id = 90
-name = "VM Phishing token"
+name = "VM phishing token"
 shortened_name = ""
 description = "Runs a phishing process in a separate window"
 valuable = false

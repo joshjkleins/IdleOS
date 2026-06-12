@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_7fgp0")
 id = 91
-name = "VM Decoding token"
+name = "VM decoding token"
 shortened_name = ""
 description = "Runs a decoding process in a separate window"
 valuable = false

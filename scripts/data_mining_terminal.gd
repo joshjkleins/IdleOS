@@ -140,12 +140,13 @@ func stop_safely():
 	end_safely = true
 
 func _cycle_complete(overclocked: bool, overheated: bool):
-	if overheated:
-		Stats.update_tempature(OVERHEAT_HEAT)
-	elif overclocked and !is_window:
-		Stats.update_tempature(OVERCLOCK_HEAT)
-	else:
-		Stats.update_tempature(HEAT)
+	if !is_window:
+		if overheated:
+			Stats.update_tempature(OVERHEAT_HEAT)
+		elif overclocked and !is_window:
+			Stats.update_tempature(OVERCLOCK_HEAT)
+		else:
+			Stats.update_tempature(HEAT)
 	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)

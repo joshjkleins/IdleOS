@@ -81,266 +81,6 @@ var TIME_TO_ROLL: float = 2.0
 var TIME_PER_METHOD: float = 0.65
 
 var sb #stylebox global
-const RANDOM_USERNAMES := [
-	"byteRunner77",
-	"neonTiger",
-	"silentProxy",
-	"darkKernel",
-	"pixelRaider",
-	"ghostCipher",
-	"ironSpectre",
-	"lunarSyntax",
-	"zeroDayFox",
-	"voidCrawler",
-	"turboHydra",
-	"omegaPulse",
-	"echoVector",
-	"rapidDelta",
-	"nightAssembler",
-	"hexCrawler",
-	"frostByte",
-	"alphaCircuit",
-	"gammaNode",
-	"dataMantis",
-	"vortexDrive",
-	"silentCrate",
-	"quantumPixel",
-	"binaryLancer",
-	"crimsonPacket",
-	"shadowSocket",
-	"omegaClaw",
-	"nightSignal",
-	"ravenUpload",
-	"staticHunter",
-	"deltaMachine",
-	"hyperBreach",
-	"nanoRunner",
-	"vaporKernel",
-	"electricNomad",
-	"stormCache",
-	"glitchNova",
-	"radarGhost",
-	"iceProtocol",
-	"pixelNomad",
-	"lunarSignal",
-	"vectorShadow",
-	"solarRogue",
-	"rapidSocket",
-	"bytePirate",
-	"frozenRoot",
-	"turboHex",
-	"crashOverride",
-	"steelCrawler",
-	"silentOverflow",
-	"toxicMatrix",
-	"omegaTrace",
-	"voidHunter",
-	"quantumEcho",
-	"cyberAnchor",
-	"blackoutNode",
-	"phantomByte",
-	"novaSignal",
-	"darkPacket",
-	"hexRaider",
-	"pixelDrifter",
-	"cyberNova",
-	"binaryFang",
-	"terminalGhost",
-	"echoCrawler",
-	"nightPulse",
-	"lunarNode",
-	"staticCipher",
-	"rapidHex",
-	"stormRunner",
-	"hyperThread",
-	"crimsonRoot",
-	"shadowOverride",
-	"voidPacket",
-	"alphaMantis",
-	"vaporSignal",
-	"gammaGhost",
-	"electricFox",
-	"zeroSpectre",
-	"silentThread",
-	"turboTrace",
-	"pixelPulse",
-	"quantumSocket",
-	"binaryDrifter",
-	"novaKernel",
-	"omegaRoot",
-	"stormHex",
-	"darkSyntax",
-	"ravenCipher",
-	"nightSocket",
-	"frostSignal",
-	"vectorHydra",
-	"phantomProxy",
-	"cyberMantis",
-	"dataNomad",
-	"rapidCrawler",
-	"blackoutPulse",
-	"shadowKernel",
-	"electricPacket",
-	"silentRogue",
-	"voidTrace",
-	"omegaByte",
-	"hyperGhost",
-	"vaporFox",
-	"crimsonHex",
-	"novaDrive",
-	"ghostThread",
-	"staticRaider",
-	"binaryPulse",
-	"echoSocket",
-	"frozenCipher",
-	"nightKernel",
-	"pixelHunter",
-	"stormProxy",
-	"darkRoot",
-	"quantumTrace",
-	"vectorSignal",
-	"alphaPacket",
-	"cyberDrive",
-	"silentMantis",
-	"lunarHex",
-	"rapidGhost",
-	"turboCipher",
-	"vaporNode",
-	"shadowFox",
-	"zeroRunner",
-	"blackoutCrawler",
-	"novaByte",
-	"ghostSocket",
-	"frostOverride",
-	"binaryTrace",
-	"nightRaider",
-	"electricSignal",
-	"echoHydra",
-	"stormDrifter",
-	"pixelKernel",
-	"crimsonProxy",
-	"staticThread",
-	"voidCipher",
-	"hyperPulse",
-	"alphaFox",
-	"quantumRunner",
-	"cyberSocket",
-	"shadowSignal",
-	"vaporHex",
-	"novaMantis",
-	"darkPacket77",
-	"silentNova",
-	"lunarCipher",
-	"frozenDrive",
-	"rapidByte",
-	"turboGhost",
-	"stormSocket",
-	"binaryNomad",
-	"omegaCrawler",
-	"nightTrace",
-	"pixelOverride",
-	"vectorRaider",
-	"electricKernel",
-	"echoPacket",
-	"cyberRoot",
-	"blackoutFox",
-	"crimsonSignal",
-	"voidHydra",
-	"ghostProxy",
-	"alphaTrace",
-	"staticNomad",
-	"hyperByte",
-	"shadowPulse",
-	"frostSocket",
-	"novaHex",
-	"binaryHunter",
-	"rapidKernel",
-	"silentPacket",
-	"vaporThread",
-	"darkCrawler",
-	"turboRunner",
-	"nightCipher",
-	"pixelFox",
-	"vectorDrive",
-	"echoGhost",
-	"stormOverride",
-	"quantumKernel",
-	"cyberRaider",
-	"zeroSignal",
-	"shadowTrace",
-	"alphaSocket",
-	"ghostByte",
-	"binaryHydra",
-	"staticRunner",
-	"omegaSignal",
-	"novaThread",
-	"rapidPulse",
-	"silentFox",
-	"lunarRoot",
-	"frostKernel",
-	"hyperNomad",
-	"darkSocket",
-	"stormByte",
-	"pixelCipher",
-	"cyberGhost",
-	"vectorPacket",
-	"voidSignal",
-	"turboRoot",
-	"electricTrace",
-	"echoRunner",
-	"binarySocket",
-	"novaProxy",
-	"shadowKernelX",
-	"nightHydra",
-	"rapidSignal",
-	"silentTrace",
-	"frostPulse",
-	"vaporRaider",
-	"ghostNomad",
-	"crimsonSocket",
-	"omegaThread",
-	"pixelByte",
-	"stormCrawler",
-	"darkProxy",
-	"quantumSignal",
-	"alphaGhost",
-	"hyperRoot",
-	"binaryCipher",
-	"vectorPulse",
-	"cyberThread",
-	"zeroKernel",
-	"electricSocket",
-	"silentHydra",
-	"novaSignalX",
-	"voidRunner",
-	"pixelTrace",
-	"nightProxy",
-	"frostNomad",
-	"shadowByte",
-	"echoSignal",
-	"stormGhost",
-	"rapidThread",
-	"turboPacket",
-	"cyberCipher",
-	"binaryRoot",
-	"omegaRunner",
-	"vectorKernel",
-	"lunarTrace",
-	"ghostSignal",
-	"hyperSocket",
-	"darkHydra",
-	"silentKernel",
-	"novaPacket",
-	"pixelRunner",
-	"frozenSignal",
-	"alphaOverride",
-	"cyberPulse",
-	"shadowNomad",
-	"rapidSocketX",
-	"stormKernelX",
-	"voidGhost",
-	"electricByte"
-]
 var u_name: String
 var TAG_COLORS = [
 	Color("#3B82F6"),
@@ -350,23 +90,40 @@ var TAG_COLORS = [
 ]
 
 var type #which minor process
+var is_window: bool = false
 
 enum MatchType {CREDENTIAL, ACCOUNT}
 var current_type: MatchType
 
-func set_cred(p_type: Dictionary):
-	_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
+func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
 	type = p_type
-	current_type = MatchType.CREDENTIAL
-	resource_one_title.text = "USERNAME"
-	resource_two_title.text = "PASSWORD"
+	is_window = window
+	match p_type.name.to_lower():
+		"credential":
+			_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
+			current_type = MatchType.CREDENTIAL
+			resource_one_title.text = "USERNAME"
+			resource_two_title.text = "PASSWORD"
+		"account":
+			_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
+			current_type = MatchType.ACCOUNT
+			resource_one_title.text = "ACCOUNT #"
+			resource_two_title.text = "PIN"
 
-func set_account(p_type: Dictionary):
-	_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
-	type = p_type
-	current_type = MatchType.ACCOUNT
-	resource_one_title.text = "ACCOUNT #"
-	resource_two_title.text = "PIN"
+
+# func set_cred(p_type: Dictionary):
+# 	_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
+# 	type = p_type
+# 	current_type = MatchType.CREDENTIAL
+# 	resource_one_title.text = "USERNAME"
+# 	resource_two_title.text = "PASSWORD"
+
+# func set_account(p_type: Dictionary):
+# 	_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
+# 	type = p_type
+# 	current_type = MatchType.ACCOUNT
+# 	resource_one_title.text = "ACCOUNT #"
+# 	resource_two_title.text = "PIN"
 
 #sets text labels on each 'tag' in center column
 func _update_tags(tag_names: Array[String]):
@@ -375,10 +132,10 @@ func _update_tags(tag_names: Array[String]):
 		tags[i].text = tag_names[i]
 
 func _set_interval_time(): #calculate interval time
-	var size = 0
+	var isize = 0
 	for i in terminal_messages:
-		size += i.size()
-	intervals = 100.0 / size
+		isize += i.size()
+	intervals = 100.0 / isize
 
 func _has_requirements() -> bool:
 	for item in type["requirements"]:
@@ -394,11 +151,11 @@ func _consume_required_items():
 func _update_username_password_labels():
 	userbox_name_label.text = u_name
 
-func _update_last_col_username(name):
-	status_username.text = name
+func _update_last_col_username(us_name):
+	status_username.text = us_name
 
-func _update_last_col_pw(name):
-	status_pw.text = name
+func _update_last_col_pw(us_name):
+	status_pw.text = us_name
 
 func _update_last_col_title(text):
 	status_title.text = text
@@ -437,6 +194,7 @@ func _repeat_loop():
 	_consume_required_items()
 	_update_resource_amount_labels()
 	_choose_username()
+	_update_username_password_labels()
 	_update_last_col_username("-")
 	_update_last_col_pw("-")
 	_update_last_col_title("username lookup")
@@ -446,7 +204,11 @@ func _repeat_loop():
 func _finished():
 	process_running = false
 	safely_stop = false
-	Signals.end_cred_matching_safely()
+	if is_window:
+		Matching.CURRENT_VMS -= 1
+		get_parent().queue_free()
+	else:
+		Signals.end_cred_matching_safely()
 
 func _begin_matching():
 	if !process_running:
@@ -535,7 +297,7 @@ func _generate_account_number() -> String:
 func _choose_username(): #sets current iteration username variable
 	match current_type:
 		MatchType.CREDENTIAL:
-			u_name = RANDOM_USERNAMES.pick_random()
+			u_name = Matching.RANDOM_USERNAMES.pick_random()
 		MatchType.ACCOUNT:
 			u_name = _generate_account_number()
 	

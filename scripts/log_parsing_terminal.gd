@@ -45,7 +45,8 @@ func start():
 	while process_running and Inventory.get_amount(type["requirements"]) > 0:
 		if end_safely:
 			process_running = false
-			Signals.end_log_parsing_safely()
+			if !is_window:
+				Signals.end_log_parsing_safely()
 			stop()
 			break
 		else:
@@ -85,7 +86,9 @@ func start():
 			if process_running:
 				_finished_log(heat_used)
 	#finishes naturally
-	if process_running:
+	if is_window: #vm window ran out of logs > shutdown
+		stop()
+	if process_running and !is_window:
 		Signals.end_log_parsing_safely()
 
 func stop():

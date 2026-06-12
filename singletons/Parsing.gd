@@ -6,12 +6,14 @@ signal quality_cycle_completed
 signal xp_gained
 
 # When the player earns the bonus
-var bonus_expires_at: int
+var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
 var MAX_VMS = 1
 var CURRENT_VMS = 0
+var VM_UPTIME = 10.0
 
 var terminal_scene = preload("res://scenes/log_parsing_terminal.tscn")
+var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -129,18 +131,27 @@ func upgraded(upgrade_stat: Dictionary):
 	upgrade_stat["amount"] += upgrade_stat["increase per level"]
 
 
-func create_vm_window(minor_process) -> Window:
+func create_vm_window(minor_process, repeat) -> Window:
 	var content_instance = terminal_scene.instantiate()
-	var new_window = Window.new()
-	new_window.title = minor_process.name + " mining"
+	var new_window = vm_window.instantiate()
+	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
+	new_window.repeat = repeat
+	
+	new_window.set_repeat(repeat)
+	new_window.set_time(VM_UPTIME)
+	new_window.set_token(vm_token)
+	new_window.set_processes(Parsing, minor_process)
 	
 	new_window.add_child(content_instance)
 	
 	new_window.size = content_instance.size
 	new_window.min_size = content_instance.size
 	
-	new_window.close_requested.connect(func(): new_window.queue_free())
+	new_window.close_requested.connect(func(): 
+		CURRENT_VMS -= 1
+		new_window.queue_free()
+	)
 	new_window.about_to_popup.connect(func(): 
 		content_instance.set_parse_type(minor_process, true)
 		content_instance.start()

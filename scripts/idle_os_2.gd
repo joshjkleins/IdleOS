@@ -6,8 +6,19 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 
 # VM TOKENS todo
-# add recursive functionality
+# add vm windows to each Skill
+# Mining [x]
+# Parsing [x] 
+# Cracking [x]
+# Matching [x]
+# Phishing [x]
+# Decoding []
 # add upgradable options in each Major skill ie process_upgrades -> windows 1-2 = 500, max at 5? | Time for each window 1min > 3min, max at 10 ish min
+
+#other VM tasks
+# semi-transparent backgrounds
+# always on top settings
+# resizing to make everything larger/scale if needed (maybe not needed
 
 #TODO
 # IDK about this one, might be a larger issue with how inventory is shown? maybe seperate window? idk -> add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
@@ -517,6 +528,10 @@ func handle_vm_token_commands(text):
 		add_line("VM command not recognized, missing components")
 		return
 	
+	var repeat = false
+	if commands.size() == 4 and commands[3] == "-r":
+		repeat = true
+		
 	#find major process
 	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding]
 	var target_process = null
@@ -546,7 +561,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	Inventory.remove_resource(target_process.vm_token, 1)
-	var new_window = target_process.create_vm_window(target_minor_process)
+	var new_window = target_process.create_vm_window(target_minor_process, repeat)
 
 	add_child(new_window)
 	
@@ -556,15 +571,12 @@ func handle_vm_token_commands(text):
 	new_window.popup()
 	new_window.transient = false
 	new_window.always_on_top = true
-	get_tree().create_timer(10.0, false).timeout.connect(func():
-		if is_instance_valid(new_window):
-			new_window.get_child(0).stop_safely()
-	)
+	new_window.start()
 	
 	await get_tree().process_frame
 	get_window().grab_focus()
 	input_line.grab_focus()
-	
+
 
 func sticky_current_process():
 	current_process.reparent(terminal_grandparent, false)
@@ -760,15 +772,6 @@ func start_log_parsing(minor_process: Dictionary):
 	new_log_parsing_terminal.start()
 	add_new_scrollback()
 
-#func start_log_cred_parsing():
-	#var new_log_parsing_terminal = log_parsing_scene.instantiate()
-	#terminal_body_container.add_child(new_log_parsing_terminal)
-	#new_log_parsing_terminal.set_parse_type(Parsing.CRED_LOGS)
-	#process_running = true
-	#current_process = new_log_parsing_terminal
-	#new_log_parsing_terminal.start()
-	#add_new_scrollback()
-
 func log_parsing_ended_safely():
 	unstick_current_process()
 	current_process = null
@@ -795,7 +798,7 @@ func password_unscramble_commands(text):
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
+			if Inventory.get_amount(Items.ENCRYPTED_PINS) <= 0:
 				add_line("No encrypted passwords found.")
 				return
 			
@@ -859,7 +862,6 @@ func start_password_cracking():
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
 	new_pw_cracking_terminal.set_cracking_type(Cracking.PASSWORD)
-	new_pw_cracking_terminal.set_pw()
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()
@@ -872,7 +874,6 @@ func start_pin_cracking():
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
 	new_pw_cracking_terminal.set_cracking_type(Cracking.PINS)
-	new_pw_cracking_terminal.set_pin()
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()
@@ -968,7 +969,7 @@ func cred_matching_commands(text):
 func start_cred_matching():
 	var new_cred_matching_terminal = cred_matching_scene.instantiate()
 	terminal_body_container.add_child(new_cred_matching_terminal)
-	new_cred_matching_terminal.set_cred(Matching.CREDENTIAL)
+	new_cred_matching_terminal.set_type(Matching.CREDENTIAL)
 	process_running = true
 	current_process = new_cred_matching_terminal
 	new_cred_matching_terminal.start()
@@ -977,7 +978,7 @@ func start_cred_matching():
 func start_account_matching():
 	var new_cred_matching_terminal = cred_matching_scene.instantiate()
 	terminal_body_container.add_child(new_cred_matching_terminal)
-	new_cred_matching_terminal.set_account(Matching.ACCOUNT)
+	new_cred_matching_terminal.set_type(Matching.ACCOUNT)
 	process_running = true
 	current_process = new_cred_matching_terminal
 	new_cred_matching_terminal.start()

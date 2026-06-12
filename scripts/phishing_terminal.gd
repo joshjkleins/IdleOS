@@ -4,6 +4,8 @@ class_name PhishingTerminal
 @onready var phishing_line = preload("res://scenes/phishing_line.tscn")
 @onready var active_lines_container = $ActiveLines/MarginContainer/VBoxContainer/ActiveLinesContainer
 
+var is_window: bool = false
+var vm_lines = []
 
 func cast_lines(type: Dictionary, lines: int):
 	if lines == -1:
@@ -21,8 +23,22 @@ func cast_lines(type: Dictionary, lines: int):
 		
 		$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str( Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]) + " lines in use"
 
+#vm token specific
+func vm_cast_all_lines(type: Dictionary, window: bool = false):
+	is_window = window
+	for i in range(Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]):
+		var new_line = phishing_line.instantiate()
+		active_lines_container.add_child(new_line)
+		new_line.line_ended_signal.connect(line_ended)
+		vm_lines.append(new_line)
+	for line in vm_lines:
+		line.begin(type)
+	
+	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str( Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]) + " lines in use"
+
 #casts all remaining available lines
-func cast_all_lines(type: Dictionary):
+func cast_all_lines(type: Dictionary, window: bool = false):
+	is_window = window
 	var line_added = []
 	while Phishing.current_lines.size() < Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]:
 		var new_line = phishing_line.instantiate()
@@ -41,24 +57,39 @@ func _clear_lines():
 			node.queue_free()
 
 func line_ended():
-	for lines in Phishing.current_lines:
-		if lines.active:
-			return
-	remove_lines()
-	print('lines removed')
-	Signals.end_phishing_safely()
+	if is_window:
+		for lines in vm_lines:
+			if lines.active:
+				return
+		vm_lines.clear()
+		Phishing.CURRENT_VMS -= 1
+		get_parent().queue_free()
+	else:
+		for lines in Phishing.current_lines:
+			if lines.active:
+				return
+		remove_lines()
+		Signals.end_phishing_safely()
 
 func stop():
-	if Phishing.current_lines.is_empty():
-		return
-	for line in Phishing.current_lines:
-		line.stop()
+	if is_window:
+		for line in vm_lines:
+			line.stop()
+	else:
+		if Phishing.current_lines.is_empty():
+			return
+		for line in Phishing.current_lines:
+			line.stop()
 
 func stop_safely():
-	if Phishing.current_lines.is_empty():
-		return
-	for line in Phishing.current_lines:
-		line.stop_safely()
+	if is_window:
+		for line in vm_lines:
+			line.stop_safely()
+	else:
+		if Phishing.current_lines.is_empty():
+			return
+		for line in Phishing.current_lines:
+			line.stop_safely()
 
 func remove_lines():
 	if Phishing.current_lines.is_empty():

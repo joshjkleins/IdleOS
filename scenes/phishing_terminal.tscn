@@ -5,9 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://bl57b6nxyr7rt" path="res://art/icons/fishing-rod(1).png" id="2_kniys"]
 
 [node name="PhishingTerminal" type="VBoxContainer"]
-custom_minimum_size = Vector2(600, 0)
-offset_right = 40.0
-offset_bottom = 40.0
+custom_minimum_size = Vector2(800, 0)
+offset_right = 600.0
+offset_bottom = 72.0
 theme = ExtResource("1_gw1tx")
 script = ExtResource("2_4mroc")
 

@@ -114,7 +114,6 @@ func stop_safely():
 
 func process_done():
 	line_ended_signal.emit()
-	print("Done")
 
 func _on_progress_bar_value_changed(value):
 	$ProgressBar/TimeRemaining.text = str(value).pad_decimals(2)
