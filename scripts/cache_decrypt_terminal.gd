@@ -17,8 +17,10 @@ var type
 
 enum DecodingType { CACHE }
 var current_type: DecodingType
+var is_window: bool = false
 
-func set_cache_type(p_type: Dictionary):
+func set_cache_type(p_type: Dictionary, window: bool = false):
+	is_window = window
 	type = p_type
 	current_type = DecodingType.CACHE
 
@@ -32,7 +34,10 @@ func start_decrypting():
 	safe_stop = false
 	while Inventory.has_cache() and running:
 		if safe_stop:
-			Signals.end_cache_decrypting_safely()
+			if is_window:
+				_vm_finish()
+			else:
+				Signals.end_cache_decrypting_safely()
 			break
 		cache_decrypt.reset()
 		can_apply_heat = true
@@ -77,7 +82,10 @@ func start_decrypting():
 		Exp.add_xp(Decoding, type, type["experience per level"] * Decoding.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Decoding)
 		
-	Signals.end_cache_decrypting_safely()
+	if is_window:
+		_vm_finish()
+	else:
+		Signals.end_cache_decrypting_safely()
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:
@@ -110,6 +118,11 @@ func update_items_gained(item, amount):
 		labels_container.add_child(new_label)
 	
 	Inventory.add_resource(item, amount)
+
+func _vm_finish():
+	if is_window:
+		Decoding.CURRENT_VMS -= 1
+		get_parent().queue_free()
 
 func stop():
 	safe_stop = false

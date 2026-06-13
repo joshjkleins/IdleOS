@@ -39,3 +39,6 @@ func set_repeat(rep: bool):
 func set_processes(major: Node, minor: Dictionary):
 	maj_process = major
 	min_process = minor
+
+func _on_focus_entered():
+	Signals.vm_window_focused()

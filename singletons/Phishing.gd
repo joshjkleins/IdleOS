@@ -7,9 +7,9 @@ signal xp_gained
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_PHISHING_TOKEN
-var MAX_VMS = 1
+@onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
+@onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
-var VM_UPTIME = 5.0
 
 var terminal_scene = preload("res://scenes/phishing_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -97,6 +97,8 @@ var process_upgrades = {
 	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
 	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
 	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
+	"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
+	"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
 }
 
 func get_upgrade_cost(upgrade_stat: String) -> int:
@@ -105,6 +107,17 @@ func get_upgrade_cost(upgrade_stat: String) -> int:
 func upgraded(upgrade_stat: Dictionary):
 	upgrade_stat["level"] += 1
 	upgrade_stat["amount"] += upgrade_stat["increase per level"]
+	
+	if upgrade_stat["name"].to_lower() == "vm windows":
+		MAX_VMS += upgrade_stat["increase per level"]
+	if upgrade_stat["name"].to_lower() == "vm duration":
+		VM_UPTIME += upgrade_stat["increase per level"]
+
+func has_requirements(minor_process) -> bool:
+	return true
+
+func missing_requirements_text(minor_process) -> String:
+	return ""
 
 func create_vm_window(minor_process, repeat) -> Window:
 	var content_instance = terminal_scene.instantiate()

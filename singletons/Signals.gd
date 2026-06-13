@@ -1,5 +1,6 @@
 extends Node
 
+signal vm_window_focused_signal
 signal contract_finished_signal
 signal contract_added_signal
 signal contracts_removed_signal
@@ -22,10 +23,7 @@ signal update_hud_root_signal
 signal end_phishing_safely_signal
 signal item_added_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
-#FILES WHERE end_hacking IS CONNECTED
-#hacking.gd - updates current context from HACKING to PERSONS
-#hacking_box.gd - handles changing screen from hacking process to list of persons at location
-#hack_container.gd - sets hacking_active to false to bail from sequence hacking event
+
 func end_hacking():
 	end_hacking_signal.emit()
 
@@ -87,3 +85,6 @@ func contract_added(contract: Contract):
 
 func defrag_finished():
 	defrag_finished_signal.emit()
+
+func vm_window_focused():
+	vm_window_focused_signal.emit()

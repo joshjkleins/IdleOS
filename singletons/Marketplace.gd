@@ -256,6 +256,12 @@ func upgrades_details(skill: Node) -> String:
 			elif p.name == "Max lines":
 				title = _pad_text(p.name + " increase", 30) 
 				upgrade_text = "     " + str(p["amount"]) + " -> " +  str(p["amount"] + p["increase per level"]) + "\n\n"
+			elif p.name.to_lower() == "vm windows":
+				title = _pad_text(p.name, 30)
+				upgrade_text = "     " + str(p["amount"]) + " -> " + str(p["amount"] + p["increase per level"]) + "\n\n"
+			elif p.name.to_lower() == "vm duration":
+				title = _pad_text(p.name, 30)
+				upgrade_text = "     " + str(p["amount"]) + " -> " + str(p["amount"] + p["increase per level"]) + "\n\n"
 			else:
 				title = _pad_text(p.name + " bonus", 30) 
 				upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"
@@ -291,7 +297,11 @@ func purchase_upgrade(num: int) -> Dictionary:
 		return { "message": "Upgrade purchased", "purchased": true }
 		
 	else:
-		if num <= 0 or num > 4:
+		var valid_num = false
+		for pu in viewing_skill.process_upgrades.keys():
+			if num == viewing_skill.process_upgrades[pu]['id']:
+				valid_num = true
+		if !valid_num:
 			return { "message": "Not valid number", "purchased": false }
 		
 		var upgrade = null

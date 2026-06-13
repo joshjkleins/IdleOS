@@ -5,23 +5,8 @@ extends Control
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 
-# VM TOKENS todo
-# add vm windows to each Skill
-# Mining [x]
-# Parsing [x] 
-# Cracking [x]
-# Matching [x]
-# Phishing [x]
-# Decoding []
-# add upgradable options in each Major skill ie process_upgrades -> windows 1-2 = 500, max at 5? | Time for each window 1min > 3min, max at 10 ish min
-
-#other VM tasks
-# semi-transparent backgrounds
-# always on top settings
-# resizing to make everything larger/scale if needed (maybe not needed
-
 #TODO
-# IDK about this one, might be a larger issue with how inventory is shown? maybe seperate window? idk -> add track command so player can see specific items : track -data, track -ip_address : should add to horizontal list right below header. can remove with track -r -data or track -data -r
+# add items & purpose to game: Account access tokens, refresh tokens, all VM tokens
 # Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
 # simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
@@ -29,12 +14,9 @@ extends Control
 # then after above is done, add more combat items to test with (utility items), and one time use items
 # add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
 #save/load
-#offline progression - cap at 24 hours?
 #export to desktop and play through
 
 #stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
-
-
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -139,6 +121,7 @@ func _ready():
 	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
 	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
 	Signals.defrag_finished_signal.connect(defrag_finished)
+	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -555,6 +538,9 @@ func handle_vm_token_commands(text):
 		add_line("VM Token for " + target_process.name + " not found.")
 		return
 	
+	if !target_process.has_requirements(target_minor_process):
+		add_line(target_process.missing_requirements_text(target_minor_process))
+		return
 	#check # of vm processes running
 	if target_process.CURRENT_VMS >= target_process.MAX_VMS:
 		add_line("Maximum virtual machines running.")
@@ -568,15 +554,18 @@ func handle_vm_token_commands(text):
 	var parent_window = get_window()
 	var center_pos = parent_window.position + parent_window.size - new_window.size
 	new_window.position = center_pos
-	new_window.popup()
+	new_window.popup_centered()
 	new_window.transient = false
 	new_window.always_on_top = true
 	new_window.start()
 	
 	await get_tree().process_frame
+	grab_all_focus()
+
+func grab_all_focus():
 	get_window().grab_focus()
 	input_line.grab_focus()
-
+	
 
 func sticky_current_process():
 	current_process.reparent(terminal_grandparent, false)
@@ -1040,10 +1029,7 @@ func cache_decrypting_commands(text):
 		"info":
 			add_line("Module: Cache Decrypting")
 			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
-			#Level
-			#Experience
 			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
-			#Effeciency
 			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
 		"-h":

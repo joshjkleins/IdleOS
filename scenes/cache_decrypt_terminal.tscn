@@ -4,11 +4,8 @@
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_ytqtf"]
 
 [node name="CacheDecryptTerminal" type="PanelContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 1016.0
+offset_bottom = 382.0
 theme = ExtResource("1_ytqtf")
 script = ExtResource("1_4hfe2")
 
@@ -28,9 +25,9 @@ layout_mode = 2
 text = "Student cache"
 
 [node name="HexDisplay" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 140)
+custom_minimum_size = Vector2(1000, 140)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 theme_override_colors/default_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_constants/line_separation = 5
 bbcode_enabled = true
