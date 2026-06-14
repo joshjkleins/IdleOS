@@ -10,7 +10,7 @@ func _ready():
 	#pass
 	#add_resource(Items.PARENTS_CREDIT_CARD, 3)
 	#add_resource(Items.ADMISSIONS_BRIBERY_RECORDS, 1)
-	#add_resource(Items.DATA, 2500)
+	add_resource(Items.DATA, 2500)
 	# add_resource(Items.LOGS, 200)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 10)
 	#add_resource(Items.ENCRYPTED_PINS, 25)

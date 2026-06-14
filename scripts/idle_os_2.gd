@@ -4,14 +4,7 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
 # BUG: weird color matching issue with MINING contracts (not the right green?)
-#GENERAL
-#maybe make data a universal label always shown?
-#fix locked minor skills label (they all say quality lvl 15)
-#not all processes can be backed out of like mining can
-#
-#CONTRACTS
-#update hud right away with exp?
-#
+
 #PARSING
 #change % for each item instead of flat 1/4 for each
 #
@@ -665,26 +658,17 @@ func mining_commands(text):
 		_:
 			add_line("Command not found")
 
-#func start_data_mining():
-	#var new_data_mining_terminal = mining_scene.instantiate()
-	#terminal_body_container.add_child(new_data_mining_terminal)
-	#new_data_mining_terminal.set_mine_type(Mining.LOGS)
-	#process_running = true
-	#current_process = new_data_mining_terminal
-	#new_data_mining_terminal.start_data_mining()
-	#add_new_scrollback()
-
 func start_log_mining(minor_process: Dictionary):
-	if minor_process.unlocked:
-		var new_data_mining_terminal = mining_scene.instantiate()
-		terminal_body_container.add_child(new_data_mining_terminal)
-		new_data_mining_terminal.set_mine_type(minor_process)
-		process_running = true
-		current_process = new_data_mining_terminal
-		new_data_mining_terminal.start_data_mining()
-		add_new_scrollback()
-	else:
-		add_line(minor_process.name + " is not unlocked.")
+	if !minor_process.unlocked:
+		add_line("Requires mining level " + str(minor_process["unlock level"]))
+		return
+	var new_data_mining_terminal = mining_scene.instantiate()
+	terminal_body_container.add_child(new_data_mining_terminal)
+	new_data_mining_terminal.set_mine_type(minor_process)
+	process_running = true
+	current_process = new_data_mining_terminal
+	new_data_mining_terminal.start_data_mining()
+	add_new_scrollback()
 
 func data_mining_ended_safely():
 	unstick_current_process()
@@ -736,17 +720,17 @@ func log_parsing_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while process is running")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("Module: Parsing")
 			add_line("Level:         " + str(Parsing["level"]))
@@ -771,7 +755,7 @@ func log_parsing_commands(text):
 
 func start_parsing(minor_process: Dictionary):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line("Requires parsing level " + str(minor_process["unlock level"]))
 		return
 	if Inventory.get_amount(minor_process["requirements"]) <= 0:
 		add_line("No logs found.")
@@ -828,17 +812,17 @@ func password_unscramble_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while process is running")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("Module: Cracking")
 			add_line("Level:         " + str(Stats.player_stats["Cracking"]["level"]))
@@ -930,17 +914,17 @@ func cred_matching_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while process is running")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("Module: Matching")
 			add_line("Level:         " + str(Stats.player_stats["Credential Matching"]["level"]))
@@ -1018,17 +1002,17 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while process is running")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("Module: Cache Decrypting")
 			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
@@ -1139,17 +1123,17 @@ func phishing_commands(text):
 				else:
 					add_line("No process found to focus")
 			"root":
-				if process_running:
-					add_line("Cannot safetly shut down module while process is running")
-					add_line("Stop process to exit module")
-				else:
-					add_line("Safetly shutting down module")
-					await get_tree().create_timer(0.8).timeout
-					#header.update_header()
-					header.update()
-					update_context(Context.ROOT)
-					add_line(Ascii.root)
-					list_help()
+				#if process_running:
+					#add_line("Cannot safetly shut down module while process is running")
+					#add_line("Stop process to exit module")
+				#else:
+				add_line("Safetly shutting down module")
+				await get_tree().create_timer(0.8).timeout
+				#header.update_header()
+				header.update()
+				update_context(Context.ROOT)
+				add_line(Ascii.root)
+				list_help()
 			"info":
 				add_line("Module: Phishing")
 			"-h":
@@ -1271,17 +1255,17 @@ func defragging_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			if process_running:
-				add_line("Cannot safetly shut down module while process is running")
-				add_line("Stop process to exit module")
-			else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+			#if process_running:
+				#add_line("Cannot safetly shut down module while defragging")
+				#add_line("Stop process to exit module")
+			#else:
+			add_line("Safetly shutting down module")
+			await get_tree().create_timer(0.8).timeout
+			#header.update_header()
+			header.update()
+			update_context(Context.ROOT)
+			add_line(Ascii.root)
+			list_help()
 		"info":
 			add_line("???")
 		"-h":
