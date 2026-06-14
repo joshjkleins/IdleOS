@@ -6,37 +6,46 @@ var current_skill
 
 func update(skill: Dictionary): #minor
 	current_skill = skill
-	$MarginContainer2/VBoxContainer/HBoxContainer/SkillName.text = skill.name
-	$MarginContainer2/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/99"
+	$Unlocked/VBoxContainer/HBoxContainer/SkillName.text = skill.name
+	$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/99"
 	
 	var experience = Exp.get_xp_display(skill)
-	$MarginContainer2/VBoxContainer/SkillExpBar.max_value = experience["needed"]
-	$MarginContainer2/VBoxContainer/SkillExpBar.value = experience["current"]
-	$MarginContainer2/VBoxContainer/HBoxContainer2/SkillExpLabel.text = experience["display"]
+	$Unlocked/VBoxContainer/SkillExpBar.max_value = experience["needed"]
+	$Unlocked/VBoxContainer/SkillExpBar.value = experience["current"]
+	$Unlocked/VBoxContainer/HBoxContainer2/SkillExpLabel.text = experience["display"]
 	
 	$ExpLabelTimer.timeout.connect(exp_timeout)
 	
 	Exp.exp_updated_signal.connect(exp_updated)
 
+func set_locked_state(locked: bool):
+	if locked:
+		$Locked.visible = true
+		$Unlocked.visible = false
+	else:
+		$Locked.visible = false
+		$Unlocked.visible = true
+		current_skill.unlocked = true
+
 #updates progress bar and 10/100 label and level label
 func update_exp(_amount: int):
 	if current_skill:
-		$MarginContainer2/VBoxContainer/HBoxContainer/SkillLevel.text = str(current_skill.level) + "/99"
+		$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(current_skill.level) + "/99"
 		
 		var experience = Exp.get_xp_display(current_skill)
-		$MarginContainer2/VBoxContainer/SkillExpBar.max_value = experience["needed"]
-		$MarginContainer2/VBoxContainer/SkillExpBar.value = experience["current"]
-		$MarginContainer2/VBoxContainer/HBoxContainer2/SkillExpLabel.text = experience["display"]
+		$Unlocked/VBoxContainer/SkillExpBar.max_value = experience["needed"]
+		$Unlocked/VBoxContainer/SkillExpBar.value = experience["current"]
+		$Unlocked/VBoxContainer/HBoxContainer2/SkillExpLabel.text = experience["display"]
 
 #shows +100 exp label
 func exp_updated(amount, minor):
 	update_exp(amount)
 	if current_skill == minor:
 		_cancel_tweens()
-		$MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel.modulate.a = 0.0
-		$MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel.visible = true
-		$MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel.text = "+" + str(amount)
-		await _fade_in($MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel)
+		$Unlocked/VBoxContainer/HBoxContainer2/ExpAddedLabel.modulate.a = 0.0
+		$Unlocked/VBoxContainer/HBoxContainer2/ExpAddedLabel.visible = true
+		$Unlocked/VBoxContainer/HBoxContainer2/ExpAddedLabel.text = "+" + str(amount)
+		await _fade_in($Unlocked/VBoxContainer/HBoxContainer2/ExpAddedLabel)
 		$ExpLabelTimer.start()
 
 func _fade_in(label: Label):
@@ -64,5 +73,5 @@ func _cancel_tweens():
 			fade_out_tween.stop()
 
 func exp_timeout():
-	await _fade_out($MarginContainer2/VBoxContainer/HBoxContainer2/ExpAddedLabel)
+	await _fade_out($Unlocked/VBoxContainer/HBoxContainer2/ExpAddedLabel)
 	

@@ -325,6 +325,9 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	Stats.update_tempature(heat)
 	type.signal.emit(1)
 	Exp.add_xp(Matching, type, type["experience per level"] * Matching.process_upgrades["experience"]["amount"])
+	
+	if randf() <= 0.01:
+		Inventory.add_resource(Items.VM_MATCHING_TOKEN, 1)
 	_update_efficiency_label()
 	Signals.update_hud(Matching)
 

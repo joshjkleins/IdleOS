@@ -1,15 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://iidue2htx3v6"]
+[gd_scene load_steps=4 format=3 uid="uid://iidue2htx3v6"]
 
 [ext_resource type="Script" uid="uid://dvwjguqtfwdqy" path="res://scripts/minor_skill.gd" id="1_1e31k"]
+[ext_resource type="Texture2D" uid="uid://bdlx077idbj1h" path="res://art/icons/lock-keyhole(3).png" id="2_i2sdy"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_nrn7b"]
 color = Color(0.272655, 0.272655, 0.272655, 1)
 vertical = true
 
 [node name="MinorSkill" type="HBoxContainer"]
-custom_minimum_size = Vector2(165, 0)
-offset_right = 150.0
-offset_bottom = 43.0
+custom_minimum_size = Vector2(145, 0)
+offset_right = 165.0
+offset_bottom = 67.0
 script = ExtResource("1_1e31k")
 
 [node name="VSeparator" type="VSeparator" parent="."]
@@ -17,46 +18,47 @@ layout_mode = 2
 theme_override_constants/separation = 10
 theme_override_styles/separator = SubResource("StyleBoxLine_nrn7b")
 
-[node name="MarginContainer2" type="MarginContainer" parent="."]
+[node name="Unlocked" type="MarginContainer" parent="."]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 15
+theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 15
+theme_override_constants/margin_right = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Unlocked"]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Unlocked/VBoxContainer"]
 layout_mode = 2
 
-[node name="SkillName" type="Label" parent="MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="SkillName" type="Label" parent="Unlocked/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Data"
 
-[node name="SkillLevel" type="Label" parent="MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="SkillLevel" type="Label" parent="Unlocked/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "1 / 99"
 horizontal_alignment = 2
 
-[node name="SkillExpBar" type="ProgressBar" parent="MarginContainer2/VBoxContainer"]
+[node name="SkillExpBar" type="ProgressBar" parent="Unlocked/VBoxContainer"]
 layout_mode = 2
 value = 20.0
 show_percentage = false
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer2/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Unlocked/VBoxContainer"]
 layout_mode = 2
 
-[node name="SkillExpLabel" type="Label" parent="MarginContainer2/VBoxContainer/HBoxContainer2"]
+[node name="SkillExpLabel" type="Label" parent="Unlocked/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "0 / 150"
 
-[node name="ExpAddedLabel" type="Label" parent="MarginContainer2/VBoxContainer/HBoxContainer2"]
+[node name="ExpAddedLabel" type="Label" parent="Unlocked/VBoxContainer/HBoxContainer2"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
@@ -64,6 +66,35 @@ theme_override_colors/font_color = Color(0.164706, 0.603922, 0.352941, 1)
 theme_override_font_sizes/font_size = 10
 text = "+10"
 horizontal_alignment = 2
+
+[node name="Locked" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Locked"]
+layout_mode = 2
+
+[node name="LockedIcon" type="TextureRect" parent="Locked/VBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+texture = ExtResource("2_i2sdy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SkillName" type="Label" parent="Locked/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Quality"
+horizontal_alignment = 1
+
+[node name="UnlockLevel" type="Label" parent="Locked/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "(lvl 15)"
+horizontal_alignment = 1
 
 [node name="ExpLabelTimer" type="Timer" parent="."]
 one_shot = true

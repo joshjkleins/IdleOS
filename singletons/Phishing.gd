@@ -3,6 +3,7 @@ extends Node
 signal spear_cycle_completed
 signal whale_cycle_completed
 signal xp_gained
+signal phishing_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -22,7 +23,8 @@ var SKILL = {
 	"name": "Phishing",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#1d9e75")
+	"color": Color("#1d9e75"),
+	"level up signal": phishing_level_up_signal
 }
 
 var SPEAR = {
@@ -35,6 +37,7 @@ var SPEAR = {
 	"efficiency": 0.3,
 	"efficiency rate": 0.005,
 	"unlocked": true,
+	"unlock level": 1,
 	"wait time min": 5.0,
 	"wait time max": 10.0,
 	"download time": 7.5,
@@ -44,7 +47,7 @@ var SPEAR = {
 	"overclock heat": 5,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.USERNAMES, Items.IP_ADDRESS],
+	"resource gained": [Items.IP_ADDRESS],
 	"resource amount gained": 1,
 	"description": "Send out emails in an attempt to get usernames and passwords",
 	"efficiency description": "Chance for successful bite",
@@ -61,6 +64,7 @@ var WHALING = {
 	"efficiency": 0.2,
 	"efficiency rate": 0.003,
 	"unlocked": true,
+	"unlock level": 10,
 	"wait time min": 6.0,
 	"wait time max": 12.0,
 	"download time": 9.5,
@@ -70,7 +74,7 @@ var WHALING = {
 	"overclock heat": 7,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.ACCOUNT_NUMBERS, Items.ENCRYPTED_PINS],
+	"resource gained": [Items.ACCOUNT_NUMBERS, Items.USERNAMES],
 	"resource amount gained": 1,
 	"description": "Targets high level individuals for a chance to extract PINs and account numbers",
 	"efficiency description": "Chance for successful bite",

@@ -67,7 +67,11 @@ func finished(caught: bool):
 		var item = type["resource gained"].pick_random()
 		$Status.text = "+1 " + item.name
 		add_heat()
-		Inventory.add_resource(item, 1)
+		
+		if randf() <= 0.002:
+			Inventory.add_resource(Items.VM_PHISHING_TOKEN, 1)
+		else:
+			Inventory.add_resource(item, 1)
 		type.signal.emit(1)
 		Exp.add_xp(Phishing, type, type["experience per level"]  * Phishing.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Phishing)

@@ -79,11 +79,21 @@ func build_minor_skills():
 	else:
 		defragged_details.visible = false
 	
+	skill.SKILL["level up signal"].connect(major_skill_level_up)
 	#build container for each minor process in skill Singleton
 	for s in skill.minor_processes:
 		var new_box = minor_skill.instantiate()
 		new_box.update(s)
+		new_box.set_locked_state(skill.SKILL.level < s["unlock level"])
+		#add signal here that connect major skill level up to new_box function that sets locked/unlocked
 		minor_skill_container.add_child(new_box)
+
+func major_skill_level_up():
+	if minor_skill_container.get_children().size() > 0:
+		for m in minor_skill_container.get_children():
+			if m is HBoxContainer:
+				m.set_locked_state(skill.SKILL.level < m.current_skill["unlock level"])
+			
 
 func update_colors():
 	skill_label.add_theme_color_override("font_color", skill.SKILL.color)

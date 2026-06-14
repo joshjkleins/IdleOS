@@ -3,6 +3,7 @@ extends Node
 signal log_cycle_completed
 signal quality_log_cycle_completed
 signal xp_gained
+signal mining_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
@@ -19,7 +20,8 @@ var SKILL = {
 	"name": "Mining",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#a97c54")
+	"color": Color("#a97c54"),
+	"level up signal": mining_level_up_signal
 }
 
 var LOGS = {
@@ -32,6 +34,7 @@ var LOGS = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.08,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed": 0.4,
 	"overclock speed": 0.2,
 	"overheat speed": 1.0,
@@ -55,7 +58,8 @@ var QUALITY_LOGS = {
 	"command": "log-mining",
 	"efficiency": 0.0,
 	"efficiency rate": 0.02,
-	"unlocked": true,
+	"unlocked": false,
+	"unlock level": 15,
 	"base speed": 0.9,
 	"overclock speed": 0.4,
 	"overheat speed": 2.9,

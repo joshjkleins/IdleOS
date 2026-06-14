@@ -3,6 +3,7 @@ extends Node
 signal pw_cycle_completed
 signal pin_cycle_completed
 signal xp_gained
+signal cracking_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
@@ -20,6 +21,7 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#EF9F27"),
+	"level up signal": cracking_level_up_signal
 }
 
 var PASSWORD = {
@@ -32,6 +34,7 @@ var PASSWORD = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed": 3.0,
 	"overclock speed": 1.0,
 	"overheat speed": 9.0,
@@ -56,6 +59,7 @@ var PINS = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
+	"unlock level": 15,
 	"base speed": 3.0,
 	"overclock speed": 1.0,
 	"overheat speed": 9.0,

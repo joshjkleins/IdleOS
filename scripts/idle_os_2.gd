@@ -6,8 +6,7 @@ extends Control
 # BUG: weird color matching issue with MINING contracts (not the right green?)
 
 #TODO
-# add items & purpose to game: Account access tokens, refresh tokens, all VM tokens
-# Add unlocks for minor skills (example: PIN cracking requires Cracking to be level 15)
+# add items & purpose to game: Account access tokens, refresh tokens
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
 # simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
@@ -538,6 +537,10 @@ func handle_vm_token_commands(text):
 		add_line("VM Token for " + target_process.name + " not found.")
 		return
 	
+	if !target_minor_process.unlocked:
+		add_line("Process is not unlocked")
+		return
+	
 	if !target_process.has_requirements(target_minor_process):
 		add_line(target_process.missing_requirements_text(target_minor_process))
 		return
@@ -645,14 +648,14 @@ func mining_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_data_mining():
-	var new_data_mining_terminal = mining_scene.instantiate()
-	terminal_body_container.add_child(new_data_mining_terminal)
-	new_data_mining_terminal.set_mine_type(Mining.LOGS)
-	process_running = true
-	current_process = new_data_mining_terminal
-	new_data_mining_terminal.start_data_mining()
-	add_new_scrollback()
+#func start_data_mining():
+	#var new_data_mining_terminal = mining_scene.instantiate()
+	#terminal_body_container.add_child(new_data_mining_terminal)
+	#new_data_mining_terminal.set_mine_type(Mining.LOGS)
+	#process_running = true
+	#current_process = new_data_mining_terminal
+	#new_data_mining_terminal.start_data_mining()
+	#add_new_scrollback()
 
 func start_log_mining(minor_process: Dictionary):
 	if minor_process.unlocked:
@@ -684,19 +687,19 @@ func log_parsing_commands(text):
 				add_line("Process already running.")
 				return
 			
-			start_log_parsing(Parsing.LOGS)
+			start_parsing(Parsing.LOGS)
 		"start -creds":
 			if process_running:
 				add_line("Process already running.")
 				return
 			
-			start_log_parsing(Parsing.CRED_LOGS)
+			start_parsing(Parsing.CRED_LOGS)
 		"start -quality":
 			if process_running:
 				add_line("Process already running.")
 				return
 			
-			start_log_parsing(Parsing.QUALITY_LOGS)
+			start_parsing(Parsing.QUALITY_LOGS)
 		"stop":
 			process_running = false
 			unstick_current_process()
@@ -749,7 +752,10 @@ func log_parsing_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_log_parsing(minor_process: Dictionary):
+func start_parsing(minor_process: Dictionary):
+	if !minor_process.unlocked:
+		add_line("Process not unlocked")
+		return
 	if Inventory.get_amount(minor_process["requirements"]) <= 0:
 		add_line("No logs found.")
 		return
@@ -778,20 +784,14 @@ func password_unscramble_commands(text):
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-				add_line("No encrypted passwords found.")
-				return
 			
-			start_password_cracking()
+			start_cracking(Cracking.PASSWORD)
 		"start pin":
 			if process_running:
 				add_line("Process already running.")
 				return
-			if Inventory.get_amount(Items.ENCRYPTED_PINS) <= 0:
-				add_line("No encrypted passwords found.")
-				return
 			
-			start_pin_cracking()
+			start_cracking(Cracking.PINS)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -844,25 +844,16 @@ func password_unscramble_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_password_cracking():
-	if Inventory.get_amount(Items.ENCRYPTED_PASSWORDS) <= 0:
-		add_line("Encrypted passwords not found")
+func start_cracking(minor_process: Dictionary):
+	if !minor_process.unlocked:
+		add_line("Process not unlocked")
+		return
+	if Inventory.get_amount(minor_process["requirements"]) <= 0:
+		add_line(minor_process["requirements"]["name"] + " not found")
 		return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_cracking_type(Cracking.PASSWORD)
-	process_running = true
-	current_process = new_pw_cracking_terminal
-	new_pw_cracking_terminal.start()
-	add_new_scrollback()
-
-func start_pin_cracking():
-	if Inventory.get_amount(Items.ENCRYPTED_PINS) <= 0:
-		add_line("Encrypted pins not found")
-		return
-	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
-	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_cracking_type(Cracking.PINS)
+	new_pw_cracking_terminal.set_cracking_type(minor_process)
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	new_pw_cracking_terminal.start()
@@ -891,7 +882,7 @@ func cred_matching_commands(text):
 				if Inventory.get_amount(Items.PASSWORDS) <= 0:
 					add_line("Required resource: Passwords")
 				return
-			start_cred_matching()
+			start_matching(Matching.CREDENTIAL)
 		"start -account":
 			if process_running:
 				add_line("Process already running.")
@@ -902,7 +893,7 @@ func cred_matching_commands(text):
 				if Inventory.get_amount(Items.ACCOUNT_NUMBERS) <= 0:
 					add_line("Required resource: Account numbers")
 				return
-			start_account_matching()
+			start_matching(Matching.ACCOUNT)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -955,19 +946,14 @@ func cred_matching_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_cred_matching():
+func start_matching(minor_process):
+	if !minor_process.unlocked:
+		add_line("Process not unlocked")
+		return
+	
 	var new_cred_matching_terminal = cred_matching_scene.instantiate()
 	terminal_body_container.add_child(new_cred_matching_terminal)
-	new_cred_matching_terminal.set_type(Matching.CREDENTIAL)
-	process_running = true
-	current_process = new_cred_matching_terminal
-	new_cred_matching_terminal.start()
-	add_new_scrollback()
-
-func start_account_matching():
-	var new_cred_matching_terminal = cred_matching_scene.instantiate()
-	terminal_body_container.add_child(new_cred_matching_terminal)
-	new_cred_matching_terminal.set_type(Matching.ACCOUNT)
+	new_cred_matching_terminal.set_type(minor_process)
 	process_running = true
 	current_process = new_cred_matching_terminal
 	new_cred_matching_terminal.start()
@@ -995,7 +981,7 @@ func cache_decrypting_commands(text):
 				add_line("No caches found.")
 				return
 			
-			start_cache_decrypting()
+			start_cache_decrypting(Decoding.CACHE)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -1045,7 +1031,11 @@ func cache_decrypting_commands(text):
 		_:
 			add_line("Command not found")
 
-func start_cache_decrypting():
+func start_cache_decrypting(minor_process):
+	if !minor_process.unlocked:
+		add_line("Process not unlocked")
+		return
+		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
 	new_cache_decrypt_terminal.set_cache_type(Decoding.CACHE)

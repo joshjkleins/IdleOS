@@ -3,6 +3,7 @@ extends Node
 signal cred_cycle_completed
 signal account_cycle_completed
 signal xp_gained
+signal matching_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -20,6 +21,7 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#D4537E"),
+	"level up signal": matching_level_up_signal
 }
 
 var CREDENTIAL = {
@@ -32,6 +34,7 @@ var CREDENTIAL = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed min": 0.2,
 	"base speed max": 1.2,
 	"overclock speed min": 0.1,
@@ -58,6 +61,7 @@ var ACCOUNT = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
+	"unlock level": 15,
 	"base speed min": 0.3,
 	"base speed max": 1.3,
 	"overclock speed min": 0.2,

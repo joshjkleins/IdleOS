@@ -4,6 +4,7 @@ signal basic_cycle_completed
 signal cred_cycle_complete
 signal quality_cycle_completed
 signal xp_gained
+signal parsing_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
@@ -20,7 +21,8 @@ var SKILL = {
 	"name": "Parsing",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#7F77DD")
+	"color": Color("#7F77DD"),
+	"level up signal": parsing_level_up_signal
 }
 
 var LOGS = {
@@ -33,6 +35,7 @@ var LOGS = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed": 0.4,
 	"overclock speed": 0.1,
 	"overheat speed": 3.0,
@@ -41,8 +44,10 @@ var LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.DATA, "min": 5, "max": 25 },
+		{ "item": Items.DATA, "min": 5, "max": 40 },
 		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 1 },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -59,6 +64,7 @@ var QUALITY_LOGS = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
+	"unlock level": 15,
 	"base speed": 0.8,
 	"overclock speed": 0.25,
 	"overheat speed": 3.0,
@@ -67,8 +73,11 @@ var QUALITY_LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.QUALITY_LOGS,
 	"item pool": [
-		{ "item": Items.DATA, "min": 5, "max": 25 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
+		{ "item": Items.PASSWORDS, "min": 1, "max": 4 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 2 },
+		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 2 },
+		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 2 },
+		
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -85,6 +94,7 @@ var CRED_LOGS = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.01,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed": 0.8,
 	"overclock speed": 0.2,
 	"overheat speed": 5.0,

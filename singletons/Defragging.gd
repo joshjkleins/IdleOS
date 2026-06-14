@@ -11,7 +11,7 @@ var SKILL = {
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Mining,
 	"bonus time": 5,
@@ -53,7 +53,7 @@ var MATCHING = {
 
 var PHISHING = {
 	"name": "Phishing",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Phishing,
 	"bonus time": 10,

@@ -82,6 +82,8 @@ func start_decrypting():
 		Exp.add_xp(Decoding, type, type["experience per level"] * Decoding.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Decoding)
 		
+		if randf() <= 0.01:
+			Inventory.add_resource(Items.VM_DECODING_TOKEN, 1)
 	if is_window:
 		_vm_finish()
 	else:

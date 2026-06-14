@@ -4,12 +4,13 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
+	pass
 	#for i in Items.ITEM_MAP:
 		#add_resource(Items.ITEM_MAP[i], 50)
 	#pass
 	#add_resource(Items.PARENTS_CREDIT_CARD, 3)
 	#add_resource(Items.ADMISSIONS_BRIBERY_RECORDS, 1)
-	add_resource(Items.DATA, 2500)
+	#add_resource(Items.DATA, 2500)
 	# add_resource(Items.LOGS, 200)
 	#add_resource(Items.ENCRYPTED_PASSWORDS, 10)
 	#add_resource(Items.ENCRYPTED_PINS, 25)
@@ -20,17 +21,17 @@ func _ready():
 	#add_resource(Items.STUDENT_CACHE, 20)
 	#add_resource(Items.PINS, 3)
 	#add_resource(Items.ACCOUNT_NUMBERS, 3)
-	add_resource(Items.VM_MINING_TOKEN, 30)
-	add_resource(Items.VM_PARSING_TOKEN, 10)
-	add_resource(Items.VM_CRACKING_TOKEN, 5)
-	add_resource(Items.VM_MATCHING_TOKEN, 10)
-	add_resource(Items.VM_PHISHING_TOKEN, 100)
-	add_resource(Items.VM_DECODING_TOKEN, 5)
+	#add_resource(Items.VM_MINING_TOKEN, 30)
+	#add_resource(Items.VM_PARSING_TOKEN, 10)
+	#add_resource(Items.VM_CRACKING_TOKEN, 5)
+	#add_resource(Items.VM_MATCHING_TOKEN, 10)
+	#add_resource(Items.VM_PHISHING_TOKEN, 100)
+	#add_resource(Items.VM_DECODING_TOKEN, 5)
 	#add_resource(Items.REFRESH_TOKEN, 500)
 	#add_resource(Items.IP_ADDRESS, 1)
 	#add_resource(Items.SQL_INJECTOR, 100)
 	#add_resource(Items.PACKET_SPOOF, 100)
-	add_resource(Items.ADMIN_CACHE, 1)
+	#add_resource(Items.ADMIN_CACHE, 1)
 	#add_resource(Items.COP_CACHE, 1)
 	#add_resource(Items.BODY_CAM_FOOTAGE_DELETION_LOGS, 2)
 	

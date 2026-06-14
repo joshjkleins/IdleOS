@@ -1,6 +1,7 @@
 extends Node
 
 signal xp_gained
+signal hacking_level_up_signal
 
 var current_anon = 100
 var max_anon = 100
@@ -38,6 +39,7 @@ var SKILL = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.0015,
 	"color": Color("#00CC55"),
+	"level up signal": hacking_level_up_signal
 }
 
 

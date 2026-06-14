@@ -83,6 +83,9 @@ func start():
 				if !process_running:
 					Stats.update_tempature(heat_used)
 					break
+			
+			if randf() <= 0.01:
+				Inventory.add_resource(Items.VM_PARSING_TOKEN, 1)
 			if process_running:
 				_finished_log(heat_used)
 	#finishes naturally

@@ -2,6 +2,7 @@ extends Node
 
 signal decode_cycle_completed
 signal xp_gained
+signal decoding_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -19,6 +20,7 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#378ADD"),
+	"level up signal": decoding_level_up_signal
 }
 
 var CACHE = {
@@ -31,6 +33,7 @@ var CACHE = {
 	"efficiency": 0.03,
 	"efficiency rate": 0.001,
 	"unlocked": true,
+	"unlock level": 1,
 	"base speed": 0.2,
 	"overclock speed": 0.05,
 	"overheat speed": 1.0,

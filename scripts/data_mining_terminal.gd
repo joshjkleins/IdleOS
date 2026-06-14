@@ -150,6 +150,8 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
+	if randf() <= 0.01:
+		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)
 	TYPE.signal.emit(reward_quantity_gained)
 	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION  * Mining.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Mining)

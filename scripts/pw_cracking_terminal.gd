@@ -31,13 +31,12 @@ var first_crack: bool = false #this forces first crack to process so it doesnt i
 func set_cracking_type(p_type: Dictionary, window: bool = false):
 	is_window = window
 	type = p_type
+	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
 	match type.name.to_lower():
 		"password":
 			set_pw()
 		"pin":
 			set_pin()
-	
-	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
 
 func set_pw():
 	for i in letter_boxes:
@@ -208,6 +207,9 @@ func _successful_crack(heat: int):
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])
+	
+	if randf() <= 0.01:
+		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)
 	Signals.update_hud(Cracking)
 	
 	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
