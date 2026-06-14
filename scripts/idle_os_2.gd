@@ -4,7 +4,24 @@ extends Control
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 # BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
 # BUG: weird color matching issue with MINING contracts (not the right green?)
-
+#GENERAL
+#maybe make data a universal label always shown?
+#fix locked minor skills label (they all say quality lvl 15)
+#not all processes can be backed out of like mining can
+#
+#CONTRACTS
+#update hud right away with exp?
+#
+#PARSING
+#change % for each item instead of flat 1/4 for each
+#
+#CRACKING
+#add small delay when efficiency triggers so its clear what is happening
+#if queue finishes on a efficiency proc the pw boxes dont stop scrambling
+#
+#DEFRAGGING
+#add estimated time
+#update defrag bonus labels (showing as x1.0 and should be +100%)
 #TODO
 # add items & purpose to game: Account access tokens, refresh tokens
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
