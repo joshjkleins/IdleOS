@@ -26,8 +26,6 @@ var is_window: bool
 
 var type: Dictionary
 
-var first_crack: bool = false #this forces first crack to process so it doesnt instantly process a billion
-
 func set_cracking_type(p_type: Dictionary, window: bool = false):
 	is_window = window
 	type = p_type
@@ -68,7 +66,6 @@ func start():
 		
 		#PW LOOP
 		
-		first_crack = true
 		for j in range(pw_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
 			if end_safely:
 				process_running = false
@@ -90,13 +87,21 @@ func start():
 			
 			
 			var max_heat_used: int = 0
-			var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 0.0
-			var eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"] + defrag_bonus
-			if randf() < eff and !first_crack:
+			var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+			var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+			var eff =  base_eff * defrag_bonus
+			if randf() < eff:
+				if process_running:
+					_update_progress_bar(4, 0.1)
+					await get_tree().create_timer(0.1).timeout
+					if !process_running:
+						break
+					for i in range(PW_LENGTH):
+						_reveal_letter(i,current_word[i])
 				_end_current_crack(current_word)
 				_successful_crack(max_heat_used)
+				progress_bar.value = 0
 			else:
-				first_crack = false
 				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
 					if process_running:
 						if Stats.overheated:

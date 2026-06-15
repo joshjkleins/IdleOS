@@ -11,74 +11,74 @@ var SKILL = {
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Mining,
 	"bonus time": 5,
-	"bonus efficiency": 1.0,
-	"description": "Efficiency increased by 100%."
+	"bonus efficiency": 1.50,
+	"description": "Efficiency increased by 50%."
 }
 
 var PARSING = {
 	"name": "Parsing",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Parsing,
 	"bonus time": 10,
-	"bonus efficiency": 0.10,
-	"description": "Efficiency increased by 10%."
+	"bonus efficiency": 1.50,
+	"description": "Efficiency increased by 50%."
 }
 
 
 var CRACKING = {
 	"name": "Cracking",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Cracking,
 	"bonus time": 10,
-	"bonus efficiency": 0.05,
-	"description": "Efficiency increased by 5%."
+	"bonus efficiency": 1.50,
+	"description": "Efficiency increased by 50%."
 }
 
 
 var MATCHING = {
 	"name": "Matching",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Matching,
 	"bonus time": 10,
-	"bonus efficiency": 0.1,
-	"description": "Efficiency increased by 10%."
+	"bonus efficiency": 1.5,
+	"description": "Efficiency increased by 50%."
 }
 
 var PHISHING = {
 	"name": "Phishing",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Phishing,
 	"bonus time": 10,
-	"bonus efficiency": 0.10,
-	"description": "Efficiency increased by 10%."
+	"bonus efficiency": 1.5,
+	"description": "Efficiency increased by 50%."
 }
 
 var HACKING = {
 	"name": "Hacking",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Hacking,
 	"bonus time": 10,
-	"bonus efficiency": 0.05,
-	"description": "Efficiency increased by 5%."
+	"bonus efficiency": 1.5,
+	"description": "Efficiency increased by 50%."
 }
 
 var DECODING = {
 	"name": "Decoding",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Decoding,
 	"bonus time": 10,
-	"bonus efficiency": 0.03,
-	"description": "Efficiency increased by 3%."
+	"bonus efficiency": 1.5,
+	"description": "Efficiency increased by 50%."
 }
 
 func add_xp(amount: int, _type: Dictionary):

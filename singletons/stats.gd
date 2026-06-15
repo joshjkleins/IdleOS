@@ -3,153 +3,6 @@ extends Node
 signal gained_xp_signal
 
 const MAX_LEVEL = 99
-#var SKILLS
-#
-#func _ready():
-	#SKILLS = {
-		#"Mining": Mining.SKILL,
-		#"Parsing": Parsing.SKILL,
-		#"Cracking": Cracking.SKILL,
-		#"Matching": Matching.SKILL,
-		#"Decoding": Decoding.SKILL,
-		#"Hacking": Hacking.SKILL,
-	#}
-#
-#var player_stats = {
-	#"Data Mining": {
-		#"name": "Data mining",
-		#"experience": 0,
-		#"exp per level": 200,
-		#"command": "data-mining",
-		#"level": 1,
-		#"efficiency": 0.0,
-		#"efficiency increase rate": 0.08,
-		#"unlocked": true,
-		#"base speed": 0.25,
-		#"overclock speed": 0.0625,
-		#"overheat speed": 1.0,
-		#"heat": 1,
-		#"overclock heat": 3,
-		#"overheat heat": 1,
-		#"requirements": [],
-		#"description": "Generates data used for purchasing items from the marketplace.",
-		#"efficiency description": "Chance to receive multiple data."
-	#},
-	#"Log Parsing": {
-		#"name": "Log parsing",
-		#"experience": 0,
-		#"exp per level": 200,
-		#"command": "log-parsing",
-		#"level": 1,
-		#"base speed": 0.4,
-		#"overclock speed": 0.1,
-		#"overheat speed": 3.0,
-		#"efficiency": 0.5,
-		#"efficiency increase rate": 0.01,
-		#"unlocked": true,
-		#"heat": 3,
-		#"overclock heat": 4,
-		#"requirements": [Items.LOGS],
-		#"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-		#"efficiency description": "Increases chance of finding a resource per row."
-	#},
-	#"Password Cracking": {
-		#"name": "Password cracking",
-		#"experience": 0,
-		#"exp per level": 900,
-		#"command": "pw-cracking",
-		#"level": 1,
-		#"efficiency": 0.0,
-		#"efficiency increase rate": 0.002,
-		#"unlocked": true,
-		#"heat": 3,
-		#"overclock heat": 8,
-		#"overheat heat": 1,
-		#"base speed": 3.0,
-		#"overclock speed": 1.0,
-		#"overheat speed": 9.0,
-		#"requirements": [Items.ENCRYPTED_PASSWORDS],
-		#"description": "Cracks encrypted passwords, turning them into Passwords that can be used in credential matching.",
-		#"efficiency description": "Chance to instantly crack password."
-	#},
-	#"Credential Matching": {
-		#"name": "Credential matching",
-		#"experience": 0,
-		#"exp per level": 1100,
-		#"command": "cred-matching",
-		#"level": 1,
-		#"efficiency": 0.0,
-		#"efficiency increase rate": 0.002,
-		#"unlocked": true,
-		#"heat": 1,
-		#"overclock heat": 1,
-		#"overheat heat": 1,
-		#"base speed": 1.0,
-		#"overclock speed": 0.33,
-		#"overheat speed": 3.0,
-		#"requirements": [Items.USERNAMES, Items.PASSWORDS],
-		#"description": "Creates credentials using passwords & usernames.",
-		#"efficiency description": "Chance to not consume a username or password."
-	#},
-	#"Hacking": {
-		#"name": "Hacking",
-		#"experience": 0,
-		#"command": "hacking",
-		#"level": 1,
-		#"base speed": 0.2,
-		#"overclock speed": 0.05,
-		#"overheat speed": 1.0,
-		#"efficiency": 0.05,
-		#"efficiency increase rate": 0.0025,
-		#"unlocked": true,
-		#"heat": 7,
-		#"overclock heat": 25,
-		#"overheat heat": 2,
-		#"requirements": [Items.IP_ADDRESS, Items.CREDENTIALS],
-		#"description": "Hack targets and extract caches for valuable items.",
-		#"efficiency description": "Increases chance of successful hacking"
-	#},
-	#"Cache Decrypting": {
-		#"name": "Cache decrypting",
-		#"experience": 0,
-		#"exp per level": 2000,
-		#"command": "cache-decrypting",
-		#"level": 1,
-		#"base speed": 0.2,
-		#"overclock speed": 0.05,
-		#"overheat speed": 1.0,
-		#"efficiency": 0.03,
-		#"efficiency increase rate": 0.001,
-		#"unlocked": true,
-		#"heat": 5,
-		#"overclock heat": 10,
-		#"overheat heat": 2,
-		#"requirements": ["Any type of cache"],
-		#"description": "Decrypt caches gained from hacking to reveal additional items.",
-		#"efficiency description": "Chance to find rare item."
-	#}
-#}
-#
-#var combat_stats = {
-	#"SQL Injection": {
-		#"name": "SQL injection",
-		#"experience": 0,
-		#"exp per level": 200,
-		#"level": 1,
-		#"damage": 0.0,
-		#"efficiency increase rate": 0.01,
-		#"unlocked": true,
-		#"base speed": 0.25,
-		#"overclock speed": 0.0625,
-		#"overheat speed": 1.0,
-		#"heat": 1,
-		#"overclock heat": 3,
-		#"overheat heat": 1,
-		#"requirements": [],
-		#"description": "Generates data used for purchasing items from the marketplace.",
-		#"efficiency description": "Chance to receive multiple data."
-	#}
-#}
 
 var MAX_TEMP = 100
 var MIN_TEMP = 30
@@ -173,6 +26,7 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
+				"requirements": [{"item": Items.IP_ADDRESS, "amount": 1}],
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
@@ -185,6 +39,7 @@ var hacking_targets = {
 				"name": "Administrator",
 				"difficulty": "Easy",
 				"command": "hack administrator",
+				"requirements": [{"item": Items.IP_ADDRESS, "amount": 1}, {"item": Items.CREDENTIALS, "amount": 1}],
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
@@ -197,6 +52,7 @@ var hacking_targets = {
 				"name": "Vice Principal",
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
+				"requirements": [{"item": Items.IP_ADDRESS, "amount": 2}, {"item": Items.CREDENTIALS, "amount": 1}],
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
@@ -209,6 +65,7 @@ var hacking_targets = {
 				"name": "Principal",
 				"difficulty": "Medium",
 				"command": "hack principal",
+				"requirements": [{"item": Items.IP_ADDRESS, "amount": 2}, {"item": Items.CREDENTIALS, "amount": 2}],
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,
@@ -221,6 +78,7 @@ var hacking_targets = {
 				"name": "Superintendent",
 				"difficulty": "Hard",
 				"command": "hack superintendent",
+				"requirements": [{"item": Items.IP_ADDRESS, "amount": 3}, {"item": Items.CREDENTIALS, "amount": 3}],
 				"heat": 5,
 				"exp": 600,
 				"integrity": 100,

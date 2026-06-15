@@ -32,10 +32,11 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 		var cont = item_labels[i]
 		var item = type["item pool"][i]
 		cont.get_child(0).text = item["item"]["name"].to_upper()
-		cont.get_child(1).text = str(item_chance) + "%"
+		cont.get_child(1).text = str(type["item pool"][i]["weight"]) + "%" #str(item_chance) + "%"
 		item_labels[i].visible = true
-	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 0.0
-	chance_per_line_label.text = "%.1f%%" % ((type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]  + frag_bonus) * 100)
+	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
+	var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
+	chance_per_line_label.text = "%.1f%%" % (base_eff * frag_bonus * 100.0)
 
 func start():
 	end_safely = false
@@ -59,11 +60,12 @@ func start():
 				var new_log_line = log_line_scene.instantiate()
 				var item = null
 				var amount = 0
-				var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 0.0
-				var eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"] + frag_bonus
+				var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
+				var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
+				var eff = base_eff * frag_bonus
 				
 				if randf() < eff:
-					var item_info = type["item pool"].pick_random()
+					var item_info = Parsing.get_weighted_item(type["item pool"])
 					item = item_info["item"]
 					amount = randi_range(item_info["min"], item_info["max"])
 					Inventory.add_resource(item, amount)
@@ -108,8 +110,9 @@ func _finished_log(heat_used: int):
 	type.signal.emit(1)
 	Exp.add_xp(Parsing, type, type["experience per level"] * Parsing.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Parsing)
-	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 0.0
-	var eff = (type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"] + frag_bonus) * 100
+	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
+	var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
+	var eff = base_eff * frag_bonus * 100.0
 	chance_per_line_label.text = "%.1f%%" % eff
 	Stats.update_tempature(heat_used)
 	if Inventory.get_amount(type["requirements"]) > 0 and !end_safely:

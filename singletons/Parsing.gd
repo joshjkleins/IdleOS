@@ -44,10 +44,10 @@ var LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.DATA, "min": 5, "max": 40 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2 },
-		{ "item": Items.USERNAMES, "min": 1, "max": 1 },
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1 },
+		{ "item": Items.DATA, "min": 5, "max": 40, "weight": 40 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2, "weight": 40 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 15 },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 5 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -73,11 +73,10 @@ var QUALITY_LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.QUALITY_LOGS,
 	"item pool": [
-		{ "item": Items.PASSWORDS, "min": 1, "max": 4 },
-		{ "item": Items.USERNAMES, "min": 1, "max": 2 },
-		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 2 },
-		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 2 },
-		
+		{ "item": Items.DATA, "min": 40, "max": 60, "weight": 15 },
+		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 1, "weight": 35  },
+		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 1, "weight": 35  },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 15  },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -94,7 +93,7 @@ var CRED_LOGS = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.01,
 	"unlocked": false,
-	"unlock level": 25,
+	"unlock level": 30,
 	"base speed": 0.8,
 	"overclock speed": 0.2,
 	"overheat speed": 5.0,
@@ -103,10 +102,10 @@ var CRED_LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.USERNAMES, "min": 1, "max": 2 },
-		{ "item": Items.PINS, "min": 1, "max": 2 },
-		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 2 },
-		{ "item": Items.PASSWORDS, "min": 1, "max": 2 },
+		{ "item": Items.CREDENTIALS, "min": 40, "max": 130, "weight": 30 },
+		{ "item": Items.ACCOUNT_ACCESS_TOKENS, "min": 1, "max": 1, "weight": 30  },
+		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 30  },
+		{ "item": Items.DDOS, "min": 1, "max": 1, "weight": 10  },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -154,6 +153,19 @@ func has_requirements(minor_process) -> bool:
 
 func missing_requirements_text(minor_process) -> String:
 	return "Missing " + minor_process["requirements"].name
+
+func get_weighted_item(pool: Array) -> Dictionary:
+	var total_weight = 0
+	for item in pool:
+		total_weight += item["weight"]
+		
+	var roll = randi_range(1, total_weight)
+	for item in pool:
+		roll -= item["weight"]
+		if roll <= 0:
+			return item
+			
+	return pool[0]
 
 func create_vm_window(minor_process, repeat) -> Window:
 	var content_instance = terminal_scene.instantiate()

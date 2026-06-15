@@ -58,7 +58,7 @@ var PINS = {
 	"command": "data-mining",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
-	"unlocked": true,
+	"unlocked": false,
 	"unlock level": 15,
 	"base speed": 3.0,
 	"overclock speed": 1.0,

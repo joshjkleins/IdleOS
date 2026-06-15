@@ -2,25 +2,17 @@ extends Control
 
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
-# BUG: Fix Parsing script to have dynamic amount of labels instead of hardcoded 4
-# BUG: weird color matching issue with MINING contracts (not the right green?)
 
-#PARSING
-#change % for each item instead of flat 1/4 for each
-#
-#CRACKING
-#add small delay when efficiency triggers so its clear what is happening
-#if queue finishes on a efficiency proc the pw boxes dont stop scrambling
-#
-#DEFRAGGING
-#add estimated time
-#update defrag bonus labels (showing as x1.0 and should be +100%)
 #TODO
-# add items & purpose to game: Account access tokens, refresh tokens
 # Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
-# simplify run commands (run/start/cast) in tandem with above updates, also think about removing locking player into module if its running
+# simplify run commands (run/start/cast) in tandem with above updates
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
+# add logic to check for requirements of hacking target. add labels to header to show all hacking related items. Maybe make them smaller and loop around
+# IP Address        Creds     SQL Injector
+#    15              12          849
+# Packet spoofer     Account tokens
+#      22                 100
 # add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
 #save/load
 #export to desktop and play through
@@ -1192,6 +1184,9 @@ func defragging_commands(text):
 			if !Defragging.PARSING.unlocked:
 				add_line("Parsing defragging not unlocked. Purchase from marketplace.")
 				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
+				return
 			
 			start_defragging(Defragging.PARSING)
 		"start -cracking":
@@ -1200,6 +1195,9 @@ func defragging_commands(text):
 				return
 			if !Defragging.CRACKING.unlocked:
 				add_line("Cracking defragging not unlocked. Purchase from marketplace.")
+				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
 				return
 			
 			start_defragging(Defragging.CRACKING)
@@ -1210,6 +1208,9 @@ func defragging_commands(text):
 			if !Defragging.MATCHING.unlocked:
 				add_line("Matching defragging not unlocked. Purchase from marketplace.")
 				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
+				return
 			
 			start_defragging(Defragging.MATCHING)
 		"start -phishing":
@@ -1218,6 +1219,9 @@ func defragging_commands(text):
 				return
 			if !Defragging.PHISHING.unlocked:
 				add_line("Phishing defragging not unlocked. Purchase from marketplace.")
+				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
 				return
 			
 			start_defragging(Defragging.PHISHING)
@@ -1228,6 +1232,9 @@ func defragging_commands(text):
 			if !Defragging.HACKING.unlocked:
 				add_line("Hacking defragging not unlocked. Purchase from marketplace.")
 				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
+				return
 			
 			start_defragging(Defragging.HACKING)
 		"start -decoding":
@@ -1236,6 +1243,9 @@ func defragging_commands(text):
 				return
 			if !Defragging.DECODING.unlocked:
 				add_line("Decoding defragging not unlocked. Purchase from marketplace.")
+				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
 				return
 			
 			start_defragging(Defragging.DECODING)

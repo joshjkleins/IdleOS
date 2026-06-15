@@ -21,18 +21,14 @@ layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
+theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+[node name="LabelContainer" type="HFlowContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
-
-[node name="MiniTerminal" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/normal_font_size = 12
-fit_content = true
+theme_override_constants/h_separation = 30
+theme_override_constants/v_separation = 10
 
 [node name="SetupSweepTimer" type="Timer" parent="."]
 wait_time = 2.0
