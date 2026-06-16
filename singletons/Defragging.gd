@@ -16,7 +16,8 @@ var MINING = {
 	"skill": Mining,
 	"bonus time": 5,
 	"bonus efficiency": 1.50,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -mining"
 }
 
 var PARSING = {
@@ -26,7 +27,8 @@ var PARSING = {
 	"skill": Parsing,
 	"bonus time": 10,
 	"bonus efficiency": 1.50,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -parsing"
 }
 
 
@@ -37,7 +39,8 @@ var CRACKING = {
 	"skill": Cracking,
 	"bonus time": 10,
 	"bonus efficiency": 1.50,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -cracking"
 }
 
 
@@ -48,7 +51,8 @@ var MATCHING = {
 	"skill": Matching,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -matching"
 }
 
 var PHISHING = {
@@ -58,7 +62,8 @@ var PHISHING = {
 	"skill": Phishing,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -phishing"
 }
 
 var HACKING = {
@@ -68,7 +73,8 @@ var HACKING = {
 	"skill": Hacking,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -hacking"
 }
 
 var DECODING = {
@@ -78,7 +84,8 @@ var DECODING = {
 	"skill": Decoding,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
-	"description": "Efficiency increased by 50%."
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -decoding"
 }
 
 func add_xp(amount: int, _type: Dictionary):

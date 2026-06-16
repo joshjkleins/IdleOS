@@ -21,7 +21,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#D4537E"),
-	"level up signal": matching_level_up_signal
+	"level up signal": matching_level_up_signal,
+	"efficiency description": "Chance to make multiple resources.",
 }
 
 var CREDENTIAL = {

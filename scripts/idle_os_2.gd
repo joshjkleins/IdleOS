@@ -3,9 +3,14 @@ extends Control
 ###NEXT
 # BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
 
+#where u at:
+# Think about custom welcome for each process. but most likely just make them all look uniform. Give additional descriptions.
+#Info that should be on each welcome screen: 
+#Name of module, name of all processes, locked status, lvl requirements, eff, eff/lvl, run command, resource gained, resource required
+# update run commands for each process. also make those updates to idle_os_2 script so they are accurate.
+
+
 #TODO
-# Update -h commands. add the main welcome screen for each process as the new -h for each. Redesign -h to show info for each process, use more width
-# simplify run commands (run/start/cast) in tandem with above updates
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
 # add logic to check for requirements of hacking target. add labels to header to show all hacking related items. Maybe make them smaller and loop around
@@ -109,7 +114,6 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
-	#header.update_header()
 	header.update()
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
@@ -284,15 +288,7 @@ buy id=[itemID] a=[amount]    Purchase x amount of items (default amount = 1)
 root                          Disconnect from market
 """)
 		Context.MINING:
-			add_line("""
-[DATA MINING COMMANDS]
-start                   Start mining data
-stop                    Stop mining process
-root                    Exit back to root
-info                    Mining data module stats
-overclock               Overclocks the system to massively increase output, also increases system heat
-overclock -kill         Stops overclocking
-""")
+			add_line(ContextCommands.get_help_text(Mining))
 		Context.PARSING:
 			add_line("""
 [PARSING COMMANDS]
@@ -328,21 +324,21 @@ root                    Exit back to root
 info                    Cache decrypting module stats
 """)
 	
-	add_line("""Usage: [command] [flag]
-
-Item Management:
-  list -a               List all items
-  list -r               List all resources (items with specific uses)
-  list -v               List all valuables (items only meant to be sold)
-  list -c               List all caches (items needing decrypting for more items)
-
-Module Management:
-  list -m               List available modules
-
-General:
-  -h                    View this help message
-  quit -s               Save and quit game
-""")
+	#add_line("""Usage: [command] [flag]
+#
+#Item Management:
+  #list -a               List all items
+  #list -r               List all resources (items with specific uses)
+  #list -v               List all valuables (items only meant to be sold)
+  #list -c               List all caches (items needing decrypting for more items)
+#
+#Module Management:
+  #list -m               List available modules
+#
+#General:
+  #-h                    View this help message
+  #quit -s               Save and quit game
+#""")
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 	
 
@@ -412,6 +408,8 @@ func universal_commands(text):
 			return true
 		"quit -s":
 			get_tree().quit()
+		"cmds":
+			add_line(ContextCommands.all_commands())
 
 #Root context commands
 func root_commands(text):
@@ -425,8 +423,7 @@ func root_commands(text):
 			add_line("[ OK ] data mining module loaded")
 			update_context(Context.MINING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.mining)
-			add_line("Welcome to the mining module.")
+			add_line(ContextCommands.get_help_text(Mining))
 		"load parsing":
 			add_line("[ .. ] loading parsing module")
 			await get_tree().create_timer(0.8).timeout
@@ -435,8 +432,7 @@ func root_commands(text):
 			add_line("[ OK ] parsing module loaded")
 			update_context(Context.PARSING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.parsing)
-			add_line("Current available logs: " + str(Inventory.get_amount(Items.LOGS)))
+			add_line(ContextCommands.get_help_text(Parsing))
 		"load cracking":
 			add_line("[ .. ] loading cracking module")
 			await get_tree().create_timer(0.8).timeout
@@ -444,8 +440,7 @@ func root_commands(text):
 			header.display_skill(Cracking)
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
-			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.cracking)
+			add_line(ContextCommands.get_help_text(Cracking))
 		"load matching":
 			add_line("[ .. ] loading matching module")
 			await get_tree().create_timer(0.8).timeout
@@ -454,7 +449,7 @@ func root_commands(text):
 			add_line("[ OK ] matching module loaded")
 			update_context(Context.MATCHING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.matching)
+			add_line(ContextCommands.get_help_text(Matching))
 		"load hacking":
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
@@ -478,7 +473,7 @@ func root_commands(text):
 			add_line("[ OK ] decoding module loaded")
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.decoding)
+			add_line(ContextCommands.get_help_text(Decoding))
 		"load phishing":
 			add_line("[ .. ] loading phishing module")
 			await get_tree().create_timer(0.8).timeout
@@ -487,7 +482,7 @@ func root_commands(text):
 			add_line("[ OK ] phishing module loaded")
 			update_context(Context.PHISHING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.phishing)
+			add_line(ContextCommands.get_help_text(Phishing))
 		"load defragging":
 			add_line("[ .. ] loading defragging module")
 			await get_tree().create_timer(0.8).timeout
@@ -496,11 +491,16 @@ func root_commands(text):
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
 			await get_tree().create_timer(0.5).timeout
-			add_line(Ascii.defragging)
+			add_line(ContextCommands.get_help_text(Defragging))
 			
 		_:#default
 			add_line("Command not found")
 
+func return_to_root():
+	header.update()
+	update_context(Context.ROOT)
+	add_line(Ascii.root)
+	add_line(ContextCommands.all_commands())
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]
@@ -617,17 +617,7 @@ func mining_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while process is running")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("Module: Data Mining")
 			add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
@@ -712,17 +702,7 @@ func log_parsing_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while process is running")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("Module: Parsing")
 			add_line("Level:         " + str(Parsing["level"]))
@@ -804,17 +784,7 @@ func password_unscramble_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while process is running")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("Module: Cracking")
 			add_line("Level:         " + str(Stats.player_stats["Cracking"]["level"]))
@@ -906,17 +876,7 @@ func cred_matching_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while process is running")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("Module: Matching")
 			add_line("Level:         " + str(Stats.player_stats["Credential Matching"]["level"]))
@@ -994,17 +954,7 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while process is running")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("Module: Cache Decrypting")
 			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
@@ -1115,17 +1065,7 @@ func phishing_commands(text):
 				else:
 					add_line("No process found to focus")
 			"root":
-				#if process_running:
-					#add_line("Cannot safetly shut down module while process is running")
-					#add_line("Stop process to exit module")
-				#else:
-				add_line("Safetly shutting down module")
-				await get_tree().create_timer(0.8).timeout
-				#header.update_header()
-				header.update()
-				update_context(Context.ROOT)
-				add_line(Ascii.root)
-				list_help()
+				return_to_root()
 			"info":
 				add_line("Module: Phishing")
 			"-h":
@@ -1265,17 +1205,7 @@ func defragging_commands(text):
 			else:
 				add_line("No process found to focus")
 		"root":
-			#if process_running:
-				#add_line("Cannot safetly shut down module while defragging")
-				#add_line("Stop process to exit module")
-			#else:
-			add_line("Safetly shutting down module")
-			await get_tree().create_timer(0.8).timeout
-			#header.update_header()
-			header.update()
-			update_context(Context.ROOT)
-			add_line(Ascii.root)
-			list_help()
+			return_to_root()
 		"info":
 			add_line("???")
 		"-h":

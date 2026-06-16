@@ -24,7 +24,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#1d9e75"),
-	"level up signal": phishing_level_up_signal
+	"level up signal": phishing_level_up_signal,
+	"efficiency description": "Chance for successful bite",
 }
 
 var SPEAR = {

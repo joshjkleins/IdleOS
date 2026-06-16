@@ -21,7 +21,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#EF9F27"),
-	"level up signal": cracking_level_up_signal
+	"level up signal": cracking_level_up_signal,
+	"efficiency description": "Chance to instantly crack encryption",
 }
 
 var PASSWORD = {

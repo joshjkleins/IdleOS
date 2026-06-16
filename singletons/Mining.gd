@@ -21,7 +21,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#a97c54"),
-	"level up signal": mining_level_up_signal
+	"level up signal": mining_level_up_signal,
+	"efficiency description": "Chance to receive multiple resources. Greater than 100% efficiency yields guaranteed multiple resources.",
 }
 
 var LOGS = {
@@ -30,7 +31,7 @@ var LOGS = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "data-mining",
+	"command": "mine logs",
 	"efficiency": 0.0,
 	"efficiency rate": 0.08,
 	"unlocked": true,
@@ -55,7 +56,7 @@ var QUALITY_LOGS = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 725,
-	"command": "log-mining",
+	"command": "mine quality",
 	"efficiency": 0.0,
 	"efficiency rate": 0.02,
 	"unlocked": false,

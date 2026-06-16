@@ -22,7 +22,8 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"color": Color("#7F77DD"),
-	"level up signal": parsing_level_up_signal
+	"level up signal": parsing_level_up_signal,
+	"efficiency description": "Increases chance of finding a resource per row."
 }
 
 var LOGS = {
