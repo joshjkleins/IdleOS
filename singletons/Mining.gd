@@ -31,7 +31,7 @@ var LOGS = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "mine logs",
+	"command": "mine -logs",
 	"efficiency": 0.0,
 	"efficiency rate": 0.08,
 	"unlocked": true,
@@ -50,13 +50,13 @@ var LOGS = {
 	"signal": log_cycle_completed
 }
 
-var QUALITY_LOGS = {
+var QUALITY = {
 	"name": "Quality",
 	"tier name": "TIER II | QUALITY LOGS",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 725,
-	"command": "mine quality",
+	"command": "mine -quality",
 	"efficiency": 0.0,
 	"efficiency rate": 0.02,
 	"unlocked": false,
@@ -77,7 +77,7 @@ var QUALITY_LOGS = {
 
 var minor_processes = [
 	LOGS,
-	QUALITY_LOGS
+	QUALITY
 ]
 
 func signal_exp(amount: int):

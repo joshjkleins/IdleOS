@@ -11,7 +11,7 @@ var SKILL = {
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Mining,
 	"bonus time": 5,
@@ -22,7 +22,7 @@ var MINING = {
 
 var PARSING = {
 	"name": "Parsing",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Parsing,
 	"bonus time": 10,
@@ -34,7 +34,7 @@ var PARSING = {
 
 var CRACKING = {
 	"name": "Cracking",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Cracking,
 	"bonus time": 10,
@@ -46,7 +46,7 @@ var CRACKING = {
 
 var MATCHING = {
 	"name": "Matching",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Matching,
 	"bonus time": 10,
@@ -57,7 +57,7 @@ var MATCHING = {
 
 var PHISHING = {
 	"name": "Phishing",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Phishing,
 	"bonus time": 10,
@@ -68,7 +68,7 @@ var PHISHING = {
 
 var HACKING = {
 	"name": "Hacking",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Hacking,
 	"bonus time": 10,
@@ -79,7 +79,7 @@ var HACKING = {
 
 var DECODING = {
 	"name": "Decoding",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Decoding,
 	"bonus time": 10,
@@ -96,7 +96,8 @@ var minor_processes = [MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, D
 func activate_cooldown():
 	SKILL["on cooldown"] = true
 	var now = Time.get_unix_time_from_system()
-	SKILL["cooldown"] = now + (15) #30 min = 30 * 60
+	var min = 60
+	SKILL["cooldown"] = now + (20 * min) #30 min = 30 * 60
 	on_cooldown_signal.emit()
 
 func on_cooldown() -> bool:

@@ -415,7 +415,7 @@ func universal_commands(text):
 func root_commands(text):
 	text = text.to_lower().strip_edges()
 	match text:
-		"load mining":
+		"load mining", "cd mining":
 			add_line("[ .. ] loading data mining module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Mining)
@@ -424,7 +424,7 @@ func root_commands(text):
 			update_context(Context.MINING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Mining))
-		"load parsing":
+		"load parsing", "cd parsing":
 			add_line("[ .. ] loading parsing module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Parsing)
@@ -433,7 +433,7 @@ func root_commands(text):
 			update_context(Context.PARSING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Parsing))
-		"load cracking":
+		"load cracking", "cd cracking":
 			add_line("[ .. ] loading cracking module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Cracking)
@@ -441,7 +441,7 @@ func root_commands(text):
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			add_line(ContextCommands.get_help_text(Cracking))
-		"load matching":
+		"load matching", "cd matching":
 			add_line("[ .. ] loading matching module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Matching)
@@ -450,7 +450,7 @@ func root_commands(text):
 			update_context(Context.MATCHING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Matching))
-		"load hacking":
+		"load hacking", "cd hacking":
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
 			await tween.finished
@@ -465,7 +465,7 @@ func root_commands(text):
 			add_line("Connected to online marketplace")
 			update_context(Context.MARKETPLACE)
 			add_line(Marketplace.marketplace_welcome())
-		"load decoding":
+		"load decoding", "cd decoding":
 			add_line("[ .. ] loading decoding module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Decoding)
@@ -474,7 +474,7 @@ func root_commands(text):
 			update_context(Context.DECODING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Decoding))
-		"load phishing":
+		"load phishing", "cd phishing":
 			add_line("[ .. ] loading phishing module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Phishing)
@@ -483,7 +483,7 @@ func root_commands(text):
 			update_context(Context.PHISHING)
 			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Phishing))
-		"load defragging":
+		"load defragging", "cd defragging":
 			add_line("[ .. ] loading defragging module")
 			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Defragging)
@@ -588,17 +588,14 @@ func unstick_current_process():
 ###################################################
 func mining_commands(text):
 	text = text.to_lower().strip_edges()
+	for ms in Mining.minor_processes:
+		if text == ms["command"]:
+			if !process_running:
+				start_log_mining(ms)
+			else:
+				add_line("Process already running")
+			break
 	match text:
-		"start":
-			if !process_running:
-				start_log_mining(Mining.LOGS)
-			else:
-				add_line("Process already running")
-		"start -quality":
-			if !process_running:
-				start_log_mining(Mining.QUALITY_LOGS)
-			else:
-				add_line("Process already running")
 		"stop":
 			process_running = false
 			unstick_current_process()
@@ -616,7 +613,7 @@ func mining_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("Module: Data Mining")
@@ -664,25 +661,14 @@ func data_mining_ended_safely():
 ###################################################
 func log_parsing_commands(text):
 	text = text.to_lower().strip_edges()
+	for ms in Parsing.minor_processes:
+		if text == ms["command"]:
+			if !process_running:
+				start_parsing(ms)
+			else:
+				add_line("Process already running")
+			break
 	match text:
-		"start -logs":
-			if process_running:
-				add_line("Process already running.")
-				return
-			
-			start_parsing(Parsing.LOGS)
-		"start -creds":
-			if process_running:
-				add_line("Process already running.")
-				return
-			
-			start_parsing(Parsing.CRED_LOGS)
-		"start -quality":
-			if process_running:
-				add_line("Process already running.")
-				return
-			
-			start_parsing(Parsing.QUALITY_LOGS)
 		"stop":
 			process_running = false
 			unstick_current_process()
@@ -701,7 +687,7 @@ func log_parsing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("Module: Parsing")
@@ -752,19 +738,14 @@ func log_parsing_ended_safely():
 ###################################################
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
+	for ms in Parsing.minor_processes:
+		if text == ms["command"]:
+			if !process_running:
+				start_cracking(ms)
+			else:
+				add_line("Process already running")
+			return
 	match text:
-		"start pw":
-			if process_running:
-				add_line("Process already running.")
-				return
-			
-			start_cracking(Cracking.PASSWORD)
-		"start pin":
-			if process_running:
-				add_line("Process already running.")
-				return
-			
-			start_cracking(Cracking.PINS)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -783,7 +764,7 @@ func password_unscramble_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("Module: Cracking")
@@ -875,7 +856,7 @@ func cred_matching_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("Module: Matching")
@@ -953,7 +934,7 @@ func cache_decrypting_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("Module: Cache Decrypting")
@@ -1064,7 +1045,7 @@ func phishing_commands(text):
 					bring_process_to_bottom()
 				else:
 					add_line("No process found to focus")
-			"root":
+			"root", "..":
 				return_to_root()
 			"info":
 				add_line("Module: Phishing")
@@ -1204,7 +1185,7 @@ func defragging_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root":
+		"root", "..":
 			return_to_root()
 		"info":
 			add_line("???")
