@@ -1,15 +1,5 @@
 extends Control
 
-###NEXT
-# BUG: FIX TYPING COMMANDS DURING WAIT PERIODS (maybe implement queue system?)
-
-#where u at:
-# Think about custom welcome for each process. but most likely just make them all look uniform. Give additional descriptions.
-#Info that should be on each welcome screen: 
-#Name of module, name of all processes, locked status, lvl requirements, eff, eff/lvl, run command, resource gained, resource required
-# update run commands for each process. also make those updates to idle_os_2 script so they are accurate.
-
-
 #TODO
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
@@ -18,7 +8,6 @@ extends Control
 #    15              12          849
 # Packet spoofer     Account tokens
 #      22                 100
-# add logic that makes terminal like hacking (ie sequential so its easier to follow: make everything sent to add_line an array split by \n?)
 #save/load
 #export to desktop and play through
 
@@ -108,6 +97,9 @@ var skill_xp_nums_index: int
 var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
 
+var output_queue: Array[String] = []
+var processing_queue = false
+
 var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) before creating a new one
 var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
 
@@ -138,10 +130,24 @@ func set_line(index: int, text: String, scroll_to_line: bool = false):
 		lines[index] = text
 	update_terminal(scroll_to_line)
 
-#Add new line 
-func add_line(text: String):
-	lines.append(text)
-	update_terminal()
+func add_line(text: String) -> void:
+	output_queue.append(text)
+
+	if not processing_queue:
+		process_queue()
+
+func process_queue() -> void:
+	processing_queue = true
+
+	while output_queue.size() > 0:
+		var text = output_queue.pop_front()
+
+		for line in text.split("\n"):
+			lines.append(line)
+			update_terminal()
+			await get_tree().create_timer(0.03).timeout
+
+	processing_queue = false
 
 #apply updates to line or new line
 func update_terminal(scroll_to_line: bool = true):
@@ -240,27 +246,27 @@ func get_context_lead():
 				
 		Context.MINING:
 			Signals.update_hud(Mining)
-			return "IdleOS/Modules/Mining>"
+			return "IdleOS/Mining>"
 		Context.PARSING:
 			Signals.update_hud(Parsing)
-			return "IdleOS/Modules/Parsing>"
+			return "IdleOS/Parsing>"
 		Context.CRACKING:
 			Signals.update_hud(Cracking)
-			return "IdleOS/Modules/Cracking>"
+			return "IdleOS/Cracking>"
 		Context.MATCHING:
 			Signals.update_hud(Matching)
-			return "IdleOS/Modules/Matching>"
+			return "IdleOS/Matching>"
 		Context.HACKING:
-			return "IdleOS/Modules/Hacking>"
+			return "IdleOS/Hacking>"
 		Context.DECODING:
 			Signals.update_hud(Decoding)
-			return "IdleOS/Modules/Decoding>"
+			return "IdleOS/Decoding>"
 		Context.PHISHING:
 			Signals.update_hud(Phishing)
-			return "IdleOS/Modules/Phishing>"
+			return "IdleOS/Phishing>"
 		Context.DEFRAGGING:
 			Signals.update_hud(Defragging)
-			return "IdleOS/Modules/Defragging>"
+			return "IdleOS/Defragging>"
 
 
 #Changes context and updates leading text
@@ -275,70 +281,20 @@ func update_market_context(new_context: MarketContext):
 func list_help():
 	match current_context:
 		Context.ROOT:
-			add_line("""
-[ROOT COMMANDS]
-load [module name]      Load a module (example: "load mining")
-marketplace -auth       Connects to the marketplace
-""")
+			add_line(ContextCommands.all_commands())
 		Context.MARKETPLACE:
-			add_line("""
-[MARKETPLACE COMMANDS]
-list                          List items to purchase
-buy id=[itemID] a=[amount]    Purchase x amount of items (default amount = 1)
-root                          Disconnect from market
-""")
+			add_line("add -help stuff here")
 		Context.MINING:
 			add_line(ContextCommands.get_help_text(Mining))
 		Context.PARSING:
-			add_line("""
-[PARSING COMMANDS]
-start                   Start log parsing process
-stop                    Stop log parsing process
-root                    Exit back to root
-info                    Log parsing module stats
-""")
-			
+			add_line(ContextCommands.get_help_text(Parsing))
 		Context.CRACKING:
-			add_line("""
-[CRACKING COMMANDS]
-start                   Start password cracking process
-stop                    Stop password cracking process
-root                    Exit back to root
-info                    Password cracking module stats
-""")
+			add_line(ContextCommands.get_help_text(Cracking))
 		Context.MATCHING:
-			add_line("""
-	[MATCHING COMMANDS]
-start                   Start matching process
-stop                    Stop matching process
-root                    Exit back to root
-info                    Matching module stats
-""")
+			add_line(ContextCommands.get_help_text(Matching))
 		Context.DECODING:
-			add_line("""
-	[CACHE DECRYPTING COMMANDS]
-start                   Start cache decrypting process
-stop                    Stop cache decrypting process
-focus                   Bring current process into view
-root                    Exit back to root
-info                    Cache decrypting module stats
-""")
-	
-	#add_line("""Usage: [command] [flag]
-#
-#Item Management:
-  #list -a               List all items
-  #list -r               List all resources (items with specific uses)
-  #list -v               List all valuables (items only meant to be sold)
-  #list -c               List all caches (items needing decrypting for more items)
-#
-#Module Management:
-  #list -m               List available modules
-#
-#General:
-  #-h                    View this help message
-  #quit -s               Save and quit game
-#""")
+			add_line(ContextCommands.get_help_text(Decoding))
+
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 	
 
@@ -394,13 +350,13 @@ func universal_commands(text):
 			else:
 				add_line("No process found to focus")
 			return true
-		"sticky":
+		"sticky", "stick":
 			if current_process != null:
 				sticky_current_process()
 			else:
 				add_line("No process running")
 			return true
-		"unsticky":
+		"unsticky", "unstick":
 			if current_process != null:
 				unstick_current_process()
 			else:
@@ -410,6 +366,7 @@ func universal_commands(text):
 			get_tree().quit()
 		"cmds":
 			add_line(ContextCommands.all_commands())
+			return true
 
 #Root context commands
 func root_commands(text):
@@ -417,25 +374,20 @@ func root_commands(text):
 	match text:
 		"load mining", "cd mining":
 			add_line("[ .. ] loading data mining module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Mining)
 			header.display_skill(Mining)
 			add_line("[ OK ] data mining module loaded")
 			update_context(Context.MINING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Mining))
 		"load parsing", "cd parsing":
 			add_line("[ .. ] loading parsing module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Parsing)
 			header.display_skill(Parsing)
 			add_line("[ OK ] parsing module loaded")
 			update_context(Context.PARSING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Parsing))
 		"load cracking", "cd cracking":
 			add_line("[ .. ] loading cracking module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Cracking)
 			header.display_skill(Cracking)
 			add_line("[ OK ] cracking module loaded")
@@ -443,12 +395,10 @@ func root_commands(text):
 			add_line(ContextCommands.get_help_text(Cracking))
 		"load matching", "cd matching":
 			add_line("[ .. ] loading matching module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Matching)
 			header.display_skill(Matching)
 			add_line("[ OK ] matching module loaded")
 			update_context(Context.MATCHING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Matching))
 		"load hacking", "cd hacking":
 			var tween = create_tween()
@@ -459,38 +409,30 @@ func root_commands(text):
 			hacking.module_loaded()
 		"marketplace -auth": #Go to marketplace
 			add_line("[ .. ] requesting permissions")
-			await get_tree().create_timer(0.8).timeout
 			add_line("[ OK ] permission granted")
-			await get_tree().create_timer(0.5).timeout
 			add_line("Connected to online marketplace")
 			update_context(Context.MARKETPLACE)
 			add_line(Marketplace.marketplace_welcome())
 		"load decoding", "cd decoding":
 			add_line("[ .. ] loading decoding module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Decoding)
 			header.display_skill(Decoding)
 			add_line("[ OK ] decoding module loaded")
 			update_context(Context.DECODING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Decoding))
 		"load phishing", "cd phishing":
 			add_line("[ .. ] loading phishing module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Phishing)
 			header.display_skill(Phishing)
 			add_line("[ OK ] phishing module loaded")
 			update_context(Context.PHISHING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Phishing))
 		"load defragging", "cd defragging":
 			add_line("[ .. ] loading defragging module")
-			await get_tree().create_timer(0.8).timeout
 			#header.update_header(Defragging)
 			header.display_defragging()
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
-			await get_tree().create_timer(0.5).timeout
 			add_line(ContextCommands.get_help_text(Defragging))
 			
 		_:#default
@@ -581,7 +523,6 @@ func unstick_current_process():
 	if current_process:
 		current_process.reparent(terminal_body_container, false)
 		add_new_scrollback()
-		add_line("Unstick")
 
 ###################################################
 ################### MINING ########################
@@ -594,7 +535,7 @@ func mining_commands(text):
 				start_log_mining(ms)
 			else:
 				add_line("Process already running")
-			break
+			return
 	match text:
 		"stop":
 			process_running = false
@@ -667,7 +608,7 @@ func log_parsing_commands(text):
 				start_parsing(ms)
 			else:
 				add_line("Process already running")
-			break
+			return
 	match text:
 		"stop":
 			process_running = false
@@ -738,7 +679,7 @@ func log_parsing_ended_safely():
 ###################################################
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
-	for ms in Parsing.minor_processes:
+	for ms in Cracking.minor_processes:
 		if text == ms["command"]:
 			if !process_running:
 				start_cracking(ms)
@@ -815,29 +756,22 @@ func password_cracking_ended_safely():
 ###################################################
 func cred_matching_commands(text):
 	text = text.to_lower().strip_edges()
+	for ms in Matching.minor_processes:
+		if text == ms["command"]:
+			if process_running:
+				add_line("Process already running")
+				return
+			var missing = false
+			for item in ms["requirements"]:
+				if Inventory.get_amount(item) <= 0:
+					add_line("Missing required resource: " + item.name)
+					missing = true
+			if missing:
+				return
+			
+			start_matching(ms)
+			return
 	match text:
-		"start -cred":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if Inventory.get_amount(Items.USERNAMES) <= 0 or Inventory.get_amount(Items.PASSWORDS) <= 0:
-				if Inventory.get_amount(Items.USERNAMES) <= 0:
-					add_line("Required resource: Usernames")
-				if Inventory.get_amount(Items.PASSWORDS) <= 0:
-					add_line("Required resource: Passwords")
-				return
-			start_matching(Matching.CREDENTIAL)
-		"start -account":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if Inventory.get_amount(Items.PINS) <= 0 or Inventory.get_amount(Items.ACCOUNT_NUMBERS) <= 0:
-				if Inventory.get_amount(Items.PINS) <= 0:
-					add_line("Required resource: PINS")
-				if Inventory.get_amount(Items.ACCOUNT_NUMBERS) <= 0:
-					add_line("Required resource: Account numbers")
-				return
-			start_matching(Matching.ACCOUNT)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -906,16 +840,19 @@ func cred_matching_ended_safely():
 ###################################################
 func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
-	match text:
-		"start":
+	for ms in Decoding.minor_processes:
+		if text == ms["command"]:
 			if process_running:
-				add_line("Process already running.")
+				add_line("Process already running")
 				return
 			if !Inventory.has_cache():
 				add_line("No caches found.")
 				return
-			
-			start_cache_decrypting(Decoding.CACHE)
+				
+			start_cache_decrypting(ms)
+			return
+	
+	match text:
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -994,73 +931,53 @@ func overclock_logic():
 ################### PHISHING ######################
 ###################################################
 func phishing_commands(text):
-	if text.begins_with("cast"):
-		if Phishing.current_lines.size() >= Phishing.max_lines:
-			add_line("At max phishing attempts.")
+	text = text.to_lower().strip_edges()
+	for ms in Phishing.minor_processes:
+		if text == ms["command"]:
+			if process_running:
+				add_line("Process already running")
+				return
+			if !ms.unlocked:
+				add_line("Process not unlocked")
+				return
+				
+			cast_line(ms, -1)
 			return
-			
-		text = text.strip_edges().to_lower()
-		var split = text.split(" ")
-		var p_type
-		var lines_num = 0
-		for type in Phishing.minor_processes:
-			if split[1] == type.name.to_lower():
-				p_type = type
-				if split[2].is_valid_int():
-					if int(split[2]) > 0:
-						lines_num = int(split[2])
-				elif split[2] == "max" or split[2] == "all":
-					lines_num = -1 # -1 means all or max
-				else:
-					lines_num = split[2]
-				break
-		if lines_num == 0:
-			add_line("Amount not valid")
-			return
-		if lines_num > Phishing.max_lines - Phishing.current_lines.size():
-			add_line("Unable to cast that many lines, clear some first.")
-			return
-		if p_type == null:
-			add_line("Phishing type not found")
-			return
-		
-		cast_line(p_type, lines_num)
-	else:
-		match text:
-			"stop":
-				unstick_current_process()
-				process_running = false
-				if current_process:
-					add_line("Killing process immediately")
-					current_process.stop()
-					current_process = null
-				else:
-					add_line("No active process to stop.")
-				Stats.overclocked = false
-			"stop -s":
-				add_line("Finishing current phishing attempt...")
-				current_process.stop_safely()
-			"focus":
-				if current_process:
-					bring_process_to_bottom()
-				else:
-					add_line("No process found to focus")
-			"root", "..":
-				return_to_root()
-			"info":
-				add_line("Module: Phishing")
-			"-h":
-				list_help()
-			"overclock":
-				overclock_logic()
-			"overclock -kill":
-				if !Stats.overclocked:
-					add_line("Not currently overclocking.")
-				if Stats.overclocked and process_running:
-					add_line("Killing overclock.")
-				Stats.overclocked = false
-			_:
-				add_line("Command not found")
+	match text:
+		"stop":
+			unstick_current_process()
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current phishing attempt...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+		"root", "..":
+			return_to_root()
+		"info":
+			add_line("Module: Phishing")
+		"-h":
+			list_help()
+		"overclock":
+			overclock_logic()
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
 
 func cast_line(type: Dictionary, lines: int):
 	if current_process is PhishingTerminal:
@@ -1086,90 +1003,21 @@ func phishing_ended_safely():
 ###################################################
 func defragging_commands(text):
 	text = text.to_lower().strip_edges()
+	
+	for ms in Defragging.minor_processes:
+		if text == ms["command"]:
+			if process_running:
+				add_line("Process already running.")
+				return
+			if !ms.unlocked:
+				add_line(ms.name + " defragging not unlocked. Purchase from marketplace.")
+				return
+			if Defragging.on_cooldown():
+				add_line("Defragging module is currently cooling down.")
+				return
+			start_defragging(ms)
+			return
 	match text:
-		"start -mining":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.MINING.unlocked:
-				add_line("Mining defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			start_defragging(Defragging.MINING)
-		"start -parsing":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.PARSING.unlocked:
-				add_line("Parsing defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.PARSING)
-		"start -cracking":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.CRACKING.unlocked:
-				add_line("Cracking defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.CRACKING)
-		"start -matching":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.MATCHING.unlocked:
-				add_line("Matching defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.MATCHING)
-		"start -phishing":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.PHISHING.unlocked:
-				add_line("Phishing defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.PHISHING)
-		"start -hacking":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.HACKING.unlocked:
-				add_line("Hacking defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.HACKING)
-		"start -decoding":
-			if process_running:
-				add_line("Process already running.")
-				return
-			if !Defragging.DECODING.unlocked:
-				add_line("Decoding defragging not unlocked. Purchase from marketplace.")
-				return
-			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
-				return
-			
-			start_defragging(Defragging.DECODING)
 		"stop":
 			unstick_current_process()
 			process_running = false
@@ -1225,7 +1073,6 @@ func marketplace_commands(text):
 		Marketplace.viewing_item = null
 		Marketplace .viewing_skill = null
 		add_line("Saftely exiting marketplace")
-		await get_tree().create_timer(0.5).timeout
 		add_line(Ascii.root)
 	else:
 		match current_marketplace_context:

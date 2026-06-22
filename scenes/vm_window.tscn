@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cd108wr6agqvs" path="res://scripts/vm_window.gd" id="1_7m12v"]
 
 [node name="VMWindow" type="Window"]
-position = Vector2i(0, 36)
 unresizable = true
 content_scale_mode = 1
 content_scale_aspect = 1

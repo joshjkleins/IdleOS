@@ -31,7 +31,10 @@ const COLOR_ORDER = [Color.GREEN, Color.BLUE, Color.ORANGE, Color.BLACK]
 
 func start(minor_skill: Dictionary):
 	type = minor_skill
-	# finished()
+	
+	#finished()
+	#return
+	
 	active = true
 	setup_sweep_timer.wait_time = SETUP_PANEL_WAIT
 	build_panels()

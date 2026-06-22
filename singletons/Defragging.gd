@@ -11,7 +11,7 @@ var SKILL = {
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"skill": Mining,
 	"bonus time": 5,
