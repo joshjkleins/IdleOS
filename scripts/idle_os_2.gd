@@ -3,7 +3,7 @@ extends Control
 #TODO
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
-# add logic to check for requirements of hacking target. add labels to header to show all hacking related items. Maybe make them smaller and loop around
+# add labels to header to show all hacking related items. Maybe make them smaller and loop around
 # IP Address        Creds     SQL Injector
 #    15              12          849
 # Packet spoofer     Account tokens

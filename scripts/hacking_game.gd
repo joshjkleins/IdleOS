@@ -325,8 +325,10 @@ func reset():
 
 func start_hack():
 	is_hacking = true
-	attacking = true
-	defending = true
+	if Inventory.get_amount(offensive_item) > 0:
+		attacking = true
+	if Inventory.get_amount(offensive_item) > 0:
+		defending = true
 	if bandwidth_timer.is_stopped():
 		bandwidth_timer.wait_time = Hacking.bandwidth_recovery_speed
 		bandwidth_timer.start()

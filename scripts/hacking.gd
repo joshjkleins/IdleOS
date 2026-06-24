@@ -133,12 +133,11 @@ func handle_hack_command(text):
 				current_context = HackingContext.HACKING
 			else:
 				player_hacking_box.add_line_error("Anonymity at 0. Increase to above 0 before hacking.")
-				player_hacking_box.add_line_system("Use anonymity increase items at any time with command: 'heal'")
+				#player_hacking_box.add_line_system("Use anonymity increase items at any time with command: 'heal'")
 		else:
-			if Inventory.get_amount(Items.IP_ADDRESS) <= 0:
-				player_hacking_box.add_line_error("No IP Addresses")
-			if Inventory.get_amount(Items.CREDENTIALS) <= 0:
-				player_hacking_box.add_line_error("No Credentials")
+			for r in target["requirements"]:
+				if Inventory.get_amount(r.item) < r.amount:
+					player_hacking_box.add_line_error("Missing: " + r.item.name)
 
 func handle_back_command():
 	match current_context:

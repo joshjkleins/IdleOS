@@ -61,8 +61,8 @@ theme_override_constants/separation = 50
 [node name="MainSkill" type="MarginContainer" parent="PanelContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_bottom = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill"]
 custom_minimum_size = Vector2(140, 0)
@@ -124,15 +124,19 @@ layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
-theme_override_constants/separation = 20
+size_flags_vertical = 4
+alignment = 1
 
 [node name="ResourceCol" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
 layout_mode = 2
-alignment = 1
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
 
 [node name="IPAddressAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "12"
 horizontal_alignment = 1
 
@@ -141,13 +145,16 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
 theme_override_font_sizes/font_size = 12
 text = "IP Address"
+horizontal_alignment = 1
 
 [node name="ResourceCol2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
 layout_mode = 2
-alignment = 1
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
 
 [node name="CredAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "4"
 horizontal_alignment = 1
 
@@ -156,6 +163,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
 theme_override_font_sizes/font_size = 12
 text = "Credentials"
+horizontal_alignment = 1
 
 [node name="VSeparator2" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
 layout_mode = 2
@@ -183,12 +191,13 @@ size_flags_horizontal = 10
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 layout_mode = 0
 offset_left = 15.0
-offset_top = -7.75816
+offset_top = -8.0
 offset_right = 769.0
-offset_bottom = 15.2418
+offset_bottom = 22.0
 bbcode_enabled = true
 text = "[bgcolor=#0b0e11]Hacking[/bgcolor]"
 fit_content = true
+scroll_active = false
 
 [node name="ExpLabelTimer" type="Timer" parent="."]
 one_shot = true

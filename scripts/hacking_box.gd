@@ -55,10 +55,10 @@ func select_person(target: Dictionary = {}, loadout: Dictionary = {}):
 		await _red_flash(target, persons_container)
 
 func can_hack_person(_target: Dictionary = {}):
-	#keep target as param because eventually people will have different requirements for hacking
-	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
-		return true
-	return false
+	for item in _target["requirements"]:
+		if Inventory.get_amount(item.item) < item["amount"]:
+			return false
+	return true
 
 func persons_to_targets():
 	await _hide_container(persons_container)
