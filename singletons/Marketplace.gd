@@ -262,7 +262,10 @@ func upgrades_details(skill: Node) -> String:
 			elif p.name.to_lower() == "vm duration":
 				title = _pad_text(p.name, 30)
 				upgrade_text = "     " + str(p["amount"]) + " -> " + str(p["amount"] + p["increase per level"]) + "\n\n"
-			else:
+			elif p.name.to_lower() == "efficiency":
+				title = _pad_text(p.name + " bonus", 30) 
+				upgrade_text = "     " + percent_format(p["amount"] + 1.0) + " -> " + percent_format(p["amount"] + 1.0 + p["increase per level"]) + "\n\n"
+			else: #speed / efficiency
 				title = _pad_text(p.name + " bonus", 30) 
 				upgrade_text = "     " + percent_format(p["amount"]) + " -> " + percent_format(p["amount"] + p["increase per level"]) + "\n\n"
 			body += key + title + cost + upgrade_text 
@@ -274,7 +277,14 @@ func upgrades_details(skill: Node) -> String:
 """
 	viewing_skill = skill
 	return header + body + footer
-
+#var process_upgrades = {
+	#"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
+	#"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
+	#"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
+	#"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
+#}
 func purchase_upgrade(num: int) -> Dictionary:
 	if viewing_skill == Defragging:
 		if num < 0 or num > 6:

@@ -27,10 +27,10 @@ signal update_console_signal #used from hacking_game to update main console in h
 func end_hacking():
 	end_hacking_signal.emit()
 
-func system_temp_updated(temp: int):
+func system_temp_updated(temp: float):
 	system_temp_updated_signal.emit(temp)
 
-func heat_added(heat: int):
+func heat_added(heat: float):
 	heat_added_signal.emit(heat)
 
 func hacking_ended():

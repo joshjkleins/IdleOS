@@ -1,5 +1,15 @@
 extends Control
 
+#playthrough notes:
+#add efficiency number somewhere to each process with clear communication of what it does
+#make -h re-show the initial process info
+#blank line missing between valuables & black market in marketplace (only sometimes)
+#make packet spoof not heal until it can heal fully
+#defrag help - update color of 'online' and 'offline' to green and red
+#tighten up spacing on mining (vertical) and limit cracking to just 5 in queue instead of 10
+#update hacking targets to do different damage/firewall/etc
+#update hacking target caches to have actual drops
+
 #TODO
 # add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
 # then after above is done, add more combat items to test with (utility items), and one time use items
@@ -8,10 +18,13 @@ extends Control
 #    15              12          849
 # Packet spoofer     Account tokens
 #      22                 100
+#add item/system to unlock new targets in hacking. or a new process that consumes credentials/ip addresses for specific target item (student hacking info) - think about this more
 #save/load
 #export to desktop and play through
 
 #stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
+
+#IDEA: commands unlock: ie Unlocked new command flag - -e, slows down speed but increases efficiency
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -180,6 +193,9 @@ func add_new_scrollback():
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
+	if new_text == "ss":
+		DisplayServer.window_set_size(Vector2i(1920, 1080))
+		return
 	var text_with_lead = get_context_lead() + new_text
 	input_line.clear()
 	add_line(text_with_lead)

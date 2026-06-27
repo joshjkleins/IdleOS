@@ -11,10 +11,10 @@ var SKILL = {
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": true,
+	"unlocked": false,
 	"unlock cost": 100,
 	"skill": Mining,
-	"bonus time": 5,
+	"bonus time": 10,
 	"bonus efficiency": 1.50,
 	"description": "Efficiency increased by 50%.",
 	"command": "defrag -mining"

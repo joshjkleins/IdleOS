@@ -9,6 +9,6 @@ name = "Student disciplinary records"
 shortened_name = "Student disc records"
 description = "Sell on the marketplace"
 valuable = true
-value = 400
+value = 1800
 color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

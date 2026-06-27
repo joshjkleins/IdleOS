@@ -4,11 +4,11 @@ signal gained_xp_signal
 
 const MAX_LEVEL = 99
 
-var MAX_TEMP = 100
-var MIN_TEMP = 30
-var system_tempature = 30
-var cooling_amount = -1 #reduces temp by 1
-var cooling_frequency = 1.0 #every 1 second
+var MAX_TEMP = 100.0
+var MIN_TEMP = 30.0
+var system_tempature = 30.0
+var cooling_amount = -5.25 #reduces temp by 1
+var cooling_frequency = 0.5 #every 1 second
 var overheated = false
 var overclocked = false
 
@@ -487,7 +487,7 @@ func get_bonus_time_text(skill: Node) -> String:
 ###### END DEFRAG BONUS ######
 ##############################
 
-func update_tempature(amount: int):
+func update_tempature(amount: float):
 	system_tempature += amount
 	if system_tempature >= MAX_TEMP:
 		system_tempature = MAX_TEMP

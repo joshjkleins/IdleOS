@@ -9,6 +9,6 @@ name = "Falsified transcript database"
 shortened_name = "Fake transcripts db"
 description = "Sell on the marketplace"
 valuable = true
-value = 300
+value = 1600
 color_type = 8
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

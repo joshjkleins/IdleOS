@@ -127,7 +127,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	new_window.size = content_instance.size
 	new_window.min_size = content_instance.size
 	
-	new_window.close_requested.connect(func(): 
+	new_window.close_requested.connect(func():
 		CURRENT_VMS -= 1
 		new_window.queue_free()
 	)

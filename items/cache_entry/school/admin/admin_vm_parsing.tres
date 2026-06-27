@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://c1ql2oi0rd2ek"]
+
+[ext_resource type="Resource" uid="uid://bqmxor6j5u88q" path="res://items/tokens/parsing/vm_parsing_token.tres" id="1_68mw5"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_o1hg2"]
+
+[resource]
+script = ExtResource("1_o1hg2")
+item = ExtResource("1_68mw5")
+min_quantity = 5
+max_quantity = 18
+drop_chance = 0.7
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

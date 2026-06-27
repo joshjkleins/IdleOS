@@ -8,9 +8,6 @@ var maj_process: Node
 var repeated_times: int = 1
 
 func start():
-	#transparent = true
-	#transparent_bg = true
-	#modulate.a = 0.5
 	$Timer.wait_time = duration
 	$Timer.one_shot = true
 	$Timer.start()

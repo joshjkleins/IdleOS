@@ -43,7 +43,7 @@ const HEAT_INFO = {
 	}
 }
 
-func update_heat_info(tempature: int) -> void:
+func update_heat_info(tempature: float) -> void:
 	if Stats.overheated:
 		status_label.text = "Overheated"
 		status_label.visible = true
@@ -52,7 +52,7 @@ func update_heat_info(tempature: int) -> void:
 		status_label.visible = true
 	else:
 		status_label.visible = false
-	temp.text = str(tempature)
+	temp.text = "%.1f" % tempature
 	temp_bar.value = tempature
 	if tempature < 60:
 		if !Stats.overheated:

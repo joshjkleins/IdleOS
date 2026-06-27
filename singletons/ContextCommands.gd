@@ -34,13 +34,13 @@ func tab_space() -> String:
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	if skill == Defragging:
-		text += "┌───────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND             │\n"
-		text += "├───────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND              │\n"
+		text += "├────────────────────────────────────────────────────────────────────────┤\n"
 	else:
-		text += "┌───────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        STATUS      REQ     EFF     EFF/LVL    COMMAND         │\n"
-		text += "├───────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ PROCESS        STATUS      REQ     EFF     EFF/LVL    COMMAND          │\n"
+		text += "├────────────────────────────────────────────────────────────────────────┤\n"
 	
 	for p in skill.minor_processes:
 		#if p["unlocked"]:
@@ -48,7 +48,7 @@ func get_help_text(skill: Node) -> String:
 		#else:
 			#text += "[color=#666666]" + _build_process_row(p, skill) + "[/color]"
 	
-	text += "└───────────────────────────────────────────────────────────────────────┘\n"
+	text += "└────────────────────────────────────────────────────────────────────────┘\n"
 	if skill == Defragging:
 		return text
 	text += "[font_size=12]Efficiency (EFF): [/font_size]\n"
@@ -64,7 +64,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	if skill == Defragging:
 		var time = str(p["bonus time"]) + " min"
 		var eff = "x" + str(p["bonus efficiency"])
-		return "│ %-14s %-11s %-12s %-9s %-19s │\n" % [
+		return "│ %-14s %-11s %-12s %-9s %-20s │\n" % [
 		p["name"],
 		status,
 		time,
@@ -82,7 +82,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var effr = str(p["efficiency rate"] * 100.0) + "%"
 		var eff = str(base_eff * frag_bonus * 100.0) + "%"
 		if !unlocked:
-			return "[color=666666]│ %-14s %-11s %-7d %-7s %-10s %-14s  │[/color]\n" % [
+			return "[color=666666]│ %-14s %-11s %-7d %-7s %-10s %-15s  │[/color]\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
@@ -91,7 +91,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				p["command"]
 			]
 		else:
-			return "│ %-14s %-11s %-7d %-7s %-10s %-14s  │\n" % [
+			return "│ %-14s %-11s %-7d %-7s %-10s %-15s  │\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
