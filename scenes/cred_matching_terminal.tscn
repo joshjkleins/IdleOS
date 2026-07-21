@@ -369,7 +369,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_font_sizes/font_size = 10
-text = "chance for extra: 2%"
+text = "chance for extra (eff): 2%"
 horizontal_alignment = 1
 
 [connection signal="value_changed" from="MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar" to="." method="_on_main_bar_value_changed"]

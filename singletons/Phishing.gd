@@ -94,7 +94,7 @@ func remove_line(line):
 	if current_lines.has(line):
 		current_lines.erase(line)
 
-func signal_exp(amount: int):
+func signal_exp(_amount: int):
 	xp_gained.emit()
 
 var process_upgrades = {
@@ -118,10 +118,10 @@ func upgraded(upgrade_stat: Dictionary):
 	if upgrade_stat["name"].to_lower() == "vm duration":
 		VM_UPTIME += upgrade_stat["increase per level"]
 
-func has_requirements(minor_process) -> bool:
+func has_requirements(_minor_process) -> bool:
 	return true
 
-func missing_requirements_text(minor_process) -> String:
+func missing_requirements_text(_minor_process) -> String:
 	return ""
 
 func create_vm_window(minor_process, repeat) -> Window:

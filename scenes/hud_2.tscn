@@ -59,6 +59,10 @@ skill_type = 5
 layout_mode = 2
 skill_type = 4
 
+[node name="Compiling" parent="HBoxContainer/MajorSkills" instance=ExtResource("2_67toa")]
+layout_mode = 2
+skill_type = 8
+
 [node name="Defragging" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 script = ExtResource("3_en2g2")

@@ -25,7 +25,7 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 	is_window = i_window
 	
 	var item_labels = [item_find_container, item_find_container_2, item_find_container_3, item_find_container_4]
-	var item_chance = int(100.0 / type["item pool"].size())
+	#var item_chance = int(100.0 / type["item pool"].size())
 	for i in item_labels:
 		i.visible = false
 	for i in range(type["item pool"].size()):

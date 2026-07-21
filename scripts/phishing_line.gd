@@ -11,7 +11,12 @@ var did_overclock: bool = false
 
 func setup():
 	active = true
-	$Method.text = type.name
+	
+	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
+	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
+	
+	$Method.text = type.name + " [color=#888888][font_size=12](eff: " + eff_text + "%)[/font_size][/color]"
 	$Status.text = "sending phishing attempt"
 	$ProgressBar.value = 0.0
 	$ProgressBar.max_value = 5.0
@@ -31,8 +36,8 @@ func begin(p_type):
 	
 	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
 	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
-	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1) 
-	$Status.text = "waiting for response   " + "[color=#888888]" + eff_text + "% chance of success[/color]"
+	#var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1) 
+	$Status.text = "waiting for response   "
 	await get_tree().create_timer(randf_range(type["wait time min"], type["wait time max"])).timeout
 	if !active:
 		return

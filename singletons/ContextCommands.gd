@@ -17,7 +17,7 @@ func all_commands() -> String:
 	cmd_text += "[font_size=12]" + tab_space() + pad_text("list -v", 20) +  "Lists all valuable items.[/font_size]\n\n"
 	
 	cmd_text += "VM TOKENS\n"
-	cmd_text += "[font_size=12]" + tab_space() + pad_text("vm [module] [process]", 30) +  "Consume a VM token to run specific process. [color=888888]example: vm mining logs[/color][/font_size]\n"
+	cmd_text += "[font_size=12]" + tab_space() + pad_text("vm [module] [process]", 30) +  "Consume a VM token to run specific process. [color=#888888]example: vm mining logs[/color][/font_size]\n"
 	
 	
 	
@@ -64,13 +64,23 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	if skill == Defragging:
 		var time = str(p["bonus time"]) + " min"
 		var eff = "x" + str(p["bonus efficiency"])
-		return "│ %-14s %-11s %-12s %-9s %-20s │\n" % [
-		p["name"],
-		status,
-		time,
-		eff,
-		p["command"]
-	]
+		if unlocked:
+			return "│ %-14s %-11s %-12s %-9s %-20s │\n" % [
+				p["name"],
+				status,
+				time,
+				eff,
+				p["command"]
+			]
+		else:
+			return "[color=666666]│ %-14s %-11s %-12s %-9s %-20s │[/color]\n" % [
+				p["name"],
+				status,
+				time,
+				eff,
+				p["command"]
+			]
+			
 	else:
 		var frag_bonus = 1.0
 		if Stats.has_bonus(skill):

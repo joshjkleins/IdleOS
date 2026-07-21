@@ -1,30 +1,27 @@
 extends Control
 
-#playthrough notes:
-#add efficiency number somewhere to each process with clear communication of what it does
-#make -h re-show the initial process info
-#blank line missing between valuables & black market in marketplace (only sometimes)
-#make packet spoof not heal until it can heal fully
-#defrag help - update color of 'online' and 'offline' to green and red
-#tighten up spacing on mining (vertical) and limit cracking to just 5 in queue instead of 10
-#update hacking targets to do different damage/firewall/etc
-#update hacking target caches to have actual drops
-
 #TODO
-# add combat equip screen before hack (and/or figure out a way for player to choose which offensive/defensive items to use, maybe prompts before hack starts?)
-# then after above is done, add more combat items to test with (utility items), and one time use items
-# add labels to header to show all hacking related items. Maybe make them smaller and loop around
-# IP Address        Creds     SQL Injector
-#    15              12          849
-# Packet spoofer     Account tokens
-#      22                 100
-#add item/system to unlock new targets in hacking. or a new process that consumes credentials/ip addresses for specific target item (student hacking info) - think about this more
-#save/load
-#export to desktop and play through
+#Update INFO command on each process to show specifics of skill and minor processes: should show requirements, items received, where to get required items, lvl, efficiency, upgrades, upgrade costs/recipes
+#Finish compilation module:
+	#IDEA: compilation
+		#use resources to combine in 'Payloads' for each location. School payload, Hospital payload etc.
+		#Command: compile -school
+		#Hacking will now consume payloads
+#Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
+#No longer able to sell items - might end up with a bunch of valuable items, need fix for this, what can these be turned into? maybe compile can change them to valuable hacking items?? Or maybe create randmoized offer table ie parents credit card can exchange for 50 passwords
+#Remove marketplace completely: remove relevant commands, marketplace, contracts
+#	[1] Contracts: sunset for now 
+#	[2] Valuables: all should be used in recipes or broken down to other resources
+#	[3] Black market: all hacking items should be found elsewhere (maybe phishing?)
+#	[4] Upgrades: Change to recipes within each module
 
-#stop adding to above > playthrough w/ notes > balance/bug patches > build store page > demo > playtesters > feedback > demo live
+#Hacking
+#Still need to solve hacking equip problem. Might need archetectural change.
+#Update UI to show payloads on viewing locations screen [School (12)] [Small business (5)] etc
+#Upgrade within hacking system to unlock more targets/locations
 
-#IDEA: commands unlock: ie Unlocked new command flag - -e, slows down speed but increases efficiency
+#SAVE/LOAD SYSTEM
+
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -68,7 +65,8 @@ enum Context {
 	MARKETPLACE,
 	DECODING,
 	PHISHING,
-	DEFRAGGING
+	DEFRAGGING,
+	COMPILING
 }
 
 enum MarketContext {
@@ -175,8 +173,9 @@ func update_terminal(scroll_to_line: bool = true):
 
 func bring_process_to_bottom():
 	if current_process:
-		terminal_body_container.move_child(current_process, -1)
-		add_new_scrollback()
+		if current_process.get_parent() == terminal_body_container:
+			terminal_body_container.move_child(current_process, -1)
+			add_new_scrollback()
 
 func add_new_scrollback():
 	lines.clear()
@@ -193,9 +192,6 @@ func add_new_scrollback():
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
-	if new_text == "ss":
-		DisplayServer.window_set_size(Vector2i(1920, 1080))
-		return
 	var text_with_lead = get_context_lead() + new_text
 	input_line.clear()
 	add_line(text_with_lead)
@@ -220,6 +216,8 @@ func _on_input_line_text_submitted(new_text):
 				phishing_commands(new_text)
 			Context.DEFRAGGING:
 				defragging_commands(new_text)
+			Context.COMPILING:
+				compiling_commands(new_text)
 
 	history_index = -1
 
@@ -283,6 +281,9 @@ func get_context_lead():
 		Context.DEFRAGGING:
 			Signals.update_hud(Defragging)
 			return "IdleOS/Defragging>"
+		Context.COMPILING:
+			Signals.update_hud(Compiling)
+			return "IdleOS/Compiling"
 
 
 #Changes context and updates leading text
@@ -310,6 +311,8 @@ func list_help():
 			add_line(ContextCommands.get_help_text(Matching))
 		Context.DECODING:
 			add_line(ContextCommands.get_help_text(Decoding))
+		Context.PHISHING:
+			add_line(ContextCommands.get_help_text(Phishing))
 
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 	
@@ -450,7 +453,11 @@ func root_commands(text):
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
 			add_line(ContextCommands.get_help_text(Defragging))
-			
+		"load compiling", "cd compiling":
+			add_line("[ .. ] loading compiling module")
+			header.display_skill(Compiling)
+			update_context(Context.COMPILING)
+			add_line(ContextCommands.get_help_text(Compiling))
 		_:#default
 			add_line("Command not found")
 
@@ -467,12 +474,9 @@ func handle_vm_token_commands(text):
 	var commands = text.split(" ")
 	#confirm commands size
 	if commands.size() < 3 or commands.size() > 4:
-		add_line("VM command not recognized, missing components")
+		add_line("VM command not recognized     [color=#888888]example usage: vm mining logs[/color]")
 		return
 	
-	var repeat = false
-	if commands.size() == 4 and commands[3] == "-r":
-		repeat = true
 		
 	#find major process
 	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding]
@@ -486,9 +490,13 @@ func handle_vm_token_commands(text):
 	
 	#find minor process
 	var target_minor_process = null
-	for mp in target_process.minor_processes:
-		if commands[2] == mp.name.to_lower():
-			target_minor_process = mp
+	if commands[2].is_valid_int():
+		if int(commands[2]) >= 0 and int(commands[2]) < target_process.minor_processes.size():
+			target_minor_process = target_process.minor_processes[int(commands[2])]
+	else:
+		for mp in target_process.minor_processes:
+			if commands[2] == mp.name.to_lower():
+				target_minor_process = mp
 	if target_minor_process == null:
 		add_line(target_process.name + " process not recognized")
 		return
@@ -510,7 +518,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	Inventory.remove_resource(target_process.vm_token, 1)
-	var new_window = target_process.create_vm_window(target_minor_process, repeat)
+	var new_window = target_process.create_vm_window(target_minor_process, true)
 
 	add_child(new_window)
 	
@@ -533,7 +541,7 @@ func grab_all_focus():
 func sticky_current_process():
 	current_process.reparent(terminal_grandparent, false)
 	terminal_grandparent.call_deferred("move_child", current_process, 0)
-	add_line("Stick")
+	add_line("Process stickied to top.")
 
 func unstick_current_process():
 	if current_process:
@@ -574,15 +582,13 @@ func mining_commands(text):
 			return_to_root()
 		"info":
 			add_line("Module: Data Mining")
-			add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
+			#add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
 			#Level
 			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
+			#add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
 			#Effeciency
-			var eff = Stats.player_stats["Data Mining"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
-		"-h":
-			list_help()
+			#var eff = Stats.player_stats["Data Mining"]["efficiency"]
+			#add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -655,8 +661,6 @@ func log_parsing_commands(text):
 			#Effeciency
 			var eff = Parsing["efficiency"]
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Parsing["efficiency description"])
-		"-h":
-			list_help()
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -732,8 +736,6 @@ func password_unscramble_commands(text):
 			#Effeciency
 			var eff = Stats.player_stats["Cracking"]["efficiency"]
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cracking"]["efficiency description"])
-		"-h":
-			list_help()
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -817,8 +819,6 @@ func cred_matching_commands(text):
 			#Effeciency
 			var eff = Stats.player_stats["Credential Matching"]["efficiency"]
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Credential Matching"]["efficiency description"])
-		"-h":
-			list_help()
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -895,8 +895,6 @@ func cache_decrypting_commands(text):
 			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
 			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
 			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
-		"-h":
-			list_help()
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -982,8 +980,6 @@ func phishing_commands(text):
 			return_to_root()
 		"info":
 			add_line("Module: Phishing")
-		"-h":
-			list_help()
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -995,15 +991,15 @@ func phishing_commands(text):
 		_:
 			add_line("Command not found")
 
-func cast_line(type: Dictionary, lines: int):
+func cast_line(type: Dictionary, t_lines: int):
 	if current_process is PhishingTerminal:
-		current_process.cast_lines(type, lines)
+		current_process.cast_lines(type, t_lines)
 	else:
 		var new_phishing_terminal = phishing_scene.instantiate()
 		terminal_body_container.add_child(new_phishing_terminal)
 		process_running = true
 		current_process = new_phishing_terminal
-		new_phishing_terminal.cast_lines(type, lines)
+		new_phishing_terminal.cast_lines(type, t_lines)
 		add_new_scrollback()
 
 func phishing_ended_safely():
@@ -1013,6 +1009,11 @@ func phishing_ended_safely():
 	Stats.overclocked = false
 	add_line("Phishing process finished.")
 
+###################################################
+################### COMPILING #####################
+###################################################
+func compiling_commands(text):
+	pass
 
 ###################################################
 ################### DEFRAGGING ####################
@@ -1053,8 +1054,6 @@ func defragging_commands(text):
 			return_to_root()
 		"info":
 			add_line("???")
-		"-h":
-			list_help()
 		"overclock":
 			add_line("Overclock not available for defragging.")
 		_:

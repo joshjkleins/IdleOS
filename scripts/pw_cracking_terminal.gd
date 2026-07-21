@@ -12,6 +12,7 @@ extends Control
 @onready var progress_bar = $MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBar
 @onready var progress_bar_label = $MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBarLabel
 @onready var title_label = $MarginContainer/VBoxContainer/TitleRow/TitleLabel
+@onready var efficiency = $MarginContainer/VBoxContainer/InfoRow/VBoxContainer3/Efficiency
 
 @export var pw_row: PackedScene
 
@@ -56,9 +57,14 @@ func start():
 	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
 	cracked_label.text = str(amount_cracked)
 	title_label.text = type["name"] + " Cracking"
+	
+	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+	var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+	efficiency.text = str(base_eff * frag_bonus * 100.0) + "%"
+	
 	while Inventory.get_amount(type["requirements"]) > 0 and process_running:
 		_clean_queue()
-		var pw_per_page = clamp(Inventory.get_amount(type["requirements"]), 0, 10)
+		var pw_per_page = clamp(Inventory.get_amount(type["requirements"]), 0, 5)
 		queue_info.text = "ENCRYPTED " + type["name"].to_upper() + " - QUEUE (" + str(pw_per_page) + ")"
 		for i in range(pw_per_page):
 			_generate_initial_queue()
@@ -88,8 +94,9 @@ func start():
 			
 			var max_heat_used: int = 0
 			var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-			var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+			base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
 			var eff =  base_eff * defrag_bonus
+			efficiency.text = str(eff * 100) + "%"
 			if randf() < eff:
 				if process_running:
 					_update_progress_bar(4, 0.1)
@@ -212,6 +219,11 @@ func _successful_crack(heat: int):
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])
+	
+	var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+	var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+	var eff =  base_eff * defrag_bonus
+	efficiency.text = str(eff * 100) + "%"
 	
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)

@@ -5,31 +5,36 @@
 
 [node name="CacheDecryptTerminal" type="PanelContainer"]
 offset_right = 1016.0
-offset_bottom = 382.0
+offset_bottom = 279.0
 theme = ExtResource("1_ytqtf")
 script = ExtResource("1_4hfe2")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 8
+theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 25
+theme_override_constants/separation = 10
 
-[node name="CacheName" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="CachesDisplayContainer" type="HFlowContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="CacheName" type="Label" parent="MarginContainer/VBoxContainer/CachesDisplayContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Student cache"
 
 [node name="HexDisplay" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(1000, 140)
+custom_minimum_size = Vector2(700, 110)
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_colors/default_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_constants/line_separation = 5
+theme_override_font_sizes/normal_font_size = 12
 bbcode_enabled = true
 text = "0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
 0x0000    ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ??    |.................|
@@ -40,7 +45,7 @@ scroll_following = true
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 5
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 100)
@@ -55,8 +60,7 @@ theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_font_sizes/font_size = 10
 text = "DECODED"
 
-[node name="LabelsContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="LabelsContainer" type="VFlowContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
+theme_override_constants/h_separation = 20

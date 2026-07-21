@@ -43,7 +43,7 @@ var SKILL = {
 }
 
 
-func signal_exp(amount: int):
+func signal_exp(_amount: int):
 	xp_gained.emit()
 
 var minor_processes = []

@@ -45,9 +45,9 @@ var LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"item pool": [
-		{ "item": Items.DATA, "min": 5, "max": 40, "weight": 40 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 2, "weight": 40 },
-		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 15 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 45 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 45 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 5 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
@@ -119,7 +119,7 @@ var minor_processes = [
 	CRED_LOGS
 ]
 
-func signal_exp(amount: int):
+func signal_exp(_amount: int):
 	xp_gained.emit()
 
 func add_xp(amount: int, type: Dictionary):

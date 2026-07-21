@@ -19,6 +19,7 @@ extends PanelContainer
 @onready var phishing: VBoxContainer = $HBoxContainer/MajorSkills/Phishing
 @onready var hacking: VBoxContainer = $HBoxContainer/MajorSkills/Hacking
 @onready var decoding: VBoxContainer = $HBoxContainer/MajorSkills/Decoding
+@onready var compiling = $HBoxContainer/MajorSkills/Compiling
 @onready var defragging = $HBoxContainer/Defragging
 
 func _ready():
@@ -34,6 +35,7 @@ func update(): #called when player enters root directory (start of game and exit
 	hacking.update()
 	decoding.update()
 	defragging.update()
+	compiling.update()
 
 func display_skill(skill: Node): #called when player enters specific process
 	var tar

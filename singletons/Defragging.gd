@@ -96,8 +96,8 @@ var minor_processes = [MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, D
 func activate_cooldown():
 	SKILL["on cooldown"] = true
 	var now = Time.get_unix_time_from_system()
-	var min = 60
-	SKILL["cooldown"] = now + (20 * min) #30 min = 30 * 60
+	var minute = 60
+	SKILL["cooldown"] = now + (20 * minute) #30 min = 30 * 60
 	on_cooldown_signal.emit()
 
 func on_cooldown() -> bool:

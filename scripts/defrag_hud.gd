@@ -25,9 +25,9 @@ func build_minor_processes():
 
 func cooldown_text(): #called when defragging has finished and cooldown has started
 	if Defragging.on_cooldown():
-		var cooldown_text = Defragging.get_cd_time_text()
-		defragging_status.text = cooldown_text
-		defragging_status_details.text = cooldown_text
+		var tt_cooldown_text = Defragging.get_cd_time_text()
+		defragging_status.text = tt_cooldown_text
+		defragging_status_details.text = tt_cooldown_text
 		if defrag_cooldown.is_stopped():
 			defrag_cooldown.start()
 	else:
@@ -74,9 +74,9 @@ func fade_in_major():
 
 func _on_defrag_cooldown_timeout():
 	if Defragging.on_cooldown():
-		var cooldown_text = Defragging.get_cd_time_text()
-		defragging_status.text = cooldown_text
-		defragging_status_details.text = cooldown_text
+		var t_cooldown_text = Defragging.get_cd_time_text()
+		defragging_status.text = t_cooldown_text
+		defragging_status_details.text = t_cooldown_text
 		if defrag_cooldown.is_stopped():
 			defrag_cooldown.start()
 	else:

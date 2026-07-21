@@ -2,8 +2,8 @@ extends PanelContainer
 
 
 @onready var blinking_timer = $BlinkingTimer
-@onready var breadcrumbs = $MarginContainer/VBoxContainer/FirstRow/Breadcrumbs
-@onready var running_label = $MarginContainer/VBoxContainer/FirstRow/HBoxContainer/RunningLabel
+#@onready var breadcrumbs = $MarginContainer/VBoxContainer/FirstRow/Breadcrumbs
+#@onready var running_label = $MarginContainer/VBoxContainer/FirstRow/HBoxContainer/RunningLabel
 @onready var title = $MarginContainer/VBoxContainer/SecondRow/Title
 @onready var tier = $MarginContainer/VBoxContainer/SecondRow/HBoxContainer/Tier
 @onready var progress_row = $MarginContainer/VBoxContainer/ProgressRow
@@ -200,12 +200,13 @@ func _reset_info():
 	level_label.text = str(Mining.SKILL["level"])
 
 func _on_blinking_timer_timeout():
-	if blink_on:
-		running_label.add_theme_color_override("font_color", COLOR_TEXT_NAME)
-		blink_on = false
-	else:
-		running_label.add_theme_color_override("font_color", COLOR_TEXT_DIM)
-		blink_on = true
+	pass
+	#if blink_on:
+		#running_label.add_theme_color_override("font_color", COLOR_TEXT_NAME)
+		#blink_on = false
+	#else:
+		#running_label.add_theme_color_override("font_color", COLOR_TEXT_DIM)
+		#blink_on = true
 
 func _create_progress_row():
 	styleEmpty  = _make_style(COLOR_SEG_EMPTY,  COLOR_SEG_EMPTY_BDR)
@@ -215,7 +216,7 @@ func _create_progress_row():
 		n.queue_free()
 	for i in range(SEGMENTS):
 		var p = Panel.new()
-		p.custom_minimum_size = Vector2(0, 22)
+		p.custom_minimum_size = Vector2(0, 18)
 		p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		p.add_theme_stylebox_override("panel", styleEmpty.duplicate())
 		progress_row.add_child(p)

@@ -1,8 +1,9 @@
 extends PanelContainer
 
-@onready var cache_name = $MarginContainer/VBoxContainer/CacheName
 @onready var labels_container = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LabelsContainer
 @onready var hex_display = $MarginContainer/VBoxContainer/HexDisplay
+@onready var cache_name = $MarginContainer/VBoxContainer/CachesDisplayContainer/CacheName
+@onready var caches_display_container = $MarginContainer/VBoxContainer/CachesDisplayContainer
 
 @onready var cache_decrypt = CacheDecrypting.new()
 
@@ -25,7 +26,7 @@ func set_cache_type(p_type: Dictionary, window: bool = false):
 	current_type = DecodingType.CACHE
 
 func _ready():
-	Signals.item_found_in_cache_signal.connect(update_items_gained)
+	cache_decrypt.item_found.connect(update_items_gained)
 
 func start_decrypting():
 	clear_labels()
@@ -88,6 +89,7 @@ func start_decrypting():
 		_vm_finish()
 	else:
 		Signals.end_cache_decrypting_safely()
+
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:

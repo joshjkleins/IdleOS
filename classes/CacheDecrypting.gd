@@ -1,6 +1,8 @@
 class_name CacheDecrypting
 extends RefCounted
 
+signal item_found(item, amount)
+
 const DUMP_SIZE: int = 5 #ROWS IN THE DUMP
 const HEX_CHARACTERS_SIZE: int = 20 #number of ?? in body
 
@@ -61,7 +63,8 @@ func render_dump() -> String:
 					row += "[bgcolor=#4ec994]" + dump_info["codes"][i][j]["hex"] + "[/bgcolor]"
 					words += dump_info["codes"][i][j]["char"]
 					if dump_info["codes"][i][j].has("item"):
-						Signals.item_found_in_cache(dump_info["codes"][i][j]["item"], dump_info["codes"][i][j]["amount"])
+						#Signals.item_found_in_cache(dump_info["codes"][i][j]["item"], dump_info["codes"][i][j]["amount"])
+						item_found.emit(dump_info["codes"][i][j]["item"], dump_info["codes"][i][j]["amount"])
 				else:
 					row += dump_info["codes"][i][j]["hex"]
 					words += dump_info["codes"][i][j]["char"]
@@ -93,6 +96,7 @@ func update_dump() -> bool:
 func get_potential_items(cache: CacheData) -> Dictionary:
 	var loot = {}
 	for item in cache.entries:
+		var ran = randf()
 		if randf() <= item.drop_chance:
 			var quant = randi_range(item.min_quantity, item.max_quantity)
 			loot[item.item] = quant
@@ -100,7 +104,8 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 	
 	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 1.0
 	var base_eff = Decoding.CACHE["efficiency"] + Decoding.process_upgrades["efficiency"]["amount"]
-	if randf() <  base_eff * defrag_bonus:
+	var r = randf()
+	if r <  base_eff * defrag_bonus:
 		var item = cache.rare_pool.pick_random()
 		loot[item.item] = 1
 	#not current conditions if loot is empty

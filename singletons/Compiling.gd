@@ -1,8 +1,8 @@
 extends Node
 
-signal decode_cycle_completed
+signal compile_cycle_complete
 signal xp_gained
-signal decoding_level_up_signal
+signal compile_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int
@@ -16,21 +16,21 @@ var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
 var SKILL = {
-	"name": "Decoding",
+	"name": "Compiling",
 	"level": 1,
 	"experience": 0,
 	"color": Color("#378ADD"),
-	"level up signal": decoding_level_up_signal,
-	"efficiency description": "Chance to find rare item.",
+	"level up signal": compile_level_up_signal,
+	"efficiency description": "??????",
 }
 
-var CACHE = {
-	"name": "Cache",
+var SCHOOL = {
+	"name": "School",
 	"tier name": "TIER I | CACHE",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
-	"command": "decode -cache",
+	"command": "compile -school",
 	"efficiency": 0.1,
 	"efficiency rate": 0.001,
 	"unlocked": true,
@@ -41,15 +41,14 @@ var CACHE = {
 	"heat": 5,
 	"overclock heat": 7,
 	"overheat heat": 2,
-	"requirements": "cache",
-	"description": "Decrypt caches gained from hacking to reveal additional items.",
-	"efficiency description": "Chance to find rare item.",
-	"signal": decode_cycle_completed
+	"requirements": [ {"item": Items.IP_ADDRESS, "amount": 1}, {"item": Items.CREDENTIALS, "amount": 1} ],
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
 }
 
-
 var minor_processes = [
-	CACHE
+	SCHOOL
 ]
 
 func signal_exp(_amount: int):
@@ -75,14 +74,6 @@ func upgraded(upgrade_stat: Dictionary):
 		MAX_VMS += upgrade_stat["increase per level"]
 	if upgrade_stat["name"].to_lower() == "vm duration":
 		VM_UPTIME += upgrade_stat["increase per level"]
-
-func has_requirements(_minor_process) -> bool:
-	if Inventory.has_cache():
-		return true
-	return false
-
-func missing_requirements_text(_minor_process) -> String:
-	return "Missing: Cache(any)"
 
 func create_vm_window(minor_process, repeat) -> Window:
 	var content_instance = terminal_scene.instantiate()

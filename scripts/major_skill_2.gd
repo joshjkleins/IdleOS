@@ -29,7 +29,8 @@ enum SkillType {
 	DECODING,
 	HACKING,
 	PHISHING,
-	DEFRAGGING
+	DEFRAGGING,
+	COMPILING
 }
 
 @export var skill_type: SkillType
@@ -51,6 +52,8 @@ func _ready():
 			skill = Hacking
 		SkillType.DECODING:
 			skill = Decoding
+		SkillType.COMPILING:
+			skill = Compiling
 			
 	skill.xp_gained.connect(xp_gained)
 	update_colors()

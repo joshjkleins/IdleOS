@@ -164,7 +164,7 @@ func _update_efficiency_label():
 	var defrag_bonus = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
 	var base_eff = type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"]
 	var eff = base_eff * defrag_bonus
-	efficiency_label.text = "chance for extra %.1f%%" % (eff * 100.0)
+	efficiency_label.text = "chance for extra (eff): %.1f%%" % (eff * 100.0)
 
 func start():
 	process_running = true
@@ -316,7 +316,7 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	var base_eff = type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"]
 	var total_eff = base_eff * defrag_bonus
 	if randf() <= total_eff:
-		quantity += 1
+		quantity += randi_range(3, 10)
 	Inventory.add_resource(type["resource gained"], quantity)
 	status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
 	status_image.texture = cred_image

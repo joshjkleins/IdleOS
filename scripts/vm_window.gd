@@ -38,4 +38,6 @@ func set_processes(major: Node, minor: Dictionary):
 	min_process = minor
 
 func _on_focus_entered():
-	Signals.vm_window_focused()
+	#commented out because player cannot close vm window with this functionality
+	pass
+	#Signals.vm_window_focused()

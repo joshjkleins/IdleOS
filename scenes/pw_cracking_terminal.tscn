@@ -38,12 +38,6 @@ theme_override_constants/separation = 10
 [node name="TitleRow" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/TitleRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
-theme_override_font_sizes/font_size = 12
-text = "Level 1"
-
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TitleRow"]
 layout_mode = 2
 text = "Cracking"
@@ -155,5 +149,19 @@ text = "REMAINING"
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "9"
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/VBoxContainer3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 10
+text = "EFFICIENCY"
+
+[node name="Efficiency" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/VBoxContainer3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0.0%"
 
 [connection signal="value_changed" from="MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBar" to="." method="_on_progress_bar_value_changed"]

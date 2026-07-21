@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_08qxt"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_5w02g"]
-[ext_resource type="Resource" uid="uid://dk03y5lhoek1v" path="res://items/cache_entry/school/admin/admin_logs.tres" id="2_gbsyv"]
-[ext_resource type="Resource" uid="uid://bbvxwnw404luf" path="res://items/cache_entry/school/student/student_data.tres" id="3_mde3a"]
+[ext_resource type="Resource" uid="uid://t3vbokrm640u" path="res://items/cache_entry/school/vice_principal/vice_principal_credential.tres" id="2_gbsyv"]
+[ext_resource type="Resource" uid="uid://c5k06t01wy0fy" path="res://items/cache_entry/school/vice_principal/vice_principal_ip.tres" id="3_mde3a"]
 [ext_resource type="Resource" uid="uid://clde6oisb6ib0" path="res://items/cache_entry/school/vice_principal/vice_principal_stud_disc_record.tres" id="4_kppex"]
 
 [resource]

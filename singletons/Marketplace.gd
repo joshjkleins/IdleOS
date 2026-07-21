@@ -118,12 +118,17 @@ func maretplace_valuables_main() -> String:
 ================================================================
 ASSET INVENTORY
 ================================================================\n\n"""
-	var header = _pad_text("ID", val_col_size_id) + _pad_text("ITEM", val_col_size_name) + _pad_text("QTY", val_col_size_amount) + _pad_text("VALUE", val_col_size_value) + "\n"
+
 	var sep = "-".repeat(val_col_size_id + val_col_size_name + val_col_size_amount + val_col_size_value) + "\n"
 	var val_text = ""
+	var item_name_char_size = 0
+	for v in vals:
+		if v.name.length() > item_name_char_size:
+			item_name_char_size = v.name.length()
+	var header = _pad_text("ID", val_col_size_id) + _pad_text("ITEM", item_name_char_size + 3) + _pad_text("QTY", val_col_size_amount) + _pad_text("VALUE", val_col_size_value) + "\n"
 	for v in vals:
 		var id = _pad_text(str(v.id), val_col_size_id)
-		var v_name = _pad_text(v.name, val_col_size_name)
+		var v_name = _pad_text(v.name, item_name_char_size + 3)
 		var amount = _pad_text(str(Inventory.get_amount(v)), val_col_size_amount)
 		var value = _pad_text(str(v.value), val_col_size_value)
 		val_text +=  id + v_name + amount + value + "\n"
