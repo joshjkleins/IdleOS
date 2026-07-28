@@ -26,6 +26,7 @@ var SKILL = {
 	"color": Color("#1d9e75"),
 	"level up signal": phishing_level_up_signal,
 	"efficiency description": "Chance for successful bite",
+	"command": "cd phishing"
 }
 
 var SPEAR = {
@@ -48,7 +49,10 @@ var SPEAR = {
 	"overclock heat": 5,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.IP_ADDRESS],
+	"resource gained": [
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
+	],
 	"resource amount gained": 1,
 	"description": "Send out emails in an attempt to get usernames and passwords",
 	"efficiency description": "Chance for successful bite",
@@ -75,7 +79,10 @@ var WHALING = {
 	"overclock heat": 7,
 	"overheat heat": 1,
 	"requirements": [],
-	"resource gained": [Items.ACCOUNT_NUMBERS, Items.USERNAMES],
+	"resource gained": [
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
+	],
 	"resource amount gained": 1,
 	"description": "Targets high level individuals for a chance to extract PINs and account numbers",
 	"efficiency description": "Chance for successful bite",

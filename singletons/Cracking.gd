@@ -23,6 +23,7 @@ var SKILL = {
 	"color": Color("#EF9F27"),
 	"level up signal": cracking_level_up_signal,
 	"efficiency description": "Chance to instantly crack encryption",
+	"command": "cd cracking"
 }
 
 var PASSWORD = {

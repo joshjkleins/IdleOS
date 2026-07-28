@@ -70,11 +70,13 @@ func begin(p_type):
 
 func finished(caught: bool):
 	if caught:
+		########### ADD WEIGHTED PICKS HERE #############
 		var item = type["resource gained"].pick_random()
+		
 		$Status.text = "+1 " + item.name
 		add_heat()
 		
-		if randf() <= 0.002:
+		if randf() <= 0.01:
 			Inventory.add_resource(Items.VM_PHISHING_TOKEN, 1)
 		else:
 			Inventory.add_resource(item, 1)

@@ -22,6 +22,7 @@ var SKILL = {
 	"color": Color("#378ADD"),
 	"level up signal": compile_level_up_signal,
 	"efficiency description": "??????",
+	"command": "cd compiling"
 }
 
 var SCHOOL = {

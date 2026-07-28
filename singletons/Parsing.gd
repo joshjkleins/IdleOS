@@ -23,7 +23,8 @@ var SKILL = {
 	"experience": 0,
 	"color": Color("#7F77DD"),
 	"level up signal": parsing_level_up_signal,
-	"efficiency description": "Increases chance of finding a resource per row."
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"command": "cd parsing"
 }
 
 var LOGS = {
@@ -44,7 +45,7 @@ var LOGS = {
 	"overclock heat": 3,
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
-	"item pool": [
+	"resource gained": [
 		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 45 },
 		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 45 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
@@ -73,7 +74,7 @@ var QUALITY_LOGS = {
 	"overclock heat": 5,
 	"overheat heat": 1,
 	"requirements": Items.QUALITY_LOGS,
-	"item pool": [
+	"resource gained": [
 		{ "item": Items.DATA, "min": 40, "max": 60, "weight": 15 },
 		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 1, "weight": 35  },
 		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 1, "weight": 35  },
@@ -102,7 +103,7 @@ var CRED_LOGS = {
 	"overclock heat": 4,
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
-	"item pool": [
+	"resource gained": [
 		{ "item": Items.CREDENTIALS, "min": 40, "max": 130, "weight": 30 },
 		{ "item": Items.ACCOUNT_ACCESS_TOKENS, "min": 1, "max": 1, "weight": 30  },
 		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 30  },

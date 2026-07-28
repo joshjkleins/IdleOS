@@ -1,7 +1,8 @@
 extends Control
 
 #TODO
-#Update INFO command on each process to show specifics of skill and minor processes: should show requirements, items received, where to get required items, lvl, efficiency, upgrades, upgrade costs/recipes
+# Finish INFO stuff : finish testing all, make sure defragging and hacking work ok
+# Update Phishing process to get weighted item (recently changed property on process dictionary from just array of items to dictionary with weights)
 #Finish compilation module:
 	#IDEA: compilation
 		#use resources to combine in 'Payloads' for each location. School payload, Hospital payload etc.
@@ -107,6 +108,8 @@ var skill_xp_progress_bar_index: int
 var skill_xp_nums_index: int
 var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
+
+var major_processes = [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling, Defragging]
 
 var output_queue: Array[String] = []
 var processing_queue = false
@@ -322,6 +325,9 @@ func universal_commands(text):
 	if text.begins_with("vm"):
 		handle_vm_token_commands(text)
 		return true
+	if text.begins_with("info"):
+		handle_info_commands(text)
+		return true
 	match text:
 		"list -r":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
@@ -466,6 +472,35 @@ func return_to_root():
 	update_context(Context.ROOT)
 	add_line(Ascii.root)
 	add_line(ContextCommands.all_commands())
+
+##INFO COMMANDS
+func handle_info_commands(text):
+	if text == "info":
+		add_line(ContextCommands.info_command_text())
+		return
+	
+	var command = text.split(" ")
+	if command.size() < 2 or command.size() > 3:
+		add_line("info command not recognized")
+		return
+	
+	if command.size() == 2:
+		for p in major_processes:
+			var n = p.SKILL.name.to_lower()
+			if command[1] == n:
+				
+				add_line(ContextCommands.get_help_text(p))
+				return
+	
+	if command.size() == 3:
+		for p in major_processes:
+			var n = p.SKILL.name.to_lower()
+			if command[1] == n:
+				for mp in p.minor_processes:
+					if command[2] == mp.name.to_lower():
+						add_line(ContextCommands.get_mp_info(p, mp))
+						return
+	add_line("info command not recognized")
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]

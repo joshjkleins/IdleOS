@@ -39,7 +39,8 @@ var SKILL = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.0015,
 	"color": Color("#00CC55"),
-	"level up signal": hacking_level_up_signal
+	"level up signal": hacking_level_up_signal,
+	"command": "cd hacking"
 }
 
 

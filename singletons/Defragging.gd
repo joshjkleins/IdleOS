@@ -7,6 +7,8 @@ var SKILL = {
 	"name": "Defragging",
 	"color": Color("#cf0000"),
 	"cooldown": 0,
+	"command": "cd defragging
+	"
 }
 
 var MINING = {

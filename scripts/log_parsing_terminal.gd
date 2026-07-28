@@ -25,14 +25,14 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 	is_window = i_window
 	
 	var item_labels = [item_find_container, item_find_container_2, item_find_container_3, item_find_container_4]
-	#var item_chance = int(100.0 / type["item pool"].size())
+	#var item_chance = int(100.0 / type["resource gained"].size())
 	for i in item_labels:
 		i.visible = false
-	for i in range(type["item pool"].size()):
+	for i in range(type["resource gained"].size()):
 		var cont = item_labels[i]
-		var item = type["item pool"][i]
+		var item = type["resource gained"][i]
 		cont.get_child(0).text = item["item"]["name"].to_upper()
-		cont.get_child(1).text = str(type["item pool"][i]["weight"]) + "%" #str(item_chance) + "%"
+		cont.get_child(1).text = str(type["resource gained"][i]["weight"]) + "%" #str(item_chance) + "%"
 		item_labels[i].visible = true
 	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
 	var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
@@ -65,7 +65,7 @@ func start():
 				var eff = base_eff * frag_bonus
 				
 				if randf() < eff:
-					var item_info = Parsing.get_weighted_item(type["item pool"])
+					var item_info = Parsing.get_weighted_item(type["resource gained"])
 					item = item_info["item"]
 					amount = randi_range(item_info["min"], item_info["max"])
 					Inventory.add_resource(item, amount)

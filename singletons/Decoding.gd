@@ -22,6 +22,7 @@ var SKILL = {
 	"color": Color("#378ADD"),
 	"level up signal": decoding_level_up_signal,
 	"efficiency description": "Chance to find rare item.",
+	"command": "cd decoding"
 }
 
 var CACHE = {
