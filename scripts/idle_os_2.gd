@@ -497,10 +497,10 @@ func handle_info_commands(text):
 			var n = p.SKILL.name.to_lower()
 			if command[1] == n:
 				for mp in p.minor_processes:
-					if command[2] == mp.name.to_lower():
+					if command[2] == mp.name.to_lower().replace(" ", "-"):
 						add_line(ContextCommands.get_mp_info(p, mp))
 						return
-	add_line("info command not recognized")
+	add_line("info command not recognized end")
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]

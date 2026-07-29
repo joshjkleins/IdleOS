@@ -112,6 +112,8 @@ enum ItemType {
 	VM_MATCHING_TOKEN, #89
 	VM_PHISHING_TOKEN, #90
 	VM_DECODING_TOKEN, #91
+	SCHOOL_PAYLOAD, #92
+	SMALL_BUSINESS_PAYLOAD, #93
 }
 
 #items
@@ -129,6 +131,9 @@ const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
 const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
 const QUALITY_LOGS = preload("res://items/resources/quality_logs.tres")
 
+### PAYLOADS ###
+const SCHOOL_PAYLOAD = preload("res://items/payloads/school_payload.tres")
+const SMALL_BUSINESS_PAYLOAD = preload("res://items/payloads/small_business_payload.tres")
 
 ### COMBAT ###
 const DDOS = preload("res://items/combat/ddos.tres")
@@ -335,4 +340,6 @@ const ITEM_MAP = {
 	ItemType.VM_MATCHING_TOKEN: VM_MATCHING_TOKEN,
 	ItemType.VM_PHISHING_TOKEN: VM_PHISHING_TOKEN,
 	ItemType.VM_DECODING_TOKEN: VM_DECODING_TOKEN,
+	ItemType.SCHOOL_PAYLOAD: SCHOOL_PAYLOAD,
+	ItemType.SMALL_BUSINESS_PAYLOAD: SMALL_BUSINESS_PAYLOAD,
 }

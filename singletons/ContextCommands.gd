@@ -44,31 +44,39 @@ func tab_space() -> String:
 
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
-	text += "[font_size=12]Efficiency (EFF): [/font_size]\n"
-	text += "[font_size=12]" + skill.SKILL["efficiency description"] + "[/font_size]\n"
+	if skill != Defragging:
+		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 	if skill == Defragging:
-		text += "┌────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND              │\n"
-		text += "├────────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND                             │\n"
+		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+	elif skill == Hacking:
+		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ LOCATION           REQ       EFF/LVL    COMMAND                                       │\n"
+		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	else:
-		text += "┌────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        STATUS      REQ     EFF     EFF/LVL    COMMAND          │\n"
-		text += "├────────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ PROCESS           STATUS      REQ     EFF     EFF/LVL    COMMAND                      │\n"
+		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	
-	for p in skill.minor_processes:
-		text += _build_process_row(p, skill, p["unlocked"])
+	##YOU ARE HERE BUT YOU NEED TO SWAP HACKING LOCATIONS/TARGETS TO RESOURCES? THEN REBUILD HOW THEY WORK IN HACKING
+	if skill == Hacking:
+		for location in Stats.hacking_targets:
+			pass
+	else:
+		for p in skill.minor_processes:
+			text += _build_process_row(p, skill, p["unlocked"])
 	
-	text += "└────────────────────────────────────────────────────────────────────────┘\n"
+	text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
 	if skill == Defragging:
 		return text
-
 	
 	text += "\n"
 	text += "[font_size=12]For additional details[/font_size]\n"
 	text += "[font_size=12]PROCESS             COMMAND[/font_size]\n"
 	text += "[font_size=12]------------------------------------------------[/font_size]\n"
 	for s in skill.minor_processes:
-		text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower() + "[/font_size]\n"
+		text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower().replace(" ", "-") + "[/font_size]\n"
 	return text
 
 func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
@@ -81,7 +89,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var time = str(p["bonus time"]) + " min"
 		var eff = "x" + str(p["bonus efficiency"])
 		if unlocked:
-			return "│ %-14s %-11s %-12s %-9s %-20s │\n" % [
+			return "│ %-14s %-11s %-12s %-9s %-35s │\n" % [
 				p["name"],
 				status,
 				time,
@@ -89,14 +97,19 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				p["command"]
 			]
 		else:
-			return "[color=666666]│ %-14s %-11s %-12s %-9s %-20s │[/color]\n" % [
+			return "[color=666666]│ %-14s %-11s %-12s %-9s %-35s │[/color]\n" % [
 				p["name"],
 				status,
 				time,
 				eff,
 				p["command"]
 			]
-			
+	elif skill == Hacking:
+		return "│ %-20s %-20s │\n" % [
+				p["name"],
+				status,
+				p["command"]
+			]
 	else:
 		var frag_bonus = 1.0
 		if Stats.has_bonus(skill):
@@ -108,7 +121,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var effr = str(p["efficiency rate"] * 100.0) + "%"
 		var eff = str(base_eff * frag_bonus * 100.0) + "%"
 		if !unlocked:
-			return "[color=666666]│ %-14s %-11s %-7d %-7s %-10s %-15s  │[/color]\n" % [
+			return "[color=666666]│ %-17s %-11s %-7d %-7s %-10s %-27s  │[/color]\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
@@ -117,7 +130,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				p["command"]
 			]
 		else:
-			return "│ %-14s %-11s %-7d %-7s %-10s %-15s  │\n" % [
+			return "│ %-17s %-11s %-7d %-7s %-10s %-27s  │\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
@@ -142,33 +155,12 @@ func get_ascii_text(skill: Node) -> String:
 			return Ascii.decoding
 		Defragging:
 			return Ascii.defragging
+		Hacking:
+			return Ascii.hacking
+		Compiling:
+			return Ascii.compiling
 		_:
 			return ""
-
-#Update INFO command on each process to show specifics of skill and minor processes: 
-# just generic 'info' command should be base info for all major skills (lvl, exp, description, commands)
-# info [major skill] should be overview of that specific skill "info mining" (name, lvl, description, commands, minor processes, locked/unlocked, upgrades (vm duration/windows))
-# info [major skill] [minor skill] "info mining logs" should be details of minor skill 
-# (name, exp, description, what is generated, requirements, requirement locations, upgrades(speed, eff))
-#should show the following:
-	#requirements (skill.requirements)
-	#items received (skill.items)
-	#where to get required items
-	#lvl (skill.lvl)
-	#efficiency (skill.eff)
-	#upgrades, upgrade costs/recipes (skill.upgrade)
-	
-	
-# LOGS (mining) - LVL 12 - Finds logs that can be parsed for a random assortment of items.
-# Item(s) gained
-# =====================
-# Logs (100%)..............Used in Parsing to receive various items.
-# VM Mining Token (1%).....Consume to create a seperate window for mining.
-# 
-# Requirements
-# =====================
-# Mining level 1
-
 
 func get_mp_info(skill: Node, process: Dictionary):
 	var return_string = "\n" + process.name + " (" + skill.SKILL.name.to_lower() + ") - LVL " + str(process.level) + " - " + process.description + "\n"
@@ -180,7 +172,7 @@ func get_mp_info(skill: Node, process: Dictionary):
 	if process["requirements"] is Array:
 		for item in process["requirements"]:
 			if item is Dictionary:
-				return_string += item.name + " x" + str(item.amount) + "\n"
+				return_string += item.item.name + " x" + str(item.amount) + "\n"
 			else:
 				return_string += item.name + " x1\n"
 	elif process["requirements"] is ItemData:

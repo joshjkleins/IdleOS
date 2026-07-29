@@ -42,14 +42,40 @@ var SCHOOL = {
 	"heat": 5,
 	"overclock heat": 7,
 	"overheat heat": 2,
-	"requirements": [ {"item": Items.IP_ADDRESS, "amount": 1}, {"item": Items.CREDENTIALS, "amount": 1} ],
+	"requirements": [ { "item": Items.IP_ADDRESS, "amount": 1 }, { "item": Items.CREDENTIALS, "amount": 1 } ],
+	"resource gained": Items.SCHOOL_PAYLOAD,
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var SMALL_BUSINESS = {
+	"name": "Small Business",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -small-business",
+	"efficiency": 0.1,
+	"efficiency rate": 0.001,
+	"unlocked": true,
+	"unlock level": 1,
+	"base speed": 0.2,
+	"overclock speed": 0.05,
+	"overheat speed": 1.0,
+	"heat": 5,
+	"overclock heat": 7,
+	"overheat heat": 2,
+	"requirements": [ { "item": Items.IP_ADDRESS, "amount": 5 }, { "item": Items.ACCOUNT_ACCESS_TOKENS, "amount": 2 } ],
+	"resource gained": Items.SMALL_BUSINESS_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
 }
 
 var minor_processes = [
-	SCHOOL
+	SCHOOL,
+	SMALL_BUSINESS
 ]
 
 func signal_exp(_amount: int):
