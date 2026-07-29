@@ -51,9 +51,9 @@ func get_help_text(skill: Node) -> String:
 		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND                             │\n"
 		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	elif skill == Hacking:
-		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ LOCATION           REQ       EFF/LVL    COMMAND                                       │\n"
-		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌─────────────────────────────────────────────────────┐\n"
+		text += "│ LOCATION                  REQ                       │\n"
+		text += "├─────────────────────────────────────────────────────┤\n"
 	else:
 		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
 		text += "│ PROCESS           STATUS      REQ     EFF     EFF/LVL    COMMAND                      │\n"
@@ -61,13 +61,20 @@ func get_help_text(skill: Node) -> String:
 	
 	##YOU ARE HERE BUT YOU NEED TO SWAP HACKING LOCATIONS/TARGETS TO RESOURCES? THEN REBUILD HOW THEY WORK IN HACKING
 	if skill == Hacking:
-		for location in Stats.hacking_targets:
-			pass
+		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+		for location in locations:
+			text += "│ %-25s %-25s │\n" % [
+				location["name"],
+				location["required payload"].name
+			]
 	else:
 		for p in skill.minor_processes:
 			text += _build_process_row(p, skill, p["unlocked"])
 	
-	text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
+	if skill == Hacking:
+		text += "└─────────────────────────────────────────────────────┘\n"
+	else:
+		text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
 	if skill == Defragging:
 		return text
 	
@@ -75,8 +82,21 @@ func get_help_text(skill: Node) -> String:
 	text += "[font_size=12]For additional details[/font_size]\n"
 	text += "[font_size=12]PROCESS             COMMAND[/font_size]\n"
 	text += "[font_size=12]------------------------------------------------[/font_size]\n"
-	for s in skill.minor_processes:
-		text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower().replace(" ", "-") + "[/font_size]\n"
+	if skill == Hacking:
+		text += "\n"
+		text += "[font_size=12]For additional details[/font_size]\n"
+		text += "[font_size=12]LOCATIONS             COMMAND[/font_size]\n"
+		text += "[font_size=12]------------------------------------------------[/font_size]\n"
+		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+		for location in locations:
+			text += "[font_size=12]" + pad_text(location.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + location.name.to_lower().replace(" ", "-") + "[/font_size]\n"
+	else:
+		text += "\n"
+		text += "[font_size=12]For additional details[/font_size]\n"
+		text += "[font_size=12]PROCESS             COMMAND[/font_size]\n"
+		text += "[font_size=12]------------------------------------------------[/font_size]\n"
+		for s in skill.minor_processes:
+			text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower().replace(" ", "-") + "[/font_size]\n"
 	return text
 
 func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:

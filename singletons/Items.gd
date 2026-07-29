@@ -114,6 +114,7 @@ enum ItemType {
 	VM_DECODING_TOKEN, #91
 	SCHOOL_PAYLOAD, #92
 	SMALL_BUSINESS_PAYLOAD, #93
+	LIBRARY_PAYLOAD, #94
 }
 
 #items
@@ -134,6 +135,7 @@ const QUALITY_LOGS = preload("res://items/resources/quality_logs.tres")
 ### PAYLOADS ###
 const SCHOOL_PAYLOAD = preload("res://items/payloads/school_payload.tres")
 const SMALL_BUSINESS_PAYLOAD = preload("res://items/payloads/small_business_payload.tres")
+const LIBRARY_PAYLOAD = preload("res://items/payloads/library_payload.tres")
 
 ### COMBAT ###
 const DDOS = preload("res://items/combat/ddos.tres")
@@ -342,4 +344,5 @@ const ITEM_MAP = {
 	ItemType.VM_DECODING_TOKEN: VM_DECODING_TOKEN,
 	ItemType.SCHOOL_PAYLOAD: SCHOOL_PAYLOAD,
 	ItemType.SMALL_BUSINESS_PAYLOAD: SMALL_BUSINESS_PAYLOAD,
+	ItemType.LIBRARY_PAYLOAD: LIBRARY_PAYLOAD,
 }

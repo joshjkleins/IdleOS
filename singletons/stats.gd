@@ -21,6 +21,7 @@ var hacking_targets = {
 		"command": "view school",
 		"name": "School",
 		"difficulty": "Easy",
+		"required payload": Items.SCHOOL_PAYLOAD,
 		"targets": [
 			{
 				"name": "Student",
@@ -93,6 +94,7 @@ var hacking_targets = {
 		"command": "view library",
 		"name": "Library",
 		"difficulty": "Easy",
+		"required payload": Items.LIBRARY_PAYLOAD,
 		"targets": [
 			{
 				"name": "Patreon",
@@ -155,6 +157,7 @@ var hacking_targets = {
 		"command": "view small-business",
 		"name": "Small Business",
 		"difficulty": "Easy",
+		"required payload": Items.SMALL_BUSINESS_PAYLOAD,
 		"targets": [
 			{
 				"name": "Worker",

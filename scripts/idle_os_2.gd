@@ -1,7 +1,8 @@
 extends Control
 
 #TODO
-# Finish INFO stuff : finish testing all, make sure defragging and hacking work ok
+# Finish INFO stuff : change hacking targets/locations to resources? maybe? or find a better way to go through the giant dictionary to display info commands such as
+# "info hacking school" : should display all school targets, maybe if it can be formatted properly show each target stats, caches, and what can be in each cache
 # Update Phishing process to get weighted item (recently changed property on process dictionary from just array of items to dictionary with weights)
 #Finish compilation module:
 	#IDEA: compilation
