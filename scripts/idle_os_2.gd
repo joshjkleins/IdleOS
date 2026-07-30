@@ -1,9 +1,8 @@
 extends Control
 
 #TODO
-# Finish INFO stuff : change hacking targets/locations to resources? maybe? or find a better way to go through the giant dictionary to display info commands such as
-# "info hacking school" : should display all school targets, maybe if it can be formatted properly show each target stats, caches, and what can be in each cache
 # Update Phishing process to get weighted item (recently changed property on process dictionary from just array of items to dictionary with weights)
+# Finish updating defragging to consume required items on use instead of lock/unlock : might need to also update info commands to not show lock/unlock now
 #Finish compilation module:
 	#IDEA: compilation
 		#use resources to combine in 'Payloads' for each location. School payload, Hospital payload etc.
@@ -494,13 +493,25 @@ func handle_info_commands(text):
 				return
 	
 	if command.size() == 3:
-		for p in major_processes:
-			var n = p.SKILL.name.to_lower()
-			if command[1] == n:
-				for mp in p.minor_processes:
-					if command[2] == mp.name.to_lower().replace(" ", "-"):
-						add_line(ContextCommands.get_mp_info(p, mp))
-						return
+		if command[1].to_lower() == "hacking":
+			var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+			for loc in locations:
+				if loc["name"].to_lower().replace(" ", "-") == command[2]:
+					add_line(ContextCommands.get_hack_target_info(loc))
+					return
+		elif command[1].to_lower() == "defragging":
+			for minor_p in Defragging.minor_processes:
+				if command[2].to_lower() == minor_p.name.to_lower():
+					add_line(ContextCommands.get_mp_dfg_info(Defragging, minor_p))
+					return
+		else:
+			for p in major_processes:
+				var n = p.SKILL.name.to_lower()
+				if command[1] == n:
+					for mp in p.minor_processes:
+						if command[2] == mp.name.to_lower().replace(" ", "-"):
+							add_line(ContextCommands.get_mp_info(p, mp))
+							return
 	add_line("info command not recognized end")
 
 ##VM TOKENS

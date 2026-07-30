@@ -6,7 +6,7 @@ signal compile_level_up_signal
 
 # When the player earns the bonus
 var bonus_expires_at: int
-var vm_token = Items.VM_DECODING_TOKEN
+var vm_token = Items.VM_COMPILING_TOKEN
 @onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0

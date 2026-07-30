@@ -78,10 +78,7 @@ func get_help_text(skill: Node) -> String:
 	if skill == Defragging:
 		return text
 	
-	text += "\n"
-	text += "[font_size=12]For additional details[/font_size]\n"
-	text += "[font_size=12]PROCESS             COMMAND[/font_size]\n"
-	text += "[font_size=12]------------------------------------------------[/font_size]\n"
+
 	if skill == Hacking:
 		text += "\n"
 		text += "[font_size=12]For additional details[/font_size]\n"
@@ -182,6 +179,15 @@ func get_ascii_text(skill: Node) -> String:
 		_:
 			return ""
 
+func get_mp_dfg_info(skill: Node, process: Dictionary):
+	var return_string = "\n" + process.name + " (" + skill.SKILL.name.to_lower() + ") - " + process.description + "\n"
+	#Requirements
+	return_string += "\nRequirements\n"
+	return_string += "=======================\n"
+	return_string += process.requirements.item.name + " x" + str(process.requirements.amount) + "\n"
+	
+	return return_string
+
 func get_mp_info(skill: Node, process: Dictionary):
 	var return_string = "\n" + process.name + " (" + skill.SKILL.name.to_lower() + ") - LVL " + str(process.level) + " - " + process.description + "\n"
 	
@@ -249,3 +255,36 @@ func info_command_text():
 			return_string += pad_text(name_s, l_name) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(experience["display"], l_exp) + pad_text(s.SKILL.command, l_cmd) + "\n"
 	
 	return return_string
+
+			#{
+				#"name": "Student",
+				#"difficulty": "Easy",
+				#"command": "hack student",
+				#"requirements": [{"item": Items.IP_ADDRESS, "amount": 1}, {"item": Items.CREDENTIALS, "amount": 1}],
+				#"heat": 5,
+				#"exp": 600,
+				#"integrity": 100,
+				#"firewall": 10,
+				#"counter": 5,
+				#"counter speed": 16.0,
+				#"loot": Items.STUDENT_CACHE
+			#},
+
+func get_hack_target_info(location: Dictionary):
+	var return_text = ""
+	return_text += location.name + "\n"
+	for tar in location["targets"]:
+		return_text += tar.name + "\n"
+		var integrity_text = "[font_size=12]♥Integrity: " + str(tar.integrity) + "[/font_size]"
+		var firewall_text = "[font_size=12]🛡Firewall: " + str(tar.firewall) + "[/font_size]"
+		var require_text = "[font_size=12]Requirements: " + str(tar.requirements.item.name) + " x" + str(tar.requirements.amount) + "[/font_size]"
+		var counter_atk_text = "[font_size=12]⚔Counter attack: " + str(tar.counter) + "[/font_size]"
+		var counter_spd_text = "[font_size=12]Counter speed: " + str(tar["counter speed"]) + "[/font_size]"
+		var exp_text = "[font_size=12]Exp: " + str(tar.exp) + "[/font_size]"
+		var pad_text_length = 30
+		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
+		return_text += "\t" + pad_text(counter_atk_text, pad_text_length) + pad_text(counter_spd_text, pad_text_length) + pad_text(exp_text, pad_text_length) + "\n"
+		return_text += "\n"
+		
+	
+	return return_text

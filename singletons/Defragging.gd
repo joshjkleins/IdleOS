@@ -7,14 +7,14 @@ var SKILL = {
 	"name": "Defragging",
 	"color": Color("#cf0000"),
 	"cooldown": 0,
-	"command": "cd defragging
-	"
+	"command": "cd defragging"
 }
 
 var MINING = {
 	"name": "Mining",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.LOGS, "amount": 15 },
 	"skill": Mining,
 	"bonus time": 10,
 	"bonus efficiency": 1.50,
@@ -26,6 +26,7 @@ var PARSING = {
 	"name": "Parsing",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.ENCRYPTED_PASSWORDS, "amount": 15 },
 	"skill": Parsing,
 	"bonus time": 10,
 	"bonus efficiency": 1.50,
@@ -38,6 +39,7 @@ var CRACKING = {
 	"name": "Cracking",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.USERNAMES, "amount": 15 },
 	"skill": Cracking,
 	"bonus time": 10,
 	"bonus efficiency": 1.50,
@@ -50,6 +52,7 @@ var MATCHING = {
 	"name": "Matching",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.CREDENTIALS, "amount": 15 },
 	"skill": Matching,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
@@ -61,6 +64,7 @@ var PHISHING = {
 	"name": "Phishing",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.IP_ADDRESS, "amount": 15 },
 	"skill": Phishing,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
@@ -72,6 +76,7 @@ var HACKING = {
 	"name": "Hacking",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.SQL_INJECTOR, "amount": 15 },
 	"skill": Hacking,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,
@@ -83,6 +88,7 @@ var DECODING = {
 	"name": "Decoding",
 	"unlocked": false,
 	"unlock cost": 100,
+	"requirements": { "item": Items.PASSWORDS, "amount": 15 },
 	"skill": Decoding,
 	"bonus time": 10,
 	"bonus efficiency": 1.5,

@@ -115,6 +115,7 @@ enum ItemType {
 	SCHOOL_PAYLOAD, #92
 	SMALL_BUSINESS_PAYLOAD, #93
 	LIBRARY_PAYLOAD, #94
+	VM_COMPILING_TOKEN, #95
 }
 
 #items
@@ -150,6 +151,7 @@ const VM_CRACKING_TOKEN = preload("res://items/tokens/cracking/vm_cracking_token
 const VM_MATCHING_TOKEN = preload("res://items/tokens/matching/vm_matching_token.tres")
 const VM_PHISHING_TOKEN = preload("res://items/tokens/phishing/vm_phishing_token.tres")
 const VM_DECODING_TOKEN = preload("res://items/tokens/decoding/vm_decoding_token.tres")
+const VM_COMPILING_TOKEN = preload("res://items/tokens/compiling/vm_compiling_token.tres")
 
 #REFRESH
 const REFRESH_TOKEN = preload("res://items/tokens/refresh/refresh_token.tres")
@@ -345,4 +347,5 @@ const ITEM_MAP = {
 	ItemType.SCHOOL_PAYLOAD: SCHOOL_PAYLOAD,
 	ItemType.SMALL_BUSINESS_PAYLOAD: SMALL_BUSINESS_PAYLOAD,
 	ItemType.LIBRARY_PAYLOAD: LIBRARY_PAYLOAD,
+	ItemType.VM_COMPILING_TOKEN: VM_COMPILING_TOKEN,
 }
