@@ -21,7 +21,11 @@ func cast_lines(type: Dictionary, lines: int):
 		for line in line_added:
 			line.begin(type)
 		
+		var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+		var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
+		var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
 		$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str( Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]) + " lines in use"
+		$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text += "[color=#888888][font_size=12](eff: " + eff_text + "%)[/font_size][/color]"
 
 #vm token specific
 func vm_cast_all_lines(type: Dictionary, window: bool = false):
@@ -48,8 +52,16 @@ func cast_all_lines(type: Dictionary, window: bool = false):
 		line_added.append(new_line)
 	for line in line_added:
 		line.begin(type)
+		line.caught_something.connect(update_eff_label)
 	
-	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str( Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]) + " lines in use"
+	update_eff_label(type)
+
+func update_eff_label(type):
+	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
+	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
+	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str( Phishing.max_lines + Phishing.process_upgrades["max lines"]["amount"]) + " lines in use\n"
+	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite.[/font_size][/color]"
 
 func _clear_lines():
 	if active_lines_container.get_child_count() > 0:

@@ -21,6 +21,7 @@ signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
 signal end_phishing_safely_signal
+signal end_compiling_safely_signal
 signal item_added_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
 
@@ -66,6 +67,9 @@ func end_data_mining_safely():
 
 func end_cred_matching_safely():
 	end_cred_matching_safely_signal.emit()
+
+func end_compiling_safely():
+	end_compiling_safely_signal.emit()
 
 func update_hud(skill): #SINGLTON AS PARAM
 	update_hud_signal.emit(skill)

@@ -10,5 +10,6 @@ shortened_name = "Account tokens"
 description = "Tokens used to breach accounts"
 valuable = false
 value = 0
-color_type = 6
+color_type = 10
+obtained_from = Array[int]([])
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

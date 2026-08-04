@@ -82,9 +82,14 @@ layout_mode = 2
 size_flags_vertical = 0
 focus_mode = 2
 
-[node name="LeadText" type="Label" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
+[node name="LeadText" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
 layout_mode = 2
-text = "IdleOS> "
+size_flags_vertical = 4
+bbcode_enabled = true
+text = "IdleOS>"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
 
 [node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
 layout_mode = 2

@@ -5,14 +5,14 @@ signal on_cooldown_signal #used to trigger HUD countdown in defragging view
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Defragging",
-	"color": Color("#cf0000"),
+	"color": Color("#EF4444"),
 	"cooldown": 0,
 	"command": "cd defragging"
 }
 
 var MINING = {
 	"name": "Mining",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.LOGS, "amount": 15 },
 	"skill": Mining,
@@ -24,7 +24,7 @@ var MINING = {
 
 var PARSING = {
 	"name": "Parsing",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.ENCRYPTED_PASSWORDS, "amount": 15 },
 	"skill": Parsing,
@@ -37,7 +37,7 @@ var PARSING = {
 
 var CRACKING = {
 	"name": "Cracking",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.USERNAMES, "amount": 15 },
 	"skill": Cracking,
@@ -50,7 +50,7 @@ var CRACKING = {
 
 var MATCHING = {
 	"name": "Matching",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.CREDENTIALS, "amount": 15 },
 	"skill": Matching,
@@ -62,7 +62,7 @@ var MATCHING = {
 
 var PHISHING = {
 	"name": "Phishing",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.IP_ADDRESS, "amount": 15 },
 	"skill": Phishing,
@@ -74,7 +74,7 @@ var PHISHING = {
 
 var HACKING = {
 	"name": "Hacking",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.SQL_INJECTOR, "amount": 15 },
 	"skill": Hacking,
@@ -86,7 +86,7 @@ var HACKING = {
 
 var DECODING = {
 	"name": "Decoding",
-	"unlocked": false,
+	"unlocked": true,
 	"unlock cost": 100,
 	"requirements": { "item": Items.PASSWORDS, "amount": 15 },
 	"skill": Decoding,
@@ -100,6 +100,13 @@ func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
 
 var minor_processes = [MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING]
+
+func has_requirements(skill: Dictionary):
+	var item = skill["requirements"]["item"]
+	var amount = skill["requirements"]["amount"]
+	if Inventory.get_amount(item) < amount:
+		return false
+	return true
 
 func activate_cooldown():
 	SKILL["on cooldown"] = true

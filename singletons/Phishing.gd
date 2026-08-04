@@ -23,7 +23,7 @@ var SKILL = {
 	"name": "Phishing",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#1d9e75"),
+	"color": Color("#3B82F6"),
 	"level up signal": phishing_level_up_signal,
 	"efficiency description": "Chance for successful bite",
 	"command": "cd phishing"

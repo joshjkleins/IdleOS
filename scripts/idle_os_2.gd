@@ -1,13 +1,9 @@
 extends Control
 
 #TODO
-# Update Phishing process to get weighted item (recently changed property on process dictionary from just array of items to dictionary with weights)
-# Finish updating defragging to consume required items on use instead of lock/unlock : might need to also update info commands to not show lock/unlock now
-#Finish compilation module:
-	#IDEA: compilation
-		#use resources to combine in 'Payloads' for each location. School payload, Hospital payload etc.
-		#Command: compile -school
-		#Hacking will now consume payloads
+# Finish compilation module: think of good efficiency mechanic, polish visuals of compiling terminal, add to Defragging
+# Think about simplifying initial commands so they make sense: List | Info | Skills
+
 #Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
 #No longer able to sell items - might end up with a bunch of valuable items, need fix for this, what can these be turned into? maybe compile can change them to valuable hacking items?? Or maybe create randmoized offer table ie parents credit card can exchange for 50 passwords
 #Remove marketplace completely: remove relevant commands, marketplace, contracts
@@ -20,9 +16,11 @@ extends Control
 #Still need to solve hacking equip problem. Might need archetectural change.
 #Update UI to show payloads on viewing locations screen [School (12)] [Small business (5)] etc
 #Upgrade within hacking system to unlock more targets/locations
+#Hacking will now consume payloads
 
 #SAVE/LOAD SYSTEM
 
+#BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade (if upgrades are a thing yet)
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -53,6 +51,7 @@ extends Control
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 @onready var phishing_scene = preload("res://scenes/phishing_terminal.tscn")
 @onready var defrag_scene = preload("res://scenes/defrag_terminal.tscn")
+@onready var compiling_scene = preload("res://scenes/compile_terminal.tscn")
 
 
 enum Context {
@@ -131,6 +130,7 @@ func _ready():
 	Signals.end_phishing_safely_signal.connect(phishing_ended_safely)
 	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
 	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
+	Signals.end_compiling_safely_signal.connect(compiling_ended_safely)
 	Signals.defrag_finished_signal.connect(defrag_finished)
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	
@@ -230,63 +230,64 @@ func get_context_lead():
 		Context.ROOT:
 			Signals.update_hud_root()
 			return "IdleOS>"
-		Context.DARKWEB:
-			return "IdleOS/Darkweb>"
-		Context.MARKETPLACE:
-			match current_marketplace_context:
-				MarketContext.MAIN:
-					return "IdleOS/Marketplace>"
-				MarketContext.VALUABLES:
-					return "IdleOS/Marketplace/Valuables>"
-				MarketContext.VALUABLES_DETAILS:
-					return "IdleOS/Marketplace/Valuables>"
-				MarketContext.BLACK_MARKET:
-					return "IdleOS/Marketplace/BlackMarket>"
-				MarketContext.BLACK_MARKET_OFFENSIVE:
-					return "IdleOS/Marketplace/BlackMarket/Offensive>"
-				MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS:
-					return "IdleOS/Marketplace/BlackMarket/Offensive>"
-				MarketContext.BLACK_MARKET_DEFENSIVE:
-					return "IdleOS/Marketplace/BlackMarket/Defensive>"
-				MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
-					return "IdleOS/Marketplace/BlackMarket/Defensive>"
-				MarketContext.BLACK_MARKET_UTILITY:
-					return "IdleOS/Marketplace/BlackMarket/Utility>"
-				MarketContext.BLACK_MARKET_UTILITY_DETAILS:
-					return "IdleOS/Marketplace/BlackMarket/Utility>"
-				MarketContext.CONTRACTS:
-					return "IdleOS/Marketplace/Contracts>"
-				MarketContext.UPGRADES:
-					return "IdleOS/Marketplace/Upgrades>"
-				MarketContext.UPGRADES_DETAILS:
-					return "IdleOS/Marketplace/Upgrades/Details>"
-				
 		Context.MINING:
 			Signals.update_hud(Mining)
-			return "IdleOS/Mining>"
+			return "IdleOS/[color=#%s]Mining[/color]>" % Mining.SKILL.color.to_html(false)
 		Context.PARSING:
 			Signals.update_hud(Parsing)
-			return "IdleOS/Parsing>"
+			return "IdleOS/[color=#%s]Parsing[/color]>" % Parsing.SKILL.color.to_html(false)
 		Context.CRACKING:
 			Signals.update_hud(Cracking)
-			return "IdleOS/Cracking>"
+			return "IdleOS/[color=#%s]Cracking[/color]>" % Cracking.SKILL.color.to_html(false)
 		Context.MATCHING:
 			Signals.update_hud(Matching)
-			return "IdleOS/Matching>"
+			return "IdleOS/[color=#%s]Matching[/color]>" % Matching.SKILL.color.to_html(false)
 		Context.HACKING:
 			return "IdleOS/Hacking>"
 		Context.DECODING:
 			Signals.update_hud(Decoding)
-			return "IdleOS/Decoding>"
+			return "IdleOS/[color=#%s]Decoding[/color]>" % Decoding.SKILL.color.to_html(false)
 		Context.PHISHING:
 			Signals.update_hud(Phishing)
-			return "IdleOS/Phishing>"
+			return "IdleOS/[color=#%s]Phishing[/color]>" % Phishing.SKILL.color.to_html(false)
 		Context.DEFRAGGING:
 			Signals.update_hud(Defragging)
-			return "IdleOS/Defragging>"
+			return "IdleOS/[color=#%s]Defragging[/color]>" % Defragging.SKILL.color.to_html(false)
 		Context.COMPILING:
 			Signals.update_hud(Compiling)
-			return "IdleOS/Compiling"
+			return "IdleOS/[color=#%s]Compiling[/color]>" % Compiling.SKILL.color.to_html(false)
+		#Context.DARKWEB:
+			#return "IdleOS/Darkweb>"
+		#Context.MARKETPLACE:
+			#match current_marketplace_context:
+				#MarketContext.MAIN:
+					#return "IdleOS/Marketplace>"
+				#MarketContext.VALUABLES:
+					#return "IdleOS/Marketplace/Valuables>"
+				#MarketContext.VALUABLES_DETAILS:
+					#return "IdleOS/Marketplace/Valuables>"
+				#MarketContext.BLACK_MARKET:
+					#return "IdleOS/Marketplace/BlackMarket>"
+				#MarketContext.BLACK_MARKET_OFFENSIVE:
+					#return "IdleOS/Marketplace/BlackMarket/Offensive>"
+				#MarketContext.BLACK_MARKET_OFFENSIVE_DETAILS:
+					#return "IdleOS/Marketplace/BlackMarket/Offensive>"
+				#MarketContext.BLACK_MARKET_DEFENSIVE:
+					#return "IdleOS/Marketplace/BlackMarket/Defensive>"
+				#MarketContext.BLACK_MARKET_DEFENSIVE_DETAILS:
+					#return "IdleOS/Marketplace/BlackMarket/Defensive>"
+				#MarketContext.BLACK_MARKET_UTILITY:
+					#return "IdleOS/Marketplace/BlackMarket/Utility>"
+				#MarketContext.BLACK_MARKET_UTILITY_DETAILS:
+					#return "IdleOS/Marketplace/BlackMarket/Utility>"
+				#MarketContext.CONTRACTS:
+					#return "IdleOS/Marketplace/Contracts>"
+				#MarketContext.UPGRADES:
+					#return "IdleOS/Marketplace/Upgrades>"
+				#MarketContext.UPGRADES_DETAILS:
+					#return "IdleOS/Marketplace/Upgrades/Details>"
+				
+
 
 
 #Changes context and updates leading text
@@ -328,6 +329,14 @@ func universal_commands(text):
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
+	if text.begins_with("list"):
+		var start = text.find('"') + 1
+		var end = text.find('"', start)
+		var item_name = text.substr(start, end - start)
+		var item = Items.ITEM_NAME_MAP.get(item_name.to_lower())
+		if item != null:
+			add_line(Inventory.list_specific_item(item))
+			return true
 	match text:
 		"list -r":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
@@ -512,7 +521,12 @@ func handle_info_commands(text):
 						if command[2] == mp.name.to_lower().replace(" ", "-"):
 							add_line(ContextCommands.get_mp_info(p, mp))
 							return
-	add_line("info command not recognized end")
+	add_line("info command not recognized")
+	add_line("info commands")
+	add_line("-----------------")
+	add_line("info                        overview of all main skills                  [color=gray]ex. info[/color]")
+	add_line("info [skill]                overview of specific skill and processes     [color=gray]ex. info mining[/color]")
+	add_line("info [skill] [process]      overview of specific processes               [color=gray]ex. info mining logs[/color]")
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]
@@ -526,7 +540,7 @@ func handle_vm_token_commands(text):
 	
 		
 	#find major process
-	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding]
+	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
 	var target_process = null
 	for p in processes:
 		if p.SKILL.name.to_lower() == commands[1]:
@@ -1060,7 +1074,72 @@ func phishing_ended_safely():
 ################### COMPILING #####################
 ###################################################
 func compiling_commands(text):
-	pass
+	text = text.to_lower().strip_edges()
+	for ms in Compiling.minor_processes:
+		if text == ms["command"]:
+			if process_running:
+				add_line("Process already running")
+				return
+			var missing = false
+			for req in ms["requirements"]:
+				if Inventory.get_amount(req.item) < req.amount:
+					add_line("Missing required resource: " + req.item.name + " x" + str(req.amount))
+					missing = true
+			if missing:
+				return
+			
+			start_compiling(ms)
+			return
+	match text:
+		"stop":
+			unstick_current_process()
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"stop -s":
+			add_line("Finishing current compile...")
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+			else:
+				add_line("No process found to focus")
+		"root", "..":
+			return_to_root()
+		"overclock":
+			overclock_logic()
+		"overclock -kill":
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			add_line("Command not found")
+
+func start_compiling(minor_process: Dictionary):
+	if !minor_process.unlocked:
+		add_line("Process not unlocked")
+		return
+	
+	var new_compiling_terminal = compiling_scene.instantiate()
+	terminal_body_container.add_child(new_compiling_terminal)
+	process_running = true
+	current_process = new_compiling_terminal
+	new_compiling_terminal.start(minor_process)
+	add_new_scrollback()
+
+func compiling_ended_safely():
+	unstick_current_process()
+	current_process = null
+	process_running = false
+	Stats.overclocked = false
+	add_line("Compiling stopped.")
 
 ###################################################
 ################### DEFRAGGING ####################
@@ -1107,6 +1186,10 @@ func defragging_commands(text):
 			add_line("Command not found")
 
 func start_defragging(minor_skill: Dictionary):
+	if !Defragging.has_requirements(minor_skill):
+		add_line("Missing requirements")
+		return
+
 	var new_defrag_terminal = defrag_scene.instantiate()
 	terminal_body_container.add_child(new_defrag_terminal)
 	process_running = true

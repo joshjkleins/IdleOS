@@ -20,7 +20,7 @@ var SKILL = {
 	"name": "Matching",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#D4537E"),
+	"color": Color("#EAB308"),
 	"level up signal": matching_level_up_signal,
 	"efficiency description": "Chance to make multiple resources.",
 	"command": "cd matching"

@@ -20,7 +20,7 @@ var SKILL = {
 	"name": "Cracking",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#EF9F27"),
+	"color": Color("#F2600C"),
 	"level up signal": cracking_level_up_signal,
 	"efficiency description": "Chance to instantly crack encryption",
 	"command": "cd cracking"

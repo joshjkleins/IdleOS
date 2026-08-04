@@ -21,6 +21,14 @@ enum ItemColor {
 	DECODING, #7
 	VALUABLE, #8
 	CONSUMABLE, #9
+	COMPILING, #10
 }
 
 @export var color_type: ItemColor
+@export var obtained_from: Array[ItemColor] = []
+
+func get_obtained_from_skills() -> Array:
+	var result = []
+	for s in obtained_from:
+		result.append(ItemColor.keys()[s].capitalize())
+	return result

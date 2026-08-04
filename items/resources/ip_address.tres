@@ -10,5 +10,6 @@ shortened_name = ""
 description = "IP address used to find hacking target"
 valuable = false
 value = 0
-color_type = 6
+color_type = 10
+obtained_from = Array[int]([5, 7])
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

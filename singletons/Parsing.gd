@@ -21,7 +21,7 @@ var SKILL = {
 	"name": "Parsing",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#7F77DD"),
+	"color": Color("#EC4899"),
 	"level up signal": parsing_level_up_signal,
 	"efficiency description": "Increases chance of finding a resource per row.",
 	"command": "cd parsing"
@@ -46,10 +46,9 @@ var LOGS = {
 	"overheat heat": 1,
 	"requirements": Items.LOGS,
 	"resource gained": [
-		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 45 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 45 },
-		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 5 },
+		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 33 },
 	],
 	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
 	"efficiency description": "Increases chance of finding a resource per row.",

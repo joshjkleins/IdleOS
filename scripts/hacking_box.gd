@@ -55,9 +55,10 @@ func select_person(target: Dictionary = {}, loadout: Dictionary = {}):
 		await _red_flash(target, persons_container)
 
 func can_hack_person(_target: Dictionary = {}):
-	for item in _target["requirements"]:
-		if Inventory.get_amount(item.item) < item["amount"]:
-			return false
+	#for item in _target["requirements"]:
+	var req = _target.requirements
+	if Inventory.get_amount(req.item) < req["amount"]:
+		return false
 	return true
 
 func persons_to_targets():

@@ -4,33 +4,11 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	#return
+	add_resource(Items.SCHOOL_PAYLOAD, 3)
+	add_resource(Items.SQL_INJECTOR, 7)
+	return
 	for i in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[i], 20)
-	#pass
-	add_resource(Items.DATA, 2500)
-	add_resource(Items.LOGS, 50)
-	add_resource(Items.ENCRYPTED_PASSWORDS, 50)
-	add_resource(Items.ENCRYPTED_PINS, 250)
-	add_resource(Items.PASSWORDS, 50)
-	add_resource(Items.USERNAMES, 50)
-	add_resource(Items.STUDENT_CACHE, 200)
-	#add_resource(Items.PINS, 3)
-	#add_resource(Items.ACCOUNT_NUMBERS, 3)
-	add_resource(Items.VM_MINING_TOKEN, 50)
-	add_resource(Items.VM_PARSING_TOKEN, 10)
-	add_resource(Items.VM_CRACKING_TOKEN, 50)
-	add_resource(Items.VM_MATCHING_TOKEN, 10)
-	add_resource(Items.VM_PHISHING_TOKEN, 100)
-	add_resource(Items.VM_DECODING_TOKEN, 50)
-	#add_resource(Items.REFRESH_TOKEN, 500)
-	#add_resource(Items.IP_ADDRESS, 4)
-	#add_resource(Items.CREDENTIALS, 4)
-	#add_resource(Items.SQL_INJECTOR, 25)
-	#add_resource(Items.PACKET_SPOOF, 6)
-	#add_resource(Items.ADMIN_CACHE, 1)
-	#add_resource(Items.COP_CACHE, 1)
-	#add_resource(Items.BODY_CAM_FOOTAGE_DELETION_LOGS, 2)
+		add_resource(Items.ITEM_MAP[i], 500)
 
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:
@@ -74,6 +52,36 @@ func _matches_filter(resource, filter: InventoryFilter) -> bool:
 			return !resource.valuable and !resource.name.contains("cache")
 		_:
 			return true
+
+func list_specific_item(item: ItemData):
+	var item_name = "Name: " + item.name
+	var amount = "Current amount: " + str(get_amount(item))
+	var description = "Description: " + item.description
+	#var obtained_from = item.get_obtained_from_skills()
+	
+	var of = []
+	for i in item.obtained_from:
+		var text = item.ItemColor.keys()[i].capitalize()
+		var c = Palette.get_color(i)
+		var hex = c.to_html(false)
+		of.append("[color=#%s]%s[/color]" % [hex, text])
+	
+	var obtained_from = "Obtained from: " + ", ".join(of)
+	
+	var mu_text = item.ItemColor.keys()[item.color_type].capitalize()
+	var c = Palette.get_color(item.color_type)
+	var hex = c.to_html(false)
+	
+	var main_use = "Main use: [color=#%s]%s[/color]" % [hex, mu_text]
+
+	var text = "\n"
+	text += item_name + "\n"
+	text += amount + "\n"
+	text += description + "\n"
+	text += obtained_from + "\n"
+	text += main_use + "\n\n"
+
+	return text
 
 func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 	var amount_width = 15

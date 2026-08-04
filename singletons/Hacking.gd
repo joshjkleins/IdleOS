@@ -39,7 +39,7 @@ var SKILL = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.0015,
 	"efficiency description": "Chance for hacking attack to deal double damage",
-	"color": Color("#00CC55"),
+	"color": Color("#22C55E"),
 	"level up signal": hacking_level_up_signal,
 	"command": "cd hacking"
 }

@@ -11,4 +11,5 @@ description = "Use to hack library targets"
 valuable = false
 value = 0
 color_type = 0
+obtained_from = Array[int]([7, 6])
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

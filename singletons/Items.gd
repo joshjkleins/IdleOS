@@ -251,6 +251,12 @@ const ASSOCIATE_ATTORNEY_CACHE = preload("res://items/cache_data/law_firm/associ
 const LAWYER_CACHE = preload("res://items/cache_data/law_firm/lawyer_cache.tres")
 const PARTNER_CACHE = preload("res://items/cache_data/law_firm/partner_cache.tres")
 
+var ITEM_NAME_MAP = {}
+
+func _ready():
+	for item in ITEM_MAP.values():
+		ITEM_NAME_MAP[item.name.to_lower()] = item
+
 const ITEM_MAP = {
 	ItemType.DATA: DATA,
 	ItemType.LOGS: LOGS,

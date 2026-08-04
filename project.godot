@@ -37,9 +37,9 @@ Hacking="*res://singletons/Hacking.gd"
 Marketplace="*res://singletons/Marketplace.gd"
 ContractsManager="*res://singletons/ContractsManager.gd"
 Phishing="*res://singletons/Phishing.gd"
-Palette="*res://singletons/Palette.gd"
-Defragging="*res://singletons/Defragging.gd"
 Compiling="*res://singletons/Compiling.gd"
+Defragging="*res://singletons/Defragging.gd"
+Palette="*res://singletons/Palette.gd"
 
 [display]
 

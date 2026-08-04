@@ -11,7 +11,7 @@ var vm_token = Items.VM_COMPILING_TOKEN
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
 
-var terminal_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
+var terminal_scene = preload("res://scenes/compile_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
@@ -19,7 +19,7 @@ var SKILL = {
 	"name": "Compiling",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#378ADD"),
+	"color": Color("#8B5CF6"),
 	"level up signal": compile_level_up_signal,
 	"efficiency description": "??????",
 	"command": "cd compiling"
@@ -36,9 +36,9 @@ var SCHOOL = {
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed": 0.2,
-	"overclock speed": 0.05,
-	"overheat speed": 1.0,
+	"base speed": 15.0,
+	"overclock speed": 3.0,
+	"overheat speed": 0.2,
 	"heat": 5,
 	"overclock heat": 7,
 	"overheat heat": 2,
@@ -60,9 +60,9 @@ var SMALL_BUSINESS = {
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed": 0.2,
-	"overclock speed": 0.05,
-	"overheat speed": 1.0,
+	"base speed": 10.0,
+	"overclock speed": 3.0,
+	"overheat speed": 0.2,
 	"heat": 5,
 	"overclock heat": 7,
 	"overheat heat": 2,
@@ -90,6 +90,20 @@ var process_upgrades = {
 	"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
 }
 
+
+func has_requirements(minor_process) -> bool:
+	for req in minor_process.requirements:
+		if Inventory.get_amount(req.item) < req.amount:
+			return false
+	return true
+
+func missing_requirements_text(minor_process) -> String:
+	var text = ""
+	for req in minor_process.requirements:
+		if Inventory.get_amount(req.item) < req.amount:
+			text += "Missing " + req.item.name + " x" + str(req.amount) + "\n"
+	return text
+
 func get_upgrade_cost(upgrade_stat: String) -> int:
 	return process_upgrades[upgrade_stat]["level"] * 800 + 100
 
@@ -112,7 +126,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	new_window.set_repeat(repeat)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
-	new_window.set_processes(Decoding, minor_process)
+	new_window.set_processes(Parsing, minor_process)
 	
 	new_window.add_child(content_instance)
 	
@@ -124,8 +138,8 @@ func create_vm_window(minor_process, repeat) -> Window:
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
-		content_instance.set_cache_type(minor_process, true)
-		content_instance.start_decrypting()
+		#content_instance.set_parse_type(minor_process, true)
+		content_instance.start(minor_process, true)
 	)
 	CURRENT_VMS += 1
 	return new_window

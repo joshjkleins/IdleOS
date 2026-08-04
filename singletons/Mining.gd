@@ -20,7 +20,7 @@ var SKILL = {
 	"name": "Mining",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#a97c54"),
+	"color": Color("#7A4A2E"),
 	"level up signal": mining_level_up_signal,
 	"efficiency description": "Chance to receive multiple resources. Greater than 100% efficiency yields guaranteed multiple resources.",
 	"command": "cd mining"

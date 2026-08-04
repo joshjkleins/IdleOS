@@ -20,22 +20,22 @@ func update_info(info):
 		for node in $MarginContainer/VBoxContainer/RequirementsRow.get_children():
 			node.queue_free()
 	
-	for item in info.requirements:
-		var hbc = HBoxContainer.new()
-		
-		var nln = Label.new()
-		nln.text = item.item["name"]
-		nln.add_theme_font_size_override("font_size", 12)
-		
-		var nla = Label.new()
-		nla.text = "x" + str(item["amount"])
-		nla.add_theme_font_size_override("font_size", 12)
-		nla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nla.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		
-		hbc.add_child(nln)
-		hbc.add_child(nla)
-		$MarginContainer/VBoxContainer/RequirementsRow.add_child(hbc)
+	var req = info.requirements
+	var hbc = HBoxContainer.new()
+	
+	var nln = Label.new()
+	nln.text = req.item["name"]
+	nln.add_theme_font_size_override("font_size", 12)
+	
+	var nla = Label.new()
+	nla.text = "x" + str(req["amount"])
+	nla.add_theme_font_size_override("font_size", 12)
+	nla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nla.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	
+	hbc.add_child(nln)
+	hbc.add_child(nla)
+	$MarginContainer/VBoxContainer/RequirementsRow.add_child(hbc)
 	
 	if $MarginContainer/VBoxContainer/LootContainer.get_children().size() > 0:
 		for n in $MarginContainer/VBoxContainer/LootContainer.get_children():

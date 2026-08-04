@@ -48,7 +48,7 @@ func get_help_text(skill: Node) -> String:
 		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 	if skill == Defragging:
 		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        STATUS      DURATION     EFF       COMMAND                             │\n"
+		text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
 		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	elif skill == Hacking:
 		text += "┌─────────────────────────────────────────────────────┐\n"
@@ -69,13 +69,16 @@ func get_help_text(skill: Node) -> String:
 			]
 	else:
 		for p in skill.minor_processes:
-			text += _build_process_row(p, skill, p["unlocked"])
+			if skill == Defragging:
+				text += _build_defrag_process_row(p, skill)
+			else:
+				text += _build_process_row(p, skill, p["unlocked"])
 	
 	if skill == Hacking:
 		text += "└─────────────────────────────────────────────────────┘\n"
 	else:
 		text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
-	if skill == Defragging:
+	if skill == Defragging: #return early since all relavent info is in base info command
 		return text
 	
 
@@ -95,6 +98,21 @@ func get_help_text(skill: Node) -> String:
 		for s in skill.minor_processes:
 			text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower().replace(" ", "-") + "[/font_size]\n"
 	return text
+
+func _build_defrag_process_row(p: Dictionary, skill: Node):
+	var name = p.name
+	var req = p.requirements.item.name + " x" + str(p.requirements.amount)
+	var duration = str(p["bonus time"]) + " min"
+	var eff = "x" + str(p["bonus efficiency"])
+	var command = p.command
+	
+	return "│ %-14s %-26s %-12s %-9s %-20s │\n" % [
+				name,
+				req,
+				duration,
+				eff,
+				command
+			]
 
 func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	var status = "ONLINE"

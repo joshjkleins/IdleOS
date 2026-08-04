@@ -38,10 +38,11 @@ expand_mode = 2
 layout_mode = 2
 text = "Active lines"
 
-[node name="SlotsLabel" type="Label" parent="ActiveLines/MarginContainer/VBoxContainer"]
+[node name="SlotsLabel" type="RichTextLabel" parent="ActiveLines/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.431373, 0.431373, 0.431373, 1)
+bbcode_enabled = true
 text = "1/2 slots used"
+fit_content = true
 
 [node name="ActiveLinesContainer" type="VBoxContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
 layout_mode = 2

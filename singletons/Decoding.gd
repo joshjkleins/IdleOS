@@ -19,7 +19,7 @@ var SKILL = {
 	"name": "Decoding",
 	"level": 1,
 	"experience": 0,
-	"color": Color("#378ADD"),
+	"color": Color("#14B8A6"),
 	"level up signal": decoding_level_up_signal,
 	"efficiency description": "Chance to find rare item.",
 	"command": "cd decoding"

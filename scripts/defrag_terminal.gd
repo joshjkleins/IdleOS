@@ -30,6 +30,7 @@ const SECTOR_SPEED = {
 const COLOR_ORDER = [Color.GREEN, Color.BLUE, Color.ORANGE, Color.BLACK]
 
 func start(minor_skill: Dictionary):
+	consume_requirement(minor_skill)
 	type = minor_skill
 	
 	#finished()
@@ -41,6 +42,9 @@ func start(minor_skill: Dictionary):
 	#update_mini_terminal("Estimated time: " + _get_estimated_time_string()) 
 	update_mini_terminal("Allocating memory")
 	setup_sweep()
+
+func consume_requirement(skill: Dictionary):
+	Inventory.remove_resource(skill["requirements"]["item"], skill["requirements"]["amount"])
 
 func stop():
 	active = false

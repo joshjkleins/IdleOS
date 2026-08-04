@@ -1,6 +1,7 @@
 extends HBoxContainer
 
 signal line_ended_signal
+signal caught_something
 
 var type
 var pb_fill_tween: Tween
@@ -16,7 +17,7 @@ func setup():
 	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
 	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
 	
-	$Method.text = type.name + " [color=#888888][font_size=12](eff: " + eff_text + "%)[/font_size][/color]"
+	$Method.text = type.name #+ " [color=#888888][font_size=12](eff: " + eff_text + "%)[/font_size][/color]"
 	$Status.text = "sending phishing attempt"
 	$ProgressBar.value = 0.0
 	$ProgressBar.max_value = 5.0
@@ -68,21 +69,47 @@ func begin(p_type):
 	else: #failure
 		finished(false)
 
+func roll_item_reward(resource_list: Array) -> Dictionary:
+
+	# Sum up total weight
+	var total_weight = 0
+	for entry in resource_list:
+		total_weight += entry["weight"]
+
+	# Roll a random number within the total weight
+	var roll = randi_range(1, total_weight)
+
+	# Walk through entries, subtracting weight until we land on one
+	var cumulative = 0
+	for entry in resource_list:
+		cumulative += entry["weight"]
+		if roll <= cumulative:
+			var amount = randi_range(entry["min"], entry["max"])
+			return {
+				"item": entry["item"],
+				"amount": amount
+			}
+
+	# Fallback (shouldn't be hit if weights are set up correctly)
+	return {}
+
 func finished(caught: bool):
 	if caught:
 		########### ADD WEIGHTED PICKS HERE #############
-		var item = type["resource gained"].pick_random()
+		var reward = roll_item_reward(type["resource gained"])
+		#var item = type["resource gained"].pick_random()
 		
-		$Status.text = "+1 " + item.name
+		$Status.text = "+1 " + reward.item.name
 		add_heat()
 		
 		if randf() <= 0.01:
 			Inventory.add_resource(Items.VM_PHISHING_TOKEN, 1)
 		else:
-			Inventory.add_resource(item, 1)
+			Inventory.add_resource(reward.item, 1)
 		type.signal.emit(1)
 		Exp.add_xp(Phishing, type, type["experience per level"]  * Phishing.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Phishing)
+		caught_something.emit(type)
 		
 		if !safe_stop:
 			await get_tree().create_timer(1.0).timeout
@@ -126,6 +153,8 @@ func stop_safely():
 
 func process_done():
 	line_ended_signal.emit()
+
+
 
 func _on_progress_bar_value_changed(value):
 	$ProgressBar/TimeRemaining.text = str(value).pad_decimals(2)
