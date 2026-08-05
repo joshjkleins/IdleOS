@@ -1,7 +1,6 @@
 extends Control
 
 #TODO
-# Finish compilation module: think of good efficiency mechanic, polish visuals of compiling terminal, add to Defragging
 # Think about simplifying initial commands so they make sense: List | Info | Skills
 
 #Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
@@ -51,7 +50,7 @@ extends Control
 @onready var cache_decrypt_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 @onready var phishing_scene = preload("res://scenes/phishing_terminal.tscn")
 @onready var defrag_scene = preload("res://scenes/defrag_terminal.tscn")
-@onready var compiling_scene = preload("res://scenes/compile_terminal.tscn")
+@onready var compiling_scene = preload("res://scenes/compiling_terminal.tscn")
 
 
 enum Context {

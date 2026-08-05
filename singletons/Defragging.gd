@@ -96,10 +96,22 @@ var DECODING = {
 	"command": "defrag -decoding"
 }
 
+var COMPILING = {
+	"name": "Compiling",
+	"unlocked": true,
+	"unlock cost": 100,
+	"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 15 },
+	"skill": Compiling,
+	"bonus time": 10,
+	"bonus efficiency": 1.5,
+	"description": "Efficiency increased by 50%.",
+	"command": "defrag -compiling"
+}
+
 func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
 
-var minor_processes = [MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING]
+var minor_processes = [MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING, COMPILING]
 
 func has_requirements(skill: Dictionary):
 	var item = skill["requirements"]["item"]

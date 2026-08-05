@@ -11,7 +11,7 @@ var vm_token = Items.VM_COMPILING_TOKEN
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
 
-var terminal_scene = preload("res://scenes/compile_terminal.tscn")
+var terminal_scene = preload("res://scenes/compiling_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
@@ -21,7 +21,7 @@ var SKILL = {
 	"experience": 0,
 	"color": Color("#8B5CF6"),
 	"level up signal": compile_level_up_signal,
-	"efficiency description": "??????",
+	"efficiency description": "Chance to increase speed by 1000% for 1 second and apply no heat.",
 	"command": "cd compiling"
 }
 
@@ -32,12 +32,12 @@ var SCHOOL = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "compile -school",
-	"efficiency": 0.1,
+	"efficiency": 0.03,
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 15.0,
-	"overclock speed": 3.0,
+	"overclock speed": 2.0,
 	"overheat speed": 0.2,
 	"heat": 5,
 	"overclock heat": 7,
@@ -56,12 +56,12 @@ var SMALL_BUSINESS = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "compile -small-business",
-	"efficiency": 0.1,
+	"efficiency": 0.03,
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 10.0,
-	"overclock speed": 3.0,
+	"overclock speed": 2.0,
 	"overheat speed": 0.2,
 	"heat": 5,
 	"overclock heat": 7,

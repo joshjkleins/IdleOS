@@ -1,0 +1,118 @@
+[gd_scene load_steps=7 format=3 uid="uid://m3nh6epn2poh"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_tend8"]
+[ext_resource type="Script" uid="uid://bblti70030f7p" path="res://scripts/compiling_terminal.gd" id="2_k15ji"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k15ji"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nt7fr"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_width_left = 2
+border_color = Color(0.545098, 0.360784, 0.964706, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nlxf4"]
+bg_color = Color(0.15967, 0.15967, 0.15967, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yiekh"]
+bg_color = Color(0.545098, 0.360784, 0.964706, 1)
+
+[node name="CompilingTerminal" type="PanelContainer"]
+custom_minimum_size = Vector2(460, 0)
+offset_right = 460.0
+offset_bottom = 204.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_k15ji")
+script = ExtResource("2_k15ji")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme = ExtResource("1_tend8")
+theme_override_styles/panel = SubResource("StyleBoxFlat_nt7fr")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PayloadName" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "SCHOOL_PAYLOAD"
+
+[node name="IngredientsContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrambleRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrambleLeft" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow"]
+layout_mode = 2
+
+[node name="SLTop" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleLeft"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 14
+text = "*$&#^"
+
+[node name="SLBottom" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleLeft"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 14
+text = "*$&#^"
+
+[node name="ScrambleRight" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="SRTop" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleRight"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 14
+text = "*$&#^"
+
+[node name="SRBottom" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleRight"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 14
+text = "*$&#^"
+
+[node name="FillBar" type="ProgressBar" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_nlxf4")
+theme_override_styles/fill = SubResource("StyleBoxFlat_yiekh")
+value = 40.0
+show_percentage = false
+
+[node name="Summary" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PayloadItem" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "school payload"
+
+[node name="AmountGainedLabel" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
+theme_override_font_sizes/font_size = 14
+text = "x4"
+
+[node name="EffTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="EffTimer" to="." method="_on_eff_timer_timeout"]

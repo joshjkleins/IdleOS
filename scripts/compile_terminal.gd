@@ -24,6 +24,8 @@ var amount_gained: int = 0
 var vm_window: bool = false
 var did_overclock_this_cycle: bool = false
 
+var final_cycle: bool = false
+
 func start(p_type: Dictionary, is_window: bool = false):
 	vm_window = is_window
 	fill_bar.value = 0.0
@@ -57,7 +59,7 @@ func _process(delta: float) -> void:
 		fill_bar.value += delta * type["base speed"] * oc_speed
 		if fill_bar.value >= fill_bar.max_value:
 			_compile_payload()
-			if _has_resources_for_more():
+			if _has_resources_for_more() and !final_cycle:
 				fill_bar.value = 0.0
 			else:
 				_stop_compiling()
@@ -86,13 +88,15 @@ func _compile_payload():
 	var amount_to_gain = 1
 	Inventory.add_resource(type["resource gained"], amount_to_gain)
 	amount_gained += amount_to_gain
-	
+	if randf() <= 0.01:
+		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)
+		
 	#UPDATETH
 	type.signal.emit(1)
 	Exp.add_xp(Compiling, type, type["experience per level"])
 	Signals.update_hud(Compiling)
 	
-	##TODO: APPLY HEAT
+	#HEATETH
 	if did_overclock_this_cycle:
 		Stats.update_tempature(type["overclock heat"])
 		did_overclock_this_cycle = false
@@ -114,6 +118,9 @@ func _stop_compiling():
 		Signals.end_cache_decrypting_safely()
 	
 	scrambling = false
+
+func stop_safely():
+	final_cycle = true
 
 func _build_item_containers(type: Dictionary):
 	for req in type.requirements:

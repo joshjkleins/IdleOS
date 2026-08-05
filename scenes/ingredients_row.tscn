@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://dwk7ybu4syk25"]
+
+[ext_resource type="Script" uid="uid://4vbr5yjbrbwe" path="res://scenes/compiling_ingredients_row.gd" id="1_t3l4d"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_k15ji"]
+color = Color(0.154876, 0.154876, 0.154876, 1)
+
+[node name="IngredientsRow" type="VBoxContainer"]
+theme_override_constants/separation = 0
+script = ExtResource("1_t3l4d")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ItemNameCost" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.534361, 0.534361, 0.534361, 1)
+theme_override_font_sizes/font_size = 14
+text = "ip address x1"
+
+[node name="ItemInventoryAmount" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 14
+text = "284"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_k15ji")
