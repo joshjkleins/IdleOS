@@ -2,6 +2,25 @@ extends Control
 
 #TODO
 # Think about simplifying initial commands so they make sense: List | Info | Skills
+# "ls" : lists all skills and items (current "info" and "list -a")
+# "cd" : keep as is
+# "tree" : show ascii tree of root > skills > minor skills
+# "ps" : list running process (as well as VMs)
+# "stop" also add "kill" to stop current process
+# change "VM" to ssh : ssh mining logs
+# "upgrades" should be "apt" (package manager) : list upgrades and can run commands there to download/upgrade "apt upgrade mining speed"
+# "history" to show last commands
+# "man" open command manual
+# "date" show time/date
+# "tutorial" : show tutorial checklist
+
+# -h/help : list 
+
+#All information pertaining to skill (major/minor)
+#General commands 
+#Items (all/filtered/specific)
+#Upgrades (need to build)
+
 
 #Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
 #No longer able to sell items - might end up with a bunch of valuable items, need fix for this, what can these be turned into? maybe compile can change them to valuable hacking items?? Or maybe create randmoized offer table ie parents credit card can exchange for 50 passwords
@@ -68,6 +87,9 @@ enum Context {
 	COMPILING
 }
 
+func get_context_name_string(current_context: Context) -> String:
+	return Context.keys()[current_context].capitalize()
+
 enum MarketContext {
 	MAIN,
 	CONTRACTS,
@@ -89,6 +111,7 @@ var current_marketplace_context = MarketContext.MAIN
 var current_scrollback
 var current_context: Context = Context.ROOT
 var current_process
+var current_process_info: Dictionary
 var lines: Array[String] = []
 
 #past commands using up/down
@@ -328,28 +351,33 @@ func universal_commands(text):
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
-	if text.begins_with("list"):
+	if text.begins_with("ls"):
 		var start = text.find('"') + 1
 		var end = text.find('"', start)
 		var item_name = text.substr(start, end - start)
+		var alt_item_name = text.substr(2).strip_edges()
 		var item = Items.ITEM_NAME_MAP.get(item_name.to_lower())
+		var alt_item = Items.ITEM_NAME_MAP.get(alt_item_name.to_lower())
 		if item != null:
 			add_line(Inventory.list_specific_item(item))
 			return true
+		if alt_item != null:
+			add_line(Inventory.list_specific_item(alt_item))
+			return true
 	match text:
-		"list -r":
+		"ls -r":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
 			return true
-		"list -a":
+		"ls -a", "ls":
 			add_line(Inventory.list_inventory())
 			return true
-		"list -v":
+		"ls -v":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.VALUABLES))
 			return true
-		"list -c":
+		"ls -c":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.CACHES))
 			return true
-		"list -m": #List processes
+		"ls -m": #List processes
 			add_line(Stats.list_unlocked_processes())
 			return true
 		"show contracts":
@@ -365,14 +393,32 @@ func universal_commands(text):
 			add_line(ContractsManager.complete_contracts())
 			return true
 		"-h":
-			list_help()
+			add_line(ContextCommands.get_help())
+			#list_help()
 			return true
-		"stop":
+		"tree":
+			add_line(ContextCommands.get_ascii_tree(get_context_name_string(current_context)))
+			return true
+		"history":
+			add_line(ContextCommands.get_history_commands(command_history))
+			return true
+		"ps":
+			if current_process_info == {}:
+				add_line("No process current running.")
+				return true
+			var p: Node = _get_major_from_minor(current_process_info)
+			add_line(ContextCommands.get_mp_info(p, current_process_info))
+			return true
+		"clear":
+			_clear_terminal()
+			return true
+		"stop", "kill":
 			process_running = false
 			unstick_current_process()
 			if current_process:
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -627,6 +673,7 @@ func mining_commands(text):
 			if current_process:
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -669,12 +716,14 @@ func start_log_mining(minor_process: Dictionary):
 	new_data_mining_terminal.set_mine_type(minor_process)
 	process_running = true
 	current_process = new_data_mining_terminal
+	current_process_info = minor_process
 	new_data_mining_terminal.start_data_mining()
 	add_new_scrollback()
 
 func data_mining_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Data mining safely finished.")
@@ -699,6 +748,7 @@ func log_parsing_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -744,12 +794,14 @@ func start_parsing(minor_process: Dictionary):
 	new_log_parsing_terminal.set_parse_type(minor_process)
 	process_running = true
 	current_process = new_log_parsing_terminal
+	current_process_info = minor_process
 	new_log_parsing_terminal.start()
 	add_new_scrollback()
 
 func log_parsing_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Parsing safely finished.")
@@ -774,6 +826,7 @@ func password_unscramble_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -819,12 +872,14 @@ func start_cracking(minor_process: Dictionary):
 	new_pw_cracking_terminal.set_cracking_type(minor_process)
 	process_running = true
 	current_process = new_pw_cracking_terminal
+	current_process_info = minor_process
 	new_pw_cracking_terminal.start()
 	add_new_scrollback()
 
 func password_cracking_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Password cracking safely finished.")
@@ -857,6 +912,7 @@ func cred_matching_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -900,12 +956,14 @@ func start_matching(minor_process):
 	new_cred_matching_terminal.set_type(minor_process)
 	process_running = true
 	current_process = new_cred_matching_terminal
+	current_process_info = minor_process
 	new_cred_matching_terminal.start()
 	add_new_scrollback()
 
 func cred_matching_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Matching safely finished.")
@@ -936,6 +994,7 @@ func cache_decrypting_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -976,12 +1035,14 @@ func start_cache_decrypting(minor_process):
 	new_cache_decrypt_terminal.set_cache_type(Decoding.CACHE)
 	process_running = true
 	current_process = new_cache_decrypt_terminal
+	current_process_info = minor_process
 	new_cache_decrypt_terminal.start_decrypting()
 	add_new_scrollback()
 
 func cache_decrypting_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Cache decrypting safely finished.")
@@ -1025,6 +1086,7 @@ func phishing_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -1059,12 +1121,14 @@ func cast_line(type: Dictionary, t_lines: int):
 		terminal_body_container.add_child(new_phishing_terminal)
 		process_running = true
 		current_process = new_phishing_terminal
+		current_process_info = type
 		new_phishing_terminal.cast_lines(type, t_lines)
 		add_new_scrollback()
 
 func phishing_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Phishing process finished.")
@@ -1097,6 +1161,7 @@ func compiling_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -1130,12 +1195,14 @@ func start_compiling(minor_process: Dictionary):
 	terminal_body_container.add_child(new_compiling_terminal)
 	process_running = true
 	current_process = new_compiling_terminal
+	current_process_info = minor_process
 	new_compiling_terminal.start(minor_process)
 	add_new_scrollback()
 
 func compiling_ended_safely():
 	unstick_current_process()
 	current_process = null
+	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
 	add_line("Compiling stopped.")
@@ -1167,6 +1234,7 @@ func defragging_commands(text):
 				add_line("Killing process immediately")
 				current_process.stop()
 				current_process = null
+				current_process_info = {}
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -1186,13 +1254,14 @@ func defragging_commands(text):
 
 func start_defragging(minor_skill: Dictionary):
 	if !Defragging.has_requirements(minor_skill):
-		add_line("Missing requirements")
+		add_line("Missing requirements: " +  minor_skill.requirements.item.name + " x" + str(minor_skill.requirements.amount))
 		return
 
 	var new_defrag_terminal = defrag_scene.instantiate()
 	terminal_body_container.add_child(new_defrag_terminal)
 	process_running = true
 	current_process = new_defrag_terminal
+	current_process_info = minor_skill
 	new_defrag_terminal.start(minor_skill)
 	add_new_scrollback()
 
@@ -1200,6 +1269,7 @@ func defrag_finished():
 	unstick_current_process()
 	process_running = false
 	current_process = null
+	current_process_info = {}
 	Stats.overclocked = false
 	add_line("Defragging process ended.")
 
@@ -1519,3 +1589,19 @@ func _scroll_to_bottom():
 	await get_tree().process_frame #if youre finding one frame is not enough uncomment this
 	await get_tree().process_frame
 	terminal_body.set_deferred("scroll_vertical", terminal_body.get_v_scroll_bar().max_value)
+
+func _get_major_from_minor(current_process_info: Dictionary):
+	for major in major_processes:
+		for min in major.minor_processes:
+			if current_process_info == min:
+				return major
+
+func _clear_terminal():
+	if terminal_body_container.get_children().size() > 0:
+		for child in terminal_body_container.get_children():
+			if child != current_process:
+				child.queue_free()
+		lines.clear()
+		var ns = scrollback.instantiate()
+		terminal_body_container.add_child(ns)
+		current_scrollback = ns

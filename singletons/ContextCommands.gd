@@ -306,3 +306,96 @@ func get_hack_target_info(location: Dictionary):
 		
 	
 	return return_text
+
+# Think about simplifying initial commands so they make sense: List | Info | Skills
+# "ls" : lists all skills and items (current "info" and "list -a")
+# "cd" : keep as is
+# "tree" : show ascii tree of root > skills > minor skills
+# "cat "item" : specific item info
+# "ps" : list running process (as well as VMs)
+# "stop" also add "kill" to stop current process
+# change "VM" to ssh : ssh mining logs
+# "upgrades" should be "apt" (package manager) : list upgrades and can run commands there to download/upgrade "apt upgrade mining speed"
+# "history" to show last commands
+# "man" open command manual
+# "date" show time/date
+# "tutorial" : show tutorial checklist
+
+# -h/help : list 
+
+#All information pertaining to skill (major/minor)
+#General commands 
+#Items (all/filtered/specific)
+#Upgrades (need to build)
+
+func get_help() -> String:
+	var text := """
+ ____________________________________________________________________
+|                                                                    |
+|                          IDLEOS COMMANDS                           |
+|____________________________________________________________________|
+|                                                                    |
+| SKILLS / TRAVERSAL                                                 |
+|   cd <skill>                   Navigate to a skill                 |
+|   ..                           Return to root                      |
+|   tree                         Display skill hierarchy             |
+|                                                                    |
+| SYSTEM                                                             |
+|   ls                           List items                          |
+|   ls <item>                    Item info                           |
+|   ps                           List running processes              |
+|   stop                         Stop a running process              |
+|   kill                         Stop a running process              |
+|   ssh <skill> <process>        Connect to a virtual machine        |
+|   history                      Show command history                |
+|   date                         Show date and time                  |
+|   clear                        Clear terminal                      |
+|                                                                    |
+| ITEMS                                                              |
+|   cat <item>                   Display item information            |
+|                                                                    |
+| UPGRADES                                                           |
+|   apt                          Open package manager                |
+|   apt upgrade                  List available upgrades             |
+|   apt upgrade <x>              Upgrade a package                   |
+|                                                                    |
+| DOCUMENTATION                                                      |
+|   tutorial                     Show tutorial checklist             |
+|   help                         Display this list                   |
+|   -h                           Display this list                   |
+|____________________________________________________________________|
+"""
+	return text
+
+
+func get_ascii_tree(current_context: String) -> String:
+	var skills = [
+		Mining,
+		Parsing,
+		Cracking,
+		Matching,
+		Phishing,
+		Compiling,
+		Hacking,
+		Decoding
+	]
+	
+	var text = "\nIDLEOS\n|\n"
+	
+	for skill in skills:
+		var c = skill.SKILL.color.to_html()
+		text += "+-[color=#%s]%s[/color]" % [c, skill.SKILL.name]
+		
+		if skill.SKILL.name == current_context:
+			text += "  <-----YOU ARE HERE"
+		text += "\n"
+		for ms in skill.minor_processes:
+			text += "|--%s\n" % ms.name
+		text += "|\n"
+	return text
+
+func get_history_commands(command_history) -> String:
+	var text = ""
+	for i in command_history:
+		text += i + "\n"
+	return text

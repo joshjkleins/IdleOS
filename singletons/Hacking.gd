@@ -44,11 +44,97 @@ var SKILL = {
 	"command": "cd hacking"
 }
 
+var SCHOOL = {
+	"name": "School",
+	"tier name": "TIER I | PASSWORD",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "crack -pw",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": true,
+	"unlock level": 1,
+	"base speed": 3.0,
+	"overclock speed": 1.0,
+	"overheat speed": 9.0,
+	"heat": 3,
+	"overclock heat": 8,
+	"overheat heat": 1,
+	"description": "Cracks encrypted passwords, transforming them into passwords",
+	"targets": [
+		{
+			"name": "Student",
+			"difficulty": "Easy",
+			"command": "hack student",
+			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 1},
+			"heat": 5,
+			"exp": 600,
+			"integrity": 100,
+			"firewall": 10,
+			"counter": 5,
+			"counter speed": 16.0,
+			"loot": Items.STUDENT_CACHE
+		},
+		{
+			"name": "Administrator",
+			"difficulty": "Easy",
+			"command": "hack administrator",
+			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
+			"heat": 5,
+			"exp": 600,
+			"integrity": 100,
+			"firewall": 10,
+			"counter": 10,
+			"counter speed": 5.0,
+			"loot": Items.ADMIN_CACHE
+		},
+		{
+			"name": "Vice Principal",
+			"difficulty": "Medium",
+			"command": "hack vice-principal",
+			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 3},
+			"heat": 5,
+			"exp": 600,
+			"integrity": 100,
+			"firewall": 10,
+			"counter": 10,
+			"counter speed": 5.0,
+			"loot": Items.VICE_PRINCIPAL_CACHE
+		},
+		{
+			"name": "Principal",
+			"difficulty": "Medium",
+			"command": "hack principal",
+			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
+			"heat": 5,
+			"exp": 600,
+			"integrity": 100,
+			"firewall": 10,
+			"counter": 10,
+			"counter speed": 5.0,
+			"loot": Items.PRINCIPAL_CACHE
+		},
+		{
+			"name": "Superintendent",
+			"difficulty": "Hard",
+			"command": "hack superintendent",
+			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
+			"heat": 5,
+			"exp": 600,
+			"integrity": 100,
+			"firewall": 10,
+			"counter": 10,
+			"counter speed": 5.0,
+			"loot": Items.SUPERINTENDENT_CACHE
+		}
+	]
+}
 
 func signal_exp(_amount: int):
 	xp_gained.emit()
 
-var minor_processes = []
+var minor_processes = [SCHOOL]
 
 var process_upgrades = {
 	"anonymity": { "id": 1, "name": "Anonymity", "level": 0, "amount": 1.0, "increase per level": 0.05 },
