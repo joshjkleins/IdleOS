@@ -85,6 +85,7 @@ focus_mode = 2
 [node name="LeadText" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
 layout_mode = 2
 size_flags_vertical = 4
+theme_override_font_sizes/normal_font_size = 14
 bbcode_enabled = true
 text = "IdleOS>"
 fit_content = true
@@ -94,6 +95,7 @@ autowrap_mode = 0
 [node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
 theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
 placeholder_text = "type a command or -h for help"
 keep_editing_on_text_submit = true

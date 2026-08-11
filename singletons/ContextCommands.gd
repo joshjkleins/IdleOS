@@ -51,21 +51,24 @@ func get_help_text(skill: Node) -> String:
 		text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
 		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	elif skill == Hacking:
-		text += "┌─────────────────────────────────────────────────────┐\n"
-		text += "│ LOCATION                  REQ                       │\n"
-		text += "├─────────────────────────────────────────────────────┤\n"
+		text += "┌─────────────────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ LOCATION                  REQ                      INFO                             │\n"
+		text += "├─────────────────────────────────────────────────────────────────────────────────────┤\n"
 	else:
-		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS           STATUS      REQ     EFF     EFF/LVL    COMMAND                      │\n"
-		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+		text += "┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n"
+		text += "│ PROCESS           STATUS      REQ     EFF     EFF/LVL    RUN COMMAND                 INFO                              │\n"
+		text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
 	
-	##YOU ARE HERE BUT YOU NEED TO SWAP HACKING LOCATIONS/TARGETS TO RESOURCES? THEN REBUILD HOW THEY WORK IN HACKING
 	if skill == Hacking:
 		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+		
+		
 		for location in locations:
-			text += "│ %-25s %-25s │\n" % [
+			var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
+			text += "│ %-25s %-25s %-31s │\n" % [
 				location["name"],
-				location["required payload"].name
+				location["required payload"].name,
+				info_text
 			]
 	else:
 		for p in skill.minor_processes:
@@ -75,28 +78,14 @@ func get_help_text(skill: Node) -> String:
 				text += _build_process_row(p, skill, p["unlocked"])
 	
 	if skill == Hacking:
-		text += "└─────────────────────────────────────────────────────┘\n"
-	else:
+		text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
+	elif skill == Defragging:
 		text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
+	else:
+		text +=     "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
 	if skill == Defragging: #return early since all relavent info is in base info command
 		return text
 	
-
-	if skill == Hacking:
-		text += "\n"
-		text += "[font_size=12]For additional details[/font_size]\n"
-		text += "[font_size=12]LOCATIONS             COMMAND[/font_size]\n"
-		text += "[font_size=12]------------------------------------------------[/font_size]\n"
-		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
-		for location in locations:
-			text += "[font_size=12]" + pad_text(location.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + location.name.to_lower().replace(" ", "-") + "[/font_size]\n"
-	else:
-		text += "\n"
-		text += "[font_size=12]For additional details[/font_size]\n"
-		text += "[font_size=12]PROCESS             COMMAND[/font_size]\n"
-		text += "[font_size=12]------------------------------------------------[/font_size]\n"
-		for s in skill.minor_processes:
-			text += "[font_size=12]" + pad_text(s.name, 20) + "info " + skill.SKILL.name.to_lower() + " " + s.name.to_lower().replace(" ", "-") + "[/font_size]\n"
 	return text
 
 func _build_defrag_process_row(p: Dictionary, skill: Node):
@@ -124,12 +113,13 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var time = str(p["bonus time"]) + " min"
 		var eff = "x" + str(p["bonus efficiency"])
 		if unlocked:
-			return "│ %-14s %-11s %-12s %-9s %-35s │\n" % [
+			return "│ %-14s %-11s %-12s %-9s %-35s %-40s │\n" % [
 				p["name"],
 				status,
 				time,
 				eff,
-				p["command"]
+				p["command"],
+				"info " + skill.SKILL.name.to_lower() + " " + p["name"].to_lower().replace(" ", "-")
 			]
 		else:
 			return "[color=666666]│ %-14s %-11s %-12s %-9s %-35s │[/color]\n" % [
@@ -137,13 +127,8 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				status,
 				time,
 				eff,
-				p["command"]
-			]
-	elif skill == Hacking:
-		return "│ %-20s %-20s │\n" % [
-				p["name"],
-				status,
-				p["command"]
+				p["command"],
+				"info " + skill.SKILL.name.to_lower() + " " + p["name"].to_lower().replace(" ", "-")
 			]
 	else:
 		var frag_bonus = 1.0
@@ -155,23 +140,27 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var base_eff = p["efficiency"] + skill.process_upgrades["efficiency"]["amount"]
 		var effr = str(p["efficiency rate"] * 100.0) + "%"
 		var eff = str(base_eff * frag_bonus * 100.0) + "%"
+		var info_text_mp = p["name"].to_lower().replace(" ", "-")
+		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), info_text_mp]
 		if !unlocked:
-			return "[color=666666]│ %-17s %-11s %-7d %-7s %-10s %-27s  │[/color]\n" % [
+			return "[color=666666]│ %-17s %-11s %-7d %-7s %-10s %-27s %-32s  │[/color]\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
 				eff,
 				effr,
-				p["command"]
+				p["command"],
+				info_text
 			]
 		else:
-			return "│ %-17s %-11s %-7d %-7s %-10s %-27s  │\n" % [
+			return "│ %-17s %-11s %-7d %-7s %-10s %-27s %-32s  │\n" % [
 				p["name"],
 				status,
 				p["unlock level"],
 				eff,
 				effr,
-				p["command"]
+				p["command"],
+				info_text
 			]
 
 func get_ascii_text(skill: Node) -> String:
@@ -198,45 +187,85 @@ func get_ascii_text(skill: Node) -> String:
 			return ""
 
 func get_mp_dfg_info(skill: Node, process: Dictionary):
-	var return_string = "\n" + process.name + " (" + skill.SKILL.name.to_lower() + ") - " + process.description + "\n"
-	#Requirements
-	return_string += "\nRequirements\n"
-	return_string += "=======================\n"
-	return_string += process.requirements.item.name + " x" + str(process.requirements.amount) + "\n"
+	###INFO
+	var return_text = "\nPROCESS\n"
+	var color_string = skill.SKILL.color.to_html()
+	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
+	return_text += "├─ Skill: %s\n" % colored_name
+	return_text += "├─ Process: " + process.name + "\n"
+	return_text += "└─ Description: " + process.description + "\n"
 	
-	return return_string
+	return_text += "\n\n"
+	
+	##Requirements
+	return_text += "REQUIREMENTS\n"
+	return_text += "└─ " + process.requirements.item.name + " x" + str(process.requirements.amount) + "\n"
+	
+	return_text += "\n\n"
+	
+	##Rewards
+	return_text += "REWARDS\n"
+	return_text += "└─ " + process.name + " efficiency x" + str(process["bonus efficiency"]) + " for " + str(process["bonus time"]) + " minutes."
+	
+	return return_text
 
-func get_mp_info(skill: Node, process: Dictionary):
-	var return_string = "\n" + process.name + " (" + skill.SKILL.name.to_lower() + ") - LVL " + str(process.level) + " - " + process.description + "\n"
+
+func get_mp_info(skill: Node, process: Dictionary) -> String:
+	###INFO
+	var return_text = "\nPROCESS\n"
+	var color_string = skill.SKILL.color.to_html()
+	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
+	return_text += "├─ Skill: %s\n" % colored_name
+	return_text += "├─ Process: " + process.name + "\n"
+	return_text += "├─ Level: " + str(process.level) + "\n"
+	return_text += "└─ Description: " + process.description + "\n"
 	
-	#Requirements
-	return_string += "\nRequirements\n"
-	return_string += "=======================\n"
-	return_string += skill.SKILL.name + " level " + str(process["unlock level"]) + "\n"
+	return_text += "\n\n"
+	
+	###REQUIREMENTS
+	return_text += "REQUIREMENTS\n"
+	
+	var requirements_list = {}
+	
 	if process["requirements"] is Array:
 		for item in process["requirements"]:
 			if item is Dictionary:
-				return_string += item.item.name + " x" + str(item.amount) + "\n"
+				requirements_list[item.item.name] = item.amount
 			else:
-				return_string += item.name + " x1\n"
+				requirements_list[item.name] = 1
 	elif process["requirements"] is ItemData:
-		return_string += process["requirements"].name + " x1\n"
+		requirements_list[process["requirements"].name] = 1
 	elif process["requirements"] == "cache":
-		return_string += "Any cache x1\n"
+		requirements_list["Any cache"] = 1
 	else:
-		return_string += "???"
-
+		requirements_list["???"] = 1
+	
+	if requirements_list.is_empty():
+		return_text += "└─ " + colored_name + " level " + str(process["unlock level"]) + "\n"
+	else:
+		return_text += "├─ " + colored_name + " level " + str(process["unlock level"]) + "\n"
+		
+	var i = 0
+	for item in requirements_list.keys():
+		var prefix = "├─ "
+		if i == requirements_list.size() - 1:
+			prefix = "└─ "
+		return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
+		i += 1
+		
+	return_text += "\n\n"
+	
+	###REWARDS
 	if skill != Decoding:
-		return_string += "\nItem(s) gained\n"
+		return_text += "REWARDS\n"
 		#Items gained
-		return_string += "========================\n"
 		if process["resource gained"] is Array:
 			for resource in process["resource gained"]:
 				if resource is Dictionary:
 					var item = resource.item
 					var item_name = item.name + " (" + str(resource.weight) + "%)"
 					var dots_amount = 35 - item_name.length()
-					return_string += item_name + ".".repeat(dots_amount) + item.description + "\n"
+					return_text += "├─ " + item_name + ".".repeat(dots_amount) + item.description + "\n"
 			
 
 			#parsing
@@ -244,13 +273,14 @@ func get_mp_info(skill: Node, process: Dictionary):
 			var item = process["resource gained"]
 			var item_name = item.name + " (100%)"
 			var dots_amount = 35 - item_name.length()
-			return_string += item_name + ".".repeat(dots_amount) + item.description + "\n"
+			return_text += "├─ " + item_name + ".".repeat(dots_amount) + item.description + "\n"
 		
 		var vm = skill.vm_token
 		var vm_name = vm.name + " (1%)"
 		var dots_amount = 35 - vm_name.length()
-		return_string += vm_name + ".".repeat(dots_amount) + vm.description + "\n"
-	return return_string
+		return_text += "└─ " + vm_name + ".".repeat(dots_amount) + vm.description + "\n"
+	
+	return return_text
 
 func info_command_text():
 	var return_string = ""
@@ -274,20 +304,6 @@ func info_command_text():
 	
 	return return_string
 
-			#{
-				#"name": "Student",
-				#"difficulty": "Easy",
-				#"command": "hack student",
-				#"requirements": [{"item": Items.IP_ADDRESS, "amount": 1}, {"item": Items.CREDENTIALS, "amount": 1}],
-				#"heat": 5,
-				#"exp": 600,
-				#"integrity": 100,
-				#"firewall": 10,
-				#"counter": 5,
-				#"counter speed": 16.0,
-				#"loot": Items.STUDENT_CACHE
-			#},
-
 func get_hack_target_info(location: Dictionary):
 	var return_text = ""
 	return_text += location.name + "\n"
@@ -307,26 +323,6 @@ func get_hack_target_info(location: Dictionary):
 	
 	return return_text
 
-# Think about simplifying initial commands so they make sense: List | Info | Skills
-# "ls" : lists all skills and items (current "info" and "list -a")
-# "cd" : keep as is
-# "tree" : show ascii tree of root > skills > minor skills
-# "cat "item" : specific item info
-# "ps" : list running process (as well as VMs)
-# "stop" also add "kill" to stop current process
-# change "VM" to ssh : ssh mining logs
-# "upgrades" should be "apt" (package manager) : list upgrades and can run commands there to download/upgrade "apt upgrade mining speed"
-# "history" to show last commands
-# "man" open command manual
-# "date" show time/date
-# "tutorial" : show tutorial checklist
-
-# -h/help : list 
-
-#All information pertaining to skill (major/minor)
-#General commands 
-#Items (all/filtered/specific)
-#Upgrades (need to build)
 
 func get_help() -> String:
 	var text := """
@@ -337,36 +333,33 @@ func get_help() -> String:
 |                                                                    |
 | SKILLS / TRAVERSAL                                                 |
 |   cd <skill>                   Navigate to a skill                 |
-|   ..                           Return to root                      |
+|   cd ..                        Return to root                      |
 |   tree                         Display skill hierarchy             |
+|   info                         Display additional skill info       |
 |                                                                    |
 | SYSTEM                                                             |
-|   ls                           List items                          |
-|   ls <item>                    Item info                           |
 |   ps                           List running processes              |
-|   stop                         Stop a running process              |
-|   kill                         Stop a running process              |
+|   kill                         Stop the running process            |
 |   ssh <skill> <process>        Connect to a virtual machine        |
 |   history                      Show command history                |
 |   date                         Show date and time                  |
 |   clear                        Clear terminal                      |
 |                                                                    |
 | ITEMS                                                              |
-|   cat <item>                   Display item information            |
+|   ls                           List items                          |
+|   ls <item>                    Item info                           |
 |                                                                    |
 | UPGRADES                                                           |
-|   apt                          Open package manager                |
-|   apt upgrade                  List available upgrades             |
-|   apt upgrade <x>              Upgrade a package                   |
+|   apt                          Open upgrade manager                |
 |                                                                    |
 | DOCUMENTATION                                                      |
 |   tutorial                     Show tutorial checklist             |
-|   help                         Display this list                   |
 |   -h                           Display this list                   |
 |____________________________________________________________________|
 """
 	return text
-
+#|   apt upgrade                  List available upgrades             |
+#|   apt upgrade <x>              Upgrade a package                   |
 
 func get_ascii_tree(current_context: String) -> String:
 	var skills = [
@@ -380,18 +373,30 @@ func get_ascii_tree(current_context: String) -> String:
 		Decoding
 	]
 	
-	var text = "\nIDLEOS\n|\n"
+	var text = "\nIDLEOS\n"
 	
-	for skill in skills:
+	for i in skills.size():
+		var skill = skills[i]
 		var c = skill.SKILL.color.to_html()
-		text += "+-[color=#%s]%s[/color]" % [c, skill.SKILL.name]
+		var is_last_skill = i == skills.size() - 1
+		var skill_branch = "└── " if is_last_skill else "├── "
+		
+		text += "%s[color=#%s]%s[/color]" % [skill_branch, c, skill.SKILL.name]
 		
 		if skill.SKILL.name == current_context:
-			text += "  <-----YOU ARE HERE"
+			text += "  <----- YOU ARE HERE"
+		
 		text += "\n"
-		for ms in skill.minor_processes:
-			text += "|--%s\n" % ms.name
-		text += "|\n"
+		
+		for j in skill.minor_processes.size():
+			var ms = skill.minor_processes[j]
+			var is_last_process = j == skill.minor_processes.size() - 1
+			
+			var prefix = "    " if is_last_skill else "│   "
+			var branch = "└── " if is_last_process else "├── "
+			
+			text += "%s%s%s\n" % [prefix, branch, ms.name]
+	
 	return text
 
 func get_history_commands(command_history) -> String:
@@ -399,3 +404,93 @@ func get_history_commands(command_history) -> String:
 	for i in command_history:
 		text += i + "\n"
 	return text
+
+func get_date_command() -> String:
+	var date = Time.get_date_dict_from_system()
+	return "%04d-%02d-%02d" % [
+		date.year,
+		date.month,
+		date.day
+	]
+
+func get_root_upgrades_text() -> String:
+	var return_text = ""
+	
+	return_text += "\nIDLEOS PACKAGE MANAGER\n"
+	return_text += "────────────────────────────────────────────────────────\n\n"
+	return_text += "Available upgrades:\n\n"
+	
+	##LOOPING THROUGH MAJOR SKILLS
+	for upgrade in Upgrades.all_upgrades:
+		var skill = upgrade.skill
+		var color_string = skill.SKILL.color.to_html()
+		var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
+		return_text += colored_name + "\n"
+		
+		##LOOPING THROUGH UPGRADES ARRAY [SPEED, EFFICIENCY, ETC]
+		
+		var i = 0
+		for upgrade_info in upgrade.upgrades:
+			#get current level
+			var current_level = 0
+			for lvl in upgrade_info.levels:
+				if lvl.unlocked:
+					current_level += 1
+			#get prefix
+			var prefix = "├─ "
+			if i == upgrade.upgrades.size() - 1:
+				prefix = "└─ "
+			
+			#get dots
+			var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
+		
+			return_text += prefix + u_name_w_dots + " LVL " + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
+			i += 1
+		return_text += "\n"
+	
+	return_text += "────────────────────────────────────────────────────────\n\n"
+	return_text += "Use 'apt info <package>' for package information.\n"
+	return_text += "Use 'apt install <package>' to install.\n"
+	
+	return return_text
+
+func get_upgrades_package_info(package_id: String) -> String:
+	var package = Upgrades.get_package_info(package_id)
+	var skill_name = Upgrades.get_skill_from_package_id(package_id)
+	var skill_level = Upgrades.get_skill_level_from_package_id(package_id)
+	var current_effect = Upgrades.get_current_effect_total_from_package(package)
+	var next_effect = Upgrades.get_next_effect_total_from_package(package)
+	var requirements = Upgrades.get_upgrade_requirement_from_package(package)
+	
+	
+	if package == null:
+		return "Package id not found"
+	
+	var return_text = "\nPackage: %s\n" % package_id
+	return_text += "Skill: %s\n" % skill_name 
+	return_text += "Level: %s\n" % skill_level 
+	
+	return_text += "\nDescription:\n"
+	return_text += package.description + "\n"
+	
+	return_text += "\nCurrent effect\n"
+	return_text += "└─ " + package.name + ": " + str(current_effect) + "\n\n"
+	return_text += "Next upgrade\n"
+	return_text += "└─ " + package.name + ": " + str(next_effect) + "\n\n"
+	
+	return_text += "Requirements\n"
+	var i = 0
+	for r in requirements:
+		var prefix = "├─ "
+		if i == requirements.size() - 1:
+			prefix = "└─ "
+		
+		return_text += prefix + r.item.name + " x" + str(r.amount) + "\n"
+		i += 1
+	
+	return_text += "\nInstall\n"
+	return_text += "└─ " + "apt install " + package.id + "\n"
+	
+	
+	
+	return return_text

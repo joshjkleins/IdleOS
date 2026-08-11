@@ -1,25 +1,20 @@
 extends Control
 
 #TODO
-# Think about simplifying initial commands so they make sense: List | Info | Skills
-# "ls" : lists all skills and items (current "info" and "list -a")
-# "cd" : keep as is
-# "tree" : show ascii tree of root > skills > minor skills
-# "ps" : list running process (as well as VMs)
-# "stop" also add "kill" to stop current process
-# change "VM" to ssh : ssh mining logs
-# "upgrades" should be "apt" (package manager) : list upgrades and can run commands there to download/upgrade "apt upgrade mining speed"
-# "history" to show last commands
-# "man" open command manual
-# "date" show time/date
+#YOU ARE HERE
+#IN MIDDLE OF APT UPGRADE MANAGER
+# figure out how/when to display percentages vs real number vs decimal vs whole numbers (0.05 or 5%) and to show negative numbers or not ie Speed upgrade: -10% or speed upgrade: 10% (leaning toward always positive)
+# get logic in place for actually upgrading
+# add skill lvl requirement to requirements ie Requires Logs x 10 and Mining lvl 15
+# add stuff / colors for max level 
+# build out cool upgrade UI
+# implement upgrades in each Skill (ie make sure speed/efiiciency is applied correctly)
+# create workflow for full installation (what it looks/feels like, question command (are you sure? y/n), checking/removing requirements resources, applying actual upgrade)
+#decide if putting all the upgrade info into resources would be better or not (leaning toward no cause lazy)
+
+
 # "tutorial" : show tutorial checklist
 
-# -h/help : list 
-
-#All information pertaining to skill (major/minor)
-#General commands 
-#Items (all/filtered/specific)
-#Upgrades (need to build)
 
 
 #Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
@@ -345,7 +340,7 @@ func list_help():
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
-	if text.begins_with("vm"):
+	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
 	if text.begins_with("info"):
@@ -364,6 +359,9 @@ func universal_commands(text):
 		if alt_item != null:
 			add_line(Inventory.list_specific_item(alt_item))
 			return true
+	if text.begins_with("apt"):
+		handle_apt_commands(text)
+		return true
 	match text:
 		"ls -r":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
@@ -406,8 +404,13 @@ func universal_commands(text):
 			if current_process_info == {}:
 				add_line("No process current running.")
 				return true
+			unstick_current_process()
+			bring_process_to_bottom()
 			var p: Node = _get_major_from_minor(current_process_info)
 			add_line(ContextCommands.get_mp_info(p, current_process_info))
+			return true
+		"date":
+			add_line(ContextCommands.get_date_command())
 			return true
 		"clear":
 			_clear_terminal()
@@ -450,6 +453,7 @@ func universal_commands(text):
 #Root context commands
 func root_commands(text):
 	text = text.to_lower().strip_edges()
+	
 	match text:
 		"load mining", "cd mining":
 			add_line("[ .. ] loading data mining module")
@@ -519,13 +523,33 @@ func root_commands(text):
 			update_context(Context.COMPILING)
 			add_line(ContextCommands.get_help_text(Compiling))
 		_:#default
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				var nt = text.substr(2).strip_edges()
+				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
+			else:
+				add_line("Command not found")
 
 func return_to_root():
 	header.update()
 	update_context(Context.ROOT)
 	add_line(Ascii.root)
 	add_line(ContextCommands.all_commands())
+
+func handle_apt_commands(text):
+	if text == "apt":
+		add_line(ContextCommands.get_root_upgrades_text())
+		return
+	
+	var t_array = text.split(" ")
+	
+	if text.begins_with("apt") and t_array.size() == 3:
+		if t_array[1] == "info":
+			add_line(ContextCommands.get_upgrades_package_info(t_array[2]))
+			return
+		if t_array[1] == "install":
+			add_line("Install upgrade package")
+			return
+			#upgrade logic here
 
 ##INFO COMMANDS
 func handle_info_commands(text):
@@ -580,7 +604,7 @@ func handle_vm_token_commands(text):
 	var commands = text.split(" ")
 	#confirm commands size
 	if commands.size() < 3 or commands.size() > 4:
-		add_line("VM command not recognized     [color=#888888]example usage: vm mining logs[/color]")
+		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
 		return
 	
 		
@@ -685,17 +709,8 @@ func mining_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
-		"info":
-			add_line("Module: Data Mining")
-			#add_line("Level:         " + str(Stats.player_stats["Data Mining"]["level"]))
-			#Level
-			#Experience
-			#add_line("Experience:    " + str(Stats.player_stats["Data Mining"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Data Mining"]["level"] + 1)))
-			#Effeciency
-			#var eff = Stats.player_stats["Data Mining"]["efficiency"]
-			#add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Data Mining"]["efficiency description"])
 		"overclock":
 			overclock_logic()
 		"overclock -kill":
@@ -705,7 +720,10 @@ func mining_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_log_mining(minor_process: Dictionary):
 	if !minor_process.unlocked:
@@ -760,7 +778,7 @@ func log_parsing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("Module: Parsing")
@@ -780,7 +798,10 @@ func log_parsing_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_parsing(minor_process: Dictionary):
 	if !minor_process.unlocked:
@@ -838,7 +859,7 @@ func password_unscramble_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("Module: Cracking")
@@ -858,7 +879,10 @@ func password_unscramble_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_cracking(minor_process: Dictionary):
 	if !minor_process.unlocked:
@@ -924,7 +948,7 @@ func cred_matching_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("Module: Matching")
@@ -944,7 +968,10 @@ func cred_matching_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_matching(minor_process):
 	if !minor_process.unlocked:
@@ -1006,7 +1033,7 @@ func cache_decrypting_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("Module: Cache Decrypting")
@@ -1023,7 +1050,10 @@ func cache_decrypting_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_cache_decrypting(minor_process):
 	if !minor_process.unlocked:
@@ -1098,7 +1128,7 @@ func phishing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("Module: Phishing")
@@ -1111,7 +1141,10 @@ func phishing_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func cast_line(type: Dictionary, t_lines: int):
 	if current_process is PhishingTerminal:
@@ -1173,7 +1206,7 @@ func compiling_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"overclock":
 			overclock_logic()
@@ -1184,7 +1217,10 @@ func compiling_commands(text):
 				add_line("Killing overclock.")
 			Stats.overclocked = false
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_compiling(minor_process: Dictionary):
 	if !minor_process.unlocked:
@@ -1243,14 +1279,17 @@ func defragging_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..":
+		"root", "..", "cd ..":
 			return_to_root()
 		"info":
 			add_line("???")
 		"overclock":
 			add_line("Overclock not available for defragging.")
 		_:
-			add_line("Command not found")
+			if text.begins_with("cd"):
+				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+			else:
+				add_line("Command not found")
 
 func start_defragging(minor_skill: Dictionary):
 	if !Defragging.has_requirements(minor_skill):
@@ -1586,7 +1625,7 @@ func _on_cooling_timer_timeout():
 	Stats.update_tempature(Stats.cooling_amount)
 
 func _scroll_to_bottom():
-	await get_tree().process_frame #if youre finding one frame is not enough uncomment this
+	await get_tree().process_frame
 	await get_tree().process_frame
 	terminal_body.set_deferred("scroll_vertical", terminal_body.get_v_scroll_bar().max_value)
 
