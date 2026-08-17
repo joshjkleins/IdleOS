@@ -7,6 +7,6 @@ func _ready():
 
 func add_label(item: ItemData, amount: int):
 	var nl = item_added_label_scene.instantiate()
-	nl.update(item.name, amount)
+	nl.update(item, amount)
 	add_child(nl)
 	nl.display()

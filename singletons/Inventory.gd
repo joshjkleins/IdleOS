@@ -4,8 +4,10 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	
-	add_resource(Items.IP_ADDRESS, 300)
+	add_resource(Items.PARENTS_CREDIT_CARD, 1)
+	add_resource(Items.SQL_INJECTOR, 100)
+	add_resource(Items.LOGS, 102)
+	add_resource(Items.IP_ADDRESS, 5)
 	add_resource(Items.CREDENTIALS, 700)
 	add_resource(Items.VM_COMPILING_TOKEN, 1)
 	add_resource(Items.SCHOOL_PAYLOAD, 15)

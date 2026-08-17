@@ -1,7 +1,7 @@
 extends Label
 
-func update(n_text: String, amount: int):
-	text = "+" + str(amount) + " " + n_text
+func update(item: ItemData, amount: int):
+	text = "+" + str(amount) + " " + item.name + " (" + str(Inventory.get_amount(item)) + ")"
 
 func display():
 	modulate.a = 0.0

@@ -220,7 +220,7 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 	return_text += "├─ Level: " + str(process.level) + "\n"
 	return_text += "└─ Description: " + process.description + "\n"
 	
-	return_text += "\n\n"
+	return_text += "\n"
 	
 	###REQUIREMENTS
 	return_text += "REQUIREMENTS\n"
@@ -253,7 +253,7 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
 		i += 1
 		
-	return_text += "\n\n"
+	return_text += "\n"
 	
 	###REWARDS
 	if skill != Decoding:
@@ -425,7 +425,7 @@ func get_root_upgrades_text() -> String:
 		var skill = upgrade.skill
 		var color_string = skill.SKILL.color.to_html()
 		var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-		return_text += colored_name + "\n"
+		return_text += colored_name + " v" + str(upgrade.version) + "\n"
 		
 		##LOOPING THROUGH UPGRADES ARRAY [SPEED, EFFICIENCY, ETC]
 		
@@ -444,7 +444,7 @@ func get_root_upgrades_text() -> String:
 			#get dots
 			var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
 		
-			return_text += prefix + u_name_w_dots + " LVL " + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
+			return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
 			i += 1
 		return_text += "\n"
 	
@@ -466,31 +466,45 @@ func get_upgrades_package_info(package_id: String) -> String:
 	if package == null:
 		return "Package id not found"
 	
-	var return_text = "\nPackage: %s\n" % package_id
+	var return_text = "────────────────────────────────────────────────────────\n"
+	return_text += "Package: %s\n" % package_id
 	return_text += "Skill: %s\n" % skill_name 
 	return_text += "Level: %s\n" % skill_level 
 	
 	return_text += "\nDescription:\n"
 	return_text += package.description + "\n"
 	
+	
 	return_text += "\nCurrent effect\n"
-	return_text += "└─ " + package.name + ": " + str(current_effect) + "\n\n"
-	return_text += "Next upgrade\n"
-	return_text += "└─ " + package.name + ": " + str(next_effect) + "\n\n"
-	
-	return_text += "Requirements\n"
-	var i = 0
-	for r in requirements:
-		var prefix = "├─ "
-		if i == requirements.size() - 1:
-			prefix = "└─ "
+	return_text += "└─ " + package.name + ": " + current_effect + "\n\n"
 		
-		return_text += prefix + r.item.name + " x" + str(r.amount) + "\n"
-		i += 1
+		
+	return_text += "Next upgrade\n"
+	return_text += "└─ " + package.name + ": " + next_effect + "\n\n"
 	
-	return_text += "\nInstall\n"
-	return_text += "└─ " + "apt install " + package.id + "\n"
-	
+	if !Upgrades.is_at_max_level(package_id):
+		return_text += "Requirements\n"
+		var i = 0
+		for r in requirements:
+			var prefix = "├─ "
+			if i == requirements.size() - 1:
+				prefix = "└─ "
+			var player_amount = Inventory.get_amount(r.item)
+			if player_amount < r.amount: #not enough
+				return_text += prefix + r.item.name + " [color=red]" + str(Inventory.get_amount(r.item)) + "/" + str(r.amount) + "[/color]\n"
+			else: #enough
+				return_text += prefix + r.item.name + " [color=green]" + str(Inventory.get_amount(r.item)) + "/" + str(r.amount) + "[/color]\n"
+			i += 1
+		
+		return_text += "\nInstall\n"
+		return_text += "└─ " + "apt install " + package.id + "\n"
+		
+		
+	return_text += "────────────────────────────────────────────────────────\n\n"
 	
 	
 	return return_text
+
+
+func cd_not_at_root() -> String:
+	return "Return to root before navigating to different directory. \t[color=#666666]example: cd ..[/color]"

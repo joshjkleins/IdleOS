@@ -1,20 +1,13 @@
 extends Control
 
-#TODO
-#YOU ARE HERE
-#IN MIDDLE OF APT UPGRADE MANAGER
-# figure out how/when to display percentages vs real number vs decimal vs whole numbers (0.05 or 5%) and to show negative numbers or not ie Speed upgrade: -10% or speed upgrade: 10% (leaning toward always positive)
-# get logic in place for actually upgrading
-# add skill lvl requirement to requirements ie Requires Logs x 10 and Mining lvl 15
-# add stuff / colors for max level 
-# build out cool upgrade UI
-# implement upgrades in each Skill (ie make sure speed/efiiciency is applied correctly)
-# create workflow for full installation (what it looks/feels like, question command (are you sure? y/n), checking/removing requirements resources, applying actual upgrade)
-#decide if putting all the upgrade info into resources would be better or not (leaning toward no cause lazy)
+#TODO 
+# add actual changes to processes
+#PARSING: SPEED   EFFICIENCY
+#PHISHING: LINES
 
+#update ssh command? : random idea, this could hook into the awaiting_player_input concept built out. ssh compiling would check for vm token then list potential skills to run. ssh compiling -> which skill? school small-business : q to quit -> start
 
 # "tutorial" : show tutorial checklist
-
 
 
 #Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
@@ -33,7 +26,9 @@ extends Control
 
 #SAVE/LOAD SYSTEM
 
-#BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade (if upgrades are a thing yet)
+#BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
+#Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
+
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -85,6 +80,16 @@ enum Context {
 func get_context_name_string(current_context: Context) -> String:
 	return Context.keys()[current_context].capitalize()
 
+enum PlayerInputContext {
+	NONE,
+	UPGRADES,
+}
+
+var current_player_input_context: PlayerInputContext = PlayerInputContext.NONE
+var awaiting_player_input: bool = false
+var accepting_player_inputs: bool = true
+var upgrade_package_selected = null
+
 enum MarketContext {
 	MAIN,
 	CONTRACTS,
@@ -132,6 +137,8 @@ var processing_queue = false
 
 var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) before creating a new one
 var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
+
+
 
 func _ready():
 	current_scrollback = original_scrollback
@@ -212,6 +219,19 @@ func add_new_scrollback():
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
+	if !accepting_player_inputs:
+		input_line.clear()
+		return
+	if awaiting_player_input:
+		if new_text.to_lower().strip_edges() == "y" or new_text.to_lower().strip_edges() == "n":
+			add_line(get_context_lead() + new_text)
+			input_line.clear()
+			accept_player_input(new_text)
+		else:
+			add_line(get_context_lead() + "Input not recognized. type y for yes or n for no.")
+			input_line.clear()
+		return
+			
 	var text_with_lead = get_context_lead() + new_text
 	input_line.clear()
 	add_line(text_with_lead)
@@ -542,14 +562,93 @@ func handle_apt_commands(text):
 	
 	var t_array = text.split(" ")
 	
-	if text.begins_with("apt") and t_array.size() == 3:
-		if t_array[1] == "info":
-			add_line(ContextCommands.get_upgrades_package_info(t_array[2]))
+	if t_array.size() != 3:
+		add_line("Apt command not recognized. [color=#666666]example: apt info mining.speed[/color]")
+		return
+
+	if !Upgrades.is_valid_package(t_array[2]):
+		add_line("Package not found. [color=#666666]example: apt info mining.speed[/color]")
+		return
+	if t_array[1] == "info":
+		add_line(ContextCommands.get_upgrades_package_info(t_array[2]))
+		return
+	if t_array[1] == "install":
+		if Upgrades.is_at_max_level(t_array[2]):
+			add_line("Package fully upgraded.")
 			return
-		if t_array[1] == "install":
-			add_line("Install upgrade package")
+		
+		var package = Upgrades.get_package_info(t_array[2])
+		var req = Upgrades.get_upgrade_requirement_from_package(package)
+		if !Upgrades.has_upgrade_requirements(t_array[2]):
+			add_line("\nRequirements missing")
+			for r in req:
+				var player_amount = Inventory.get_amount(r.item)
+				if player_amount < r.amount:
+					add_line(r.item.name + " [color=red]" + str(player_amount) + "/" + str(r.amount) + "[/color]")
+				else:
+					add_line(r.item.name + " [color=green]" + str(player_amount) + "/" + str(r.amount) + "[/color]")
 			return
-			#upgrade logic here
+			
+		#at this point player has requirements and the package can be upgraded
+		add_line("Preparing to install " + t_array[2] + " package.")
+		add_line("This upgrade will consume the following:")
+		for r in req:
+			add_line(r.item.name + " x" + str(r.amount))
+		add_line("[color=green]Are you sure you want install this package?[/color] y/n")
+		awaiting_player_input = true
+		current_player_input_context = PlayerInputContext.UPGRADES
+		upgrade_package_selected = package
+		#upgrade logic here
+
+##player gave acceptable input
+func accept_player_input(text):
+	text = text.to_lower().strip_edges()
+	match current_player_input_context:
+		PlayerInputContext.NONE:
+			return
+		PlayerInputContext.UPGRADES:
+			if text == "y":
+				await apply_apt_package_upgrade()
+			upgrade_package_selected = null
+			current_player_input_context = PlayerInputContext.NONE
+			awaiting_player_input = false
+
+func apply_apt_package_upgrade():
+	#RECONFIRM PLAYER HAS REQUIREMENTS
+	var req = Upgrades.get_upgrade_requirement_from_package(upgrade_package_selected)
+	for r in req:
+		if Inventory.get_amount(r.item) < r.amount:
+			add_line("You no longer have required resources for this upgrade. Terminating install.")
+			return
+	#REMOVE REQUIREMENTS FROM PLAYER
+	for r in req:
+		Inventory.remove_resource(r.item, r.amount)
+		add_line("removing " + r.item.name + " x" + str(r.amount))
+	
+	accepting_player_inputs = false
+	add_line("downloading updated package...")
+	await bro_wait(0.2)
+	add_line("unpacking update packages..")
+	await bro_wait(0.6)
+	add_line("installing upgrades")
+	await bro_wait(2.0)
+	add_line("configuring optimal settings")
+	await bro_wait(0.8)
+	add_line("upgrade complete")
+	var completion_text = Upgrades.get_completion_text(upgrade_package_selected)
+
+	add_line(completion_text)
+	
+	Upgrades.package_aquired(upgrade_package_selected)
+	accepting_player_inputs = true
+	#do awaits, add_line(ascii progress bar download (maybe multiple)) and random text
+	# apply upgrades (i'll do this)
+	#satisfying finish
+	#unlock player
+
+func bro_wait(time: float):
+	await get_tree().create_timer(time).timeout
+	
 
 ##INFO COMMANDS
 func handle_info_commands(text):
@@ -721,7 +820,7 @@ func mining_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -799,7 +898,7 @@ func log_parsing_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -880,7 +979,7 @@ func password_unscramble_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -969,7 +1068,7 @@ func cred_matching_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -1051,7 +1150,7 @@ func cache_decrypting_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -1083,6 +1182,9 @@ func overclock_logic():
 		return
 	if Stats.overclocked: #already overclocked
 		add_line("System is already overclocked")
+		return
+	if !Upgrades.can_overclock(_get_major_from_minor(current_process_info)):
+		add_line("Overclock not available. Check upgrade package manager with 'apt'.")
 		return
 	if Stats.overheated: #overheated - still recovering
 		add_line("System has been overheated, needs to cool to below 40°C.")
@@ -1142,7 +1244,7 @@ func phishing_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -1218,7 +1320,7 @@ func compiling_commands(text):
 			Stats.overclocked = false
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 
@@ -1287,7 +1389,7 @@ func defragging_commands(text):
 			add_line("Overclock not available for defragging.")
 		_:
 			if text.begins_with("cd"):
-				add_line("Return to root before navigating to different directory. \t[color=#666666]cmd: cd ..[/color]")
+				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
 

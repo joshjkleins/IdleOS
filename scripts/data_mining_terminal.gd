@@ -85,9 +85,12 @@ func _process(delta):
 func set_mine_type(type: Dictionary, window: bool = false):
 	is_window = window
 	TYPE = type
-	BASE_SPEED = type["base speed"] / Mining.process_upgrades["speed"]["amount"]
-	OVERCLOCK_SPEED = type["overclock speed"] / Mining.process_upgrades["speed"]["amount"]
-	OVERHEAT_SPEED = type["overheat speed"] / Mining.process_upgrades["speed"]["amount"]
+	var speed_mining_package = Upgrades.get_package_info("mining.speed")
+	var speed_upgrade = speed_mining_package.current #use min to cap speed upgrade to negatives dont occur and frig everything
+
+	BASE_SPEED = type["base speed"] / (1.0 + speed_upgrade)
+	OVERCLOCK_SPEED = type["overclock speed"] / (1.0 + speed_upgrade)
+	OVERHEAT_SPEED = type["overheat speed"]
 	HEAT = type["heat"]
 	OVERCLOCK_HEAT = type["overclock heat"]
 	OVERHEAT_HEAT = type["overheat heat"]
@@ -159,18 +162,29 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	session_yield += reward_quantity_gained
 	cycles_label.text = str(session_cycle)
 	data_yield_label.text = str(session_yield)
-	var eff_label_text = ""
-	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
-	var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
-	eff_label_text = str(base_eff * frag_bonus * 100.0) + "%"
-
-	efficiency_label.text = eff_label_text
+	#var eff_label_text = ""
+	#var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
+	#var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
+	#var c_efficiency = _get_mining_efficiency_total()
+	#eff_label_text = str(c_efficiency * 100.0) + "%"
+#
+	#efficiency_label.text = eff_label_text
+	_update_efficiency_label()
 	level_label.text = str(Mining.SKILL["level"])
 
+func _get_mining_efficiency_total():
+	var base_efficiency = TYPE["efficiency"]
+	var defrag_multiplier = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
+	
+	var efficiency_mining_package = Upgrades.get_package_info("mining.efficiency")
+	var efficiency_upgrade = efficiency_mining_package.current
+	
+	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
+
 func _get_reward_quantity() -> int:
-	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
-	var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
-	var eff = base_eff * frag_bonus
+	#var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
+	#var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
+	var eff = _get_mining_efficiency_total()
 	
 	var quant = 1
 
@@ -193,11 +207,19 @@ func _reset_info():
 	session_cycle = 0
 	session_time = 0.0
 	#_update_rate_label()
-	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
-	var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
-	efficiency_label.text = str(base_eff * frag_bonus * 100.0) + "%"
+	#var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
+	#var base_eff = TYPE["efficiency"] + Mining.process_upgrades["efficiency"]["amount"]
+	_update_efficiency_label()
+	#efficiency_label.text = str(base_eff * frag_bonus * 100.0) + "%"
 
 	level_label.text = str(Mining.SKILL["level"])
+
+func _update_efficiency_label():
+	var eff_label_text = ""
+	var c_efficiency = _get_mining_efficiency_total()
+	eff_label_text = str(c_efficiency * 100.0) + "%"
+
+	efficiency_label.text = eff_label_text
 
 func _on_blinking_timer_timeout():
 	pass
