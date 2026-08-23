@@ -64,6 +64,7 @@ var target_reward
 var target_name
 
 var reward_amount: int = 0
+var requirements
 
 var offensive_item
 var defensive_item
@@ -155,6 +156,8 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	target_name_label.text = "-"
 	target_label_2.text = "-"
 	integ_label.text = "--/--"
+	#requirements
+	requirements = target.requirements
 	
 	#status_label.text = "finding target"
 	update_status_label_badge("finding target", c_yellow)
@@ -207,6 +210,7 @@ func attack():
 	integ_bar.value -= actual_dmg
 	add_heat(ATTACK_HEAT)
 	Inventory.remove_resource(offensive_item, 1)
+	Signals.update_hacking_header()
 	attack_amount_label.text = "x" + str(Inventory.get_amount(offensive_item))
 	if crit > 1: 
 		_update_info_panel("efficiency caused hack to be extra effective", c_green)
@@ -235,6 +239,7 @@ func defense():
 	band_bar.value = Hacking.current_bandwidth
 	anon_bar.value = Stats.current_anon
 	Inventory.remove_resource(defensive_item, 1)
+	Signals.update_hacking_header()
 	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
 	var info_text = "packet_spoof increased anonymity - anonymity +" + str(DEFEND_AMOUNT)
 	_update_info_panel(info_text, c_blue)
@@ -272,26 +277,8 @@ func lose():
 	attacking = false
 	defending = false
 	var messages = ""
-	messages += "[color=#e24b4a]INTEGRITY CRITICAL - ABORTING HACK[/color]\n" 
+	messages += "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n" 
 	messages += "[color=#e24b4a]Items lost[/color]\n"
-	#DATA
-	if Inventory.get_amount(Items.DATA) > 10:
-		var data_amount = Inventory.get_amount(Items.DATA)
-		var to_remove = int(data_amount * 0.1)
-		Inventory.remove_resource(Items.DATA, to_remove)
-		messages += "[color=#e24b4a]Data x" + str(to_remove) + "[/color]\n"
-		#OFFENSIVE
-	if Inventory.get_amount(offensive_item) > 0:
-		var data_amount = Inventory.get_amount(offensive_item)
-		var to_remove = int(data_amount * 0.5)
-		Inventory.remove_resource(offensive_item, to_remove)
-		messages += "[color=#e24b4a]" + offensive_item.name + " x" + str(to_remove) +"[/color]\n"
-	#DEFENSIVE
-	if Inventory.get_amount(defensive_item) > 10:
-		var data_amount = Inventory.get_amount(defensive_item)
-		var to_remove = int(data_amount * 0.5)
-		Inventory.remove_resource(defensive_item, to_remove)
-		messages += "[color=#e24b4a]" + defensive_item.name + " x" + str(to_remove) + "[/color]\n"
 	
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
@@ -303,6 +290,7 @@ func win():
 	defending = false
 	firewall_bar.value = 0
 	Inventory.add_resource(target_reward, 1)
+	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
 	reward_amount += 1
 	update_bottom_row()
 	_update_info_panel("target successfully hacked. +1 " + target_reward.name, c_blue)
@@ -327,7 +315,7 @@ func start_hack():
 	is_hacking = true
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
-	if Inventory.get_amount(offensive_item) > 0:
+	if Inventory.get_amount(defensive_item) > 0:
 		defending = true
 	if bandwidth_timer.is_stopped():
 		bandwidth_timer.wait_time = Hacking.bandwidth_recovery_speed
@@ -366,58 +354,64 @@ func end():
 	stop_hacking = true
 	reward_amount = 0
 
+func _remove_required_resources():
+	Inventory.remove_resource(requirements.item, requirements.amount)
+	var remove_text = "removing " + requirements.item.name + " x" + str(requirements.amount)
+	_update_info_panel(remove_text, c_blue)
+
+func _has_requirements():
+	if Inventory.get_amount(requirements.item) < requirements.amount:
+		return false
+	return true
+
 func prepare():
-	if Inventory.get_amount(Items.IP_ADDRESS) <= 0 or Inventory.get_amount(Items.CREDENTIALS) <= 0:
+	if !_has_requirements():
 		Stats.overclocked = false
 		_update_info_panel("Unable to find target", c_red)
 		Signals.update_hack_console("[color=#ef9f27]Missing required resources to hack " + target_name + ", aborting.[/color]\n")
 		await get_tree().create_timer(1.5).timeout
 		Stats.overclocked = false
 		Signals.hacking_ended()
-	else:
-		target_name_label.text = "-"
-		target_label_2.text = "-"
-		_update_info_panel("locating " + target_name, c_white)
-		await get_tree().create_timer(1.0).timeout
-		_update_info_panel("target found", c_white)
-		await get_tree().create_timer(0.3).timeout
-		update_status_label_badge("gaining access", c_blue)
-		await get_tree().create_timer(0.3).timeout
-		target_name_label.text = target_name
-		target_label_2.text = target_name
-		await get_tree().create_timer(0.3).timeout
-		_update_info_panel("using IP Address and Credentials to gain access", c_white)
-		await get_tree().create_timer(0.2).timeout
-		if stop_hacking:
-			return
-		_update_info_panel("-1 credential", c_blue)
-		_update_info_panel("-1 ip address", c_blue)
-		update_bottom_row()
-		await get_tree().create_timer(0.5).timeout
-		Inventory.remove_resource(Items.IP_ADDRESS, 1)
-		Inventory.remove_resource(Items.CREDENTIALS, 1)
-		Signals.update_hacking_header()
-		update_bottom_row()
-		_update_info_panel("access granted", c_green)
-		var tween = create_tween()
-		var firewall_tween = create_tween()
-		tween.tween_property(integ_bar, "value", integ_bar.max_value, 1.0)
-		firewall_tween.tween_property(firewall_bar, "value", firewall_bar.max_value, 1.0)
-		await tween.finished
-		await firewall_tween.finished
-		await get_tree().create_timer(0.2).timeout
-		_update_info_panel("starting hack", c_white)
-		#status_label.text = "hacking"
-		update_status_label_badge("hacking", c_green)
-		
-		
-		integ_bar.max_value = INTEGRITY_AMOUNT
-		integ_bar.value = INTEGRITY_AMOUNT
-		firewall_bar.max_value = FIREWALL_AMOUNT
-		firewall_bar.value = FIREWALL_AMOUNT
-		if stop_hacking:
-			return
-		start_hack()
+		return
+
+	target_name_label.text = "-"
+	target_label_2.text = "-"
+	_update_info_panel("locating " + target_name, c_white)
+	await get_tree().create_timer(1.0).timeout
+	_update_info_panel("target found", c_white)
+	await get_tree().create_timer(0.3).timeout
+	update_status_label_badge("gaining access", c_blue)
+	await get_tree().create_timer(0.3).timeout
+	target_name_label.text = target_name
+	target_label_2.text = target_name
+	await get_tree().create_timer(0.3).timeout
+	_update_info_panel("using " + requirements.item.name + " to gain access", c_white)
+	await get_tree().create_timer(0.2).timeout
+	if stop_hacking:
+		return
+	update_bottom_row()
+	await get_tree().create_timer(0.5).timeout
+	_remove_required_resources()
+	Signals.update_hacking_header()
+	update_bottom_row()
+	_update_info_panel("access granted", c_green)
+	var tween = create_tween()
+	var firewall_tween = create_tween()
+	tween.tween_property(integ_bar, "value", integ_bar.max_value, 1.0)
+	firewall_tween.tween_property(firewall_bar, "value", firewall_bar.max_value, 1.0)
+	await tween.finished
+	await firewall_tween.finished
+	await get_tree().create_timer(0.2).timeout
+	_update_info_panel("starting hack", c_white)
+	update_status_label_badge("hacking", c_green)
+	
+	integ_bar.max_value = INTEGRITY_AMOUNT
+	integ_bar.value = INTEGRITY_AMOUNT
+	firewall_bar.max_value = FIREWALL_AMOUNT
+	firewall_bar.value = FIREWALL_AMOUNT
+	if stop_hacking:
+		return
+	start_hack()
 
 func _on_anon_bar_value_changed(value):
 	anon_label.text = "anonymity " + str(int(value)) + "/" + str(Stats.max_anon)

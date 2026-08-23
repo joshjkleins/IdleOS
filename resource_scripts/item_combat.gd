@@ -8,5 +8,6 @@ extends ItemData
 @export var bandwidth_cost: int = 0
 @export var data_cost: int = 0
 @export var firewall_damage: int = 0
+
 @export_enum("Attack", "Heal")
 var type: String = "Attack"

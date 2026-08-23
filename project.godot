@@ -41,6 +41,7 @@ Compiling="*res://singletons/Compiling.gd"
 Defragging="*res://singletons/Defragging.gd"
 Palette="*res://singletons/Palette.gd"
 Upgrades="*res://singletons/Upgrades.gd"
+Tutorial="*res://singletons/Tutorial.gd"
 
 [display]
 

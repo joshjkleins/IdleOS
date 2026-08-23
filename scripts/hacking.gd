@@ -6,6 +6,8 @@ signal start_loading
 @onready var player_hacking_box: Control = $VBoxContainer/HBoxContainer/PlayerHackingBox
 @onready var enemy_hacking_box: Control = $VBoxContainer/HBoxContainer/HackingBox
 
+var is_in_hacking_context: bool = false
+
 enum HackingContext {
 	TARGETS,
 	PERSONS,
@@ -17,6 +19,7 @@ var current_context: HackingContext = HackingContext.TARGETS
 func _ready():
 	Signals.hacking_ended_signal.connect(hacking_ended)
 	Signals.update_console_signal.connect(message_from_hack_game)
+	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 
 func module_loaded():
 	header_hacking_box.update_hacking_header()
@@ -28,13 +31,20 @@ func module_loaded():
 	tween2.tween_property(self, "modulate:a", 1.0, 0.5)
 	await tween2.finished
 	enemy_hacking_box.update_targets()
+	is_in_hacking_context = true
+	Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_HACKING)
+
+
+func tutorial_event_completed(message: String):
+	if is_in_hacking_context:
+		player_hacking_box.add_line(message)
 
 func go_to_root() -> void:
 	var tween2 = create_tween()
 	tween2.tween_property(self, "modulate:a", 0.0, 0.5)
 	await tween2.finished
 	visible = false
-	
+	is_in_hacking_context = false
 	start_loading.emit()
 
 
@@ -124,20 +134,31 @@ func _on_player_hacking_box_command_entered(text):
 
 func handle_hack_command(text):
 	var target: Dictionary = Stats.get_hacking_target_by_command(text)
+	
+	#Valid target
 	if target.is_empty():
 		player_hacking_box.add_line_error("Not a valid target.")
-	else:
-		if enemy_hacking_box.can_hack_person(target):
-			if Stats.current_anon > 0:
-				await enemy_hacking_box.select_person(target)
-				current_context = HackingContext.HACKING
-			else:
-				player_hacking_box.add_line_error("Anonymity at 0. Increase to above 0 before hacking.")
-				#player_hacking_box.add_line_system("Use anonymity increase items at any time with command: 'heal'")
-		else:
-			for r in target["requirements"]:
-				if Inventory.get_amount(r.item) < r.amount:
-					player_hacking_box.add_line_error("Missing: " + r.item.name)
+		return
+	
+	#Has enough anonymity
+	if Stats.current_anon <= 0:
+		await enemy_hacking_box.target_select_error(target)
+		player_hacking_box.add_line_error("Anonymity too low. Wait for recover or use 'heal' to recover with Packet Spoofs.")
+		return
+	
+	#Has requirements in inventory
+	if !_has_hacking_requirements(target):
+		await enemy_hacking_box.target_select_error(target)
+		player_hacking_box.add_line_error("Missing required payloads.")
+		player_hacking_box.add_line_error("Missing: " + target.requirements.item.name + " x" + str(target.requirements.amount))
+		return
+
+	if Inventory.get_amount(Items.SQL_INJECTOR) <= 0:
+		player_hacking_box.add_line_error("Missing offensive hacking attack. [color=666666]can be found with Phishing[/color]")
+		return
+	
+	await enemy_hacking_box.select_person(target)
+	current_context = HackingContext.HACKING
 
 func handle_back_command():
 	match current_context:
@@ -180,3 +201,9 @@ func format_command_list(title: String, commands: Array) -> String:
 		lines += "\n"
 	
 	return lines.strip_edges()
+
+func _has_hacking_requirements(target) -> bool:
+	var req = target.requirements
+	if Inventory.get_amount(req.item) < req["amount"]:
+		return false
+	return true

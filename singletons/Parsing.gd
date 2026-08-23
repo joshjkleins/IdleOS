@@ -34,7 +34,7 @@ var LOGS = {
 	"experience": 0,
 	"experience per level": 200,
 	"command": "parse -logs",
-	"efficiency": 0.05,
+	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
 	"unlock level": 1,

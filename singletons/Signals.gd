@@ -24,6 +24,10 @@ signal end_phishing_safely_signal
 signal end_compiling_safely_signal
 signal item_added_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
+signal tutorial_event_completed_signal
+
+func tutorial_event_completed(message: String):
+	tutorial_event_completed_signal.emit(message)
 
 func end_hacking():
 	end_hacking_signal.emit()

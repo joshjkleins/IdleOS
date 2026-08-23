@@ -58,6 +58,7 @@ layout_mode = 2
 
 [node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
 layout_mode = 2
+size_flags_horizontal = 10
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2

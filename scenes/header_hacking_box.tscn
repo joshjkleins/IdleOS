@@ -123,52 +123,6 @@ horizontal_alignment = 2
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
-custom_minimum_size = Vector2(230, 0)
-layout_mode = 2
-size_flags_vertical = 4
-alignment = 1
-
-[node name="ResourceCol" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 2
-
-[node name="IPAddressAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "12"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
-theme_override_font_sizes/font_size = 12
-text = "IP Address"
-horizontal_alignment = 1
-
-[node name="ResourceCol2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 2
-
-[node name="CredAmount" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "4"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
-theme_override_font_sizes/font_size = 12
-text = "Credentials"
-horizontal_alignment = 1
-
-[node name="VSeparator2" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
-layout_mode = 2
-theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
-
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
 layout_mode = 2
 alignment = 1
@@ -183,6 +137,88 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.592157, 0.592157, 0.592157, 1)
 theme_override_font_sizes/font_size = 10
 text = "EFFICIENCY"
+
+[node name="VSeparator2" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
+
+[node name="HackingItemsRow" type="GridContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="ResourceCol" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="OffensiveItem" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "12"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "SQL Injectors"
+horizontal_alignment = 1
+
+[node name="ResourceCol2" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="DefensiveItem" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "4"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "Packet Spoofs"
+horizontal_alignment = 1
+
+[node name="School" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow"]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_constants/separation = 2
+
+[node name="SchoolPayload" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/School"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "12"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/School"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "School Payloads"
+horizontal_alignment = 1
+
+[node name="Library" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow"]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_constants/separation = 2
+
+[node name="LibraryPayload" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/Library"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "12"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/Library"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
+theme_override_font_sizes/font_size = 12
+text = "Library Payloads"
+horizontal_alignment = 1
 
 [node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
 layout_mode = 2

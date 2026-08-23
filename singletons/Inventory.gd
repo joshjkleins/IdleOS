@@ -4,13 +4,8 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.PARENTS_CREDIT_CARD, 1)
 	add_resource(Items.SQL_INJECTOR, 100)
-	add_resource(Items.LOGS, 102)
-	add_resource(Items.IP_ADDRESS, 5)
-	add_resource(Items.CREDENTIALS, 700)
-	add_resource(Items.VM_COMPILING_TOKEN, 1)
-	add_resource(Items.SCHOOL_PAYLOAD, 15)
+	add_resource(Items.SCHOOL_PAYLOAD, 5)
 	return
 	for i in Items.ITEM_MAP:
 		add_resource(Items.ITEM_MAP[i], 500)
@@ -62,7 +57,6 @@ func list_specific_item(item: ItemData):
 	var item_name = "Name: " + item.name
 	var amount = "Current amount: " + str(get_amount(item))
 	var description = "Description: " + item.description
-	#var obtained_from = item.get_obtained_from_skills()
 	
 	var of = []
 	for i in item.obtained_from:
@@ -86,7 +80,25 @@ func list_specific_item(item: ItemData):
 	text += obtained_from + "\n"
 	text += main_use + "\n\n"
 
+	
+	if item is CombatItem:
+		match item.type:
+			"Attack":
+				text += "Integrity damage: " + str(item.damage) + "\n"
+				text += "Firewall damage: " + str(item["firewall_damage"]) + "\n"
+				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
+				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
+			
+			"Heal":
+				text += "Integrity restore: " + str(item.heal) + "\n"
+				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
+				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
+
 	return text
+
+func get_combat_item_speed_text(item: CombatItem) -> String:
+	var sp = 1.0 / (100.0 / item.speed)
+	return "%.2f" % sp
 
 func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 	var amount_width = 15

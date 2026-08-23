@@ -102,10 +102,15 @@ func finished(caught: bool):
 		$Status.text = "+1 " + reward.item.name
 		add_heat()
 		
+		#make this one either or since player should only be able to 'phish' in one thing
 		if randf() <= 0.01:
 			Inventory.add_resource(Items.VM_PHISHING_TOKEN, 1)
 		else:
 			Inventory.add_resource(reward.item, 1)
+			if reward.item == Items.SQL_INJECTOR:
+				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_15_SQL_INJECTORS, 1)
+			if reward.item == Items.PACKET_SPOOF:
+				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_5_PACKET_SPOOFS, 1)
 		type.signal.emit(1)
 		Exp.add_xp(Phishing, type, type["experience per level"]  * Phishing.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Phishing)
@@ -153,8 +158,6 @@ func stop_safely():
 
 func process_done():
 	line_ended_signal.emit()
-
-
 
 func _on_progress_bar_value_changed(value):
 	$ProgressBar/TimeRemaining.text = str(value).pad_decimals(2)

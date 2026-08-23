@@ -73,10 +73,10 @@ layout_mode = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 layout_mode = 2
-offset_left = 16.2827
-offset_top = -8.22328
-offset_right = 136.283
-offset_bottom = 14.7767
+offset_left = 16.0
+offset_top = -8.0
+offset_right = 615.0
+offset_bottom = 15.0
 bbcode_enabled = true
 text = "[bgcolor=#0b0e11]Hacking[/bgcolor]"
 fit_content = true

@@ -323,6 +323,73 @@ func get_hack_target_info(location: Dictionary):
 	
 	return return_text
 
+func list_vm_terminals_for_skill(skill: Node):
+	var first_col = 20
+	var second_col = 30
+	var return_text = ""
+	return_text += skill.name + "\n\n"
+	return_text += pad_text("Process", first_col) + pad_text("Run command", second_col) + "\n"
+	return_text += "-".repeat(first_col + second_col) + "\n"
+	for mp in skill.minor_processes:
+		var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+		return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
+	return return_text
+
+func ssh_commands(major_processes: Array) -> String:
+	var first_col = 15
+	var second_col = 20
+	var third_col = 25
+	var return_text = "SSH Commands\n\n"
+	return_text += pad_text("Skill", first_col) + pad_text("Tokens", second_col) + pad_text("Info", third_col) + "\n"
+	return_text += "-".repeat(first_col + second_col + third_col) + "\n"
+	
+	for p in major_processes:
+		var c = p.SKILL.color.to_html()
+		var s_name = "[color=#%s]%s[/color]" % [c, p.SKILL.name]
+		var info_command = "ssh " + p.SKILL.name.to_lower()
+		var tokens = str(Inventory.get_amount(p.vm_token))
+		return_text += pad_text(s_name, first_col) + pad_text(tokens, second_col) + pad_text(info_command, third_col) + "\n"
+
+	return return_text
+	
+
+func ssh_help_commands() -> String:
+	var text := """
+ ____________________________________________________________________
+|                                                                    |
+|                            SSH COMMANDS                            |
+|____________________________________________________________________|
+|                                                                    |
+|   ssh                          List available VM tokens            |
+|   ssh <skill>                  List ssh run commands               |
+|   ssh <skill> <process>        Consume VM token to run process     |
+|                                in seperate window                  |
+|   ssh -h                       Show this list of commands          |
+|____________________________________________________________________|
+"""
+	return text
+
+func process_commands() -> String:
+	var text := """
+ ____________________________________________________________________
+|                                                                    |
+|                          PROCESS COMMANDS                          |
+|____________________________________________________________________|
+|                                                                    |
+|   <skill> -<process>           Run a process                       |
+|   ps                           List running process                |
+|   kill                         Stop currently running process      |
+|   stop                         Stop currently running process      |
+|   focus                        Bring currently running process     |
+|                                to bottom of terminal               |
+|   sticky                       Anchor process to top of terminal   |
+|   stick                        Anchor process to top of terminal   |
+|   unsticky                     Remove anchored process from top    |
+|   unstick                      Remove anchored process from top    |
+|   process -h                   Show this list of commands          |
+|____________________________________________________________________|
+"""
+	return text
 
 func get_help() -> String:
 	var text := """
@@ -338,23 +405,22 @@ func get_help() -> String:
 |   info                         Display additional skill info       |
 |                                                                    |
 | SYSTEM                                                             |
-|   ps                           List running processes              |
-|   kill                         Stop the running process            |
-|   ssh <skill> <process>        Connect to a virtual machine        |
 |   history                      Show command history                |
 |   date                         Show date and time                  |
 |   clear                        Clear terminal                      |
 |                                                                    |
 | ITEMS                                                              |
 |   ls                           List items                          |
-|   ls <item>                    Item info                           |
+|   ls <item>                    Item details                        |
 |                                                                    |
 | UPGRADES                                                           |
-|   apt                          Open upgrade manager                |
+|   apt                          Upgrade package manager             |
 |                                                                    |
 | DOCUMENTATION                                                      |
 |   tutorial                     Show tutorial checklist             |
 |   -h                           Display this list                   |
+|   process -h                   List process commands               |
+|   ssh -h                       List ssh commands                   |
 |____________________________________________________________________|
 """
 	return text
@@ -508,3 +574,56 @@ func get_upgrades_package_info(package_id: String) -> String:
 
 func cd_not_at_root() -> String:
 	return "Return to root before navigating to different directory. \t[color=#666666]example: cd ..[/color]"
+
+func returned_to_root() -> String:
+	var text := """  
+ ____________________________________________________________________
+|                                                                    |
+|                            ROOT COMMANDS                           |
+|____________________________________________________________________|
+|                                                                    |
+| SKILLS / TRAVERSAL                                                 |
+|   cd <skill>                   Navigate to a skill                 |
+|   info                         Display additional skill info       |
+|                                                                    |
+| SYSTEM                                                             |
+|   clear                        Clear terminal                      |
+|                                                                    |
+| ITEMS                                                              |
+|   ls                           List items                          |
+|   ls <item>                    Item details                        |
+|                                                                    |
+| UPGRADES                                                           |
+|   apt                          Upgrade package manager             |
+|                                                                    |
+| DOCUMENTATION                                                      |
+|   tutorial                     Show tutorial checklist             |
+|   -h                           Display expanded commands list      |
+|____________________________________________________________________|
+"""
+	return text
+
+func get_tutorial() -> String:
+	var return_string = "IDLEOS // TUTORIAL\n\n"
+	
+	return_string += "PROGRESS: " + Tutorial.get_tutorial_progress_string() + "\n\n"
+	
+	var completed_tasks = Tutorial.get_completed_tasks()
+	
+	return_string += "COMPLETED\n"
+	for task in completed_tasks:
+		return_string += "\t[✓] " + task + "\n"
+	
+	return_string += "\nCURRENT TASK\n"
+	return_string += "\t[>] " +  Tutorial.get_current_task() + "\n\n"
+	
+	return_string += "NEXT\n"
+	var next_tasks = Tutorial.get_next_tasks(4)
+	for task in next_tasks:
+		return_string += "\t[?] " + task + "\n"
+	
+	return_string += "────────────────────────────────────────────────────────\n\n"
+	
+	return_string += "Type 'tutorial' at any time to view progress.\n"
+	
+	return return_string

@@ -20,6 +20,10 @@ var is_window: bool = false
 
 var type: Dictionary
 
+var base_speed
+var overclock_speed
+var overheat_speed
+
 func set_parse_type(p_type: Dictionary, i_window = false):
 	type = p_type
 	is_window = i_window
@@ -34,9 +38,15 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 		cont.get_child(0).text = item["item"]["name"].to_upper()
 		cont.get_child(1).text = str(type["resource gained"][i]["weight"]) + "%" #str(item_chance) + "%"
 		item_labels[i].visible = true
-	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
-	var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
-	chance_per_line_label.text = "%.1f%%" % (base_eff * frag_bonus * 100.0)
+	
+	var eff = _get_total_effeciency()
+	chance_per_line_label.text = "%.1f%%" % (eff * 100.0)
+	#speed
+	var speed_parsing_package = Upgrades.get_package_info("parsing.speed")
+	var speed_upgrade = speed_parsing_package.current
+	base_speed = type["base speed"] / (1.0 + speed_upgrade)
+	overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
+	overheat_speed = type["overheat speed"]
 
 func start():
 	end_safely = false
@@ -60,27 +70,32 @@ func start():
 				var new_log_line = log_line_scene.instantiate()
 				var item = null
 				var amount = 0
-				var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
-				var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
-				var eff = base_eff * frag_bonus
+				var eff = _get_total_effeciency()
 				
 				if randf() < eff:
 					var item_info = Parsing.get_weighted_item(type["resource gained"])
 					item = item_info["item"]
 					amount = randi_range(item_info["min"], item_info["max"])
 					Inventory.add_resource(item, amount)
+					if item == Items.ENCRYPTED_PASSWORDS:
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_ENCRYPTED_PASSWORDS, 1)
+					if item == Items.USERNAMES:
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_USERNAMES, 1)
+					if item == Items.IP_ADDRESS:
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_IP_ADDRESSES, 1)
+						
 				
 				new_log_line.update(Parsing.LOG_LINES.pick_random(), item, amount)
 				logs_container.add_child(new_log_line)
 				
 				if Stats.overheated:
-					await get_tree().create_timer(type["overheat speed"] / Parsing.process_upgrades["speed"]["amount"]).timeout
+					await get_tree().create_timer(overheat_speed).timeout
 					heat_used = type["overheat heat"]
 				elif Stats.overclocked:
-					await get_tree().create_timer(type["overclock speed"] / Parsing.process_upgrades["speed"]["amount"]).timeout
+					await get_tree().create_timer(overclock_speed).timeout
 					heat_used = type["overclock heat"]
 				else:
-					await get_tree().create_timer(type["base speed"] / Parsing.process_upgrades["speed"]["amount"]).timeout
+					await get_tree().create_timer(base_speed).timeout
 					heat_used = type["heat"]
 				if !process_running:
 					Stats.update_tempature(heat_used)
@@ -108,12 +123,12 @@ func stop_safely():
 
 func _finished_log(heat_used: int):
 	type.signal.emit(1)
+	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_25_LOGS, 1)
 	Exp.add_xp(Parsing, type, type["experience per level"] * Parsing.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Parsing)
-	var frag_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
-	var base_eff = type["efficiency"] + Parsing.process_upgrades["efficiency"]["amount"]
-	var eff = base_eff * frag_bonus * 100.0
-	chance_per_line_label.text = "%.1f%%" % eff
+
+	var eff = _get_total_effeciency()
+	chance_per_line_label.text = "%.1f%%" % (eff * 100)
 	Stats.update_tempature(heat_used)
 	if Inventory.get_amount(type["requirements"]) > 0 and !end_safely:
 		_reset_logs()
@@ -121,3 +136,10 @@ func _finished_log(heat_used: int):
 func _reset_logs():
 	for n in logs_container.get_children():
 		n.queue_free()
+
+func _get_total_effeciency() -> float:
+	var base = type["efficiency"]
+	var upgrades = Upgrades.get_package_info("parsing.efficiency")
+	var defragging_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
+	
+	return (base + upgrades.current) * defragging_bonus

@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://nvkps616p7hs"]
+
+[ext_resource type="Script" uid="uid://edw0ibt5vci0" path="res://scripts/hud_process_running.gd" id="1_46pb0"]
+
+[node name="HUDProcessRunning" type="PanelContainer"]
+custom_minimum_size = Vector2(140, 60)
+size_flags_horizontal = 10
+script = ExtResource("1_46pb0")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 24
+
+[node name="CenterContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="RunningLabel" type="Label" parent="MarginContainer/CenterContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "PROCESS RUNNING"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/CenterContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="SkillName" type="RichTextLabel" parent="MarginContainer/CenterContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+text = "Mining"
+fit_content = true
+autowrap_mode = 0
+
+[node name="ProcessName" type="RichTextLabel" parent="MarginContainer/CenterContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+text = "logs"
+fit_content = true
+autowrap_mode = 0
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/CenterContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0:00:00"
+horizontal_alignment = 1

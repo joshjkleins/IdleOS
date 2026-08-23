@@ -216,6 +216,7 @@ func _successful_crack(heat: int):
 	type.signal.emit(1)
 	Inventory.remove_resource(type["requirements"], 1)
 	Inventory.add_resource(type["resource gained"], 1)
+	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_5_PASSWORDS, 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])

@@ -6,7 +6,7 @@ extends Resource
 @export var name: String
 @export var shortened_name: String
 @export var description: String
-@export var valuable: bool
+@export var upgrade_ingredient: bool
 @export var value: int
 
 
@@ -19,7 +19,7 @@ enum ItemColor {
 	PHISHING, #5
 	HACKING,  #6
 	DECODING, #7
-	VALUABLE, #8
+	UPGRADE, #8
 	CONSUMABLE, #9
 	COMPILING, #10
 }

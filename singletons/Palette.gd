@@ -9,7 +9,7 @@ var COLORS = {
 	ItemData.ItemColor.PHISHING: Phishing.SKILL.color,  #5
 	ItemData.ItemColor.HACKING: Hacking.SKILL.color,    #6
 	ItemData.ItemColor.DECODING: Decoding.SKILL.color,  #7
-	ItemData.ItemColor.VALUABLE: Color.AQUAMARINE,      #8
+	ItemData.ItemColor.UPGRADE: Color.AQUAMARINE,      #8
 	ItemData.ItemColor.CONSUMABLE: Color.CRIMSON,       #9
 	ItemData.ItemColor.COMPILING: Compiling.SKILL.color, #10
 }

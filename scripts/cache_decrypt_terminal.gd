@@ -80,6 +80,8 @@ func start_decrypting():
 		apply_heat(overclocked_this_cache)
 		
 		type.signal.emit(1)
+		
+		Tutorial.track_event(Tutorial.TutorialEvent.DECODE_1_STUDENT_CACHE, 1)
 		Exp.add_xp(Decoding, type, type["experience per level"] * Decoding.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Decoding)
 		

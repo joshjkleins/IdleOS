@@ -1,33 +1,17 @@
 extends Control
 
 #TODO 
-# add actual changes to processes
-#PARSING: SPEED   EFFICIENCY
-#PHISHING: LINES
-
-#update ssh command? : random idea, this could hook into the awaiting_player_input concept built out. ssh compiling would check for vm token then list potential skills to run. ssh compiling -> which skill? school small-business : q to quit -> start
-
-# "tutorial" : show tutorial checklist
-
-
-#Remove data completely. Anything that was purchasable should be moved to getting aquired through processes
-#No longer able to sell items - might end up with a bunch of valuable items, need fix for this, what can these be turned into? maybe compile can change them to valuable hacking items?? Or maybe create randmoized offer table ie parents credit card can exchange for 50 passwords
-#Remove marketplace completely: remove relevant commands, marketplace, contracts
-#	[1] Contracts: sunset for now 
-#	[2] Valuables: all should be used in recipes or broken down to other resources
-#	[3] Black market: all hacking items should be found elsewhere (maybe phishing?)
-#	[4] Upgrades: Change to recipes within each module
+# next tutorial playthrough, make sure 'PROCESS STARTED' timer in header is working properly for all skills
+# take data out of caches
+# add decoding option for upgradable items (decode parents cc for 50 Usernames etc)
 
 #Hacking
-#Still need to solve hacking equip problem. Might need archetectural change.
-#Update UI to show payloads on viewing locations screen [School (12)] [Small business (5)] etc
 #Upgrade within hacking system to unlock more targets/locations
-#Hacking will now consume payloads
 
 #SAVE/LOAD SYSTEM
 
-#BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
-#Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
+# BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
+# Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
 
 
 #STEPS FOR ADDING NEW MODULE
@@ -50,6 +34,7 @@ extends Control
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 @onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
+@onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -157,6 +142,7 @@ func _ready():
 	Signals.end_compiling_safely_signal.connect(compiling_ended_safely)
 	Signals.defrag_finished_signal.connect(defrag_finished)
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
+	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 	
 	#cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
@@ -356,7 +342,11 @@ func list_help():
 			add_line(ContextCommands.get_help_text(Phishing))
 
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
-	
+
+func tutorial_event_completed(message: String):
+	if current_context == Context.HACKING:
+		return
+	add_line(message)
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
@@ -373,11 +363,16 @@ func universal_commands(text):
 		var alt_item_name = text.substr(2).strip_edges()
 		var item = Items.ITEM_NAME_MAP.get(item_name.to_lower())
 		var alt_item = Items.ITEM_NAME_MAP.get(alt_item_name.to_lower())
-		if item != null:
+		
+		if item != null: #if player uses quotes around item name > ls "logs"
 			add_line(Inventory.list_specific_item(item))
+			if item.name == "logs":
+				Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
 			return true
-		if alt_item != null:
+		if alt_item != null: #without quotes > ls logs
 			add_line(Inventory.list_specific_item(alt_item))
+			if alt_item_name == "logs":
+				Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
 			return true
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
@@ -388,6 +383,7 @@ func universal_commands(text):
 			return true
 		"ls -a", "ls":
 			add_line(Inventory.list_inventory())
+			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_ITEMS)
 			return true
 		"ls -v":
 			add_line(Inventory.list_inventory(Inventory.InventoryFilter.VALUABLES))
@@ -398,27 +394,33 @@ func universal_commands(text):
 		"ls -m": #List processes
 			add_line(Stats.list_unlocked_processes())
 			return true
-		"show contracts":
-			add_line(ContractsManager.show_contracts())
-			return true
-		"open contracts":
-			contracts_container.open_contracts()
-			return true
-		"close contracts":
-			contracts_container.min_contracts()
-			return true
-		"complete -c":
-			add_line(ContractsManager.complete_contracts())
-			return true
-		"-h":
+		#"show contracts":
+			#add_line(ContractsManager.show_contracts())
+			#return true
+		#"open contracts":
+			#contracts_container.open_contracts()
+			#return true
+		#"close contracts":
+			#contracts_container.min_contracts()
+			#return true
+		#"complete -c":
+			#add_line(ContractsManager.complete_contracts())
+			#return true
+		"-h", "help":
 			add_line(ContextCommands.get_help())
-			#list_help()
+			Tutorial.complete_event(Tutorial.TutorialEvent.RUN_HELP_COMMAND)
+			return true
+		"tutorial":
+			add_line(ContextCommands.get_tutorial())
 			return true
 		"tree":
 			add_line(ContextCommands.get_ascii_tree(get_context_name_string(current_context)))
 			return true
 		"history":
 			add_line(ContextCommands.get_history_commands(command_history))
+			return true
+		"process -h":
+			add_line(ContextCommands.process_commands())
 			return true
 		"ps":
 			if current_process_info == {}:
@@ -439,9 +441,9 @@ func universal_commands(text):
 			process_running = false
 			unstick_current_process()
 			if current_process:
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
+				_kill_current_process()
+				
+				Tutorial.complete_event(Tutorial.TutorialEvent.STOP_MINING_PROCESS)
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
@@ -449,18 +451,21 @@ func universal_commands(text):
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
+				Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
 			else:
 				add_line("No process found to focus")
 			return true
 		"sticky", "stick":
 			if current_process != null:
 				sticky_current_process()
+				Tutorial.complete_event(Tutorial.TutorialEvent.USE_STICKY)
 			else:
 				add_line("No process running")
 			return true
 		"unsticky", "unstick":
 			if current_process != null:
 				unstick_current_process()
+				Tutorial.complete_event(Tutorial.TutorialEvent.USE_UNSTICKY)
 			else:
 				add_line("No process running")
 			return true
@@ -482,6 +487,7 @@ func root_commands(text):
 			add_line("[ OK ] data mining module loaded")
 			update_context(Context.MINING)
 			add_line(ContextCommands.get_help_text(Mining))
+			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
 		"load parsing", "cd parsing":
 			add_line("[ .. ] loading parsing module")
 			#header.update_header(Parsing)
@@ -489,6 +495,7 @@ func root_commands(text):
 			add_line("[ OK ] parsing module loaded")
 			update_context(Context.PARSING)
 			add_line(ContextCommands.get_help_text(Parsing))
+			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
 		"load cracking", "cd cracking":
 			add_line("[ .. ] loading cracking module")
 			#header.update_header(Cracking)
@@ -504,18 +511,21 @@ func root_commands(text):
 			update_context(Context.MATCHING)
 			add_line(ContextCommands.get_help_text(Matching))
 		"load hacking", "cd hacking":
+			if process_running:
+				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
+				return
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
 			await tween.finished
 			terminal_root.visible = false
 			await loading.show_loading()
 			hacking.module_loaded()
-		"marketplace -auth": #Go to marketplace
-			add_line("[ .. ] requesting permissions")
-			add_line("[ OK ] permission granted")
-			add_line("Connected to online marketplace")
-			update_context(Context.MARKETPLACE)
-			add_line(Marketplace.marketplace_welcome())
+		#"marketplace -auth": #Go to marketplace
+			#add_line("[ .. ] requesting permissions")
+			#add_line("[ OK ] permission granted")
+			#add_line("Connected to online marketplace")
+			#update_context(Context.MARKETPLACE)
+			#add_line(Marketplace.marketplace_welcome())
 		"load decoding", "cd decoding":
 			add_line("[ .. ] loading decoding module")
 			#header.update_header(Decoding)
@@ -553,7 +563,8 @@ func return_to_root():
 	header.update()
 	update_context(Context.ROOT)
 	add_line(Ascii.root)
-	add_line(ContextCommands.all_commands())
+	add_line(ContextCommands.info_command_text())
+	#add_line(ContextCommands.all_commands())
 
 func handle_apt_commands(text):
 	if text == "apt":
@@ -648,12 +659,12 @@ func apply_apt_package_upgrade():
 
 func bro_wait(time: float):
 	await get_tree().create_timer(time).timeout
-	
 
 ##INFO COMMANDS
 func handle_info_commands(text):
 	if text == "info":
 		add_line(ContextCommands.info_command_text())
+		Tutorial.complete_event(Tutorial.TutorialEvent.INFO_COMMAND)
 		return
 	
 	var command = text.split(" ")
@@ -667,6 +678,8 @@ func handle_info_commands(text):
 			if command[1] == n:
 				
 				add_line(ContextCommands.get_help_text(p))
+				if n == "mining":
+					Tutorial.complete_event(Tutorial.TutorialEvent.INFO_MINING_COMMAND)
 				return
 	
 	if command.size() == 3:
@@ -688,6 +701,8 @@ func handle_info_commands(text):
 					for mp in p.minor_processes:
 						if command[2] == mp.name.to_lower().replace(" ", "-"):
 							add_line(ContextCommands.get_mp_info(p, mp))
+							if p == Phishing and mp == Phishing.SPEAR:
+								Tutorial.complete_event(Tutorial.TutorialEvent.PHISH_SPEAR_INFO)
 							return
 	add_line("info command not recognized")
 	add_line("info commands")
@@ -700,7 +715,24 @@ func handle_info_commands(text):
 #command vm [process] [minor process] [optional flag -r]
 #command example: vm mining basic -r
 func handle_vm_token_commands(text):
+	if text == "ssh -h":
+		add_line(ContextCommands.ssh_help_commands())
+		return
+		
+	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
+	var target_process = null
+	if text == "ssh":
+		add_line(ContextCommands.ssh_commands(processes))
+		return
 	var commands = text.split(" ")
+	
+	#LIST MINOR PROCESSES AVAILABLE FOR SSH/VM example: ssh mining -> list logs, quality logs, etc
+	if commands.size() == 2:
+		#is 2nd array index a skill name
+		for p in processes:
+			if commands[1] == p.SKILL.name.to_lower():
+				add_line(ContextCommands.list_vm_terminals_for_skill(p))
+				return
 	#confirm commands size
 	if commands.size() < 3 or commands.size() > 4:
 		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
@@ -708,8 +740,7 @@ func handle_vm_token_commands(text):
 	
 		
 	#find major process
-	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
-	var target_process = null
+
 	for p in processes:
 		if p.SKILL.name.to_lower() == commands[1]:
 			target_process = p
@@ -761,6 +792,7 @@ func handle_vm_token_commands(text):
 	
 	await get_tree().process_frame
 	grab_all_focus()
+	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
 
 func grab_all_focus():
 	get_window().grab_focus()
@@ -806,6 +838,7 @@ func mining_commands(text):
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
+				Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
 			else:
 				add_line("No process found to focus")
 		"root", "..", "cd ..":
@@ -835,7 +868,9 @@ func start_log_mining(minor_process: Dictionary):
 	current_process = new_data_mining_terminal
 	current_process_info = minor_process
 	new_data_mining_terminal.start_data_mining()
+	hud_process_running.process_started(Mining, minor_process)
 	add_new_scrollback()
+	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_MINING_LOG)
 
 func data_mining_ended_safely():
 	unstick_current_process()
@@ -916,6 +951,7 @@ func start_parsing(minor_process: Dictionary):
 	current_process = new_log_parsing_terminal
 	current_process_info = minor_process
 	new_log_parsing_terminal.start()
+	hud_process_running.process_started(Parsing, minor_process)
 	add_new_scrollback()
 
 func log_parsing_ended_safely():
@@ -997,6 +1033,7 @@ func start_cracking(minor_process: Dictionary):
 	current_process = new_pw_cracking_terminal
 	current_process_info = minor_process
 	new_pw_cracking_terminal.start()
+	hud_process_running.process_started(Cracking, minor_process)
 	add_new_scrollback()
 
 func password_cracking_ended_safely():
@@ -1084,6 +1121,7 @@ func start_matching(minor_process):
 	current_process = new_cred_matching_terminal
 	current_process_info = minor_process
 	new_cred_matching_terminal.start()
+	hud_process_running.process_started(Matching, minor_process)
 	add_new_scrollback()
 
 func cred_matching_ended_safely():
@@ -1166,6 +1204,7 @@ func start_cache_decrypting(minor_process):
 	current_process = new_cache_decrypt_terminal
 	current_process_info = minor_process
 	new_cache_decrypt_terminal.start_decrypting()
+	hud_process_running.process_started(Decoding, minor_process)
 	add_new_scrollback()
 
 func cache_decrypting_ended_safely():
@@ -1258,6 +1297,7 @@ func cast_line(type: Dictionary, t_lines: int):
 		current_process = new_phishing_terminal
 		current_process_info = type
 		new_phishing_terminal.cast_lines(type, t_lines)
+		hud_process_running.process_started(Phishing, type)
 		add_new_scrollback()
 
 func phishing_ended_safely():
@@ -1335,6 +1375,7 @@ func start_compiling(minor_process: Dictionary):
 	current_process = new_compiling_terminal
 	current_process_info = minor_process
 	new_compiling_terminal.start(minor_process)
+	hud_process_running.process_started(Compiling, minor_process)
 	add_new_scrollback()
 
 func compiling_ended_safely():
@@ -1404,6 +1445,7 @@ func start_defragging(minor_skill: Dictionary):
 	current_process = new_defrag_terminal
 	current_process_info = minor_skill
 	new_defrag_terminal.start(minor_skill)
+	hud_process_running.process_started(Defragging, minor_skill)
 	add_new_scrollback()
 
 func defrag_finished():
@@ -1746,3 +1788,11 @@ func _clear_terminal():
 		var ns = scrollback.instantiate()
 		terminal_body_container.add_child(ns)
 		current_scrollback = ns
+
+func _kill_current_process():
+	var main_skill = _get_major_from_minor(current_process_info)
+	add_line("Process killed: " + main_skill.SKILL.name + " - " + current_process_info.name)
+	hud_process_running.process_killed()
+	current_process.stop()
+	current_process = null
+	current_process_info = {}

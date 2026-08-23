@@ -87,6 +87,7 @@ func _compile_payload():
 	#GIVETH
 	var amount_to_gain = 1
 	Inventory.add_resource(type["resource gained"], amount_to_gain)
+	Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_5_SCHOOL_PAYLOADS, 1)
 	amount_gained += amount_to_gain
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)
@@ -115,7 +116,7 @@ func _stop_compiling():
 	if vm_window:
 		_vm_finish()
 	else:
-		Signals.end_cache_decrypting_safely()
+		Signals.end_compiling_safely()
 	
 	scrambling = false
 

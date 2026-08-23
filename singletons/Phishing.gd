@@ -50,8 +50,8 @@ var SPEAR = {
 	"overheat heat": 1,
 	"requirements": [],
 	"resource gained": [
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
-		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 90 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 10 },
 	],
 	"resource amount gained": 1,
 	"description": "Send out emails in an attempt to get usernames and passwords",

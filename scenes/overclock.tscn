@@ -24,6 +24,7 @@ corner_radius_bottom_left = 2
 [node name="Overclock" type="PanelContainer"]
 offset_right = 130.0
 offset_bottom = 61.0
+size_flags_horizontal = 8
 script = ExtResource("2_h710b")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]

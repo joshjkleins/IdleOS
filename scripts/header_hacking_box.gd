@@ -4,9 +4,11 @@ extends Control
 @export var title_text: String = "Hacking"
 @onready var rtl = $RichTextLabel
 
-@onready var ip_address_amount = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol/IPAddressAmount
-@onready var cred_amount = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HBoxContainer/ResourceCol2/CredAmount
 @onready var efficiency = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/VBoxContainer/Efficiency
+@onready var offensive_item = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol/OffensiveItem
+@onready var defensive_item = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/ResourceCol2/DefensiveItem
+@onready var school_payload = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/School/SchoolPayload
+@onready var library_payload = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/Library/LibraryPayload
 
 @onready var skill_level = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer/SkillLevel
 @onready var skill_exp_bar = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/SkillExpBar
@@ -27,8 +29,10 @@ func update_hacking_header():
 	update_header_resources()
 
 func update_header_resources():
-	ip_address_amount.text = str(Inventory.get_amount(Items.IP_ADDRESS))
-	cred_amount.text = str(Inventory.get_amount(Items.CREDENTIALS))
+	offensive_item.text = str(Inventory.get_amount(Items.SQL_INJECTOR))
+	defensive_item.text = str(Inventory.get_amount(Items.PACKET_SPOOF))
+	school_payload.text = str(Inventory.get_amount(Items.SCHOOL_PAYLOAD))
+	library_payload.text = str(Inventory.get_amount(Items.LIBRARY_PAYLOAD))
 
 func update_header_exp(amount: int = 0):
 	var experience = Exp.get_xp_display(Hacking.SKILL)

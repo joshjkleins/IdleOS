@@ -318,6 +318,7 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	if randf() <= total_eff:
 		quantity += randi_range(3, 10)
 	Inventory.add_resource(type["resource gained"], quantity)
+	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_5_CREDENTIALS, 1)
 	status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
 	status_image.texture = cred_image
 	var og_box = third_col.get_theme_stylebox("panel").duplicate()

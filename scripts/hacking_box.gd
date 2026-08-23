@@ -15,7 +15,7 @@ func _ready():
 	targets_container.visible = true
 	persons_container.visible = false
 	hacking_game.visible = false
-	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
+	update_box_title(title_text)
 	update_targets()
 
 func update_targets():
@@ -37,25 +37,26 @@ func select_target(target: Dictionary = {}):
 	await _green_flash(target, targets_container)
 	await _hide_container(targets_container)
 	_update_persons(target)
+	update_box_title("IdleOS > Hacking > " + target.name)
 	await _show_container(persons_container)
 
 func select_person(target: Dictionary = {}, loadout: Dictionary = {}):
-	if Inventory.get_amount(Items.CREDENTIALS) > 0 and Inventory.get_amount(Items.IP_ADDRESS) > 0:
-		await _green_flash(target, persons_container)
-		await _hide_container(persons_container)
-		loadout = {
-			"offensive": Items.SQL_INJECTOR,
-			"defensive": Items.PACKET_SPOOF
-		}
-		hacking_game.setup(target, loadout)
-		await _show_container(hacking_game)
-		await hacking_game.prepare()
-		hacking_game.start_hack()
-	else:
-		await _red_flash(target, persons_container)
+	await _green_flash(target, persons_container)
+	await _hide_container(persons_container)
+	loadout = {
+		"offensive": Items.SQL_INJECTOR,
+		"defensive": Items.PACKET_SPOOF
+	}
+	hacking_game.setup(target, loadout)
+	update_box_title(rtl.text + " > " + target.name)
+	await _show_container(hacking_game)
+	await hacking_game.prepare()
+	hacking_game.start_hack()
+
+func target_select_error(target):
+	await _red_flash(target, persons_container)
 
 func can_hack_person(_target: Dictionary = {}):
-	#for item in _target["requirements"]:
 	var req = _target.requirements
 	if Inventory.get_amount(req.item) < req["amount"]:
 		return false
@@ -63,10 +64,12 @@ func can_hack_person(_target: Dictionary = {}):
 
 func persons_to_targets():
 	await _hide_container(persons_container)
+	remove_last_title_update()
 	await _show_container(targets_container)
 
 func hacking_to_persons():
 	await _hide_container(hacking_game)
+	remove_last_title_update()
 	await _show_container(persons_container)
 
 func _hide_container(container):
@@ -106,3 +109,14 @@ func _update_persons(target_location):
 		new_card.update_info(target)
 		
 		persons_container.add_child(new_card)
+
+func remove_last_title_update():
+	var split_text = rtl.text.split(">")
+	if split_text.size() <= 1:
+		return
+	split_text.remove_at(split_text.size() - 1)
+	rtl.text = ">".join(split_text).strip_edges()
+	
+
+func update_box_title(text: String):
+	rtl.text = "[bgcolor=#0b0e11]" + text + "[/bgcolor]"

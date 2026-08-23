@@ -102,7 +102,7 @@ var PARSING = {
 					"level": 1,
 					"id": "mining.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.05,
+					"amount": 0.50,
 					"unlocked": false
 				},
 				{
@@ -131,7 +131,7 @@ var PARSING = {
 					"level": 1,
 					"id": "mining.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.02,
+					"amount": 0.3,
 					"unlocked": false
 				},
 				{
@@ -332,6 +332,8 @@ func unlock_next_level(package):
 		if !lvl.unlocked:
 			lvl.unlocked = true
 			if package.current is float or package.current is int:
+				if package.id == "mining.speed" and package.levels[0].unlocked == true:
+					Tutorial.complete_event(Tutorial.TutorialEvent.UPGRADE_MINING_SPEED_WITH_APT)
 				package.current += lvl.amount
 				return
 			if package.current is bool:
