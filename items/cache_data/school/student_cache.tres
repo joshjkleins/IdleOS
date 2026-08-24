@@ -1,14 +1,16 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=6 format=3 uid="uid://cpjo55i7ddc8b"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://cpjo55i7ddc8b"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_3uaf6"]
-[ext_resource type="Resource" uid="uid://bbvxwnw404luf" path="res://items/cache_entry/school/student/student_data.tres" id="2_51f42"]
+[ext_resource type="Resource" uid="uid://bpmpt23pha6yl" path="res://items/cache_entry/school/student/student_encrypted_pw.tres" id="2_g5xjn"]
+[ext_resource type="Resource" uid="uid://b82dhbg1pwl0h" path="res://items/cache_entry/school/student/student_vm_mining_token.tres" id="3_3uaf6"]
 [ext_resource type="Resource" uid="uid://c1fdvurvkmgnj" path="res://items/cache_entry/school/student/student_logs.tres" id="3_g5xjn"]
 [ext_resource type="Resource" uid="uid://cnv1kmbjwjhej" path="res://items/cache_entry/school/student/student_parent_cc.tres" id="4_jtq2p"]
+[ext_resource type="Resource" uid="uid://du5w0msm1yehr" path="res://items/cache_entry/school/student/student_usernames.tres" id="4_y6tvt"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="5_y6tvt"]
 
 [resource]
 script = ExtResource("5_y6tvt")
-entries = Array[ExtResource("1_3uaf6")]([ExtResource("2_51f42"), ExtResource("3_g5xjn")])
+entries = Array[ExtResource("1_3uaf6")]([ExtResource("2_g5xjn"), ExtResource("3_g5xjn"), ExtResource("4_y6tvt"), ExtResource("3_3uaf6")])
 rare_pool = Array[ExtResource("1_3uaf6")]([ExtResource("4_jtq2p")])
 rare_drop_chance = 0.05
 id = 8

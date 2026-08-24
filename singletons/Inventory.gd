@@ -4,7 +4,7 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.SQL_INJECTOR, 100)
+	add_resource(Items.PARENTS_CREDIT_CARD, 4)
 	add_resource(Items.SCHOOL_PAYLOAD, 5)
 	return
 	for i in Items.ITEM_MAP:
@@ -170,6 +170,12 @@ func has_cache() -> bool:
 func has_valuables() -> bool:
 	for i in inventory:
 		if i.valuable:
+			return true
+	return false
+
+func has_intel() -> bool:
+	for i in inventory:
+		if i.upgrade_ingredient:
 			return true
 	return false
 

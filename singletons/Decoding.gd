@@ -1,6 +1,7 @@
 extends Node
 
-signal decode_cycle_completed
+signal cache_decode_cycle_completed
+signal intel_decode_cycle_completed
 signal xp_gained
 signal decoding_level_up_signal
 
@@ -27,7 +28,6 @@ var SKILL = {
 
 var CACHE = {
 	"name": "Cache",
-	"tier name": "TIER I | CACHE",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -45,9 +45,30 @@ var CACHE = {
 	"requirements": "cache",
 	"description": "Decrypt caches gained from hacking to reveal additional items.",
 	"efficiency description": "Chance to find rare item.",
-	"signal": decode_cycle_completed
+	"signal": cache_decode_cycle_completed
 }
 
+var INTEL = {
+	"name": "Intel",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 300,
+	"command": "decode -intel",
+	"efficiency": 0.1,
+	"efficiency rate": 0.001,
+	"unlocked": true,
+	"unlock level": 1,
+	"base speed": 0.2,
+	"overclock speed": 0.05,
+	"overheat speed": 1.0,
+	"heat": 5,
+	"overclock heat": 7,
+	"overheat heat": 2,
+	"requirements": "upgrade material",
+	"description": "Decrypt caches gained from hacking to reveal additional items.",
+	"efficiency description": "Increases chance to find items.",
+	"signal": intel_decode_cycle_completed
+}
 
 var minor_processes = [
 	CACHE

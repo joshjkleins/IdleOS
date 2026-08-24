@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://cpr2ov5rp20bm"]
+
+[ext_resource type="Resource" uid="uid://cm5x81sc5kujh" path="res://items/tokens/phishing/vm_phishing_token.tres" id="1_4i2sl"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_v2kpg"]
+
+[resource]
+script = ExtResource("2_v2kpg")
+item = ExtResource("1_4i2sl")
+min_quantity = 5
+max_quantity = 15
+drop_chance = 0.3
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

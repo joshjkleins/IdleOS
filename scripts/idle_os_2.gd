@@ -2,7 +2,6 @@ extends Control
 
 #TODO 
 # next tutorial playthrough, make sure 'PROCESS STARTED' timer in header is working properly for all skills
-# take data out of caches
 # add decoding option for upgradable items (decode parents cc for 50 Usernames etc)
 
 #Hacking
@@ -1146,6 +1145,9 @@ func cache_decrypting_commands(text):
 			if !Inventory.has_cache():
 				add_line("No caches found.")
 				return
+			if !Inventory.has_intel():
+				add_line("No intel found.")
+				return
 				
 			start_cache_decrypting(ms)
 			return
@@ -1199,7 +1201,7 @@ func start_cache_decrypting(minor_process):
 		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
-	new_cache_decrypt_terminal.set_cache_type(Decoding.CACHE)
+	new_cache_decrypt_terminal.set_cache_type(minor_process)
 	process_running = true
 	current_process = new_cache_decrypt_terminal
 	current_process_info = minor_process

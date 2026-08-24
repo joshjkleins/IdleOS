@@ -1,14 +1,16 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=6 format=3 uid="uid://0tyaq543vqch"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://0tyaq543vqch"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_08qxt"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_5w02g"]
 [ext_resource type="Resource" uid="uid://t3vbokrm640u" path="res://items/cache_entry/school/vice_principal/vice_principal_credential.tres" id="2_gbsyv"]
 [ext_resource type="Resource" uid="uid://c5k06t01wy0fy" path="res://items/cache_entry/school/vice_principal/vice_principal_ip.tres" id="3_mde3a"]
 [ext_resource type="Resource" uid="uid://clde6oisb6ib0" path="res://items/cache_entry/school/vice_principal/vice_principal_stud_disc_record.tres" id="4_kppex"]
+[ext_resource type="Resource" uid="uid://cljpmnp1qbutb" path="res://items/cache_entry/school/vice_principal/vice_principal_vm_matching.tres" id="4_ts1kr"]
+[ext_resource type="Resource" uid="uid://cpr2ov5rp20bm" path="res://items/cache_entry/school/vice_principal/vp_vm_phishing.tres" id="5_jskjs"]
 
 [resource]
 script = ExtResource("2_5w02g")
-entries = Array[ExtResource("1_08qxt")]([ExtResource("2_gbsyv"), ExtResource("3_mde3a")])
+entries = Array[ExtResource("1_08qxt")]([ExtResource("2_gbsyv"), ExtResource("3_mde3a"), ExtResource("4_ts1kr"), ExtResource("5_jskjs")])
 rare_pool = Array[ExtResource("1_08qxt")]([ExtResource("4_kppex")])
 rare_drop_chance = 0.05
 id = 14

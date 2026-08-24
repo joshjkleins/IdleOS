@@ -16,14 +16,11 @@ var item_label = preload("res://scenes/cache_item_label.tscn")
 
 var type
 
-enum DecodingType { CACHE }
-var current_type: DecodingType
 var is_window: bool = false
 
 func set_cache_type(p_type: Dictionary, window: bool = false):
 	is_window = window
 	type = p_type
-	current_type = DecodingType.CACHE
 
 func _ready():
 	cache_decrypt.item_found.connect(update_items_gained)
@@ -33,7 +30,7 @@ func start_decrypting():
 	items_from_session = {}
 	running = true
 	safe_stop = false
-	while Inventory.has_cache() and running:
+	while _has_requirements() and running:
 		if safe_stop:
 			if is_window:
 				_vm_finish()
@@ -42,11 +39,12 @@ func start_decrypting():
 			break
 		cache_decrypt.reset()
 		can_apply_heat = true
-		if !Inventory.has_cache():
-			print("No cache")
+		if !_has_requirements:
+			print("Missing requirements (cache or intel)")
 			return
 			
 		var current_cache = Inventory.get_cache()
+		var current_item = _get_required_item()
 		cache_name.text = current_cache.name + " x" + str(Inventory.get_amount(current_cache))
 		Inventory.remove_resource(current_cache, 1)
 		#build body
@@ -92,6 +90,21 @@ func start_decrypting():
 	else:
 		Signals.end_cache_decrypting_safely()
 
+func _get_required_item() -> ItemData:
+	match type:
+		Decoding.CACHE:
+			return Inventory.get_cache()
+		Decoding.INTEL:
+			return Inventory.get_intel_item()
+	return null
+
+func _has_requirements() -> bool:
+	match type:
+		Decoding.CACHE:
+			return Inventory.has_cache()
+		Decoding.INTEL:
+			return Inventory.has_intel()
+	return false
 
 func apply_heat(overclocked_this_cache):
 	if can_apply_heat:
