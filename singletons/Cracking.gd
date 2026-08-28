@@ -11,6 +11,7 @@ var vm_token = Items.VM_CRACKING_TOKEN
 @onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
+var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/pw_cracking_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -40,9 +41,9 @@ var PASSWORD = {
 	"base speed": 3.0,
 	"overclock speed": 1.0,
 	"overheat speed": 9.0,
-	"heat": 3,
-	"overclock heat": 8,
-	"overheat heat": 1,
+	"heat": 1.6,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
 	"requirements": Items.ENCRYPTED_PASSWORDS,
 	"resource gained": Items.PASSWORDS,
 	"resource amount gained": 1,
@@ -132,6 +133,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
+		Stats.CURRENT_ALL_VMS -= 1
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
@@ -139,6 +141,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 		content_instance.start()
 	)
 	CURRENT_VMS += 1
+	Stats.CURRENT_ALL_VMS += 1
 	return new_window
 
 

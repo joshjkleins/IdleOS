@@ -17,29 +17,29 @@ enum TutorialEvent {
 	USE_STICKY,
 	LIST_ITEMS,
 	LIST_LOG_DETAILS,
-	MINE_25_LOGS,
+	MINE_20_LOGS,
 	USE_UNSTICKY,
 	STOP_MINING_PROCESS,
 
 	# Parsing
 	NAVIGATE_PARSING,
-	PARSE_25_LOGS,
-	OBTAIN_5_ENCRYPTED_PASSWORDS,
-	OBTAIN_5_USERNAMES,
-	OBTAIN_5_IP_ADDRESSES,
+	PARSE_20_LOGS,
+	OBTAIN_3_ENCRYPTED_PASSWORDS,
+	OBTAIN_3_USERNAMES,
+	OBTAIN_3_IP_ADDRESSES,
 	# Cracking
-	CRACK_5_PASSWORDS,
+	CRACK_3_PASSWORDS,
 
 	# Matching
-	MATCH_5_CREDENTIALS,
+	MATCH_3_CREDENTIALS,
 
 	# Phishing
 	PHISH_SPEAR_INFO, ####<-------TEST
 	PHISH_15_SQL_INJECTORS,
-	PHISH_5_PACKET_SPOOFS,
+	PHISH_1_PACKET_SPOOFS,
 
 	# Compiling
-	COMPILE_5_SCHOOL_PAYLOADS,
+	COMPILE_3_SCHOOL_PAYLOADS,
 
 	# Hacking
 	NAVIGATE_HACKING,
@@ -49,7 +49,7 @@ enum TutorialEvent {
 	DECODE_1_STUDENT_CACHE,
 
 	# Upgrades
-	UPGRADE_MINING_SPEED_WITH_APT,
+	UNLOCK_MINING_OVERCLOCK_WITH_APT,
 
 	# Advanced
 	RUN_VM_WITH_SSH,
@@ -67,32 +67,32 @@ var tutorial_tasks := {
 	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list your items.",
 	TutorialEvent.LIST_LOG_DETAILS: "Use 'ls logs' to view information about your logs. Additional details for any item can be seen with 'ls <item name>'.",
 	
-	TutorialEvent.MINE_25_LOGS: "Mine 25 logs.",
+	TutorialEvent.MINE_20_LOGS: "Mine 20 logs.",
 	TutorialEvent.USE_UNSTICKY: "Use 'unsticky' to unpin the mining process.",
 	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'.",
 
 	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First return to the root directory with 'cd ..' then to the Parsing skill with 'cd parsing'",
-	TutorialEvent.PARSE_25_LOGS: "Parse 25 logs.",
-	TutorialEvent.OBTAIN_5_ENCRYPTED_PASSWORDS: "Obtain 5 encrypted passwords from parsing logs.",
-	TutorialEvent.OBTAIN_5_USERNAMES: "Obtain 5 usernames from Parsing logs.",
-	TutorialEvent.OBTAIN_5_IP_ADDRESSES: "Obtain 5 IP Addresses from Parsing logs.",
+	TutorialEvent.PARSE_20_LOGS: "Parse 20 logs.",
+	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Obtain 3 encrypted passwords from parsing logs.",
+	TutorialEvent.OBTAIN_3_USERNAMES: "Obtain 3 usernames from Parsing logs.",
+	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Obtain 3 IP Addresses from Parsing logs.",
 
-	TutorialEvent.CRACK_5_PASSWORDS: "Navigate to and use the Cracking skill to crack 5 encrypted passwords.",
+	TutorialEvent.CRACK_3_PASSWORDS: "Navigate to and use the Cracking skill to crack 3 encrypted passwords.",
 	
-	TutorialEvent.MATCH_5_CREDENTIALS: "Navigate to and use the Matching skill to match 5 credentials.",
+	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 3 credentials.",
 
 	TutorialEvent.PHISH_SPEAR_INFO: "Use 'info phishing spear' to view what can be obtained from spear phishing",
 	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to and use the Phishing skill to phish for 15 SQL injectors.",
-	TutorialEvent.PHISH_5_PACKET_SPOOFS: "Navigate to and use the Phishing skill to phish for 5 packet spoofs.",
+	TutorialEvent.PHISH_1_PACKET_SPOOFS: "Navigate to and use the Phishing skill to phish for 1 packet spoofs.",
 
-	TutorialEvent.COMPILE_5_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 5 school payloads.",
+	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 3 school payloads.",
 
 	TutorialEvent.NAVIGATE_HACKING: "Navigate to the Hacking terminal.",
 	TutorialEvent.HACK_STUDENT: "Successfully hack a student and obtain a Student Cache.",
 
 	TutorialEvent.DECODE_1_STUDENT_CACHE: "Decode 1 student cache.",
 
-	TutorialEvent.UPGRADE_MINING_SPEED_WITH_APT: "Upgrade the Mining skill with 'apt'.",
+	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT: "Upgrade the Mining skill to unlock overclocking with 'apt'.",
 
 	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Required a VM Token. For more info on ssh commands use 'ssh'.",
 }
@@ -111,53 +111,27 @@ func track_event(event: TutorialEvent, amount: int = 1) -> void:
 	if tutorial_progress[event] >= get_event_requirement(event):
 		complete_event(event)
 
-####TESTING VERSION, REAL ONE BELOW
-#func get_event_requirement(event: TutorialEvent) -> int:
-	#match event:
-		#TutorialEvent.MINE_25_LOGS:
-			#return 5
-		#TutorialEvent.PARSE_25_LOGS:
-			#return 5
-		#TutorialEvent.OBTAIN_5_ENCRYPTED_PASSWORDS:
-			#return 1
-		#TutorialEvent.CRACK_5_PASSWORDS:
-			#return 1
-		#TutorialEvent.OBTAIN_5_USERNAMES:
-			#return 1
-		#TutorialEvent.MATCH_5_CREDENTIALS:
-			#return 1
-		#TutorialEvent.PHISH_15_SQL_INJECTORS:
-			#return 3
-		#TutorialEvent.PHISH_5_PACKET_SPOOFS:
-			#return 5
-		#TutorialEvent.COMPILE_5_SCHOOL_PAYLOADS:
-			#return 5
-		#TutorialEvent.DECODE_1_STUDENT_CACHE:
-			#return 1
-		#_:
-			#return 1
-
 ##### REAL ONE
 func get_event_requirement(event: TutorialEvent) -> int:
 	match event:
-		TutorialEvent.MINE_25_LOGS:
-			return 25
-		TutorialEvent.PARSE_25_LOGS:
-			return 25
-		TutorialEvent.OBTAIN_5_ENCRYPTED_PASSWORDS:
-			return 5
-		TutorialEvent.CRACK_5_PASSWORDS:
-			return 5
-		TutorialEvent.OBTAIN_5_USERNAMES:
-			return 5
-		TutorialEvent.MATCH_5_CREDENTIALS:
-			return 5
+		TutorialEvent.MINE_20_LOGS:
+			return 20
+		TutorialEvent.PARSE_20_LOGS:
+			return 20
+		TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS:
+			return 3
+		TutorialEvent.CRACK_3_PASSWORDS:
+			return 3
+		TutorialEvent.OBTAIN_3_USERNAMES:
+			return 3
+		TutorialEvent.MATCH_3_CREDENTIALS:
+			return 3
 		TutorialEvent.PHISH_15_SQL_INJECTORS:
 			return 15
-		TutorialEvent.PHISH_5_PACKET_SPOOFS:
-			return 5
-		TutorialEvent.COMPILE_5_SCHOOL_PAYLOADS:
-			return 5
+		TutorialEvent.PHISH_1_PACKET_SPOOFS:
+			return 1
+		TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS:
+			return 3
 		_:
 			return 1
 

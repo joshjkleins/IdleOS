@@ -1,13 +1,17 @@
 extends Control
 
-@onready var temp = $MarginContainer/VBoxContainer/HBoxContainer3/Temp
+#@onready var temp = $MarginContainer/VBoxContainer/HBoxContainer3/Temp
 @onready var temp_bar = $MarginContainer/VBoxContainer/HBoxContainer2/TempBar
 @onready var added_heat_labels = $MarginContainer/VBoxContainer/HBoxContainer3/ScrollContainer/MarginContainer/AddedHeatLabels
 @onready var status_label = $MarginContainer/VBoxContainer/MarginContainer/StatusLabel
+@onready var temp = $MarginContainer/VBoxContainer/HBoxContainer3/VBoxContainer/Temp
+@onready var cool_rate_label = $MarginContainer/VBoxContainer/HBoxContainer3/VBoxContainer/CoolRate
 
 func _ready():
 	Signals.system_temp_updated_signal.connect(update_heat_info)
 	Signals.heat_added_signal.connect(heat_added_label)
+	Signals.cooling_updated_signal.connect(update_cooling_rate_label)
+	update_cooling_rate_label()
 
 const ZONE_COLORS = [
 	Color("#2d9e75"),  # cool
@@ -76,7 +80,7 @@ func update_progressbar_fill(color: Color) -> void:
 	stylebox.bg_color = color
 	temp_bar.add_theme_stylebox_override("fill", stylebox)
 
-func heat_added_label(temp_n: int):
+func heat_added_label(temp_n: float):
 	var lab = Label.new()
 	lab.add_theme_font_size_override("font_size", 10)
 	lab.add_theme_color_override("font_color", Color.DARK_RED)
@@ -100,3 +104,10 @@ func _fade_out(label: Label):
 	tween.tween_property(label, "modulate:a", 0.0, 0.3)
 	await tween.finished
 	label.queue_free()
+
+func update_cooling_rate_label():
+	var temp_per_second = Stats.cooling_amount / Stats.cooling_frequency
+	if temp_per_second >= 0.0:
+		temp_per_second = 0.0
+	
+	cool_rate_label.text = "%.1f°C/s" % temp_per_second

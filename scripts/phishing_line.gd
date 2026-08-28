@@ -27,8 +27,13 @@ func setup():
 func begin(p_type):
 	type = p_type
 	setup()
+	var cast_time = type["cast time"]
+	if Stats.overclocked:
+		cast_time = type["overclock cast time"]
+	if Stats.overheated:
+		cast_time = type["overheat cast time"]
 	pb_fill_tween = create_tween()
-	pb_fill_tween.tween_property($ProgressBar, "value", $ProgressBar.max_value, 2.0)
+	pb_fill_tween.tween_property($ProgressBar, "value", $ProgressBar.max_value, cast_time)
 	await pb_fill_tween.finished
 	if !active:
 		return
@@ -110,7 +115,7 @@ func finished(caught: bool):
 			if reward.item == Items.SQL_INJECTOR:
 				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_15_SQL_INJECTORS, 1)
 			if reward.item == Items.PACKET_SPOOF:
-				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_5_PACKET_SPOOFS, 1)
+				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_1_PACKET_SPOOFS, 1)
 		type.signal.emit(1)
 		Exp.add_xp(Phishing, type, type["experience per level"]  * Phishing.process_upgrades["experience"]["amount"])
 		Signals.update_hud(Phishing)

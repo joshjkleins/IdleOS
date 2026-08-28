@@ -68,9 +68,9 @@ var end_safely: bool = false
 var BASE_SPEED: float = 0.0
 var OVERCLOCK_SPEED: float = 0.0
 var OVERHEAT_SPEED: float = 0.0
-var HEAT: int = 0
-var OVERCLOCK_HEAT: int = 0
-var OVERHEAT_HEAT: int = 0
+var HEAT: float = 0
+var OVERCLOCK_HEAT: float = 0
+var OVERHEAT_HEAT: float = 0
 var RESOURCE_GAIN: ItemData
 var EXP_PER_COMPLETION: int = 0
 var EFFICIENCY_RATE: float = 0.0
@@ -96,7 +96,7 @@ func set_mine_type(type: Dictionary, window: bool = false):
 	OVERHEAT_HEAT = type["overheat heat"]
 	RESOURCE_GAIN = type["resource gained"]
 	EXP_PER_COMPLETION = type["experience per level"]
-	EFFICIENCY_RATE = type["efficiency rate"] + (Mining.process_upgrades["efficiency"]["amount"] - 1.0)
+	#EFFICIENCY_RATE = type["efficiency rate"] + (Mining.process_upgrades["efficiency"]["amount"] - 1.0)
 	tier.text = type["tier name"]
 	yield_title_label.text = type["name"].to_upper() + " YIELD"
 	title.text = "MINING " + type["name"].to_upper()
@@ -118,11 +118,10 @@ func start_data_mining():
 		for i in range(SEGMENTS):
 			_set_progress(i)
 			
-			#_update_rate_label()
 			if Stats.overheated:
 				await get_tree().create_timer(OVERHEAT_SPEED).timeout
 				overheated = true
-			elif Stats.overclocked and !is_window:
+			elif Stats.overclocked:
 				await get_tree().create_timer(OVERCLOCK_SPEED).timeout
 				overclocked = true
 			else:
@@ -143,21 +142,20 @@ func stop_safely():
 	end_safely = true
 
 func _cycle_complete(overclocked: bool, overheated: bool):
-	if !is_window:
-		if overheated:
-			Stats.update_tempature(OVERHEAT_HEAT)
-		elif overclocked and !is_window:
-			Stats.update_tempature(OVERCLOCK_HEAT)
-		else:
-			Stats.update_tempature(HEAT)
+	if overheated:
+		Stats.update_tempature(OVERHEAT_HEAT)
+	elif overclocked:
+		Stats.update_tempature(OVERCLOCK_HEAT)
+	else:
+		Stats.update_tempature(HEAT)
 	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
-	Tutorial.track_event(Tutorial.TutorialEvent.MINE_25_LOGS, reward_quantity_gained)
+	Tutorial.track_event(Tutorial.TutorialEvent.MINE_20_LOGS, reward_quantity_gained)
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)
 	TYPE.signal.emit(reward_quantity_gained)
-	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION  * Mining.process_upgrades["experience"]["amount"])
+	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION)
 	Signals.update_hud(Mining)
 	session_cycle += 1
 	session_yield += reward_quantity_gained

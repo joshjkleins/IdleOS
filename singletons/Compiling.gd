@@ -10,6 +10,7 @@ var vm_token = Items.VM_COMPILING_TOKEN
 @onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
+var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/compiling_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -36,12 +37,12 @@ var SCHOOL = {
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed": 15.0,
-	"overclock speed": 2.0,
-	"overheat speed": 0.2,
-	"heat": 5,
-	"overclock heat": 7,
-	"overheat heat": 2,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
 	"requirements": [ { "item": Items.IP_ADDRESS, "amount": 1 }, { "item": Items.CREDENTIALS, "amount": 1 } ],
 	"resource gained": Items.SCHOOL_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
@@ -135,6 +136,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
+		Stats.CURRENT_ALL_VMS -= 1
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
@@ -142,4 +144,5 @@ func create_vm_window(minor_process, repeat) -> Window:
 		content_instance.start(minor_process, true)
 	)
 	CURRENT_VMS += 1
+	Stats.CURRENT_ALL_VMS += 1
 	return new_window

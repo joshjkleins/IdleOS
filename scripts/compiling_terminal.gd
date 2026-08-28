@@ -67,16 +67,19 @@ func _begin_scramble():
 	scrambling = true
 
 func _process(delta: float) -> void:
-	##TODO: EFFICIENCY
 	if scrambling and not paused:
 		_time_accum += delta
 
 		#PROGRESS BAR FILL
-		var oc_speed = type["overclock speed"] if Stats.overclocked else 1.0
-		if Stats.overclocked:
-			did_overclock_this_cycle = true
-		var eff = 100.0 if eff_proc else 1.0
-		fill_bar.value += delta * type["base speed"] * oc_speed * eff
+		if Stats.overheated:
+			fill_bar.value += delta * type["overheat speed"]
+			did_overclock_this_cycle = false
+		else:
+			var oc_speed = type["overclock speed"] if Stats.overclocked else type["base speed"]
+			if Stats.overclocked:
+				did_overclock_this_cycle = true
+			var eff = 100.0 if eff_proc else 1.0
+			fill_bar.value += delta * oc_speed * eff
 
 		if fill_bar.value >= fill_bar.max_value:
 			fill_bar.value = fill_bar.max_value
@@ -90,9 +93,14 @@ func _process(delta: float) -> void:
 			return
 
 		#SCRAMBLED CHARS LABELS, revealing in tandem with fill_bar
-		if _time_accum >= scramble_interval:
-			_time_accum -= scramble_interval
-			_update_scramble_labels()
+		if Stats.overheated:
+			if _time_accum >= scramble_interval + 0.5:
+				_time_accum -= scramble_interval + 0.5
+				_update_scramble_labels()
+		else:
+			if _time_accum >= scramble_interval:
+				_time_accum -= scramble_interval
+				_update_scramble_labels()
 
 func _pause_then_restart() -> void:
 	paused = true
@@ -149,7 +157,7 @@ func _compile_payload():
 	#GIVETH
 	var amount_to_gain = 1
 	Inventory.add_resource(type["resource gained"], amount_to_gain)
-	Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_5_SCHOOL_PAYLOADS, 1)
+	Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, 1)
 	amount_gained += amount_to_gain
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)
@@ -161,7 +169,9 @@ func _compile_payload():
 
 	#HEATETH
 	if !eff_proc:
-		if did_overclock_this_cycle:
+		if Stats.overheated:
+			Stats.update_tempature(type["overheat heat"])
+		elif did_overclock_this_cycle:
 			Stats.update_tempature(type["overclock heat"])
 			did_overclock_this_cycle = false
 		else:

@@ -58,6 +58,12 @@ func start():
 	cracked_label.text = str(amount_cracked)
 	title_label.text = type["name"] + " Cracking"
 	
+	var speed_cracking_package = Upgrades.get_package_info("cracking.speed")
+	var speed_upgrade = speed_cracking_package.current
+	var speed = type["base speed"] / (1.0 + speed_upgrade)
+	var overheat_speed = type["overheat speed"]
+	var overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
+	
 	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
 	var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
 	efficiency.text = str(base_eff * frag_bonus * 100.0) + "%"
@@ -92,10 +98,10 @@ func start():
 				current_word = Cracking.random_four_digit_words.pick_random()
 			
 			
-			var max_heat_used: int = 0
-			var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-			base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
-			var eff =  base_eff * defrag_bonus
+			var max_heat_used: float = 0
+			#var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+			#base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+			var eff =  _get_total_efficiency()
 			efficiency.text = str(eff * 100) + "%"
 			if randf() < eff:
 				if process_running:
@@ -111,25 +117,23 @@ func start():
 			else:
 				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
 					if process_running:
+						
 						if Stats.overheated:
-							var speed = type["overheat speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["overheat heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
-							_update_progress_bar(i, speed)
-							await get_tree().create_timer(speed).timeout
+							_update_progress_bar(i, overheat_speed)
+							await get_tree().create_timer(overheat_speed).timeout
 						elif Stats.overclocked:
-							var speed = type["overclock speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["overclock heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat
-							_update_progress_bar(i, speed)
-							await get_tree().create_timer(speed).timeout
+							_update_progress_bar(i, overclock_speed)
+							await get_tree().create_timer(overclock_speed).timeout
 						else:
-							var speed = type["base speed"] / Cracking.process_upgrades["speed"]["amount"]
 							var heat = type["heat"]
 							if heat > max_heat_used:
-								max_heat_used = speed
+								max_heat_used = heat
 							_update_progress_bar(i, speed)
 							await get_tree().create_timer(speed).timeout
 						if !process_running:
@@ -212,18 +216,18 @@ func _start_next_crack() -> void:
 			cracking_current_status.text = "Cracking: " + str(current_crack_line.uuid) +  "..."
 			return
 
-func _successful_crack(heat: int):
+func _successful_crack(heat: float):
 	type.signal.emit(1)
 	Inventory.remove_resource(type["requirements"], 1)
 	Inventory.add_resource(type["resource gained"], 1)
-	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_5_PASSWORDS, 1)
+	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])
 	
-	var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-	var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
-	var eff =  base_eff * defrag_bonus
+	#var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+	#var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
+	var eff = _get_total_efficiency()
 	efficiency.text = str(eff * 100) + "%"
 	
 	if randf() <= 0.01:
@@ -236,3 +240,11 @@ func _successful_crack(heat: int):
 func _on_progress_bar_value_changed(value):
 	if process_running:
 		progress_bar_label.text = str(int(value)) + "%"
+
+func _get_total_efficiency() -> float:
+	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
+	var base_eff = type["efficiency"]
+	var efficiency_cracking_package = Upgrades.get_package_info("cracking.efficiency")
+	var efficiency_upgrade = efficiency_cracking_package.current
+	
+	return (base_eff + efficiency_upgrade) * frag_bonus

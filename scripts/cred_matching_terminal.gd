@@ -145,8 +145,7 @@ func _has_requirements() -> bool:
 
 func _consume_required_items():
 	for item in type["requirements"]:
-		if randf() > type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"]:
-			Inventory.remove_resource(item, 1)
+		Inventory.remove_resource(item, 1)
 
 func _update_username_password_labels():
 	userbox_name_label.text = u_name
@@ -161,9 +160,7 @@ func _update_last_col_title(text):
 	status_title.text = text
 
 func _update_efficiency_label():
-	var defrag_bonus = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
-	var base_eff = type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"]
-	var eff = base_eff * defrag_bonus
+	var eff = _get_efficiency_total()
 	efficiency_label.text = "chance for extra (eff): %.1f%%" % (eff * 100.0)
 
 func start():
@@ -261,12 +258,18 @@ func _update_resource_amount_labels():
 
 func _get_speed() -> float:
 	var time
+	var speed_matching_package = Upgrades.get_package_info("matching.speed")
+	var speed_upgrade = speed_matching_package.current 
 	if Stats.overheated:
 		time = type["overheat speed"]
 	elif Stats.overclocked:
-		time = randf_range(type["overclock speed min"], type["overclock speed max"])
+		var time_min = type["overclock speed min"] / (1.0 + speed_upgrade)
+		var time_max = type["overclock speed max"] / (1.0 + speed_upgrade)
+		time = randf_range(time_min, time_max)
 	else:
-		time = randf_range(type["base speed min"], type["base speed max"])
+		var time_min = type["base speed min"] / (1.0 + speed_upgrade)
+		var time_max = type["base speed max"] / (1.0 + speed_upgrade)
+		time = randf_range(time_min, time_max)
 	
 	return time
 
@@ -312,13 +315,13 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	else:
 		heat = type["heat"]
 	var quantity = 1
-	var defrag_bonus = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
-	var base_eff = type["efficiency"] + Matching.process_upgrades["efficiency"]["amount"]
-	var total_eff = base_eff * defrag_bonus
+	var total_eff = _get_efficiency_total()
 	if randf() <= total_eff:
-		quantity += randi_range(3, 10)
+		var min_q = 3 + int(Upgrades.MATCHING.version * 10.0)
+		var max_q = 10 + int(Upgrades.MATCHING.version * 10.0)
+		quantity += randi_range(min_q, max_q)
 	Inventory.add_resource(type["resource gained"], quantity)
-	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_5_CREDENTIALS, 1)
+	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_3_CREDENTIALS, 1)
 	status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
 	status_image.texture = cred_image
 	var og_box = third_col.get_theme_stylebox("panel").duplicate()
@@ -327,7 +330,7 @@ func _match_finished(): #add heat/resource/xp/emit signals
 		
 	Stats.update_tempature(heat)
 	type.signal.emit(1)
-	Exp.add_xp(Matching, type, type["experience per level"] * Matching.process_upgrades["experience"]["amount"])
+	Exp.add_xp(Matching, type, type["experience per level"])
 	
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_MATCHING_TOKEN, 1)
@@ -378,3 +381,12 @@ func generate_username_variations(base_username: String) -> Array[String]:
 
 func _on_main_bar_value_changed(value):
 	status_progress_bar.text = "%.1f%%" % value
+
+func _get_efficiency_total():
+	var base_efficiency = type["efficiency"]
+	var defrag_multiplier = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
+	
+	var efficiency_matching_package = Upgrades.get_package_info("matching.efficiency")
+	var efficiency_upgrade = efficiency_matching_package.current
+	
+	return (base_efficiency + efficiency_upgrade) * defrag_multiplier

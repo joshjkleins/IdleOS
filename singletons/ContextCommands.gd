@@ -58,11 +58,10 @@ func get_help_text(skill: Node) -> String:
 		text += "┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n"
 		text += "│ PROCESS           STATUS      REQ     EFF     EFF/LVL    RUN COMMAND                 INFO                              │\n"
 		text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
-	
+
 	if skill == Hacking:
 		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
-		
-		
+
 		for location in locations:
 			var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
 			text += "│ %-25s %-25s %-31s │\n" % [
@@ -76,17 +75,25 @@ func get_help_text(skill: Node) -> String:
 				text += _build_defrag_process_row(p, skill)
 			else:
 				text += _build_process_row(p, skill, p["unlocked"])
-	
+
 	if skill == Hacking:
 		text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
 	elif skill == Defragging:
-		text +=     "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
+		text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
 	else:
-		text +=     "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
-	if skill == Defragging: #return early since all relavent info is in base info command
-		return text
-	
-	return text
+		text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
+
+	return _wrap_center_lines(text)
+
+func _wrap_center(text: String) -> String:
+	return "[center]" + text + "[/center]"
+
+func _wrap_center_lines(text: String) -> String:
+	var lines = text.split("\n")
+	for i in range(lines.size()):
+		if lines[i] != "":  # skip empty trailing line from the final \n
+			lines[i] = _wrap_center(lines[i])
+	return "\n".join(lines)
 
 func _build_defrag_process_row(p: Dictionary, skill: Node):
 	var name = p.name
@@ -313,7 +320,7 @@ func get_hack_target_info(location: Dictionary):
 		var firewall_text = "[font_size=12]🛡Firewall: " + str(tar.firewall) + "[/font_size]"
 		var require_text = "[font_size=12]Requirements: " + str(tar.requirements.item.name) + " x" + str(tar.requirements.amount) + "[/font_size]"
 		var counter_atk_text = "[font_size=12]⚔Counter attack: " + str(tar.counter) + "[/font_size]"
-		var counter_spd_text = "[font_size=12]Counter speed: " + str(tar["counter speed"]) + "[/font_size]"
+		var counter_spd_text = "[font_size=12]Counter speed: " + get_speed_text(tar["counter speed"]) + "/s[/font_size]"
 		var exp_text = "[font_size=12]Exp: " + str(tar.exp) + "[/font_size]"
 		var pad_text_length = 30
 		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
@@ -322,6 +329,10 @@ func get_hack_target_info(location: Dictionary):
 		
 	
 	return return_text
+
+func get_speed_text(speed: float) -> String:
+	var sp = 1.0 / (100.0 / speed)
+	return "%.2f" % sp
 
 func list_vm_terminals_for_skill(skill: Node):
 	var first_col = 20
@@ -376,16 +387,21 @@ func process_commands() -> String:
 |                          PROCESS COMMANDS                          |
 |____________________________________________________________________|
 |                                                                    |
+| STARTING / STOPPING                                                |
 |   <skill> -<process>           Run a process                       |
-|   ps                           List running process                |
 |   kill                         Stop currently running process      |
 |   stop                         Stop currently running process      |
+|                                                                    |
+| DISPLAY & CONTROL                                                  |
 |   focus                        Bring currently running process     |
 |                                to bottom of terminal               |
+|   ps                           List running process                |
 |   sticky                       Anchor process to top of terminal   |
 |   stick                        Anchor process to top of terminal   |
 |   unsticky                     Remove anchored process from top    |
 |   unstick                      Remove anchored process from top    |
+|                                                                    |
+| DOCUMENTATION                                                      |
 |   process -h                   Show this list of commands          |
 |____________________________________________________________________|
 """
@@ -404,14 +420,11 @@ func get_help() -> String:
 |   tree                         Display skill hierarchy             |
 |   info                         Display additional skill info       |
 |                                                                    |
-| SYSTEM                                                             |
-|   history                      Show command history                |
-|   date                         Show date and time                  |
-|   clear                        Clear terminal                      |
-|                                                                    |
 | ITEMS                                                              |
 |   ls                           List items                          |
 |   ls <item>                    Item details                        |
+|   track <item>, <item>         Track item(s) (comma seperated)     |
+|   untrack <item>               Remove tracking                     |
 |                                                                    |
 | UPGRADES                                                           |
 |   apt                          Upgrade package manager             |
@@ -421,11 +434,13 @@ func get_help() -> String:
 |   -h                           Display this list                   |
 |   process -h                   List process commands               |
 |   ssh -h                       List ssh commands                   |
+|                                                                    |
+| SYSTEM                                                             |
+|   date                         Show date and time                  |
+|   clear                        Clear terminal                      |
 |____________________________________________________________________|
 """
 	return text
-#|   apt upgrade                  List available upgrades             |
-#|   apt upgrade <x>              Upgrade a package                   |
 
 func get_ascii_tree(current_context: String) -> String:
 	var skills = [
@@ -472,11 +487,54 @@ func get_history_commands(command_history) -> String:
 	return text
 
 func get_date_command() -> String:
-	var date = Time.get_date_dict_from_system()
-	return "%04d-%02d-%02d" % [
+	var date = Time.get_datetime_dict_from_system()
+	
+	var weekday_names = [
+		"Sunday",
+		"Monday",
+		"Tuesday",
+		"Wednesday",
+		"Thursday",
+		"Friday",
+		"Saturday"
+	]
+	
+	var month_names = [
+		"",
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December"
+	]
+	
+	var hour = date.hour
+	var period = "AM"
+	
+	if hour >= 12:
+		period = "PM"
+	
+	if hour == 0:
+		hour = 12
+	elif hour > 12:
+		hour -= 12
+	
+	return "%s, %s %d, %d %d:%02d:%02d %s" % [
+		weekday_names[date.weekday],
+		month_names[date.month],
+		date.day,
 		date.year,
-		date.month,
-		date.day
+		hour,
+		date.minute,
+		date.second,
+		period
 	]
 
 func get_root_upgrades_text() -> String:
@@ -627,3 +685,8 @@ func get_tutorial() -> String:
 	return_string += "Type 'tutorial' at any time to view progress.\n"
 	
 	return return_string
+
+func process_already_running_text() -> String:
+	#hint: use kill to stop or 'ps' to bring current process to bottom 
+	var hint = "\n[color=666666]hint: use 'kill' to stop current process\nuse 'ps' for current process info.[/color]"
+	return "Process already running." + hint

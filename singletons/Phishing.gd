@@ -11,6 +11,7 @@ var vm_token = Items.VM_PHISHING_TOKEN
 @onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
+var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/phishing_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -40,14 +41,17 @@ var SPEAR = {
 	"efficiency rate": 0.005,
 	"unlocked": true,
 	"unlock level": 1,
+	"cast time": 2.0,
+	"overclock cast time": 1.0,
+	"overheat cast time": 7.0,
 	"wait time min": 5.0,
 	"wait time max": 10.0,
 	"download time": 7.5,
 	"overclocked download time": 3.75,
 	"overheated download time": 22.5,
-	"heat": 2,
-	"overclock heat": 5,
-	"overheat heat": 1,
+	"heat": 0.3,
+	"overclock heat": 0.6,
+	"overheat heat": 0.1,
 	"requirements": [],
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 90 },
@@ -141,19 +145,20 @@ func create_vm_window(minor_process, repeat) -> Window:
 	new_window.set_repeat(repeat)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
-	new_window.set_processes(Matching, minor_process)
+	new_window.set_processes(Phishing, minor_process)
 	
 	new_window.add_child(content_instance)
-	
 	new_window.size = content_instance.size
 	new_window.min_size = content_instance.size
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
+		Stats.CURRENT_ALL_VMS -= 1
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
 		content_instance.vm_cast_all_lines(minor_process, true)
 	)
 	CURRENT_VMS += 1
+	Stats.CURRENT_ALL_VMS += 1
 	return new_window

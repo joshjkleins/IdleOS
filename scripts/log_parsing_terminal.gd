@@ -78,11 +78,11 @@ func start():
 					amount = randi_range(item_info["min"], item_info["max"])
 					Inventory.add_resource(item, amount)
 					if item == Items.ENCRYPTED_PASSWORDS:
-						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_ENCRYPTED_PASSWORDS, 1)
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS, 1)
 					if item == Items.USERNAMES:
-						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_USERNAMES, 1)
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_USERNAMES, 1)
 					if item == Items.IP_ADDRESS:
-						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_5_IP_ADDRESSES, 1)
+						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_IP_ADDRESSES, 1)
 						
 				
 				new_log_line.update(Parsing.LOG_LINES.pick_random(), item, amount)
@@ -121,9 +121,9 @@ func stop():
 func stop_safely():
 	end_safely = true
 
-func _finished_log(heat_used: int):
+func _finished_log(heat_used: float):
 	type.signal.emit(1)
-	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_25_LOGS, 1)
+	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_20_LOGS, 1)
 	Exp.add_xp(Parsing, type, type["experience per level"] * Parsing.process_upgrades["experience"]["amount"])
 	Signals.update_hud(Parsing)
 

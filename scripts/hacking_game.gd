@@ -42,6 +42,7 @@ var player_is_alive: bool = true
 var attacking: bool = false
 var ATTACK_SPEED: float = 10.0
 var ATTACK_AMOUNT: int = 0
+var FIREWALL_DAMAGE: int = 0
 var ATTACK_BW_COST = 0
 var ATTACK_HEAT: int = 3
 var defending: bool = false
@@ -53,6 +54,8 @@ var COUNTER_SPEED: float = 12.0
 var COUNTER_AMOUNT: int = 2
 var COUNTER_HEAT: int = 0
 var EXP_AMOUNT: int = 0
+var BANDWIDTH_RECOVERY_RATE: int = 0
+var MAX_BANDWIDTH: int = 0
 
 var OVERCLOCK_VALUE: float = 1.0
 var OVERHEAT_VALUE: float = 1.0
@@ -129,24 +132,35 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	stop_hacking = false
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
-	ATTACK_AMOUNT = offensive_item.damage
+	var dmg_upgrade = Upgrades.get_package_info("hacking.damage")
+	ATTACK_AMOUNT = offensive_item.damage + dmg_upgrade.current
+	var firewall_upgrade = Upgrades.get_package_info("hacking.firewall")
+	FIREWALL_DAMAGE = offensive_item.firewall_damage + firewall_upgrade.current
 	ATTACK_SPEED = offensive_item.speed
 	ATTACK_BW_COST = offensive_item.bandwidth_cost
 	
+	var bandwidth_upgrade = Upgrades.get_package_info("hacking.bandwidth_recovery")
+	BANDWIDTH_RECOVERY_RATE = Hacking.bandwidth_recovery_rate + bandwidth_upgrade.current
+	
+	var max_b_upgrade = Upgrades.get_package_info("hacking.max_bandwidth")
+	MAX_BANDWIDTH = Hacking.max_bandwidth + max_b_upgrade.current
+	
 	COUNTER_SPEED = target["counter speed"]
 	COMBAT_QUEUE.clear()
-	DEFEND_AMOUNT = defensive_item.heal
+	var healing_upgrade = Upgrades.get_package_info("hacking.healing")
+	DEFEND_AMOUNT = defensive_item.heal + healing_upgrade.current
 	DEFEND_SPEED = defensive_item.speed
 	DEFEND_BW_COST = defensive_item.bandwidth_cost
 	#anonymity
-	anon_bar.max_value = Stats.max_anon
+	var anonymity_upgrade = Upgrades.get_package_info("hacking.max_anonymity")
+	anon_bar.max_value = Stats.max_anon + anonymity_upgrade.current
 	anon_bar.value = Stats.current_anon
 	#integrity
 	integ_bar.max_value = target.integrity
 	integ_bar.value = 0
 	#bandwidth
-	Hacking.current_bandwidth = Hacking.max_bandwidth #reset bandwidth when starting to hack (not sure about this, could possibly be abused)
-	band_bar.max_value = Hacking.max_bandwidth
+	Hacking.current_bandwidth = MAX_BANDWIDTH #reset bandwidth when starting to hack (not sure about this, could possibly be abused)
+	band_bar.max_value = MAX_BANDWIDTH
 	band_bar.value = Hacking.current_bandwidth
 	#firewall
 	firewall_bar.max_value = target.firewall
@@ -190,7 +204,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 		attacking = true
 
 func attack():
-	var FIREWALL_DMG = 1
+	#var FIREWALL_DMG = 1
 	var crit = 1
 	if randf() <= Hacking.SKILL["efficiency"]:
 		crit = 2
@@ -198,7 +212,7 @@ func attack():
 	
 	var blocked = firewall_bar.value
 	
-	firewall_bar.value -= FIREWALL_DMG
+	firewall_bar.value -= FIREWALL_DAMAGE
 	
 	Hacking.current_bandwidth -= ATTACK_BW_COST
 	if Hacking.current_bandwidth <= 0:
@@ -216,7 +230,7 @@ func attack():
 		_update_info_panel("efficiency caused hack to be extra effective", c_green)
 	var i_text = "sql_injector fires: integrity -" + str(int(actual_dmg)) + "  (" + "firewall blocked " + str(int(blocked)) + ")"
 	_update_info_panel(i_text, c_green)
-	_update_info_panel("firewall damaged: -" + str(FIREWALL_DMG), c_yellow)
+	_update_info_panel("firewall damaged: -" + str(FIREWALL_DAMAGE), c_yellow)
 	if Inventory.get_amount(offensive_item) <= 0:
 		attacking = false
 	else:
@@ -449,10 +463,10 @@ func update_status_label_badge(text: String, color: Color):
 
 func _on_bandwidth_timer_timeout():
 	if is_hacking:
-		Hacking.current_bandwidth += Hacking.bandwidth_recovery_rate
+		Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE
 		
-		if Hacking.current_bandwidth > Hacking.max_bandwidth:
-			Hacking.current_bandwidth = Hacking.max_bandwidth
+		if Hacking.current_bandwidth > MAX_BANDWIDTH:
+			Hacking.current_bandwidth = MAX_BANDWIDTH
 			
 		band_bar.value = Hacking.current_bandwidth
 		

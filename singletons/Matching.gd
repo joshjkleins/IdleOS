@@ -11,6 +11,7 @@ var vm_token = Items.VM_MATCHING_TOKEN
 @onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
 @onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
 var CURRENT_VMS = 0
+var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/cred_matching_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -42,14 +43,14 @@ var CREDENTIAL = {
 	"overclock speed min": 0.1,
 	"overclock speed max": 0.2,
 	"overheat speed": 3.0,
-	"heat": 1,
-	"overclock heat": 1,
-	"overheat heat": 1,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
 	"requirements": [Items.USERNAMES, Items.PASSWORDS],
 	"resource gained": Items.CREDENTIALS,
 	"resource amount gained": 1,
 	"description": "Creates credentials using passwords & usernames.",
-	"efficiency description": "Chance to not consume a username or password.",
+	#"efficiency description": "Chance to not consume a username or password.",
 	"signal": cred_cycle_completed
 }
 
@@ -142,6 +143,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
+		Stats.CURRENT_ALL_VMS -= 1
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
@@ -149,6 +151,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 		content_instance.start()
 	)
 	CURRENT_VMS += 1
+	Stats.CURRENT_ALL_VMS += 1
 	return new_window
 
 

@@ -79,6 +79,8 @@ func _on_player_hacking_box_command_entered(text):
 							["view [location]", "List targets at location", "e.g. view school"],
 							["root",            "Return to terminal root"]
 						]))
+					"apt":
+						player_hacking_box.add_line("Apt upgrade manager not available in hacking console. Return to root to view.")
 					_:
 						player_hacking_box.add_line("Command not found.")
 			HackingContext.PERSONS:
@@ -94,6 +96,8 @@ func _on_player_hacking_box_command_entered(text):
 							["hack [target]", "Start hacking target", "e.g. hack student"],
 							["..",            "Return to locations directory", "e.g. '..'"]
 						]))
+					"apt":
+						player_hacking_box.add_line("Apt upgrade manager not available in hacking console. Return to root to view.")
 					_:
 						player_hacking_box.add_line("Command not found.")
 			HackingContext.HACKING:
@@ -113,15 +117,18 @@ func _on_player_hacking_box_command_entered(text):
 							
 						]))
 					"overclock":
-						if !Stats.overclocked and !Stats.overheated:
-							if Stats.system_tempature < 60:
-								Stats.overclocked = true
-							else:
-								player_hacking_box.add_line_warning("System tempature needs to cool to below 60°C before overclocking")
-						elif Stats.overheated:
+						if !Upgrades.can_overclock(Hacking):
+							player_hacking_box.add_line_warning("Overclock not available. Unlock with apt package manager.")
+							return
+						if Stats.overheated:
 							player_hacking_box.add_line_warning("System has been overheated, needs to cool to below 40°C.")
-						else:
+							return
+						if Stats.overclocked:
 							player_hacking_box.add_line("System is already overclocked.")
+							return
+							
+						Stats.overclocked = true
+						player_hacking_box.add_line_success("System overclocked. Speed and heat increased. Use 'overclock -kill' to stop.")
 					"overclock -kill":
 						if !Stats.overclocked:
 							player_hacking_box.add_line("Not currently overclocking.")

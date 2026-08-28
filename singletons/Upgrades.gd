@@ -1,13 +1,5 @@
 extends Node
 
-#UPGRADE IDEAS
-# SPEED
-# EFFICIENCY
-# HEAT REDUCTION
-# OVERCLOCK
-# SPECIFIC
-	#MINING: 
-
 var MINING = {
 	"skill": Mining,
 	"version": 0.1,
@@ -36,7 +28,7 @@ var MINING = {
 					"level": 3,
 					"id": "mining.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.45,
+					"amount": 0.55,
 					"unlocked": false
 				}
 			]
@@ -100,23 +92,23 @@ var PARSING = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "mining.speed", 
+					"id": "parsing.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.50,
+					"amount": 0.05,
 					"unlocked": false
 				},
 				{
 					"level": 2,
-					"id": "mining.speed", 
+					"id": "parsing.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
 					"amount": 0.05,
 					"unlocked": false
 				},
 				{
 					"level": 3,
-					"id": "mining.speed", 
+					"id": "parsing.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.1,
+					"amount": 0.15,
 					"unlocked": false
 				}
 			]
@@ -129,23 +121,23 @@ var PARSING = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "mining.efficiency", 
+					"id": "parsing.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.3,
+					"amount": 0.03,
 					"unlocked": false
 				},
 				{
 					"level": 2,
-					"id": "mining.efficiency", 
+					"id": "parsing.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
 					"amount": 0.03,
 					"unlocked": false
 				},
 				{
 					"level": 3,
-					"id": "mining.efficiency", 
+					"id": "parsing.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
-					"amount": 0.03,
+					"amount": 0.05,
 					"unlocked": false
 				}
 			]
@@ -168,6 +160,166 @@ var PARSING = {
 	],
 }
 
+var CRACKING = {
+	"skill": Cracking,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Speed",
+			"id": "cracking.speed",
+			"description": "Increases cracking speed.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "cracking.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 10 }],
+					"amount": 0.2,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "cracking.speed", 
+					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
+					"amount": 0.2,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "cracking.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 25 }],
+					"amount": 0.35,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Efficiency",
+			"id": "cracking.efficiency",
+			"description": "Increases cracking efficiency.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "cracking.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
+					"amount": 0.03,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "cracking.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
+					"amount": 0.03,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "cracking.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
+					"amount": 0.03,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Overclock",
+			"id": "cracking.overclock",
+			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "cracking.overclock", 
+					"requirements": [{"item": Items.USERNAMES, "amount": 33 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 33 }, {"item": Items.IP_ADDRESS, "amount": 33 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
+		}
+	],
+}
+
+
+var MATCHING = {
+	"skill": Matching,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Speed",
+			"id": "matching.speed",
+			"description": "Increases matching speed.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "matching.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 10 }],
+					"amount": 0.95,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "matching.speed", 
+					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
+					"amount": 0.05,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "matching.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 25 }],
+					"amount": 0.1,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Efficiency",
+			"id": "matching.efficiency",
+			"description": "Increases matching efficiency.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "matching.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
+					"amount": 0.5,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "matching.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
+					"amount": 0.03,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "matching.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
+					"amount": 0.03,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Overclock",
+			"id": "matching.overclock",
+			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "matching.overclock", 
+					"requirements": [{"item": Items.USERNAMES, "amount": 33 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 33 }, {"item": Items.IP_ADDRESS, "amount": 33 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
+		}
+	],
+}
 
 var PHISHING = {
 	"skill": Phishing,
@@ -220,7 +372,461 @@ var PHISHING = {
 	],
 }
 
-var all_upgrades = [ MINING, PARSING, PHISHING ]
+var HACKING = {
+	"skill": Hacking,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Damage",
+			"id": "hacking.damage",
+			"description": "Increases SQL Injector damage to enemy integrity.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.damage", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.damage", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 15 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.damage", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }],
+					"amount": 10,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Firewall",
+			"id": "hacking.firewall",
+			"description": "Increases SQL Injector damage to firewall.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.firewall", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 1,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.firewall", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 15 }],
+					"amount": 2,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.firewall", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }],
+					"amount": 3,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Healing",
+			"id": "hacking.healing",
+			"description": "Increases amount Packet Spoof recovers.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.firewall", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 3 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.firewall", 
+					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 10 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.firewall", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 20 }],
+					"amount": 10,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Bandwidth Recovery",
+			"id": "hacking.bandwidth_recovery",
+			"description": "Increases amount of bandwidth recoverd per second.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.bandwidth_recovery", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 3 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 1,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.bandwidth_recovery", 
+					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 10 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 1,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.bandwidth_recovery", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 20 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 2,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Max Bandwidth",
+			"id": "hacking.max_bandwidth",
+			"description": "Increases max bandwidth.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.max_bandwidth", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 3 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.max_bandwidth", 
+					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 10 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 5,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.max_bandwidth", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 20 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 10,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Max Anonymity",
+			"id": "hacking.max_anonymity",
+			"description": "Increases max anonymity.",
+			"current": 0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.max_anonymity", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 3 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 10,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "hacking.max_anonymity", 
+					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 10 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 10,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "hacking.max_anonymity", 
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 20 }, {"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 10,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Overclock",
+			"id": "hacking.overclock",
+			"description": "Allows overclocking of Hacking, increasing speed and heat output.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.overclock", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }, {"item": Items.PACKET_SPOOF, "amount": 5 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
+		}
+	],
+}
+
+
+var DECODING = {
+	"skill": Decoding,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Speed",
+			"id": "decoding.speed",
+			"description": "Increases decoding speed.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "decoding.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 10 }],
+					"amount": 0.05,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "decoding.speed", 
+					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
+					"amount": 0.05,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "decoding.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 25 }],
+					"amount": 0.1,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Efficiency",
+			"id": "decoding.efficiency",
+			"description": "Increases decoding efficiency.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "decoding.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
+					"amount": 0.3,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "decoding.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
+					"amount": 0.03,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "decoding.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
+					"amount": 0.03,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Overclock",
+			"id": "decoding.overclock",
+			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "decoding.overclock", 
+					"requirements": [{"item": Items.USERNAMES, "amount": 33 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 33 }, {"item": Items.IP_ADDRESS, "amount": 33 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
+		}
+	],
+}
+
+
+var COMPILING = {
+	"skill": Compiling,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Speed",
+			"id": "compiling.speed",
+			"description": "Increases compiling speed.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "compiling.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 10 }],
+					"amount": 0.05,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "compiling.speed", 
+					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
+					"amount": 0.05,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "compiling.speed", 
+					"requirements": [{"item": Items.LOGS, "amount": 25 }],
+					"amount": 0.1,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Efficiency",
+			"id": "compiling.efficiency",
+			"description": "Increases compiling efficiency.",
+			"current": 0.0,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "compiling.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
+					"amount": 0.3,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "compiling.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
+					"amount": 0.03,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "compiling.efficiency", 
+					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
+					"amount": 0.03,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Overclock",
+			"id": "compiling.overclock",
+			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "compiling.overclock", 
+					"requirements": [{"item": Items.USERNAMES, "amount": 33 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 33 }, {"item": Items.IP_ADDRESS, "amount": 33 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
+		}
+	],
+}
+
+var SYSTEM = {
+	"skill": System,
+	"version": 0.1,
+	"upgrades": [
+		{ 
+			"name": "Cooling Amount",
+			"id": "system.cooling_amount",
+			"description": "Increases amount cooled per second.",
+			"current": -0.1,
+			"display percentage": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "system.cooling_amount", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": -0.1,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "system.cooling_amount", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 15 }],
+					"amount": -0.2,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "system.cooling_amount", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }],
+					"amount": -0.3,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "VM Windows",
+			"id": "system.vm_windows",
+			"description": "Increases max amount of VM windows that can be running at once.",
+			"current": 1,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "system.vm_windows", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 2,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "system.vm_windows", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 15 }],
+					"amount": 3,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "system.vm_windows", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }],
+					"amount": 5,
+					"unlocked": false
+				}
+			]
+		},
+		{ 
+			"name": "Heat Reduction",
+			"id": "system.heat_reduction",
+			"description": "Applies base heat reduction to all heat applications.",
+			"current": 0.0,
+			"display percentage": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "system.vm_windows", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": 0.1,
+					"unlocked": false
+				},
+				{
+					"level": 2,
+					"id": "system.vm_windows", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 15 }],
+					"amount": 0.1,
+					"unlocked": false
+				},
+				{
+					"level": 3,
+					"id": "system.vm_windows", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 25 }],
+					"amount": 0.1,
+					"unlocked": false
+				}
+			]
+		},
+	],
+}
+
+var all_upgrades = [ SYSTEM, MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING, COMPILING ]
 
 func get_package_info(package_id):
 	for up in all_upgrades:
@@ -254,7 +860,13 @@ func get_skill_level_from_package_id(package_id):
 
 func get_current_effect_total_from_package(package) -> String:
 	if package.current is float:
+		if package.has('display percentage'):
+			if package["display percentage"] == false:
+				return str(package.current)
+				
 		return "%.2f%%" % (package.current * 100)
+		
+		return str(package.current)
 	
 	if package.current is bool or package.current is int:
 		return str(package.current)
@@ -265,7 +877,12 @@ func get_next_effect_total_from_package(package) -> String:
 	if package.current is float:
 		for lvl in package.levels:
 			if !lvl.unlocked:
+				if package.has('display percentage'):
+					if package["display percentage"] == false:
+						return str(package.current + lvl.amount)
 				return "%.2f%%" % ((package.current + lvl.amount) * 100)
+				
+				
 		return "At max level"
 	
 	if package.current is bool:
@@ -332,9 +949,19 @@ func unlock_next_level(package):
 		if !lvl.unlocked:
 			lvl.unlocked = true
 			if package.current is float or package.current is int:
-				if package.id == "mining.speed" and package.levels[0].unlocked == true:
-					Tutorial.complete_event(Tutorial.TutorialEvent.UPGRADE_MINING_SPEED_WITH_APT)
+				if package.id == "mining.overclock":
+					Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
 				package.current += lvl.amount
+				
+				#Specific upgrades that need to happen (cooling etc)
+				match package.id:
+					"system.cooling_amount":
+						Stats.cooling_amount = package.current
+						Stats.cooling_updated()
+					"system.vm_windows":
+						Stats.MAX_ALL_VMS = package.current
+					"system.heat_reduction":
+						Stats.HEAT_REDUCTION = package.current
 				return
 			if package.current is bool:
 				package.current = lvl.amount
@@ -369,6 +996,7 @@ func get_completion_text(package: Dictionary) -> String:
 	return return_text
 
 func can_overclock(skill: Node) -> bool:
+	#return true
 	for upgrade in all_upgrades:
 		if upgrade.skill == skill:
 			for u_type in upgrade.upgrades:

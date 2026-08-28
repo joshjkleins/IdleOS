@@ -4,11 +4,12 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.PARENTS_CREDIT_CARD, 4)
-	add_resource(Items.SCHOOL_PAYLOAD, 5)
-	return
-	for i in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[i], 500)
+	add_resource(Items.VM_PHISHING_TOKEN, 1)
+	add_resource(Items.VM_MINING_TOKEN, 1)
+	add_resource(Items.SQL_INJECTOR, 100)
+	#return
+	for item in Items.ITEM_MAP:
+		add_resource(Items.ITEM_MAP[item], 50)
 
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:
@@ -46,8 +47,8 @@ func _matches_filter(resource, filter: InventoryFilter) -> bool:
 	match filter:
 		InventoryFilter.CACHES:
 			return resource.name.contains("cache")
-		InventoryFilter.VALUABLES:
-			return resource.valuable
+		#InventoryFilter.VALUABLES:
+			#return resource.valuable
 		InventoryFilter.RESOURCES:
 			return !resource.valuable and !resource.name.contains("cache")
 		_:
@@ -88,13 +89,76 @@ func list_specific_item(item: ItemData):
 				text += "Firewall damage: " + str(item["firewall_damage"]) + "\n"
 				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
 				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
-			
 			"Heal":
 				text += "Integrity restore: " + str(item.heal) + "\n"
 				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
 				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
+	
+	if item is CacheData:
+		text += "Potential items\n"
 
+		var name_width = 0
+		for c_item in item.entries:
+			name_width = max(name_width, c_item.item.name.length())
+		for r_item in item.rare_pool:
+			name_width = max(name_width, r_item.item.name.length())
+
+		for c_item in item.entries:
+			text += _build_cache_item_row(c_item, name_width)
+		for r_item in item.rare_pool:
+			text += _build_cache_item_row(r_item, name_width, true)
+			
+	
+	if item.name.contains("VM"):
+		text += "[color=#666666]for usage details use 'ssh -h'.[/color]\n"
 	return text
+
+func _build_cache_item_row(entry, name_width: int, rare_item: bool = false) -> String:
+	var ci_name = entry.item.name
+	var min_amount = entry.min_quantity
+	var max_amount = entry.max_quantity
+	var drop_chance = entry.drop_chance  # float: 0.3 (example)
+
+	var amount_text = "x%d" % min_amount if min_amount == max_amount else "x%d-%d" % [min_amount, max_amount]
+	#if rare item use Decoding efficiency for drop chance, otherwise just use cache entry drop chance
+	var chance_text = "%.0f%%" % (Decoding.CACHE["efficiency"] * 100) if rare_item else "%.0f%%" % (drop_chance * 100)
+
+	return "  %-*s   %-8s %6s\n" % [name_width, ci_name, amount_text, chance_text]
+
+
+func get_item_by_name(item_name: String) -> ItemData:
+	var name = item_name.to_lower().strip_edges()
+	
+	# Remove surrounding quotes
+	if name.begins_with('"') and name.ends_with('"'):
+		name = name.trim_prefix('"').trim_suffix('"').strip_edges()
+	
+	# Exact match
+	var item = Items.ITEM_NAME_MAP.get(name)
+	if item != null:
+		return item
+	
+	# Player typed singular, stored item might be plural
+	item = Items.ITEM_NAME_MAP.get(name + "s")
+	if item != null:
+		return item
+	
+	item = Items.ITEM_NAME_MAP.get(name + "es")
+	if item != null:
+		return item
+	
+	# Player typed plural, stored item might be singular
+	if name.ends_with("es"):
+		item = Items.ITEM_NAME_MAP.get(name.left(-2))
+		if item != null:
+			return item
+	
+	if name.ends_with("s"):
+		item = Items.ITEM_NAME_MAP.get(name.left(-1))
+		if item != null:
+			return item
+	
+	return null
 
 func get_combat_item_speed_text(item: CombatItem) -> String:
 	var sp = 1.0 / (100.0 / item.speed)

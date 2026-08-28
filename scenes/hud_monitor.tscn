@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmkmq8hglqsu4"]
+
+[ext_resource type="Script" uid="uid://bfkq17que2cnb" path="res://scripts/hud_monitor.gd" id="1_cxjsk"]
+
+[node name="HUDMonitor" type="PanelContainer"]
+script = ExtResource("1_cxjsk")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_top = 12
+
+[node name="LabelsContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/LabelsContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 9
+theme_override_font_sizes/font_size = 10
+text = "IP Address=4"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/LabelsContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 9
+theme_override_font_sizes/font_size = 10
+text = "IP Address=4"
+horizontal_alignment = 1
+
+[node name="Label3" type="Label" parent="MarginContainer/LabelsContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 9
+theme_override_font_sizes/font_size = 10
+text = "IP Address=4"
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="MarginContainer/LabelsContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 9
+theme_override_font_sizes/font_size = 10
+text = "IP Address=4"
+horizontal_alignment = 1

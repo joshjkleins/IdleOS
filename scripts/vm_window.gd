@@ -7,10 +7,39 @@ var min_process: Dictionary
 var maj_process: Node
 var repeated_times: int = 1
 
+var seconds_left: int = 0
+var cooling_reduction: float = 0.0
+
 func start():
 	$Timer.wait_time = duration
 	$Timer.one_shot = true
 	$Timer.start()
+
+	start_countdown(duration)
+
+func start_countdown(seconds: int):
+	seconds_left = seconds
+	_update_title()
+
+	$CountdownTimer.wait_time = 1.0
+	$CountdownTimer.one_shot = false
+	$CountdownTimer.start()
+
+func _on_countdown_timer_timeout():
+	seconds_left -= 1
+
+	if seconds_left <= 0:
+		$CountdownTimer.stop()
+		_on_countdown_finished()
+	else:
+		_update_title()
+
+func _update_title():
+	self.title = maj_process.SKILL.name + " | " + min_process.name + " | Tokens used: " + str(repeated_times) + " | Remaining: " + str(seconds_left) + "s"
+
+func _on_countdown_finished():
+	if repeat and Inventory.get_amount(token) > 0:
+		start_countdown(int(ceil(duration)))  # loop
 
 func _on_timer_timeout():
 	if is_instance_valid(self):
@@ -22,7 +51,8 @@ func _on_timer_timeout():
 			$Timer.one_shot = true
 			$Timer.start()
 		else:
-			self.get_child(1).stop_safely()
+			self.title = maj_process.SKILL.name + " | " + min_process.name + " | Tokens used: " + str(repeated_times) + " | Stopping safely..."
+			self.get_child(2).stop_safely() #2 (or whatever number) should be the child process added to this popup window. 
 
 func set_time(time: float):
 	duration = time
@@ -38,6 +68,11 @@ func set_processes(major: Node, minor: Dictionary):
 	min_process = minor
 
 func _on_focus_entered():
-	#commented out because player cannot close vm window with this functionality
 	pass
-	#Signals.vm_window_focused()
+
+#func set_cooling_reduction(VM_COOLING_REDUCTION: float):
+	#cooling_reduction = VM_COOLING_REDUCTION
+	#Stats.update_cooling_amount(cooling_reduction)
+#
+#func remove_cooling_reduction():
+	#Stats.update_cooling_amount(cooling_reduction * -1.0)

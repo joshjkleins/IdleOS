@@ -7,10 +7,13 @@ const MAX_LEVEL = 99
 var MAX_TEMP = 100.0
 var MIN_TEMP = 30.0
 var system_tempature = 30.0
-var cooling_amount = -5.25 #reduces temp by 1
-var cooling_frequency = 0.5 #every 1 second
+var cooling_amount = -0.1 #reduces temp by 1
+var cooling_frequency = 1.0 #in seconds
 var overheated = false
 var overclocked = false
+var CURRENT_ALL_VMS: int = 0
+var MAX_ALL_VMS: int = 0
+var HEAT_REDUCTION: float = 0.0
 
 #hacking
 var current_anon = 100
@@ -476,6 +479,12 @@ var hacking_targets = {
 		"art": preload("res://art/lawfirm-ascii.png")
 	}
 }
+
+func _ready():
+	cooling_amount = Upgrades.SYSTEM.upgrades[0].current
+	MAX_ALL_VMS = Upgrades.SYSTEM.upgrades[1].current
+	HEAT_REDUCTION = Upgrades.SYSTEM.upgrades[2].current
+
 ##############################
 ######## DEFRAG BONUS ########
 ##############################
@@ -501,6 +510,10 @@ func get_bonus_time_text(skill: Node) -> String:
 ##############################
 
 func update_tempature(amount: float):
+	if amount >= 0.0:
+		amount -= HEAT_REDUCTION
+		if amount <= 0.0:
+			amount = 0.0
 	system_tempature += amount
 	if system_tempature >= MAX_TEMP:
 		system_tempature = MAX_TEMP
@@ -533,52 +546,6 @@ func get_hacking_location_by_command(command):
 		if hacking_targets[target]["command"] == command:
 			return hacking_targets[target]
 	return {}
-
-
-#unlock module
-#func unlock_module(mod_name: String):
-	#if not player_stats.has(mod_name):
-		#return "Item ID not found."
-	#
-	#if player_stats[mod_name]["unlocked"]:
-		#return "Module already unlocked, you shouldn't be seeing this message..."
-	#
-	#player_stats[mod_name]["unlocked"] = true
-	#return mod_name + " has been unlocked and can now be installed."
-
-#lists unlocked processes
-#func list_unlocked_processes():
-	#var output = "\n"
-	#var first_col = 25
-	#var second_col = 20
-	#
-	##Heading
-	#output += "Module" + " ".repeat(first_col - 6) + "Command" + " ".repeat(second_col - 7) + "Description\n"
-	##output += "Module              Command               Description\n"
-	#output += "-".repeat(first_col + second_col + 40) + "\n"
-	#
-	#for process in player_stats.keys():
-		#var proc = player_stats[process]
-		#var desc = proc["description"]
-		#if desc.length() > 80:
-			#var slice = desc.substr(0, 80)
-			#var break_index = slice.rfind(" ")
-			#if break_index == -1:
-				#break_index = 80
-#
-			#desc = (
-				#desc.substr(0, break_index)
-				#+ "\n"
-				#+ " ".repeat(45)
-				#+ desc.substr(break_index + 1)
-			#)
-#
-#
-		#if proc.unlocked:
-			#output += process + " ".repeat(first_col - process.length()) + proc["command"] + " ".repeat(second_col - proc.command.length()) + desc + "\n"
-	#
-	#return output
-#
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]
@@ -654,3 +621,18 @@ func on_level_up(skill_data: Dictionary):
 	skill_data["efficiency"] += skill_data["efficiency increase rate"]
 	print("Leveled up!")
 	print("Current process" + " is level " + str(int(skill_data.level)))
+
+func update_cooling_amount(amount_to_add: float):
+	cooling_amount += amount_to_add
+	if cooling_amount >= 0.0:
+		cooling_amount = 0.0
+	cooling_updated()
+
+#func update_cooling_frequency(time_to_remove: float): #negative number, making it cool faster
+	#cooling_frequency += time_to_remove
+	#if cooling_frequency <= 0.1:
+		#cooling_frequency = 0.1
+	#cooling_updated()
+
+func cooling_updated():
+	Signals.cooling_updated()

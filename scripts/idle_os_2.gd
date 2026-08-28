@@ -1,17 +1,28 @@
 extends Control
 
 #TODO 
-# next tutorial playthrough, make sure 'PROCESS STARTED' timer in header is working properly for all skills
-# add decoding option for upgradable items (decode parents cc for 50 Usernames etc)
 
-#Hacking
+# go through apt upgrade and make sure all speed/efficiency are being applied (matching, compiling, decoding)
+
+#bugs
+#runing apt instal system.vm_windows doesnt give any feedback that it was a bad command (install spelt wrong)
+#vm shouldnt apply heat, just a base cooling reduction
+#vm shouldn't have overclock applied
+#using ps while defragging breaks the game
+#being in the defragging module and tracking a long named item causes screen to leave viewport
+#HUD PROCESS RUNNING doesnt go away when a process naturally finishes (runs out of resources ie cracking done with passwords)
+
+#hacking
+# hacking specific 'tutorial' command (next objective only)
+# better navigation
+# potentially more tutorial items for 'view school' and 'hack student' and 'kill' and '..' and 'root'
+# hacking breakdown in terminal when you enter. Welcome to the hacking terminal. Here you can choose locations then targets and attempt to hack them via auto-battler. 
 #Upgrade within hacking system to unlock more targets/locations
 
 #SAVE/LOAD SYSTEM
 
 # BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
 # Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
-
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -34,6 +45,7 @@ extends Control
 @onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
+@onready var hud_monitor = $Panel/MarginContainer/TerminalRoot/Header/HUDMonitor
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -355,56 +367,50 @@ func universal_commands(text):
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
-	if text.begins_with("ls"):
-		var start = text.find('"') + 1
-		var end = text.find('"', start)
-		var item_name = text.substr(start, end - start)
-		var alt_item_name = text.substr(2).strip_edges()
-		var item = Items.ITEM_NAME_MAP.get(item_name.to_lower())
-		var alt_item = Items.ITEM_NAME_MAP.get(alt_item_name.to_lower())
+	if text.begins_with("track"):
+		var item_names = text.trim_prefix("track").strip_edges().split(",")
+		add_line(hud_monitor.add_monitored_items(item_names))
+		return true
+
+
+	if text.begins_with("untrack"):
+		var item_names = text.trim_prefix("untrack").strip_edges()
 		
-		if item != null: #if player uses quotes around item name > ls "logs"
-			add_line(Inventory.list_specific_item(item))
-			if item.name == "logs":
-				Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
+		if item_names in ["-a", "-all", "all"]:
+			add_line(hud_monitor.remove_all())
 			return true
-		if alt_item != null: #without quotes > ls logs
-			add_line(Inventory.list_specific_item(alt_item))
-			if alt_item_name == "logs":
-				Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
+		
+		var names = item_names.split(",")
+		add_line(hud_monitor.remove_monitored_items(names))
+		return true
+		
+	if text.begins_with("ls"):
+		var item_name = text.trim_prefix("ls").strip_edges()
+		
+		# Just "ls"
+		if item_name.is_empty():
+			add_line(Inventory.list_inventory())
+			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_ITEMS)
 			return true
+		
+		# "ls <item>"
+		var item = Inventory.get_item_by_name(item_name)
+		
+		if item == null:
+			add_line("Item not found: " + item_name)
+			return true
+		
+		add_line(Inventory.list_specific_item(item))
+		
+		if item.name.to_lower() == "logs":
+			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
+		
+		return true
+
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
 	match text:
-		"ls -r":
-			add_line(Inventory.list_inventory(Inventory.InventoryFilter.RESOURCES))
-			return true
-		"ls -a", "ls":
-			add_line(Inventory.list_inventory())
-			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_ITEMS)
-			return true
-		"ls -v":
-			add_line(Inventory.list_inventory(Inventory.InventoryFilter.VALUABLES))
-			return true
-		"ls -c":
-			add_line(Inventory.list_inventory(Inventory.InventoryFilter.CACHES))
-			return true
-		"ls -m": #List processes
-			add_line(Stats.list_unlocked_processes())
-			return true
-		#"show contracts":
-			#add_line(ContractsManager.show_contracts())
-			#return true
-		#"open contracts":
-			#contracts_container.open_contracts()
-			#return true
-		#"close contracts":
-			#contracts_container.min_contracts()
-			#return true
-		#"complete -c":
-			#add_line(ContractsManager.complete_contracts())
-			#return true
 		"-h", "help":
 			add_line(ContextCommands.get_help())
 			Tutorial.complete_event(Tutorial.TutorialEvent.RUN_HELP_COMMAND)
@@ -739,7 +745,6 @@ func handle_vm_token_commands(text):
 	
 		
 	#find major process
-
 	for p in processes:
 		if p.SKILL.name.to_lower() == commands[1]:
 			target_process = p
@@ -776,11 +781,18 @@ func handle_vm_token_commands(text):
 		add_line("Maximum virtual machines running.")
 		return
 	
-	Inventory.remove_resource(target_process.vm_token, 1)
-	var new_window = target_process.create_vm_window(target_minor_process, true)
-
-	add_child(new_window)
+	if Stats.CURRENT_ALL_VMS >= Stats.MAX_ALL_VMS:
+		add_line("Maximum total virtual machines running.")
+		return
+		
 	
+	Inventory.remove_resource(target_process.vm_token, 1)
+	
+	var new_window = target_process.create_vm_window(target_minor_process, true)
+	
+	add_child(new_window)
+
+
 	var parent_window = get_window()
 	var center_pos = parent_window.position + parent_window.size - new_window.size
 	new_window.position = center_pos
@@ -788,7 +800,7 @@ func handle_vm_token_commands(text):
 	new_window.transient = false
 	new_window.always_on_top = true
 	new_window.start()
-	
+	new_window.size = new_window.min_size
 	await get_tree().process_frame
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
@@ -818,7 +830,7 @@ func mining_commands(text):
 			if !process_running:
 				start_log_mining(ms)
 			else:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 			return
 	match text:
 		"stop":
@@ -889,7 +901,7 @@ func log_parsing_commands(text):
 			if !process_running:
 				start_parsing(ms)
 			else:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 			return
 	match text:
 		"stop":
@@ -971,7 +983,7 @@ func password_unscramble_commands(text):
 			if !process_running:
 				start_cracking(ms)
 			else:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 			return
 	match text:
 		"stop":
@@ -1051,7 +1063,7 @@ func cred_matching_commands(text):
 	for ms in Matching.minor_processes:
 		if text == ms["command"]:
 			if process_running:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 				return
 			var missing = false
 			for item in ms["requirements"]:
@@ -1140,13 +1152,10 @@ func cache_decrypting_commands(text):
 	for ms in Decoding.minor_processes:
 		if text == ms["command"]:
 			if process_running:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 				return
 			if !Inventory.has_cache():
 				add_line("No caches found.")
-				return
-			if !Inventory.has_intel():
-				add_line("No intel found.")
 				return
 				
 			start_cache_decrypting(ms)
@@ -1243,7 +1252,7 @@ func phishing_commands(text):
 	for ms in Phishing.minor_processes:
 		if text == ms["command"]:
 			if process_running:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 				return
 			if !ms.unlocked:
 				add_line("Process not unlocked")
@@ -1318,7 +1327,7 @@ func compiling_commands(text):
 	for ms in Compiling.minor_processes:
 		if text == ms["command"]:
 			if process_running:
-				add_line("Process already running")
+				add_line(ContextCommands.process_already_running_text())
 				return
 			var missing = false
 			for req in ms["requirements"]:

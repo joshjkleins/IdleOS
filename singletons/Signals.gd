@@ -26,6 +26,10 @@ signal item_added_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
 signal tutorial_event_completed_signal
 
+signal cooling_updated_signal
+func cooling_updated():
+	cooling_updated_signal.emit()
+
 func tutorial_event_completed(message: String):
 	tutorial_event_completed_signal.emit(message)
 
