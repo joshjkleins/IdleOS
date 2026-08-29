@@ -60,7 +60,8 @@ func process_killed():
 	_stop_timer()
 	_stop_pulse()
 	await get_tree().create_timer(2.0).timeout
-	_hide()
+	if !_timer_running:#in case a different process is started in the 2 sec fade window
+		_hide()
 
 func _stop_timer():
 	_timer_running = false

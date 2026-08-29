@@ -34,10 +34,11 @@ enum TutorialEvent {
 	MATCH_3_CREDENTIALS,
 
 	# Phishing
-	PHISH_SPEAR_INFO, ####<-------TEST
+	PHISH_SPEAR_INFO,
+	TRACK_SQL,
 	PHISH_15_SQL_INJECTORS,
 	PHISH_1_PACKET_SPOOFS,
-
+	UNTRACK_ITEMS,
 	# Compiling
 	COMPILE_3_SCHOOL_PAYLOADS,
 
@@ -72,7 +73,7 @@ var tutorial_tasks := {
 	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'.",
 
 	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First return to the root directory with 'cd ..' then to the Parsing skill with 'cd parsing'",
-	TutorialEvent.PARSE_20_LOGS: "Parse 20 logs.",
+	TutorialEvent.PARSE_20_LOGS: "Parse through 20 logs with the -footprint process.",
 	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Obtain 3 encrypted passwords from parsing logs.",
 	TutorialEvent.OBTAIN_3_USERNAMES: "Obtain 3 usernames from Parsing logs.",
 	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Obtain 3 IP Addresses from Parsing logs.",
@@ -82,9 +83,10 @@ var tutorial_tasks := {
 	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 3 credentials.",
 
 	TutorialEvent.PHISH_SPEAR_INFO: "Use 'info phishing spear' to view what can be obtained from spear phishing",
-	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to and use the Phishing skill to phish for 15 SQL injectors.",
-	TutorialEvent.PHISH_1_PACKET_SPOOFS: "Navigate to and use the Phishing skill to phish for 1 packet spoofs.",
-
+	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. hint: 'track <item name>'",
+	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to and use the Phishing skill to phish for 10 SQL injectors.",
+	TutorialEvent.PHISH_1_PACKET_SPOOFS: "Use the Phishing skill to phish for 1 packet spoofs.",
+	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'.",
 	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 3 school payloads.",
 
 	TutorialEvent.NAVIGATE_HACKING: "Navigate to the Hacking terminal.",
@@ -124,10 +126,12 @@ func get_event_requirement(event: TutorialEvent) -> int:
 			return 3
 		TutorialEvent.OBTAIN_3_USERNAMES:
 			return 3
+		TutorialEvent.OBTAIN_3_IP_ADDRESSES:
+			return 3
 		TutorialEvent.MATCH_3_CREDENTIALS:
 			return 3
 		TutorialEvent.PHISH_15_SQL_INJECTORS:
-			return 15
+			return 10
 		TutorialEvent.PHISH_1_PACKET_SPOOFS:
 			return 1
 		TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS:
@@ -177,13 +181,13 @@ func get_tutorial_progress_string() -> String:
 		tutorial_tasks.size()
 	]
 
-func get_completed_tasks() -> Array[String]:
+func get_completed_tasks(num_of_tasks: int = 5) -> Array[String]:
 	var tasks: Array[String] = []
 	for event in completed_events:
 		if tutorial_tasks.has(event):
 			tasks.append(tutorial_tasks[event])
-	if tasks.size() > 5:
-		tasks = tasks.slice(tasks.size() - 5, tasks.size())
+	if tasks.size() > num_of_tasks:
+		tasks = tasks.slice(tasks.size() - num_of_tasks, tasks.size())
 	return tasks
 
 func get_current_task() -> String:

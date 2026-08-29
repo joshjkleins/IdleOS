@@ -2,7 +2,8 @@ extends PanelContainer
 
 @onready var item_container_scene = preload("res://scenes/ingredients_row.tscn")
 
-@onready var payload_name = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PayloadName
+@onready var payload_name = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PayloadName
+#@onready var payload_name = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PayloadName
 @onready var ingredients_container = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/IngredientsContainer
 @onready var sl_top = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleLeft/SLTop
 @onready var sl_bottom = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ScrambleRow/ScrambleLeft/SLBottom
@@ -12,6 +13,7 @@ extends PanelContainer
 @onready var payload_item = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary/PayloadItem
 @onready var amount_gained_label = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary/AmountGainedLabel
 @onready var eff_timer = $EffTimer
+@onready var eff_label = $MarginContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/EffLabel
 
 var scramble_interval: float = 0.05
 var charset: String = "01#$%&*"
@@ -44,6 +46,10 @@ var final_cycle: bool = false
 
 var eff_proc: bool = false
 
+var speed: float = 0.0
+var overheat_speed: float = 0.0
+var overclock_speed: float = 0.0
+
 func start(p_type: Dictionary, is_window: bool = false):
 	vm_window = is_window
 	fill_bar.value = 0.0
@@ -51,6 +57,14 @@ func start(p_type: Dictionary, is_window: bool = false):
 	_build_item_containers(p_type)
 	_update_labels()
 	_generate_targets()
+	
+	var speed_compiling_package = Upgrades.get_package_info("compiling.speed")
+	var speed_upgrade = speed_compiling_package.current
+	speed = type["base speed"] * (1.0 + speed_upgrade)
+	overclock_speed = type["overclock speed"] * (1.0 + speed_upgrade)
+	overheat_speed = type["overheat speed"]
+	 
+	eff_label.text = "eff: " + str(_get_current_eff() * 100.0) + "%"
 
 	if _has_resources_for_more():
 		_begin_scramble()
@@ -72,10 +86,10 @@ func _process(delta: float) -> void:
 
 		#PROGRESS BAR FILL
 		if Stats.overheated:
-			fill_bar.value += delta * type["overheat speed"]
+			fill_bar.value += delta * overheat_speed
 			did_overclock_this_cycle = false
 		else:
-			var oc_speed = type["overclock speed"] if Stats.overclocked else type["base speed"]
+			var oc_speed = overclock_speed if Stats.overclocked else speed
 			if Stats.overclocked:
 				did_overclock_this_cycle = true
 			var eff = 100.0 if eff_proc else 1.0
@@ -177,17 +191,12 @@ func _compile_payload():
 		else:
 			Stats.update_tempature(type["heat"])
 	
-	#EFFICIENCY
-	var eff_label_text = ""
-	var frag_bonus = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Compiling) else 1.0
-	var base_eff = type["efficiency"] + Compiling.process_upgrades["efficiency"]["amount"]
-	
-
-	if randf() <= base_eff:
+	#EFFICIENCY	
+	var eff = _get_current_eff()
+	if randf() <= eff:
 		_efficiency_trigger()
-	eff_label_text = str(base_eff * frag_bonus * 100.0) + "%"
+	eff_label.text = "eff: " + str(eff * 100.0) + "%"
 
-	#efficiency_label.text = eff_label_text
 	_update_labels()
 
 func _efficiency_trigger():
@@ -232,3 +241,11 @@ func _random_string(length: int, source_charset: String) -> String:
 
 func _on_eff_timer_timeout():
 	eff_proc = false
+
+func _get_current_eff() -> float:
+	var efficiency_compiling_package = Upgrades.get_package_info("compiling.efficiency")
+	var efficiency_upgrade = efficiency_compiling_package.current
+	
+	var frag_bonus = Defragging.COMPILING["bonus efficiency"] if Stats.has_bonus(Compiling) else 1.0
+	
+	return (type["efficiency"] + efficiency_upgrade) * frag_bonus

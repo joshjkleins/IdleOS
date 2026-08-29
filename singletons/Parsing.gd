@@ -28,13 +28,13 @@ var SKILL = {
 	"command": "cd parsing"
 }
 
-var LOGS = {
-	"name": "Basic",
+var FOOTPRINT = {
+	"name": "Footprint",
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "parse -logs",
+	"command": "parse -footprint",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
@@ -115,7 +115,7 @@ var CRED_LOGS = {
 }
 
 var minor_processes = [
-	LOGS,
+	FOOTPRINT,
 	QUALITY_LOGS,
 	CRED_LOGS
 ]

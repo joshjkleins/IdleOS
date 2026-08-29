@@ -14,21 +14,21 @@ var MINING = {
 					"level": 1,
 					"id": "mining.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }, {"item": Items.IP_ADDRESS, "amount": 5 }],
-					"amount": 0.45,
+					"amount": 0.25,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "mining.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.45,
+					"amount": 0.4,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "mining.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.55,
+					"amount": 0.5,
 					"unlocked": false
 				}
 			]
@@ -43,21 +43,21 @@ var MINING = {
 					"level": 1,
 					"id": "mining.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.25,
+					"amount": 0.2,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "mining.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
-					"amount": 0.60,
+					"amount": 0.3,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "mining.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
-					"amount": 1.0,
+					"amount": 0.7,
 					"unlocked": false
 				}
 			]
@@ -94,21 +94,21 @@ var PARSING = {
 					"level": 1,
 					"id": "parsing.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.05,
+					"amount": 0.1,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "parsing.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.05,
+					"amount": 0.15,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "parsing.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.15,
+					"amount": 0.2,
 					"unlocked": false
 				}
 			]
@@ -123,7 +123,7 @@ var PARSING = {
 					"level": 1,
 					"id": "parsing.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.03,
+					"amount": 0.02,
 					"unlocked": false
 				},
 				{
@@ -181,14 +181,14 @@ var CRACKING = {
 					"level": 2,
 					"id": "cracking.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.2,
+					"amount": 0.3,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "cracking.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.35,
+					"amount": 0.5,
 					"unlocked": false
 				}
 			]
@@ -203,21 +203,21 @@ var CRACKING = {
 					"level": 1,
 					"id": "cracking.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.03,
+					"amount": 0.02,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "cracking.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
-					"amount": 0.03,
+					"amount": 0.04,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "cracking.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
-					"amount": 0.03,
+					"amount": 0.06,
 					"unlocked": false
 				}
 			]
@@ -255,21 +255,21 @@ var MATCHING = {
 					"level": 1,
 					"id": "matching.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.95,
+					"amount": 0.2,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "matching.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.05,
+					"amount": 0.3,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "matching.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.1,
+					"amount": 0.5,
 					"unlocked": false
 				}
 			]
@@ -284,21 +284,21 @@ var MATCHING = {
 					"level": 1,
 					"id": "matching.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.5,
+					"amount": 0.03,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "matching.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
-					"amount": 0.03,
+					"amount": 0.04,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "matching.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 25 }],
-					"amount": 0.03,
+					"amount": 0.06,
 					"unlocked": false
 				}
 			]
@@ -525,7 +525,7 @@ var HACKING = {
 			"name": "Max Anonymity",
 			"id": "hacking.max_anonymity",
 			"description": "Increases max anonymity.",
-			"current": 0,
+			"current": 100,
 			"levels": [ 
 				{
 					"level": 1,
@@ -568,7 +568,6 @@ var HACKING = {
 	],
 }
 
-
 var DECODING = {
 	"skill": Decoding,
 	"version": 0.1,
@@ -583,21 +582,21 @@ var DECODING = {
 					"level": 1,
 					"id": "decoding.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.05,
+					"amount": 0.2,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "decoding.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.05,
+					"amount": 0.3,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "decoding.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.1,
+					"amount": 0.5,
 					"unlocked": false
 				}
 			]
@@ -612,14 +611,14 @@ var DECODING = {
 					"level": 1,
 					"id": "decoding.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.3,
+					"amount": 0.01,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "decoding.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
-					"amount": 0.03,
+					"amount": 0.02,
 					"unlocked": false
 				},
 				{
@@ -664,21 +663,21 @@ var COMPILING = {
 					"level": 1,
 					"id": "compiling.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 10 }],
-					"amount": 0.05,
+					"amount": 0.20,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "compiling.speed", 
 					"requirements":[ {"item": Items.LOGS, "amount": 15 }],
-					"amount": 0.05,
+					"amount": 0.30,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "compiling.speed", 
 					"requirements": [{"item": Items.LOGS, "amount": 25 }],
-					"amount": 0.1,
+					"amount": 0.50,
 					"unlocked": false
 				}
 			]
@@ -693,14 +692,14 @@ var COMPILING = {
 					"level": 1,
 					"id": "compiling.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 10 }],
-					"amount": 0.3,
+					"amount": 0.01,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "compiling.efficiency", 
 					"requirements": [{ "item": Items.LOGS, "amount": 15 }],
-					"amount": 0.03,
+					"amount": 0.01,
 					"unlocked": false
 				},
 				{
@@ -944,6 +943,12 @@ func increase_version_from_package(package):
 				upgrade.version += 0.1
 				return
 
+func get_skill_version(skill: Node) -> float:
+	for upgrade in all_upgrades:
+		if upgrade.skill == skill:
+			return upgrade.version
+	return 0.0
+
 func unlock_next_level(package):
 	for lvl in package.levels:
 		if !lvl.unlocked:
@@ -962,6 +967,8 @@ func unlock_next_level(package):
 						Stats.MAX_ALL_VMS = package.current
 					"system.heat_reduction":
 						Stats.HEAT_REDUCTION = package.current
+					"hacking.max_anonymity":
+						Stats.set_max_anon()
 				return
 			if package.current is bool:
 				package.current = lvl.amount

@@ -26,6 +26,11 @@ func _ready():
 	cache_decrypt.item_found.connect(update_items_gained)
 
 func start_decrypting():
+	var speed_decoding_package = Upgrades.get_package_info("decoding.speed")
+	var speed_upgrade = speed_decoding_package.current
+	var speed = type["base speed"] / (1.0 + speed_upgrade)
+	var overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
+	var overheat_speed = type["overheat speed"]
 	clear_labels()
 	items_from_session = {}
 	running = true
@@ -61,15 +66,15 @@ func start_decrypting():
 				break
 			cache_decrypt.update_dump()
 			hex_display.text = cache_decrypt.render_dump()
-			var speed
+			var current_speed
 			if Stats.overclocked:
-				speed = type["overclock speed"] / Decoding.process_upgrades["speed"]["amount"]
+				current_speed = overclock_speed
 				overclocked_this_cache = true
 			elif Stats.overheated:
-				speed = type["overheat speed"] / Decoding.process_upgrades["speed"]["amount"]
+				current_speed = overheat_speed
 			else:
-				speed = type["base speed"] / Decoding.process_upgrades["speed"]["amount"]
-			await get_tree().create_timer(speed).timeout
+				current_speed = speed
+			await get_tree().create_timer(current_speed).timeout
 		if !running:
 			apply_heat(overclocked_this_cache)
 			break

@@ -152,8 +152,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	DEFEND_SPEED = defensive_item.speed
 	DEFEND_BW_COST = defensive_item.bandwidth_cost
 	#anonymity
-	var anonymity_upgrade = Upgrades.get_package_info("hacking.max_anonymity")
-	anon_bar.max_value = Stats.max_anon + anonymity_upgrade.current
+	anon_bar.max_value = Stats.max_anon
 	anon_bar.value = Stats.current_anon
 	#integrity
 	integ_bar.max_value = target.integrity

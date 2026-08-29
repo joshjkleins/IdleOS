@@ -33,7 +33,7 @@ var SCHOOL = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "compile -school",
-	"efficiency": 0.03,
+	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,

@@ -1,23 +1,13 @@
 extends Control
 
-#TODO 
+#bug
+#tracking command doesn't work with single quotes 'track sql injectors'
 
-# go through apt upgrade and make sure all speed/efficiency are being applied (matching, compiling, decoding)
-
-#bugs
-#runing apt instal system.vm_windows doesnt give any feedback that it was a bad command (install spelt wrong)
-#vm shouldnt apply heat, just a base cooling reduction
-#vm shouldn't have overclock applied
-#using ps while defragging breaks the game
-#being in the defragging module and tracking a long named item causes screen to leave viewport
-#HUD PROCESS RUNNING doesnt go away when a process naturally finishes (runs out of resources ie cracking done with passwords)
-
+#figure out - over heat cooling way too slow
 #hacking
-# hacking specific 'tutorial' command (next objective only)
-# better navigation
-# potentially more tutorial items for 'view school' and 'hack student' and 'kill' and '..' and 'root'
-# hacking breakdown in terminal when you enter. Welcome to the hacking terminal. Here you can choose locations then targets and attempt to hack them via auto-battler. 
-#Upgrade within hacking system to unlock more targets/locations
+# kick out after successful hack. later show that you can use -r to repeat attacks automatically
+# add help text after starting a hack
+# reduce heat buildup for student
 
 #SAVE/LOAD SYSTEM
 
@@ -42,10 +32,11 @@ extends Control
 @onready var terminal_body = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody
 @onready var terminal_body_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody/TerminalBodyContainer
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
-@onready var contracts_container = $Panel/ContractsContainer
+#@onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
-@onready var hud_monitor = $Panel/MarginContainer/TerminalRoot/Header/HUDMonitor
+#@onready var hud_monitor = $Panel/MarginContainer/TerminalRoot/Header/HUDMonitor
+@onready var hud_monitor = $Panel/TrackingContainer/HUDMonitor
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -614,7 +605,9 @@ func handle_apt_commands(text):
 		awaiting_player_input = true
 		current_player_input_context = PlayerInputContext.UPGRADES
 		upgrade_package_selected = package
-		#upgrade logic here
+		return
+	
+	add_line("apt command not recognized. Use 'apt' for upgrade manager.")
 
 ##player gave acceptable input
 func accept_player_input(text):
@@ -889,6 +882,7 @@ func data_mining_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Data mining safely finished.")
 
 ###################################################
@@ -971,6 +965,7 @@ func log_parsing_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Parsing safely finished.")
 
 ###################################################
@@ -1053,6 +1048,7 @@ func password_cracking_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Password cracking safely finished.")
 
 ###################################################
@@ -1141,6 +1137,7 @@ func cred_matching_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Matching safely finished.")
 	
 
@@ -1224,6 +1221,7 @@ func cache_decrypting_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Cache decrypting safely finished.")
 
 func overclock_logic():
@@ -1317,6 +1315,7 @@ func phishing_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Phishing process finished.")
 
 ###################################################
@@ -1395,6 +1394,7 @@ func compiling_ended_safely():
 	current_process_info = {}
 	process_running = false
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Compiling stopped.")
 
 ###################################################

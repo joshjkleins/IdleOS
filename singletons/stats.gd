@@ -484,6 +484,7 @@ func _ready():
 	cooling_amount = Upgrades.SYSTEM.upgrades[0].current
 	MAX_ALL_VMS = Upgrades.SYSTEM.upgrades[1].current
 	HEAT_REDUCTION = Upgrades.SYSTEM.upgrades[2].current
+	set_max_anon()
 
 ##############################
 ######## DEFRAG BONUS ########
@@ -636,3 +637,9 @@ func update_cooling_amount(amount_to_add: float):
 
 func cooling_updated():
 	Signals.cooling_updated()
+
+func set_max_anon():
+	var max_anon_upgrade = Upgrades.get_package_info("hacking.max_anonymity")
+	var actual_max_anon = max_anon_upgrade.current
+	max_anon = actual_max_anon
+	current_anon = max_anon

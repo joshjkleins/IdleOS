@@ -22,6 +22,7 @@ func _ready():
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 
 func module_loaded():
+	current_context = HackingContext.TARGETS
 	header_hacking_box.update_hacking_header()
 	modulate.a = 0.0
 	visible = true
@@ -33,6 +34,8 @@ func module_loaded():
 	enemy_hacking_box.update_targets()
 	is_in_hacking_context = true
 	Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_HACKING)
+	player_hacking_box.add_line("Welcome to the hacking module. The hacking module has limited commands.\nUse this module to view and hack potential targets via auto-battler.")
+	hacking_help_commands()
 
 
 func tutorial_event_completed(message: String):
@@ -59,11 +62,16 @@ func _on_player_hacking_box_command_entered(text):
 			return
 			
 		Inventory.remove_resource(Items.PACKET_SPOOF, 1)
-		Stats.current_anon += Items.PACKET_SPOOF["heal"]
+		var ps_u = Upgrades.get_package_info("hacking.healing")
+		var extra_heal = ps_u.current
+		Stats.current_anon += Items.PACKET_SPOOF["heal"] + extra_heal
 		if Stats.current_anon > Stats.max_anon:
 			Stats.current_anon = Stats.max_anon
-		var t = "1 " + Items.PACKET_SPOOF.name + " consumed: +" + str(Items.PACKET_SPOOF.heal) + " anonymity"
+		var t = "1 " + Items.PACKET_SPOOF.name + " consumed: +" + str(Items.PACKET_SPOOF.heal + extra_heal) + " anonymity"
 		player_hacking_box.add_line_success(t)
+	
+	elif text.to_lower() == "tutorial":
+		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
 		match current_context:
 			HackingContext.TARGETS:
@@ -72,13 +80,10 @@ func _on_player_hacking_box_command_entered(text):
 					return
 				
 				match text:
-					"root":
+					"cd ..":
 						go_to_root()
 					"-h":
-						player_hacking_box.add_line(format_command_list("[HACKING COMMANDS]", [
-							["view [location]", "List targets at location", "e.g. view school"],
-							["root",            "Return to terminal root"]
-						]))
+						hacking_help_commands()
 					"apt":
 						player_hacking_box.add_line("Apt upgrade manager not available in hacking console. Return to root to view.")
 					_:
@@ -89,13 +94,10 @@ func _on_player_hacking_box_command_entered(text):
 					return
 				
 				match text:
-					"..":
+					"cd ..":
 						handle_back_command()
 					"-h":
-						player_hacking_box.add_line(format_command_list("COMMANDS", [
-							["hack [target]", "Start hacking target", "e.g. hack student"],
-							["..",            "Return to locations directory", "e.g. '..'"]
-						]))
+						hacking_help_commands()
 					"apt":
 						player_hacking_box.add_line("Apt upgrade manager not available in hacking console. Return to root to view.")
 					_:
@@ -109,13 +111,7 @@ func _on_player_hacking_box_command_entered(text):
 					"kill -s":
 						Signals.end_hacking_safely()
 					"-h":
-						player_hacking_box.add_line(format_command_list("COMMANDS", [
-							["kill", "Kills current hack attempt immediately, resources may be lost."],
-							["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
-							["overclock", "Overclocks system to increase speed and heat output"],
-							["overclock -kill", "Stops overclocking"],
-							
-						]))
+						hacking_help_commands()
 					"overclock":
 						if !Upgrades.can_overclock(Hacking):
 							player_hacking_box.add_line_warning("Overclock not available. Unlock with apt package manager.")
@@ -150,7 +146,7 @@ func handle_hack_command(text):
 	#Has enough anonymity
 	if Stats.current_anon <= 0:
 		await enemy_hacking_box.target_select_error(target)
-		player_hacking_box.add_line_error("Anonymity too low. Wait for recover or use 'heal' to recover with Packet Spoofs.")
+		player_hacking_box.add_line_error("Anonymity too low. Wait for recovery or use 'heal' to recover with Packet Spoofs.")
 		return
 	
 	#Has requirements in inventory
@@ -172,9 +168,11 @@ func handle_back_command():
 		HackingContext.PERSONS:
 			await enemy_hacking_box.persons_to_targets()
 			current_context = HackingContext.TARGETS
+			hacking_help_commands()
 		HackingContext.HACKING:
 			await enemy_hacking_box.hacking_to_persons()
 			current_context = HackingContext.PERSONS
+			hacking_help_commands()
 
 func handle_view_command(text):
 	var target: Dictionary = Stats.get_hacking_location_by_command(text)
@@ -183,6 +181,7 @@ func handle_view_command(text):
 	else:
 		await enemy_hacking_box.select_target(target)
 		current_context = HackingContext.PERSONS
+		hacking_help_commands()
 
 
 func hacking_ended():
@@ -214,3 +213,23 @@ func _has_hacking_requirements(target) -> bool:
 	if Inventory.get_amount(req.item) < req["amount"]:
 		return false
 	return true
+
+func hacking_help_commands():
+	match current_context:
+		HackingContext.TARGETS:
+			player_hacking_box.add_line(format_command_list("[HACKING COMMANDS]", [
+				["view [location]", "List targets at location", "e.g. view school"],
+				["cd ..",            "Return to terminal root"]
+			]))
+		HackingContext.PERSONS:
+			player_hacking_box.add_line(format_command_list("COMMANDS", [
+				["hack [target]", "Start hacking target", "e.g. hack student"],
+				["cd ..",            "Return to locations directory", "e.g. '..'"]
+			]))
+		HackingContext.HACKING:
+			player_hacking_box.add_line(format_command_list("COMMANDS", [
+				["kill", "Kills current hack attempt immediately, resources may be lost."],
+				["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
+				["overclock", "Overclocks system to increase speed and heat output"],
+				["overclock -kill", "Stops overclocking"],
+			]))

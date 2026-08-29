@@ -33,6 +33,8 @@ func add_monitored_item(item: ItemData) -> String:
 		)
 	
 	tracked_items.append(item)
+	if item == Items.SQL_INJECTOR:
+		Tutorial.complete_event(Tutorial.TutorialEvent.TRACK_SQL)
 	refresh_items()
 	
 	return wrap_text_in_color(
@@ -82,6 +84,7 @@ func add_monitored_items(item_names: Array[String]) -> String:
 			continue
 		
 		tracked_items.append(item)
+
 		slots_remaining -= 1
 		
 		messages.append(
@@ -90,7 +93,8 @@ func add_monitored_items(item_names: Array[String]) -> String:
 				TextColor.SUCCESS
 			)
 		)
-	
+		if item == Items.SQL_INJECTOR:
+			Tutorial.complete_event(Tutorial.TutorialEvent.TRACK_SQL)
 	refresh_items()
 	
 	return "\n".join(messages)
@@ -126,6 +130,8 @@ func remove_monitored_items(item_names: Array[String]) -> String:
 			continue
 		
 		tracked_items.erase(item)
+		if item == Items.SQL_INJECTOR:
+			Tutorial.complete_event(Tutorial.TutorialEvent.UNTRACK_ITEMS)
 		
 		messages.append(
 			wrap_text_in_color(

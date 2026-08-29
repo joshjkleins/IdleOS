@@ -102,13 +102,16 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 			loot[item.item] = quant
 	#rare items
 	
+	var efficiency_decoding_package = Upgrades.get_package_info("decoding.efficiency")
+	var efficiency_upgrade = efficiency_decoding_package.current
 	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 1.0
-	var base_eff = Decoding.CACHE["efficiency"] + Decoding.process_upgrades["efficiency"]["amount"]
-	var r = randf()
-	if r <  base_eff * defrag_bonus:
+	var base_eff = Decoding.CACHE["efficiency"]
+	var eff = (base_eff + efficiency_upgrade) * defrag_bonus
+	
+	if randf() < eff:
 		var item = cache.rare_pool.pick_random()
 		loot[item.item] = 1
-	#not current conditions if loot is empty
+	#not current conditions if loot is empty, should never reach this
 	return loot
 
 func get_item_hexes(item, amount) -> Array:
@@ -162,7 +165,6 @@ func get_random_hexes(num: int, blank_lines: bool = true) -> Array:
 	var result: Array = []
 	
 	#10% chance of blank row
-	
 	if randf() < 0.1 and blank_lines:
 		for i in range(num):
 			result.append({

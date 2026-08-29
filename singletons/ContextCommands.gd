@@ -216,8 +216,9 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 	
 	return return_text
 
-
 func get_mp_info(skill: Node, process: Dictionary) -> String:
+	if skill == Defragging:
+		return get_mp_dfg_info(skill, process)
 	###INFO
 	var return_text = "\nPROCESS\n"
 	var color_string = skill.SKILL.color.to_html()
@@ -292,22 +293,24 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 func info_command_text():
 	var return_string = ""
 	var l_name = 15
+	var l_upgrades = 10
 	var l_lvl = 6
 	var l_exp = 18
 	var l_cmd = 20
-	return_string += pad_text("SKILL", l_name) + pad_text("LVL", l_lvl) + pad_text("EXP", l_exp) + pad_text("COMMAND(from root)", l_cmd) + "\n"
-	return_string += "-".repeat(l_name + l_lvl + l_exp + l_cmd) + "\n"
+	return_string += pad_text("SKILL", l_name) + pad_text("UPGRADE", l_upgrades) + pad_text("LVL", l_lvl) + pad_text("COMMAND(from root)", l_cmd) + "\n"
+	return_string += "-".repeat(l_name + l_upgrades + l_lvl + l_cmd) + "\n"
 	var skills = [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling, Defragging]
 	for s in skills:
 		if s.name == "Defragging":
 			var color_string = s.SKILL.color.to_html()
 			var name_s = "[color=#%s]%s[/color]" % [color_string, s.SKILL.name]
-			return_string += pad_text(name_s, l_name) + pad_text("n/a", l_lvl) + pad_text("n/a", l_exp) + pad_text(s.SKILL.command, l_cmd) + "\n"
+			return_string += pad_text(name_s, l_name) + pad_text("n/a", l_upgrades) + pad_text("n/a", l_lvl) + pad_text(s.SKILL.command, l_cmd) + "\n"
 		else:
 			var experience = Exp.get_xp_display(s.SKILL)
 			var color_string = s.SKILL.color.to_html()
+			var version = "v" + str(Upgrades.get_skill_version(s)) 
 			var name_s = "[color=#%s]%s[/color]" % [color_string, s.SKILL.name]
-			return_string += pad_text(name_s, l_name) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(experience["display"], l_exp) + pad_text(s.SKILL.command, l_cmd) + "\n"
+			return_string += pad_text(name_s, l_name) + pad_text(version, l_upgrades) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(s.SKILL.command, l_cmd) + "\n"
 	
 	return return_string
 
@@ -660,6 +663,23 @@ func returned_to_root() -> String:
 |____________________________________________________________________|
 """
 	return text
+
+func get_hacking_tutorial() -> String:
+	var return_string = "PROGRESS: " + Tutorial.get_tutorial_progress_string() + "\n"
+	
+	return_string += "\nCURRENT TASK\n"
+	return_string += "\t[>] " +  Tutorial.get_current_task() + "\n\n"
+	
+	return_string += "NEXT\n"
+	var next_tasks = Tutorial.get_next_tasks(1)
+	for task in next_tasks:
+		return_string += "\t[?] " + task + "\n"
+	
+	return_string += "───────────────────────────────────\n\n"
+	
+	return_string += "Type 'tutorial' at any time to view progress.\n"
+	
+	return return_string
 
 func get_tutorial() -> String:
 	var return_string = "IDLEOS // TUTORIAL\n\n"
