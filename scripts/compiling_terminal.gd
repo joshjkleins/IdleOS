@@ -89,9 +89,13 @@ func _process(delta: float) -> void:
 			fill_bar.value += delta * overheat_speed
 			did_overclock_this_cycle = false
 		else:
-			var oc_speed = overclock_speed if Stats.overclocked else speed
-			if Stats.overclocked:
+			var oc_speed
+			if Stats.overclocked and Upgrades.can_overclock(Compiling):
+				oc_speed = overclock_speed
 				did_overclock_this_cycle = true
+			else:
+				oc_speed = speed
+				
 			var eff = 100.0 if eff_proc else 1.0
 			fill_bar.value += delta * oc_speed * eff
 

@@ -262,7 +262,7 @@ func _get_speed() -> float:
 	var speed_upgrade = speed_matching_package.current 
 	if Stats.overheated:
 		time = type["overheat speed"]
-	elif Stats.overclocked:
+	elif Stats.overclocked and Upgrades.can_overclock(Matching):
 		var time_min = type["overclock speed min"] / (1.0 + speed_upgrade)
 		var time_max = type["overclock speed max"] / (1.0 + speed_upgrade)
 		time = randf_range(time_min, time_max)

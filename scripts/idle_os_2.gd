@@ -1,9 +1,11 @@
 extends Control
 
-#bug
-#tracking command doesn't work with single quotes 'track sql injectors'
 
-#figure out - over heat cooling way too slow
+#SYSTEM: ADD more system commands (anon, bandwith, bunch of hacking stuff)
+#add system command to -h sheet
+#bug : when vm stop cause running out of resources (i think, maybe also just naturally) doesn't remove max vm number. Example. ran parsing vm, it stopped, couldnt run another vm anywhere.
+
+
 #hacking
 # kick out after successful hack. later show that you can use -r to repeat attacks automatically
 # add help text after starting a hack
@@ -469,6 +471,9 @@ func universal_commands(text):
 			get_tree().quit()
 		"cmds":
 			add_line(ContextCommands.all_commands())
+			return true
+		"system":
+			add_line(ContextCommands.system_commands())
 			return true
 
 #Root context commands
@@ -1766,7 +1771,6 @@ func _navigate_history(delta: int):
 	call_deferred("_move_caret_to_end")
 
 func _on_hacking_start_loading() -> void:
-	#header.update_header()
 	header.update()
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
@@ -1777,7 +1781,10 @@ func _on_hacking_start_loading() -> void:
 	await tween.finished
 
 func _on_cooling_timer_timeout():
-	Stats.update_tempature(Stats.cooling_amount)
+	var amount_to_cool = Stats.cooling_amount
+	if Stats.OVERHEAT_FAN and Stats.overheated:
+		amount_to_cool += -0.3
+	Stats.update_tempature(amount_to_cool)
 
 func _scroll_to_bottom():
 	await get_tree().process_frame

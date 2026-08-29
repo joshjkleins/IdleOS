@@ -67,7 +67,7 @@ func start_decrypting():
 			cache_decrypt.update_dump()
 			hex_display.text = cache_decrypt.render_dump()
 			var current_speed
-			if Stats.overclocked:
+			if Stats.overclocked and Upgrades.can_overclock(Decoding):
 				current_speed = overclock_speed
 				overclocked_this_cache = true
 			elif Stats.overheated:

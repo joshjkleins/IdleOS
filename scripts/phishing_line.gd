@@ -28,7 +28,7 @@ func begin(p_type):
 	type = p_type
 	setup()
 	var cast_time = type["cast time"]
-	if Stats.overclocked:
+	if Stats.overclocked and Upgrades.can_overclock(Phishing):
 		cast_time = type["overclock cast time"]
 	if Stats.overheated:
 		cast_time = type["overheat cast time"]

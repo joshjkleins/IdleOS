@@ -4,14 +4,13 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.LOGS, 5)
-	return
+	add_resource(Items.LOGS, 2)
 	add_resource(Items.VM_PHISHING_TOKEN, 1)
-	add_resource(Items.VM_MINING_TOKEN, 1)
+	add_resource(Items.VM_PARSING_TOKEN, 5)
 	add_resource(Items.SQL_INJECTOR, 100)
-	#return
+	return
 	for item in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[item], 10)
+		add_resource(Items.ITEM_MAP[item], 100)
 
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:
@@ -134,7 +133,8 @@ func get_item_by_name(item_name: String) -> ItemData:
 	# Remove surrounding quotes
 	if name.begins_with('"') and name.ends_with('"'):
 		name = name.trim_prefix('"').trim_suffix('"').strip_edges()
-	
+	if name.begins_with('\'') and name.ends_with('\''):
+		name = name.trim_prefix('\'').trim_suffix('\'').strip_edges()
 	# Exact match
 	var item = Items.ITEM_NAME_MAP.get(name)
 	if item != null:

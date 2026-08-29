@@ -710,3 +710,18 @@ func process_already_running_text() -> String:
 	#hint: use kill to stop or 'ps' to bring current process to bottom 
 	var hint = "\n[color=666666]hint: use 'kill' to stop current process\nuse 'ps' for current process info.[/color]"
 	return "Process already running." + hint
+
+func system_commands() -> String:
+	var cooling_amount = Stats.cooling_amount
+	var tempature = Stats.system_tempature
+	var time = get_date_command()
+	var max_vms = Stats.MAX_ALL_VMS
+	var current_vms = Stats.CURRENT_ALL_VMS
+	
+	return """
+Cooling amount: %s °C/s
+Current temp: %s °C/s
+Current time: %s
+Virtual Machines (VMS): %s/%s
+""" % [cooling_amount, tempature, time, current_vms, max_vms]
+	

@@ -124,7 +124,7 @@ func start():
 								max_heat_used = heat
 							_update_progress_bar(i, overheat_speed)
 							await get_tree().create_timer(overheat_speed).timeout
-						elif Stats.overclocked:
+						elif Stats.overclocked and Upgrades.can_overclock(Cracking):
 							var heat = type["overclock heat"]
 							if heat > max_heat_used:
 								max_heat_used = heat

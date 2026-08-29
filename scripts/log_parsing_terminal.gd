@@ -91,7 +91,7 @@ func start():
 				if Stats.overheated:
 					await get_tree().create_timer(overheat_speed).timeout
 					heat_used = type["overheat heat"]
-				elif Stats.overclocked:
+				elif Stats.overclocked and Upgrades.can_overclock(Parsing):
 					await get_tree().create_timer(overclock_speed).timeout
 					heat_used = type["overclock heat"]
 				else:

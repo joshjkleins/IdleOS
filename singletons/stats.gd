@@ -14,6 +14,7 @@ var overclocked = false
 var CURRENT_ALL_VMS: int = 0
 var MAX_ALL_VMS: int = 0
 var HEAT_REDUCTION: float = 0.0
+var OVERHEAT_FAN: bool = false
 
 #hacking
 var current_anon = 100
@@ -481,9 +482,10 @@ var hacking_targets = {
 }
 
 func _ready():
-	cooling_amount = Upgrades.SYSTEM.upgrades[0].current
-	MAX_ALL_VMS = Upgrades.SYSTEM.upgrades[1].current
-	HEAT_REDUCTION = Upgrades.SYSTEM.upgrades[2].current
+	cooling_amount = Upgrades.get_package_info("system.cooling_amount").current
+	MAX_ALL_VMS =  Upgrades.get_package_info("system.vm_windows").current
+	HEAT_REDUCTION =  Upgrades.get_package_info("system.heat_reduction").current
+	OVERHEAT_FAN =  Upgrades.get_package_info("system.overheat_fan").current
 	set_max_anon()
 
 ##############################
@@ -523,13 +525,13 @@ func update_tempature(amount: float):
 	
 	
 	#OVERHEAT PARAMETERS
-	if system_tempature <= 40: #if overheated, stops overheat mode when reaching below 40
+	if system_tempature <= 80: #if overheated, stops overheat mode when reaching below 40
 		overheated = false
 	elif system_tempature >= 95: #if temp reaches 95 then overheat
 		overclocked = false
 		overheated = true
-	elif system_tempature >= 85: #attempt to auto stop overclock when above 85
-		overclocked = false
+	#elif system_tempature >= 85: #attempt to auto stop overclock when above 85
+		#overclocked = false
 	Signals.system_temp_updated(system_tempature)
 	
 	if amount > 0:
@@ -639,7 +641,4 @@ func cooling_updated():
 	Signals.cooling_updated()
 
 func set_max_anon():
-	var max_anon_upgrade = Upgrades.get_package_info("hacking.max_anonymity")
-	var actual_max_anon = max_anon_upgrade.current
-	max_anon = actual_max_anon
-	current_anon = max_anon
+	max_anon = Upgrades.get_package_info("hacking.max_anonymity").current

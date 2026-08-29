@@ -822,6 +822,22 @@ var SYSTEM = {
 				}
 			]
 		},
+		{ 
+			"name": "Overheat Fan",
+			"id": "system.overheat_fan",
+			"description": "Optimize system fan for increased cooling while overheated.",
+			"current": false,
+			"display percentage": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "system.overheat_fan", 
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"amount": true,
+					"unlocked": false
+				}
+			]
+		},
 	],
 }
 
@@ -972,6 +988,11 @@ func unlock_next_level(package):
 				return
 			if package.current is bool:
 				package.current = lvl.amount
+				
+				#Specific upgrades that need to happen (bool)
+				match package.id:
+					"system.overheat_fan":
+						Stats.OVERHEAT_FAN = package.current
 				return
 			print("nothing returned: Upgrades.unlock_next_level()")
 

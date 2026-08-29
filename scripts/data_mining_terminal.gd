@@ -121,7 +121,7 @@ func start_data_mining():
 			if Stats.overheated:
 				await get_tree().create_timer(OVERHEAT_SPEED).timeout
 				overheated = true
-			elif Stats.overclocked:
+			elif Stats.overclocked and Upgrades.can_overclock(Mining):
 				await get_tree().create_timer(OVERCLOCK_SPEED).timeout
 				overclocked = true
 			else:
