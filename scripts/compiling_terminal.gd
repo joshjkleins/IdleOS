@@ -71,6 +71,7 @@ func start(p_type: Dictionary, is_window: bool = false):
 
 func _vm_finish():
 	if vm_window:
+		Stats.remove_vm_count(1)
 		Compiling.CURRENT_VMS -= 1
 		get_parent().queue_free()
 

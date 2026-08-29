@@ -448,45 +448,6 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "Student Cache x 1"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="BottomRow/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 10
-theme_override_constants/separation = 50
-
-[node name="IPCol" type="VBoxContainer" parent="BottomRow/HBoxContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="BottomRow/HBoxContainer/HBoxContainer/IPCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.574328, 0.574328, 0.574328, 1)
-theme_override_font_sizes/font_size = 10
-text = "IP ADDRESSES"
-horizontal_alignment = 2
-
-[node name="IPLabel" type="Label" parent="BottomRow/HBoxContainer/HBoxContainer/IPCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "IP Addresses x 1"
-horizontal_alignment = 2
-
-[node name="CredCol" type="VBoxContainer" parent="BottomRow/HBoxContainer/HBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="BottomRow/HBoxContainer/HBoxContainer/CredCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.574328, 0.574328, 0.574328, 1)
-theme_override_font_sizes/font_size = 10
-text = "CREDENTIALS"
-horizontal_alignment = 2
-
-[node name="CredLabel" type="Label" parent="BottomRow/HBoxContainer/HBoxContainer/CredCol"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Credentials x 4"
-horizontal_alignment = 2
-
 [node name="SafeExitTimer" type="Timer" parent="."]
 wait_time = 5.0
 one_shot = true

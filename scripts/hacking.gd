@@ -50,7 +50,6 @@ func go_to_root() -> void:
 	is_in_hacking_context = false
 	start_loading.emit()
 
-
 func _on_player_hacking_box_command_entered(text):
 	if text.to_lower() == "heal":
 		#healing logic
@@ -162,6 +161,7 @@ func handle_hack_command(text):
 	
 	await enemy_hacking_box.select_person(target)
 	current_context = HackingContext.HACKING
+	hacking_help_commands()
 
 func handle_back_command():
 	match current_context:
@@ -228,8 +228,8 @@ func hacking_help_commands():
 			]))
 		HackingContext.HACKING:
 			player_hacking_box.add_line(format_command_list("COMMANDS", [
-				["kill", "Kills current hack attempt immediately, resources may be lost."],
-				["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
+				["kill", "Kills current hack attempt immediately."],
+				#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
 				["overclock", "Overclocks system to increase speed and heat output"],
 				["overclock -kill", "Stops overclocking"],
 			]))

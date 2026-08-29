@@ -441,6 +441,7 @@ func get_help() -> String:
 | SYSTEM                                                             |
 |   date                         Show date and time                  |
 |   clear                        Clear terminal                      |
+|   system                       Show system information             |
 |____________________________________________________________________|
 """
 	return text
@@ -717,11 +718,18 @@ func system_commands() -> String:
 	var time = get_date_command()
 	var max_vms = Stats.MAX_ALL_VMS
 	var current_vms = Stats.CURRENT_ALL_VMS
+	var anonymity = Stats.current_anon
+	var max_anon = Stats.max_anon
+	var bandwidth = Hacking.current_bandwidth
+	var m_band = Hacking.max_bandwidth
+	var bw_recov = Hacking.bandwidth_recovery_rate
 	
 	return """
-Cooling amount: %s °C/s
 Current temp: %s °C/s
+Cooling amount: %s °C/s
 Current time: %s
 Virtual Machines (VMS): %s/%s
-""" % [cooling_amount, tempature, time, current_vms, max_vms]
-	
+Anonymity: %s
+Max Bandwidth: %s
+Bandwidth Restore: +%s/second
+""" % [tempature, cooling_amount, time, current_vms, max_vms, max_anon, m_band, bw_recov]

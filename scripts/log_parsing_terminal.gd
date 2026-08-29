@@ -24,6 +24,8 @@ var base_speed
 var overclock_speed
 var overheat_speed
 
+var stopped_once: bool = false
+
 func set_parse_type(p_type: Dictionary, i_window = false):
 	type = p_type
 	is_window = i_window
@@ -112,10 +114,15 @@ func start():
 		Signals.end_log_parsing_safely()
 
 func stop():
+	if stopped_once:
+		return
+	
+	stopped_once = true
 	end_safely = false
 	process_running = false
 	if is_window:
 		Parsing.CURRENT_VMS -= 1
+		Stats.remove_vm_count(1)
 		get_parent().queue_free()
 
 func stop_safely():

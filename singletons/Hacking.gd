@@ -68,7 +68,7 @@ var SCHOOL = {
 			"difficulty": "Easy",
 			"command": "hack student",
 			"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 1},
-			"heat": 5,
+			"heat": 0.2,
 			"exp": 600,
 			"integrity": 100,
 			"firewall": 10,

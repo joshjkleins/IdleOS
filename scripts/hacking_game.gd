@@ -20,8 +20,6 @@ extends VBoxContainer
 @onready var firewall_bar = $StatsRow/HBoxContainer2/EnemySide/FirewallBar
 
 @onready var yield_label = $BottomRow/HBoxContainer/YieldCol/YieldLabel
-@onready var ip_label = $BottomRow/HBoxContainer/HBoxContainer/IPCol/IPLabel
-@onready var cred_label = $BottomRow/HBoxContainer/HBoxContainer/CredCol/CredLabel
 
 @onready var anon_label = $StatsRow/HBoxContainer2/PlayerSide/AnonLabel
 @onready var band_label = $StatsRow/HBoxContainer2/PlayerSide/BandLabel
@@ -44,12 +42,12 @@ var ATTACK_SPEED: float = 10.0
 var ATTACK_AMOUNT: int = 0
 var FIREWALL_DAMAGE: int = 0
 var ATTACK_BW_COST = 0
-var ATTACK_HEAT: int = 3
+var ATTACK_HEAT: int = 0.3
 var defending: bool = false
 var DEFEND_SPEED: float = 5.0
 var DEFEND_AMOUNT: int = 0
 var DEFEND_BW_COST: int = 0
-var DEFEND_HEAT: int = 3
+var DEFEND_HEAT: int = 0.5
 var COUNTER_SPEED: float = 12.0
 var COUNTER_AMOUNT: int = 2
 var COUNTER_HEAT: int = 0
@@ -153,7 +151,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	DEFEND_BW_COST = defensive_item.bandwidth_cost
 	#anonymity
 	anon_bar.max_value = Stats.max_anon
-	anon_bar.value = Stats.current_anon
+	anon_bar.value = Stats.max_anon
 	#integrity
 	integ_bar.max_value = target.integrity
 	integ_bar.value = 0
@@ -443,12 +441,6 @@ func update_bottom_row():
 		yield_label.text = target_reward.name + " x" + str(reward_amount)
 	else:
 		yield_label.text = ""
-	
-	var ip_amount = Inventory.get_amount(Items.IP_ADDRESS)
-	var cred_amount = Inventory.get_amount(Items.CREDENTIALS)
-	
-	ip_label.text = "x" + str(ip_amount)
-	cred_label.text = "x" + str(cred_amount)
 
 func _on_safe_exit_timer_timeout():
 	end()

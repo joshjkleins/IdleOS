@@ -1,20 +1,17 @@
 extends Control
 
-
-#SYSTEM: ADD more system commands (anon, bandwith, bunch of hacking stuff)
-#add system command to -h sheet
-#bug : when vm stop cause running out of resources (i think, maybe also just naturally) doesn't remove max vm number. Example. ran parsing vm, it stopped, couldnt run another vm anywhere.
-
-
-#hacking
-# kick out after successful hack. later show that you can use -r to repeat attacks automatically
-# add help text after starting a hack
-# reduce heat buildup for student
-
 #SAVE/LOAD SYSTEM
+# remove all but one for each upgrade (1 lvl of speed/efficiency, etc) so its 1 speed, 1 efficiency, 1 overclock
+# only 1 processes for each skill, rest can just be ???
+# remove library payloads from hacking.
+# update upgrades to have different requirements that make sense
 
 # BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
 # Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
+#create discord server for playtest
+#add copy function for playtest server
+#Export and test on pc
+#Upload playtest
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -37,7 +34,6 @@ extends Control
 #@onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
-#@onready var hud_monitor = $Panel/MarginContainer/TerminalRoot/Header/HUDMonitor
 @onready var hud_monitor = $Panel/TrackingContainer/HUDMonitor
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
@@ -517,6 +513,7 @@ func root_commands(text):
 				return
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
+			tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
 			await tween.finished
 			terminal_root.visible = false
 			await loading.show_loading()
@@ -1778,6 +1775,7 @@ func _on_hacking_start_loading() -> void:
 	input_line.grab_focus()
 	var tween = create_tween()
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
+	tween.parallel().tween_property(hud_monitor, "modulate:a", 1.0, 1.0)
 	await tween.finished
 
 func _on_cooling_timer_timeout():

@@ -58,15 +58,15 @@ func update_heat_info(tempature: float) -> void:
 		status_label.visible = false
 	temp.text = "%.1f" % tempature
 	temp_bar.value = tempature
-	if tempature < 60:
+	if tempature < 80:
 		if !Stats.overheated:
 			temp_bar.indeterminate = false
 		temp.add_theme_color_override("font_color", HEAT_INFO[0]["color"])
 		update_progressbar_fill(HEAT_INFO[0]["color"])
-	elif tempature >= 60 and tempature < 85:
+	elif tempature >= 60 and tempature < 80:
 		temp.add_theme_color_override("font_color", HEAT_INFO[1]["color"])
 		update_progressbar_fill(HEAT_INFO[1]["color"])
-	elif tempature >= 85 and tempature < 95:
+	elif tempature >= 80 and tempature < 95:
 		temp.add_theme_color_override("font_color", HEAT_INFO[2]["color"])
 		update_progressbar_fill(HEAT_INFO[2]["color"])
 	elif tempature >= 95:

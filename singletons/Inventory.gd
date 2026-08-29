@@ -4,13 +4,14 @@ enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
 func _ready():
-	add_resource(Items.LOGS, 2)
-	add_resource(Items.VM_PHISHING_TOKEN, 1)
-	add_resource(Items.VM_PARSING_TOKEN, 5)
-	add_resource(Items.SQL_INJECTOR, 100)
-	return
+	#add_resource(Items.LOGS, 40)
+	#add_resource(Items.ENCRYPTED_PASSWORDS, 20)
+	#add_resource(Items.VM_PHISHING_TOKEN, 1)
+	#add_resource(Items.VM_PARSING_TOKEN, 5)
+	#add_resource(Items.SQL_INJECTOR, 100)
+	#return
 	for item in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[item], 100)
+		add_resource(Items.ITEM_MAP[item], 25)
 
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:

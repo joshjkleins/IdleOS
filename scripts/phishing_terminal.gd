@@ -79,6 +79,7 @@ func line_ended():
 				return
 		vm_lines.clear()
 		Phishing.CURRENT_VMS -= 1
+		Stats.remove_vm_count(1)
 		get_parent().queue_free()
 	else:
 		for lines in Phishing.current_lines:

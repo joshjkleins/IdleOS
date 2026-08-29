@@ -159,6 +159,7 @@ func stop():
 		n.stop_scramble()
 	if is_window:
 		Cracking.CURRENT_VMS -= 1
+		Stats.remove_vm_count(1)
 		get_parent().queue_free()
 
 func stop_safely():

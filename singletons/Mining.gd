@@ -132,7 +132,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	
 	new_window.close_requested.connect(func():
 		CURRENT_VMS -= 1
-		Stats.CURRENT_ALL_VMS -= 1
+		Stats.remove_vm_count(1)
 		#new_window.remove_cooling_reduction()
 		new_window.queue_free()
 	)

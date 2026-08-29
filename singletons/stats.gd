@@ -17,8 +17,8 @@ var HEAT_REDUCTION: float = 0.0
 var OVERHEAT_FAN: bool = false
 
 #hacking
-var current_anon = 100
-var max_anon = 100
+var current_anon: int = 100
+var max_anon: int = 100
 
 var hacking_targets = {
 	"School": {
@@ -32,7 +32,7 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"command": "hack student",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 1},
-				"heat": 5,
+				"heat": 0.5,
 				"exp": 600,
 				"integrity": 100,
 				"firewall": 10,
@@ -642,3 +642,8 @@ func cooling_updated():
 
 func set_max_anon():
 	max_anon = Upgrades.get_package_info("hacking.max_anonymity").current
+
+func remove_vm_count(amount: int = 1):
+	CURRENT_ALL_VMS -= amount
+	if CURRENT_ALL_VMS < 0:
+		CURRENT_ALL_VMS = 0
