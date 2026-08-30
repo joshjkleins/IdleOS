@@ -1,21 +1,12 @@
 extends Control
 
-# remove all but one for each upgrade (1 lvl of speed/efficiency, etc) so its 1 speed, 1 efficiency, 1 overclock
-# only 1 processes for each skill, rest can just be ???
-# remove library payloads from hacking.
-# update upgrades to have different requirements that make sense
-# in hacking : update so player only gets cache if they escape hacking attempt successfully
-# update run commands for cracking -pw and phishing -spear (should be crack -password and phish -spear)
-# in hacking only show the 'overclock/overclock -kill' example commands if hacking.overclock is unlocked
+#Rethink APT commands / displays
+# confusing with the 'current effect' vs next upgrade since some upgrades are the base stat (cooling) and others are simply bonuses (speed/efficiency)
+# apt system - should not only display all System upgrades but also requirements as well for just the next upgrade
+#Description updates on resources (just double check, make sure they make sense)
 
-#BUG : removing resource doesn't update tracking : track logs : defragging should -15 logs but number doesn't change
-#BUG : PROCESS RUNNING  doesn't go away after defragging is finished
-#BUG : running system command shows temp as 33.39999999999999994
-#BUG: when compiling is finished it says 'cache decrypted safely finished'
-#BUG : no heat being applied during hack battle
+#Export and play through.
 
-# BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
-# Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
 #create discord server for playtest
 #add copy function for playtest Discord server
 #Export and test on pc
@@ -134,7 +125,6 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 
 func _ready():
 	if not SaveManager.load_game():
-		print("No save found, starting fresh.")
 		Signals.system_temp_updated(30)
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
@@ -1491,6 +1481,7 @@ func defrag_finished():
 	current_process = null
 	current_process_info = {}
 	Stats.overclocked = false
+	hud_process_running.process_killed()
 	add_line("Defragging process ended.")
 
 ###################################################

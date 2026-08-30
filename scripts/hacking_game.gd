@@ -42,15 +42,15 @@ var ATTACK_SPEED: float = 10.0
 var ATTACK_AMOUNT: int = 0
 var FIREWALL_DAMAGE: int = 0
 var ATTACK_BW_COST = 0
-var ATTACK_HEAT: int = 0.3
+var ATTACK_HEAT: float = 0.3
 var defending: bool = false
 var DEFEND_SPEED: float = 5.0
 var DEFEND_AMOUNT: int = 0
 var DEFEND_BW_COST: int = 0
-var DEFEND_HEAT: int = 0.5
+var DEFEND_HEAT: float = 0.5
 var COUNTER_SPEED: float = 12.0
 var COUNTER_AMOUNT: int = 2
-var COUNTER_HEAT: int = 0
+var COUNTER_HEAT: float = 0
 var EXP_AMOUNT: int = 0
 var BANDWIDTH_RECOVERY_RATE: int = 0
 var MAX_BANDWIDTH: int = 0
@@ -72,6 +72,8 @@ var defensive_item
 var COMBAT_QUEUE = []
 
 var stop_hacking: bool = false
+
+var caches_gained: int = 0
 
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
@@ -127,6 +129,7 @@ func queue_defense(item):
 	COMBAT_QUEUE.append(item)
 
 func setup(target: Dictionary, loadout: Dictionary = {}):
+	caches_gained = 0
 	stop_hacking = false
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
@@ -267,20 +270,24 @@ func counter():
 	if Stats.current_anon < 0.0:
 		Stats.current_anon = 0.0
 	anon_bar.value = Stats.current_anon
-	var info_text = "countermeasures taken - -" + str(COUNTER_AMOUNT) + " anonymity"
+	var info_text = "countermeasures taken: -" + str(COUNTER_AMOUNT) + " anonymity"
 	_update_info_panel(info_text, c_red)
 	if Stats.current_anon <= 0.0:
 		lose()
 
-func add_heat(amount):
+func add_heat(amount: float):
 	if Stats.overheated:
-		Stats.update_tempature(1)
+		Stats.update_tempature(0.3)
 		return
 	if NEXT_HEAT_APPLICATION > 0:
 		amount += NEXT_HEAT_APPLICATION
 		NEXT_HEAT_APPLICATION = 0
 	
 	Stats.update_tempature(amount)
+	if Stats.overheated:
+		var messages = "[color=#e24b4a]SYSTEM OVERHEATED - ATTACKING SLOWED[/color]\n" 
+		messages += "[color=#e24b4a]ENEMY COUNTERMEASURES INCREASED SIGNIFICANTLY[/color]\n" 
+		Signals.update_hack_console(messages)
 
 func lose():
 	bandwidth_timer.stop()
@@ -289,8 +296,9 @@ func lose():
 	defending = false
 	var messages = ""
 	messages += "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n" 
-	messages += "[color=#e24b4a]Items lost[/color]\n"
-	
+	if caches_gained > 0:
+		messages += "[color=#e24b4a]Items lost[/color]\n"
+		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]" 
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
 	Signals.hacking_ended()
@@ -300,7 +308,7 @@ func win():
 	attacking = false
 	defending = false
 	firewall_bar.value = 0
-	Inventory.add_resource(target_reward, 1)
+	caches_gained += 1
 	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
 	reward_amount += 1
 	update_bottom_row()
@@ -350,7 +358,8 @@ func _update_info_panel(message: String, color: Color):
 
 func kill_hack():
 	end()
-	Stats.current_anon -= 10.0
+	if caches_gained > 0:
+		Inventory.add_resource(target_reward, caches_gained)
 	Signals.hacking_ended()
 
 func kill_hack_safely():

@@ -97,6 +97,7 @@ value = 30.0
 show_percentage = false
 
 [node name="Ticks" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer2/TempBar"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

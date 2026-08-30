@@ -35,7 +35,7 @@ var SPEAR = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "phishing -spear",
+	"command": "phish -spear",
 	"efficiency": 0.3,
 	"efficiency rate": 0.005,
 	"unlocked": true,

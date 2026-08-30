@@ -223,7 +223,7 @@ func _stop_compiling():
 	if vm_window:
 		_vm_finish()
 	else:
-		Signals.end_cache_decrypting_safely()
+		Signals.end_compiling_safely()
 
 	scrambling = false
 

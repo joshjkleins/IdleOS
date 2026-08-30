@@ -202,24 +202,6 @@ theme_override_font_sizes/font_size = 12
 text = "School Payloads"
 horizontal_alignment = 1
 
-[node name="Library" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow"]
-layout_mode = 2
-size_flags_horizontal = 2
-theme_override_constants/separation = 2
-
-[node name="LibraryPayload" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/Library"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "12"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/HackingItemsRow/Library"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.593134, 0.593134, 0.593134, 1)
-theme_override_font_sizes/font_size = 12
-text = "Library Payloads"
-horizontal_alignment = 1
-
 [node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
 layout_mode = 2
 size_flags_horizontal = 10

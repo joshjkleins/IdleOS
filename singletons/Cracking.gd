@@ -32,7 +32,7 @@ var PASSWORD = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
-	"command": "crack -pw",
+	"command": "crack -password",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,

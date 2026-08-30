@@ -31,7 +31,7 @@ var hacking_targets = {
 				"name": "Student",
 				"difficulty": "Easy",
 				"command": "hack student",
-				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 1},
+				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 1 },
 				"heat": 0.5,
 				"exp": 600,
 				"integrity": 100,
@@ -45,25 +45,25 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"command": "hack administrator",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
-				"heat": 5,
-				"exp": 600,
-				"integrity": 100,
-				"firewall": 10,
-				"counter": 10,
-				"counter speed": 5.0,
+				"heat": 0.9,
+				"exp": 1200,
+				"integrity": 120,
+				"firewall": 13,
+				"counter": 7,
+				"counter speed": 16.0,
 				"loot": Items.ADMIN_CACHE
 			},
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
 				"command": "hack vice-principal",
-				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 3},
-				"heat": 5,
-				"exp": 600,
-				"integrity": 100,
-				"firewall": 10,
-				"counter": 10,
-				"counter speed": 5.0,
+				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
+				"heat": 1.0,
+				"exp": 1800,
+				"integrity": 140,
+				"firewall": 15,
+				"counter": 9,
+				"counter speed": 16.0,
 				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
 			{
@@ -71,12 +71,12 @@ var hacking_targets = {
 				"difficulty": "Medium",
 				"command": "hack principal",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
-				"heat": 5,
-				"exp": 600,
-				"integrity": 100,
-				"firewall": 10,
-				"counter": 10,
-				"counter speed": 5.0,
+				"heat": 1.3,
+				"exp": 2400,
+				"integrity": 120,
+				"firewall": 20,
+				"counter": 3,
+				"counter speed": 25.0,
 				"loot": Items.PRINCIPAL_CACHE
 			},
 			{
@@ -84,12 +84,12 @@ var hacking_targets = {
 				"difficulty": "Hard",
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
-				"heat": 5,
-				"exp": 600,
-				"integrity": 100,
-				"firewall": 10,
-				"counter": 10,
-				"counter speed": 5.0,
+				"heat": 2.0,
+				"exp": 3000,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],
@@ -486,7 +486,6 @@ func _ready():
 	MAX_ALL_VMS =  Upgrades.get_package_info("system.vm_windows").current
 	HEAT_REDUCTION =  Upgrades.get_package_info("system.heat_reduction").current
 	OVERHEAT_FAN =  Upgrades.get_package_info("system.overheat_fan").current
-	print(system_tempature)
 	set_max_anon()
 
 ##############################
@@ -531,8 +530,7 @@ func update_tempature(amount: float):
 	elif system_tempature >= 95: #if temp reaches 95 then overheat
 		overclocked = false
 		overheated = true
-	#elif system_tempature >= 85: #attempt to auto stop overclock when above 85
-		#overclocked = false
+	
 	Signals.system_temp_updated(system_tempature)
 	
 	if amount > 0:
@@ -651,10 +649,11 @@ func remove_vm_count(amount: int = 1):
 
 func save_data() -> Dictionary:
 	return {
-		"system_tempature": system_tempature
+		"system_tempature": system_tempature,
+		"overheated": overheated
 	}
 
 func load_data(data: Dictionary) -> void:
 	system_tempature = float(data.get("system_tempature", system_tempature))
+	overheated = bool(data.get("overheated", overheated))
 	Signals.system_temp_updated(system_tempature)
-	print(system_tempature)

@@ -132,7 +132,6 @@ func _on_player_hacking_box_command_entered(text):
 						Stats.overclocked = false
 					_:
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type '-kill'")
-	
 
 func handle_hack_command(text):
 	var target: Dictionary = Stats.get_hacking_target_by_command(text)
@@ -227,9 +226,14 @@ func hacking_help_commands():
 				["cd ..",            "Return to locations directory", "e.g. '..'"]
 			]))
 		HackingContext.HACKING:
-			player_hacking_box.add_line(format_command_list("COMMANDS", [
-				["kill", "Kills current hack attempt immediately."],
-				#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
-				["overclock", "Overclocks system to increase speed and heat output"],
-				["overclock -kill", "Stops overclocking"],
-			]))
+			if Upgrades.get_package_info("hacking.overclock").current:
+				player_hacking_box.add_line(format_command_list("COMMANDS", [
+					["kill", "Kills current hack attempt immediately."],
+					#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
+					["overclock", "Overclocks system to increase speed and heat output"],
+					["overclock -kill", "Stops overclocking"],
+				]))
+			else:
+				player_hacking_box.add_line(format_command_list("COMMANDS", [
+					["kill", "Kills current hack attempt immediately."],
+				]))

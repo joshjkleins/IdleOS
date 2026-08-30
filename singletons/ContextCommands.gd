@@ -60,7 +60,7 @@ func get_help_text(skill: Node) -> String:
 		text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
 
 	if skill == Hacking:
-		var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+		var locations = [Stats.hacking_targets["School"]] #, Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
 
 		for location in locations:
 			var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
@@ -758,7 +758,7 @@ func system_commands() -> String:
 	var bw_recov = Hacking.bandwidth_recovery_rate
 	
 	return """
-Current temp: %s °C/s
+Current temp: %.1f °C/s
 Cooling amount: %s °C/s
 Current time: %s
 Virtual Machines (VMS): %s/%s
