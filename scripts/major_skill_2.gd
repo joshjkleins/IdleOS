@@ -61,8 +61,18 @@ func _ready():
 	
 	minor_skill_container.visible = false
 	major_skill_container.visible = true
+	
+	SaveManager.save_loaded.connect(_on_save_loaded)
+
+func _on_save_loaded():
+	build_minor_skills()
 
 func build_minor_skills():
+	for child in minor_skill_container.get_children():
+		if child == minor_skill_container.get_child(0):
+			continue
+		child.queue_free()
+		
 	#Update first container with accurate exp/lvl/name/color
 	skill_name.text = skill.SKILL.name
 	skill_name.add_theme_color_override("font_color", skill.SKILL.color)
@@ -82,7 +92,9 @@ func build_minor_skills():
 	else:
 		defragged_details.visible = false
 	
-	skill.SKILL["level up signal"].connect(major_skill_level_up)
+	if not skill.SKILL["level up signal"].is_connected(major_skill_level_up):
+		skill.SKILL["level up signal"].connect(major_skill_level_up)
+		
 	#build container for each minor process in skill Singleton
 	for s in skill.minor_processes:
 		var new_box = minor_skill.instantiate()

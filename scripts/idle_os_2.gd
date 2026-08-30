@@ -1,15 +1,23 @@
 extends Control
 
-#SAVE/LOAD SYSTEM
 # remove all but one for each upgrade (1 lvl of speed/efficiency, etc) so its 1 speed, 1 efficiency, 1 overclock
 # only 1 processes for each skill, rest can just be ???
 # remove library payloads from hacking.
 # update upgrades to have different requirements that make sense
+# in hacking : update so player only gets cache if they escape hacking attempt successfully
+# update run commands for cracking -pw and phishing -spear (should be crack -password and phish -spear)
+# in hacking only show the 'overclock/overclock -kill' example commands if hacking.overclock is unlocked
+
+#BUG : removing resource doesn't update tracking : track logs : defragging should -15 logs but number doesn't change
+#BUG : PROCESS RUNNING  doesn't go away after defragging is finished
+#BUG : running system command shows temp as 33.39999999999999994
+#BUG: when compiling is finished it says 'cache decrypted safely finished'
+#BUG : no heat being applied during hack battle
 
 # BALANCE: Resources, speeds, efficiencies, heat, cache rewards, upgrade
 # Visual polish: Apt upgrades install (maybe some progress bars done with ascii and set_line) : go through each item and set correct colors for used in/found in
 #create discord server for playtest
-#add copy function for playtest server
+#add copy function for playtest Discord server
 #Export and test on pc
 #Upload playtest
 
@@ -124,14 +132,15 @@ var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) 
 var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
 
 
-
 func _ready():
+	if not SaveManager.load_game():
+		print("No save found, starting fresh.")
+		Signals.system_temp_updated(30)
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	header.update()
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
-	Signals.system_temp_updated(30)
 	
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
@@ -395,7 +404,15 @@ func universal_commands(text):
 			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_LOG_DETAILS)
 		
 		return true
-
+	
+	if text.begins_with("add"):
+		var item_name = text.trim_prefix("add").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.add_resource(item, 50)
+			return true
+		
+	
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
@@ -464,6 +481,7 @@ func universal_commands(text):
 				add_line("No process running")
 			return true
 		"quit -s":
+			SaveManager.save_game()
 			get_tree().quit()
 		"cmds":
 			add_line(ContextCommands.all_commands())
@@ -570,6 +588,12 @@ func handle_apt_commands(text):
 		return
 	
 	var t_array = text.split(" ")
+	
+	if t_array.size() == 2:
+		for upgrade_name in Upgrades.all_upgrades:
+			if t_array[1].to_lower() == upgrade_name.skill.SKILL.name.to_lower():
+				add_line(ContextCommands.get_skill_upgrades_text(upgrade_name))
+				return
 	
 	if t_array.size() != 3:
 		add_line("Apt command not recognized. [color=#666666]example: apt info mining.speed[/color]")

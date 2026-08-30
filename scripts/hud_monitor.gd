@@ -8,8 +8,10 @@ const MONITOR_SIZE = 4
 
 func _ready():
 	Signals.item_added_signal.connect(update_monitored_items_hud)
+	Signals.item_removed_signal.connect(update_monitored_items_hud)
+	add_to_group("tracked_items_panel")
 
-func update_monitored_items_hud(item: ItemData, _amount: int):
+func update_monitored_items_hud(item: ItemData, _amount: int = 0):
 	if !tracked_items.has(item):
 		return
 	
@@ -18,6 +20,7 @@ func update_monitored_items_hud(item: ItemData, _amount: int):
 	if index >= 0:
 		var labels = labels_container.get_children()
 		labels[index].text = item.name + "=" + str(Inventory.get_amount(item))
+	SaveManager.mark_dirty()
 
 func add_monitored_item(item: ItemData) -> String:
 	if tracked_items.size() >= MONITOR_SIZE:
@@ -37,6 +40,7 @@ func add_monitored_item(item: ItemData) -> String:
 		Tutorial.complete_event(Tutorial.TutorialEvent.TRACK_SQL)
 	refresh_items()
 	
+	SaveManager.mark_dirty()
 	return wrap_text_in_color(
 		"Tracking " + item.name,
 		TextColor.SUCCESS
@@ -97,6 +101,7 @@ func add_monitored_items(item_names: Array[String]) -> String:
 			Tutorial.complete_event(Tutorial.TutorialEvent.TRACK_SQL)
 	refresh_items()
 	
+	SaveManager.mark_dirty()
 	return "\n".join(messages)
 
 
@@ -142,6 +147,7 @@ func remove_monitored_items(item_names: Array[String]) -> String:
 	
 	refresh_items()
 	
+	SaveManager.mark_dirty()
 	return "\n".join(messages)
 
 func remove_all() -> String:
@@ -152,6 +158,8 @@ func remove_all() -> String:
 	tracked_items.clear()
 	
 	refresh_items()
+	
+	SaveManager.mark_dirty()
 	return wrap_text_in_color("Stopped tracking " + str(amount_removed) + " item" + ("s" if amount_removed != 1 else "") + ".", TextColor.SUCCESS)
 
 func refresh_items():
@@ -179,3 +187,22 @@ func wrap_text_in_color(text: String, color: TextColor) -> String:
 			color_hex = "#c96b6b"
 	
 	return "[color=%s]%s[/color]" % [color_hex, text]
+
+func save_data() -> Dictionary:
+	var ids := []
+	for item in tracked_items:
+		ids.append(item.id)
+	return {
+		"tracked_item_ids": ids
+	}
+
+func load_data(data: Dictionary) -> void:
+	tracked_items.clear()
+	var ids: Array = data.get("tracked_item_ids", [])
+	for id in ids:
+		var item: ItemData = Items.ITEM_MAP.get(int(id))
+		if item == null:
+			push_warning("Unknown item id in tracked_items save: %s" % id)
+			continue
+		tracked_items.append(item)
+	refresh_items()

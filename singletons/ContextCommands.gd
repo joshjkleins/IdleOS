@@ -144,7 +144,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				if ms["skill"] == skill:
 					frag_bonus = ms["bonus efficiency"]
 		#var frag_bonus = Defragging.skill["bonus efficiency"] if Stats.has_bonus(skill) else 1.0
-		var base_eff = p["efficiency"] + skill.process_upgrades["efficiency"]["amount"]
+		var base_eff = p["efficiency"]
 		var effr = str(p["efficiency rate"] * 100.0) + "%"
 		var eff = str(base_eff * frag_bonus * 100.0) + "%"
 		var info_text_mp = p["name"].to_lower().replace(" ", "-")
@@ -575,6 +575,39 @@ func get_root_upgrades_text() -> String:
 			return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
 			i += 1
 		return_text += "\n"
+	
+	return_text += "────────────────────────────────────────────────────────\n\n"
+	return_text += "Use 'apt info <package>' for package information.\n"
+	return_text += "Use 'apt install <package>' to install.\n"
+	
+	return return_text
+
+func get_skill_upgrades_text(upgrade):
+	var return_text = ""
+	return_text += "\nAvailable upgrades:\n\n"
+	
+	var skill = upgrade.skill
+	var color_string = skill.SKILL.color.to_html()
+	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
+	return_text += colored_name + " v" + str(upgrade.version) + "\n"
+	var i = 0
+	for upgrade_info in upgrade.upgrades:
+		#get current level
+		var current_level = 0
+		for lvl in upgrade_info.levels:
+			if lvl.unlocked:
+				current_level += 1
+		#get prefix
+		var prefix = "├─ "
+		if i == upgrade.upgrades.size() - 1:
+			prefix = "└─ "
+		
+		#get dots
+		var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
+	
+		return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
+		i += 1
+	return_text += "\n"
 	
 	return_text += "────────────────────────────────────────────────────────\n\n"
 	return_text += "Use 'apt info <package>' for package information.\n"

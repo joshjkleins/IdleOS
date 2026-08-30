@@ -133,19 +133,33 @@ var SCHOOL = {
 
 func signal_exp(_amount: int):
 	xp_gained.emit()
+	SaveManager.mark_dirty()
 
 var minor_processes = [SCHOOL]
+#
+#var process_upgrades = {
+	#"anonymity": { "id": 1, "name": "Anonymity", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"max bandwidth": { "id": 1, "name": "Max bandwidth", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"bandwidth regen": { "id": 1, "name": "Bandwidth regen rate", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+#}
+#
+#func get_upgrade_cost(upgrade_stat: String) -> int:
+	#return process_upgrades[upgrade_stat]["level"] * 800 + 100
+#
+#func upgraded(upgrade_stat: Dictionary):
+	#upgrade_stat["level"] += 1
+	#upgrade_stat["amount"] += upgrade_stat["increase per level"]
 
-var process_upgrades = {
-	"anonymity": { "id": 1, "name": "Anonymity", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"max bandwidth": { "id": 1, "name": "Max bandwidth", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"bandwidth regen": { "id": 1, "name": "Bandwidth regen rate", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-}
 
-func get_upgrade_cost(upgrade_stat: String) -> int:
-	return process_upgrades[upgrade_stat]["level"] * 800 + 100
+func save_data() -> Dictionary:
+	return {
+		"bonus_expires_at": bonus_expires_at,
+		"skill_level": SKILL["level"],
+		"skill_experience": SKILL["experience"],
+	}
 
-func upgraded(upgrade_stat: Dictionary):
-	upgrade_stat["level"] += 1
-	upgrade_stat["amount"] += upgrade_stat["increase per level"]
+func load_data(data: Dictionary) -> void:
+	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
+	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
+	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))

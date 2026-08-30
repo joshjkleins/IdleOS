@@ -85,7 +85,7 @@ func start_decrypting():
 		type.signal.emit(1)
 		
 		Tutorial.track_event(Tutorial.TutorialEvent.DECODE_1_STUDENT_CACHE, 1)
-		Exp.add_xp(Decoding, type, type["experience per level"] * Decoding.process_upgrades["experience"]["amount"])
+		Exp.add_xp(Decoding, type, type["experience per level"])
 		Signals.update_hud(Decoding)
 		
 		if randf() <= 0.01:

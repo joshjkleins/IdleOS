@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_gqeqw")
 damage = 0
-heal = 15
+heal = 5
 speed = 8.0
 speed_name = "SLOW"
 bandwidth_cost = 2

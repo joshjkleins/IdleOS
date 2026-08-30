@@ -3,16 +3,6 @@ extends Node
 enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
-func _ready():
-	#add_resource(Items.LOGS, 40)
-	#add_resource(Items.ENCRYPTED_PASSWORDS, 20)
-	#add_resource(Items.VM_PHISHING_TOKEN, 1)
-	#add_resource(Items.VM_PARSING_TOKEN, 5)
-	#add_resource(Items.SQL_INJECTOR, 100)
-	#return
-	for item in Items.ITEM_MAP:
-		add_resource(Items.ITEM_MAP[item], 25)
-
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:
 		if i.id == id:
@@ -43,6 +33,7 @@ func remove_resource(resource: ItemData, amount: int) -> bool:
 	if inventory[resource] <= 0:
 		inventory.erase(resource)
 	
+	Signals.item_removed(resource)
 	return true
 
 func _matches_filter(resource, filter: InventoryFilter) -> bool:
@@ -254,3 +245,24 @@ func get_all_valuables() -> Array:
 		if i.valuable:
 			vals.append(i)
 	return vals
+
+func save_data() -> Dictionary:
+	var serializable := {}
+	for item in inventory:
+		serializable[str(item.id)] = inventory[item]
+	
+	return {
+		"inventory": serializable
+	}
+
+
+func load_data(data: Dictionary) -> void:
+	inventory.clear()
+	var raw: Dictionary = data.get("inventory", {})
+	for id_str in raw:
+		var id := int(id_str)
+		var item: ItemData = Items.ITEM_MAP.get(id)
+		if item == null:
+			push_warning("Unknown item id in save: %s" % id_str)
+			continue
+		inventory[item] = int(raw[id_str])

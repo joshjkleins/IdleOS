@@ -23,6 +23,7 @@ signal update_hud_root_signal
 signal end_phishing_safely_signal
 signal end_compiling_safely_signal
 signal item_added_signal
+signal item_removed_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
 signal tutorial_event_completed_signal
 
@@ -86,7 +87,12 @@ func update_hud_root():
 	update_hud_root_signal.emit()
 
 func item_added(item: ItemData, amount: int):
+	SaveManager.mark_dirty()
 	item_added_signal.emit(item, amount)
+
+func item_removed(item: ItemData):
+	SaveManager.mark_dirty()
+	item_removed_signal.emit(item)
 
 #message: you lost, #type: "Error", "Success"
 func update_hack_console(message: String):

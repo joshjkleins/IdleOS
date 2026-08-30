@@ -112,8 +112,8 @@ func track_event(event: TutorialEvent, amount: int = 1) -> void:
 
 	if tutorial_progress[event] >= get_event_requirement(event):
 		complete_event(event)
+	SaveManager.mark_dirty()
 
-##### REAL ONE
 func get_event_requirement(event: TutorialEvent) -> int:
 	match event:
 		TutorialEvent.MINE_20_LOGS:
@@ -171,6 +171,7 @@ func complete_event(event: TutorialEvent) -> void:
 		]
 	
 	Signals.tutorial_event_completed(message)
+	SaveManager.mark_dirty()
 
 func is_tutorial_complete() -> bool:
 	return completed_events.size() >= tutorial_tasks.size()
@@ -213,3 +214,29 @@ func get_next_tasks(num_of_tasks: int) -> Array[String]:
 		if tasks.size() >= num_of_tasks:
 			break
 	return tasks
+
+
+func save_data() -> Dictionary:
+	var progress_out := {}
+	for event in tutorial_progress:
+		progress_out[str(event)] = tutorial_progress[event]
+
+	var completed_out := []
+	for event in completed_events:
+		completed_out.append(int(event))
+
+	return {
+		"tutorial_progress": progress_out,
+		"completed_events": completed_out
+	}
+
+func load_data(data: Dictionary) -> void:
+	tutorial_progress.clear()
+	var progress_in: Dictionary = data.get("tutorial_progress", {})
+	for key in progress_in:
+		tutorial_progress[int(key)] = int(progress_in[key])
+
+	completed_events.clear()
+	var completed_in: Array = data.get("completed_events", [])
+	for v in completed_in:
+		completed_events.append(int(v))

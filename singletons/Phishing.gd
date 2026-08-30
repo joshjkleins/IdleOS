@@ -8,10 +8,9 @@ signal phishing_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_PHISHING_TOKEN
-@onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
-@onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
+@onready var MAX_VMS = 1
+@onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
-var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/phishing_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -63,39 +62,38 @@ var SPEAR = {
 	"signal": spear_cycle_completed
 }
 
-var WHALING = {
-	"name": "Whaling",
-	"tier name": "TIER I | WHALING",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 200,
-	"command": "phishing -whale",
-	"efficiency": 0.2,
-	"efficiency rate": 0.003,
-	"unlocked": false,
-	"unlock level": 10,
-	"wait time min": 6.0,
-	"wait time max": 12.0,
-	"download time": 9.5,
-	"overclocked download time": 5.0,
-	"overheated download time": 25.5,
-	"heat": 4,
-	"overclock heat": 7,
-	"overheat heat": 1,
-	"requirements": [],
-	"resource gained": [
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
-		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
-	],
-	"resource amount gained": 1,
-	"description": "Targets high level individuals for a chance to extract PINs and account numbers",
-	"efficiency description": "Chance for successful bite",
-	"signal": whale_cycle_completed
-}
+#var WHALING = {
+	#"name": "Whaling",
+	#"tier name": "TIER I | WHALING",
+	#"level": 1,
+	#"experience": 0,
+	#"experience per level": 200,
+	#"command": "phishing -whale",
+	#"efficiency": 0.2,
+	#"efficiency rate": 0.003,
+	#"unlocked": false,
+	#"unlock level": 10,
+	#"wait time min": 6.0,
+	#"wait time max": 12.0,
+	#"download time": 9.5,
+	#"overclocked download time": 5.0,
+	#"overheated download time": 25.5,
+	#"heat": 4,
+	#"overclock heat": 7,
+	#"overheat heat": 1,
+	#"requirements": [],
+	#"resource gained": [
+		#{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
+		#{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
+	#],
+	#"resource amount gained": 1,
+	#"description": "Targets high level individuals for a chance to extract PINs and account numbers",
+	#"efficiency description": "Chance for successful bite",
+	#"signal": whale_cycle_completed
+#}
 
 var minor_processes = [
-	SPEAR,
-	WHALING
+	SPEAR
 ]
 
 func add_line(line):
@@ -107,27 +105,28 @@ func remove_line(line):
 
 func signal_exp(_amount: int):
 	xp_gained.emit()
+	SaveManager.mark_dirty()
 
-var process_upgrades = {
-	"max lines": { "id": 1, "name": "Max lines", "level": 0, "amount": 0, "increase per level": 1 },
-	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
-	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
-	"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
-	"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
-}
-
-func get_upgrade_cost(upgrade_stat: String) -> int:
-	return process_upgrades[upgrade_stat]["level"] * 800 + 100
-
-func upgraded(upgrade_stat: Dictionary):
-	upgrade_stat["level"] += 1
-	upgrade_stat["amount"] += upgrade_stat["increase per level"]
-	
-	if upgrade_stat["name"].to_lower() == "vm windows":
-		MAX_VMS += upgrade_stat["increase per level"]
-	if upgrade_stat["name"].to_lower() == "vm duration":
-		VM_UPTIME += upgrade_stat["increase per level"]
+#var process_upgrades = {
+	#"max lines": { "id": 1, "name": "Max lines", "level": 0, "amount": 0, "increase per level": 1 },
+	#"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
+	#"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
+	#"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
+	#"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
+#}
+#
+#func get_upgrade_cost(upgrade_stat: String) -> int:
+	#return process_upgrades[upgrade_stat]["level"] * 800 + 100
+#
+#func upgraded(upgrade_stat: Dictionary):
+	#upgrade_stat["level"] += 1
+	#upgrade_stat["amount"] += upgrade_stat["increase per level"]
+	#
+	#if upgrade_stat["name"].to_lower() == "vm windows":
+		#MAX_VMS += upgrade_stat["increase per level"]
+	#if upgrade_stat["name"].to_lower() == "vm duration":
+		#VM_UPTIME += upgrade_stat["increase per level"]
 
 func has_requirements(_minor_process) -> bool:
 	return true
@@ -162,3 +161,20 @@ func create_vm_window(minor_process, repeat) -> Window:
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1
 	return new_window
+
+
+func save_data() -> Dictionary:
+	return {
+		"bonus_expires_at": bonus_expires_at,
+		"skill_level": SKILL["level"],
+		"skill_experience": SKILL["experience"],
+		"spear_level": SPEAR["level"],
+		"spear_experience": SPEAR["experience"]
+	}
+
+func load_data(data: Dictionary) -> void:
+	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
+	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
+	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
+	SPEAR["level"] = int(data.get("spear_level", SPEAR["level"]))
+	SPEAR["experience"] = int(data.get("spear_experience", SPEAR["experience"]))

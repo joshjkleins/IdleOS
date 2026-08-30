@@ -120,14 +120,13 @@ custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 anchors_preset = 0
 offset_left = 1057.0
-offset_top = 92.0
+offset_top = 91.0
 offset_right = 1257.0
-offset_bottom = 171.0
+offset_bottom = 170.0
 
 [node name="HUDMonitor" parent="Panel/TrackingContainer" instance=ExtResource("4_7qmxk")]
 layout_mode = 2
 offset_right = 200.0
-offset_bottom = 12.0
 
 [node name="Timers" type="Node2D" parent="."]
 position = Vector2(8, 8)

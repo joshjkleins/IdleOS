@@ -60,9 +60,8 @@ func cast_all_lines(type: Dictionary, window: bool = false):
 	update_eff_label(type)
 
 func update_eff_label(type):
-	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
-	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
-	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
+	var base_eff = _get_total_eff(type)
+	var eff_text = str(base_eff * 100.0).pad_decimals(1)
 	var max_lines = _get_max_lines_count()
 	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use\n"
 	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite.[/font_size][/color]"
@@ -117,3 +116,9 @@ func _get_max_lines_count() -> int:
 	var base = Phishing.max_lines
 	var upgrades = Upgrades.get_package_info("phishing.lines")
 	return base + upgrades.current
+
+func _get_total_eff(type) -> float:
+	###NOTE : NO PHISHING EFFICIENCY UPGRADE YET. if efficiency upgrade is added to APT then need to add here too
+	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var base_eff = type["efficiency"]
+	return base_eff * defrag_bonus

@@ -8,10 +8,9 @@ signal mining_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_MINING_TOKEN
-@onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
-@onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
+@onready var MAX_VMS = 1
+@onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
-var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/data_mining_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -52,59 +51,13 @@ var LOGS = {
 	"signal": log_cycle_completed
 }
 
-var QUALITY = {
-	"name": "Quality",
-	"tier name": "TIER II | QUALITY LOGS",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 725,
-	"command": "mine -quality",
-	"efficiency": 0.0,
-	"efficiency rate": 0.02,
-	"unlocked": false,
-	"unlock level": 15,
-	"base speed": 0.9,
-	"overclock speed": 0.4,
-	"overheat speed": 2.9,
-	"heat": 5,
-	"overclock heat": 11,
-	"overheat heat": 1,
-	"requirements": [],
-	"resource gained": Items.QUALITY_LOGS,
-	"resource amount gained": 1,
-	"description": "Finds logs that can be parsed for a random assortment of items.",
-	"efficiency description": "Chance to receive multiple logs.",
-	"signal": quality_log_cycle_completed
-}
-
 var minor_processes = [
-	LOGS,
-	QUALITY
+	LOGS
 ]
 
 func signal_exp(_amount: int):
 	xp_gained.emit()
-
-var process_upgrades = {
-	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
-	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
-	"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
-	"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
-}
-
-func get_upgrade_cost(upgrade_stat: String) -> int:
-	return process_upgrades[upgrade_stat]["level"] * 800 + 100
-
-func upgraded(upgrade_stat: Dictionary):
-	upgrade_stat["level"] += 1
-	upgrade_stat["amount"] += upgrade_stat["increase per level"]
-	
-	if upgrade_stat["name"].to_lower() == "vm windows":
-		MAX_VMS += upgrade_stat["increase per level"]
-	if upgrade_stat["name"].to_lower() == "vm duration":
-		VM_UPTIME += upgrade_stat["increase per level"]
+	SaveManager.mark_dirty()
 
 func has_requirements(_minor_process) -> bool:
 	return true
@@ -143,3 +96,20 @@ func create_vm_window(minor_process, repeat) -> Window:
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1
 	return new_window
+
+
+func save_data() -> Dictionary:
+	return {
+		"bonus_expires_at": bonus_expires_at,
+		"skill_level": SKILL["level"],
+		"skill_experience": SKILL["experience"],
+		"logs_level": LOGS["level"],
+		"logs_experience": LOGS["experience"]
+	}
+
+func load_data(data: Dictionary) -> void:
+	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
+	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
+	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
+	LOGS["level"] = int(data.get("logs_level", LOGS["level"]))
+	LOGS["experience"] = int(data.get("logs_experience", LOGS["experience"]))

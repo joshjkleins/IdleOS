@@ -131,7 +131,7 @@ func stop_safely():
 func _finished_log(heat_used: float):
 	type.signal.emit(1)
 	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_20_LOGS, 1)
-	Exp.add_xp(Parsing, type, type["experience per level"] * Parsing.process_upgrades["experience"]["amount"])
+	Exp.add_xp(Parsing, type, type["experience per level"])
 	Signals.update_hud(Parsing)
 
 	var eff = _get_total_effeciency()

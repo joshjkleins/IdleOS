@@ -64,9 +64,8 @@ func start():
 	var overheat_speed = type["overheat speed"]
 	var overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
 	
-	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-	var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
-	efficiency.text = str(base_eff * frag_bonus * 100.0) + "%"
+	var base_eff = _get_total_efficiency()
+	efficiency.text = str(base_eff * 100.0) + "%"
 	
 	while Inventory.get_amount(type["requirements"]) > 0 and process_running:
 		_clean_queue()
@@ -224,7 +223,7 @@ func _successful_crack(heat: float):
 	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
-	Exp.add_xp(Cracking, type, type["experience per level"] / Cracking.process_upgrades["experience"]["amount"])
+	Exp.add_xp(Cracking, type, type["experience per level"])
 	
 	#var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
 	#var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]

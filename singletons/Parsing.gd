@@ -9,10 +9,9 @@ signal parsing_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
-@onready var MAX_VMS = process_upgrades["vm windows"]["amount"]
-@onready var VM_UPTIME = process_upgrades["vm duration"]["amount"]
+@onready var MAX_VMS = 1
+@onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
-var VM_COOLING_REDUCTION = 0.2
 
 var terminal_scene = preload("res://scenes/log_parsing_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
@@ -56,97 +55,38 @@ var FOOTPRINT = {
 	"signal": basic_cycle_completed
 }
 
-var QUALITY_LOGS = {
-	"name": "Quality",
-	"tier name": "TIER I | LOGS",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 200,
-	"command": "parse -quality",
-	"efficiency": 0.05,
-	"efficiency rate": 0.0012,
-	"unlocked": false,
-	"unlock level": 15,
-	"base speed": 0.8,
-	"overclock speed": 0.25,
-	"overheat speed": 3.0,
-	"heat": 4,
-	"overclock heat": 5,
-	"overheat heat": 1,
-	"requirements": Items.QUALITY_LOGS,
-	"resource gained": [
-		{ "item": Items.DATA, "min": 40, "max": 60, "weight": 15 },
-		{ "item": Items.ENCRYPTED_PINS, "min": 1, "max": 1, "weight": 35  },
-		{ "item": Items.ACCOUNT_NUMBERS, "min": 1, "max": 1, "weight": 35  },
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 15  },
-	],
-	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-	"efficiency description": "Increases chance of finding a resource per row.",
-	"signal": quality_cycle_completed
-}
-
-var CRED_LOGS = {
-	"name": "Credential",
-	"tier name": "TIER I | LOGS",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 200,
-	"command": "parse -cred",
-	"efficiency": 0.05,
-	"efficiency rate": 0.01,
-	"unlocked": false,
-	"unlock level": 30,
-	"base speed": 0.8,
-	"overclock speed": 0.2,
-	"overheat speed": 5.0,
-	"heat": 3,
-	"overclock heat": 4,
-	"overheat heat": 1,
-	"requirements": Items.LOGS,
-	"resource gained": [
-		{ "item": Items.CREDENTIALS, "min": 40, "max": 130, "weight": 30 },
-		{ "item": Items.ACCOUNT_ACCESS_TOKENS, "min": 1, "max": 1, "weight": 30  },
-		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 30  },
-		{ "item": Items.DDOS, "min": 1, "max": 1, "weight": 10  },
-	],
-	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
-	"efficiency description": "Increases chance of finding a resource per row.",
-	"signal": cred_cycle_complete
-}
-
 var minor_processes = [
-	FOOTPRINT,
-	QUALITY_LOGS,
-	CRED_LOGS
+	FOOTPRINT
 ]
 
 func signal_exp(_amount: int):
 	xp_gained.emit()
+	SaveManager.mark_dirty()
 
 func add_xp(amount: int, type: Dictionary):
 	SKILL["experience"] += amount
 	type["experience"] += amount
 
-var process_upgrades = {
-	"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
-	"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
-	"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
-	"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
-	"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
-}
-
-func get_upgrade_cost(upgrade_stat: String) -> int:
-	return process_upgrades[upgrade_stat]["level"] * 800 + 100
-
-func upgraded(upgrade_stat: Dictionary):
-	upgrade_stat["level"] += 1
-	upgrade_stat["amount"] += upgrade_stat["increase per level"]
-	
-	if upgrade_stat["name"].to_lower() == "vm windows":
-		MAX_VMS += upgrade_stat["increase per level"]
-	if upgrade_stat["name"].to_lower() == "vm duration":
-		VM_UPTIME += upgrade_stat["increase per level"]
+#var process_upgrades = {
+	#"speed": { "id": 1, "name": "Speed", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"efficiency": { "id": 2, "name": "Efficiency", "level": 0, "amount": 0.0, "increase per level": 0.15 },
+	#"experience": { "id": 3, "name": "Experience", "level": 0, "amount": 1.0, "increase per level": 0.05 },
+	#"offline": { "id": 4, "name": "Offline progression", "level": 0, "amount": 0, "increase per level": 60 },
+	#"vm windows": { "id": 5, "name": "VM Windows", "level": 0, "amount": 1, "increase per level": 1 },
+	#"vm duration": { "id": 6, "name": "VM Duration", "level": 0, "amount": 30.0, "increase per level": 30.0 },
+#}
+#
+#func get_upgrade_cost(upgrade_stat: String) -> int:
+	#return process_upgrades[upgrade_stat]["level"] * 800 + 100
+#
+#func upgraded(upgrade_stat: Dictionary):
+	#upgrade_stat["level"] += 1
+	#upgrade_stat["amount"] += upgrade_stat["increase per level"]
+	#
+	#if upgrade_stat["name"].to_lower() == "vm windows":
+		#MAX_VMS += upgrade_stat["increase per level"]
+	#if upgrade_stat["name"].to_lower() == "vm duration":
+		#VM_UPTIME += upgrade_stat["increase per level"]
 
 func has_requirements(minor_process) -> bool:
 	if Inventory.get_amount(minor_process["requirements"]) > 0:
@@ -200,6 +140,22 @@ func create_vm_window(minor_process, repeat) -> Window:
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1
 	return new_window
+
+func save_data() -> Dictionary:
+	return {
+		"bonus_expires_at": bonus_expires_at,
+		"skill_level": SKILL["level"],
+		"skill_experience": SKILL["experience"],
+		"footprint_level": FOOTPRINT["level"],
+		"footprint_experience": FOOTPRINT["experience"]
+	}
+
+func load_data(data: Dictionary) -> void:
+	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
+	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
+	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
+	FOOTPRINT["level"] = int(data.get("footprint_level", FOOTPRINT["level"]))
+	FOOTPRINT["experience"] = int(data.get("footprint_experience", FOOTPRINT["experience"]))
 
 
 var LOG_LINES = [

@@ -486,6 +486,7 @@ func _ready():
 	MAX_ALL_VMS =  Upgrades.get_package_info("system.vm_windows").current
 	HEAT_REDUCTION =  Upgrades.get_package_info("system.heat_reduction").current
 	OVERHEAT_FAN =  Upgrades.get_package_info("system.overheat_fan").current
+	print(system_tempature)
 	set_max_anon()
 
 ##############################
@@ -647,3 +648,13 @@ func remove_vm_count(amount: int = 1):
 	CURRENT_ALL_VMS -= amount
 	if CURRENT_ALL_VMS < 0:
 		CURRENT_ALL_VMS = 0
+
+func save_data() -> Dictionary:
+	return {
+		"system_tempature": system_tempature
+	}
+
+func load_data(data: Dictionary) -> void:
+	system_tempature = float(data.get("system_tempature", system_tempature))
+	Signals.system_temp_updated(system_tempature)
+	print(system_tempature)

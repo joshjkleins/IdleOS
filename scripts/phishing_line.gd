@@ -13,9 +13,8 @@ var did_overclock: bool = false
 func setup():
 	active = true
 	
-	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
-	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
-	var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1)
+	var base_eff = _get_total_eff()
+	var eff_text = str(base_eff * 100.0).pad_decimals(1)
 	
 	$Method.text = type.name #+ " [color=#888888][font_size=12](eff: " + eff_text + "%)[/font_size][/color]"
 	$Status.text = "sending phishing attempt"
@@ -40,14 +39,13 @@ func begin(p_type):
 	
 	add_heat()
 	
-	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
-	var base_eff = type["efficiency"] + Phishing.process_upgrades["efficiency"]["amount"]
+	var base_eff = _get_total_eff()
 	#var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1) 
 	$Status.text = "waiting for response   "
 	await get_tree().create_timer(randf_range(type["wait time min"], type["wait time max"])).timeout
 	if !active:
 		return
-	var eff = base_eff * defrag_bonus
+	var eff = base_eff
 	if randf() <= eff: #success
 		$ProgressBar/TimeRemaining.visible = true
 		$Status.text = "attempt successful, downloading information"
@@ -117,7 +115,7 @@ func finished(caught: bool):
 			if reward.item == Items.PACKET_SPOOF:
 				Tutorial.track_event(Tutorial.TutorialEvent.PHISH_1_PACKET_SPOOFS, 1)
 		type.signal.emit(1)
-		Exp.add_xp(Phishing, type, type["experience per level"]  * Phishing.process_upgrades["experience"]["amount"])
+		Exp.add_xp(Phishing, type, type["experience per level"])
 		Signals.update_hud(Phishing)
 		caught_something.emit(type)
 		
@@ -166,3 +164,9 @@ func process_done():
 
 func _on_progress_bar_value_changed(value):
 	$ProgressBar/TimeRemaining.text = str(value).pad_decimals(2)
+
+func _get_total_eff() -> float:
+	###NOTE : NO PHISHING EFFICIENCY UPGRADE YET. if efficiency upgrade is added to APT then need to add here too
+	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var base_eff = type["efficiency"]
+	return base_eff * defrag_bonus

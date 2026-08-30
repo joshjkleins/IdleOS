@@ -13,7 +13,7 @@ var MINING = {
 				{
 					"level": 1,
 					"id": "mining.speed", 
-					"requirements": [{"item": Items.LOGS, "amount": 10 }, {"item": Items.IP_ADDRESS, "amount": 5 }],
+					"requirements": [{"item": Items.LOGS, "amount": 1 }],
 					"amount": 0.25,
 					"unlocked": false
 				},
@@ -743,7 +743,7 @@ var SYSTEM = {
 				{
 					"level": 1,
 					"id": "system.cooling_amount", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 10 }],
+					"requirements": [{"item": Items.LOGS, "amount": 1 }],
 					"amount": -0.1,
 					"unlocked": false
 				},
@@ -842,6 +842,36 @@ var SYSTEM = {
 }
 
 var all_upgrades = [ SYSTEM, MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING, COMPILING ]
+
+
+func save_data() -> Dictionary:
+	var data := {}
+	for skill_data in all_upgrades:
+		for upgrade in skill_data["upgrades"]:
+			var unlocked_levels := []
+			for level in upgrade["levels"]:
+				if level["unlocked"]:
+					unlocked_levels.append(level["level"])
+
+			data[upgrade["id"]] = {
+				"current": upgrade["current"],
+				"unlocked_levels": unlocked_levels
+			}
+	return data
+
+func load_data(data: Dictionary) -> void:
+	for skill_data in all_upgrades:
+		for upgrade in skill_data["upgrades"]:
+			if not data.has(upgrade["id"]):
+				continue
+			var saved: Dictionary = data[upgrade["id"]]
+			upgrade["current"] = saved.get("current", upgrade["current"])
+			var unlocked_levels: Array = []
+			for v in saved.get("unlocked_levels", []):
+				unlocked_levels.append(int(v))
+			for level in upgrade["levels"]:
+				level["unlocked"] = level["level"] in unlocked_levels
+			_apply_stat_effects(upgrade)
 
 func get_package_info(package_id):
 	for up in all_upgrades:
@@ -995,6 +1025,20 @@ func unlock_next_level(package):
 						Stats.OVERHEAT_FAN = package.current
 				return
 			print("nothing returned: Upgrades.unlock_next_level()")
+
+func _apply_stat_effects(package) -> void:
+	match package.id:
+		"system.cooling_amount":
+			Stats.cooling_amount = package.current
+			Stats.cooling_updated()
+		"system.vm_windows":
+			Stats.MAX_ALL_VMS = package.current
+		"system.heat_reduction":
+			Stats.HEAT_REDUCTION = package.current
+		"hacking.max_anonymity":
+			Stats.set_max_anon()
+		"system.overheat_fan":
+			Stats.OVERHEAT_FAN = package.current
 
 func package_aquired(package):
 	increase_version_from_package(package)
