@@ -26,6 +26,7 @@ enum ItemColor {
 
 @export var color_type: ItemColor
 @export var obtained_from: Array[ItemColor] = []
+@export var obtained_from_additional_hint: String = ""
 
 func get_obtained_from_skills() -> Array:
 	var result = []

@@ -26,6 +26,9 @@ signal item_added_signal
 signal item_removed_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
 signal tutorial_event_completed_signal
+signal system_overheated_signal
+signal system_cooled_below_overheat_signal
+signal hacking_can_accept_player_commands_signal
 
 signal cooling_updated_signal
 func cooling_updated():
@@ -106,3 +109,12 @@ func defrag_finished():
 
 func vm_window_focused():
 	vm_window_focused_signal.emit()
+
+func system_overheated():
+	system_overheated_signal.emit()
+
+func system_cooled_below_overheat():
+	system_cooled_below_overheat_signal.emit()
+
+func hacking_can_accept_player_commands(accept: bool):
+	hacking_can_accept_player_commands_signal.emit(accept)

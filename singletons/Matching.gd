@@ -8,7 +8,7 @@ signal matching_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_MATCHING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -23,7 +23,8 @@ var SKILL = {
 	"color": Color("#EAB308"),
 	"level up signal": matching_level_up_signal,
 	"efficiency description": "Chance to make multiple resources.",
-	"command": "cd matching"
+	"command": "cd matching",
+	"sfx": "matching_item_received"
 }
 
 var CREDENTIAL = {
@@ -160,7 +161,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"credential_level": CREDENTIAL["level"],
-		"credential_experience": CREDENTIAL["experience"]
+		"credential_experience": CREDENTIAL["experience"],
+		"credential_efficiency": CREDENTIAL["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -169,6 +171,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	CREDENTIAL["level"] = int(data.get("credential_level", CREDENTIAL["level"]))
 	CREDENTIAL["experience"] = int(data.get("credential_experience", CREDENTIAL["experience"]))
+	CREDENTIAL["efficiency"] = float(data.get("credential_efficiency", CREDENTIAL["efficiency"]))
 
 const RANDOM_USERNAMES := [
 	"byteRunner77",

@@ -18,7 +18,6 @@ func _process(delta: float) -> void:
 		_timer = 0.0
 
 func mark_dirty() -> void:
-	print("Marked dirty, will save.")
 	dirty = true
 
 func save_game() -> void:

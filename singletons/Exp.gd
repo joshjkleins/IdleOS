@@ -65,6 +65,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 	while major.SKILL["level"] < major_new_level:
 		major.SKILL["level"] += 1
 		major.SKILL["level up signal"].emit()
+		Audiomanager.play_sfx("level_up")
 		if major.SKILL.has("efficiency"):
 			major.SKILL["efficiency"] += major.SKILL["efficiency rate"]
 

@@ -8,7 +8,7 @@ signal phishing_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_PHISHING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -26,7 +26,8 @@ var SKILL = {
 	"color": Color("#3B82F6"),
 	"level up signal": phishing_level_up_signal,
 	"efficiency description": "Chance for successful bite",
-	"command": "cd phishing"
+	"command": "cd phishing",
+	"sfx": "phishing_item_received"
 }
 
 var SPEAR = {
@@ -169,7 +170,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"spear_level": SPEAR["level"],
-		"spear_experience": SPEAR["experience"]
+		"spear_experience": SPEAR["experience"],
+		"spear_efficiency": SPEAR["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -178,3 +180,4 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	SPEAR["level"] = int(data.get("spear_level", SPEAR["level"]))
 	SPEAR["experience"] = int(data.get("spear_experience", SPEAR["experience"]))
+	SPEAR["efficiency"] = float(data.get("spear_efficiency", SPEAR["efficiency"]))

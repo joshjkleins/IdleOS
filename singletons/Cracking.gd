@@ -8,7 +8,7 @@ signal cracking_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_CRACKING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -23,7 +23,8 @@ var SKILL = {
 	"color": Color("#F2600C"),
 	"level up signal": cracking_level_up_signal,
 	"efficiency description": "Chance to instantly crack encryption",
-	"command": "cd cracking"
+	"command": "cd cracking",
+	"sfx": "cracking_item_received"
 }
 
 var PASSWORD = {
@@ -33,7 +34,7 @@ var PASSWORD = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "crack -password",
-	"efficiency": 0.0,
+	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": true,
 	"unlock level": 1,
@@ -125,7 +126,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"password_level": PASSWORD["level"],
-		"password_experience": PASSWORD["experience"]
+		"password_experience": PASSWORD["experience"],
+		"password_efficiency": PASSWORD["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -134,6 +136,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	PASSWORD["level"] = int(data.get("password_level", PASSWORD["level"]))
 	PASSWORD["experience"] = int(data.get("password_experience", PASSWORD["experience"]))
+	PASSWORD["efficiency"] = float(data.get("password_efficiency", PASSWORD["efficiency"]))
 
 
 var random_four_digit_words: Array = [

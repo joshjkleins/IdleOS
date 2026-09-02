@@ -438,10 +438,14 @@ func get_help() -> String:
 |   process -h                   List process commands               |
 |   ssh -h                       List ssh commands                   |
 |                                                                    |
+| SETTINGS                                                           |
+|   settings                     Player settings menu                |
+|                                                                    |
 | SYSTEM                                                             |
 |   date                         Show date and time                  |
 |   clear                        Clear terminal                      |
 |   system                       Show system information             |
+|   quit -s                      Save and quit                       |
 |____________________________________________________________________|
 """
 	return text
@@ -577,8 +581,9 @@ func get_root_upgrades_text() -> String:
 		return_text += "\n"
 	
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt info <package>' for package information.\n"
+	return_text += "Use 'apt <package>' for package information.\n"
 	return_text += "Use 'apt install <package>' to install.\n"
+	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.\n"
 	
 	return return_text
 

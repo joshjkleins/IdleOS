@@ -75,6 +75,10 @@ var stop_hacking: bool = false
 
 var caches_gained: int = 0
 
+# If true (set via "-r" flag passed into setup()), a successful hack loops
+# back into another attempt against the same target instead of ending.
+var recursive_hack: bool = false
+
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
 	Signals.end_hacking_signal.connect(kill_hack)
@@ -97,28 +101,25 @@ func _process(delta):
 			defense_bar.value += DEFEND_SPEED * OVERCLOCK_VALUE * delta
 		if Stats.current_anon > 0:
 			counter_bar.value += COUNTER_SPEED * OVERHEAT_VALUE * delta
-		
+
 		if attack_bar.value >= attack_bar.max_value and attacking:
 			if has_bandwidth(ATTACK_BW_COST):
 				attack()
 			else:
 				queue_attack(offensive_item)
-		
+
 		if defense_bar.value >= defense_bar.max_value and defending:
 			if has_bandwidth(DEFEND_BW_COST):
 				defense()
 			else:
 				queue_defense(defensive_item)
-			
+
 		if counter_bar.value >= counter_bar.max_value:
 			counter()
 			counter_bar.value = 0.0
 
-func has_bandwidth(cost: int):
-	if Hacking.current_bandwidth >= cost:
-		return true
-	else:
-		return false
+func has_bandwidth(cost: int) -> bool:
+	return Hacking.current_bandwidth >= cost
 
 func queue_attack(item):
 	attacking = false
@@ -128,9 +129,12 @@ func queue_defense(item):
 	defending = false
 	COMBAT_QUEUE.append(item)
 
-func setup(target: Dictionary, loadout: Dictionary = {}):
+# recursive: if true, a successful hack auto-restarts against the same
+# target instead of ending after a win (set via the "-r" command flag).
+func setup(target: Dictionary, loadout: Dictionary = {}, recursive: bool = false):
 	caches_gained = 0
 	stop_hacking = false
+	recursive_hack = recursive
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
 	var dmg_upgrade = Upgrades.get_package_info("hacking.damage")
@@ -139,13 +143,13 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	FIREWALL_DAMAGE = offensive_item.firewall_damage + firewall_upgrade.current
 	ATTACK_SPEED = offensive_item.speed
 	ATTACK_BW_COST = offensive_item.bandwidth_cost
-	
+
 	var bandwidth_upgrade = Upgrades.get_package_info("hacking.bandwidth_recovery")
 	BANDWIDTH_RECOVERY_RATE = Hacking.bandwidth_recovery_rate + bandwidth_upgrade.current
-	
+
 	var max_b_upgrade = Upgrades.get_package_info("hacking.max_bandwidth")
 	MAX_BANDWIDTH = Hacking.max_bandwidth + max_b_upgrade.current
-	
+
 	COUNTER_SPEED = target["counter speed"]
 	COMBAT_QUEUE.clear()
 	var healing_upgrade = Upgrades.get_package_info("hacking.healing")
@@ -153,8 +157,9 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	DEFEND_SPEED = defensive_item.speed
 	DEFEND_BW_COST = defensive_item.bandwidth_cost
 	#anonymity
+	Stats.current_anon = Stats.max_anon
 	anon_bar.max_value = Stats.max_anon
-	anon_bar.value = Stats.max_anon
+	anon_bar.value = Stats.current_anon
 	#integrity
 	integ_bar.max_value = target.integrity
 	integ_bar.value = 0
@@ -172,25 +177,24 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 	integ_label.text = "--/--"
 	#requirements
 	requirements = target.requirements
-	
-	#status_label.text = "finding target"
+
 	update_status_label_badge("finding target", c_yellow)
 	#update # of sql injectors (attacks) and packet spoofer (heal)
 	offensive_item_label.text = offensive_item.name
 	defensive_item_label.text = defensive_item.name
 	attack_amount_label.text = "x" + str(Inventory.get_amount(offensive_item))
 	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
-	
+
 	attack_bar.value = 0
 	defense_bar.value = 0
 	counter_bar.value = 0
-	
+
 	update_bottom_row()
 	#clear combat terminal
 	if labels_container.get_children().size() > 0:
 		for n in labels_container.get_children():
 			n.queue_free()
-	
+
 	COUNTER_AMOUNT = target["counter"]
 	COUNTER_HEAT = target["heat"]
 	EXP_AMOUNT = target["exp"]
@@ -204,38 +208,35 @@ func setup(target: Dictionary, loadout: Dictionary = {}):
 		attacking = true
 
 func attack():
-	#var FIREWALL_DMG = 1
 	var crit = 1
 	if randf() <= Hacking.SKILL["efficiency"]:
 		crit = 2
-	var actual_dmg = max(ATTACK_AMOUNT * crit - firewall_bar.value, 0)
-	
-	var blocked = firewall_bar.value
-	
+	var raw_dmg = ATTACK_AMOUNT * crit
+	var actual_dmg = max(raw_dmg - firewall_bar.value, 0)
+	# only the portion of firewall that actually absorbed damage counts as "blocked"
+	var blocked = min(firewall_bar.value, raw_dmg)
+
 	firewall_bar.value -= FIREWALL_DAMAGE
-	
+
 	Hacking.current_bandwidth -= ATTACK_BW_COST
 	if Hacking.current_bandwidth <= 0:
 		Hacking.current_bandwidth = 0
-	
+
 	band_bar.value = Hacking.current_bandwidth
 	_update_info_panel("-" + str(ATTACK_BW_COST) + " bandwidth", c_blue)
-	
+
 	integ_bar.value -= actual_dmg
 	add_heat(ATTACK_HEAT)
 	Inventory.remove_resource(offensive_item, 1)
 	Signals.update_hacking_header()
 	attack_amount_label.text = "x" + str(Inventory.get_amount(offensive_item))
-	if crit > 1: 
+	if crit > 1:
 		_update_info_panel("efficiency caused hack to be extra effective", c_green)
-	var i_text = "sql_injector fires: integrity -" + str(int(actual_dmg)) + "  (" + "firewall blocked " + str(int(blocked)) + ")"
+	var i_text = "sql_injector fires: integrity -" + str(int(actual_dmg)) + " (firewall blocked " + str(int(blocked)) + ")"
 	_update_info_panel(i_text, c_green)
 	_update_info_panel("firewall damaged: -" + str(FIREWALL_DAMAGE), c_yellow)
-	if Inventory.get_amount(offensive_item) <= 0:
-		attacking = false
-	else:
-		attacking = true
-	
+	attacking = Inventory.get_amount(offensive_item) > 0
+
 	attack_bar.value = 0.0
 	if integ_bar.value <= 0.0:
 		win()
@@ -245,11 +246,11 @@ func defense():
 	if Stats.current_anon > Stats.max_anon:
 		Stats.current_anon = Stats.max_anon
 	add_heat(DEFEND_HEAT)
-	
+
 	Hacking.current_bandwidth -= DEFEND_BW_COST
 	if Hacking.current_bandwidth <= 0:
 		Hacking.current_bandwidth = 0
-	
+
 	band_bar.value = Hacking.current_bandwidth
 	anon_bar.value = Stats.current_anon
 	Inventory.remove_resource(defensive_item, 1)
@@ -257,11 +258,8 @@ func defense():
 	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
 	var info_text = "packet_spoof increased anonymity - anonymity +" + str(DEFEND_AMOUNT)
 	_update_info_panel(info_text, c_blue)
-	if Inventory.get_amount(defensive_item) <= 0:
-		defending = false
-	else:
-		defending = true
-	
+	defending = Inventory.get_amount(defensive_item) > 0
+
 	defense_bar.value = 0.0
 
 func counter():
@@ -282,11 +280,11 @@ func add_heat(amount: float):
 	if NEXT_HEAT_APPLICATION > 0:
 		amount += NEXT_HEAT_APPLICATION
 		NEXT_HEAT_APPLICATION = 0
-	
+
 	Stats.update_tempature(amount)
 	if Stats.overheated:
-		var messages = "[color=#e24b4a]SYSTEM OVERHEATED - ATTACKING SLOWED[/color]\n" 
-		messages += "[color=#e24b4a]ENEMY COUNTERMEASURES INCREASED SIGNIFICANTLY[/color]\n" 
+		var messages = "[color=#e24b4a]SYSTEM OVERHEATED - ATTACKING SLOWED[/color]\n"
+		messages += "[color=#e24b4a]ENEMY COUNTERMEASURES INCREASED SIGNIFICANTLY[/color]\n"
 		Signals.update_hack_console(messages)
 
 func lose():
@@ -295,10 +293,10 @@ func lose():
 	attacking = false
 	defending = false
 	var messages = ""
-	messages += "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n" 
+	messages += "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]Items lost[/color]\n"
-		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]" 
+		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
 	Signals.hacking_ended()
@@ -316,8 +314,29 @@ func win():
 	_update_info_panel("-----------------------------------------------", c_white)
 	Exp.add_xp(Hacking, null, EXP_AMOUNT)
 	Signals.update_hacking_header()
-	#Signals.update_hud(Hacking)
-	reset()
+
+	if recursive_hack:
+		reset()
+	else:
+		_finish_hack()
+
+# Ends the session after a win when not running recursively: bank the
+# rewards accumulated so far and signal that hacking has ended.
+func _finish_hack():
+	bandwidth_timer.stop()
+	is_hacking = false
+	attacking = false
+	defending = false
+	stop_hacking = true
+	_grant_rewards()
+	_update_info_panel("hack complete, disconnecting", c_blue)
+	await get_tree().create_timer(1.0).timeout
+	Signals.hacking_ended()
+
+func _grant_rewards():
+	if caches_gained > 0:
+		Inventory.add_resource(target_reward, caches_gained)
+		caches_gained = 0
 
 func reset():
 	attack_bar.value = 0
@@ -325,7 +344,7 @@ func reset():
 	counter_bar.value = 0
 	COMBAT_QUEUE.clear()
 	integ_bar.max_value = INTEGRITY_AMOUNT
-	
+
 	integ_label.text = "--/--"
 	firewall_label.text = "--/--"
 	await prepare()
@@ -342,29 +361,28 @@ func start_hack():
 
 func _update_info_panel(message: String, color: Color):
 	var label = Label.new()
-	
+
 	label.text = message
-	
+
 	label.add_theme_font_size_override("font_size", 10)
 	label.add_theme_color_override("font_color", color)
-	
+
 	labels_container.add_child(label)
-	
+
 	if labels_container.get_children().size() > 50:
 		labels_container.get_children()[0].queue_free()
-		
+
 	await get_tree().process_frame
 	scroll_container.scroll_vertical = scroll_container.get_v_scroll_bar().max_value
 
 func kill_hack():
 	end()
-	if caches_gained > 0:
-		Inventory.add_resource(target_reward, caches_gained)
+	_grant_rewards()
 	Signals.hacking_ended()
 
 func kill_hack_safely():
 	safe_exit_timer.start()
-	_update_info_panel("Attempting to exit safely in approx. 6 second", c_yellow)
+	_update_info_panel("Attempting to exit safely in approx. 6 seconds", c_yellow)
 
 func end():
 	bandwidth_timer.stop()
@@ -379,10 +397,8 @@ func _remove_required_resources():
 	var remove_text = "removing " + requirements.item.name + " x" + str(requirements.amount)
 	_update_info_panel(remove_text, c_blue)
 
-func _has_requirements():
-	if Inventory.get_amount(requirements.item) < requirements.amount:
-		return false
-	return true
+func _has_requirements() -> bool:
+	return Inventory.get_amount(requirements.item) >= requirements.amount
 
 func prepare():
 	if !_has_requirements():
@@ -424,7 +440,7 @@ func prepare():
 	await get_tree().create_timer(0.2).timeout
 	_update_info_panel("starting hack", c_white)
 	update_status_label_badge("hacking", c_green)
-	
+
 	integ_bar.max_value = INTEGRITY_AMOUNT
 	integ_bar.value = INTEGRITY_AMOUNT
 	firewall_bar.max_value = FIREWALL_AMOUNT
@@ -453,6 +469,7 @@ func update_bottom_row():
 
 func _on_safe_exit_timer_timeout():
 	end()
+	_grant_rewards()
 	Signals.hacking_ended()
 
 func update_status_label_badge(text: String, color: Color):
@@ -462,39 +479,23 @@ func update_status_label_badge(text: String, color: Color):
 	status_label_box.add_theme_stylebox_override("panel", b)
 
 func _on_bandwidth_timer_timeout():
-	if is_hacking:
-		Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE
-		
-		if Hacking.current_bandwidth > MAX_BANDWIDTH:
-			Hacking.current_bandwidth = MAX_BANDWIDTH
-			
-		band_bar.value = Hacking.current_bandwidth
-		
-		#slop
-		while COMBAT_QUEUE.size() > 0:
-			var queued_action = COMBAT_QUEUE.pop_front()
+	if not is_hacking:
+		return
 
-			if queued_action.bandwidth_cost > Hacking.current_bandwidth:
-				COMBAT_QUEUE.push_front(queued_action)
-				break
+	Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE
+	if Hacking.current_bandwidth > MAX_BANDWIDTH:
+		Hacking.current_bandwidth = MAX_BANDWIDTH
+	band_bar.value = Hacking.current_bandwidth
 
-			if queued_action.type == "Attack":
-				attack()
-			elif queued_action.type == "Heal":
-				defense()
-		## Process queue in order
-		#while COMBAT_QUEUE.size() > 0:
-			#var queued_action = COMBAT_QUEUE[0]
-			#
-			## Stop if not enough bandwidth yet
-			#if queued_action.bandwidth_cost > Hacking.current_bandwidth:
-				#break
-			#
-			## Execute
-			#if queued_action.type == "Attack":
-				#attack()
-			#elif queued_action.type == "Heal":
-				#defense()
-			#
-			## Remove processed action
-			#COMBAT_QUEUE.remove_at(0)
+	# process any queued attack/heal actions that were waiting on bandwidth
+	while COMBAT_QUEUE.size() > 0:
+		var queued_action = COMBAT_QUEUE.pop_front()
+
+		if queued_action.bandwidth_cost > Hacking.current_bandwidth:
+			COMBAT_QUEUE.push_front(queued_action)
+			break
+
+		if queued_action.type == "Attack":
+			attack()
+		elif queued_action.type == "Heal":
+			defense()

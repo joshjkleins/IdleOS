@@ -65,7 +65,7 @@ var tutorial_tasks := {
 	TutorialEvent.INFO_MINING_COMMAND: "Use 'info mining' to view specific Mining info.",
 	TutorialEvent.USE_FOCUS: "Use 'focus' to bring the active process to the bottom.",
 	TutorialEvent.USE_STICKY: "Use 'sticky' to pin the mining process.",
-	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list your items.",
+	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list of your items.",
 	TutorialEvent.LIST_LOG_DETAILS: "Use 'ls logs' to view information about your logs. Additional details for any item can be seen with 'ls <item name>'.",
 	
 	TutorialEvent.MINE_20_LOGS: "Mine 20 logs.",
@@ -73,7 +73,7 @@ var tutorial_tasks := {
 	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'.",
 
 	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First return to the root directory with 'cd ..' then to the Parsing skill with 'cd parsing'",
-	TutorialEvent.PARSE_20_LOGS: "Parse through 20 logs with the -footprint process.",
+	TutorialEvent.PARSE_20_LOGS: "Parse through 20 logs with the Footprint process.",
 	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Obtain 3 encrypted passwords from parsing logs.",
 	TutorialEvent.OBTAIN_3_USERNAMES: "Obtain 3 usernames from Parsing logs.",
 	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Obtain 3 IP Addresses from Parsing logs.",
@@ -84,8 +84,8 @@ var tutorial_tasks := {
 
 	TutorialEvent.PHISH_SPEAR_INFO: "Use 'info phishing spear' to view what can be obtained from spear phishing",
 	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. hint: 'track <item name>'",
-	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to and use the Phishing skill to phish for 10 SQL injectors.",
-	TutorialEvent.PHISH_1_PACKET_SPOOFS: "Use the Phishing skill to phish for 1 packet spoofs.",
+	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to Phishing and use the Spear skill to phish for 10 SQL injectors.",
+	TutorialEvent.PHISH_1_PACKET_SPOOFS: "In Phishing, use the Spear skill to phish for 1 packet spoof.",
 	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'.",
 	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 3 school payloads.",
 

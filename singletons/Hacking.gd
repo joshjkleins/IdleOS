@@ -157,9 +157,11 @@ func save_data() -> Dictionary:
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
+		"skill_efficiency": SKILL["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
 	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
 	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
+	SKILL["efficiency"] = float(data.get("skill_efficiency", SKILL["efficiency"]))

@@ -44,6 +44,8 @@ Palette="*res://singletons/Palette.gd"
 Upgrades="*res://singletons/Upgrades.gd"
 Tutorial="*res://singletons/Tutorial.gd"
 SaveManager="*res://singletons/SaveManager.gd"
+Audiomanager="*res://singletons/Audiomanager.gd"
+Settings="*res://singletons/Settings.gd"
 
 [display]
 

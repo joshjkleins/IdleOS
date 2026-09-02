@@ -8,6 +8,8 @@ signal start_loading
 
 var is_in_hacking_context: bool = false
 
+var can_accept_inputs: bool = true
+
 enum HackingContext {
 	TARGETS,
 	PERSONS,
@@ -20,6 +22,10 @@ func _ready():
 	Signals.hacking_ended_signal.connect(hacking_ended)
 	Signals.update_console_signal.connect(message_from_hack_game)
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
+	Signals.hacking_can_accept_player_commands_signal.connect(toggle_hacking_accepted_input_text)
+
+func toggle_hacking_accepted_input_text(accept: bool):
+	can_accept_inputs = accept
 
 func module_loaded():
 	current_context = HackingContext.TARGETS
@@ -51,25 +57,27 @@ func go_to_root() -> void:
 	start_loading.emit()
 
 func _on_player_hacking_box_command_entered(text):
-	if text.to_lower() == "heal":
-		#healing logic
-		if Inventory.get_amount(Items.PACKET_SPOOF) <= 0:
-			player_hacking_box.add_line_error("No Packet Spoof found")
-			return
-		if Stats.current_anon >= Stats.max_anon:
-			player_hacking_box.add_line_warning("Already at max anonymity")
-			return
-			
-		Inventory.remove_resource(Items.PACKET_SPOOF, 1)
-		var ps_u = Upgrades.get_package_info("hacking.healing")
-		var extra_heal = ps_u.current
-		Stats.current_anon += Items.PACKET_SPOOF["heal"] + extra_heal
-		if Stats.current_anon > Stats.max_anon:
-			Stats.current_anon = Stats.max_anon
-		var t = "1 " + Items.PACKET_SPOOF.name + " consumed: +" + str(Items.PACKET_SPOOF.heal + extra_heal) + " anonymity"
-		player_hacking_box.add_line_success(t)
+	if !can_accept_inputs:
+		return
+	#if text.to_lower() == "heal":
+		##healing logic
+		#if Inventory.get_amount(Items.PACKET_SPOOF) <= 0:
+			#player_hacking_box.add_line_error("No Packet Spoof found")
+			#return
+		#if Stats.current_anon >= Stats.max_anon:
+			#player_hacking_box.add_line_warning("Already at max anonymity")
+			#return
+			#
+		#Inventory.remove_resource(Items.PACKET_SPOOF, 1)
+		#var ps_u = Upgrades.get_package_info("hacking.healing")
+		#var extra_heal = ps_u.current
+		#Stats.current_anon += Items.PACKET_SPOOF["heal"] + extra_heal
+		#if Stats.current_anon > Stats.max_anon:
+			#Stats.current_anon = Stats.max_anon
+		#var t = "1 " + Items.PACKET_SPOOF.name + " consumed: +" + str(Items.PACKET_SPOOF.heal + extra_heal) + " anonymity"
+		#player_hacking_box.add_line_success(t)
 	
-	elif text.to_lower() == "tutorial":
+	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
 		match current_context:
@@ -134,17 +142,22 @@ func _on_player_hacking_box_command_entered(text):
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type '-kill'")
 
 func handle_hack_command(text):
+	var recursive: bool = false
+	var tokens = Array(text.split(" ", false)) # convert PackedStringArray -> Array so we can use erase()
+	if "-r" in tokens:
+		if !Upgrades.get_package_info("hacking.recursive_hacking").current:
+			player_hacking_box.add_line_error("Recursive functionality not unlocked. Unlock with apt upgrade manager.")
+		else:
+			recursive = true
+		tokens.erase("-r")
+
+	text = " ".join(tokens)
+
 	var target: Dictionary = Stats.get_hacking_target_by_command(text)
 	
 	#Valid target
 	if target.is_empty():
 		player_hacking_box.add_line_error("Not a valid target.")
-		return
-	
-	#Has enough anonymity
-	if Stats.current_anon <= 0:
-		await enemy_hacking_box.target_select_error(target)
-		player_hacking_box.add_line_error("Anonymity too low. Wait for recovery or use 'heal' to recover with Packet Spoofs.")
 		return
 	
 	#Has requirements in inventory
@@ -153,14 +166,16 @@ func handle_hack_command(text):
 		player_hacking_box.add_line_error("Missing required payloads.")
 		player_hacking_box.add_line_error("Missing: " + target.requirements.item.name + " x" + str(target.requirements.amount))
 		return
-
 	if Inventory.get_amount(Items.SQL_INJECTOR) <= 0:
 		player_hacking_box.add_line_error("Missing offensive hacking attack. [color=666666]can be found with Phishing[/color]")
 		return
 	
-	await enemy_hacking_box.select_person(target)
+	toggle_hacking_accepted_input_text(false)
 	current_context = HackingContext.HACKING
 	hacking_help_commands()
+	Stats.current_anon = Stats.max_anon
+	await enemy_hacking_box.select_person(target, recursive)
+	toggle_hacking_accepted_input_text(true)
 
 func handle_back_command():
 	match current_context:
@@ -178,14 +193,15 @@ func handle_view_command(text):
 	if target.is_empty():
 		player_hacking_box.add_line("Not a valid location.")
 	else:
-		await enemy_hacking_box.select_target(target)
 		current_context = HackingContext.PERSONS
 		hacking_help_commands()
+		await enemy_hacking_box.select_target(target)
 
 
 func hacking_ended():
 	#enemy_hacking_box.end_hack()
 	current_context = HackingContext.PERSONS
+	hacking_help_commands()
 	await enemy_hacking_box.hacking_to_persons()
 
 func message_from_hack_game(message: String):
@@ -221,10 +237,17 @@ func hacking_help_commands():
 				["cd ..",            "Return to terminal root"]
 			]))
 		HackingContext.PERSONS:
-			player_hacking_box.add_line(format_command_list("COMMANDS", [
+			var recursive_unlocked = Upgrades.get_package_info("hacking.recursive_hacking").current
+
+			var commands = [
 				["hack [target]", "Start hacking target", "e.g. hack student"],
-				["cd ..",            "Return to locations directory", "e.g. '..'"]
-			]))
+				["cd ..",            "Return to locations directory", "e.g. 'cd ..'"]
+			]
+
+			if recursive_unlocked:
+				commands.insert(1, ["hack [target] -r", "Recursively hack target until manually cancelled or defeated", "e.g. hack student -r"])
+
+			player_hacking_box.add_line(format_command_list("COMMANDS", commands))
 		HackingContext.HACKING:
 			if Upgrades.get_package_info("hacking.overclock").current:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [

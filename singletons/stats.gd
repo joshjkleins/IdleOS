@@ -526,8 +526,15 @@ func update_tempature(amount: float):
 	
 	#OVERHEAT PARAMETERS
 	if system_tempature <= 80: #if overheated, stops overheat mode when reaching below 40
+		if overheated:
+			Audiomanager.play_sfx("overheat_finished_sfx")
+			Signals.system_cooled_below_overheat()
 		overheated = false
 	elif system_tempature >= 95: #if temp reaches 95 then overheat
+		if !overheated:
+			Audiomanager.play_sfx("overheat_sfx")
+			overheated = true
+			Signals.system_overheated()
 		overclocked = false
 		overheated = true
 	
@@ -621,8 +628,7 @@ func add_xp(skill_data: Dictionary, amount: int = 0):
 func on_level_up(skill_data: Dictionary):
 	#update efficiency
 	skill_data["efficiency"] += skill_data["efficiency increase rate"]
-	print("Leveled up!")
-	print("Current process" + " is level " + str(int(skill_data.level)))
+	Audiomanager.play_sfx("level_up")
 
 func update_cooling_amount(amount_to_add: float):
 	cooling_amount += amount_to_add

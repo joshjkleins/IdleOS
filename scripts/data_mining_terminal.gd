@@ -136,6 +136,7 @@ func stop():
 	blinking_timer.stop()
 	if is_window:
 		Mining.CURRENT_VMS -= 1
+		Stats.remove_vm_count(1)
 		get_parent().queue_free()
 
 func stop_safely():

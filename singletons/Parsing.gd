@@ -9,7 +9,7 @@ signal parsing_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -24,7 +24,8 @@ var SKILL = {
 	"color": Color("#EC4899"),
 	"level up signal": parsing_level_up_signal,
 	"efficiency description": "Increases chance of finding a resource per row.",
-	"command": "cd parsing"
+	"command": "cd parsing",
+	"sfx": "parsing_item_received"
 }
 
 var FOOTPRINT = {
@@ -147,7 +148,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"footprint_level": FOOTPRINT["level"],
-		"footprint_experience": FOOTPRINT["experience"]
+		"footprint_experience": FOOTPRINT["experience"],
+		"footprint_efficiency": FOOTPRINT["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -156,6 +158,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	FOOTPRINT["level"] = int(data.get("footprint_level", FOOTPRINT["level"]))
 	FOOTPRINT["experience"] = int(data.get("footprint_experience", FOOTPRINT["experience"]))
+	FOOTPRINT["efficiency"] = float(data.get("footprint_efficiency", FOOTPRINT["efficiency"]))
 
 
 var LOG_LINES = [

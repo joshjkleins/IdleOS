@@ -3,6 +3,10 @@ extends Node
 enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
+#func _ready():
+	#for item in Items.ITEM_MAP:
+		#add_resource(Items.ITEM_MAP[item], 1)
+
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:
 		if i.id == id:
@@ -19,7 +23,9 @@ func add_resource(resource: ItemData, amount):
 		inventory[resource] += amount
 	else:
 		inventory[resource] = amount
-	
+	var sfx_to_play = Audiomanager.get_sfx_from_item(resource)
+	if sfx_to_play != "":
+		Audiomanager.play_sfx(sfx_to_play, 0.05)
 	Signals.item_added(resource, amount)
 
 func remove_resource(resource: ItemData, amount: int) -> bool:
@@ -60,6 +66,8 @@ func list_specific_item(item: ItemData):
 		of.append("[color=#%s]%s[/color]" % [hex, text])
 	
 	var obtained_from = "Obtained from: " + ", ".join(of)
+	if item.obtained_from_additional_hint != "":
+		obtained_from += " - " + item.obtained_from_additional_hint
 	
 	var mu_text = item.ItemColor.keys()[item.color_type].capitalize()
 	var c = Palette.get_color(item.color_type)

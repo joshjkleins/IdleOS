@@ -8,7 +8,7 @@ signal decoding_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_DECODING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -122,7 +122,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"cache_level": CACHE["level"],
-		"cache_experience": CACHE["experience"]
+		"cache_experience": CACHE["experience"],
+		"cache_efficiency": CACHE["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -131,3 +132,4 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	CACHE["level"] = int(data.get("cache_level", CACHE["level"]))
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
+	CACHE["efficiency"] = float(data.get("cache_efficiency", CACHE["efficiency"]))

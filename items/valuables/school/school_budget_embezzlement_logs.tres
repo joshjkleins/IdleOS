@@ -12,4 +12,5 @@ upgrade_ingredient = true
 value = 2000
 color_type = 8
 obtained_from = Array[int]([7])
+obtained_from_additional_hint = "PRINCIPAL CACHE"
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

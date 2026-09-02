@@ -8,7 +8,7 @@ signal mining_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_MINING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -23,7 +23,8 @@ var SKILL = {
 	"color": Color("#7A4A2E"),
 	"level up signal": mining_level_up_signal,
 	"efficiency description": "Chance to receive multiple resources. Greater than 100% efficiency yields guaranteed multiple resources.",
-	"command": "cd mining"
+	"command": "cd mining",
+	"sfx": "mining_item_received"
 }
 
 var LOGS = {
@@ -84,6 +85,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	new_window.min_size = content_instance.size
 	
 	new_window.close_requested.connect(func():
+		#THIS ONLY HAPPENS WHEN PLAYER CLOSES WINDOW MANUALLY
 		CURRENT_VMS -= 1
 		Stats.remove_vm_count(1)
 		#new_window.remove_cooling_reduction()
@@ -104,7 +106,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"logs_level": LOGS["level"],
-		"logs_experience": LOGS["experience"]
+		"logs_experience": LOGS["experience"],
+		"logs_efficiency": LOGS["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -113,3 +116,4 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	LOGS["level"] = int(data.get("logs_level", LOGS["level"]))
 	LOGS["experience"] = int(data.get("logs_experience", LOGS["experience"]))
+	LOGS["efficiency"] = float(data.get("logs_efficiency", LOGS["efficiency"]))

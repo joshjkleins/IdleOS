@@ -7,7 +7,7 @@ signal compile_level_up_signal
 # When the player earns the bonus
 var bonus_expires_at: int
 var vm_token = Items.VM_COMPILING_TOKEN
-@onready var MAX_VMS = 1
+@onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
@@ -22,7 +22,8 @@ var SKILL = {
 	"color": Color("#8B5CF6"),
 	"level up signal": compile_level_up_signal,
 	"efficiency description": "Chance to increase speed by 1000% for 1 second and apply no heat.",
-	"command": "cd compiling"
+	"command": "cd compiling",
+	"sfx": "compiling_item_received"
 }
 
 var SCHOOL = {
@@ -153,7 +154,8 @@ func save_data() -> Dictionary:
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
 		"school_level": SCHOOL["level"],
-		"school_experience": SCHOOL["experience"]
+		"school_experience": SCHOOL["experience"],
+		"school_efficiency": SCHOOL["efficiency"]
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -162,3 +164,4 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	SCHOOL["level"] = int(data.get("school_level", SCHOOL["level"]))
 	SCHOOL["experience"] = int(data.get("school_experience", SCHOOL["experience"]))
+	SCHOOL["efficiency"] = float(data.get("school_efficiency", SCHOOL["efficiency"]))

@@ -12,4 +12,5 @@ upgrade_ingredient = false
 value = 0
 color_type = 2
 obtained_from = Array[int]([1])
+obtained_from_additional_hint = ""
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

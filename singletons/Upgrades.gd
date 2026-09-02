@@ -403,6 +403,21 @@ var HACKING = {
 					"unlocked": false
 				},
 			]
+		},
+		{ 
+			"name": "Recursive hacking",
+			"id": "hacking.recursive_hacking",
+			"description": "Allows for '-r' to be used when initiating a hack to automatically repeat the hack when finished until out of required resources.",
+			"current": false,
+			"levels": [ 
+				{
+					"level": 1,
+					"id": "hacking.overclock", 
+					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 3 }],
+					"amount": true,
+					"unlocked": false
+				},
+			]
 		}
 	],
 }
@@ -601,7 +616,7 @@ var SYSTEM = {
 		{ 
 			"name": "Overheat Fan",
 			"id": "system.overheat_fan",
-			"description": "Optimize system fan to increase cooling while overeated by 0.3/second.",
+			"description": "Optimize system fan to increase cooling while overheated by 0.3/second.",
 			"current": false,
 			"display percentage": false,
 			"levels": [ 

@@ -1,9 +1,6 @@
 extends Control
 
-#Rethink APT commands / displays
-# confusing with the 'current effect' vs next upgrade since some upgrades are the base stat (cooling) and others are simply bonuses (speed/efficiency)
-# apt system - should not only display all System upgrades but also requirements as well for just the next upgrade
-#Description updates on resources (just double check, make sure they make sense)
+# Welcome message : Thank you for playing Tutorial message : Discord message
 
 #Export and play through.
 
@@ -122,6 +119,7 @@ var processing_queue = false
 var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) before creating a new one
 var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
 
+var NOTIFY_OF_OVERHEAT: bool = false
 
 func _ready():
 	if not SaveManager.load_game():
@@ -142,8 +140,10 @@ func _ready():
 	Signals.defrag_finished_signal.connect(defrag_finished)
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
+	Signals.system_overheated_signal.connect(overheat_terminal_notice)
+	Signals.system_cooled_below_overheat_signal.connect(system_cooled_out_of_overheat_range)
 	
-	#cooling timer
+	##cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
 
@@ -349,6 +349,12 @@ func tutorial_event_completed(message: String):
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
+	if text.begins_with("settings"):
+		if text == "settings":
+			add_line(Settings.settings_help())
+			return true
+		add_line(Settings.handle_settings_command(text))
+		return true
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
@@ -359,7 +365,6 @@ func universal_commands(text):
 		var item_names = text.trim_prefix("track").strip_edges().split(",")
 		add_line(hud_monitor.add_monitored_items(item_names))
 		return true
-
 
 	if text.begins_with("untrack"):
 		var item_names = text.trim_prefix("untrack").strip_edges()
@@ -526,6 +531,7 @@ func root_commands(text):
 			terminal_root.visible = false
 			await loading.show_loading()
 			hacking.module_loaded()
+			current_context = Context.HACKING
 		#"marketplace -auth": #Go to marketplace
 			#add_line("[ .. ] requesting permissions")
 			#add_line("[ OK ] permission granted")
@@ -580,20 +586,25 @@ func handle_apt_commands(text):
 	var t_array = text.split(" ")
 	
 	if t_array.size() == 2:
+		#check if its an "apt <skill>" command
 		for upgrade_name in Upgrades.all_upgrades:
 			if t_array[1].to_lower() == upgrade_name.skill.SKILL.name.to_lower():
 				add_line(ContextCommands.get_skill_upgrades_text(upgrade_name))
 				return
-	
-	if t_array.size() != 3:
-		add_line("Apt command not recognized. [color=#666666]example: apt info mining.speed[/color]")
+		#see if [1] is a valid package to get info from
+		if !Upgrades.is_valid_package(t_array[1]):
+			add_line("Package not found. [color=#666666]example: apt mining.speed[/color]")
+			return
+			
+		add_line(ContextCommands.get_upgrades_package_info(t_array[1]))
 		return
-
+			
+	if t_array.size() != 3 and t_array.size() != 2:
+		add_line("Apt command not recognized. [color=#666666]example: apt mining.speed[/color]")
+		return
+		
 	if !Upgrades.is_valid_package(t_array[2]):
-		add_line("Package not found. [color=#666666]example: apt info mining.speed[/color]")
-		return
-	if t_array[1] == "info":
-		add_line(ContextCommands.get_upgrades_package_info(t_array[2]))
+		add_line("Package not found. [color=#666666]example: apt install mining.speed[/color]")
 		return
 	if t_array[1] == "install":
 		if Upgrades.is_at_max_level(t_array[2]):
@@ -1251,10 +1262,10 @@ func overclock_logic():
 		add_line("Overclock not available. Check upgrade package manager with 'apt'.")
 		return
 	if Stats.overheated: #overheated - still recovering
-		add_line("System has been overheated, needs to cool to below 40°C.")
+		add_line("System has been overheated, needs to cool to below 80°C.")
 		return
-	if Stats.system_tempature >= 60: #cant overclock above 60
-		add_line("System tempature needs to cool to below 60°C before overclocking")
+	if Stats.system_tempature >= 80: #cant overclock above 60
+		add_line("System tempature needs to cool to below 80°C before overclocking")
 		return
 	Stats.overclocked = true
 
@@ -1792,6 +1803,7 @@ func _on_hacking_start_loading() -> void:
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	tween.parallel().tween_property(hud_monitor, "modulate:a", 1.0, 1.0)
 	await tween.finished
+	current_context = Context.ROOT
 
 func _on_cooling_timer_timeout():
 	var amount_to_cool = Stats.cooling_amount
@@ -1827,3 +1839,15 @@ func _kill_current_process():
 	current_process.stop()
 	current_process = null
 	current_process_info = {}
+
+func system_cooled_out_of_overheat_range():
+	NOTIFY_OF_OVERHEAT = false
+	add_line("[color=blue]System no longer overheated.[/color]")
+
+func overheat_terminal_notice():
+	if NOTIFY_OF_OVERHEAT:
+		return
+	if Stats.overheated:
+		NOTIFY_OF_OVERHEAT = true
+		add_line("[color=red]SYSTEM OVERHEATED - ALL PROCESSES SLOWED[/color]")
+		add_line("Cool system to < 80 to resume processes as normal.")
