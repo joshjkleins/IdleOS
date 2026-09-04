@@ -96,7 +96,7 @@ var tutorial_tasks := {
 
 	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT: "Upgrade the Mining skill to unlock overclocking with 'apt'.",
 
-	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Required a VM Token. For more info on ssh commands use 'ssh'.",
+	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Requires a VM Token. For more info on ssh commands use 'ssh'.",
 }
 
 var tutorial_progress: Dictionary = {}

@@ -43,7 +43,7 @@ var MINING = {
 				{
 					"level": 1,
 					"id": "mining.overclock", 
-					"requirements": [{"item": Items.LOGS, "amount": 250 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"requirements": [{"item": Items.LOGS, "amount": 50 }],
 					"amount": true,
 					"unlocked": false
 				},
