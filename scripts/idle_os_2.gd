@@ -407,12 +407,12 @@ func universal_commands(text):
 		
 		return true
 	
-	if text.begins_with("add"):
-		var item_name = text.trim_prefix("add").strip_edges()
-		var item = Inventory.get_item_by_name(item_name)
-		if item != null:
-			Inventory.add_resource(item, 1)
-			return true
+	#if text.begins_with("add"):
+		#var item_name = text.trim_prefix("add").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.add_resource(item, 1)
+			#return true
 		
 	
 	if text.begins_with("apt"):
