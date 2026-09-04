@@ -41,7 +41,8 @@ var SKILL = {
 	"efficiency description": "Chance for hacking attack to deal double damage",
 	"color": Color("#22C55E"),
 	"level up signal": hacking_level_up_signal,
-	"command": "cd hacking"
+	"command": "cd hacking",
+	"sfx": "cracking_item_received"
 }
 
 var SCHOOL = {

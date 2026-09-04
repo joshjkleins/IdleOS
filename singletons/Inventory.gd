@@ -3,9 +3,9 @@ extends Node
 enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
 var inventory := {}
 
-#func _ready():
-	#for item in Items.ITEM_MAP:
-		#add_resource(Items.ITEM_MAP[item], 1)
+func _ready():
+	for item in Items.ITEM_MAP:
+		add_resource(Items.ITEM_MAP[item], 1)
 
 func has_item_by_id(id: int) -> bool:
 	for i in inventory:

@@ -117,12 +117,15 @@ layout_mode = 2
 
 [node name="TrackingContainer" type="Control" parent="Panel"]
 custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-anchors_preset = 0
-offset_left = 1057.0
-offset_top = 91.0
-offset_right = 1257.0
-offset_bottom = 170.0
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -229.0
+offset_top = 93.0
+offset_right = -29.0
+offset_bottom = 172.0
+grow_horizontal = 0
 
 [node name="HUDMonitor" parent="Panel/TrackingContainer" instance=ExtResource("4_7qmxk")]
 layout_mode = 2
