@@ -771,3 +771,26 @@ Anonymity: %s
 Max Bandwidth: %s
 Bandwidth Restore: +%s/second
 """ % [tempature, cooling_amount, time, current_vms, max_vms, max_anon, m_band, bw_recov]
+
+
+func playtest_welcome_message():
+	return """
+WELCOME TO THE IDLEOS PLAYTEST
+
+This is a playtest build, and your feedback is valuable.
+Please report any bugs, issues, or general feedback in the Discord:
+
+https://discord.gg/XnrH7zrdb
+
+Thanks for helping test IdleOS!
+
+To view this message again, use the 'playtest' command.
+To copy the discord link to your clipboard use 'discord -c'
+"""
+
+func discord_message():
+	return """
+Discord link: https://discord.gg/XnrH7zrdb
+
+To copy the discord link to your clipboard use 'discord -c'
+"""

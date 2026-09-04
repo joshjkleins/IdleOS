@@ -122,13 +122,16 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 var NOTIFY_OF_OVERHEAT: bool = false
 
 func _ready():
-	if not SaveManager.load_game():
-		Signals.system_temp_updated(30)
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	header.update()
 	input_line.grab_focus() #uncomment this when not testing hacking module
+	
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+	add_line(ContextCommands.playtest_welcome_message())
+	if not SaveManager.load_game():
+		Signals.system_temp_updated(30)
+		add_line("To get started, type `-h` in the terminal.")
 	
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
@@ -146,6 +149,10 @@ func _ready():
 	##cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
+	
+	
+	
+	
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -400,12 +407,12 @@ func universal_commands(text):
 		
 		return true
 	
-	if text.begins_with("add"):
-		var item_name = text.trim_prefix("add").strip_edges()
-		var item = Inventory.get_item_by_name(item_name)
-		if item != null:
-			Inventory.add_resource(item, 50)
-			return true
+	#if text.begins_with("add"):
+		#var item_name = text.trim_prefix("add").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.add_resource(item, 50)
+			#return true
 		
 	
 	if text.begins_with("apt"):
@@ -439,6 +446,17 @@ func universal_commands(text):
 			return true
 		"date":
 			add_line(ContextCommands.get_date_command())
+			return true
+		"playtest":
+			add_line(ContextCommands.playtest_welcome_message())
+			return true
+		"discord -c":
+			var discord_link = "https://discord.gg/bWFwUsF9a"
+			DisplayServer.clipboard_set(discord_link)
+			add_line("[color=green]Discord invite copied to clipboard.[/color]")
+			return true
+		"discord":
+			add_line(ContextCommands.discord_message())
 			return true
 		"clear":
 			_clear_terminal()
@@ -475,12 +493,12 @@ func universal_commands(text):
 			else:
 				add_line("No process running")
 			return true
-		"quit -s":
+		"quit -s", "quit", "exit", "exit -s":
 			SaveManager.save_game()
 			get_tree().quit()
-		"cmds":
-			add_line(ContextCommands.all_commands())
-			return true
+		#"cmds":
+			#add_line(ContextCommands.all_commands())
+			#return true
 		"system":
 			add_line(ContextCommands.system_commands())
 			return true

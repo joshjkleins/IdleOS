@@ -157,7 +157,11 @@ func complete_event(event: TutorialEvent) -> void:
 		message = "[color=green]════════════════════════════════[/color]\n"
 		message += "[color=green]TUTORIAL COMPLETE[/color]\n"
 		message += "[color=gray]All objectives completed.[/color]\n"
-		message += "[color=green]════════════════════════════════[/color]"
+		message += "[color=green]════════════════════════════════[/color]\n\n"
+		
+		message += "You have finished the full gameplay loop of IdleOS.\n"
+		message += "\nFrom here you're on your own. Explore more hacking targets, upgrade all your processes and see if you can become efficient enough to hack the Superintendent."
+		message += "\n\nThank you for playing IdleOS, please do not forget to send feedback and report bugs in the discord server. Use 'discord -c' to copy the server link."
 	else:
 		var next_task := get_current_task()
 		
