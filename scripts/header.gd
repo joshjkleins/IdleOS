@@ -25,6 +25,7 @@ extends PanelContainer
 func _ready():
 	major_skills.visible = true
 	defragging.visible = true
+	update()
 
 func update(): #called when player enters root directory (start of game and exiting processes)
 	mining.update()

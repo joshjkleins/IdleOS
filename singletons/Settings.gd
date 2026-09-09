@@ -21,7 +21,7 @@ const DEFS := {
 		"help": "Sets background music volume percentage",
 	},
 	"window_mode": {
-		"section": "Window", "default": "windowed", "type": "enum",
+		"section": "Window", "default": "full_screen", "type": "enum",
 		"values": {
 			"windowed":    "Sets mode to windowed",
 			"full_screen": "Sets mode to full screen",

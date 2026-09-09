@@ -66,6 +66,7 @@ func _ready():
 
 func _on_save_loaded():
 	build_minor_skills()
+	update()
 
 func build_minor_skills():
 	for child in minor_skill_container.get_children():

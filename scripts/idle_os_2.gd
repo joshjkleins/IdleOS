@@ -1,14 +1,5 @@
 extends Control
 
-# Welcome message : Thank you for playing Tutorial message : Discord message
-
-#Export and play through.
-
-#create discord server for playtest
-#add copy function for playtest Discord server
-#Export and test on pc
-#Upload playtest
-
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
 #2. ADD TO GET_CONTEXT_LEAD FUNC
@@ -149,10 +140,6 @@ func _ready():
 	##cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
-	
-	
-	
-	
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):

@@ -95,13 +95,26 @@ func update_dump() -> bool:
 
 func get_potential_items(cache: CacheData) -> Dictionary:
 	var loot = {}
+	
+	if not Decoding.first_cache_decoded and cache == Items.STUDENT_CACHE:
+		for entry in cache.entries:
+			var quant = randi_range(entry.min_quantity, entry.max_quantity)
+			loot[entry.item] = quant
+		
+		var rare_item = cache.rare_pool.pick_random()
+		loot[rare_item.item] = 1
+		
+		Decoding.first_cache_decoded = true
+		SaveManager.mark_dirty()
+		
+		return loot
+	
 	for item in cache.entries:
-		var ran = randf()
 		if randf() <= item.drop_chance:
 			var quant = randi_range(item.min_quantity, item.max_quantity)
 			loot[item.item] = quant
-	#rare items
 	
+	# Rare items
 	var efficiency_decoding_package = Upgrades.get_package_info("decoding.efficiency")
 	var efficiency_upgrade = efficiency_decoding_package.current
 	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 1.0
@@ -111,7 +124,7 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 	if randf() < eff:
 		var item = cache.rare_pool.pick_random()
 		loot[item.item] = 1
-	#not current conditions if loot is empty, should never reach this
+	
 	return loot
 
 func get_item_hexes(item, amount) -> Array:

@@ -15,6 +15,8 @@ var CURRENT_VMS = 0
 var terminal_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 var vm_window = preload("res://scenes/vm_window.tscn")
 
+var first_cache_decoded: bool = false
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Decoding",
@@ -124,7 +126,8 @@ func save_data() -> Dictionary:
 		"skill_experience": SKILL["experience"],
 		"cache_level": CACHE["level"],
 		"cache_experience": CACHE["experience"],
-		"cache_efficiency": CACHE["efficiency"]
+		"cache_efficiency": CACHE["efficiency"],
+		"first_cache_decoded": first_cache_decoded
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -134,3 +137,4 @@ func load_data(data: Dictionary) -> void:
 	CACHE["level"] = int(data.get("cache_level", CACHE["level"]))
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
 	CACHE["efficiency"] = float(data.get("cache_efficiency", CACHE["efficiency"]))
+	first_cache_decoded = data.get("first_cache_decoded", false)

@@ -806,8 +806,6 @@ func unlock_next_level(package):
 		if !lvl.unlocked:
 			lvl.unlocked = true
 			if package.current is float or package.current is int:
-				if package.id == "mining.overclock":
-					Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
 				package.current += lvl.amount
 				
 				#Specific upgrades that need to happen (cooling etc)
@@ -823,6 +821,8 @@ func unlock_next_level(package):
 						Stats.set_max_anon()
 				return
 			if package.current is bool:
+				if package.id == "mining.overclock":
+					Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
 				package.current = lvl.amount
 				
 				#Specific upgrades that need to happen (bool)
