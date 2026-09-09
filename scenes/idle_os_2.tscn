@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=13 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
@@ -10,6 +10,10 @@
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
 [ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
 [ext_resource type="Script" uid="uid://dbkqk0s6tx2x3" path="res://scripts/item_added_container.gd" id="8_h30m8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hvrtx"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_color = Color(0.0431373, 0.054902, 0.0666667, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
@@ -31,6 +35,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hvrtx")
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel"]
 layout_mode = 1

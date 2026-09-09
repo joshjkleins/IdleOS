@@ -14,6 +14,9 @@ config/name="IdleOS"
 run/main_scene="uid://g3kf6mnbkbca"
 config/features=PackedStringArray("4.4", "Forward Plus")
 run/max_fps=60
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/fullsize=false
+boot_splash/image="uid://cfjsrniyk2x1h"
 config/icon="uid://ccxfw38ia6taw"
 
 [autoload]
