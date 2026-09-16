@@ -1,5 +1,15 @@
 extends Control
 
+#TODO for Demo
+# add better welcome screen where players can choose save file
+# balance exp gained for each skill
+# give VM token for each major skill level up
+# cap level at 10 for each skill
+# maybe only allow demo to have Student and one other target (much harder to feel progression, like principal)
+# show ??? for additional minor processes in Skills
+# play through and add more player feedback and juice anywhere you can
+# take another look at VM windows, add command to allow them to be behind
+
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
 #2. ADD TO GET_CONTEXT_LEAD FUNC
