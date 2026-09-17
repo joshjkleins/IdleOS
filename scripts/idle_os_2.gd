@@ -1,14 +1,18 @@
 extends Control
 
-#TODO for Demo
-# add better welcome screen where players can choose save file
-# balance exp gained for each skill
-# give VM token for each major skill level up
-# cap level at 10 for each skill
-# maybe only allow demo to have Student and one other target (much harder to feel progression, like principal)
-# show ??? for additional minor processes in Skills
-# play through and add more player feedback and juice anywhere you can
-# take another look at VM windows, add command to allow them to be behind
+#playtest feedback
+#update apt : when typing just apt it lists everything : when typing apt <skill> list package and indent and list requirements
+#go through each skill and make sure labels are accurate (cracking should be crack passwords, remaining encrypted passwords)
+#add clarity on overclock feature (maybe when going into skill you can see optional commands underneath : overclock: locked)
+#level up notification - either in console or by items labels
+
+#big add - a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
+#add settings as a popout menu instead of consoles
+#clicking for commands? Major Skills, Hacking Locations, Hacking Targets
+
+
+#BUG : apt versions not saving
+#BUG ish : upgrades should be applied if process is already running (phishing lines)
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -221,7 +225,7 @@ func _on_input_line_text_submitted(new_text):
 			input_line.clear()
 		return
 			
-	var text_with_lead = get_context_lead() + new_text
+	var text_with_lead = get_context_lead() + " " + new_text
 	input_line.clear()
 	add_line(text_with_lead)
 	command_history.append(new_text)
@@ -359,6 +363,7 @@ func universal_commands(text):
 			return true
 		add_line(Settings.handle_settings_command(text))
 		return true
+	
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
@@ -404,17 +409,20 @@ func universal_commands(text):
 		
 		return true
 	
-	#if text.begins_with("add"):
-		#var item_name = text.trim_prefix("add").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.add_resource(item, 1)
-			#return true
-		
-	
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
+	
+	if text.begins_with("cd"):
+		handle_cd_commands(text)
+		return true
+	
+	if text.begins_with("add"):
+		var item_name = text.trim_prefix("add").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.add_resource(item, 1)
+			return true
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())
@@ -431,6 +439,9 @@ func universal_commands(text):
 			return true
 		"process -h":
 			add_line(ContextCommands.process_commands())
+			return true
+		"version", "v":
+			add_line(ContextCommands.get_build_version())
 			return true
 		"ps":
 			if current_process_info == {}:
@@ -499,6 +510,106 @@ func universal_commands(text):
 		"system":
 			add_line(ContextCommands.system_commands())
 			return true
+
+func handle_cd_commands(text):
+	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context != Context.ROOT:
+		return_to_root()
+		return
+
+	text = text.trim_prefix("cd").strip_edges()
+
+	var move_up = false
+
+	if text.begins_with("../"):
+		move_up = true
+		text = text.trim_prefix("../")
+
+	var goal_destination = text.strip_edges()
+	
+	if goal_destination == get_context_name_string(current_context).to_lower():
+		add_line("Already in %s skill." % goal_destination)
+		return
+	
+	if current_context != Context.ROOT and !move_up:
+		add_line("Must move up a directory with 'cd ..'")
+		return
+	
+	match goal_destination:
+		"mining":
+			add_line("[ .. ] loading data mining module")
+			#header.update_header(Mining)
+			header.display_skill(Mining)
+			add_line("[ OK ] data mining module loaded")
+			update_context(Context.MINING)
+			add_line(ContextCommands.get_help_text(Mining))
+			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
+		"parsing":
+			add_line("[ .. ] loading parsing module")
+			#header.update_header(Parsing)
+			header.display_skill(Parsing)
+			add_line("[ OK ] parsing module loaded")
+			update_context(Context.PARSING)
+			add_line(ContextCommands.get_help_text(Parsing))
+			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
+		"cracking":
+			add_line("[ .. ] loading cracking module")
+			#header.update_header(Cracking)
+			header.display_skill(Cracking)
+			add_line("[ OK ] cracking module loaded")
+			update_context(Context.CRACKING)
+			add_line(ContextCommands.get_help_text(Cracking))
+		"matching":
+			add_line("[ .. ] loading matching module")
+			#header.update_header(Matching)
+			header.display_skill(Matching)
+			add_line("[ OK ] matching module loaded")
+			update_context(Context.MATCHING)
+			add_line(ContextCommands.get_help_text(Matching))
+		"hacking":
+			if process_running:
+				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
+				return
+			var tween = create_tween()
+			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
+			tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
+			await tween.finished
+			terminal_root.visible = false
+			await loading.show_loading()
+			hacking.module_loaded()
+			current_context = Context.HACKING
+		"decoding":
+			add_line("[ .. ] loading decoding module")
+			#header.update_header(Decoding)
+			header.display_skill(Decoding)
+			add_line("[ OK ] decoding module loaded")
+			update_context(Context.DECODING)
+			add_line(ContextCommands.get_help_text(Decoding))
+		"phishing":
+			add_line("[ .. ] loading phishing module")
+			#header.update_header(Phishing)
+			header.display_skill(Phishing)
+			add_line("[ OK ] phishing module loaded")
+			update_context(Context.PHISHING)
+			add_line(ContextCommands.get_help_text(Phishing))
+		"defragging":
+			add_line("[ .. ] loading defragging module")
+			#header.update_header(Defragging)
+			header.display_defragging()
+			add_line("[ OK ] defragging module loaded")
+			update_context(Context.DEFRAGGING)
+			add_line(ContextCommands.get_help_text(Defragging))
+		"compiling":
+			add_line("[ .. ] loading compiling module")
+			header.display_skill(Compiling)
+			update_context(Context.COMPILING)
+			add_line(ContextCommands.get_help_text(Compiling))
+		_:#default
+			if text.begins_with("cd"):
+				var nt = text.substr(2).strip_edges()
+				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
+			else:
+				add_line("Command not found")
+		
 
 #Root context commands
 func root_commands(text):
@@ -817,7 +928,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	if Stats.CURRENT_ALL_VMS >= Stats.MAX_ALL_VMS:
-		add_line("Maximum total virtual machines running.")
+		add_line("Maximum total virtual machines running. Upgrade system with 'apt' to increase capacity.")
 		return
 		
 	
@@ -887,7 +998,7 @@ func mining_commands(text):
 				Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"overclock":
 			overclock_logic()
@@ -959,7 +1070,7 @@ func log_parsing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Parsing")
@@ -1042,7 +1153,7 @@ func password_unscramble_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Cracking")
@@ -1133,7 +1244,7 @@ func cred_matching_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Matching")
@@ -1220,7 +1331,7 @@ func cache_decrypting_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Cache Decrypting")
@@ -1320,7 +1431,7 @@ func phishing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Phishing")
@@ -1400,7 +1511,7 @@ func compiling_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"overclock":
 			overclock_logic()
@@ -1475,7 +1586,7 @@ func defragging_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("???")
@@ -1783,6 +1894,8 @@ func _move_caret_to_end():
 
 #handle up/down input for history commands
 func _input(event):
+	if event is InputEventMouseButton and event.pressed:
+		input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_TAB:
 			get_viewport().set_input_as_handled()

@@ -798,8 +798,16 @@ func increase_version_from_package(package):
 func get_skill_version(skill: Node) -> float:
 	for upgrade in all_upgrades:
 		if upgrade.skill == skill:
-			return upgrade.version
-	return 0.0
+			return calculate_version(upgrade)
+	return 0.1
+
+func calculate_version(skill: Dictionary) -> float:
+	var version = 0.1
+	for upgrade in skill.upgrades:
+		for level in upgrade.levels:
+			if level.unlocked:
+				version += 0.1
+	return version
 
 func unlock_next_level(package):
 	for lvl in package.levels:

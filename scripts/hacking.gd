@@ -55,27 +55,11 @@ func go_to_root() -> void:
 	visible = false
 	is_in_hacking_context = false
 	start_loading.emit()
+	enemy_hacking_box.persons_to_targets()
 
 func _on_player_hacking_box_command_entered(text):
 	if !can_accept_inputs:
 		return
-	#if text.to_lower() == "heal":
-		##healing logic
-		#if Inventory.get_amount(Items.PACKET_SPOOF) <= 0:
-			#player_hacking_box.add_line_error("No Packet Spoof found")
-			#return
-		#if Stats.current_anon >= Stats.max_anon:
-			#player_hacking_box.add_line_warning("Already at max anonymity")
-			#return
-			#
-		#Inventory.remove_resource(Items.PACKET_SPOOF, 1)
-		#var ps_u = Upgrades.get_package_info("hacking.healing")
-		#var extra_heal = ps_u.current
-		#Stats.current_anon += Items.PACKET_SPOOF["heal"] + extra_heal
-		#if Stats.current_anon > Stats.max_anon:
-			#Stats.current_anon = Stats.max_anon
-		#var t = "1 " + Items.PACKET_SPOOF.name + " consumed: +" + str(Items.PACKET_SPOOF.heal + extra_heal) + " anonymity"
-		#player_hacking_box.add_line_success(t)
 	
 	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
@@ -103,6 +87,8 @@ func _on_player_hacking_box_command_entered(text):
 				match text:
 					"cd ..":
 						handle_back_command()
+					"cd ../..":
+						go_to_root()
 					"-h":
 						hacking_help_commands()
 					"apt":
@@ -131,7 +117,7 @@ func _on_player_hacking_box_command_entered(text):
 							return
 							
 						Stats.overclocked = true
-						player_hacking_box.add_line_success("System overclocked. Speed and heat increased. Use 'overclock -kill' to stop.")
+						player_hacking_box.add_line_success("System overclocked. Speed and heat increased. Use 'overclock kill' to stop.")
 					"overclock -kill":
 						if !Stats.overclocked:
 							player_hacking_box.add_line("Not currently overclocking.")
@@ -139,7 +125,7 @@ func _on_player_hacking_box_command_entered(text):
 							player_hacking_box.add_line("Killing overclock.")
 						Stats.overclocked = false
 					_:
-						player_hacking_box.add_line("Hacking in progress, to stop hacking type '-kill'")
+						player_hacking_box.add_line("Hacking in progress, to stop hacking type 'kill'")
 
 func handle_hack_command(text):
 	var recursive: bool = false

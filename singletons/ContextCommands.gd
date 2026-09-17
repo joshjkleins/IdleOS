@@ -377,7 +377,7 @@ func ssh_help_commands() -> String:
 |   ssh                          List available VM tokens            |
 |   ssh <skill>                  List ssh run commands               |
 |   ssh <skill> <process>        Consume VM token to run process     |
-|                                in seperate window                  |
+|                                in separate window                  |
 |   ssh -h                       Show this list of commands          |
 |____________________________________________________________________|
 """
@@ -426,7 +426,7 @@ func get_help() -> String:
 | ITEMS                                                              |
 |   ls                           List items                          |
 |   ls <item>                    Item details                        |
-|   track <item>, <item>         Track item(s) (comma seperated)     |
+|   track <item>, <item>         Track item(s) (comma separated)     |
 |   untrack <item>               Remove tracking                     |
 |                                                                    |
 | UPGRADES                                                           |
@@ -588,36 +588,67 @@ func get_root_upgrades_text() -> String:
 	return return_text
 
 func get_skill_upgrades_text(upgrade):
-	var return_text = ""
-	return_text += "\nAvailable upgrades:\n\n"
-	
+	var return_text = "\nAvailable upgrades:\n\n"
+	var skill_version = Upgrades.get_skill_version(upgrade.skill)
 	var skill = upgrade.skill
 	var color_string = skill.SKILL.color.to_html()
 	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-	return_text += colored_name + " v" + str(upgrade.version) + "\n"
-	var i = 0
-	for upgrade_info in upgrade.upgrades:
-		#get current level
+
+	return_text += colored_name + " v" + str(skill_version) + "\n"
+	
+	for i in upgrade.upgrades.size():
+		var upgrade_info = upgrade.upgrades[i]
 		var current_level = 0
-		for lvl in upgrade_info.levels:
-			if lvl.unlocked:
+
+		# Find current level
+		for level in upgrade_info.levels:
+			if level.unlocked:
 				current_level += 1
-		#get prefix
-		var prefix = "├─ "
-		if i == upgrade.upgrades.size() - 1:
-			prefix = "└─ "
-		
-		#get dots
+
+		var is_last_upgrade = i == upgrade.upgrades.size() - 1
+		var prefix = "└─ " if is_last_upgrade else "├─ "
+
+		# Upgrade name + level
 		var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
-	
 		return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
-		i += 1
+
+		# Max level reached
+		if current_level >= upgrade_info.levels.size():
+			var max_prefix = "   └─ " if is_last_upgrade else "│  └─ "
+			return_text += max_prefix + "[color=yellow]MAX LEVEL[/color]\n"
+
+		else:
+			# Requirements for next level
+			var req = upgrade_info.levels[current_level].requirements
+
+			for j in req.size():
+				var is_last_requirement = j == req.size() - 1
+				var r_prefix = ""
+
+				if is_last_upgrade:
+					r_prefix = "   └─ " if is_last_requirement else "   ├─ "
+				else:
+					r_prefix = "│  └─ " if is_last_requirement else "│  ├─ "
+
+				var r = req[j]
+				var current_amount = Inventory.get_amount(r.item)
+				var amount_text = "%d/%d" % [current_amount, r.amount]
+
+				if current_amount >= r.amount:
+					amount_text = "[color=green]" + amount_text + "[/color]"
+				else:
+					amount_text = "[color=red]" + amount_text + "[/color]"
+
+				return_text += r_prefix + r.item.name + " " + amount_text + "\n"
+
+		if !is_last_upgrade:
+			return_text += "│\n"
+
 	return_text += "\n"
-	
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt info <package>' for package information.\n"
+	return_text += "Use 'apt <package>' for package information.\n"
 	return_text += "Use 'apt install <package>' to install.\n"
-	
+
 	return return_text
 
 func get_upgrades_package_info(package_id: String) -> String:
@@ -794,3 +825,6 @@ Discord link: https://discord.gg/XnrH7zrdb
 
 To copy the discord link to your clipboard use 'discord -c'
 """
+
+func get_build_version() -> String:
+	return System.SKILL.version
