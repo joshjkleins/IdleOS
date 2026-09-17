@@ -42,6 +42,7 @@ func display_skill(skill: Node): #called when player enters specific process
 	var tar
 	for s in major_skills.get_children():
 		s.fade_out_major()
+		s.fade_out_minor()
 		if skill == s.skill:
 			tar = s
 	defragging.fade_out_major()

@@ -42,6 +42,59 @@ func pad_text(text: String, width: int) -> String:
 func tab_space() -> String:
 	return "  "
 
+func get_modifier_info_text(skill: Node) -> String:
+	if skill == Defragging:
+		return ""
+	var l_mod = 16
+	var l_status = 14
+	var l_cmd = 45
+	var l_effect = 44
+	var text = ""
+	text += "┌────────────────────────────────────────────────────── MODIFIERS ───────────────────────────────────────────────────────┐\n"
+	text += "│ " + pad_text('MODIFIER', l_mod) + pad_text('STATUS', l_status) + pad_text('COMMAND', l_cmd) + pad_text('EFFECT', l_effect) + '│\n'
+	text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
+			 
+	var modifier_name = ["Overclock"]
+	var status
+	if Upgrades.can_overclock(skill):
+		status = ["UNLOCKED"]
+	else:
+		status = ["LOCKED"]
+	
+	var command = ["While process is active use 'overclock'",  "Stop with 'overclock -kill'"]
+	var command_new_line_start_pos = l_mod + l_status
+	
+	var effect = ["Increase speed & heat output."]
+	
+	var text_components = [modifier_name, status, command, effect]
+	var widths = [l_mod, l_status, l_cmd, l_effect]
+	var line_count = find_largest_array(text_components).size()
+
+	for i in range(line_count):
+		var line = "│ "
+		for c in range(text_components.size()):
+			var col = text_components[c]
+			var cell = col[i] if i < col.size() else ""
+			line += pad_text(cell, widths[c])
+		text += line + "│\n"
+
+	text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
+	return text
+
+
+func find_largest_array(matrix: Array) -> Array:
+	if matrix.is_empty():
+		return [] # Return an empty array if the main array is empty
+
+	var largest_arr: Array = matrix[0]
+
+	for i in range(1, matrix.size()):
+		if matrix[i].size() > largest_arr.size():
+			largest_arr = matrix[i]
+
+	return largest_arr
+
+
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	if skill != Defragging:
@@ -82,8 +135,9 @@ func get_help_text(skill: Node) -> String:
 		text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
 	else:
 		text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
-
-	return _wrap_center_lines(text)
+	
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return _wrap_center_lines(final_text)
 
 func _wrap_center(text: String) -> String:
 	return "[center]" + text + "[/center]"
@@ -314,6 +368,8 @@ func info_command_text():
 	
 	return return_string
 
+
+
 func get_hack_target_info(location: Dictionary):
 	var return_text = ""
 	return_text += location.name + "\n"
@@ -459,7 +515,8 @@ func get_ascii_tree(current_context: String) -> String:
 		Phishing,
 		Compiling,
 		Hacking,
-		Decoding
+		Decoding,
+		Defragging
 	]
 	
 	var text = "\nIDLEOS\n"
@@ -555,9 +612,10 @@ func get_root_upgrades_text() -> String:
 	##LOOPING THROUGH MAJOR SKILLS
 	for upgrade in Upgrades.all_upgrades:
 		var skill = upgrade.skill
+		var skill_version = Upgrades.get_skill_version(upgrade.skill)
 		var color_string = skill.SKILL.color.to_html()
 		var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-		return_text += colored_name + " v" + str(upgrade.version) + "\n"
+		return_text += colored_name + " v" + str(skill_version) + "\n"
 		
 		##LOOPING THROUGH UPGRADES ARRAY [SPEED, EFFICIENCY, ETC]
 		
@@ -648,6 +706,7 @@ func get_skill_upgrades_text(upgrade):
 	return_text += "────────────────────────────────────────────────────────\n\n"
 	return_text += "Use 'apt <package>' for package information.\n"
 	return_text += "Use 'apt install <package>' to install.\n"
+	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.\n"
 
 	return return_text
 

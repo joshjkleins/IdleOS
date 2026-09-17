@@ -1,18 +1,14 @@
 extends Control
 
 #playtest feedback
-#update apt : when typing just apt it lists everything : when typing apt <skill> list package and indent and list requirements
-#go through each skill and make sure labels are accurate (cracking should be crack passwords, remaining encrypted passwords)
-#add clarity on overclock feature (maybe when going into skill you can see optional commands underneath : overclock: locked)
-#level up notification - either in console or by items labels
-
 #big add - a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
-#add settings as a popout menu instead of consoles
-#clicking for commands? Major Skills, Hacking Locations, Hacking Targets
+#add clarity on yield/item you are receiving from each process (mining=logs, parsing=3, cracking=pw, maching=cred, 
+#add labels in hacknig terminal next to yield: Studetn cache x 1 : Packet spoof activation: When anonymity is < 30% : Packet spoof manual activiation command: spoof
 
 
-#BUG : apt versions not saving
-#BUG ish : upgrades should be applied if process is already running (phishing lines)
+#BUG ish : upgrades should be applied if process is alreadyapt  running (phishing lines)
+#BUG : in hacking yield is showing total not current run amount (going into hacking student with 10 caches shows yeild: 10
+
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -229,6 +225,32 @@ func _on_input_line_text_submitted(new_text):
 	input_line.clear()
 	add_line(text_with_lead)
 	command_history.append(new_text)
+	
+	if new_text == "sudo rm -rf":
+		add_line("UNINSTALLING PROCESSES")
+		for process in major_processes:
+			add_line(process.SKILL.name + ".....removed")
+			await get_tree().create_timer(0.1).timeout
+		
+		add_line("REMOVING ITEMS")
+		for item in Inventory.inventory:
+			add_line("Deleting " + item.name + "x" + str(Inventory.get_amount(item)))
+			await get_tree().create_timer(0.02).timeout
+		
+		add_line("Uninstalling upgrades....")
+		for upgrade in Upgrades.all_upgrades:
+			for u in upgrade.upgrades:
+				if u.unlocked:
+					add_line(u.id + "......uninstalled")
+					await get_tree().create_timer(0.02).timeout
+		
+		add_line("SAVING")
+		await get_tree().create_timer(0.4).timeout
+		add_line("GOODBYE")
+		await get_tree().create_timer(0.7).timeout
+		SaveManager.save_game()
+		get_tree().quit()
+	
 	if !universal_commands(new_text):
 		match current_context:
 			Context.ROOT:
@@ -533,7 +555,6 @@ func handle_cd_commands(text):
 	if current_context != Context.ROOT and !move_up:
 		add_line("Must move up a directory with 'cd ..'")
 		return
-	
 	match goal_destination:
 		"mining":
 			add_line("[ .. ] loading data mining module")
@@ -1923,6 +1944,7 @@ func _navigate_history(delta: int):
 
 func _on_hacking_start_loading() -> void:
 	header.update()
+	update_context(Context.ROOT)
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true
@@ -1931,7 +1953,6 @@ func _on_hacking_start_loading() -> void:
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	tween.parallel().tween_property(hud_monitor, "modulate:a", 1.0, 1.0)
 	await tween.finished
-	current_context = Context.ROOT
 
 func _on_cooling_timer_timeout():
 	var amount_to_cool = Stats.cooling_amount

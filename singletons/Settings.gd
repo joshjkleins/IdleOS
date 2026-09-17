@@ -155,6 +155,8 @@ func settings_help() -> String:
 	lines.append(_row("settings <key>=<value>", "Apply a setting"))
 	lines.append(_row("settings reset", "Restore defaults"))
 	lines.append("|" + "_".repeat(BOX_INNER) + "|")
+	lines.append("\nexample: settings volume=25")
+	lines.append("example: settings window_mode=windowed\n")
 	return "\n".join(lines)
 
  

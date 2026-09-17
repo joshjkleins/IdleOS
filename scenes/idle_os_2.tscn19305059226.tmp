@@ -1,0 +1,173 @@
+[gd_scene load_steps=13 format=3 uid="uid://g3kf6mnbkbca"]
+
+[ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
+[ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
+[ext_resource type="PackedScene" uid="uid://cawbutc5qs2ck" path="res://scenes/hud_2.tscn" id="3_h30m8"]
+[ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="3_sd1y4"]
+[ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
+[ext_resource type="PackedScene" uid="uid://cmkmq8hglqsu4" path="res://scenes/hud_monitor.tscn" id="4_7qmxk"]
+[ext_resource type="PackedScene" uid="uid://nvkps616p7hs" path="res://scenes/hud_process_running.tscn" id="4_hvrtx"]
+[ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
+[ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
+[ext_resource type="Script" uid="uid://dbkqk0s6tx2x3" path="res://scripts/item_added_container.gd" id="8_h30m8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hvrtx"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+border_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pudlb"]
+bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)
+
+[node name="IdleOS2" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_u0uic")
+script = ExtResource("2_u0uic")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hvrtx")
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TerminalRoot" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Header" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+
+[node name="HEADER" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_h30m8")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HUDProcessRunning" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("4_hvrtx")]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/TerminalRoot"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+
+[node name="TerminalGrandparent" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
+layout_mode = 2
+
+[node name="TerminalBody" type="ScrollContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TerminalBodyContainer" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="Scrollback" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/TerminalBody/TerminalBodyContainer" instance=ExtResource("4_s42mw")]
+layout_mode = 2
+
+[node name="InputLineContainer" type="HBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent"]
+layout_mode = 2
+size_flags_vertical = 0
+focus_mode = 2
+
+[node name="LeadText" type="RichTextLabel" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "IdleOS>"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="InputLine" type="LineEdit" parent="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/focus = SubResource("StyleBoxFlat_pudlb")
+placeholder_text = "type a command or -h for help"
+keep_editing_on_text_submit = true
+context_menu_enabled = false
+caret_blink = true
+
+[node name="Hacking" parent="Panel/MarginContainer" instance=ExtResource("3_wp27s")]
+visible = false
+layout_mode = 2
+
+[node name="Loading" parent="Panel/MarginContainer" instance=ExtResource("4_u0uic")]
+visible = false
+layout_mode = 2
+
+[node name="TrackingContainer" type="Control" parent="Panel"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -229.0
+offset_top = 93.0
+offset_right = -29.0
+offset_bottom = 172.0
+grow_horizontal = 0
+
+[node name="HUDMonitor" parent="Panel/TrackingContainer" instance=ExtResource("4_7qmxk")]
+layout_mode = 2
+offset_right = 200.0
+
+[node name="Timers" type="Node2D" parent="."]
+position = Vector2(8, 8)
+
+[node name="LogparsingTimer" type="Timer" parent="Timers"]
+one_shot = true
+
+[node name="CoolingTimer" type="Timer" parent="Timers"]
+
+[node name="ItemAdded" type="Control" parent="."]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ItemAddedContainer" type="VBoxContainer" parent="ItemAdded"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = -34.0
+offset_top = -51.0
+offset_right = 143.0
+offset_bottom = -7.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("8_h30m8")
+
+[connection signal="text_submitted" from="Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer/InputLine" to="." method="_on_input_line_text_submitted"]
+[connection signal="start_loading" from="Panel/MarginContainer/Hacking" to="." method="_on_hacking_start_loading"]
+[connection signal="timeout" from="Timers/CoolingTimer" to="." method="_on_cooling_timer_timeout"]
