@@ -2,12 +2,12 @@ extends Control
 
 #playtest feedback
 #big add - a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
-#add clarity on yield/item you are receiving from each process (mining=logs, parsing=3, cracking=pw, maching=cred, 
-#add labels in hacknig terminal next to yield: Studetn cache x 1 : Packet spoof activation: When anonymity is < 30% : Packet spoof manual activiation command: spoof
+#add clarity on yield/item you are receiving from each process (mining=logs, parsing=3, cracking=pw, maching=cred etc)
 
+
+#add functionality to start decoding different caches
 
 #BUG ish : upgrades should be applied if process is alreadyapt  running (phishing lines)
-#BUG : in hacking yield is showing total not current run amount (going into hacking student with 10 caches shows yeild: 10
 
 
 #STEPS FOR ADDING NEW MODULE
@@ -234,15 +234,16 @@ func _on_input_line_text_submitted(new_text):
 		
 		add_line("REMOVING ITEMS")
 		for item in Inventory.inventory:
-			add_line("Deleting " + item.name + "x" + str(Inventory.get_amount(item)))
-			await get_tree().create_timer(0.02).timeout
+			add_line("Deleting " + item.name + " x" + str(Inventory.get_amount(item)))
+			await get_tree().create_timer(0.1).timeout
 		
 		add_line("Uninstalling upgrades....")
 		for upgrade in Upgrades.all_upgrades:
 			for u in upgrade.upgrades:
-				if u.unlocked:
-					add_line(u.id + "......uninstalled")
-					await get_tree().create_timer(0.02).timeout
+				for level in u.levels:
+					if level.unlocked:
+						add_line(u.id + "......uninstalled")
+						await get_tree().create_timer(0.1).timeout
 		
 		add_line("SAVING")
 		await get_tree().create_timer(0.4).timeout
@@ -439,12 +440,12 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	if text.begins_with("add"):
-		var item_name = text.trim_prefix("add").strip_edges()
-		var item = Inventory.get_item_by_name(item_name)
-		if item != null:
-			Inventory.add_resource(item, 1)
-			return true
+	#if text.begins_with("add"):
+		#var item_name = text.trim_prefix("add").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.add_resource(item, 1)
+			#return true
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())

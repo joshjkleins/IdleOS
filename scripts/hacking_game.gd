@@ -19,6 +19,14 @@ extends VBoxContainer
 @onready var counter_bar = $AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/CounterBar
 @onready var firewall_bar = $StatsRow/HBoxContainer2/EnemySide/FirewallBar
 
+@onready var attack_dmg_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackDmgLabel
+@onready var attack_bandwidth_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackBandwidthLabel
+@onready var attack_firewall_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackFirewallLabel
+@onready var defense_restoer_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseRestoerLabel
+@onready var defense_bandwidth_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseBandwidthLabel
+@onready var defense_description_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseDescriptionLabel
+@onready var counter_dmg_label = $AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/CounterHelperTextRow/CounterDmgLabel
+
 @onready var yield_label = $BottomRow/HBoxContainer/YieldCol/YieldLabel
 
 @onready var anon_label = $StatsRow/HBoxContainer2/PlayerSide/AnonLabel
@@ -82,6 +90,7 @@ var recursive_hack: bool = false
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
 	Signals.end_hacking_signal.connect(kill_hack)
+	Signals.manual_packet_spoof_signal.connect(manual_defense)
 
 func _process(delta):
 	if is_hacking:
@@ -177,6 +186,16 @@ func setup(target: Dictionary, loadout: Dictionary = {}, recursive: bool = false
 	integ_label.text = "--/--"
 	#requirements
 	requirements = target.requirements
+	
+	attack_dmg_label.text = "DMG: --"
+	attack_bandwidth_label.text = "BANDWIDTH: --"
+	attack_firewall_label.text = "FIREWALL: --"
+	
+	defense_restoer_label.text = "RESTORE: --"
+	defense_bandwidth_label.text = "BANDWIDTH: --"
+	defense_description_label.text = "--"
+	
+	counter_dmg_label.text = "DMG: --"
 
 	update_status_label_badge("finding target", c_yellow)
 	#update # of sql injectors (attacks) and packet spoofer (heal)
@@ -188,7 +207,8 @@ func setup(target: Dictionary, loadout: Dictionary = {}, recursive: bool = false
 	attack_bar.value = 0
 	defense_bar.value = 0
 	counter_bar.value = 0
-
+	
+	reward_amount = 0
 	update_bottom_row()
 	#clear combat terminal
 	if labels_container.get_children().size() > 0:
@@ -202,7 +222,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}, recursive: bool = false
 	target_reward = target["loot"]
 	target_name = target["name"]
 	FIREWALL_AMOUNT = target["firewall"]
-	if Inventory.get_amount(defensive_item) > 0:
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
 		defending = true
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
@@ -258,8 +278,11 @@ func defense():
 	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
 	var info_text = "packet_spoof increased anonymity - anonymity +" + str(DEFEND_AMOUNT)
 	_update_info_panel(info_text, c_blue)
-	defending = Inventory.get_amount(defensive_item) > 0
-
+	
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+		defending = Inventory.get_amount(defensive_item) > 0
+	else:
+		defending = false
 	defense_bar.value = 0.0
 
 func counter():
@@ -272,6 +295,9 @@ func counter():
 	_update_info_panel(info_text, c_red)
 	if Stats.current_anon <= 0.0:
 		lose()
+	
+	if is_anon_below_healing_threshold():
+		defending = true
 
 func add_heat(amount: float):
 	if Stats.overheated:
@@ -353,7 +379,7 @@ func start_hack():
 	is_hacking = true
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
-	if Inventory.get_amount(defensive_item) > 0:
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
 		defending = true
 	if bandwidth_timer.is_stopped():
 		bandwidth_timer.wait_time = Hacking.bandwidth_recovery_speed
@@ -412,6 +438,17 @@ func prepare():
 
 	target_name_label.text = "-"
 	target_label_2.text = "-"
+
+	attack_dmg_label.text = "DMG: --"
+	attack_bandwidth_label.text = "BANDWIDTH: --"
+	attack_firewall_label.text = "FIREWALL: --"
+	
+	defense_restoer_label.text = "RESTORE: --"
+	defense_bandwidth_label.text = "BANDWIDTH: --"
+	defense_description_label.text = "--"
+	
+	counter_dmg_label.text = "DMG: --"
+	
 	_update_info_panel("locating " + target_name, c_white)
 	await get_tree().create_timer(1.0).timeout
 	_update_info_panel("target found", c_white)
@@ -440,6 +477,16 @@ func prepare():
 	await get_tree().create_timer(0.2).timeout
 	_update_info_panel("starting hack", c_white)
 	update_status_label_badge("hacking", c_green)
+	
+	attack_dmg_label.text = "DMG: " + str(ATTACK_AMOUNT) #HERE
+	attack_bandwidth_label.text = "BANDWIDTH: " + str(ATTACK_BW_COST)
+	attack_firewall_label.text = "FIREWALL: " + str(FIREWALL_DAMAGE)
+	
+	defense_restoer_label.text = "RESTORE: " + str(DEFEND_AMOUNT)
+	defense_bandwidth_label.text = "BANDWIDTH: " + str(DEFEND_BW_COST)
+	defense_description_label.text = "STARTS WHEN BELOW 30% ANONYMITY"
+	
+	counter_dmg_label.text = "DMG: " + str(COUNTER_AMOUNT)
 
 	integ_bar.max_value = INTEGRITY_AMOUNT
 	integ_bar.value = INTEGRITY_AMOUNT
@@ -499,3 +546,10 @@ func _on_bandwidth_timer_timeout():
 			attack()
 		elif queued_action.type == "Heal":
 			defense()
+
+func is_anon_below_healing_threshold() -> bool:
+	return Stats.current_anon * 100 <= Stats.max_anon * int(Stats.healing_threshold_auto_start * 100)
+
+func manual_defense():
+	if is_hacking and Inventory.get_amount(Items.PACKET_SPOOF) > 0 and !defending:
+		defending = true

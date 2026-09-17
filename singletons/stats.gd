@@ -19,6 +19,7 @@ var OVERHEAT_FAN: bool = false
 #hacking
 var current_anon: int = 100
 var max_anon: int = 100
+var healing_threshold_auto_start: float = 0.3
 
 var hacking_targets = {
 	"School": {
@@ -73,10 +74,10 @@ var hacking_targets = {
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
 				"heat": 1.3,
 				"exp": 2400,
-				"integrity": 120,
+				"integrity": 160,
 				"firewall": 20,
-				"counter": 3,
-				"counter speed": 25.0,
+				"counter": 6,
+				"counter speed": 30.0,
 				"loot": Items.PRINCIPAL_CACHE
 			},
 			{

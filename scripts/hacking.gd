@@ -124,6 +124,8 @@ func _on_player_hacking_box_command_entered(text):
 						if Stats.overclocked:
 							player_hacking_box.add_line("Killing overclock.")
 						Stats.overclocked = false
+					"spoof":
+						Signals.manual_packet_spoof()
 					_:
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type 'kill'")
 
@@ -237,6 +239,7 @@ func hacking_help_commands():
 		HackingContext.HACKING:
 			if Upgrades.get_package_info("hacking.overclock").current:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
+					["spoof", "Start packet spoof to restore anonymity."],
 					["kill", "Kills current hack attempt immediately."],
 					#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
 					["overclock", "Overclocks system to increase speed and heat output"],
@@ -244,5 +247,6 @@ func hacking_help_commands():
 				]))
 			else:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
+					["spoof", "Start packet spoof to restore anonymity."],
 					["kill", "Kills current hack attempt immediately."],
 				]))
