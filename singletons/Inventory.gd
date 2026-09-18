@@ -208,7 +208,8 @@ func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 
 	if not has_items:
 		return "You have no items."
-
+	
+	output += "\nuse 'ls <item>' for additional item information.\n\n"
 	return output
 
 func pad_text(value, width: int) -> String:

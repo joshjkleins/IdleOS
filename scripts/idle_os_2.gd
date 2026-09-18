@@ -1,14 +1,14 @@
 extends Control
 
 #playtest feedback
-#big add - a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
 #add clarity on yield/item you are receiving from each process (mining=logs, parsing=3, cracking=pw, maching=cred etc)
-
-
 #add functionality to start decoding different caches
+
+#cloud saving (if easy?)
 
 #BUG ish : upgrades should be applied if process is alreadyapt  running (phishing lines)
 
+#FEATURE:  a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -235,7 +235,7 @@ func _on_input_line_text_submitted(new_text):
 		add_line("REMOVING ITEMS")
 		for item in Inventory.inventory:
 			add_line("Deleting " + item.name + " x" + str(Inventory.get_amount(item)))
-			await get_tree().create_timer(0.1).timeout
+			await get_tree().create_timer(0.2).timeout
 		
 		add_line("Uninstalling upgrades....")
 		for upgrade in Upgrades.all_upgrades:
@@ -243,12 +243,12 @@ func _on_input_line_text_submitted(new_text):
 				for level in u.levels:
 					if level.unlocked:
 						add_line(u.id + "......uninstalled")
-						await get_tree().create_timer(0.1).timeout
+						await get_tree().create_timer(0.4).timeout
 		
 		add_line("SAVING")
-		await get_tree().create_timer(0.4).timeout
+		await get_tree().create_timer(0.8).timeout
 		add_line("GOODBYE")
-		await get_tree().create_timer(0.7).timeout
+		await get_tree().create_timer(1.2).timeout
 		SaveManager.save_game()
 		get_tree().quit()
 	
@@ -403,6 +403,7 @@ func universal_commands(text):
 		
 		if item_names in ["-a", "-all", "all"]:
 			add_line(hud_monitor.remove_all())
+			Tutorial.complete_event(Tutorial.TutorialEvent.UNTRACK_ITEMS)
 			return true
 		
 		var names = item_names.split(",")
@@ -440,12 +441,12 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	#if text.begins_with("add"):
-		#var item_name = text.trim_prefix("add").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.add_resource(item, 1)
-			#return true
+	if text.begins_with("add"):
+		var item_name = text.trim_prefix("add").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.add_resource(item, 1)
+			return true
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())
@@ -503,6 +504,15 @@ func universal_commands(text):
 				add_line("No active process to stop.")
 			Stats.overclocked = false
 			return true
+		"stop -s", "kill -s":
+			if current_process:
+				add_line("Stopping process after current cycle completion.")
+				current_process.stop_safely()
+				Tutorial.complete_event(Tutorial.TutorialEvent.STOP_MINING_PROCESS)
+				return true
+			else:
+				add_line("No active process to stop.")
+				return true
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
@@ -535,6 +545,9 @@ func universal_commands(text):
 			return true
 
 func handle_cd_commands(text):
+	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context == Context.ROOT:
+		add_line("Already at root.")
+		return
 	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context != Context.ROOT:
 		return_to_root()
 		return
@@ -589,7 +602,7 @@ func handle_cd_commands(text):
 			add_line(ContextCommands.get_help_text(Matching))
 		"hacking":
 			if process_running:
-				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
+				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.[/color]")
 				return
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
@@ -630,94 +643,97 @@ func handle_cd_commands(text):
 				var nt = text.substr(2).strip_edges()
 				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
 			else:
-				add_line("Command not found")
+				add_line("Command not found1")
 		
 
 #Root context commands
 func root_commands(text):
 	text = text.to_lower().strip_edges()
-	
-	match text:
-		"load mining", "cd mining":
-			add_line("[ .. ] loading data mining module")
-			#header.update_header(Mining)
-			header.display_skill(Mining)
-			add_line("[ OK ] data mining module loaded")
-			update_context(Context.MINING)
-			add_line(ContextCommands.get_help_text(Mining))
-			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
-		"load parsing", "cd parsing":
-			add_line("[ .. ] loading parsing module")
-			#header.update_header(Parsing)
-			header.display_skill(Parsing)
-			add_line("[ OK ] parsing module loaded")
-			update_context(Context.PARSING)
-			add_line(ContextCommands.get_help_text(Parsing))
-			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
-		"load cracking", "cd cracking":
-			add_line("[ .. ] loading cracking module")
-			#header.update_header(Cracking)
-			header.display_skill(Cracking)
-			add_line("[ OK ] cracking module loaded")
-			update_context(Context.CRACKING)
-			add_line(ContextCommands.get_help_text(Cracking))
-		"load matching", "cd matching":
-			add_line("[ .. ] loading matching module")
-			#header.update_header(Matching)
-			header.display_skill(Matching)
-			add_line("[ OK ] matching module loaded")
-			update_context(Context.MATCHING)
-			add_line(ContextCommands.get_help_text(Matching))
-		"load hacking", "cd hacking":
-			if process_running:
-				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
-				return
-			var tween = create_tween()
-			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-			tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
-			await tween.finished
-			terminal_root.visible = false
-			await loading.show_loading()
-			hacking.module_loaded()
-			current_context = Context.HACKING
-		#"marketplace -auth": #Go to marketplace
-			#add_line("[ .. ] requesting permissions")
-			#add_line("[ OK ] permission granted")
-			#add_line("Connected to online marketplace")
-			#update_context(Context.MARKETPLACE)
-			#add_line(Marketplace.marketplace_welcome())
-		"load decoding", "cd decoding":
-			add_line("[ .. ] loading decoding module")
-			#header.update_header(Decoding)
-			header.display_skill(Decoding)
-			add_line("[ OK ] decoding module loaded")
-			update_context(Context.DECODING)
-			add_line(ContextCommands.get_help_text(Decoding))
-		"load phishing", "cd phishing":
-			add_line("[ .. ] loading phishing module")
-			#header.update_header(Phishing)
-			header.display_skill(Phishing)
-			add_line("[ OK ] phishing module loaded")
-			update_context(Context.PHISHING)
-			add_line(ContextCommands.get_help_text(Phishing))
-		"load defragging", "cd defragging":
-			add_line("[ .. ] loading defragging module")
-			#header.update_header(Defragging)
-			header.display_defragging()
-			add_line("[ OK ] defragging module loaded")
-			update_context(Context.DEFRAGGING)
-			add_line(ContextCommands.get_help_text(Defragging))
-		"load compiling", "cd compiling":
-			add_line("[ .. ] loading compiling module")
-			header.display_skill(Compiling)
-			update_context(Context.COMPILING)
-			add_line(ContextCommands.get_help_text(Compiling))
-		_:#default
-			if text.begins_with("cd"):
-				var nt = text.substr(2).strip_edges()
-				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
-			else:
-				add_line("Command not found")
+	if text == "overclock":
+		add_line("Overclocking requires a process running in the main terminal (not VM window).")
+	else:
+		add_line("Command not found")
+	#match text:
+		#"load mining", "cd mining":
+			#add_line("[ .. ] loading data mining module")
+			##header.update_header(Mining)
+			#header.display_skill(Mining)
+			#add_line("[ OK ] data mining module loaded")
+			#update_context(Context.MINING)
+			#add_line(ContextCommands.get_help_text(Mining))
+			#Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
+		#"load parsing", "cd parsing":
+			#add_line("[ .. ] loading parsing module")
+			##header.update_header(Parsing)
+			#header.display_skill(Parsing)
+			#add_line("[ OK ] parsing module loaded")
+			#update_context(Context.PARSING)
+			#add_line(ContextCommands.get_help_text(Parsing))
+			#Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
+		#"load cracking", "cd cracking":
+			#add_line("[ .. ] loading cracking module")
+			##header.update_header(Cracking)
+			#header.display_skill(Cracking)
+			#add_line("[ OK ] cracking module loaded")
+			#update_context(Context.CRACKING)
+			#add_line(ContextCommands.get_help_text(Cracking))
+		#"load matching", "cd matching":
+			#add_line("[ .. ] loading matching module")
+			##header.update_header(Matching)
+			#header.display_skill(Matching)
+			#add_line("[ OK ] matching module loaded")
+			#update_context(Context.MATCHING)
+			#add_line(ContextCommands.get_help_text(Matching))
+		#"load hacking", "cd hacking":
+			#if process_running:
+				#add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
+				#return
+			#var tween = create_tween()
+			#tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
+			#tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
+			#await tween.finished
+			#terminal_root.visible = false
+			#await loading.show_loading()
+			#hacking.module_loaded()
+			#current_context = Context.HACKING
+		##"marketplace -auth": #Go to marketplace
+			##add_line("[ .. ] requesting permissions")
+			##add_line("[ OK ] permission granted")
+			##add_line("Connected to online marketplace")
+			##update_context(Context.MARKETPLACE)
+			##add_line(Marketplace.marketplace_welcome())
+		#"load decoding", "cd decoding":
+			#add_line("[ .. ] loading decoding module")
+			##header.update_header(Decoding)
+			#header.display_skill(Decoding)
+			#add_line("[ OK ] decoding module loaded")
+			#update_context(Context.DECODING)
+			#add_line(ContextCommands.get_help_text(Decoding))
+		#"load phishing", "cd phishing":
+			#add_line("[ .. ] loading phishing module")
+			##header.update_header(Phishing)
+			#header.display_skill(Phishing)
+			#add_line("[ OK ] phishing module loaded")
+			#update_context(Context.PHISHING)
+			#add_line(ContextCommands.get_help_text(Phishing))
+		#"load defragging", "cd defragging":
+			#add_line("[ .. ] loading defragging module")
+			##header.update_header(Defragging)
+			#header.display_defragging()
+			#add_line("[ OK ] defragging module loaded")
+			#update_context(Context.DEFRAGGING)
+			#add_line(ContextCommands.get_help_text(Defragging))
+		#"load compiling", "cd compiling":
+			#add_line("[ .. ] loading compiling module")
+			#header.display_skill(Compiling)
+			#update_context(Context.COMPILING)
+			#add_line(ContextCommands.get_help_text(Compiling))
+		#_:#default
+			#if text.begins_with("cd"):
+				#var nt = text.substr(2).strip_edges()
+				#add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
+			#else:
+		
 
 func return_to_root():
 	header.update()
@@ -950,7 +966,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	if Stats.CURRENT_ALL_VMS >= Stats.MAX_ALL_VMS:
-		add_line("Maximum total virtual machines running. Upgrade system with 'apt' to increase capacity.")
+		add_line("Maximum total virtual machines running. Upgrade [color=#14B8A6]System[/color] with 'apt' to increase capacity.")
 		return
 		
 	
@@ -1011,8 +1027,8 @@ func mining_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
-			add_line("Finishing current data mine...")
+		"stop -s", "kill -s":
+			add_line("Finishing current mine...")
 			current_process.stop_safely()
 		"focus":
 			if current_process:
@@ -1084,7 +1100,7 @@ func log_parsing_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current log...")
 			current_process.stop_safely()
 		"focus":
@@ -1167,7 +1183,7 @@ func password_unscramble_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current password...")
 			current_process.stop_safely()
 		"focus":
@@ -1258,7 +1274,7 @@ func cred_matching_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current match...")
 			current_process.stop_safely()
 		"focus":
@@ -1345,7 +1361,7 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current cache...")
 			current_process.stop_safely()
 		"focus":
@@ -1445,7 +1461,7 @@ func phishing_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current phishing attempt...")
 			current_process.stop_safely()
 		"focus":
@@ -1525,7 +1541,7 @@ func compiling_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current compile...")
 			current_process.stop_safely()
 		"focus":
@@ -1587,7 +1603,7 @@ func defragging_commands(text):
 				add_line(ms.name + " defragging not unlocked. Purchase from marketplace.")
 				return
 			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
+				add_line("Defragging is currently cooling down.")
 				return
 			start_defragging(ms)
 			return
@@ -1992,7 +2008,7 @@ func _kill_current_process():
 
 func system_cooled_out_of_overheat_range():
 	NOTIFY_OF_OVERHEAT = false
-	add_line("[color=blue]System no longer overheated.[/color]")
+	add_line("[color=#5599FF]System no longer overheated.[/color]")
 
 func overheat_terminal_notice():
 	if NOTIFY_OF_OVERHEAT:

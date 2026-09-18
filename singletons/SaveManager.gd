@@ -34,6 +34,7 @@ func save_game() -> void:
 		"decoding": Decoding.save_data(),
 		"compiling": Compiling.save_data(),
 		"hacking": Hacking.save_data(),
+		"defragging": Defragging.save_data(),
 		"tutorial": Tutorial.save_data(),
 		"stats": Stats.save_data(),
 	}
@@ -83,6 +84,7 @@ func load_game() -> bool:
 	Decoding.load_data(data.get("decoding", {}))
 	Compiling.load_data(data.get("compiling", {}))
 	Hacking.load_data(data.get("hacking", {}))
+	Defragging.load_data(data.get("defragging", {}))
 	Tutorial.load_data(data.get("tutorial", {}))
 	Stats.load_data(data.get("stats", {}))
 	

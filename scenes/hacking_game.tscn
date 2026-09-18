@@ -496,7 +496,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.574328, 0.574328, 0.574328, 1)
 theme_override_font_sizes/font_size = 10
-text = "YIELD"
+text = "YIELD (will be lost if anonymity reached 0)"
 
 [node name="YieldLabel" type="Label" parent="BottomRow/HBoxContainer/YieldCol"]
 layout_mode = 2

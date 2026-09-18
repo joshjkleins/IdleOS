@@ -172,7 +172,8 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	
 	if skill == Defragging:
 		var time = str(p["bonus time"]) + " min"
-		var eff = "x" + str(p["bonus efficiency"])
+		#var eff = "x" + str(p["bonus efficiency"])
+		var eff = "x" + String.num(p["bonus efficiency"], 2)
 		if unlocked:
 			return "│ %-14s %-11s %-12s %-9s %-35s %-40s │\n" % [
 				p["name"],
@@ -351,7 +352,7 @@ func info_command_text():
 	var l_lvl = 6
 	var l_exp = 18
 	var l_cmd = 20
-	return_string += pad_text("SKILL", l_name) + pad_text("UPGRADE", l_upgrades) + pad_text("LVL", l_lvl) + pad_text("COMMAND(from root)", l_cmd) + "\n"
+	return_string += pad_text("SKILL", l_name) + pad_text("VERSION", l_upgrades) + pad_text("LVL", l_lvl) + pad_text("COMMAND(from root)", l_cmd) + "\n"
 	return_string += "-".repeat(l_name + l_upgrades + l_lvl + l_cmd) + "\n"
 	var skills = [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling, Defragging]
 	for s in skills:
@@ -366,6 +367,9 @@ func info_command_text():
 			var name_s = "[color=#%s]%s[/color]" % [color_string, s.SKILL.name]
 			return_string += pad_text(name_s, l_name) + pad_text(version, l_upgrades) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(s.SKILL.command, l_cmd) + "\n"
 	
+	if Tutorial.is_tutorial_complete():
+		return_string += "\n\nUse 'apt <skill>' to see version upgrades. [color=#666666]example: apt mining[/color]\n"
+		return_string += "Use 'apt system' to see general system upgrades.\n"
 	return return_string
 
 
@@ -409,8 +413,9 @@ func ssh_commands(major_processes: Array) -> String:
 	var first_col = 15
 	var second_col = 20
 	var third_col = 25
-	var return_text = "SSH Commands\n\n"
-	return_text += pad_text("Skill", first_col) + pad_text("Tokens", second_col) + pad_text("Info", third_col) + "\n"
+
+	var return_text = "\n\nSSH Commands\n\n"
+	return_text += pad_text("Skill", first_col) + pad_text("VM Tokens", second_col) + pad_text("Info", third_col) + "\n"
 	return_text += "-".repeat(first_col + second_col + third_col) + "\n"
 	
 	for p in major_processes:
@@ -419,7 +424,9 @@ func ssh_commands(major_processes: Array) -> String:
 		var info_command = "ssh " + p.SKILL.name.to_lower()
 		var tokens = str(Inventory.get_amount(p.vm_token))
 		return_text += pad_text(s_name, first_col) + pad_text(tokens, second_col) + pad_text(info_command, third_col) + "\n"
-
+		
+	return_text += "\nVM Tokens can be used to run processes in a seperate pop-up window.\nEach window consumes a VM token to run for 30 seconds.\n"
+	return_text += "If there are additional VM tokens they will be consumed to run for an additional 30 seconds until the window is exited out of or you run out of VM Tokens for that skill."
 	return return_text
 	
 
@@ -639,9 +646,9 @@ func get_root_upgrades_text() -> String:
 		return_text += "\n"
 	
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt <package>' for package information.\n"
-	return_text += "Use 'apt install <package>' to install.\n"
-	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.\n"
+	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.   [color=#666666]apt mining[/color]\n"
+	return_text += "Use 'apt <package>' for package information.                      [color=#666666]apt mining.speed[/color]\n"
+	return_text += "Use 'apt install <package>' to install.                           [color=#666666]apt install mining.speed[/color]\n"
 	
 	return return_text
 
@@ -704,9 +711,10 @@ func get_skill_upgrades_text(upgrade):
 
 	return_text += "\n"
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt <package>' for package information.\n"
-	return_text += "Use 'apt install <package>' to install.\n"
-	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.\n"
+
+	return_text += "Use 'apt <package>' for package information.       [color=#666666]apt mining.speed[/color]\n"
+	return_text += "Use 'apt install <package>' to install.            [color=#666666]apt install mining.speed[/color]\n\n"
+	return_text += "[color=#666666]remember to use 'ls <item>' for more information on where to obtain items.[/color]\n"
 
 	return return_text
 

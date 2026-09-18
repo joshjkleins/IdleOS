@@ -125,44 +125,96 @@ func _on_player_hacking_box_command_entered(text):
 							player_hacking_box.add_line("Killing overclock.")
 						Stats.overclocked = false
 					"spoof":
-						Signals.manual_packet_spoof()
+						if Inventory.get_amount(Items.PACKET_SPOOF) <= 0:
+							player_hacking_box.add_line_error("OUT OF PACKET SPOOFS")
+						else:
+							Signals.manual_packet_spoof()
 					_:
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type 'kill'")
 
 func handle_hack_command(text):
 	var recursive: bool = false
-	var tokens = Array(text.split(" ", false)) # convert PackedStringArray -> Array so we can use erase()
+	var overclock: bool = false
+	var hack_count: int = 1
+	
+	var tokens = Array(text.split(" ", false))
+	
+	# Check for recursive flag
 	if "-r" in tokens:
 		if !Upgrades.get_package_info("hacking.recursive_hacking").current:
 			player_hacking_box.add_line_error("Recursive functionality not unlocked. Unlock with apt upgrade manager.")
+			return
 		else:
 			recursive = true
+		
 		tokens.erase("-r")
-
-	text = " ".join(tokens)
-
-	var target: Dictionary = Stats.get_hacking_target_by_command(text)
 	
-	#Valid target
+	# Check for overclock flag
+	if "-overclock" in tokens:
+		tokens.erase("-overclock")
+		
+		if !Upgrades.can_overclock(Hacking):
+			player_hacking_box.add_line_error("Overclocking for hacking not unlocked, continuing without overclock.")
+		if Upgrades.can_overclock(Hacking) and !Stats.overheated:
+			overclock = true
+	
+	# Check for hack count (the "=N" can be on any token, e.g. "hack vice principal=25")
+	for i in tokens.size():
+		var equals_index: int = tokens[i].find("=")
+		if equals_index == -1:
+			continue
+		
+		var count_text: String = tokens[i].substr(equals_index + 1)
+		tokens[i] = tokens[i].substr(0, equals_index)
+		
+		if !count_text.is_valid_int():
+			player_hacking_box.add_line_error("Invalid hack amount.")
+			return
+		
+		hack_count = int(count_text)
+		if hack_count <= 0:
+			player_hacking_box.add_line_error("Hack amount must be greater than 0.")
+			return
+		break
+	
+	# Command with the "=N" removed, e.g. "hack student" or "hack vice principal"
+	var target_name: String = " ".join(tokens)
+	text = target_name
+	
+	# Recursive and specific amount are mutually exclusive
+	if recursive:
+		hack_count = -1
+	
+	var target: Dictionary = Stats.get_hacking_target_by_command(target_name)
+	
+	# Valid target
 	if target.is_empty():
-		player_hacking_box.add_line_error("Not a valid target.")
+		player_hacking_box.add_line_error("Not a valid command.")
+		player_hacking_box.add_line_system("Example: hack student=4")
+		player_hacking_box.add_line_system("Example: hack student=4 -overclock")
+		player_hacking_box.add_line_system("Example: hack student -overclock")
 		return
 	
-	#Has requirements in inventory
+	# Has requirements in inventory
 	if !_has_hacking_requirements(target):
 		await enemy_hacking_box.target_select_error(target)
 		player_hacking_box.add_line_error("Missing required payloads.")
 		player_hacking_box.add_line_error("Missing: " + target.requirements.item.name + " x" + str(target.requirements.amount))
 		return
+	
 	if Inventory.get_amount(Items.SQL_INJECTOR) <= 0:
-		player_hacking_box.add_line_error("Missing offensive hacking attack. [color=666666]can be found with Phishing[/color]")
+		player_hacking_box.add_line_error("Missing SQL Injectors.")
+		player_hacking_box.add_line_system("Can be found Phishing.")
 		return
 	
 	toggle_hacking_accepted_input_text(false)
 	current_context = HackingContext.HACKING
 	hacking_help_commands()
+	
 	Stats.current_anon = Stats.max_anon
-	await enemy_hacking_box.select_person(target, recursive)
+	
+	await enemy_hacking_box.select_person(target, hack_count, overclock)
+	
 	toggle_hacking_accepted_input_text(true)
 
 func handle_back_command():
@@ -228,12 +280,14 @@ func hacking_help_commands():
 			var recursive_unlocked = Upgrades.get_package_info("hacking.recursive_hacking").current
 
 			var commands = [
-				["hack [target]", "Start hacking target", "e.g. hack student"],
-				["cd ..",            "Return to locations directory", "e.g. 'cd ..'"]
+				["hack [target]", "Hack target once", "e.g. hack student"],
+				["hack [target]=[amount]", "Hack target a set number of times", "e.g. hack student=20"],
+				["hack [target] -overclock", "Hack target with overclock", "e.g. hack student -overclock"],
+				["cd ..", "Return to locations directory", "e.g. 'cd ..'"]
 			]
 
 			if recursive_unlocked:
-				commands.insert(1, ["hack [target] -r", "Recursively hack target until manually cancelled or defeated", "e.g. hack student -r"])
+				commands.insert(2, ["hack [target] -r", "Recursively hack target until manually cancelled or defeated", "e.g. hack student -r"])
 
 			player_hacking_box.add_line(format_command_list("COMMANDS", commands))
 		HackingContext.HACKING:

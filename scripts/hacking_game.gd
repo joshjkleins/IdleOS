@@ -83,9 +83,12 @@ var stop_hacking: bool = false
 
 var caches_gained: int = 0
 
-# If true (set via "-r" flag passed into setup()), a successful hack loops
-# back into another attempt against the same target instead of ending.
-var recursive_hack: bool = false
+# Number of hacks remaining.
+# -1 means recursive/unlimited.
+var hacks_remaining: int = 1
+
+# If true, the hack starts in overclock mode.
+var start_overclock: bool = false
 
 func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
@@ -140,10 +143,19 @@ func queue_defense(item):
 
 # recursive: if true, a successful hack auto-restarts against the same
 # target instead of ending after a win (set via the "-r" command flag).
-func setup(target: Dictionary, loadout: Dictionary = {}, recursive: bool = false):
+#target, loadout, hack_count, overclock
+func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
 	caches_gained = 0
 	stop_hacking = false
-	recursive_hack = recursive
+	
+	# Store how many hacks to perform.
+	# -1 means recursive/unlimited.
+	hacks_remaining = hack_count
+	
+	# Store whether this session should start overclocked.
+	start_overclock = overclock
+	Stats.overclocked = start_overclock
+	
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
 	var dmg_upgrade = Upgrades.get_package_info("hacking.damage")
@@ -256,6 +268,9 @@ func attack():
 	_update_info_panel(i_text, c_green)
 	_update_info_panel("firewall damaged: -" + str(FIREWALL_DAMAGE), c_yellow)
 	attacking = Inventory.get_amount(offensive_item) > 0
+	
+	if !attacking:
+		Signals.update_hack_console("\n\n[color=#e24b4a]OUT OF SQL INJECTORS - ABORT HACKING WITH 'KILL'[/color]\n")
 
 	attack_bar.value = 0.0
 	if integ_bar.value <= 0.0:
@@ -341,7 +356,12 @@ func win():
 	Exp.add_xp(Hacking, null, EXP_AMOUNT)
 	Signals.update_hacking_header()
 
-	if recursive_hack:
+	# Decrease remaining hacks unless running recursively.
+	if hacks_remaining > 0:
+		hacks_remaining -= 1
+	
+	# Continue if there are more hacks remaining or recursive mode is active.
+	if hacks_remaining == -1 or hacks_remaining > 0:
 		reset()
 	else:
 		_finish_hack()
@@ -354,9 +374,13 @@ func _finish_hack():
 	attacking = false
 	defending = false
 	stop_hacking = true
+	Signals.update_hack_console("\n\n[color=#4ec994]SUCCESSFULLY HACKED " + target_name + "[/color]")
+	Signals.update_hack_console("[color=#4ec994]Gained " + target_reward.name + " x" + str(caches_gained) + "[/color]\n\n")
 	_grant_rewards()
 	_update_info_panel("hack complete, disconnecting", c_blue)
 	await get_tree().create_timer(1.0).timeout
+	#target_name
+
 	Signals.hacking_ended()
 
 func _grant_rewards():
@@ -431,6 +455,9 @@ func prepare():
 		Stats.overclocked = false
 		_update_info_panel("Unable to find target", c_red)
 		Signals.update_hack_console("[color=#ef9f27]Missing required resources to hack " + target_name + ", aborting.[/color]\n")
+		if caches_gained > 0:
+			Signals.update_hack_console("\n\n[color=#4ec994]SUCCESSFULLY HACKED " + target_name + "[/color]")
+			Signals.update_hack_console("[color=#4ec994]Gained " + target_reward.name + " x" + str(caches_gained) + "[/color]\n\n")
 		await get_tree().create_timer(1.5).timeout
 		Stats.overclocked = false
 		Signals.hacking_ended()

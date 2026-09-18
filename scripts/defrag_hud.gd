@@ -37,7 +37,7 @@ func cooldown_text(): #called when defragging has finished and cooldown has star
 func update(): #called when user goes to root or starts game
 	skill_label.text = Defragging.SKILL.name
 	#cooldown/available logic
-	
+	cooldown_text()
 	await fade_out_minor()
 	fade_in_major()
 

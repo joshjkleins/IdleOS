@@ -58,7 +58,7 @@ var SPEAR = {
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 10 },
 	],
 	"resource amount gained": 1,
-	"description": "Send out emails in an attempt to get usernames and passwords",
+	"description": "Harvest SQL Injectors and Packet Spoofs through targeted phishing emails",
 	"efficiency description": "Chance for successful bite",
 	"signal": spear_cycle_completed
 }

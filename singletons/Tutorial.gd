@@ -56,47 +56,53 @@ enum TutorialEvent {
 	RUN_VM_WITH_SSH,
 }
 
+
+
+
+
+
+
 var tutorial_tasks := {
-	TutorialEvent.RUN_HELP_COMMAND: "Type '-h' to see the available commands.",
-	TutorialEvent.NAVIGATE_MINING: "Navigate to the Mining skill with 'cd mining'.",
-	TutorialEvent.RUN_MINING_LOG: "Run the mining logs process with 'mine -logs'.",
+	TutorialEvent.RUN_HELP_COMMAND: "Type '-h' to see the available commands. If you're ever stuck, this is a good way to see your current command options.",
+	TutorialEvent.NAVIGATE_MINING: "Navigate to the Mining skill with 'cd mining'. Navigating in the terminal always uses the command 'cd', which stands for Change Directory, followed by where you'd like to go.",
+	TutorialEvent.RUN_MINING_LOG: "Each skill has processes you can run. The pattern to run a process is <singular skill name> -<process name>. Run the mine logs process with 'mine -logs'.",
 	
-	TutorialEvent.INFO_COMMAND: "Use 'info' to view the list of skills.",
-	TutorialEvent.INFO_MINING_COMMAND: "Use 'info mining' to view specific Mining info.",
-	TutorialEvent.USE_FOCUS: "Use 'focus' to bring the active process to the bottom.",
-	TutorialEvent.USE_STICKY: "Use 'sticky' to pin the mining process.",
-	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list of your items.",
-	TutorialEvent.LIST_LOG_DETAILS: "Use 'ls logs' to view information about your logs. Additional details for any item can be seen with 'ls <item name>'.",
+	TutorialEvent.INFO_COMMAND: "Use 'info' to view the list of skills. These are all the places you can navigate to and run processes, as well as their current version and level.",
+	TutorialEvent.INFO_MINING_COMMAND: "Use 'info mining' to view specific Mining info. This is the same information presented when entering that directory, in case you need to see relevant info from elsewhere.",
+	TutorialEvent.USE_FOCUS: "Use 'focus' to bring the active process to the bottom. If you're unsure if you have a process running, you can look in the top right of the terminal next to the system temperature.",
+	TutorialEvent.USE_STICKY: "Use 'sticky' to pin the mining process to the top to prevent it from going off screen.",
+	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list of your items. 'ls' stands for 'list' and will show everything you have obtained so far.",
+	TutorialEvent.LIST_LOG_DETAILS: "Use 'ls logs' to view information about your Logs item. Additional details for any item can be seen with 'ls <item name>', including where it's used, where it's obtained, drop rates, etc.",
 	
 	TutorialEvent.MINE_20_LOGS: "Mine 20 logs.",
 	TutorialEvent.USE_UNSTICKY: "Use 'unsticky' to unpin the mining process.",
-	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'.",
-
-	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First return to the root directory with 'cd ..' then to the Parsing skill with 'cd parsing'",
-	TutorialEvent.PARSE_20_LOGS: "Parse through 20 logs with the Footprint process.",
-	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Obtain 3 encrypted passwords from parsing logs.",
-	TutorialEvent.OBTAIN_3_USERNAMES: "Obtain 3 usernames from Parsing logs.",
-	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Obtain 3 IP Addresses from Parsing logs.",
-
-	TutorialEvent.CRACK_3_PASSWORDS: "Navigate to and use the Cracking skill to crack 3 encrypted passwords.",
+	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'. You can add the '-s' flag to wait until the end of the current cycle to safely end and prevent wasting resources. [kill -s]",
 	
-	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 3 credentials.",
-
-	TutorialEvent.PHISH_SPEAR_INFO: "Use 'info phishing spear' to view what can be obtained from spear phishing",
-	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. hint: 'track <item name>'",
-	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to Phishing and use the Spear skill to phish for 10 SQL injectors.",
-	TutorialEvent.PHISH_1_PACKET_SPOOFS: "In Phishing, use the Spear skill to phish for 1 packet spoof.",
-	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'.",
-	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 3 school payloads.",
-
-	TutorialEvent.NAVIGATE_HACKING: "Navigate to the Hacking terminal.",
+	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First, return to the root directory with 'cd ..', then go to the Parsing skill with 'cd parsing'.",
+	TutorialEvent.PARSE_20_LOGS: "Parse through 20 logs with the Footprint process. You can also view what items you get from this process with 'info <skill> <process>'. Ex. info parsing footprint",
+	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Use the Footprint process to parse through logs and obtain 3 encrypted passwords.",
+	TutorialEvent.OBTAIN_3_USERNAMES: "Use the Footprint process to parse through logs and obtain 3 usernames.",
+	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Use the Footprint process to parse through logs and obtain 3 IP addresses.",
+	
+	TutorialEvent.CRACK_3_PASSWORDS: "Navigate to and use the Cracking skill to crack 3 encrypted passwords into usable passwords. Tip: You can navigate directly without having to go back to the root directory with 'cd ../cracking'.",
+	
+	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 3 credentials. Matching takes 2 items and combines them. Matching a Username and Password gives you a credential used to build a payload for hacking.",
+	
+	TutorialEvent.PHISH_SPEAR_INFO: "Use 'info phishing spear' to view what can be obtained from spear phishing.",
+	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. Hint: 'track <item name>'. This keeps a live count in the top right corner of the terminal, below the system temperature.",
+	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to Phishing and use the Spear skill to phish for 10 SQL Injectors. Learn more about SQL Injectors with 'ls sql injectors'.",
+	TutorialEvent.PHISH_1_PACKET_SPOOFS: "In Phishing, use the Spear skill to phish for 1 Packet Spoof. Learn more about Packet Spoofs with 'ls packet spoof'.",
+	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'. If you're tracking multiple items you want removed, you can remove them all with the '-a' flag. Ex. untrack -a",
+	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 3 school payloads. Payloads require a Credential and IP Address and are required to attempt hacking.",
+	
+	TutorialEvent.NAVIGATE_HACKING: "Navigate to the Hacking skill.",
 	TutorialEvent.HACK_STUDENT: "Successfully hack a student and obtain a Student Cache.",
-
-	TutorialEvent.DECODE_1_STUDENT_CACHE: "Decode 1 student cache.",
-
+	
+	TutorialEvent.DECODE_1_STUDENT_CACHE: "Decode 1 Student Cache. To exit the Hacking skill use 'cd ..' until back to root.",
+	
 	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT: "Upgrade the Mining skill to unlock overclocking with 'apt'.",
-
-	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Requires a VM Token. For more info on ssh commands use 'ssh'.",
+	
+	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Requires a VM Token. For more info on SSH commands, use 'ssh'.",
 }
 
 var tutorial_progress: Dictionary = {}

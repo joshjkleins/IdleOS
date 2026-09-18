@@ -40,14 +40,14 @@ func select_target(target: Dictionary = {}):
 	update_box_title("IdleOS > Hacking > " + target.name)
 	await _show_container(persons_container)
 
-func select_person(target: Dictionary = {}, recursive: bool = false):
+func select_person(target: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
 	await _green_flash(target, persons_container)
 	await _hide_container(persons_container)
 	var loadout = {
 		"offensive": Items.SQL_INJECTOR,
 		"defensive": Items.PACKET_SPOOF
 	}
-	hacking_game.setup(target, loadout, recursive)
+	hacking_game.setup(target, loadout, hack_count, overclock)
 	update_box_title(rtl.text + " > " + target.name)
 	await _show_container(hacking_game)
 	await hacking_game.prepare()
