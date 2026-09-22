@@ -871,19 +871,19 @@ Bandwidth Restore: +%s/second
 """ % [tempature, cooling_amount, time, current_vms, max_vms, max_anon, m_band, bw_recov]
 
 
-func playtest_welcome_message():
+func demo_welcome_message():
 	return """
-WELCOME TO THE IDLEOS PLAYTEST
+WELCOME TO THE IDLEOS DEMO
 
-This is a playtest build, and your feedback is valuable.
-Please report any bugs, issues, or general feedback in the Discord:
+Thanks for playing IdleOS!
+
+Want to share your thoughts, suggestions, or see what others are saying?
+Join the IdleOS Discord:
 
 https://discord.gg/XnrH7zrdb
 
-Thanks for helping test IdleOS!
-
-To view this message again, use the 'playtest' command.
-To copy the discord link to your clipboard use 'discord -c'
+To view this message again, use the 'demo' command.
+To copy the Discord link to your clipboard, use 'discord -c'
 """
 
 func discord_message():

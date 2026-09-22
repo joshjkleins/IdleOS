@@ -2,21 +2,19 @@ extends PanelContainer
 
 
 @onready var blinking_timer = $BlinkingTimer
-#@onready var breadcrumbs = $MarginContainer/VBoxContainer/FirstRow/Breadcrumbs
-#@onready var running_label = $MarginContainer/VBoxContainer/FirstRow/HBoxContainer/RunningLabel
 @onready var title = $MarginContainer/VBoxContainer/SecondRow/Title
 @onready var tier = $MarginContainer/VBoxContainer/SecondRow/HBoxContainer/Tier
 @onready var progress_row = $MarginContainer/VBoxContainer/ProgressRow
 @onready var percent_label = $MarginContainer/VBoxContainer/FourthRow/HBoxContainer/PercentLabel
 @onready var data_yield_label = $MarginContainer/VBoxContainer/InfoRow/DataCol/DataYield
-#@onready var data_rate_label = $MarginContainer/VBoxContainer/InfoRow/RateCol/DataRate
 @onready var cycles_label = $MarginContainer/VBoxContainer/InfoRow/CyclesCol/Cycles
 @onready var time_label = $MarginContainer/VBoxContainer/InfoRow/TimeCol/Time
 @onready var efficiency_label = $MarginContainer/VBoxContainer/InfoRow/EffeciencyCol/EfficiencyLabel
 @onready var level_label = $MarginContainer/VBoxContainer/InfoRow/LevelCol/LevelLabel
 @onready var yield_title_label = $MarginContainer/VBoxContainer/InfoRow/DataCol/YieldTitleLabel
 
-
+@onready var total_label_title = $MarginContainer/VBoxContainer/InfoRow/TotalCol/TotalLabelTitle
+@onready var total_label_amount = $MarginContainer/VBoxContainer/InfoRow/TotalCol/TotalLabelAmount
 
 # Data Mining – color scheme
 # Backgrounds
@@ -96,10 +94,12 @@ func set_mine_type(type: Dictionary, window: bool = false):
 	OVERHEAT_HEAT = type["overheat heat"]
 	RESOURCE_GAIN = type["resource gained"]
 	EXP_PER_COMPLETION = type["experience per level"]
-	#EFFICIENCY_RATE = type["efficiency rate"] + (Mining.process_upgrades["efficiency"]["amount"] - 1.0)
 	tier.text = type["tier name"]
 	yield_title_label.text = type["name"].to_upper() + " YIELD"
 	title.text = "MINING " + type["name"].to_upper()
+	
+	total_label_title.text = "TOTAL " + type["name"].to_upper()
+	total_label_amount.text = str(Inventory.get_amount(RESOURCE_GAIN))
 
 func start_data_mining():
 	process_running = true
@@ -152,6 +152,7 @@ func _cycle_complete(overclocked: bool, overheated: bool):
 	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
+	total_label_amount.text = str(Inventory.get_amount(RESOURCE_GAIN))
 	Tutorial.track_event(Tutorial.TutorialEvent.MINE_20_LOGS, reward_quantity_gained)
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)

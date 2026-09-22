@@ -10,6 +10,8 @@ extends PanelContainer
 @onready var item_find_container_3 = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer3
 @onready var item_find_container_4 = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer4
 
+@onready var player_total_labels = $MarginContainer/VBoxContainer/MarginContainer4/PlayerTotalLabels
+
 @onready var log_line_scene = preload("res://scenes/log_line.tscn")
 
 const MAX_LOG_LINES = 10
@@ -31,15 +33,23 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 	is_window = i_window
 	
 	var item_labels = [item_find_container, item_find_container_2, item_find_container_3, item_find_container_4]
+	
+	for i in player_total_labels.get_children():
+		i.visible = false
 	#var item_chance = int(100.0 / type["resource gained"].size())
 	for i in item_labels:
 		i.visible = false
+		
+	update_total_player_labels()
+	
 	for i in range(type["resource gained"].size()):
 		var cont = item_labels[i]
 		var item = type["resource gained"][i]
 		cont.get_child(0).text = item["item"]["name"].to_upper()
 		cont.get_child(1).text = str(type["resource gained"][i]["weight"]) + "%" #str(item_chance) + "%"
+		
 		item_labels[i].visible = true
+		player_total_labels.get_child(i).visible = true
 	
 	var eff = _get_total_effeciency()
 	chance_per_line_label.text = "%.1f%%" % (eff * 100.0)
@@ -79,6 +89,7 @@ func start():
 					item = item_info["item"]
 					amount = randi_range(item_info["min"], item_info["max"])
 					Inventory.add_resource(item, amount)
+					update_total_player_labels()
 					if item == Items.ENCRYPTED_PASSWORDS:
 						Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS, 1)
 					if item == Items.USERNAMES:
@@ -150,3 +161,12 @@ func _get_total_effeciency() -> float:
 	var defragging_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
 	
 	return (base + upgrades.current) * defragging_bonus
+
+
+func update_total_player_labels():
+	for i in range(type["resource gained"].size()):
+		var item = type["resource gained"][i]
+		var total_label = player_total_labels.get_child(i)
+		total_label.get_child(0).text = item.item.name.to_upper() + " TOTAL"
+		total_label.get_child(1).text = str(Inventory.get_amount(item.item))
+		total_label.visible = true

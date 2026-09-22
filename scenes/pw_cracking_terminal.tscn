@@ -164,4 +164,40 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "0.0%"
 
+[node name="PlayerAmountLabels" type="VBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="VBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels"]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels/VBoxContainer4"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 10
+text = "ENCRYPTED PASSWORDS"
+
+[node name="Efficiency" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels/VBoxContainer4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "123"
+
+[node name="VBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels"]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels/VBoxContainer5"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.419608, 0.470588, 1)
+theme_override_font_sizes/font_size = 10
+text = "PASSWORDS"
+
+[node name="Efficiency" type="Label" parent="MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels/VBoxContainer5"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "519"
+
 [connection signal="value_changed" from="MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBar" to="." method="_on_progress_bar_value_changed"]

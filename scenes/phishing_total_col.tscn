@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2olqa5n0nypr"]
+
+[ext_resource type="Script" uid="uid://cdqbaplq74gn7" path="res://scripts/phishing_total_col.gd" id="1_47gxp"]
+
+[node name="PhishingTotalCol" type="VBoxContainer"]
+script = ExtResource("1_47gxp")
+
+[node name="TotalLabelTitle" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "TOTAL LOGS"
+
+[node name="TotalLabelAmount" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "1"

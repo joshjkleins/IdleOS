@@ -1,14 +1,31 @@
 extends Control
 
-#playtest feedback
-#add clarity on yield/item you are receiving from each process (mining=logs, parsing=3, cracking=pw, maching=cred etc)
-#add functionality to start decoding different caches
+#								FOR DEMO
+#---------------------------------------------------------------------------------------
+#Add functionality to Decoding to let player choose caches.
+#cloud saving
+#INTRO
+#--------
+#First time launch, let everything download (skills, tempature, etc)
+#Add someone communicating with the player, first objective is to hack a student and get their parents CC info.
+#add tab auto-complete
+#add control panel for VM windows, allow t=<tokens to use> for amount of cycles/tokens to be used
+#---------------------------------------------------------------------------------------
 
-#cloud saving (if easy?)
 
-#BUG ish : upgrades should be applied if process is alreadyapt  running (phishing lines)
+#	IDEA A
+# Phishing:  'bait' to be used for Phishing, increasing bite chance + chance for addtional other items | attach 'logs' to phishing attempt, +5% chance to bite, 50% for IP address to be attached
+# Mining : 
+# Parsing : Parse through caches first to increase drop rates? Turns Student Cache into Student Cache+ | add 't=<item>' command so players can parse specifically for an item. Also add a=<amount> with this example: parse -footprint t=ip_address a=25
+# Cracking : Crack VM Tokens to change what they can be used for. crack -vm destroy=vm_mining_token : Gives generic VM Token to be used for anything. Uses 3 tokens?
+# Matching : Match all caches of a Location > create School Cache (or school cache+ if parsed) which when decoded has 50% chance to give 2-5 of each cache.
+# Compiling : give each item compiling effect (maybe only works for that tier of hacking (ip address x 10 = increase sql damage by 1 for next 1 hack)
+# Hacking : add difficulty tiers Student tier 1 gives 1 cache, tier 2 gives 5, tier 3 gives 15?
+# Decoding : Decode logs for 1% chance at super powerful compiling item (sql amplifier = +100% speed for next 10 hacks) for that tier (tier 1 is logs, tier 2-6ish determined later)
+# Defragging : 
 
-#FEATURE:  a mysterious person giving a small narrative. You've been chosen, i need to you obtain some things for me. to start just try to get through hacking a student.
+
+#MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
@@ -129,7 +146,7 @@ func _ready():
 	input_line.grab_focus() #uncomment this when not testing hacking module
 	
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
-	add_line(ContextCommands.playtest_welcome_message())
+	add_line(ContextCommands.demo_welcome_message())
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
 		add_line("To get started, type `-h` in the terminal.")
@@ -441,12 +458,12 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	#if text.begins_with("add"):
-		#var item_name = text.trim_prefix("add").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.add_resource(item, 1)
-			#return true
+	if text.begins_with("add"):
+		var item_name = text.trim_prefix("add").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.add_resource(item, 10)
+			return true
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())
@@ -976,7 +993,6 @@ func handle_vm_token_commands(text):
 	
 	add_child(new_window)
 
-
 	var parent_window = get_window()
 	var center_pos = parent_window.position + parent_window.size - new_window.size
 	new_window.position = center_pos
@@ -984,8 +1000,8 @@ func handle_vm_token_commands(text):
 	new_window.transient = false
 	new_window.always_on_top = true
 	new_window.start()
-	new_window.size = new_window.min_size
 	await get_tree().process_frame
+	new_window.size = new_window.get_child(2).custom_minimum_size
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
 

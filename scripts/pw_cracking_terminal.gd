@@ -13,6 +13,7 @@ extends Control
 @onready var progress_bar_label = $MarginContainer/VBoxContainer/PwRow/HBoxContainer/ProgressBarLabel
 @onready var title_label = $MarginContainer/VBoxContainer/TitleRow/TitleLabel
 @onready var efficiency = $MarginContainer/VBoxContainer/InfoRow/VBoxContainer3/Efficiency
+@onready var player_amount_labels = $MarginContainer/VBoxContainer/InfoRow/PlayerAmountLabels
 
 @export var pw_row: PackedScene
 
@@ -57,6 +58,8 @@ func start():
 	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
 	cracked_label.text = str(amount_cracked)
 	title_label.text = type["name"] + " Cracking"
+	
+	set_player_amount_labels()
 	
 	var speed_cracking_package = Upgrades.get_package_info("cracking.speed")
 	var speed_upgrade = speed_cracking_package.current
@@ -220,6 +223,7 @@ func _successful_crack(heat: float):
 	type.signal.emit(1)
 	Inventory.remove_resource(type["requirements"], 1)
 	Inventory.add_resource(type["resource gained"], 1)
+	set_player_amount_labels()
 	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
@@ -248,3 +252,17 @@ func _get_total_efficiency() -> float:
 	var efficiency_upgrade = efficiency_cracking_package.current
 	
 	return (base_eff + efficiency_upgrade) * frag_bonus
+
+
+func set_player_amount_labels():
+	var required_item_label = player_amount_labels.get_child(0)
+	var received_item_label = player_amount_labels.get_child(1)
+	
+	var required_item = type["requirements"]
+	var received_item = type["resource gained"]
+	
+	required_item_label.get_child(0).text = required_item.name
+	received_item_label.get_child(0).text = received_item.name
+	
+	required_item_label.get_child(1).text = str(Inventory.get_amount(required_item))
+	received_item_label.get_child(1).text = str(Inventory.get_amount(received_item))

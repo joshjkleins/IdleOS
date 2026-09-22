@@ -2,12 +2,16 @@ extends VBoxContainer
 class_name PhishingTerminal
 
 @onready var phishing_line = preload("res://scenes/phishing_line.tscn")
+@onready var phishing_total_col = preload("res://scenes/phishing_total_col.tscn")
 @onready var active_lines_container = $ActiveLines/MarginContainer/VBoxContainer/ActiveLinesContainer
+@onready var totals_row = $ActiveLines/MarginContainer/VBoxContainer/TotalsRow
 
 var is_window: bool = false
 var vm_lines = []
+var p_type
 
 func cast_lines(type: Dictionary, lines: int):
+	p_type = type
 	if lines == -1:
 		cast_all_lines(type)
 	else:
@@ -30,6 +34,8 @@ func cast_lines(type: Dictionary, lines: int):
 
 #vm token specific
 func vm_cast_all_lines(type: Dictionary, window: bool = false):
+	p_type = type
+	Signals.phishing_lines_increase_upgrade_while_running_signal.connect(lines_upgrade_while_running)
 	is_window = window
 	var max_lines = _get_max_lines_count()
 	for i in range(max_lines):
@@ -39,11 +45,22 @@ func vm_cast_all_lines(type: Dictionary, window: bool = false):
 		vm_lines.append(new_line)
 	for line in vm_lines:
 		line.begin(type)
-	
-	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use"
+		line.caught_something.connect(update_eff_label)
+		
+	#Build Totals label row so player has updated counts of all things they caught in inventory
+	for item in type["resource gained"]:
+		var new_col = phishing_total_col.instantiate()
+		new_col.set_item(item.item)
+		totals_row.add_child(new_col)
+	#update_eff_label(type)
+	#$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use"
+	update_eff_label(type)
 
 #casts all remaining available lines
+#ITS THIS ONE WHEN PHISH -SPEAR
 func cast_all_lines(type: Dictionary, window: bool = false):
+	p_type = type
+	Signals.phishing_lines_increase_upgrade_while_running_signal.connect(lines_upgrade_while_running)
 	is_window = window
 	var line_added = []
 	var max_lines = _get_max_lines_count()
@@ -57,6 +74,11 @@ func cast_all_lines(type: Dictionary, window: bool = false):
 		line.begin(type)
 		line.caught_something.connect(update_eff_label)
 	
+	#Build Totals label row so player has updated counts of all things they caught in inventory
+	for item in type["resource gained"]:
+		var new_col = phishing_total_col.instantiate()
+		new_col.set_item(item.item)
+		totals_row.add_child(new_col)
 	update_eff_label(type)
 
 func update_eff_label(type):
@@ -122,3 +144,14 @@ func _get_total_eff(type) -> float:
 	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
 	var base_eff = type["efficiency"]
 	return base_eff * defrag_bonus
+
+func lines_upgrade_while_running():
+	#This should always pass since it's only called while Phishing is running and someone upgrades their max lines.
+	if _get_max_lines_count() > Phishing.current_lines.size():
+		var new_line = phishing_line.instantiate()
+		Phishing.current_lines.append(new_line)
+		active_lines_container.add_child(new_line)
+		new_line.line_ended_signal.connect(line_ended)
+
+		new_line.begin(p_type)
+		new_line.caught_something.connect(update_eff_label)

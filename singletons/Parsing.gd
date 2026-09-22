@@ -122,16 +122,11 @@ func create_vm_window(minor_process, repeat) -> Window:
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Parsing, minor_process)
-	
 	new_window.add_child(content_instance)
-	
-	new_window.size = content_instance.size
-	new_window.min_size = content_instance.size
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
 		Stats.CURRENT_ALL_VMS -= 1
-		#new_window.remove_cooling_reduction()
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
@@ -141,6 +136,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1
 	return new_window
+
 
 func save_data() -> Dictionary:
 	return {

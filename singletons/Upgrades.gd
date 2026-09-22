@@ -232,6 +232,13 @@ var PHISHING = {
 					"amount": 1,
 					"unlocked": false
 				},
+				{
+					"level": 3,
+					"id": "phishing.lines", 
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 50 }, {"item": Items.PACKET_SPOOF, "amount": 10 }],
+					"amount": 1,
+					"unlocked": false
+				}
 			]
 		},
 		{ 
@@ -827,6 +834,8 @@ func unlock_next_level(package):
 						Stats.HEAT_REDUCTION = package.current
 					"hacking.max_anonymity":
 						Stats.set_max_anon()
+					"phishing.lines":
+						Signals.phishing_lines_increase_upgrade_while_running()
 				return
 			if package.current is bool:
 				if package.id == "mining.overclock":
