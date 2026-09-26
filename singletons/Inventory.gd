@@ -230,6 +230,12 @@ func has_cache() -> bool:
 			return true
 	return false
 
+func has_specific_cache(cache_name: String) -> bool:
+	var item = get_item_by_name(cache_name)
+	if get_amount(item) > 0:
+		return true
+	return false
+
 func has_valuables() -> bool:
 	for i in inventory:
 		if i.valuable:

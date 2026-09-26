@@ -43,7 +43,10 @@ var SCHOOL = {
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": [ { "item": Items.IP_ADDRESS, "amount": 1 }, { "item": Items.CREDENTIALS, "amount": 1 } ],
+	"requirements": {
+		Items.IP_ADDRESS: 1,
+		Items.CREDENTIALS: 1
+	},
 	"resource gained": Items.SCHOOL_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",

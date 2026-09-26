@@ -47,7 +47,7 @@ func set_pin():
 		i.is_pin = true
 
 func start():
-	if Inventory.get_amount(type["requirements"]) <= 0:
+	if !has_requirements():
 		return #no encrypted passwords
 	
 	#SETUP
@@ -55,7 +55,7 @@ func start():
 	end_safely = false
 	progress_bar.value = 0
 	amount_cracked = 0
-	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
+	remaining_label.text = str(Inventory.get_amount(type.requirements.keys()[0])) #works because of only 1 item requirement
 	cracked_label.text = str(amount_cracked)
 	title_label.text = type["name"] + " Cracking"
 	
@@ -70,9 +70,9 @@ func start():
 	var base_eff = _get_total_efficiency()
 	efficiency.text = str(base_eff * 100.0) + "%"
 	
-	while Inventory.get_amount(type["requirements"]) > 0 and process_running:
+	while has_requirements() and process_running:
 		_clean_queue()
-		var pw_per_page = clamp(Inventory.get_amount(type["requirements"]), 0, 5)
+		var pw_per_page = clamp(Inventory.get_amount(type.requirements.keys()[0]), 0, 5)
 		queue_info.text = "ENCRYPTED " + type["name"].to_upper() + " - QUEUE (" + str(pw_per_page) + ")"
 		for i in range(pw_per_page):
 			_generate_initial_queue()
@@ -179,8 +179,8 @@ func _finished():
 	if is_window:
 		stop()
 		return
-	if Inventory.get_amount(type["requirements"]) <= 0:
-		cracking_current_status.text = "All " + type["requirements"].name + " cracked."
+	if !has_requirements():
+		cracking_current_status.text = "All " + type.requirements.keys()[0].name + " cracked."
 	
 	if Stats.overclocked:
 		Stats.overclocked = false
@@ -221,7 +221,7 @@ func _start_next_crack() -> void:
 
 func _successful_crack(heat: float):
 	type.signal.emit(1)
-	Inventory.remove_resource(type["requirements"], 1)
+	remove_requirements()
 	Inventory.add_resource(type["resource gained"], 1)
 	set_player_amount_labels()
 	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
@@ -238,7 +238,7 @@ func _successful_crack(heat: float):
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)
 	Signals.update_hud(Cracking)
 	
-	remaining_label.text = str(Inventory.get_amount(type["requirements"]))
+	remaining_label.text = str(Inventory.get_amount(type.requirements.keys()[0])) #works because of only 1 item requirement
 	cracked_label.text = str(amount_cracked)
 
 func _on_progress_bar_value_changed(value):
@@ -258,7 +258,7 @@ func set_player_amount_labels():
 	var required_item_label = player_amount_labels.get_child(0)
 	var received_item_label = player_amount_labels.get_child(1)
 	
-	var required_item = type["requirements"]
+	var required_item = type.requirements.keys()[0]
 	var received_item = type["resource gained"]
 	
 	required_item_label.get_child(0).text = required_item.name
@@ -266,3 +266,17 @@ func set_player_amount_labels():
 	
 	required_item_label.get_child(1).text = str(Inventory.get_amount(required_item))
 	received_item_label.get_child(1).text = str(Inventory.get_amount(received_item))
+
+func has_requirements() -> bool:
+	var requirements = type.requirements
+	for item in requirements:
+		if Inventory.get_amount(item) < requirements[item]:
+			return false
+	
+	return true
+
+func remove_requirements() -> void:
+	var requirements = type.requirements
+	for item in requirements:
+		if Inventory.get_amount(item) >= requirements[item]:
+			Inventory.remove_resource(item, requirements[item])

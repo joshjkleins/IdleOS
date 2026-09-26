@@ -44,7 +44,7 @@ var PASSWORD = {
 	"heat": 1.6,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": Items.ENCRYPTED_PASSWORDS,
+	"requirements": {Items.ENCRYPTED_PASSWORDS: 1},
 	"resource gained": Items.PASSWORDS,
 	"resource amount gained": 1,
 	"description": "Cracks encrypted passwords, transforming them into passwords",

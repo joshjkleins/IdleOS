@@ -4,6 +4,7 @@ extends PanelContainer
 @onready var status_label = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer/StatusLabel
 @onready var logs_container = $MarginContainer/VBoxContainer/MarginContainer3/LogsContainer
 @onready var chance_per_line_label = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer3/ChancePerLineLabel
+@onready var req_item_label = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/HBoxContainer2/ReqItemLabel
 
 @onready var item_find_container = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer
 @onready var item_find_container_2 = $MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/ItemFindContainer2
@@ -42,6 +43,9 @@ func set_parse_type(p_type: Dictionary, i_window = false):
 		
 	update_total_player_labels()
 	
+	req_item_label.text = type.requirements.keys()[0].name.to_upper() #ONLY ONE REQUIREMENT
+	
+	
 	for i in range(type["resource gained"].size()):
 		var cont = item_labels[i]
 		var item = type["resource gained"][i]
@@ -65,7 +69,7 @@ func start():
 	_reset_logs()
 	process_running = true
 
-	while process_running and Inventory.get_amount(type["requirements"]) > 0:
+	while process_running and has_requirements():
 		if end_safely:
 			process_running = false
 			if !is_window:
@@ -73,8 +77,8 @@ func start():
 			stop()
 			break
 		else:
-			Inventory.remove_resource(type["requirements"], 1)
-			amount_label.text = "x" + str(Inventory.get_amount(type["requirements"]))
+			remove_requirements()
+			amount_label.text = "x" + str(Inventory.get_amount(type.requirements.keys()[0]))
 			
 			var heat_used = 0
 			for i in range(MAX_LOG_LINES):
@@ -148,7 +152,7 @@ func _finished_log(heat_used: float):
 	var eff = _get_total_effeciency()
 	chance_per_line_label.text = "%.1f%%" % (eff * 100)
 	Stats.update_tempature(heat_used)
-	if Inventory.get_amount(type["requirements"]) > 0 and !end_safely:
+	if has_requirements() and !end_safely:
 		_reset_logs()
 
 func _reset_logs():
@@ -170,3 +174,18 @@ func update_total_player_labels():
 		total_label.get_child(0).text = item.item.name.to_upper() + " TOTAL"
 		total_label.get_child(1).text = str(Inventory.get_amount(item.item))
 		total_label.visible = true
+
+
+func has_requirements() -> bool:
+	var requirements = type.requirements
+	for item in requirements:
+		if Inventory.get_amount(item) < requirements[item]:
+			return false
+	
+	return true
+
+func remove_requirements() -> void:
+	var requirements = type.requirements
+	for item in requirements:
+		if Inventory.get_amount(item) >= requirements[item]:
+			Inventory.remove_resource(item, requirements[item])

@@ -28,6 +28,23 @@ var SKILL = {
 	"sfx": "parsing_item_received"
 }
 
+#TIER I
+#Footprint - 
+# From Mining Item: chance for 1 of 5 items (typically related to all other Skills to be used)
+# From Cache: changes type from Student Cache to Student Cache (footprint) - Doubles IP address, username, encrypted password, password found in caches
+#TIER II
+#Corruption -
+# From Mining Item: small chance for hacking items (SQL injectors, packet spoof, hacking upgrade items)
+# From Cache: Much higher chance to find items in cache, but 25% chance to destroy cache after each its found.
+#Tier III
+#Network -
+# From Mining Item: small chance to find Compiled payload of that tier
+# From Cache Item: if cache contains VM Tokens, double the amount found.
+#Tier IV
+#Extraction -
+# From Mining Item: take additional argument to start, looks for that specific item
+# From Cache Item: Student Cache > Student Cache (Extraction) : If a rare item is decoded, find 4 additional copies
+
 var FOOTPRINT = {
 	"name": "Footprint",
 	"tier name": "TIER I | LOGS",
@@ -45,19 +62,106 @@ var FOOTPRINT = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": Items.LOGS,
-	"resource gained": [
+	"requirements": "1x Any Mined Item or Cache", #need to change this somehow to any Mining resource
+	"resource gained": [  #this also needs to be updated per item used
 		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 33 },
 		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 33 },
 		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 33 },
 	],
-	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
+	"description": "Parses through Mined item for a chance to gain random resources. Upgrades any cache to a Footprint version, increasing quantity of certain resources.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var CORRUPTION = {
+	"name": "Corruption",
+	"tier name": "TIER II | CORRUPTION",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -corruption",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	#"requirements": { Items.LOGS: 1 }, #need to change this somehow to any Mining resource
+	"requirements": "1x Any Mined Item or Cache",
+	"resource gained": [  #this also needs to be updated per item used
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 50 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 50 },
+	],
+	"description": "Looks for hacking items. Upgrades Caches to Corrupted verions, massively increasing chance of decoding items, with a 25% chance to destroy the cache after each item decoded.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var NETWORK = {
+	"name": "Network",
+	"tier name": "TIER III | NETWORK",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -network",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	"requirements": "1x Any Mined Item or Cache", #need to change this somehow to any Mining resource
+	"resource gained": [  #this also needs to be updated per item used
+		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 33 },
+	],
+	"description": "Looks for compiled payloads. Upgrades Caches to Network Cache, doubling VM Tokens if they are Decoded.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var EXTRACTION = {
+	"name": "Extraction",
+	"tier name": "TIER IV | EXTRACTION",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -extraction",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	"requirements": "1x Any Mined Item or Cache", #need to change this somehow to any Mining resource
+	"resource gained": [  #this also needs to be updated per item used
+		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 33 },
+		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 33 },
+	],
+	"description": "Can take an additional argument to Parse for that specific item. Upgrades Caches to Extraction Cache, giving 4 additional copies of rare items decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
 	"signal": basic_cycle_completed
 }
 
 var minor_processes = [
-	FOOTPRINT
+	FOOTPRINT,
+	CORRUPTION,
+	NETWORK,
+	EXTRACTION
 ]
 
 func signal_exp(_amount: int):

@@ -46,7 +46,10 @@ var CREDENTIAL = {
 	"heat": 2.4,
 	"overclock heat": 2.7,
 	"overheat heat": 0.3,
-	"requirements": [Items.USERNAMES, Items.PASSWORDS],
+	"requirements": {
+		Items.USERNAMES: 1, 
+		Items.PASSWORDS: 1
+	},
 	"resource gained": Items.CREDENTIALS,
 	"resource amount gained": 1,
 	"description": "Creates credentials using passwords & usernames.",

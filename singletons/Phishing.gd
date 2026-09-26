@@ -52,7 +52,7 @@ var SPEAR = {
 	"heat": 0.3,
 	"overclock heat": 0.6,
 	"overheat heat": 0.1,
-	"requirements": [],
+	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 90 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 10 },

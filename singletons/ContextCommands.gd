@@ -94,8 +94,161 @@ func find_largest_array(matrix: Array) -> Array:
 
 	return largest_arr
 
-
 func get_help_text(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
+	
+	# DETERMINE COLUMN SIZES
+	# 0 = Process
+	# 1 = Status
+	# 2 = Level
+	# 3 = Efficiency
+	# 4 = Eff/Level
+	# 5 = Run Command
+	# 6 = Info Command
+	# 7 = Required Items
+	var cols_size = [7, 0, 0, 0, 10, 12, 0, 15]
+	
+	for p in skill.minor_processes:
+		# PROCESS NAME
+		cols_size[0] = max(cols_size[0], p.name.length())
+		
+		# STATUS
+		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
+		cols_size[1] = max(cols_size[1], status.length())
+		
+		# LEVEL
+		cols_size[2] = 3 # LVL should never be more than 99
+		
+		# EFFICIENCY
+		var efficiency = "%.1f%%" % p.efficiency
+		cols_size[3] = max(cols_size[3], efficiency.length())
+		
+		# EFFICIENCY / LEVEL
+		#cols_size[4] = 5 # Something like 8.0% or 0.1%
+		
+		# RUN COMMAND
+		cols_size[5] = max(cols_size[5], p.command.length())
+		
+		# INFO COMMAND
+		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
+		cols_size[6] = max(cols_size[6], info_cmd.length())
+		
+		# REQUIRED ITEMS
+		var req_items = get_requirements_text(p)
+		cols_size[7] = max(cols_size[7], req_items.length())
+	
+	
+	# TOP BORDER
+	text += "┌"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┬"
+			text += "─"
+	text += "┐\n"
+	
+	
+	# HEADER
+	text += "│ "
+	text += pad_text("PROCESS", cols_size[0]) + "     | "
+	text += pad_text("STATUS", cols_size[1]) + "     | "
+	text += pad_text("LVL", cols_size[2]) + "     | "
+	text += pad_text("EFF", cols_size[3]) + "     | "
+	text += pad_text("EFF/LVL", cols_size[4]) + "     | "
+	text += pad_text("RUN COMMAND", cols_size[5]) + "     | "
+	text += pad_text("INFO COMMAND", cols_size[6]) + "     | "
+	text += pad_text("REQUIRED ITEMS", cols_size[7]) + "     │\n"
+	
+	
+	# HEADER SEPARATOR
+	text += "├"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┼"
+			text += "─"
+	text += "┤\n"
+	
+	
+	# PROCESS ROWS
+	for p in skill.minor_processes:
+		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
+		var efficiency = "%.1f%%" % p.efficiency
+		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
+		var req_items = get_requirements_text(p)
+		
+		if !p.unlocked:
+			text += "[color=666666]"
+		text += "│ "
+		text += pad_text(p.name, cols_size[0]) + "     | "
+		text += pad_text(status, cols_size[1]) + "     | "
+		text += pad_text(str(p.level), cols_size[2]) + "     | "
+		text += pad_text(efficiency, cols_size[3]) + "     | "
+		text += pad_text(str(p['efficiency rate']) + "%", cols_size[4]) + "     | "
+		text += pad_text(p.command, cols_size[5]) + "     | "
+		text += pad_text(info_cmd, cols_size[6]) + "     | "
+		text += pad_text(req_items, cols_size[7]) + "     │\n"
+		if !p.unlocked:
+			text += "[/color]"
+	
+	
+	# BOTTOM BORDER
+	text += "└"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┴"
+			text += "─"
+	text += "┘\n"
+	
+	return text + "\n\n" + get_modifier_info_text(skill)
+
+func get_requirements_text(p: Dictionary) -> String:
+	if p.requirements is String:
+		return p.requirements
+	if p.requirements.is_empty():
+		return "-"
+	
+	var requirements = []
+	
+	for item in p.requirements:
+		requirements.append("%s x%s" % [item.name, p.requirements[item]])
+	
+	return ", ".join(requirements)
+
+func get_help_text_defragging(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
+	text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
+	text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+	for p in skill.minor_processes:
+		text += _build_defrag_process_row(p, skill)
+	text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
+	
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return final_text
+
+func get_help_text_hacking(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "┌─────────────────────────────────────────────────────────────────────────────────────┐\n"
+	text += "│ LOCATION                  REQ                      INFO                             │\n"
+	text += "├─────────────────────────────────────────────────────────────────────────────────────┤\n"
+	
+	var locations = [Stats.hacking_targets["School"]] #, Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+
+	for location in locations:
+		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
+		text += "│ %-25s %-25s %-31s │\n" % [
+			location["name"],
+			location["required payload"].name,
+			info_text
+		]
+	text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return final_text
+
+func get_help_text_2(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	if skill != Defragging:
 		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
@@ -137,10 +290,13 @@ func get_help_text(skill: Node) -> String:
 		text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
 	
 	var final_text = text + "\n\n" + get_modifier_info_text(skill)
-	return _wrap_center_lines(final_text)
+	return final_text
 
 func _wrap_center(text: String) -> String:
 	return "[center]" + text + "[/center]"
+
+func _wrap_pad_left(text: String) -> String:
+	return "[indent]" + text + "[/indent]"
 
 func _wrap_center_lines(text: String) -> String:
 	var lines = text.split("\n")
@@ -296,10 +452,12 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 				requirements_list[item.item.name] = item.amount
 			else:
 				requirements_list[item.name] = 1
+	if process["requirements"] is Dictionary:
+		requirements_list = process["requirements"]
 	elif process["requirements"] is ItemData:
 		requirements_list[process["requirements"].name] = 1
-	elif process["requirements"] == "cache":
-		requirements_list["Any cache"] = 1
+	elif process["requirements"] is String:
+		requirements_list[process["requirements"]] = 1
 	else:
 		requirements_list["???"] = 1
 	
@@ -313,7 +471,10 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		var prefix = "├─ "
 		if i == requirements_list.size() - 1:
 			prefix = "└─ "
-		return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
+		if item is String:
+			return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
+		else:
+			return_text += prefix + item.name + " x" + str(requirements_list[item]) + "\n"
 		i += 1
 		
 	return_text += "\n"

@@ -1,29 +1,79 @@
 extends Control
 
+
+#Parsing Updates for Demo- 
+######
+#Need to specify item when using the run command: parse -footprint item=logs, student cache. Make sure this works with VM windows as well.
+#exmaple command: parse -footprint=logs
+#Add ability to 'change' caches from base Student Cache to an upgraded type (Student Cache (footprint))
+######
+
+#Cracking updates for Demo-
+######
+#crack -password   = cracks pasword
+#crack -pin        = cracks pin
+#crack -vm use=mining_token create=parsing_token  = changes 3 mining tokens to 1 parsing token 
+######
+
+#Compiling update for Demo-
+####
+#create new items just used in compiling 
+#add attributes to each item on what it gives in compiling, logs=1 sql injector dmg
+#limit compiling for hacking to 2 items x 5, x 10, or x 50 each.
+#every 5 gives 1 hack of bonus
+#save this somewhere, add bonuses into hack game, find a way to clear hacking bonus
+####
+
+#Hacking update for Demo-
+###
+#add difficulty tiers for each target
+#limit to only Student for Demo
+#Give 3 tiers of difficulty for student
+#Each tier will be marginally more difficult but give more caches (or caches+ and caches++)
+###
+
+#Decoding update for Demo-
+###
+#Add ability to decode Mined items
+#very small chance for powerful consumable items to be used in Compiling
+###
+
+#Phishing update for Demo-
+###
+#give every item a 'bait' attribute
+#if that item is used for bait in phishing it is consumed on cast, increases bite chance for that cast, and has a chance to give additional items on reel in.
+#This could be unlockable and not available in demo
+###
+
+
 #								FOR DEMO
 #---------------------------------------------------------------------------------------
-#Add functionality to Decoding to let player choose caches.
-#cloud saving
+#add clarity to Decoding skill on how to decode a specific cache, command is decode -cache=student but not found anywhere
+# CAP skill/process levels to 10
+#adjust exp gain/requirements
+# show DEMO LOCKED random processes to display how much more of the game there is.
+# add logic to hide descriptions of processes not unlocked so i can figure out details later.
+# only 'unlockable' resources should be Cracking, Compiling, Decoding
+
 #INTRO
 #--------
 #First time launch, let everything download (skills, tempature, etc)
 #Add someone communicating with the player, first objective is to hack a student and get their parents CC info.
-#add tab auto-complete
-#add control panel for VM windows, allow t=<tokens to use> for amount of cycles/tokens to be used
+
 #---------------------------------------------------------------------------------------
 
+#bug: cache decrypting ended safely showing twice (also should be 'Decoding ended safely'
 
 #	IDEA A
 # Phishing:  'bait' to be used for Phishing, increasing bite chance + chance for addtional other items | attach 'logs' to phishing attempt, +5% chance to bite, 50% for IP address to be attached
-# Mining : 
-# Parsing : Parse through caches first to increase drop rates? Turns Student Cache into Student Cache+ | add 't=<item>' command so players can parse specifically for an item. Also add a=<amount> with this example: parse -footprint t=ip_address a=25
-# Cracking : Crack VM Tokens to change what they can be used for. crack -vm destroy=vm_mining_token : Gives generic VM Token to be used for anything. Uses 3 tokens?
+# Cracking : Crack 3 VM Tokens to change what they can be used for. crack -vm=vm_mining_token : Gives generic VM Token to be used for anything.
 # Matching : Match all caches of a Location > create School Cache (or school cache+ if parsed) which when decoded has 50% chance to give 2-5 of each cache.
-# Compiling : give each item compiling effect (maybe only works for that tier of hacking (ip address x 10 = increase sql damage by 1 for next 1 hack)
-# Hacking : add difficulty tiers Student tier 1 gives 1 cache, tier 2 gives 5, tier 3 gives 15?
-# Decoding : Decode logs for 1% chance at super powerful compiling item (sql amplifier = +100% speed for next 10 hacks) for that tier (tier 1 is logs, tier 2-6ish determined later)
+# Compiling : give each item compiling effect (maybe only works for that tier of hacking (ip address x 10 = increase sql damage by 5 for next 10 hack)
+# Hacking : add difficulty tiers - Student tier 1 gives 1 cache, tier 2 gives 5, tier 3 gives 15?
+# Decoding : Decode logs for 1% chance at super powerful compiling item (sql amplifier = +100% speed for next 10 hacks)
 # Defragging : 
 
+#General Polish?
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
@@ -139,6 +189,10 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 
 var NOTIFY_OF_OVERHEAT: bool = false
 
+#player_tabbed is so player can press tab for a different option if one exists
+var PLAYER_TABBED: int = 0
+var SAVED_LAST_SUBMITTED: String = ""
+
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
@@ -225,6 +279,7 @@ func add_new_scrollback():
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
+	PLAYER_TABBED = 0
 	if !accepting_player_inputs:
 		input_line.clear()
 		return
@@ -462,7 +517,7 @@ func universal_commands(text):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
-			Inventory.add_resource(item, 10)
+			Inventory.add_resource(item, 1)
 			return true
 	match text:
 		"-h", "help":
@@ -496,8 +551,8 @@ func universal_commands(text):
 		"date":
 			add_line(ContextCommands.get_date_command())
 			return true
-		"playtest":
-			add_line(ContextCommands.playtest_welcome_message())
+		"demo":
+			add_line(ContextCommands.demo_welcome_message())
 			return true
 		"discord -c":
 			var discord_link = "https://discord.gg/bWFwUsF9a"
@@ -660,7 +715,7 @@ func handle_cd_commands(text):
 				var nt = text.substr(2).strip_edges()
 				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
 			else:
-				add_line("Command not found1")
+				add_line("Command not found")
 		
 
 #Root context commands
@@ -882,6 +937,14 @@ func handle_info_commands(text):
 		for p in major_processes:
 			var n = p.SKILL.name.to_lower()
 			if command[1] == n:
+				if p == Hacking:
+					add_line(ContextCommands.get_help_text_hacking(Hacking))
+					return
+				
+				if p == Defragging:
+					add_line(ContextCommands.get_help_text_defragging(Defragging))
+					return
+				
 				
 				add_line(ContextCommands.get_help_text(p))
 				if n == "mining":
@@ -950,18 +1013,19 @@ func handle_vm_token_commands(text):
 		if p.SKILL.name.to_lower() == commands[1]:
 			target_process = p
 	if target_process == null:
-		add_line("process not recognized")
+		add_line(commands[1] + " not a recognized skill.")
 		return
 	
 	#find minor process
 	var target_minor_process = null
-	if commands[2].is_valid_int():
-		if int(commands[2]) >= 0 and int(commands[2]) < target_process.minor_processes.size():
-			target_minor_process = target_process.minor_processes[int(commands[2])]
-	else:
-		for mp in target_process.minor_processes:
-			if commands[2] == mp.name.to_lower():
-				target_minor_process = mp
+	#if commands[2].is_valid_int():
+		#if int(commands[2]) >= 0 and int(commands[2]) < target_process.minor_processes.size():
+			#target_minor_process = target_process.minor_processes[int(commands[2])]
+	#else:
+	for mp in target_process.minor_processes:
+		if commands[2].split("=")[0] == mp.name.to_lower():
+			target_minor_process = mp
+		
 	if target_minor_process == null:
 		add_line(target_process.name + " process not recognized")
 		return
@@ -977,6 +1041,7 @@ func handle_vm_token_commands(text):
 	if !target_process.has_requirements(target_minor_process):
 		add_line(target_process.missing_requirements_text(target_minor_process))
 		return
+		
 	#check # of vm processes running
 	if target_process.CURRENT_VMS >= target_process.MAX_VMS:
 		add_line("Maximum virtual machines running.")
@@ -985,11 +1050,24 @@ func handle_vm_token_commands(text):
 	if Stats.CURRENT_ALL_VMS >= Stats.MAX_ALL_VMS:
 		add_line("Maximum total virtual machines running. Upgrade [color=#14B8A6]System[/color] with 'apt' to increase capacity.")
 		return
-		
 	
-	Inventory.remove_resource(target_process.vm_token, 1)
+	#target_process = Decoding | Mining | Parsing etc
+	#target_minor_process = Decoding.CACHE | Mining.LOGS | Parsing.FOOTPRINT etc
+	var new_window
+	if target_process == Decoding:
+		var cache_item = null
+		if commands[2].contains("="):
+			cache_item = Inventory.get_item_by_name(commands[2].split("=")[1] + " cache")
+			if cache_item == null:
+				add_line("Cache name not recognized. [color=666666]example: ssh decoding cache=student[/color]")
+				return
+			
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, true, cache_item)
 	
-	var new_window = target_process.create_vm_window(target_minor_process, true)
+	else:
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, true)
 	
 	add_child(new_window)
 
@@ -1153,7 +1231,7 @@ func start_parsing(minor_process: Dictionary):
 	if !minor_process.unlocked:
 		add_line("Requires parsing level " + str(minor_process["unlock level"]))
 		return
-	if Inventory.get_amount(minor_process["requirements"]) <= 0:
+	if !has_requirements(minor_process.requirements):
 		add_line("No logs found.")
 		return
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
@@ -1236,8 +1314,9 @@ func start_cracking(minor_process: Dictionary):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
-	if Inventory.get_amount(minor_process["requirements"]) <= 0:
-		add_line(minor_process["requirements"]["name"] + " not found")
+	if !has_requirements(minor_process.requirements):
+		add_line(minor_process.requirements.keys()[0].name + " not found")
+		#add_line(minor_process["requirements"]["name"] + " not found")
 		return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
@@ -1353,16 +1432,42 @@ func cred_matching_ended_safely():
 ###################################################
 func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
+
 	for ms in Decoding.minor_processes:
 		if text == ms["command"]:
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
+				
 			if !Inventory.has_cache():
 				add_line("No caches found.")
 				return
-				
+			
 			start_cache_decrypting(ms)
+			return
+		
+		if text.begins_with(ms["command"] + "="):
+			var cache_target = text.trim_prefix(ms["command"] + "=").strip_edges()
+			
+			if process_running:
+				add_line(ContextCommands.process_already_running_text())
+				return
+				
+			if cache_target.is_empty():
+				add_line("Please specify a cache.")
+				return
+			
+			var cache_item = Inventory.get_item_by_name(cache_target + " cache")
+			if cache_item == null:
+				add_line(cache_target + " cache not found.")
+				return
+			
+			# cache_target will be:
+			# "student"
+			# "vice principal"
+			# etc.
+			
+			start_cache_decrypting(ms, cache_item)
 			return
 	
 	match text:
@@ -1407,14 +1512,14 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_cache_decrypting(minor_process):
+func start_cache_decrypting(minor_process, cache_item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
 		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
-	new_cache_decrypt_terminal.set_cache_type(minor_process)
+	new_cache_decrypt_terminal.set_cache_type(minor_process, false, cache_item)
 	process_running = true
 	current_process = new_cache_decrypt_terminal
 	current_process_info = minor_process
@@ -1952,8 +2057,21 @@ func _input(event):
 		input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_TAB:
+			#var completion
+			#if PLAYER_TABBED == 0:
+				#SAVED_LAST_SUBMITTED = input_line.text
+				#completion = CommandRegistry.get_completions(input_line.text, PLAYER_TABBED, get_context_name_string(current_context))
+			#else:
+				#if SAVED_LAST_SUBMITTED == "":
+					#SAVED_LAST_SUBMITTED = input_line.text
+				#completion = CommandRegistry.get_completions(SAVED_LAST_SUBMITTED, PLAYER_TABBED, get_context_name_string(current_context))
+			#input_line.text = completion
+			#input_line.caret_column = input_line.text.length()
+			#PLAYER_TABBED += 1
 			get_viewport().set_input_as_handled()
 			return
+		if event.keycode == KEY_BACKSPACE:
+			PLAYER_TABBED = 0
 	if current_context != Context.HACKING:
 		if event is InputEventKey and event.pressed:
 			if event.keycode == Key.KEY_UP:
@@ -2033,3 +2151,11 @@ func overheat_terminal_notice():
 		NOTIFY_OF_OVERHEAT = true
 		add_line("[color=red]SYSTEM OVERHEATED - ALL PROCESSES SLOWED[/color]")
 		add_line("Cool system to < 80 to resume processes as normal.")
+
+
+func has_requirements(requirements: Dictionary) -> bool:
+	for item in requirements:
+		if Inventory.get_amount(item) < requirements[item]:
+			return false
+	
+	return true

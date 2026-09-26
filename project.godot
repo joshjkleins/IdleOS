@@ -49,6 +49,7 @@ Tutorial="*res://singletons/Tutorial.gd"
 SaveManager="*res://singletons/SaveManager.gd"
 Audiomanager="*res://singletons/Audiomanager.gd"
 Settings="*res://singletons/Settings.gd"
+CommandRegistry="*res://singletons/CommandRegistry.gd"
 
 [display]
 

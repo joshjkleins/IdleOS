@@ -44,7 +44,7 @@ var LOGS = {
 	"heat": 0.8,
 	"overclock heat": 1.5,
 	"overheat heat": 0.3,
-	"requirements": [],
+	"requirements": {},
 	"resource gained": Items.LOGS,
 	"resource amount gained": 1,
 	"description": "Finds logs that can be parsed for a random assortment of items.",
@@ -52,8 +52,139 @@ var LOGS = {
 	"signal": log_cycle_completed
 }
 
+var COOKIES = {
+	"name": "Cookies",
+	"tier name": "TIER II | COOKIES",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "mine -cookies",
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
+	"heat": 0.8,
+	"overclock heat": 1.5,
+	"overheat heat": 0.3,
+	"requirements": {},
+	"resource gained": Items.LOGS,
+	"resource amount gained": 1,
+	"description": "Finds cookies that can be Parsed through for resources or used as bait for Phishing.",
+	"efficiency description": "Chance to receive multiple cookies.",
+	"signal": log_cycle_completed
+}
+
+var METADATA = {
+	"name": "Metadata",
+	"tier name": "TIER IIII | METADATA",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "mine -metadata",
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
+	"heat": 0.8,
+	"overclock heat": 1.5,
+	"overheat heat": 0.3,
+	"requirements": {},
+	"resource gained": Items.LOGS,
+	"resource amount gained": 1,
+	"description": "Finds metadata that can be Parsed through for resources or used as bait for Phishing.",
+	"efficiency description": "Chance to receive multiple metadata.",
+	"signal": log_cycle_completed
+}
+
+var ARCHIVES = {
+	"name": "Archives",
+	"tier name": "TIER IV | ARCHIVES",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "mine -archives",
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
+	"heat": 0.8,
+	"overclock heat": 1.5,
+	"overheat heat": 0.3,
+	"requirements": {},
+	"resource gained": Items.LOGS,
+	"resource amount gained": 1,
+	"description": "Finds archives that can be Parsed through for resources or used as bait for Phishing.",
+	"efficiency description": "Chance to receive multiple archives.",
+	"signal": log_cycle_completed
+}
+
+var REPOSITORIES = {
+	"name": "Repositories",
+	"tier name": "TIER V | REPOSITORIES",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "mine -repo",
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
+	"heat": 0.8,
+	"overclock heat": 1.5,
+	"overheat heat": 0.3,
+	"requirements": {},
+	"resource gained": Items.LOGS,
+	"resource amount gained": 1,
+	"description": "Finds repositories of data that can be Parsed through for resources or used as bait for Phishing.",
+	"efficiency description": "Chance to receive multiple repos.",
+	"signal": log_cycle_completed
+}
+
+var DATABASES = {
+	"name": "Databases",
+	"tier name": "TIER VI | DATABASES",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "mine -databases",
+	"efficiency": 0.0,
+	"efficiency rate": 0.08,
+	"unlocked": false,
+	"unlock level": 101,
+	"base speed": 0.4,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
+	"heat": 0.8,
+	"overclock heat": 1.5,
+	"overheat heat": 0.3,
+	"requirements": {},
+	"resource gained": Items.LOGS,
+	"resource amount gained": 1,
+	"description": "Finds databases that can be Parsed through for resources or used as bait for Phishing.",
+	"efficiency description": "Chance to receive multiple databases.",
+	"signal": log_cycle_completed
+}
+
+
 var minor_processes = [
-	LOGS
+	LOGS,
+	COOKIES,
+	METADATA,
+	ARCHIVES,
+	REPOSITORIES,
+	DATABASES
 ]
 
 func signal_exp(_amount: int):

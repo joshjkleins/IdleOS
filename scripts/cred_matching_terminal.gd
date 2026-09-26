@@ -117,21 +117,6 @@ func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
 	resource_received_title.text = type["resource gained"].name.to_upper()
 	update_player_amount_received_labels()
 
-
-# func set_cred(p_type: Dictionary):
-# 	_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
-# 	type = p_type
-# 	current_type = MatchType.CREDENTIAL
-# 	resource_one_title.text = "USERNAME"
-# 	resource_two_title.text = "PASSWORD"
-
-# func set_account(p_type: Dictionary):
-# 	_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
-# 	type = p_type
-# 	current_type = MatchType.ACCOUNT
-# 	resource_one_title.text = "ACCOUNT #"
-# 	resource_two_title.text = "PIN"
-
 #sets text labels on each 'tag' in center column
 func _update_tags(tag_names: Array[String]):
 	var tags = [tag_1, tag_2, tag_3, tag_4]
@@ -261,8 +246,9 @@ func _begin_matching():
 	_repeat_loop()
 
 func _update_resource_amount_labels():
-	resource_amount_one.text = "x" + str(Inventory.get_amount(type["requirements"][0]))
-	resource_amount_two.text = "x" + str(Inventory.get_amount(type["requirements"][1]))
+	str(Inventory.get_amount(type.requirements.keys()[0]))
+	resource_amount_one.text = "x" + str(Inventory.get_amount(type.requirements.keys()[0]))
+	resource_amount_two.text = "x" + str(Inventory.get_amount(type.requirements.keys()[1]))
 
 func _get_speed() -> float:
 	var time
@@ -399,7 +385,6 @@ func _get_efficiency_total():
 	var efficiency_upgrade = efficiency_matching_package.current
 	
 	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
-
 
 func update_player_amount_received_labels():
 	resource_received_amount.text = "x" + str(Inventory.get_amount(type["resource gained"]))
