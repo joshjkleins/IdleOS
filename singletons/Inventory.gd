@@ -140,11 +140,19 @@ func get_item_by_name(item_name: String) -> ItemData:
 	item = Items.ITEM_NAME_MAP.get(name + "s")
 	if item != null:
 		return item
+		
+	item = Items.ITEM_NAME_MAP.get(name + "s cache")
+	if item != null:
+		return item
 	
 	item = Items.ITEM_NAME_MAP.get(name + "es")
 	if item != null:
 		return item
 	
+	item = Items.ITEM_NAME_MAP.get(name + "es cache")
+	if item != null:
+		return item
+		
 	# Player typed plural, stored item might be singular
 	if name.ends_with("es"):
 		item = Items.ITEM_NAME_MAP.get(name.left(-2))

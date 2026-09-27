@@ -8,6 +8,8 @@ extends Resource
 @export var description: String
 @export var upgrade_ingredient: bool
 @export var value: int
+@export var parsable: bool
+@export var contained_items: Array[ItemData]
 
 
 enum ItemColor {

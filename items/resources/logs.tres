@@ -1,6 +1,9 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://0clcrm3pt51j"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://0clcrm3pt51j"]
 
 [ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_sg8x0"]
+[ext_resource type="Resource" uid="uid://cnwj6ms1amnna" path="res://items/resources/encrypted_passwords.tres" id="2_q1gsd"]
+[ext_resource type="Resource" uid="uid://y7cfa0st0xu8" path="res://items/resources/ip_address.tres" id="3_daw3f"]
+[ext_resource type="Resource" uid="uid://be4bgvww8xhjx" path="res://items/resources/usernames.tres" id="4_8cm0b"]
 
 [resource]
 script = ExtResource("1_sg8x0")
@@ -10,6 +13,8 @@ shortened_name = ""
 description = "Obtained from Mining. Can be Parsed for resources."
 upgrade_ingredient = false
 value = 0
+parsable = true
+contained_items = Array[ExtResource("1_sg8x0")]([ExtResource("2_q1gsd"), ExtResource("3_daw3f"), ExtResource("4_8cm0b")])
 color_type = 2
 obtained_from = Array[int]([1])
 obtained_from_additional_hint = ""

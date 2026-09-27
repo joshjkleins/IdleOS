@@ -59,7 +59,6 @@ extends Control
 #--------
 #First time launch, let everything download (skills, tempature, etc)
 #Add someone communicating with the player, first objective is to hack a student and get their parents CC info.
-
 #---------------------------------------------------------------------------------------
 
 #bug: cache decrypting ended safely showing twice (also should be 'Decoding ended safely'
@@ -1065,6 +1064,11 @@ func handle_vm_token_commands(text):
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true, cache_item)
 	
+	elif target_process == Parsing:
+		var items_to_parse = [] #ADD LOGIC TO FILTER LIKE IN PARSING COMMANDS FUNCTION
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, items_to_parse)
+		
 	else:
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true)
@@ -1176,12 +1180,52 @@ func data_mining_ended_safely():
 func log_parsing_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Parsing.minor_processes:
-		if text == ms["command"]:
-			if !process_running:
-				start_parsing(ms)
-			else:
+		#if text begins with command
+		#if it equal exactly then add_line("Missing target item") example: parse -footprint=logs, parse -footprint=all
+		#strip out command, try to get inventory item from leftover command
+		#check if player has item
+		#add item to argument
+		if text.begins_with(ms['command']):
+			if !ms.unlocked:
+				add_line("ERROR: requires parsing level " + str(ms["unlock level"]))
+				return
+			if process_running:
 				add_line(ContextCommands.process_already_running_text())
+				return
+			
+			var items_string = text.trim_prefix(ms['command'])
+			if !items_string.begins_with("="):
+				add_line("Command not recognized. [color=666666]example parse command: parse -footprint=logs[/color]")
+				return
+				
+			var items = items_string.trim_prefix("=").split(",")
+			var items_arr: Array[ItemData] = []
+			for item in items:
+				var current_item = Inventory.get_item_by_name(item)
+				if current_item != null:
+					items_arr.append(current_item)
+			
+			if items_arr.is_empty():
+				add_line("Item not found. [color=666666]example parse command: parse -footprint=logs[/color]")
+				return
+			
+			var parsable_items = Parsing.filter_parsable_items(items_arr)
+			
+			if parsable_items.is_empty():
+				add_line("ERROR: items provided are not compatable with parsing.")
+				return
+			
+			if items_arr != parsable_items:
+				add_line("Not all items provided are compatable with parsing.")
+				add_line("Will parse the following items:")
+				add_line("-------------------------------------------------------")
+				for item in parsable_items:
+					add_line(item.name)
+				return
+			
+			start_parsing(ms, items_arr)
 			return
+	
 	match text:
 		"stop":
 			process_running = false
@@ -1227,16 +1271,27 @@ func log_parsing_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_parsing(minor_process: Dictionary):
-	if !minor_process.unlocked:
-		add_line("Requires parsing level " + str(minor_process["unlock level"]))
+#HERE!!
+func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
+	#if !minor_process.unlocked:
+		#add_line("Requires parsing level " + str(minor_process["unlock level"]))
+		#return
+	#if !has_requirements(minor_process.requirements):
+		#add_line("No logs found.")
+		#return
+	
+	var has_at_least_one_item = false
+	for item in items_to_parse:
+		if Inventory.get_amount(item) > 0:
+			has_at_least_one_item = true
+	
+	if !has_at_least_one_item:
+		add_line("ERROR: item(s) listed not found in inventory.")
 		return
-	if !has_requirements(minor_process.requirements):
-		add_line("No logs found.")
-		return
+	
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
 	terminal_body_container.add_child(new_log_parsing_terminal)
-	new_log_parsing_terminal.set_parse_type(minor_process)
+	new_log_parsing_terminal.set_parse_type(minor_process, items_to_parse)
 	process_running = true
 	current_process = new_log_parsing_terminal
 	current_process_info = minor_process

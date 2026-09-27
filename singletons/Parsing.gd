@@ -214,15 +214,24 @@ func get_weighted_item(pool: Array) -> Dictionary:
 			
 	return pool[0]
 
-func create_vm_window(minor_process, repeat) -> Window:
+func filter_parsable_items(items_arr: Array[ItemData]) -> Array[ItemData]:
+	var return_items: Array[ItemData] = []
+	for item in items_arr:
+		if item.parsable:
+			return_items.append(item)
+		
+	return return_items
+
+
+func create_vm_window(minor_process, items_to_parse) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
-	new_window.repeat = repeat
+	new_window.repeat = true
 	
 	#new_window.set_cooling_reduction(VM_COOLING_REDUCTION)
-	new_window.set_repeat(repeat)
+	new_window.set_repeat(true)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Parsing, minor_process)

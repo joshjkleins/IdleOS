@@ -19,6 +19,7 @@ shortened_name = ""
 description = "Obtained from School Student. Can be Decoded for a variety of resources."
 upgrade_ingredient = false
 value = 0
+parsable = true
 color_type = 7
 obtained_from = Array[int]([6])
 obtained_from_additional_hint = ""
