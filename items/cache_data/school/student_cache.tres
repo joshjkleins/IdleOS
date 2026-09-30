@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://cpjo55i7ddc8b"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://cpjo55i7ddc8b"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_3uaf6"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_jtq2p"]
 [ext_resource type="Resource" uid="uid://bpmpt23pha6yl" path="res://items/cache_entry/school/student/student_encrypted_pw.tres" id="2_g5xjn"]
 [ext_resource type="Resource" uid="uid://b82dhbg1pwl0h" path="res://items/cache_entry/school/student/student_vm_cracking_token.tres" id="3_3uaf6"]
 [ext_resource type="Resource" uid="uid://c1fdvurvkmgnj" path="res://items/cache_entry/school/student/student_logs.tres" id="3_g5xjn"]
@@ -16,10 +17,11 @@ rare_drop_chance = 0.05
 id = 8
 name = "Student cache"
 shortened_name = ""
-description = "Obtained from School Student. Can be Decoded for a variety of resources."
+description = "Obtained from School Student. Can be Decoded for a variety of resources or Parsed to transform into a different variant."
 upgrade_ingredient = false
 value = 0
 parsable = true
+contained_items = Array[ExtResource("1_jtq2p")]([])
 color_type = 7
 obtained_from = Array[int]([6])
 obtained_from_additional_hint = ""

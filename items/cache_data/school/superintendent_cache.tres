@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://dqqlgah50jt8k"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://dqqlgah50jt8k"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_1nymx"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_i8bxd"]
 [ext_resource type="Resource" uid="uid://8smq7rwhalfj" path="res://items/cache_entry/school/superintendent/superintendent_admin_cache.tres" id="2_4tf4d"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_l4252"]
 [ext_resource type="Resource" uid="uid://cfllrje0q12yh" path="res://items/cache_entry/school/superintendent/superintendent_master_pw.tres" id="3_3l7nh"]
@@ -19,6 +20,8 @@ shortened_name = ""
 description = "Obtained from School Superintendent. Can be Decoded for a variety of resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_i8bxd")]([])
 color_type = 7
 obtained_from = Array[int]([6])
 obtained_from_additional_hint = ""

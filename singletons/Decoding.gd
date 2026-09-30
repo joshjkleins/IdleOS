@@ -35,6 +35,7 @@ var CACHE = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "decode -cache",
+	"display command": "decode -cache[=<item>]",
 	"efficiency": 0.1,
 	"efficiency rate": 0.001,
 	"unlocked": true,

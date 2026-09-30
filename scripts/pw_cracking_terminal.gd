@@ -26,11 +26,16 @@ var prog_bar_tween: Tween
 var end_safely: bool = false
 var is_window: bool
 
+var use_token: ItemData = null
+var create_token: ItemData = null
+
 var type: Dictionary
 
-func set_cracking_type(p_type: Dictionary, window: bool = false):
+func set_cracking_type(p_type: Dictionary, window: bool = false, use_item: ItemData = null, create_item: ItemData = null):
 	is_window = window
 	type = p_type
+	use_token = use_item
+	create_token = create_item
 	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
 	match type.name.to_lower():
 		"password":
@@ -48,14 +53,17 @@ func set_pin():
 
 func start():
 	if !has_requirements():
-		return #no encrypted passwords
+		return
 	
 	#SETUP
 	process_running = true
 	end_safely = false
 	progress_bar.value = 0
 	amount_cracked = 0
-	remaining_label.text = str(Inventory.get_amount(type.requirements.keys()[0])) #works because of only 1 item requirement
+	if type == Cracking.VM:
+		remaining_label.text = str(int(Inventory.get_amount(get_requirements()) / 3))
+	else:
+		remaining_label.text = str(Inventory.get_amount(get_requirements()))
 	cracked_label.text = str(amount_cracked)
 	title_label.text = type["name"] + " Cracking"
 	
@@ -72,15 +80,16 @@ func start():
 	
 	while has_requirements() and process_running:
 		_clean_queue()
-		var pw_per_page = clamp(Inventory.get_amount(type.requirements.keys()[0]), 0, 5)
-		queue_info.text = "ENCRYPTED " + type["name"].to_upper() + " - QUEUE (" + str(pw_per_page) + ")"
-		for i in range(pw_per_page):
+		var lines_per_page = get_lines_queue_per_page()
+		#var pw_per_page = clamp(Inventory.get_amount(get_requirements()), 0, 5)
+		queue_info.text = type["name"].to_upper() + " CRACKING - QUEUE (" + str(lines_per_page) + ")"
+		for i in range(lines_per_page):
 			_generate_initial_queue()
 		#END SETUP
 		
 		#PW LOOP
 		
-		for j in range(pw_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
+		for j in range(lines_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
 			if end_safely:
 				process_running = false
 				if is_window:
@@ -93,7 +102,9 @@ func start():
 			_start_next_crack()
 			_start_scrambling()
 			var current_word
-			if letter_boxes[0].is_pin:
+			if type == Cracking.VM:
+				current_word = Cracking.get_vm_cracking_word(create_token)
+			elif letter_boxes[0].is_pin:
 				var random_number = randi() % 10000
 				current_word = "%04d" % random_number
 			else:
@@ -180,7 +191,10 @@ func _finished():
 		stop()
 		return
 	if !has_requirements():
-		cracking_current_status.text = "All " + type.requirements.keys()[0].name + " cracked."
+		if type == Cracking.VM:
+			cracking_current_status.text = "All available " + use_token.name + " cracked to " + create_token.name
+		else:
+			cracking_current_status.text = "All " + get_requirements().name + " cracked."
 	
 	if Stats.overclocked:
 		Stats.overclocked = false
@@ -202,7 +216,7 @@ func _clean_queue():
 
 func _generate_initial_queue():
 	var new_row = pw_row.instantiate()
-	new_row.new_row()
+	new_row.new_row(type, use_token, create_token)
 	queue_container.add_child(new_row)
 
 func _end_current_crack(word) -> void:
@@ -221,10 +235,19 @@ func _start_next_crack() -> void:
 
 func _successful_crack(heat: float):
 	type.signal.emit(1)
-	remove_requirements()
-	Inventory.add_resource(type["resource gained"], 1)
+	
+	if type == Cracking.VM:
+		if Inventory.get_amount(use_token) >= 3:
+			remove_requirements()
+			Inventory.add_resource(create_token, 1)
+		else:
+			stop()
+	else:
+		remove_requirements()
+		Inventory.add_resource(type["resource gained"], 1)
 	set_player_amount_labels()
-	Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
+	if type == Cracking.PASSWORD:
+		Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
 	Stats.update_tempature(heat)
 	Exp.add_xp(Cracking, type, type["experience per level"])
@@ -238,7 +261,10 @@ func _successful_crack(heat: float):
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)
 	Signals.update_hud(Cracking)
 	
-	remaining_label.text = str(Inventory.get_amount(type.requirements.keys()[0])) #works because of only 1 item requirement
+	if type == Cracking.VM:
+		remaining_label.text = str(int(Inventory.get_amount(get_requirements()) / 3))
+	else:
+		remaining_label.text = str(Inventory.get_amount(get_requirements()))
 	cracked_label.text = str(amount_cracked)
 
 func _on_progress_bar_value_changed(value):
@@ -258,8 +284,8 @@ func set_player_amount_labels():
 	var required_item_label = player_amount_labels.get_child(0)
 	var received_item_label = player_amount_labels.get_child(1)
 	
-	var required_item = type.requirements.keys()[0]
-	var received_item = type["resource gained"]
+	var required_item = get_requirements()
+	var received_item = get_item_received()
 	
 	required_item_label.get_child(0).text = required_item.name
 	received_item_label.get_child(0).text = received_item.name
@@ -268,15 +294,41 @@ func set_player_amount_labels():
 	received_item_label.get_child(1).text = str(Inventory.get_amount(received_item))
 
 func has_requirements() -> bool:
-	var requirements = type.requirements
-	for item in requirements:
-		if Inventory.get_amount(item) < requirements[item]:
+	if type == Cracking.VM:
+		if Inventory.get_amount(use_token) < 3:
 			return false
+	else:
+		var requirements = type.requirements
+		for item in requirements:
+			if Inventory.get_amount(item) < requirements[item]:
+				return false
 	
 	return true
 
 func remove_requirements() -> void:
-	var requirements = type.requirements
-	for item in requirements:
-		if Inventory.get_amount(item) >= requirements[item]:
-			Inventory.remove_resource(item, requirements[item])
+	if type == Cracking.VM:
+		if Inventory.get_amount(use_token) >= 3:
+			Inventory.remove_resource(use_token, 3)
+	else:
+		var requirements = type.requirements
+		for item in requirements:
+			if Inventory.get_amount(item) >= requirements[item]:
+				Inventory.remove_resource(item, requirements[item])
+
+func get_requirements() -> ItemData:
+	if type == Cracking.VM:
+		return use_token
+	else:
+		return type.requirements.keys()[0]
+
+func get_item_received() -> ItemData:
+	if type == Cracking.VM:
+		return create_token
+	else:
+		return type["resource gained"]
+
+func get_lines_queue_per_page() -> int:
+	if type == Cracking.VM:
+		return clamp(int(Inventory.get_amount(get_requirements()) / 3), 0, 5)
+	else:
+		return clamp(Inventory.get_amount(get_requirements()), 0, 5)

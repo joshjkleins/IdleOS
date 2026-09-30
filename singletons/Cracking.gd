@@ -52,8 +52,61 @@ var PASSWORD = {
 	"signal": pw_cycle_completed
 }
 
+var VM = {
+	"name": "VM",
+	"tier name": "TIER I | VM",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "crack -vm",
+	"display command": "crack -vm use=<skill> create=<skill>",
+	"efficiency": 0.05,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 1,
+	"base speed": 3.0,
+	"overclock speed": 1.0,
+	"overheat speed": 9.0,
+	"heat": 1.6,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "VM Token x 3",
+	"resource gained": "VM Token x 1",
+	"resource amount gained": 1,
+	"description": "Cracks 3 VM Tokens to be used on a different process.",
+	"efficiency description": "Chance to instantly crack VM Token",
+	"signal": pw_cycle_completed
+}
+
+var PIN = {
+	"name": "PIN",
+	"tier name": "TIER I | PIN",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "crack -pin",
+	"efficiency": 0.05,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 20,
+	"base speed": 3.0,
+	"overclock speed": 1.0,
+	"overheat speed": 9.0,
+	"heat": 1.6,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": {Items.ENCRYPTED_PINS: 1},
+	"resource gained": Items.PASSWORDS,
+	"resource amount gained": 1,
+	"description": "Cracks encrypted PINs, transforming them into PINs",
+	"efficiency description": "Chance to instantly crack PIN",
+	"signal": pw_cycle_completed
+}
+
 var minor_processes = [
-	PASSWORD
+	PASSWORD,
+	VM,
+	PIN
 ]
 
 func signal_exp(_amount: int):
@@ -80,6 +133,26 @@ func signal_exp(_amount: int):
 		#MAX_VMS += upgrade_stat["increase per level"]
 	#if upgrade_stat["name"].to_lower() == "vm duration":
 		#VM_UPTIME += upgrade_stat["increase per level"]
+
+#Cracking.get_vm_cracking_word(create_token)
+func get_vm_cracking_word(vm_token: ItemData) -> String:
+	match vm_token:
+		Mining.vm_token:
+			return "MINE"
+		Parsing.vm_token:
+			return "PRSE"
+		Cracking.vm_token:
+			return "CRCK"
+		Matching.vm_token:
+			return "MTCH"
+		Phishing.vm_token:
+			return "PHSH"
+		Decoding.vm_token:
+			return "DCOD"
+		Compiling.vm_token:
+			return "COMP"
+		_:
+			return "0000"
 
 func has_requirements(minor_process) -> bool:
 	if Inventory.get_amount(minor_process["requirements"]) > 0:

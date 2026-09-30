@@ -31,8 +31,10 @@ func _ready():
 func strip_bbcode(text: String) -> String:
 	return _bbcode_regex.sub(text, "", true)
 
-func pad_text(text: String, width: int) -> String:
-	var visible_length = strip_bbcode(text).length()
+func pad_text(text: String, width: int, strip_bbc: bool = true) -> String:
+	var visible_length = text.length()
+	if strip_bbc:
+		visible_length = strip_bbcode(text).length()
 
 	if visible_length >= width:
 		return text
@@ -94,21 +96,22 @@ func find_largest_array(matrix: Array) -> Array:
 
 	return largest_arr
 
+
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
-	
+
 	# DETERMINE COLUMN SIZES
 	# 0 = Process
 	# 1 = Status
-	# 2 = Level
+	# 2 = Unlock LVL
 	# 3 = Efficiency
 	# 4 = Eff/Level
 	# 5 = Run Command
 	# 6 = Info Command
 	# 7 = Required Items
 	var cols_size = [7, 0, 0, 0, 10, 12, 0, 15]
-	
+
 	for p in skill.minor_processes:
 		# PROCESS NAME
 		cols_size[0] = max(cols_size[0], p.name.length())
@@ -117,8 +120,8 @@ func get_help_text(skill: Node) -> String:
 		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
 		cols_size[1] = max(cols_size[1], status.length())
 		
-		# LEVEL
-		cols_size[2] = 3 # LVL should never be more than 99
+		# UNLOCK LEVEL
+		cols_size[2] = max(cols_size[2], "UNLOCK".length())
 		
 		# EFFICIENCY
 		var efficiency = "%.1f%%" % p.efficiency
@@ -128,7 +131,10 @@ func get_help_text(skill: Node) -> String:
 		#cols_size[4] = 5 # Something like 8.0% or 0.1%
 		
 		# RUN COMMAND
-		cols_size[5] = max(cols_size[5], p.command.length())
+		if p.has('display command'):
+			cols_size[5] = max(cols_size[5], p['display command'].length())
+		else:
+			cols_size[5] = max(cols_size[5], p.command.length())
 		
 		# INFO COMMAND
 		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
@@ -137,8 +143,8 @@ func get_help_text(skill: Node) -> String:
 		# REQUIRED ITEMS
 		var req_items = get_requirements_text(p)
 		cols_size[7] = max(cols_size[7], req_items.length())
-	
-	
+
+
 	# TOP BORDER
 	text += "┌"
 	for i in cols_size.size():
@@ -147,20 +153,20 @@ func get_help_text(skill: Node) -> String:
 			#text += "┬"
 			text += "─"
 	text += "┐\n"
-	
-	
+
+
 	# HEADER
 	text += "│ "
 	text += pad_text("PROCESS", cols_size[0]) + "     | "
 	text += pad_text("STATUS", cols_size[1]) + "     | "
-	text += pad_text("LVL", cols_size[2]) + "     | "
+	text += pad_text("UNLOCK", cols_size[2]) + "     | "
 	text += pad_text("EFF", cols_size[3]) + "     | "
 	text += pad_text("EFF/LVL", cols_size[4]) + "     | "
 	text += pad_text("RUN COMMAND", cols_size[5]) + "     | "
 	text += pad_text("INFO COMMAND", cols_size[6]) + "     | "
 	text += pad_text("REQUIRED ITEMS", cols_size[7]) + "     │\n"
-	
-	
+
+
 	# HEADER SEPARATOR
 	text += "├"
 	for i in cols_size.size():
@@ -169,30 +175,37 @@ func get_help_text(skill: Node) -> String:
 			#text += "┼"
 			text += "─"
 	text += "┤\n"
-	
-	
+
+
 	# PROCESS ROWS
 	for p in skill.minor_processes:
-		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
+		var status
+		if p.unlocked:
+			status = "ONLINE"
+		else:
+			status = "OFFLINE" if p['unlock level'] < 10 else "DEMO LOCKED"
 		var efficiency = "%.1f%%" % p.efficiency
 		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
 		var req_items = get_requirements_text(p)
+		var run_command = p['display command'] if p.has('display command') else p.command
+		
+		var line_to_add = ""
+		line_to_add += "│ "
+		line_to_add += pad_text(p.name, cols_size[0]) + "     | "
+		line_to_add += pad_text(status, cols_size[1]) + "     | "
+		line_to_add += pad_text(str(p['unlock level']), cols_size[2]) + "     | "
+		line_to_add += pad_text(efficiency, cols_size[3]) + "     | "
+		line_to_add += pad_text(str(p['efficiency rate']) + "%", cols_size[4]) + "     | "
+		line_to_add += pad_text(run_command, cols_size[5], false) + "     | "
+		line_to_add += pad_text(info_cmd, cols_size[6]) + "     | "
+		line_to_add += pad_text(req_items, cols_size[7]) + "     │"
 		
 		if !p.unlocked:
-			text += "[color=666666]"
-		text += "│ "
-		text += pad_text(p.name, cols_size[0]) + "     | "
-		text += pad_text(status, cols_size[1]) + "     | "
-		text += pad_text(str(p.level), cols_size[2]) + "     | "
-		text += pad_text(efficiency, cols_size[3]) + "     | "
-		text += pad_text(str(p['efficiency rate']) + "%", cols_size[4]) + "     | "
-		text += pad_text(p.command, cols_size[5]) + "     | "
-		text += pad_text(info_cmd, cols_size[6]) + "     | "
-		text += pad_text(req_items, cols_size[7]) + "     │\n"
-		if !p.unlocked:
-			text += "[/color]"
-	
-	
+			text += "[color=#666666]" + line_to_add + "[/color]\n"
+		else:
+			text += line_to_add + "\n"
+
+
 	# BOTTOM BORDER
 	text += "└"
 	for i in cols_size.size():
@@ -201,8 +214,10 @@ func get_help_text(skill: Node) -> String:
 			#text += "┴"
 			text += "─"
 	text += "┘\n"
-	
+
 	return text + "\n\n" + get_modifier_info_text(skill)
+
+
 
 func get_requirements_text(p: Dictionary) -> String:
 	if p.requirements is String:
@@ -472,7 +487,7 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		if i == requirements_list.size() - 1:
 			prefix = "└─ "
 		if item is String:
-			return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
+			return_text += prefix + item + "\n"
 		else:
 			return_text += prefix + item.name + " x" + str(requirements_list[item]) + "\n"
 		i += 1
@@ -498,6 +513,10 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 			var item_name = item.name + " (100%)"
 			var dots_amount = 35 - item_name.length()
 			return_text += "├─ " + item_name + ".".repeat(dots_amount) + item.description + "\n"
+		
+		elif process["resource gained"] is String:
+			var text = process["resource gained"]
+			return_text += "├─ " + text + "\n"
 		
 		var vm = skill.vm_token
 		var vm_name = vm.name + " (1%)"

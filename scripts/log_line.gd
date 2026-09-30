@@ -1,5 +1,7 @@
 extends PanelContainer
 
+var is_green: bool = false
+
 # {"level":"INFO","service":"auth.service","message":"Login attempt from 172.16.4.23","tags":[]}
 func update(log_line: Dictionary, item: ItemData = null, amount: int = 0) -> void:
 	var lvl = log_line["level"]
@@ -23,6 +25,33 @@ func update(log_line: Dictionary, item: ItemData = null, amount: int = 0) -> voi
 	
 	flash_green()
 
+func cache_update(highlight: bool):
+	var lvl = 'INFO'
+	var category_label = $MarginContainer/Panel/HBoxContainer/CategoryLabel
+	var code_label = $MarginContainer/Panel/HBoxContainer/CodeLabel
+	var message_label = $MarginContainer/Panel/HBoxContainer/MessageLabel
+
+	$MarginContainer/Panel/HBoxContainer/TimeLabel.text = Time.get_time_string_from_system()
+	
+	
+	#if its successful
+	if highlight:
+		category_label.text = "CACHE"
+		code_label.text = "cache.success"
+		message_label.text = "unlocked"
+		apply_log_color(category_label, lvl)
+		apply_log_color(code_label, lvl)
+		apply_log_color(message_label, lvl)
+		highlight_green()
+	#failure and needs to get updated again
+	else:
+		category_label.text = "CACHE"
+		code_label.text = "cache.failure"
+		message_label.text = "locked"
+		apply_log_color(category_label, lvl)
+		apply_log_color(code_label, lvl)
+		apply_log_color(message_label, lvl)
+		flash_green()
 
 func apply_log_color(label: Label, level: String) -> void:
 	match level:
@@ -54,3 +83,24 @@ func flash_green(duration := 0.15) -> void:
 	# Tween back to original
 	var tween = create_tween()
 	tween.tween_property(stylebox, "bg_color", original_color, duration)
+
+
+func highlight_green() -> void:
+	var panel = $MarginContainer/Panel
+	
+	# Duplicate current stylebox so we don't modify the shared resource
+	var stylebox := panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	panel.add_theme_stylebox_override("panel", stylebox)
+
+	# Store original color
+	var original_color = stylebox.bg_color
+
+	# Flash green
+	stylebox.bg_color = Color(0, 1, 0, 0.01)
+	
+	is_green = true
+
+	# Tween back to original
+	#var tween = create_tween()
+	#tween.tween_property(stylebox, "bg_color", original_color, duration)
+	

@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="CombatItem" load_steps=2 format=3 uid="uid://btjjhl0l0geno"]
+[gd_resource type="Resource" script_class="CombatItem" load_steps=3 format=3 uid="uid://btjjhl0l0geno"]
 
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_65pr5"]
 [ext_resource type="Script" uid="uid://c7r65t2y40b2d" path="res://resource_scripts/item_combat.gd" id="1_tr1om"]
 
 [resource]
@@ -18,6 +19,8 @@ shortened_name = ""
 description = "Basic attacking hack. Can be upgraded with 'apt'."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_65pr5")]([])
 color_type = 6
 obtained_from = Array[int]([5])
 obtained_from_additional_hint = ""

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://b0frwv16lmrv0"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://b0frwv16lmrv0"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_fq8h3"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_p34l3"]
 [ext_resource type="Resource" uid="uid://dk03y5lhoek1v" path="res://items/cache_entry/school/admin/admin_logs.tres" id="2_qxmky"]
 [ext_resource type="Resource" uid="uid://brr7hiiwn3y7d" path="res://items/cache_entry/school/admin/admin_passwords.tres" id="3_p34l3"]
 [ext_resource type="Resource" uid="uid://clgxgdhmiqv12" path="res://items/cache_entry/school/admin/admin_usernames.tres" id="3_vjqvj"]
@@ -19,6 +20,8 @@ shortened_name = ""
 description = "Obtained from School Admin. Can be Decoded for a variety of resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_p34l3")]([])
 color_type = 7
 obtained_from = Array[int]([6])
 obtained_from_additional_hint = ""

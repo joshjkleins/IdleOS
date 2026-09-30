@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://cmlalywof0isq"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=5 format=3 uid="uid://cmlalywof0isq"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_gyp6e"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_nqs8o"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_nesxr"]
 [ext_resource type="Resource" uid="uid://ye81u0wk7eoa" path="res://items/cache_entry/lawfirm/assoc_attorney/associate_attorney_sealed_case.tres" id="2_nqs8o"]
 
@@ -15,6 +16,8 @@ shortened_name = ""
 description = "Received from hacking an associate attorney. Decrypt for resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_nqs8o")]([])
 color_type = 7
 obtained_from = Array[int]([])
 obtained_from_additional_hint = ""

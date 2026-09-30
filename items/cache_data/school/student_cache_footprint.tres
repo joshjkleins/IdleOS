@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://vnpcxyixanmn"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_5pe70"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_8f0r4"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_rco1r"]
+[ext_resource type="Resource" uid="uid://b580jbt28slbd" path="res://items/cache_entry/school/student/student_encrypted_footprint.tres" id="3_vd7a3"]
+[ext_resource type="Resource" uid="uid://dgen65k3qp2e7" path="res://items/cache_entry/school/student/student_logs_footprint.tres" id="4_eqj4r"]
+[ext_resource type="Resource" uid="uid://c3jp25rj2v5cg" path="res://items/cache_entry/school/student/student_usernames_footprint.tres" id="5_7ur5l"]
+[ext_resource type="Resource" uid="uid://b82dhbg1pwl0h" path="res://items/cache_entry/school/student/student_vm_cracking_token.tres" id="6_sg2r5"]
+
+[resource]
+script = ExtResource("3_rco1r")
+entries = Array[ExtResource("2_8f0r4")]([ExtResource("3_vd7a3"), ExtResource("4_eqj4r"), ExtResource("5_7ur5l"), ExtResource("6_sg2r5")])
+rare_pool = Array[ExtResource("2_8f0r4")]([])
+rare_drop_chance = 0.05
+id = 96
+name = "Student Cache Footprint"
+shortened_name = ""
+description = "A variant of Student Cache. Provides double basic resources but removes rare drop chance."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_5pe70")]([])
+color_type = 7
+obtained_from = Array[int]([2])
+obtained_from_additional_hint = "Obtained by parsing through a Student Cache with the 'Footprint' process."
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

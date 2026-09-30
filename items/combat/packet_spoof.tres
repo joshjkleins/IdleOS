@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CombatItem" load_steps=2 format=3 uid="uid://dcwclc67mecy4"]
+[gd_resource type="Resource" script_class="CombatItem" load_steps=3 format=3 uid="uid://dcwclc67mecy4"]
 
 [ext_resource type="Script" uid="uid://c7r65t2y40b2d" path="res://resource_scripts/item_combat.gd" id="1_gqeqw"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_radrk"]
 
 [resource]
 script = ExtResource("1_gqeqw")
@@ -18,6 +19,8 @@ shortened_name = ""
 description = "Restores anonymity during hack. Can be upgraded with 'apt'."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_radrk")]([])
 color_type = 6
 obtained_from = Array[int]([5])
 obtained_from_additional_hint = ""

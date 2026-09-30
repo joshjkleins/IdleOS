@@ -47,7 +47,7 @@ func start_decrypting():
 		cache_decrypt.reset()
 		can_apply_heat = true
 		if !_has_requirements:
-			print("Missing requirements (cache or intel)")
+			print("Missing requirements")
 			return
 		
 		var current_cache

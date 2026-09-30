@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://b48k75x6dglqm"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=5 format=3 uid="uid://b48k75x6dglqm"]
 
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_714gr"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_yx46i"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_48gix"]
 [ext_resource type="Resource" uid="uid://b3vsbekbc3q5k" path="res://items/cache_entry/hospital/reception/reception_appoint_history.tres" id="2_714gr"]
@@ -15,6 +16,8 @@ shortened_name = ""
 description = "Received from hacking a receptionist. Decrypt for resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_714gr")]([])
 color_type = 7
 obtained_from = Array[int]([])
 obtained_from_additional_hint = ""

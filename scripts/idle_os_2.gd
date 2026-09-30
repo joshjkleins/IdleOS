@@ -1,18 +1,14 @@
 extends Control
 
 
-#Parsing Updates for Demo- 
-######
-#Need to specify item when using the run command: parse -footprint item=logs, student cache. Make sure this works with VM windows as well.
-#exmaple command: parse -footprint=logs
-#Add ability to 'change' caches from base Student Cache to an upgraded type (Student Cache (footprint))
-######
-
 #Cracking updates for Demo-
 ######
 #crack -password   = cracks pasword
 #crack -pin        = cracks pin
 #crack -vm use=mining_token create=parsing_token  = changes 3 mining tokens to 1 parsing token 
+
+#TODO: Add command to info cracking and info cracking vm > show example command since this one is confusing
+#TODO: Make it work with SSH
 ######
 
 #Compiling update for Demo-
@@ -62,6 +58,8 @@ extends Control
 #---------------------------------------------------------------------------------------
 
 #bug: cache decrypting ended safely showing twice (also should be 'Decoding ended safely'
+#bug: 'data mining safely finished' should be 'log mining safely finished'
+#bug: % not working at top of parsing logs
 
 #	IDEA A
 # Phishing:  'bait' to be used for Phishing, increasing bite chance + chance for addtional other items | attach 'logs' to phishing attempt, +5% chance to bite, 50% for IP address to be attached
@@ -516,7 +514,7 @@ func universal_commands(text):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
-			Inventory.add_resource(item, 1)
+			Inventory.add_resource(item, 10)
 			return true
 	match text:
 		"-h", "help":
@@ -932,6 +930,7 @@ func handle_info_commands(text):
 		add_line("info command not recognized")
 		return
 	
+	#INFO FOR SKILL
 	if command.size() == 2:
 		for p in major_processes:
 			var n = p.SKILL.name.to_lower()
@@ -999,12 +998,18 @@ func handle_vm_token_commands(text):
 		#is 2nd array index a skill name
 		for p in processes:
 			if commands[1] == p.SKILL.name.to_lower():
-				add_line(ContextCommands.list_vm_terminals_for_skill(p))
+				target_process = p
+				match p:
+					Parsing:
+						add_line(Parsing.list_vm_commands())
+					_:
+						add_line(ContextCommands.list_vm_terminals_for_skill(p))
+					
 				return
 	#confirm commands size
-	if commands.size() < 3 or commands.size() > 4:
-		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
-		return
+	#if commands.size() < 3 or commands.size() > 4:
+		#add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
+		#return
 	
 		
 	#find major process
@@ -1017,13 +1022,11 @@ func handle_vm_token_commands(text):
 	
 	#find minor process
 	var target_minor_process = null
-	#if commands[2].is_valid_int():
-		#if int(commands[2]) >= 0 and int(commands[2]) < target_process.minor_processes.size():
-			#target_minor_process = target_process.minor_processes[int(commands[2])]
-	#else:
+
 	for mp in target_process.minor_processes:
 		if commands[2].split("=")[0] == mp.name.to_lower():
 			target_minor_process = mp
+			break
 		
 	if target_minor_process == null:
 		add_line(target_process.name + " process not recognized")
@@ -1037,9 +1040,10 @@ func handle_vm_token_commands(text):
 		add_line("Process is not unlocked")
 		return
 	
-	if !target_process.has_requirements(target_minor_process):
-		add_line(target_process.missing_requirements_text(target_minor_process))
-		return
+	if target_process != Parsing:
+		if !target_process.has_requirements(target_minor_process):
+			add_line(target_process.missing_requirements_text(target_minor_process))
+			return
 		
 	#check # of vm processes running
 	if target_process.CURRENT_VMS >= target_process.MAX_VMS:
@@ -1056,18 +1060,30 @@ func handle_vm_token_commands(text):
 	if target_process == Decoding:
 		var cache_item = null
 		if commands[2].contains("="):
-			cache_item = Inventory.get_item_by_name(commands[2].split("=")[1] + " cache")
+			var provided_cache_name = text.split("=")
+			cache_item = Inventory.get_item_by_name(provided_cache_name[1])
 			if cache_item == null:
-				add_line("Cache name not recognized. [color=666666]example: ssh decoding cache=student[/color]")
+				add_line("Cache name not recognized. [color=666666]example: ssh decoding cache=student cache[/color]")
 				return
 			
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true, cache_item)
 	
 	elif target_process == Parsing:
-		var items_to_parse = [] #ADD LOGIC TO FILTER LIKE IN PARSING COMMANDS FUNCTION
+		var parsed_cmd = Parsing.parse_through_parse_start_command(text, target_minor_process) #returns dictionary with properties: 'valid' bool, 'items_to_parse' [items], 'message' string
+		
+		if !parsed_cmd.valid:
+			add_line(parsed_cmd.message)
+			return
+		
+		if parsed_cmd.message != "":
+			add_line(parsed_cmd.message)
+		
+		#DO SOMETHING WITH PARSED_CMD
+		#start_parsing(target_minor_process, parsed_cmd.items_to_parse)
+		#return
 		Inventory.remove_resource(target_process.vm_token, 1)
-		new_window = target_process.create_vm_window(target_minor_process, items_to_parse)
+		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse)
 		
 	else:
 		Inventory.remove_resource(target_process.vm_token, 1)
@@ -1186,44 +1202,27 @@ func log_parsing_commands(text):
 		#check if player has item
 		#add item to argument
 		if text.begins_with(ms['command']):
+			#CHECK IF PROCESS IS UNLOCKED
 			if !ms.unlocked:
 				add_line("ERROR: requires parsing level " + str(ms["unlock level"]))
 				return
+			
+			#CHECK IF ANOTHER PROCESS IS RUNNING
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
 			
-			var items_string = text.trim_prefix(ms['command'])
-			if !items_string.begins_with("="):
-				add_line("Command not recognized. [color=666666]example parse command: parse -footprint=logs[/color]")
-				return
-				
-			var items = items_string.trim_prefix("=").split(",")
-			var items_arr: Array[ItemData] = []
-			for item in items:
-				var current_item = Inventory.get_item_by_name(item)
-				if current_item != null:
-					items_arr.append(current_item)
+			#already remvoe ms command
+			var parsed_cmd = Parsing.parse_through_parse_start_command(text, ms) #returns dictionary with properties: 'valid' bool, 'items_to_parse' [items], 'message' string
 			
-			if items_arr.is_empty():
-				add_line("Item not found. [color=666666]example parse command: parse -footprint=logs[/color]")
+			if !parsed_cmd.valid:
+				add_line(parsed_cmd.message)
 				return
 			
-			var parsable_items = Parsing.filter_parsable_items(items_arr)
+			if parsed_cmd.message != "":
+				add_line(parsed_cmd.message)
 			
-			if parsable_items.is_empty():
-				add_line("ERROR: items provided are not compatable with parsing.")
-				return
-			
-			if items_arr != parsable_items:
-				add_line("Not all items provided are compatable with parsing.")
-				add_line("Will parse the following items:")
-				add_line("-------------------------------------------------------")
-				for item in parsable_items:
-					add_line(item.name)
-				return
-			
-			start_parsing(ms, items_arr)
+			start_parsing(ms, parsed_cmd.items_to_parse)
 			return
 	
 	match text:
@@ -1295,7 +1294,8 @@ func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
 	process_running = true
 	current_process = new_log_parsing_terminal
 	current_process_info = minor_process
-	new_log_parsing_terminal.start()
+	#new_log_parsing_terminal.start()
+	new_log_parsing_terminal.begin()
 	hud_process_running.process_started(Parsing, minor_process)
 	add_new_scrollback()
 
@@ -1314,11 +1314,39 @@ func log_parsing_ended_safely():
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Cracking.minor_processes:
-		if text == ms["command"]:
-			if !process_running:
-				start_cracking(ms)
-			else:
+		if text.begins_with(ms["command"]):
+			if process_running:
 				add_line(ContextCommands.process_already_running_text())
+				return
+			
+			
+			if ms == Cracking.VM:
+				#example command: crack -vm use=mining create=parsing
+				var flags = text.trim_prefix(ms["command"]).strip_edges()
+				#confirm command has proper flags (use/create)
+				var parts = flags.split(" ")
+				if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+					add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+					return
+				
+				#get items from the commands
+				var use_item = Inventory.get_vm_token_by_skill_name(parts[0].trim_prefix("use="))
+				var create_item = Inventory.get_vm_token_by_skill_name(parts[1].trim_prefix("create="))
+				
+				if use_item == null or create_item == null:
+					add_line("ERROR: 'cracking -vm' token name not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+					return
+				
+				#confirm the player has at least 3 of the 'use' items
+				if Inventory.get_amount(use_item) < 3:
+					add_line("ERROR: not enough " + use_item.name + ". Requires 3 to crack. Current amount: " + str(Inventory.get_amount(use_item)))
+					return
+				
+				#pass the use/create items to start_cracking
+				start_cracking(ms, use_item, create_item)
+			
+			else:
+				start_cracking(ms)
 			return
 	match text:
 		"stop":
@@ -1365,17 +1393,18 @@ func password_unscramble_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_cracking(minor_process: Dictionary):
+func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create_item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
-	if !has_requirements(minor_process.requirements):
-		add_line(minor_process.requirements.keys()[0].name + " not found")
-		#add_line(minor_process["requirements"]["name"] + " not found")
-		return
+	#check if requirements are dictionary because if requirements are a String then player is using vm cracking command and initial item check already happened
+	if minor_process.requirements is Dictionary:
+		if !has_requirements(minor_process.requirements):
+			add_line(minor_process.requirements.keys()[0].name + " not found")
+			return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_cracking_type(minor_process)
+	new_pw_cracking_terminal.set_cracking_type(minor_process, false, use_item, create_item)
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	current_process_info = minor_process
@@ -1512,7 +1541,7 @@ func cache_decrypting_commands(text):
 				add_line("Please specify a cache.")
 				return
 			
-			var cache_item = Inventory.get_item_by_name(cache_target + " cache")
+			var cache_item = Inventory.get_item_by_name(cache_target)
 			if cache_item == null:
 				add_line(cache_target + " cache not found.")
 				return

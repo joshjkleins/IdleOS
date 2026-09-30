@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://bpqx1olulqjvg"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=5 format=3 uid="uid://bpqx1olulqjvg"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_s5mhc"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_tdka4"]
 [ext_resource type="Resource" uid="uid://dfy5fm45omlwl" path="res://items/cache_entry/small_business/hr/hr_complaint_files.tres" id="2_tdka4"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_ygwbc"]
 
@@ -15,6 +16,8 @@ shortened_name = ""
 description = "Received from hacking human resources. Decrypt for resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_tdka4")]([])
 color_type = 7
 obtained_from = Array[int]([])
 obtained_from_additional_hint = ""

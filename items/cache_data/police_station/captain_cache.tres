@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3 uid="uid://dup2hdmqe85i0"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=5 format=3 uid="uid://dup2hdmqe85i0"]
 
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_bxbi7"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_ec61r"]
 [ext_resource type="Resource" uid="uid://86fhv81x2tcs" path="res://items/cache_entry/police_station/captain/captain_corruption.tres" id="2_bxbi7"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_jeso4"]
@@ -15,6 +16,8 @@ shortened_name = ""
 description = "Received from hacking a captain. Decrypt for resources."
 upgrade_ingredient = false
 value = 0
+parsable = false
+contained_items = Array[ExtResource("1_bxbi7")]([])
 color_type = 7
 obtained_from = Array[int]([])
 obtained_from_additional_hint = ""

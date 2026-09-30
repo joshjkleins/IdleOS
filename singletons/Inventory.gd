@@ -71,13 +71,20 @@ func list_specific_item(item: ItemData):
 	
 	var main_use = "Main use: [color=#%s]%s[/color]" % [hex, mu_text]
 
+
 	var text = "\n"
 	text += item_name + "\n"
 	text += amount + "\n"
 	text += description + "\n"
 	text += obtained_from + "\n"
 	text += main_use + "\n\n"
-
+	
+	if item.contained_items.size() > 0:
+		var names = []
+		for i in item.contained_items:
+			names.append(i.name)
+		var all_names = ", ".join(names)
+		text += "Parsing these logs can find the following items: " + all_names + "\n\n"
 	
 	if item is CombatItem:
 		match item.type:
@@ -228,13 +235,13 @@ func pad_text(value, width: int) -> String:
 
 func get_cache() -> CacheData:
 	for i in inventory:
-		if i.name.contains("cache"):
+		if i.name.to_lower().contains("cache"):
 			return i
 	return null #should never hit this
 
 func has_cache() -> bool:
 	for i in inventory:
-		if i.name.contains("cache"):
+		if i.name.to_lower().contains("cache"):
 			return true
 	return false
 
@@ -285,3 +292,12 @@ func load_data(data: Dictionary) -> void:
 			push_warning("Unknown item id in save: %s" % id_str)
 			continue
 		inventory[item] = int(raw[id_str])
+
+
+#example command: crack -vm use=mining create=parsing
+func get_vm_token_by_skill_name(skill_name: String) -> ItemData:
+	var skills_with_vm_tokens = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
+	for skill in skills_with_vm_tokens:
+		if skill_name.to_lower() == skill.SKILL.name.to_lower():
+			return skill.vm_token
+	return null

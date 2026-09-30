@@ -6,7 +6,7 @@ extends Node
 # create resource in items directory 
 # assign id (same as ItemType)
 # add preload
-# add to ITEM_MAP (order not important here(ithink))
+# add to ITEM_MAP
 
 ## ADDING VALUABLES ##
 # Same as above but add to valuables directory and check valuable bool in resource
@@ -116,6 +116,7 @@ enum ItemType {
 	SMALL_BUSINESS_PAYLOAD, #93
 	LIBRARY_PAYLOAD, #94
 	VM_COMPILING_TOKEN, #95
+	STUDENT_CACHE_FOOTPRINT, #96
 }
 
 #items
@@ -208,6 +209,8 @@ const ADMIN_CACHE = preload("res://items/cache_data/school/admin_cache.tres")
 const VICE_PRINCIPAL_CACHE = preload("res://items/cache_data/school/vice_principal_cache.tres")
 const PRINCIPAL_CACHE = preload("res://items/cache_data/school/principal_cache.tres")
 const SUPERINTENDENT_CACHE = preload("res://items/cache_data/school/superintendent_cache.tres")
+
+const STUDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/school/student_cache_footprint.tres")
 
 #library
 const PATRON_CACHE = preload("res://items/cache_data/library/patron_cache.tres")
@@ -354,4 +357,5 @@ const ITEM_MAP = {
 	ItemType.SMALL_BUSINESS_PAYLOAD: SMALL_BUSINESS_PAYLOAD,
 	ItemType.LIBRARY_PAYLOAD: LIBRARY_PAYLOAD,
 	ItemType.VM_COMPILING_TOKEN: VM_COMPILING_TOKEN,
+	ItemType.STUDENT_CACHE_FOOTPRINT: STUDENT_CACHE_FOOTPRINT,
 }
