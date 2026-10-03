@@ -9,7 +9,7 @@ signal cracking_level_up_signal
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_CRACKING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 30.0
+@onready var VM_UPTIME = 6.0
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/pw_cracking_terminal.tscn")
@@ -54,16 +54,20 @@ var PASSWORD = {
 
 var VM = {
 	"name": "VM",
-	"tier name": "TIER I | VM",
+	"tier name": "TIER II | VM",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
 	"command": "crack -vm",
+	"ssh command": "ssh cracking vm",
 	"display command": "crack -vm use=<skill> create=<skill>",
+	"example commands": [
+		{'cmd': 'crack -vm use=mining create=phishing', 'description': 'Uses 3 VM Mining Tokens to create 1 VM Phishing Token'}
+	],
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 1,
+	"unlock level": 8,
 	"base speed": 3.0,
 	"overclock speed": 1.0,
 	"overheat speed": 9.0,
@@ -80,7 +84,7 @@ var VM = {
 
 var PIN = {
 	"name": "PIN",
-	"tier name": "TIER I | PIN",
+	"tier name": "TIER III | PIN",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -103,10 +107,63 @@ var PIN = {
 	"signal": pw_cycle_completed
 }
 
+var API = {
+	"name": "API",
+	"tier name": "TIER IV | API",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "crack -api",
+	"efficiency": 0.05,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed": 3.0,
+	"overclock speed": 1.0,
+	"overheat speed": 9.0,
+	"heat": 1.6,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "Hashed API key x1",
+	"resource gained": Items.PASSWORDS,
+	"resource amount gained": 1,
+	"description": "Cracks hashed API key, transforming them into API Key",
+	"efficiency description": "Chance to instantly crack API",
+	"signal": pw_cycle_completed
+}
+
+var ROOT = {
+	"name": "ROOT",
+	"tier name": "TIER V | ROOT",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "crack -api",
+	"efficiency": 0.05,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 60,
+	"base speed": 3.0,
+	"overclock speed": 1.0,
+	"overheat speed": 9.0,
+	"heat": 1.6,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "Encrypted Root Key x1",
+	"resource gained": Items.PASSWORDS,
+	"resource amount gained": 1,
+	"description": "Cracks encrypted Root key, transforming them into Root Key",
+	"efficiency description": "Chance to instantly crack Root Key",
+	"signal": pw_cycle_completed
+}
+
+
 var minor_processes = [
 	PASSWORD,
 	VM,
-	PIN
+	PIN,
+	API,
+	ROOT
 ]
 
 func signal_exp(_amount: int):
@@ -155,21 +212,21 @@ func get_vm_cracking_word(vm_token: ItemData) -> String:
 			return "0000"
 
 func has_requirements(minor_process) -> bool:
-	if Inventory.get_amount(minor_process["requirements"]) > 0:
+	if Inventory.get_amount(minor_process["requirements"].keys()[0]) > 0:
 		return true
 	return false
 
 func missing_requirements_text(minor_process) -> String:
 	return "Missing " + minor_process["requirements"].name
 
-func create_vm_window(minor_process, repeat) -> Window:
+func create_vm_window(minor_process, use_token: ItemData = null, create_token: ItemData = null) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
-	new_window.repeat = repeat
+	new_window.repeat = true
 	
-	new_window.set_repeat(repeat)
+	new_window.set_repeat(true)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Cracking, minor_process)
@@ -185,7 +242,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
-		content_instance.set_cracking_type(minor_process, true)
+		content_instance.set_cracking_type(minor_process, true, use_token, create_token)
 		content_instance.start()
 	)
 	CURRENT_VMS += 1

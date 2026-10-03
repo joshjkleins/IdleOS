@@ -1,15 +1,12 @@
 extends Control
 
 
-#Cracking updates for Demo-
-######
-#crack -password   = cracks pasword
-#crack -pin        = cracks pin
-#crack -vm use=mining_token create=parsing_token  = changes 3 mining tokens to 1 parsing token 
-
-#TODO: Add command to info cracking and info cracking vm > show example command since this one is confusing
-#TODO: Make it work with SSH
-######
+#choose which modified actions belong to which basic resources and add to Resources
+#add compiling process to create these modified actions and figure out how long they should be applied for (or how that is calculated)
+#add the current modified action to the 'ls' command (what action and duration/hacks remaining)
+#add clear command to get rid of it
+#add item that only has a use to be compiled for a powerful hacking bonus
+#add decode process to decode Mined items (logs) to obtain these powerful items
 
 #Compiling update for Demo-
 ####
@@ -34,13 +31,6 @@ extends Control
 #very small chance for powerful consumable items to be used in Compiling
 ###
 
-#Phishing update for Demo-
-###
-#give every item a 'bait' attribute
-#if that item is used for bait in phishing it is consumed on cast, increases bite chance for that cast, and has a chance to give additional items on reel in.
-#This could be unlockable and not available in demo
-###
-
 
 #								FOR DEMO
 #---------------------------------------------------------------------------------------
@@ -60,6 +50,7 @@ extends Control
 #bug: cache decrypting ended safely showing twice (also should be 'Decoding ended safely'
 #bug: 'data mining safely finished' should be 'log mining safely finished'
 #bug: % not working at top of parsing logs
+#bug: when cracking in an ssh window - if the next queue isn't 5 full items then it shrinks the black bg of the window, showing the grey underneath. Solution: Always gneerate the height of 5 lines. Blank space is ok
 
 #	IDEA A
 # Phishing:  'bait' to be used for Phishing, increasing bite chance + chance for addtional other items | attach 'logs' to phishing attempt, +5% chance to bite, 50% for IP address to be attached
@@ -514,7 +505,7 @@ func universal_commands(text):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
-			Inventory.add_resource(item, 10)
+			Inventory.add_resource(item, 1000)
 			return true
 	match text:
 		"-h", "help":
@@ -722,87 +713,6 @@ func root_commands(text):
 		add_line("Overclocking requires a process running in the main terminal (not VM window).")
 	else:
 		add_line("Command not found")
-	#match text:
-		#"load mining", "cd mining":
-			#add_line("[ .. ] loading data mining module")
-			##header.update_header(Mining)
-			#header.display_skill(Mining)
-			#add_line("[ OK ] data mining module loaded")
-			#update_context(Context.MINING)
-			#add_line(ContextCommands.get_help_text(Mining))
-			#Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
-		#"load parsing", "cd parsing":
-			#add_line("[ .. ] loading parsing module")
-			##header.update_header(Parsing)
-			#header.display_skill(Parsing)
-			#add_line("[ OK ] parsing module loaded")
-			#update_context(Context.PARSING)
-			#add_line(ContextCommands.get_help_text(Parsing))
-			#Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
-		#"load cracking", "cd cracking":
-			#add_line("[ .. ] loading cracking module")
-			##header.update_header(Cracking)
-			#header.display_skill(Cracking)
-			#add_line("[ OK ] cracking module loaded")
-			#update_context(Context.CRACKING)
-			#add_line(ContextCommands.get_help_text(Cracking))
-		#"load matching", "cd matching":
-			#add_line("[ .. ] loading matching module")
-			##header.update_header(Matching)
-			#header.display_skill(Matching)
-			#add_line("[ OK ] matching module loaded")
-			#update_context(Context.MATCHING)
-			#add_line(ContextCommands.get_help_text(Matching))
-		#"load hacking", "cd hacking":
-			#if process_running:
-				#add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
-				#return
-			#var tween = create_tween()
-			#tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-			#tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
-			#await tween.finished
-			#terminal_root.visible = false
-			#await loading.show_loading()
-			#hacking.module_loaded()
-			#current_context = Context.HACKING
-		##"marketplace -auth": #Go to marketplace
-			##add_line("[ .. ] requesting permissions")
-			##add_line("[ OK ] permission granted")
-			##add_line("Connected to online marketplace")
-			##update_context(Context.MARKETPLACE)
-			##add_line(Marketplace.marketplace_welcome())
-		#"load decoding", "cd decoding":
-			#add_line("[ .. ] loading decoding module")
-			##header.update_header(Decoding)
-			#header.display_skill(Decoding)
-			#add_line("[ OK ] decoding module loaded")
-			#update_context(Context.DECODING)
-			#add_line(ContextCommands.get_help_text(Decoding))
-		#"load phishing", "cd phishing":
-			#add_line("[ .. ] loading phishing module")
-			##header.update_header(Phishing)
-			#header.display_skill(Phishing)
-			#add_line("[ OK ] phishing module loaded")
-			#update_context(Context.PHISHING)
-			#add_line(ContextCommands.get_help_text(Phishing))
-		#"load defragging", "cd defragging":
-			#add_line("[ .. ] loading defragging module")
-			##header.update_header(Defragging)
-			#header.display_defragging()
-			#add_line("[ OK ] defragging module loaded")
-			#update_context(Context.DEFRAGGING)
-			#add_line(ContextCommands.get_help_text(Defragging))
-		#"load compiling", "cd compiling":
-			#add_line("[ .. ] loading compiling module")
-			#header.display_skill(Compiling)
-			#update_context(Context.COMPILING)
-			#add_line(ContextCommands.get_help_text(Compiling))
-		#_:#default
-			#if text.begins_with("cd"):
-				#var nt = text.substr(2).strip_edges()
-				#add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
-			#else:
-		
 
 func return_to_root():
 	header.update()
@@ -1040,7 +950,7 @@ func handle_vm_token_commands(text):
 		add_line("Process is not unlocked")
 		return
 	
-	if target_process != Parsing:
+	if target_process != Parsing and target_process != Cracking:
 		if !target_process.has_requirements(target_minor_process):
 			add_line(target_process.missing_requirements_text(target_minor_process))
 			return
@@ -1079,12 +989,49 @@ func handle_vm_token_commands(text):
 		if parsed_cmd.message != "":
 			add_line(parsed_cmd.message)
 		
-		#DO SOMETHING WITH PARSED_CMD
-		#start_parsing(target_minor_process, parsed_cmd.items_to_parse)
-		#return
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse)
+	
+	elif target_process == Cracking:
+		var use_item = null
+		var create_item = null
+		if target_minor_process == Cracking.VM:
+			#example command: crack -vm use=mining create=parsing
+			var flags = text.trim_prefix(target_minor_process["ssh command"]).strip_edges()
+			#confirm command has proper flags (use/create)
+			var parts = flags.split(" ")
+			if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+				add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+				return
+			
+			#get items from the commands
+			use_item = Inventory.get_vm_token_by_skill_name(parts[0].trim_prefix("use="))
+			create_item = Inventory.get_vm_token_by_skill_name(parts[1].trim_prefix("create="))
+			
+			if use_item == null or create_item == null:
+				add_line("ERROR: 'cracking -vm' token name not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+				return
+			
+			#confirm the player has at least 3 of the 'use' items (4 if using a 'cracking' vm token)
+			if use_item == Cracking.vm_token and Inventory.get_amount(use_item) < 4:
+				add_line("ERROR: not enough " + use_item.name + ". Requires 4 to start cracking in VM window (3 to crack + 1 to run window). Current amount: " + str(Inventory.get_amount(use_item)))
+				return
+			if Inventory.get_amount(use_item) < 3:
+				add_line("ERROR: not enough " + use_item.name + ". Requires 3 to crack. Current amount: " + str(Inventory.get_amount(use_item)))
+				return
+			
+			#pass the use/create items to start_cracking
+			#start_cracking(target_minor_process, use_item, create_item)
 		
+		else:
+			if !target_process.has_requirements(target_minor_process):
+				add_line(target_process.missing_requirements_text(target_minor_process))
+				return
+			#start_cracking(target_minor_process)
+		
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, use_item, create_item)
+			
 	else:
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true)
@@ -1720,20 +1667,42 @@ func phishing_ended_safely():
 func compiling_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Compiling.minor_processes:
-		if text == ms["command"]:
+		if text.begins_with(ms["command"]):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-			var missing = false
-			for req in ms["requirements"]:
-				if Inventory.get_amount(req.item) < req.amount:
-					add_line("Missing required resource: " + req.item.name + " x" + str(req.amount))
-					missing = true
-			if missing:
-				return
 			
-			start_compiling(ms)
-			return
+			if ms == Compiling.MOD:
+				if !text.contains("="):
+					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				var item_string = text.split("=")
+				if item_string.size() <= 1:
+					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				var item = Inventory.get_item_by_name(item_string[1])
+				if item == null:
+					add_line("Item not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				
+				var amount_needed = item.hacking_mod_consumed
+				if Inventory.get_amount(item) < amount_needed:
+					add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
+					return
+				
+				start_compiling(ms, item)
+				return
+			else:
+				var missing = false
+				for req in ms["requirements"]:
+					if Inventory.get_amount(req) < ms['requirements'][req]:
+						add_line("Missing required resource: " + req.name + " x" + str(ms['requirements'][req]))
+						missing = true
+				if missing:
+					return
+				
+				start_compiling(ms)
+				return
 	match text:
 		"stop":
 			unstick_current_process()
@@ -1770,7 +1739,7 @@ func compiling_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_compiling(minor_process: Dictionary):
+func start_compiling(minor_process: Dictionary, item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
@@ -1780,7 +1749,7 @@ func start_compiling(minor_process: Dictionary):
 	process_running = true
 	current_process = new_compiling_terminal
 	current_process_info = minor_process
-	new_compiling_terminal.start(minor_process)
+	new_compiling_terminal.start(minor_process, false, item)
 	hud_process_running.process_started(Compiling, minor_process)
 	add_new_scrollback()
 

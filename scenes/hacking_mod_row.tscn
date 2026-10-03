@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://brctrwa7m56um"]
+
+[ext_resource type="Script" uid="uid://cg1jylr2feb75" path="res://scripts/hacking_mod_row.gd" id="1_6fcih"]
+
+[node name="HackingModRow" type="HBoxContainer"]
+theme_override_constants/separation = 20
+script = ExtResource("1_6fcih")
+
+[node name="ModifierLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "+3 damage"
+
+[node name="ModifierLabel2" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "5 hacks"
+horizontal_alignment = 2

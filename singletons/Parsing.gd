@@ -53,6 +53,11 @@ var FOOTPRINT = {
 	"experience per level": 200,
 	"command": "parse -footprint",
 	"display command": "parse -footprint=<item>",
+	"example commands": [
+		{ 'cmd': 'parse -footprint=logs', 'description': 'Mining item' },
+		{ 'cmd': 'parse -footprint=student cache', 'description': 'Cache item' },
+		{ 'cmd': 'parse -footprint=logs, student cache', 'description': 'Queueing up multiple items' },
+	],
 	"ssh command": "ssh parsing footprint",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,

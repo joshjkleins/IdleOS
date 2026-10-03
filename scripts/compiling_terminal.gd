@@ -50,8 +50,11 @@ var speed: float = 0.0
 var overheat_speed: float = 0.0
 var overclock_speed: float = 0.0
 
-func start(p_type: Dictionary, is_window: bool = false):
+var hacking_mod_item: ItemData = null
+
+func start(p_type: Dictionary, is_window: bool = false, resource_to_compile: ItemData = null):
 	vm_window = is_window
+	hacking_mod_item = resource_to_compile
 	fill_bar.value = 0.0
 	type = p_type
 	_build_item_containers(p_type)
@@ -105,7 +108,7 @@ func _process(delta: float) -> void:
 			_update_scramble_labels() # snap to fully resolved token
 			_compile_payload()
 
-			if _has_resources_for_more() and !final_cycle:
+			if _has_resources_for_more() and !final_cycle and type != Compiling.MOD:
 				_pause_then_restart()
 			else:
 				_stop_compiling()
@@ -129,10 +132,18 @@ func _pause_then_restart() -> void:
 	paused = false
 
 func _update_labels():
-	payload_item.text = type["resource gained"].name
-	amount_gained_label.text = "x" + str(amount_gained)
-	for container in ingredients_container.get_children():
-		container.update_amount()
+	if type == Compiling.MOD:
+		var hacking_mod_value = HackingMods.get_mod_value_text(hacking_mod_item.hacking_mod_type, hacking_mod_item.hacking_mod_value)
+		var hacking_mod_name = HackingMods.get_mod_name(hacking_mod_item.hacking_mod_type)
+		var hacking_mod_duration = "Duration: " + str(hacking_mod_item.hacking_mod_duration) + " hack(s)"
+		
+		payload_item.text = hacking_mod_name + " +" + hacking_mod_value
+		amount_gained_label.text = hacking_mod_duration
+	else:
+		payload_item.text = type["resource gained"].name
+		amount_gained_label.text = "x" + str(amount_gained)
+		for container in ingredients_container.get_children():
+			container.update_amount()
 
 func _generate_targets() -> void:
 	target_sl_bottom = _random_string(scramble_length, hex_charset)
@@ -170,14 +181,21 @@ func _scrambled_reveal(target: String, progress: float, label: Label, full_done:
 
 func _compile_payload():
 	#TAKETH
-	for req in type.requirements:
-		Inventory.remove_resource(req.item, req.amount)
+	#Double check player has enough and wasnt spent somewhere else
+	if type == Compiling.MOD:
+		if Inventory.get_amount(hacking_mod_item) < hacking_mod_item.hacking_mod_consumed:
+			return
+		Inventory.remove_resource(hacking_mod_item, hacking_mod_item.hacking_mod_consumed)
+		HackingMods.add_mod(hacking_mod_item)
+	else:
+		for req in type.requirements:
+			Inventory.remove_resource(req, type.requirements[req])
 
-	#GIVETH
-	var amount_to_gain = 1
-	Inventory.add_resource(type["resource gained"], amount_to_gain)
-	Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, 1)
-	amount_gained += amount_to_gain
+		#GIVETH
+		var amount_to_gain = 1
+		Inventory.add_resource(type["resource gained"], amount_to_gain)
+		Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, 1)
+		amount_gained += amount_to_gain
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)
 
@@ -196,9 +214,9 @@ func _compile_payload():
 		else:
 			Stats.update_tempature(type["heat"])
 	
-	#EFFICIENCY	
+	#EFFICIENCY
 	var eff = _get_current_eff()
-	if randf() <= eff:
+	if randf() <= eff and type != Compiling.MOD:
 		_efficiency_trigger()
 	eff_label.text = "eff: " + str(eff * 100.0) + "%"
 
@@ -214,10 +232,15 @@ func _efficiency_trigger():
 	
 
 func _has_resources_for_more() -> bool:
-	for req in type.requirements:
-		if Inventory.get_amount(req.item) < req.amount:
-			return false
-	return true
+	if type == Compiling.MOD:
+		if Inventory.get_amount(hacking_mod_item) >= hacking_mod_item.hacking_mod_consumed:
+			return true
+	else:
+		for req in type.requirements:
+			if Inventory.get_amount(req) < type.requirements[req]:
+				return false
+		return true
+	return false
 
 func _stop_compiling():
 	if vm_window:
@@ -231,11 +254,15 @@ func stop_safely():
 	final_cycle = true
 
 func _build_item_containers(type: Dictionary):
-	for req in type.requirements:
-		var item = req.item
+	if type == Compiling.MOD:
 		var container = item_container_scene.instantiate()
-		container.set_labels(req)
+		container.set_labels({"item": hacking_mod_item, "amount": hacking_mod_item.hacking_mod_consumed})
 		ingredients_container.add_child(container)
+	else:
+		for req in type.requirements:
+			var container = item_container_scene.instantiate()
+			container.set_labels({"item": req, "amount": type.requirements[req]})
+			ingredients_container.add_child(container)
 
 func _random_string(length: int, source_charset: String) -> String:
 	var result := ""

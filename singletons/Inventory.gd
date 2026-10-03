@@ -70,14 +70,25 @@ func list_specific_item(item: ItemData):
 	var hex = c.to_html(false)
 	
 	var main_use = "Main use: [color=#%s]%s[/color]" % [hex, mu_text]
-
-
+	
 	var text = "\n"
 	text += item_name + "\n"
 	text += amount + "\n"
 	text += description + "\n"
 	text += obtained_from + "\n"
 	text += main_use + "\n\n"
+	
+	if item.hacking_mod_duration != 0:
+		var hacking_mod_value = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var hacking_mod_name = HackingMods.get_mod_name(item.hacking_mod_type)
+		var hacking_mod_duration = "Duration: " + str(item.hacking_mod_duration) + " hack(s)"
+		var hacking_mod_required_amount = "Required amount: " + item.name + " x" + str(item.hacking_mod_consumed)
+		
+		var hacking_mod_display = "Hacking Modifications\n"
+		hacking_mod_display += "├─ " + hacking_mod_required_amount + "\n"
+		hacking_mod_display += "├─ " + hacking_mod_name + " +" + hacking_mod_value + "\n"
+		hacking_mod_display += "└─ " + hacking_mod_duration + "\n\n"
+		text += hacking_mod_display
 	
 	if item.contained_items.size() > 0:
 		var names = []

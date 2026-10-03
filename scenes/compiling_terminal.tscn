@@ -114,14 +114,14 @@ layout_mode = 2
 [node name="PayloadItem" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "school payload"
+text = "SQL Damage +5"
 
 [node name="AmountGainedLabel" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/Summary"]
 layout_mode = 2
 size_flags_horizontal = 10
 theme_override_colors/font_color = Color(0.533333, 0.533333, 0.533333, 1)
 theme_override_font_sizes/font_size = 14
-text = "x4"
+text = "Duration: 5 hacks"
 
 [node name="EffTimer" type="Timer" parent="."]
 one_shot = true

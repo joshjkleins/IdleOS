@@ -491,7 +491,8 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		else:
 			return_text += prefix + item.name + " x" + str(requirements_list[item]) + "\n"
 		i += 1
-		
+	
+	
 	return_text += "\n"
 	
 	###REWARDS
@@ -523,6 +524,17 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		var dots_amount = 35 - vm_name.length()
 		return_text += "└─ " + vm_name + ".".repeat(dots_amount) + vm.description + "\n"
 	
+	if process.has('example commands'):
+		return_text += "\nEXAMPLE COMMANDS\n"
+		
+		var j = 0
+		for example_text in process['example commands']:
+			var prefix = "├─"
+			if j == process['example commands'].size() - 1:
+				prefix = "└─"
+			var dots_length = 45 - example_text.cmd.length()
+			return_text += prefix + " " +  example_text.cmd + ".".repeat(dots_length) + example_text.description + "\n"
+			j += 1
 	return return_text
 
 func info_command_text():

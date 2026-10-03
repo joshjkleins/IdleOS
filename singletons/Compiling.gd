@@ -53,32 +53,164 @@ var SCHOOL = {
 	"signal": compile_cycle_complete
 }
 
-#var SMALL_BUSINESS = {
-	#"name": "Small Business",
-	#"tier name": "TIER I | CACHE",
-	#"level": 1,
-	#"experience": 0,
-	#"experience per level": 900,
-	#"command": "compile -small-business",
-	#"efficiency": 0.03,
-	#"efficiency rate": 0.001,
-	#"unlocked": true,
-	#"unlock level": 1,
-	#"base speed": 10.0,
-	#"overclock speed": 2.0,
-	#"overheat speed": 0.2,
-	#"heat": 5,
-	#"overclock heat": 7,
-	#"overheat heat": 2,
-	#"requirements": [ { "item": Items.IP_ADDRESS, "amount": 5 }, { "item": Items.ACCOUNT_ACCESS_TOKENS, "amount": 2 } ],
-	#"resource gained": Items.SMALL_BUSINESS_PAYLOAD,
-	#"description": "Compile resources to create a payload used to hack targets.",
-	#"efficiency description": "?????",
-	#"signal": compile_cycle_complete
-#}
+var MOD = {
+	"name": "Mod",
+	"tier name": "TIER II | MOD",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -mod",
+	"ssh command": "ssh compiling mod",
+	"display command": "compile -mod=<item>",
+	"example commands": [
+		{'cmd': 'compile -mod=logs', 'description': 'Uses 10 Logs to grant a hacking modification for 1 hack.'},
+		{'cmd': 'compile -mod=ip address', 'description': 'Uses 10 IP Addresses to grant a hacking modification for 1 hack.'}
+	],
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 5,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "Any item. Use 'ls <item>' to view details of each item.",
+	"resource gained": "Temporary Hacking Modification",
+	"description": "Compile resources into temporary hacking modifications.",
+	"efficiency description": "?",
+	"signal": compile_cycle_complete
+}
+
+var LIBRARY = {
+	"name": "Library",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -library",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 20,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var HOSPITAL = {
+	"name": "Hospital",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -hospital",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 30,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var LAWFIRM = {
+	"name": "Lawfirm",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -lawfirm",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var POLICE = {
+	"name": "Police",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -police",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 60,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var GOVERNMENT = {
+	"name": "Government",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -government",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 80,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
 
 var minor_processes = [
-	SCHOOL
+	SCHOOL,
+	MOD,
+	LIBRARY,
+	HOSPITAL,
+	LAWFIRM,
+	POLICE,
+	GOVERNMENT
 ]
 
 func signal_exp(_amount: int):

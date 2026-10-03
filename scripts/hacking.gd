@@ -30,6 +30,7 @@ func toggle_hacking_accepted_input_text(accept: bool):
 func module_loaded():
 	current_context = HackingContext.TARGETS
 	header_hacking_box.update_hacking_header()
+	header_hacking_box.update_modifiers_ui()
 	modulate.a = 0.0
 	visible = true
 	player_hacking_box.grab()

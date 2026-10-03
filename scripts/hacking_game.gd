@@ -107,12 +107,21 @@ func _process(delta):
 		else:
 			OVERCLOCK_VALUE = 1.0
 			OVERHEAT_VALUE = 1.0
+			
+		var mod_atk_spd = 1.0
+		if HackingMods.has_mod(HackingMods.MOD_TYPE.ATTACK_SPEED):
+			mod_atk_spd = 1.0 + HackingMods.get_mod_value(HackingMods.MOD_TYPE.ATTACK_SPEED)
+
+		var mod_counter_slow = 1.0
+		if HackingMods.has_mod(HackingMods.MOD_TYPE.COUNTER_SLOW):
+			mod_counter_slow = 1.0 + HackingMods.get_mod_value(HackingMods.MOD_TYPE.COUNTER_SLOW)
+			
 		if attacking:
-			attack_bar.value += ATTACK_SPEED * OVERCLOCK_VALUE * delta
+			attack_bar.value += ATTACK_SPEED * OVERCLOCK_VALUE * delta * mod_atk_spd
 		if defending:
 			defense_bar.value += DEFEND_SPEED * OVERCLOCK_VALUE * delta
 		if Stats.current_anon > 0:
-			counter_bar.value += COUNTER_SPEED * OVERHEAT_VALUE * delta
+			counter_bar.value += COUNTER_SPEED * OVERHEAT_VALUE * delta / mod_counter_slow
 
 		if attack_bar.value >= attack_bar.max_value and attacking:
 			if has_bandwidth(ATTACK_BW_COST):
@@ -240,15 +249,24 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 		attacking = true
 
 func attack():
-	var crit = 1
-	if randf() <= Hacking.SKILL["efficiency"]:
-		crit = 2
-	var raw_dmg = ATTACK_AMOUNT * crit
+	var crit = 1.0
+	var eff = _get_total_efficiency()
+	if randf() <= eff:
+		crit = 2.0
+	
+	var mod_damage = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE):
+		mod_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE)
+		
+	var raw_dmg = (ATTACK_AMOUNT + mod_damage) * crit
 	var actual_dmg = max(raw_dmg - firewall_bar.value, 0)
 	# only the portion of firewall that actually absorbed damage counts as "blocked"
 	var blocked = min(firewall_bar.value, raw_dmg)
 
-	firewall_bar.value -= FIREWALL_DAMAGE
+	var mod_firewall_damage = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FIREWALL_DAMAGE):
+		mod_firewall_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.FIREWALL_DAMAGE)
+	firewall_bar.value -= FIREWALL_DAMAGE + mod_firewall_damage
 
 	Hacking.current_bandwidth -= ATTACK_BW_COST
 	if Hacking.current_bandwidth <= 0:
@@ -277,7 +295,10 @@ func attack():
 		win()
 
 func defense():
-	Stats.current_anon += DEFEND_AMOUNT
+	var mod_restore = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.RESTORE):
+		mod_restore = HackingMods.get_mod_value(HackingMods.MOD_TYPE.RESTORE)
+	Stats.current_anon += DEFEND_AMOUNT + mod_restore
 	if Stats.current_anon > Stats.max_anon:
 		Stats.current_anon = Stats.max_anon
 	add_heat(DEFEND_HEAT)
@@ -301,7 +322,11 @@ func defense():
 	defense_bar.value = 0.0
 
 func counter():
-	Stats.current_anon -= COUNTER_AMOUNT
+	var mod_dmg_reduce = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE_REDUCTION):
+		mod_dmg_reduce = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE_REDUCTION)
+	
+	Stats.current_anon -= max(1, COUNTER_AMOUNT - mod_dmg_reduce) #MIM OF 1 DAMAGE
 	add_heat(COUNTER_HEAT)
 	if Stats.current_anon < 0.0:
 		Stats.current_anon = 0.0
@@ -338,6 +363,7 @@ func lose():
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]Items lost[/color]\n"
 		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
+	remove_mod_duration()
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
 	Signals.hacking_ended()
@@ -350,6 +376,7 @@ func win():
 	caches_gained += 1
 	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
 	reward_amount += 1
+	remove_mod_duration()
 	update_bottom_row()
 	_update_info_panel("target successfully hacked. +1 " + target_reward.name, c_blue)
 	_update_info_panel("-----------------------------------------------", c_white)
@@ -427,6 +454,7 @@ func _update_info_panel(message: String, color: Color):
 
 func kill_hack():
 	end()
+	remove_mod_duration()
 	_grant_rewards()
 	Signals.hacking_ended()
 
@@ -518,7 +546,12 @@ func prepare():
 	integ_bar.max_value = INTEGRITY_AMOUNT
 	integ_bar.value = INTEGRITY_AMOUNT
 	firewall_bar.max_value = FIREWALL_AMOUNT
-	firewall_bar.value = FIREWALL_AMOUNT
+	
+	var mod_firewall_reduction = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FIREWALL_REDUCTION):
+		mod_firewall_reduction = HackingMods.get_mod_value(HackingMods.MOD_TYPE.FIREWALL_REDUCTION)
+		
+	firewall_bar.value = max(0, FIREWALL_AMOUNT - mod_firewall_reduction)
 	if stop_hacking:
 		return
 	start_hack()
@@ -555,8 +588,12 @@ func update_status_label_badge(text: String, color: Color):
 func _on_bandwidth_timer_timeout():
 	if not is_hacking:
 		return
-
-	Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE
+		
+	var mod_band_recov = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.BAND_RATE):
+		mod_band_recov = HackingMods.get_mod_value(HackingMods.MOD_TYPE.BAND_RATE)
+		
+	Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE + mod_band_recov
 	if Hacking.current_bandwidth > MAX_BANDWIDTH:
 		Hacking.current_bandwidth = MAX_BANDWIDTH
 	band_bar.value = Hacking.current_bandwidth
@@ -580,3 +617,16 @@ func is_anon_below_healing_threshold() -> bool:
 func manual_defense():
 	if is_hacking and Inventory.get_amount(Items.PACKET_SPOOF) > 0 and !defending:
 		defending = true
+
+func _get_total_efficiency() -> float:
+	var base = Hacking.SKILL.efficiency
+	var frag_bonus = Defragging.HACKING["bonus efficiency"] if Stats.has_bonus(Hacking) else 1.0
+	
+	var mod_eff = 0.0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.EFFICIENCY):
+		mod_eff = HackingMods.get_mod_value(HackingMods.MOD_TYPE.EFFICIENCY)
+	
+	return snapped((base + mod_eff) * frag_bonus, 0.01)
+
+func remove_mod_duration():
+	HackingMods.remove_duration()

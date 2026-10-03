@@ -30,6 +30,12 @@ enum ItemColor {
 @export var obtained_from: Array[ItemColor] = []
 @export var obtained_from_additional_hint: String = ""
 
+@export var hacking_mod_type: HackingMods.MOD_TYPE
+@export var hacking_mod_value: float
+@export var hacking_mod_duration: int
+@export var hacking_mod_consumed: int
+
+
 func get_obtained_from_skills() -> Array:
 	var result = []
 	for s in obtained_from:

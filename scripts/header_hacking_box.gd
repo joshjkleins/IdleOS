@@ -18,13 +18,18 @@ extends Control
 @onready var defragged_details = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/DefraggedDetails
 @onready var defrag_bonus_timer = $DefragBonusTimer
 
+@onready var modifiers_title = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer/ModifiersTitle
+@onready var modifiers = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer/Modifiers
+
+const hacking_mod_row: PackedScene = preload("res://scenes/hacking_mod_row.tscn")
+
 var fade_in_tween: Tween
 var fade_out_tween: Tween
 
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
 	Exp.gained_xp_signal.connect(update_header_exp)
-	Signals.update_hacking_header_signal.connect(update_header_resources)
+	Signals.update_hacking_header_signal.connect(header_update_from_hacking_game)
 	defragged_details.text = ""
 	defragged_details.visible = false
 
@@ -39,6 +44,10 @@ func update_hacking_header():
 		defrag_bonus_timer.start()
 	else:
 		defragged_details.visible = false
+
+func header_update_from_hacking_game():
+	update_header_resources()
+	update_modifiers_ui()
 
 func update_header_resources():
 	offensive_item.text = str(Inventory.get_amount(Items.SQL_INJECTOR))
@@ -103,3 +112,19 @@ func _get_total_effeciency() -> float:
 	var defragging_bonus = Defragging.HACKING["bonus efficiency"] if Stats.has_bonus(Hacking) else 1.0
 	
 	return base * defragging_bonus
+
+func update_modifiers_ui():
+	modifiers_title.text = "Temporary Modifiers " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)
+	for m in modifiers.get_children():
+		m.queue_free()
+	
+	#m is enum number : Damage = 0 etc
+	for m in HackingMods.current_mods.keys():
+		var mod_value = HackingMods.current_mods[m].value
+		var mod_duration = HackingMods.current_mods[m].duration
+		var mod_name = HackingMods.get_mod_name(m)
+		var mod_row = hacking_mod_row.instantiate()
+		
+		mod_row.update(mod_name, mod_value, mod_duration)
+		modifiers.add_child(mod_row)
+		
