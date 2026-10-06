@@ -1,36 +1,10 @@
 extends Control
 
-
-#choose which modified actions belong to which basic resources and add to Resources
-#add compiling process to create these modified actions and figure out how long they should be applied for (or how that is calculated)
-#add the current modified action to the 'ls' command (what action and duration/hacks remaining)
-#add clear command to get rid of it
-#add item that only has a use to be compiled for a powerful hacking bonus
-#add decode process to decode Mined items (logs) to obtain these powerful items
-
-#Compiling update for Demo-
-####
-#create new items just used in compiling 
-#add attributes to each item on what it gives in compiling, logs=1 sql injector dmg
-#limit compiling for hacking to 2 items x 5, x 10, or x 50 each.
-#every 5 gives 1 hack of bonus
-#save this somewhere, add bonuses into hack game, find a way to clear hacking bonus
-####
-
-#Hacking update for Demo-
-###
-#add difficulty tiers for each target
-#limit to only Student for Demo
-#Give 3 tiers of difficulty for student
-#Each tier will be marginally more difficult but give more caches (or caches+ and caches++)
-###
-
-#Decoding update for Demo-
-###
-#Add ability to decode Mined items
-#very small chance for powerful consumable items to be used in Compiling
-###
-
+#HACKING TODOS
+#actually balance Student hard mode
+#show more targets but as 'locked'
+#lock hard mode behind something. Either unlocked in apt or unlocked after so many student hacks
+#Show more locations but as 'locked' - should be same as compiling payloads
 
 #								FOR DEMO
 #---------------------------------------------------------------------------------------
@@ -51,17 +25,9 @@ extends Control
 #bug: 'data mining safely finished' should be 'log mining safely finished'
 #bug: % not working at top of parsing logs
 #bug: when cracking in an ssh window - if the next queue isn't 5 full items then it shrinks the black bg of the window, showing the grey underneath. Solution: Always gneerate the height of 5 lines. Blank space is ok
+#bug: phishing not showing all lines when upgraded (works fine in ssh but not main terminal phishing)
+#bug ^: run phishing spear > upgrade lines > kill process > kills game
 
-#	IDEA A
-# Phishing:  'bait' to be used for Phishing, increasing bite chance + chance for addtional other items | attach 'logs' to phishing attempt, +5% chance to bite, 50% for IP address to be attached
-# Cracking : Crack 3 VM Tokens to change what they can be used for. crack -vm=vm_mining_token : Gives generic VM Token to be used for anything.
-# Matching : Match all caches of a Location > create School Cache (or school cache+ if parsed) which when decoded has 50% chance to give 2-5 of each cache.
-# Compiling : give each item compiling effect (maybe only works for that tier of hacking (ip address x 10 = increase sql damage by 5 for next 10 hack)
-# Hacking : add difficulty tiers - Student tier 1 gives 1 cache, tier 2 gives 5, tier 3 gives 15?
-# Decoding : Decode logs for 1% chance at super powerful compiling item (sql amplifier = +100% speed for next 10 hacks)
-# Defragging : 
-
-#General Polish?
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
@@ -505,8 +471,72 @@ func universal_commands(text):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
-			Inventory.add_resource(item, 1000)
+			Inventory.add_resource(item, 10)
 			return true
+	
+	if text.begins_with("mod"):
+		if text == "mod" or text == "mods":
+			add_line(ContextCommands.get_mod_command())
+			return true
+		
+		if text.begins_with("mod -rm"):
+			#NO MODS ACTIVE TO REMOVE
+			if HackingMods.current_mods.is_empty():
+				add_line("No mods available to remove.")
+				return true
+			
+			#CONFIRM ID IS AN INT
+			var id_to_remove = text.trim_prefix("mod -rm").strip_edges()
+			if !id_to_remove.is_valid_int():
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
+				return true
+			
+			#CONFIRM ID IS IN RANGE OF CURRENT ACTIVE MODS SIZE
+			if HackingMods.current_mods.size() < int(id_to_remove) + 1 or int(id_to_remove) < 0:
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
+				return true
+			
+			var mod_to_remove = HackingMods.current_mods.keys()[int(id_to_remove)]
+			HackingMods.remove_mod(mod_to_remove)
+			add_line(HackingMods.get_mod_name(mod_to_remove) + " mod deleted.")
+			return true
+		
+		if text.begins_with("mod -add"):
+			#check player even has mod items
+			if !Inventory.has_mod_item():
+				add_line("No mod items found in inventory.")
+				return true
+			
+			if HackingMods.at_max_mods():
+				add_line("Error: maximum active Hacking Mods reached. Use the 'mod -rm <id>' command to remove active Hacking Mods.")
+				return true
+			
+			#verify number after -add
+			var id_to_add = text.trim_prefix("mod -add").strip_edges()
+			if !id_to_add.is_valid_int():
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
+				return true
+			
+			#Confirm number is usable 
+			var mod_items = Inventory.get_hacking_mods_items()
+			var valid_id = mod_items.size()
+			
+			if int(id_to_add) < 0 or int(id_to_add) >= valid_id:
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
+				return true
+			
+			var item_mod_to_add = mod_items[int(id_to_add)]
+			
+			if HackingMods.has_mod(item_mod_to_add.hacking_mod_type):
+				add_line("Error: Hacking Mod of this type already active. Mods of similar type cannot stack. Use 'mod -rm <id>' to remove first to replace.")
+				return true
+				
+			HackingMods.add_mod(item_mod_to_add)
+			Inventory.remove_resource(item_mod_to_add, 1)
+			add_line(item_mod_to_add.name + " added.")
+			return true
+			
+			
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())
@@ -950,7 +980,7 @@ func handle_vm_token_commands(text):
 		add_line("Process is not unlocked")
 		return
 	
-	if target_process != Parsing and target_process != Cracking:
+	if target_process != Parsing and target_process != Cracking and target_process != Compiling:
 		if !target_process.has_requirements(target_minor_process):
 			add_line(target_process.missing_requirements_text(target_minor_process))
 			return
@@ -991,6 +1021,51 @@ func handle_vm_token_commands(text):
 		
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse)
+	
+	elif target_process == Compiling:
+		if target_minor_process == Compiling.MOD:
+			if !text.contains("="):
+				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			var item_string = text.split("=")
+			if item_string.size() <= 1:
+				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			var item = Inventory.get_item_by_name(item_string[1])
+			if item == null:
+				add_line("Item not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			
+			if item.hacking_mod_item:
+				add_line("ERROR: cannot further Compile hacking mod.")
+				return
+			var amount_needed = item.hacking_mod_consumed
+			if Inventory.get_amount(item) < amount_needed:
+				add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
+				return
+			
+			if HackingMods.at_max_mods():
+				add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
+				return
+			
+			#check if type of mod already exists on player and confirm overwriting
+			if HackingMods.has_mod(item.hacking_mod_type):
+				add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
+				return
+				
+			Inventory.remove_resource(target_process.vm_token, 1)
+			new_window = target_process.create_vm_window(target_minor_process, item)
+		else:
+			var missing = false
+			for req in target_minor_process["requirements"]:
+				if Inventory.get_amount(req) < target_minor_process['requirements'][req]:
+					add_line("Missing required resource: " + req.name + " x" + str(target_minor_process['requirements'][req]))
+					missing = true
+			if missing:
+				return
+			
+			Inventory.remove_resource(target_process.vm_token, 1)
+			new_window = target_process.create_vm_window(target_minor_process)
 	
 	elif target_process == Cracking:
 		var use_item = null
@@ -1685,11 +1760,22 @@ func compiling_commands(text):
 					add_line("Item not recognized. [color=#666666]ex. compile -mod=logs[/color]")
 					return
 				
+				if item.hacking_mod_item:
+					add_line("ERROR: cannot further Compile hacking mod.")
+					return
 				var amount_needed = item.hacking_mod_consumed
 				if Inventory.get_amount(item) < amount_needed:
 					add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
 					return
 				
+				if HackingMods.at_max_mods():
+					add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
+					return
+				
+				#check if type of mod already exists on player and confirm overwriting
+				if HackingMods.has_mod(item.hacking_mod_type):
+					add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
+					return
 				start_compiling(ms, item)
 				return
 			else:

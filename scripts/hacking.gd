@@ -186,7 +186,8 @@ func handle_hack_command(text):
 	if recursive:
 		hack_count = -1
 	
-	var target: Dictionary = Stats.get_hacking_target_by_command(target_name)
+	#var target: Dictionary = Stats.get_hacking_target_by_command(target_name)
+	var target: Dictionary = enemy_hacking_box.get_hacking_target(target_name)
 	
 	# Valid target
 	if target.is_empty():
@@ -230,13 +231,15 @@ func handle_back_command():
 			hacking_help_commands()
 
 func handle_view_command(text):
-	var target: Dictionary = Stats.get_hacking_location_by_command(text)
-	if target.is_empty():
+	#var target: Dictionary = Stats.get_hacking_location_by_command(text)
+	var targets: Array = Stats.get_hacking_targets_by_command(text)
+	var location_name: String = Stats.get_hacking_location_name_by_command(text)
+	if targets.is_empty():
 		player_hacking_box.add_line("Not a valid location.")
 	else:
 		current_context = HackingContext.PERSONS
 		hacking_help_commands()
-		await enemy_hacking_box.select_target(target)
+		await enemy_hacking_box.select_target(location_name, targets)
 
 
 func hacking_ended():

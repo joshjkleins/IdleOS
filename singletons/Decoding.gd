@@ -35,7 +35,11 @@ var CACHE = {
 	"experience": 0,
 	"experience per level": 900,
 	"command": "decode -cache",
-	"display command": "decode -cache[=<item>]",
+	"display command": "decode -cache[=<cache item>]",
+	"example commands": [
+		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
+		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
+	],
 	"efficiency": 0.1,
 	"efficiency rate": 0.001,
 	"unlocked": true,

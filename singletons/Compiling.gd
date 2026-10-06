@@ -252,14 +252,14 @@ func missing_requirements_text(minor_process) -> String:
 	#if upgrade_stat["name"].to_lower() == "vm duration":
 		#VM_UPTIME += upgrade_stat["increase per level"]
 
-func create_vm_window(minor_process, repeat) -> Window:
+func create_vm_window(minor_process, item: ItemData = null) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
-	new_window.repeat = repeat
+	new_window.repeat = true
 	
-	new_window.set_repeat(repeat)
+	new_window.set_repeat(true)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Parsing, minor_process)
@@ -276,7 +276,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	)
 	new_window.about_to_popup.connect(func(): 
 		#content_instance.set_parse_type(minor_process, true)
-		content_instance.start(minor_process, true)
+		content_instance.start(minor_process, true, item)
 	)
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1

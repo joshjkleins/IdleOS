@@ -24,7 +24,10 @@ var healing_threshold_auto_start: float = 0.3
 var hacking_targets = {
 	"School": {
 		"command": "view school",
+		"hard mode command": "view school -hard",
 		"name": "School",
+		"unlocked": true,
+		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.SCHOOL_PAYLOAD,
 		"targets": [
@@ -94,10 +97,80 @@ var hacking_targets = {
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],
+		"hard mode targets": [
+			{
+				"name": "Student (Hard)",
+				"difficulty": "Hard",
+				"command": "hack student",
+				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 15 },
+				"heat": 0.5,
+				"exp": 600,
+				"integrity": 1,
+				"firewall": 10,
+				"counter": 15,
+				"counter speed": 40.0,
+				"loot": Items.STUDENT_CACHE,
+				"loot quantity": 25,
+			},
+			{
+				"name": "Administrator",
+				"difficulty": "Hard",
+				"command": "hack administrator",
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
+				"heat": 0.9,
+				"exp": 1200,
+				"integrity": 120,
+				"firewall": 13,
+				"counter": 7,
+				"counter speed": 16.0,
+				"loot": Items.ADMIN_CACHE
+			},
+			{
+				"name": "Vice Principal",
+				"difficulty": "Hard",
+				"command": "hack vice-principal",
+				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
+				"heat": 1.0,
+				"exp": 1800,
+				"integrity": 140,
+				"firewall": 15,
+				"counter": 9,
+				"counter speed": 16.0,
+				"loot": Items.VICE_PRINCIPAL_CACHE
+			},
+			{
+				"name": "Principal",
+				"difficulty": "Hard",
+				"command": "hack principal",
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
+				"heat": 1.3,
+				"exp": 2400,
+				"integrity": 160,
+				"firewall": 20,
+				"counter": 6,
+				"counter speed": 30.0,
+				"loot": Items.PRINCIPAL_CACHE
+			},
+			{
+				"name": "Superintendent",
+				"difficulty": "Hard",
+				"command": "hack superintendent",
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
+				"heat": 2.0,
+				"exp": 3000,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.SUPERINTENDENT_CACHE
+			}
+		],
 		"art": preload("res://art/school-ascii.png")
 	}, "Library": {
 		"command": "view library",
 		"name": "Library",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.LIBRARY_PAYLOAD,
 		"targets": [
@@ -166,6 +239,8 @@ var hacking_targets = {
 	}, "Small Business": {
 		"command": "view small-business",
 		"name": "Small Business",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.SMALL_BUSINESS_PAYLOAD,
 		"targets": [
@@ -234,6 +309,8 @@ var hacking_targets = {
 	}, "University": {
 		"command": "view university",
 		"name": "University",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"difficulty": "Moderate",
 		"targets": [
 			{
@@ -296,6 +373,8 @@ var hacking_targets = {
 	}, "Hospital": {
 		"command": "view hospital",
 		"name": "Hospital",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"targets": [
 			{
@@ -359,6 +438,8 @@ var hacking_targets = {
 		"command": "view police-station",
 		"name": "Police Station",
 		"difficulty": "Easy",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"targets": [
 			{
 				"name": "Secretary",
@@ -420,6 +501,8 @@ var hacking_targets = {
 	}, "Lawfirm": {
 		"command": "view lawfirm",
 		"name": "Lawfirm",
+		"unlocked": false,
+		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"targets": [
 			{
@@ -546,16 +629,38 @@ func update_tempature(amount: float):
 
 func get_hacking_target_by_command(command):
 	for target in hacking_targets:
-		for person in hacking_targets[target]["targets"]:
-			if person["command"] == command:
-				return person
+		if hacking_targets[target].unlocked:
+			for person in hacking_targets[target]["targets"]:
+				if person["command"] == command:
+					return person
 	return {}
 
 func get_hacking_location_by_command(command):
 	for target in hacking_targets:
-		if hacking_targets[target]["command"] == command:
-			return hacking_targets[target]
+		if hacking_targets[target].unlocked:
+			if hacking_targets[target]["command"] == command:
+				return hacking_targets[target]
 	return {}
+
+	#var targets: Dictionary = Stats.get_hacking_targets_by_command(text)
+	#var location_name: String = Stats.get_hacking_location_name_by_command(text)
+
+func get_hacking_targets_by_command(text: String) -> Array:
+	for location in hacking_targets:
+		if hacking_targets[location].unlocked:
+			if hacking_targets[location]["command"] == text:
+				return hacking_targets[location]["targets"]
+			
+			if hacking_targets[location]["hard mode command"] == text:
+				return hacking_targets[location]["hard mode targets"]
+	
+	return []
+
+func get_hacking_location_name_by_command(text: String) -> String:
+	for location in hacking_targets:
+		if text.to_lower() == hacking_targets[location].name.to_lower():
+			return hacking_targets[location].name.to_lower()
+	return ""
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]

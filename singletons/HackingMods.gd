@@ -1,30 +1,18 @@
 extends Node
 
-#how mods work
-#player can consume an item x100 for its Mod type/value/duration
-#Once a mod exists for the player, it cannot be modified
-#cmmand compile -mod item=logs amount=max 
-#Logs x 10 = Damage, 1, 1, #Logs x 50 = Damage, 5, 5, #Logs x 100 = Damage, 10, 10 (max)
-#Player can only do a max of 100 per item per mod
-#Option A
-#If another Item is compiled with similar Type then simply replace or message that a type already exists with that bonus
-#
-#Option B
-#If another item is compiled with similar Type then 
-
 var max_mods: int = 2
 var current_mods_count: int = 0
 
 enum MOD_TYPE {
-	DAMAGE,
-	EFFICIENCY,
-	FIREWALL_REDUCTION,
-	FIREWALL_DAMAGE,
-	RESTORE,
-	BAND_RATE,
-	ATTACK_SPEED,
-	DAMAGE_REDUCTION,
-	COUNTER_SLOW,
+	DAMAGE,               #logs | parents CC
+	EFFICIENCY,           #pw, e-pw
+	FIREWALL_REDUCTION,   #usernames
+	FIREWALL_DAMAGE,      #IP address
+	RESTORE,              #packet spoof
+	BAND_RATE,            #school payload
+	ATTACK_SPEED,         #credentials
+	DAMAGE_REDUCTION,     #student cache
+	COUNTER_SLOW,         #sql injector
 }
 
 var current_mods = {}
@@ -32,9 +20,7 @@ var current_mods = {}
 var MAX_DURATION: int = 10
 
 #func _ready():
-	#add_mod(MOD_TYPE.DAMAGE, 5, 5)
-	#add_mod(MOD_TYPE.ATTACK_SPEED, 7, 0.2)
-	#add_mod(MOD_TYPE.EFFICIENCY, 3, 0.3)
+	#add_mod(Items.LOGS)
 
 func get_mod_description(mod: MOD_TYPE) -> String:
 	match mod:
@@ -49,7 +35,7 @@ func get_mod_description(mod: MOD_TYPE) -> String:
 		MOD_TYPE.RESTORE:
 			return "Increases Packet Spoof restore"
 		MOD_TYPE.BAND_RATE:
-			return "Increases bandwith restore rate"
+			return "Increases bandwith restore amount"
 		MOD_TYPE.ATTACK_SPEED:
 			return "Increases attack speed"
 		MOD_TYPE.DAMAGE_REDUCTION:
@@ -72,7 +58,7 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 		MOD_TYPE.RESTORE:
 			return "Packet Spoof Amount"
 		MOD_TYPE.BAND_RATE:
-			return "Bandwith Restore Rate"
+			return "Bandwith Restore Amount"
 		MOD_TYPE.ATTACK_SPEED:
 			return "SQL Attack Speed"
 		MOD_TYPE.DAMAGE_REDUCTION:
@@ -86,25 +72,26 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 	match mod:
 		MOD_TYPE.DAMAGE:
-			return str(int(value))
+			return "+" + str(int(value))
 		MOD_TYPE.EFFICIENCY:
-			return str(value * 100.0) + "%"
+			return "+%.f%%" % (value * 100.0)
 		MOD_TYPE.FIREWALL_REDUCTION:
-			return str(int(value))
+			return "-" + str(int(value))
 		MOD_TYPE.FIREWALL_DAMAGE:
-			return str(int(value))
+			return "+" + str(int(value))
 		MOD_TYPE.RESTORE:
-			return str(int(value))
+			return "+" + str(int(value))
 		MOD_TYPE.BAND_RATE:
-			return str(int(value))
+			return "+" + str(int(value))
 		MOD_TYPE.ATTACK_SPEED:
-			return str(value * 100.0) + "%"
+			return "+" + "%.f%%" % (value * 100.0)
 		MOD_TYPE.DAMAGE_REDUCTION:
-			return str(int(value))
+			return "-" + str(int(value))
 		MOD_TYPE.COUNTER_SLOW:
-			return str(value * 100.0) + "%"
+			return "-" + "%.f%%" % (value * 100.0)
 		_:
 			return str(0)
+
 
 #MOD_TYPE.DAMAGE: {
 	#"duration": 5,
@@ -143,6 +130,6 @@ func at_max_mods() -> bool:
 	return false
 
 func get_mod_value(mod: MOD_TYPE):
-	if current_mods.has_mod(mod):
+	if current_mods.has(mod):
 		return current_mods[mod].value
 	return 0

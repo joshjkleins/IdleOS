@@ -1087,3 +1087,82 @@ To copy the discord link to your clipboard use 'discord -c'
 
 func get_build_version() -> String:
 	return System.SKILL.version
+
+func get_mod_command() -> String:
+	#if HackingMods.current_mods.is_empty():
+		#return "No active Hacking Mods. Use the Mod process in the [color=" + Compiling.SKILL.color.to_html() + "]Compiling[/color] skill to Compile items into Hacking Mods."
+
+	var return_text = ""
+	var id_col = 5
+	var mod_col = 30
+	var mod_val = 8
+	
+	var active_mods_title = "\n| ACTIVE MODS " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)  + " |\n"
+	
+	return_text += "\n------------------"
+	return_text += active_mods_title
+	return_text += "------------------\n\n"
+	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
+	return_text += "--------------------------------------------------------------\n"
+
+	if HackingMods.current_mods.is_empty():
+		return_text += pad_text("-", id_col)
+		return_text += pad_text("-", mod_col)
+		return_text += pad_text("-", mod_val)
+		return_text += "-\n"
+	
+	else:
+
+		for i in range(HackingMods.current_mods.size()):
+			var mod_type = HackingMods.current_mods.keys()[i]
+			var mod = HackingMods.current_mods[mod_type]
+
+			var hmv = HackingMods.get_mod_value_text(mod_type, mod.value)
+			var hmn = HackingMods.get_mod_name(mod_type)
+			var hmd = mod.duration
+
+			return_text += pad_text("[" + str(i) + "]", id_col, false)
+			return_text += pad_text(hmn, mod_col)
+			return_text += pad_text(" " + hmv, mod_val)
+			return_text += str(hmd) + " hacks\n"
+	
+	return_text += "\n\n\n-------------"
+	return_text += "\n| MOD ITEMS |\n"
+	return_text += "-------------\n"
+	
+	
+	var mod_id_col = 5
+	var mod_name_col = 25
+	var mod_mod_col = 30
+	var mod_val_col = 8
+	
+	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("MOD", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
+	return_text += "----------------------------------------------------------------------------------\n"
+	if Inventory.has_mod_item():
+		var player_hacking_mods = Inventory.get_hacking_mods_items()
+		
+		if !player_hacking_mods.is_empty():
+			for i in player_hacking_mods.size(): #loop through hacking items
+				var mod = player_hacking_mods[i]
+				var mod_type = mod.hacking_mod_type
+
+				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
+				var hmn = HackingMods.get_mod_name(mod_type)
+				var hmd = mod.hacking_mod_duration
+
+				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
+				return_text += pad_text(mod.name, mod_name_col)
+				return_text += pad_text(hmn, mod_mod_col)
+				return_text += pad_text(hmv, mod_val_col)
+				return_text += str(hmd) + " hacks\n"
+		
+	else:
+		return_text += pad_text("-", mod_id_col)
+		return_text += pad_text("-", mod_name_col)
+		return_text += pad_text("-", mod_mod_col)
+		return_text += pad_text("-", mod_val_col)
+		return_text += "-"
+
+	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods.\n"
+	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n\n"
+	return return_text

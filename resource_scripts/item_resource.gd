@@ -34,7 +34,7 @@ enum ItemColor {
 @export var hacking_mod_value: float
 @export var hacking_mod_duration: int
 @export var hacking_mod_consumed: int
-
+@export var hacking_mod_item: bool = false
 
 func get_obtained_from_skills() -> Array:
 	var result = []

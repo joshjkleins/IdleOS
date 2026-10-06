@@ -117,6 +117,7 @@ enum ItemType {
 	LIBRARY_PAYLOAD, #94
 	VM_COMPILING_TOKEN, #95
 	STUDENT_CACHE_FOOTPRINT, #96
+	SQL_BOOSTER, #97
 }
 
 #items
@@ -143,6 +144,9 @@ const LIBRARY_PAYLOAD = preload("res://items/payloads/library_payload.tres")
 const DDOS = preload("res://items/combat/ddos.tres")
 const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
 const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
+
+### HACKING MODS ###
+const SQL_BOOSTER = preload("res://items/hacking_mods/sql_booster.tres")
 
 ### TOKENS ###
 #VMs
@@ -358,4 +362,5 @@ const ITEM_MAP = {
 	ItemType.LIBRARY_PAYLOAD: LIBRARY_PAYLOAD,
 	ItemType.VM_COMPILING_TOKEN: VM_COMPILING_TOKEN,
 	ItemType.STUDENT_CACHE_FOOTPRINT: STUDENT_CACHE_FOOTPRINT,
+	ItemType.SQL_BOOSTER: SQL_BOOSTER,
 }

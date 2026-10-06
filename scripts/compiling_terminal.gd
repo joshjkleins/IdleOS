@@ -137,7 +137,7 @@ func _update_labels():
 		var hacking_mod_name = HackingMods.get_mod_name(hacking_mod_item.hacking_mod_type)
 		var hacking_mod_duration = "Duration: " + str(hacking_mod_item.hacking_mod_duration) + " hack(s)"
 		
-		payload_item.text = hacking_mod_name + " +" + hacking_mod_value
+		payload_item.text = hacking_mod_name + " " + hacking_mod_value
 		amount_gained_label.text = hacking_mod_duration
 	else:
 		payload_item.text = type["resource gained"].name

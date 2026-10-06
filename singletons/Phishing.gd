@@ -63,6 +63,38 @@ var SPEAR = {
 	"signal": spear_cycle_completed
 }
 
+
+var MOD = {
+	"name": "Mod",
+	"tier name": "TIER II | MOD",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "phish -mod",
+	"efficiency": 0.005,
+	"efficiency rate": 0.0001,
+	"unlocked": false,
+	"unlock level": 10,
+	"cast time": 3.0,
+	"overclock cast time": 1.5,
+	"overheat cast time": 9.0,
+	"wait time min": 6.0,
+	"wait time max": 13.0,
+	"download time": 35.0,
+	"overclocked download time": 27.5,
+	"overheated download time": 75.5,
+	"heat": 0.3,
+	"overclock heat": 0.6,
+	"overheat heat": 0.1,
+	"requirements": {},
+	"resource gained": [
+		{ "item": Items.SQL_BOOSTER, "min": 1, "max": 1, "weight": 10 },
+	],
+	"resource amount gained": 1,
+	"description": "A risky phishing attempt with a slim chance of uncovering a powerful Hacking Modification.",
+	"efficiency description": "Chance for successful bite.",
+	"signal": spear_cycle_completed
+}
 #var WHALING = {
 	#"name": "Whaling",
 	#"tier name": "TIER I | WHALING",
@@ -94,7 +126,8 @@ var SPEAR = {
 #}
 
 var minor_processes = [
-	SPEAR
+	SPEAR,
+	MOD
 ]
 
 func add_line(line):

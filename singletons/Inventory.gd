@@ -86,7 +86,7 @@ func list_specific_item(item: ItemData):
 		
 		var hacking_mod_display = "Hacking Modifications\n"
 		hacking_mod_display += "├─ " + hacking_mod_required_amount + "\n"
-		hacking_mod_display += "├─ " + hacking_mod_name + " +" + hacking_mod_value + "\n"
+		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
 		hacking_mod_display += "└─ " + hacking_mod_duration + "\n\n"
 		text += hacking_mod_display
 	
@@ -312,3 +312,20 @@ func get_vm_token_by_skill_name(skill_name: String) -> ItemData:
 		if skill_name.to_lower() == skill.SKILL.name.to_lower():
 			return skill.vm_token
 	return null
+
+
+func has_mod_item():
+	for i in inventory:
+		if i.hacking_mod_item:
+			return true
+	return false
+
+func get_hacking_mods_items() -> Array:
+	var hacking_items = []
+	if inventory.is_empty():
+		return hacking_items
+	
+	for i in inventory:
+		if i.hacking_mod_item:
+			hacking_items.append(i)
+	return hacking_items

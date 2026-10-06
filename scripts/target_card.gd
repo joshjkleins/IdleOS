@@ -4,7 +4,7 @@ var target
 
 func update_info(info):
 	target = info
-	$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "Command " + info["command"]
+	$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "Command: '" + info["command"] + "'\n" + "Hard mode command: '" + info['hard mode command'] + "'"
 	$MarginContainer/VBoxContainer/VBoxContainer/Title.text = info["name"]
 	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
 	$MarginContainer/VBoxContainer/TextureRect.texture = info["art"]

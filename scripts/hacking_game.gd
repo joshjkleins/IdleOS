@@ -70,6 +70,7 @@ var NEXT_HEAT_APPLICATION: int = 0
 var INTEGRITY_AMOUNT: int = 0
 var FIREWALL_AMOUNT: int = 0
 var target_reward
+var target_reward_amount
 var target_name
 
 var reward_amount: int = 0
@@ -168,7 +169,12 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	offensive_item = loadout.offensive
 	defensive_item = loadout.defensive
 	var dmg_upgrade = Upgrades.get_package_info("hacking.damage")
-	ATTACK_AMOUNT = offensive_item.damage + dmg_upgrade.current
+	
+	var mod_damage = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE):
+		mod_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE)
+	
+	ATTACK_AMOUNT = offensive_item.damage + dmg_upgrade.current + mod_damage
 	var firewall_upgrade = Upgrades.get_package_info("hacking.firewall")
 	FIREWALL_DAMAGE = offensive_item.firewall_damage + firewall_upgrade.current
 	ATTACK_SPEED = offensive_item.speed
@@ -241,6 +247,9 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	EXP_AMOUNT = target["exp"]
 	INTEGRITY_AMOUNT = target["integrity"]
 	target_reward = target["loot"]
+	target_reward_amount = 1
+	if target.has('loot quantity'):
+		target_reward_amount = target['loot quantity']
 	target_name = target["name"]
 	FIREWALL_AMOUNT = target["firewall"]
 	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
@@ -253,12 +262,8 @@ func attack():
 	var eff = _get_total_efficiency()
 	if randf() <= eff:
 		crit = 2.0
-	
-	var mod_damage = 0
-	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE):
-		mod_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE)
 		
-	var raw_dmg = (ATTACK_AMOUNT + mod_damage) * crit
+	var raw_dmg = ATTACK_AMOUNT * crit
 	var actual_dmg = max(raw_dmg - firewall_bar.value, 0)
 	# only the portion of firewall that actually absorbed damage counts as "blocked"
 	var blocked = min(firewall_bar.value, raw_dmg)
@@ -373,12 +378,13 @@ func win():
 	attacking = false
 	defending = false
 	firewall_bar.value = 0
-	caches_gained += 1
 	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
-	reward_amount += 1
+	
+	caches_gained += target_reward_amount
+	reward_amount += target_reward_amount
 	remove_mod_duration()
 	update_bottom_row()
-	_update_info_panel("target successfully hacked. +1 " + target_reward.name, c_blue)
+	_update_info_panel("target successfully hacked. +" + str(target_reward_amount) + " " + target_reward.name, c_blue)
 	_update_info_panel("-----------------------------------------------", c_white)
 	Exp.add_xp(Hacking, null, EXP_AMOUNT)
 	Signals.update_hacking_header()
@@ -533,7 +539,7 @@ func prepare():
 	_update_info_panel("starting hack", c_white)
 	update_status_label_badge("hacking", c_green)
 	
-	attack_dmg_label.text = "DMG: " + str(ATTACK_AMOUNT) #HERE
+	attack_dmg_label.text = "DMG: " + str(ATTACK_AMOUNT) #aaaaa
 	attack_bandwidth_label.text = "BANDWIDTH: " + str(ATTACK_BW_COST)
 	attack_firewall_label.text = "FIREWALL: " + str(FIREWALL_DAMAGE)
 	

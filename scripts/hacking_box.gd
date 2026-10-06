@@ -33,15 +33,22 @@ func update_targets():
 		targets_container.add_child(new_row)
 		break
 
-func select_target(target: Dictionary = {}):
-	await _green_flash(target, targets_container)
+func select_target(location_name: String, targets: Array = []):
+	await _green_flash(location_name)
 	await _hide_container(targets_container)
-	_update_persons(target)
-	update_box_title("IdleOS > Hacking > " + target.name)
+	_update_persons(targets)
+	update_box_title("IdleOS > Hacking > " + location_name.capitalize())
 	await _show_container(persons_container)
 
+#func select_target1(target: Dictionary = {}):
+	#await _green_flash(target, targets_container)
+	#await _hide_container(targets_container)
+	#_update_persons(target)
+	#update_box_title("IdleOS > Hacking > " + target.name)
+	#await _show_container(persons_container)
+
 func select_person(target: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
-	await _green_flash(target, persons_container)
+	#await _green_flash(target, persons_container)
 	await _hide_container(persons_container)
 	var loadout = {
 		"offensive": Items.SQL_INJECTOR,
@@ -89,10 +96,15 @@ func _show_container(container):
 	tween.tween_property(container, "modulate:a", 1.0, 0.3)
 	await tween.finished
 
-func _green_flash(target, container):
-	for tar in container.get_children():
-		if tar.target.name == target.name:
+func _green_flash(location: String):
+	for tar in targets_container.get_children():
+		if tar.target.name.to_lower() == location.to_lower():
 			await tar.flash_green()
+
+#func _green_flash1(location_name: String, container):
+	#for tar in container.get_children():
+		#if tar.target.name == target.name:
+			#await tar.flash_green()
 
 func _red_flash(target, container):
 	for tar in container.get_children():
@@ -100,11 +112,11 @@ func _red_flash(target, container):
 			await tar.flash_red()
 
 #lists each person at specific location
-func _update_persons(target_location):
+func _update_persons(targets: Array):
 	for child in persons_container.get_children():
 		child.queue_free()
 	
-	for target in target_location.targets:
+	for target in targets:
 		var new_card = person_card.instantiate()
 		new_card.update_info(target)
 		
@@ -120,3 +132,9 @@ func remove_last_title_update():
 
 func update_box_title(text: String):
 	rtl.text = "[bgcolor=#0b0e11]" + text + "[/bgcolor]"
+
+func get_hacking_target(target_name: String) -> Dictionary:
+	for person in persons_container.get_children():
+		if target_name == person.target.command:
+			return person.target
+	return {}

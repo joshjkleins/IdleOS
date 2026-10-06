@@ -110,8 +110,12 @@ func _on_defrag_bonus_timer_timeout() -> void:
 func _get_total_effeciency() -> float:
 	var base = Hacking.SKILL.efficiency
 	var defragging_bonus = Defragging.HACKING["bonus efficiency"] if Stats.has_bonus(Hacking) else 1.0
+	var mod_eff = 0.0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.EFFICIENCY):
+		mod_eff = HackingMods.get_mod_value(HackingMods.MOD_TYPE.EFFICIENCY)
 	
-	return base * defragging_bonus
+	return snapped((base + mod_eff) * defragging_bonus, 0.01)
+
 
 func update_modifiers_ui():
 	modifiers_title.text = "Temporary Modifiers " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)
@@ -120,11 +124,11 @@ func update_modifiers_ui():
 	
 	#m is enum number : Damage = 0 etc
 	for m in HackingMods.current_mods.keys():
-		var mod_value = HackingMods.current_mods[m].value
-		var mod_duration = HackingMods.current_mods[m].duration
-		var mod_name = HackingMods.get_mod_name(m)
+		var hacking_mod_value = HackingMods.get_mod_value_text(m, HackingMods.current_mods[m].value)
+		var hacking_mod_name = HackingMods.get_mod_name(m)
+		
 		var mod_row = hacking_mod_row.instantiate()
 		
-		mod_row.update(mod_name, mod_value, mod_duration)
+		mod_row.update(hacking_mod_name, hacking_mod_value, HackingMods.current_mods[m].duration)
 		modifiers.add_child(mod_row)
 		
