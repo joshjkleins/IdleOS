@@ -1,7 +1,6 @@
 extends Node
 
 var max_mods: int = 2
-var current_mods_count: int = 0
 
 enum MOD_TYPE {
 	DAMAGE,               #logs | parents CC
@@ -13,11 +12,10 @@ enum MOD_TYPE {
 	ATTACK_SPEED,         #credentials
 	DAMAGE_REDUCTION,     #student cache
 	COUNTER_SLOW,         #sql injector
+	NONE,
 }
 
 var current_mods = {}
-
-var MAX_DURATION: int = 10
 
 #func _ready():
 	#add_mod(Items.LOGS)
@@ -133,3 +131,24 @@ func get_mod_value(mod: MOD_TYPE):
 	if current_mods.has(mod):
 		return current_mods[mod].value
 	return 0
+
+
+func save_data() -> Dictionary:
+	return {
+		"current_mods": current_mods,
+		"max_mods": max_mods
+	}
+
+func load_data(data: Dictionary) -> void:
+	var loaded_mods: Dictionary = data.get("current_mods", {})
+
+	current_mods.clear()
+
+	for mod_type in loaded_mods:
+		var mod: Dictionary = loaded_mods[mod_type]
+
+		mod["duration"] = int(mod.get("duration", 0))
+
+		current_mods[int(mod_type)] = mod
+
+	max_mods = int(data.get("max_mods", max_mods))

@@ -32,7 +32,7 @@ var LOGS = {
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 15,
 	"command": "mine -logs",
 	"efficiency": 0.0,
 	"efficiency rate": 0.08,

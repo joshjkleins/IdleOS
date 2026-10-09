@@ -4,7 +4,7 @@ signal gained_xp_signal
 signal exp_updated_signal
 
 
-const MAX_LEVEL: int = 99
+const MAX_LEVEL: int = 10
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]

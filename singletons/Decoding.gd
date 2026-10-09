@@ -33,7 +33,7 @@ var CACHE = {
 	"name": "Cache",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 900,
+	"experience per level": 50,
 	"command": "decode -cache",
 	"display command": "decode -cache[=<cache item>]",
 	"example commands": [

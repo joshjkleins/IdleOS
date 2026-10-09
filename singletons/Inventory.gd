@@ -329,3 +329,28 @@ func get_hacking_mods_items() -> Array:
 		if i.hacking_mod_item:
 			hacking_items.append(i)
 	return hacking_items
+
+#Logs.....+5 damage.......10 hacks.......x100
+func list_inventory_hacking_mods():
+	if inventory.is_empty():
+		return "Inventory is empty."
+	
+	var col_1 = 5
+	var col_2 = 10
+	for item in inventory:
+		if item.name.length() > col_1:
+			col_1 = item.name.length()
+	col_1 += 5
+	var return_text = "\n\n"
+	return_text += pad_text("ITEM", col_1) + pad_text("HACKING MOD", 40) + pad_text("DURATION", 15) + pad_text("REQUIRED", 10) + pad_text("CURRENT AMOUNT", 20)
+	return_text += "\n" + "-".repeat(120)
+	for item in inventory:
+		var first_col = item.name + " ".repeat(col_1 - item.name.length())
+		var second_col = HackingMods.get_mod_name(item.hacking_mod_type) + " " + HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var third_col = str(int(item.hacking_mod_duration)) + " hacks"
+		#var fourth_col = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var fifth_col = "x" + str(item.hacking_mod_consumed)
+		var sixth_col = str(Inventory.get_amount(item))
+		
+		return_text += "\n" + pad_text(first_col, col_1) + pad_text(second_col, 40) + pad_text(third_col, 15) + pad_text(fifth_col, 10) + pad_text(sixth_col, 20)
+	return return_text

@@ -13,7 +13,7 @@ var MINING = {
 				{
 					"level": 1,
 					"id": "mining.speed", 
-					"requirements": [{"item": Items.LOGS, "amount": 35 }],
+					"requirements": [{"item": Items.LOGS, "amount": 100 }],
 					"amount": 0.50,
 					"unlocked": false
 				},
@@ -28,7 +28,7 @@ var MINING = {
 				{
 					"level": 1,
 					"id": "mining.efficiency", 
-					"requirements": [{ "item": Items.LOGS, "amount": 120 }],
+					"requirements": [{ "item": Items.LOGS, "amount": 200 }],
 					"amount": 1.5,
 					"unlocked": false
 				},
@@ -43,7 +43,7 @@ var MINING = {
 				{
 					"level": 1,
 					"id": "mining.overclock", 
-					"requirements": [{"item": Items.LOGS, "amount": 50 }],
+					"requirements": [{"item": Items.LOGS, "amount": 75 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -65,7 +65,7 @@ var PARSING = {
 				{
 					"level": 1,
 					"id": "parsing.speed", 
-					"requirements": [{"item": Items.IP_ADDRESS, "amount": 20 }, {"item": Items.USERNAMES, "amount": 20 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 20 }],
+					"requirements": [{"item": Items.IP_ADDRESS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }],
 					"amount": 0.35,
 					"unlocked": false
 				},
@@ -95,7 +95,7 @@ var PARSING = {
 				{
 					"level": 1,
 					"id": "parsing.overclock", 
-					"requirements": [{"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }, {"item": Items.IP_ADDRESS, "amount": 50 }, {"item": Items.FALSIFIED_TRANSCRIPT_DATABASE, "amount": 1 }],
+					"requirements": [{"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }, {"item": Items.IP_ADDRESS, "amount": 50 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -117,7 +117,7 @@ var CRACKING = {
 				{
 					"level": 1,
 					"id": "cracking.speed", 
-					"requirements": [{"item": Items.PASSWORDS, "amount": 25 }],
+					"requirements": [{"item": Items.PASSWORDS, "amount": 50 }],
 					"amount": 0.3,
 					"unlocked": false
 				},
@@ -132,7 +132,7 @@ var CRACKING = {
 				{
 					"level": 1,
 					"id": "cracking.efficiency", 
-					"requirements": [{ "item": Items.PASSWORDS, "amount": 55 }],
+					"requirements": [{ "item": Items.PASSWORDS, "amount": 100 }],
 					"amount": 0.08,
 					"unlocked": false
 				},
@@ -147,7 +147,7 @@ var CRACKING = {
 				{
 					"level": 1,
 					"id": "cracking.overclock", 
-					"requirements": [{ "item": Items.PASSWORDS, "amount": 80 }, { "item": Items.STUDENT_DISCIPLINARY_RECORDS, "amount": 1 }],
+					"requirements": [{ "item": Items.PASSWORDS, "amount": 80 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -199,7 +199,7 @@ var MATCHING = {
 				{
 					"level": 1,
 					"id": "matching.overclock", 
-					"requirements": [{ "item": Items.CREDENTIALS, "amount": 100 }, { "item": Items.SCHOOL_BUDGET_EMBEZZLEMENT_LOGS, "amount": 1 }],
+					"requirements": [{ "item": Items.CREDENTIALS, "amount": 100 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -235,7 +235,7 @@ var PHISHING = {
 				{
 					"level": 3,
 					"id": "phishing.lines", 
-					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 50 }, {"item": Items.PACKET_SPOOF, "amount": 10 }],
+					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 2 }],
 					"amount": 1,
 					"unlocked": false
 				}
@@ -250,7 +250,7 @@ var PHISHING = {
 				{
 					"level": 1,
 					"id": "parsing.overclock", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 25 }, {"item": Items.DISTRICT_WIDE_MASTER_PASSWORD, "amount": 1 }],
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 25 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -280,14 +280,14 @@ var HACKING = {
 				{
 					"level": 2,
 					"id": "hacking.damage", 
-					"requirements":[ {"item": Items.ADMIN_CACHE, "amount": 10 }],
+					"requirements":[ {"item": Items.STUDENT_CACHE, "amount": 10 }],
 					"amount": 7,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "hacking.damage", 
-					"requirements": [{"item": Items.VICE_PRINCIPAL_CACHE, "amount": 10 }],
+					"requirements": [{"item": Items.STUDENT_CACHE_FOOTPRINT, "amount": 10 }],
 					"amount": 10,
 					"unlocked": false
 				}
@@ -309,14 +309,14 @@ var HACKING = {
 				{
 					"level": 2,
 					"id": "hacking.firewall", 
-					"requirements":[{"item": Items.SQL_INJECTOR, "amount": 40 }, {"item": Items.LOGS, "amount": 85 }, {"item": Items.STUDENT_DISCIPLINARY_RECORDS, "amount": 1 }],
+					"requirements":[{"item": Items.SQL_INJECTOR, "amount": 40 }, {"item": Items.LOGS, "amount": 85 }],
 					"amount": 3,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "hacking.firewall", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 90 }, {"item": Items.LOGS, "amount": 200 }, {"item": Items.SCHOOL_BUDGET_EMBEZZLEMENT_LOGS, "amount": 1 }],
+					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 60 }, {"item": Items.LOGS, "amount": 200 }],
 					"amount": 4,
 					"unlocked": false
 				}
@@ -331,21 +331,21 @@ var HACKING = {
 				{
 					"level": 1,
 					"id": "hacking.firewall", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 15 }],
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "hacking.firewall", 
-					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 30 }],
+					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "hacking.firewall", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 80 }],
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 80 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
 				}
@@ -375,7 +375,7 @@ var HACKING = {
 				{
 					"level": 1,
 					"id": "hacking.max_bandwidth", 
-					"requirements": [{"item": Items.PASSWORDS, "amount": 100 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 100 }],
+					"requirements": [{"item": Items.PASSWORDS, "amount": 120 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 120 }],
 					"amount": 10,
 					"unlocked": false
 				},
@@ -405,7 +405,7 @@ var HACKING = {
 				{
 					"level": 1,
 					"id": "hacking.overclock", 
-					"requirements": [{"item": Items.PARENTS_CREDIT_CARD, "amount": 3 }, {"item": Items.FALSIFIED_TRANSCRIPT_DATABASE, "amount": 3 }],
+					"requirements": [{"item": Items.PARENTS_CREDIT_CARD, "amount": 3 }, {"item": Items.STUDENT_CACHE, "amount": 10 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -457,7 +457,7 @@ var DECODING = {
 				{
 					"level": 1,
 					"id": "decoding.efficiency", 
-					"requirements": [{ "item": Items.ADMIN_CACHE, "amount": 10 }],
+					"requirements": [{ "item": Items.STUDENT_CACHE_FOOTPRINT, "amount": 10 }],
 					"amount": 0.05,
 					"unlocked": false
 				},
@@ -472,7 +472,7 @@ var DECODING = {
 				{
 					"level": 1,
 					"id": "decoding.overclock", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }, {"item": Items.ADMIN_CACHE, "amount": 10 }],
+					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -524,7 +524,7 @@ var COMPILING = {
 				{
 					"level": 1,
 					"id": "compiling.overclock", 
-					"requirements": [{"item": Items.SCHOOL_PAYLOAD, "amount": 33 }, {"item": Items.ADMIN_CACHE, "amount": 3 }, {"item": Items.STUDENT_DISCIPLINARY_RECORDS, "amount": 1 }],
+					"requirements": [{"item": Items.SCHOOL_PAYLOAD, "amount": 200 }],
 					"amount": true,
 					"unlocked": false
 				},
@@ -547,21 +547,21 @@ var SYSTEM = {
 				{
 					"level": 1,
 					"id": "system.cooling_amount", 
-					"requirements": [{"item": Items.LOGS, "amount": 20 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 20 }, {"item": Items.IP_ADDRESS, "amount": 20 }],
+					"requirements": [{"item": Items.LOGS, "amount": 20 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 20 }, {"item": Items.IP_ADDRESS, "amount": 20 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": -0.1,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "system.cooling_amount", 
-					"requirements":[{"item": Items.PASSWORDS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.CREDENTIALS, "amount": 50 }],
+					"requirements":[{"item": Items.PASSWORDS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.CREDENTIALS, "amount": 50 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": -0.1,
 					"unlocked": false
 				},
 				{
 					"level": 3,
 					"id": "system.cooling_amount", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 30 }, {"item": Items.SCHOOL_BUDGET_EMBEZZLEMENT_LOGS, "amount": 1 }],
+					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": -0.1,
 					"unlocked": false
 				}
@@ -607,14 +607,14 @@ var SYSTEM = {
 				{
 					"level": 1,
 					"id": "system.vm_windows", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
+					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 5 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 0.1,
 					"unlocked": false
 				},
 				{
 					"level": 2,
 					"id": "system.vm_windows", 
-					"requirements":[{"item": Items.ADMIN_CACHE, "amount": 15 }, {"item": Items.FALSIFIED_TRANSCRIPT_DATABASE, "amount": 2 }],
+					"requirements":[{"item": Items.STUDENT_CACHE, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 0.1,
 					"unlocked": false
 				},
@@ -630,7 +630,7 @@ var SYSTEM = {
 				{
 					"level": 1,
 					"id": "system.overheat_fan", 
-					"requirements": [{"item": Items.LOGS, "amount": 25 }],
+					"requirements": [{"item": Items.LOGS, "amount": 50 }],
 					"amount": true,
 					"unlocked": false
 				}
@@ -847,7 +847,6 @@ func unlock_next_level(package):
 					"system.overheat_fan":
 						Stats.OVERHEAT_FAN = package.current
 				return
-			print("nothing returned: Upgrades.unlock_next_level()")
 
 func _apply_stat_effects(package) -> void:
 	match package.id:

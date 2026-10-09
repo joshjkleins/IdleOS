@@ -124,7 +124,8 @@ func get_help_text(skill: Node) -> String:
 		cols_size[2] = max(cols_size[2], "UNLOCK".length())
 		
 		# EFFICIENCY
-		var efficiency = "%.1f%%" % p.efficiency
+		
+		var efficiency = "%.1f%%" % (p.efficiency * 100.0)
 		cols_size[3] = max(cols_size[3], efficiency.length())
 		
 		# EFFICIENCY / LEVEL
@@ -175,37 +176,46 @@ func get_help_text(skill: Node) -> String:
 			#text += "┼"
 			text += "─"
 	text += "┤\n"
-
-
+	
+	
 	# PROCESS ROWS
 	for p in skill.minor_processes:
 		var status
 		if p.unlocked:
 			status = "ONLINE"
 		else:
-			status = "OFFLINE" if p['unlock level'] < 10 else "DEMO LOCKED"
-		var efficiency = "%.1f%%" % p.efficiency
-		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
-		var req_items = get_requirements_text(p)
-		var run_command = p['display command'] if p.has('display command') else p.command
-		
+			status = "OFFLINE" if p['unlock level'] <= 10 else "DEMO LOCKED"
+
+		var efficiency = "-"
+		var efficiency_rate = "-"
+		var run_command = "-"
+		var info_cmd = "-"
+		var req_items = "-"
+
+		if p['unlock level'] <= 10:
+			efficiency = "%.1f%%" % (p.efficiency * 100.0)
+			efficiency_rate = "%.1f%%" % (p['efficiency rate'] * 100.0)
+			run_command = p['display command'] if p.has('display command') else p.command
+			info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
+			req_items = get_requirements_text(p)
+
 		var line_to_add = ""
 		line_to_add += "│ "
 		line_to_add += pad_text(p.name, cols_size[0]) + "     | "
 		line_to_add += pad_text(status, cols_size[1]) + "     | "
 		line_to_add += pad_text(str(p['unlock level']), cols_size[2]) + "     | "
 		line_to_add += pad_text(efficiency, cols_size[3]) + "     | "
-		line_to_add += pad_text(str(p['efficiency rate']) + "%", cols_size[4]) + "     | "
+		line_to_add += pad_text(efficiency_rate, cols_size[4]) + "     | "
 		line_to_add += pad_text(run_command, cols_size[5], false) + "     | "
 		line_to_add += pad_text(info_cmd, cols_size[6]) + "     | "
 		line_to_add += pad_text(req_items, cols_size[7]) + "     │"
-		
+
 		if !p.unlocked:
 			text += "[color=#666666]" + line_to_add + "[/color]\n"
 		else:
 			text += line_to_add + "\n"
-
-
+			
+			
 	# BOTTOM BORDER
 	text += "└"
 	for i in cols_size.size():
@@ -445,6 +455,9 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 func get_mp_info(skill: Node, process: Dictionary) -> String:
 	if skill == Defragging:
 		return get_mp_dfg_info(skill, process)
+	
+	if process['unlock level'] > 10:
+		return "ERROR: process not available."
 	###INFO
 	var return_text = "\nPROCESS\n"
 	var color_string = skill.SKILL.color.to_html()
@@ -597,8 +610,18 @@ func list_vm_terminals_for_skill(skill: Node):
 	return_text += pad_text("Process", first_col) + pad_text("Run command", second_col) + "\n"
 	return_text += "-".repeat(first_col + second_col) + "\n"
 	for mp in skill.minor_processes:
-		var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
-		return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
+		if mp.unlocked:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
+		elif !mp.unlocked and mp['unlock level'] <= 10:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			var text_line = "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("OFFLINE", second_col) + "[/color]\n"
+			return_text += text_line
+		else:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("DEMO LOCKED", second_col) + "[/color]\n"
+			
+			
 	return return_text
 
 func ssh_commands(major_processes: Array) -> String:
@@ -667,41 +690,43 @@ func process_commands() -> String:
 
 func get_help() -> String:
 	var text := """
- ____________________________________________________________________
-|                                                                    |
-|                          IDLEOS COMMANDS                           |
-|____________________________________________________________________|
-|                                                                    |
-| SKILLS / TRAVERSAL                                                 |
-|   cd <skill>                   Navigate to a skill                 |
-|   cd ..                        Return to root                      |
-|   tree                         Display skill hierarchy             |
-|   info                         Display additional skill info       |
-|                                                                    |
-| ITEMS                                                              |
-|   ls                           List items                          |
-|   ls <item>                    Item details                        |
-|   track <item>, <item>         Track item(s) (comma separated)     |
-|   untrack <item>               Remove tracking                     |
-|                                                                    |
-| UPGRADES                                                           |
-|   apt                          Upgrade package manager             |
-|                                                                    |
-| DOCUMENTATION                                                      |
-|   tutorial                     Show tutorial checklist             |
-|   -h                           Display this list                   |
-|   process -h                   List process commands               |
-|   ssh -h                       List ssh commands                   |
-|                                                                    |
-| SETTINGS                                                           |
-|   settings                     Player settings menu                |
-|                                                                    |
-| SYSTEM                                                             |
-|   date                         Show date and time                  |
-|   clear                        Clear terminal                      |
-|   system                       Show system information             |
-|   quit -s                      Save and quit                       |
-|____________________________________________________________________|
+ _____________________________________________________________________
+|                                                                     |
+|                          IDLEOS COMMANDS                            |
+|_____________________________________________________________________|
+|                                                                     |
+| SKILLS / TRAVERSAL                                                  |
+|   cd <skill>                   Navigate to a skill                  |
+|   cd ..                        Return to root                       |
+|   tree                         Display skill hierarchy              |
+|   info                         Display additional skill info        |
+|                                                                     |
+| ITEMS                                                               |
+|   ls                           List items                           |
+|   ls <item>                    Item details                         |
+|   ls mods                      List current items Hacking mod stats |
+|   track <item>, <item>         Track item(s) (comma separated)      |
+|   untrack <item>               Remove tracking                      |
+|                                                                     |
+| UPGRADES                                                            |
+|   apt                          Upgrade package manager              |
+|   mod                          Hacking mod manager                  |
+|                                                                     |
+| DOCUMENTATION                                                       |
+|   tutorial                     Show tutorial checklist              |
+|   -h                           Display this list                    |
+|   process -h                   List process commands                |
+|   ssh -h                       List ssh commands                    |
+|                                                                     |
+| SETTINGS                                                            |
+|   settings                     Player settings menu                 |
+|                                                                     |
+| SYSTEM                                                              |
+|   date                         Show date and time                   |
+|   clear                        Clear terminal                       |
+|   system                       Show system information              |
+|   quit -s                      Save and quit                        |
+|_____________________________________________________________________|
 """
 	return text
 
@@ -1165,4 +1190,9 @@ func get_mod_command() -> String:
 
 	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods.\n"
 	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n\n"
+	return return_text
+
+
+func upload_info():
+	var return_text = "\n\nAquire and upload the Parents Credit Card item. Obtain from Hacking the Student and Decoding the Student Cache.\n\nUse 'upload parents credit card' to upload once aquired."
 	return return_text

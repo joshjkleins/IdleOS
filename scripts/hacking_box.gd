@@ -31,7 +31,6 @@ func update_targets():
 		
 		#add to ui
 		targets_container.add_child(new_row)
-		break
 
 func select_target(location_name: String, targets: Array = []):
 	await _green_flash(location_name)

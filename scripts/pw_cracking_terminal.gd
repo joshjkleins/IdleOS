@@ -90,6 +90,8 @@ func start():
 		#PW LOOP
 		
 		for j in range(lines_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
+			if !has_requirements():
+				break
 			if end_safely:
 				process_running = false
 				if is_window:

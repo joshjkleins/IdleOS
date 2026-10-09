@@ -2,7 +2,7 @@ extends Node
 
 signal gained_xp_signal
 
-const MAX_LEVEL = 99
+const MAX_LEVEL = 10
 
 var MAX_TEMP = 100.0
 var MIN_TEMP = 30.0
@@ -34,10 +34,11 @@ var hacking_targets = {
 			{
 				"name": "Student",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack student",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 1 },
 				"heat": 0.5,
-				"exp": 600,
+				"exp": 100,
 				"integrity": 100,
 				"firewall": 10,
 				"counter": 5,
@@ -47,6 +48,7 @@ var hacking_targets = {
 			{
 				"name": "Administrator",
 				"difficulty": "Easy",
+				"unlocked": false,
 				"command": "hack administrator",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
 				"heat": 0.9,
@@ -60,6 +62,7 @@ var hacking_targets = {
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
+				"unlocked": false,
 				"command": "hack vice-principal",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
 				"heat": 1.0,
@@ -73,6 +76,7 @@ var hacking_targets = {
 			{
 				"name": "Principal",
 				"difficulty": "Medium",
+				"unlocked": false,
 				"command": "hack principal",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
 				"heat": 1.3,
@@ -86,6 +90,7 @@ var hacking_targets = {
 			{
 				"name": "Superintendent",
 				"difficulty": "Hard",
+				"unlocked": false,
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
 				"heat": 2.0,
@@ -98,77 +103,87 @@ var hacking_targets = {
 			}
 		],
 		"hard mode targets": [
-			{
+			{ #generally hard - requires 2 mods to beat (hopefully) and manually spoof and overclock management
 				"name": "Student (Hard)",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack student",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 15 },
 				"heat": 0.5,
-				"exp": 600,
-				"integrity": 1,
-				"firewall": 10,
-				"counter": 15,
-				"counter speed": 40.0,
+				"exp": 4500,
+				"integrity": 500,
+				"firewall": 80,
+				"counter": 20,
+				"counter speed": 50.0,
 				"loot": Items.STUDENT_CACHE,
-				"loot quantity": 25,
+				"loot quantity": 50,
 			},
-			{
+			{ #insane amount of integrity, needs speed + dmg
 				"name": "Administrator",
 				"difficulty": "Hard",
+				"unlocked": false,
 				"command": "hack administrator",
-				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 20},
 				"heat": 0.9,
 				"exp": 1200,
-				"integrity": 120,
-				"firewall": 13,
+				"integrity": 3000,
+				"firewall": 0,
 				"counter": 7,
-				"counter speed": 16.0,
-				"loot": Items.ADMIN_CACHE
+				"counter speed": 30.0,
+				"loot": Items.ADMIN_CACHE,
+				"loot quantity": 50,
 			},
-			{
+			{ #huge firewall, needs firewall reduction + damage
 				"name": "Vice Principal",
 				"difficulty": "Hard",
+				"unlocked": false,
 				"command": "hack vice-principal",
-				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
+				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 25 },
 				"heat": 1.0,
 				"exp": 1800,
-				"integrity": 140,
-				"firewall": 15,
-				"counter": 9,
-				"counter speed": 16.0,
-				"loot": Items.VICE_PRINCIPAL_CACHE
+				"integrity": 10,
+				"firewall": 5000,
+				"counter": 12,
+				"counter speed": 15.0,
+				"loot": Items.VICE_PRINCIPAL_CACHE,
+				"loot quantity": 50,
 			},
-			{
+			{ #hits slow and hard, needs restore to win
 				"name": "Principal",
 				"difficulty": "Hard",
+				"unlocked": false,
 				"command": "hack principal",
-				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 30},
 				"heat": 1.3,
 				"exp": 2400,
-				"integrity": 160,
+				"integrity": 500,
 				"firewall": 20,
-				"counter": 6,
-				"counter speed": 30.0,
-				"loot": Items.PRINCIPAL_CACHE
+				"counter": 150,
+				"counter speed": 2.0,
+				"loot": Items.PRINCIPAL_CACHE,
+				"loot quantity": 50,
 			},
-			{
+			{ #hits fast and weak, damage reduction + restore
 				"name": "Superintendent",
 				"difficulty": "Hard",
+				"unlocked": false,
 				"command": "hack superintendent",
-				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 35},
 				"heat": 2.0,
 				"exp": 3000,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.SUPERINTENDENT_CACHE
+				"integrity": 700,
+				"firewall": 55,
+				"counter": 6,
+				"counter speed": 100.0,
+				"loot": Items.SUPERINTENDENT_CACHE,
+				"loot quantity": 50,
 			}
 		],
 		"art": preload("res://art/school-ascii.png")
-	}, "Library": {
+	}, "Bank": {
 		"command": "view library",
-		"name": "Library",
+		"hard mode command": "view library -hard",
+		"name": "Bank",
 		"unlocked": false,
 		"hard mode unlocked": false,
 		"difficulty": "Easy",
@@ -181,9 +196,10 @@ var hacking_targets = {
 				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 1},
 				"heat": 10,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.PATRON_CACHE
 			},
 			{
@@ -193,9 +209,10 @@ var hacking_targets = {
 				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 2},
 				"heat": 10,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.VOLUNTEER_CACHE
 			},
 			{
@@ -205,9 +222,10 @@ var hacking_targets = {
 				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 3},
 				"heat": 10,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.ASSISTANT_LIBRARIAN_CACHE
 			},
 			{
@@ -217,9 +235,10 @@ var hacking_targets = {
 				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 4},
 				"heat": 10,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.HEAD_LIBRARIAN_CACHE
 			},
 			{
@@ -229,149 +248,17 @@ var hacking_targets = {
 				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 5},
 				"heat": 10,
 				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
 				"loot": Items.DIRECTOR_CACHE
 			}
 		],
 		"art": preload("res://art/library-ascii.png")
-	}, "Small Business": {
-		"command": "view small-business",
-		"name": "Small Business",
-		"unlocked": false,
-		"hard mode unlocked": false,
-		"difficulty": "Easy",
-		"required payload": Items.SMALL_BUSINESS_PAYLOAD,
-		"targets": [
-			{
-				"name": "Worker",
-				"difficulty": "Easy",
-				"command": "hack worker",
-				"requirements": {"item": Items.SMALL_BUSINESS_PAYLOAD, "amount": 1},
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.WORKER_CACHE
-			},
-			{
-				"name": "Supervisor",
-				"difficulty": "Easy",
-				"command": "hack supervisor",
-				"requirements": {"item": Items.SMALL_BUSINESS_PAYLOAD, "amount": 2},
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.SUPERVISOR_CACHE
-			},
-			{
-				"name": "Manager",
-				"difficulty": "Medium",
-				"command": "hack manager",
-				"requirements": {"item": Items.SMALL_BUSINESS_PAYLOAD, "amount": 3},
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.MANAGER_CACHE
-			},
-			{
-				"name": "Human Resources",
-				"difficulty": "Medium",
-				"command": "hack human-resources",
-				"requirements": {"item": Items.SMALL_BUSINESS_PAYLOAD, "amount": 4},
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.HUMAN_RESOURCES_CACHE
-			},
-			{
-				"name": "Owner",
-				"difficulty": "Hard",
-				"command": "hack owner",
-				"requirements": {"item": Items.SMALL_BUSINESS_PAYLOAD, "amount": 5},
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.OWNER_CACHE
-			}
-		],
-		"art": preload("res://art/small-business-ascii.png")
-	}, "University": {
-		"command": "view university",
-		"name": "University",
-		"unlocked": false,
-		"hard mode unlocked": false,
-		"difficulty": "Moderate",
-		"targets": [
-			{
-				"name": "Teachers Assistant",
-				"difficulty": "Easy",
-				"command": "hack teachers-assistant",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.TEACHERS_ASSISTANT_CACHE
-			},
-			{
-				"name": "Professor",
-				"difficulty": "Easy",
-				"command": "hack professor",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.PROFESSOR_CACHE
-			},
-			{
-				"name": "Department Chair",
-				"difficulty": "Medium",
-				"command": "hack department-chair",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.DEPARTMENT_CHAIR_CACHE
-			},
-			{
-				"name": "Dean",
-				"difficulty": "Medium",
-				"command": "hack dean",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.DEAN_CACHE
-			},
-			{
-				"name": "University President",
-				"difficulty": "Hard",
-				"command": "hack university-president",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.UNIVERSITY_PRESIDENT_CACHE
-			}
-		],
-		"art": preload("res://art/university-ascii.png")
 	}, "Hospital": {
 		"command": "view hospital",
+		"hard mode command": "view hospital -hard",
 		"name": "Hospital",
 		"unlocked": false,
 		"hard mode unlocked": false,
@@ -434,72 +321,9 @@ var hacking_targets = {
 			}
 		],
 		"art": preload("res://art/hospital-ascii.png")
-	}, "Police Station": {
-		"command": "view police-station",
-		"name": "Police Station",
-		"difficulty": "Easy",
-		"unlocked": false,
-		"hard mode unlocked": false,
-		"targets": [
-			{
-				"name": "Secretary",
-				"difficulty": "Easy",
-				"command": "hack secretary",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.SECRETARY_CACHE
-			},
-			{
-				"name": "Cop",
-				"difficulty": "Easy",
-				"command": "hack cop",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.COP_CACHE
-			},
-			{
-				"name": "Detective",
-				"difficulty": "Medium",
-				"command": "hack detective",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.DETECTIVE_CACHE
-			},
-			{
-				"name": "Sergeant",
-				"difficulty": "Medium",
-				"command": "hack sergeant",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.SERGEANT_CACHE
-			},
-			{
-				"name": "Captain",
-				"difficulty": "Hard",
-				"command": "hack captain",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.CAPTAIN_CACHE
-			}
-		],
-		"art": preload("res://art/police-station-ascii.png")
 	}, "Lawfirm": {
 		"command": "view lawfirm",
+		"hard mode command": "view lawfirm -hard",
 		"name": "Lawfirm",
 		"unlocked": false,
 		"hard mode unlocked": false,
@@ -562,6 +386,136 @@ var hacking_targets = {
 			}
 		],
 		"art": preload("res://art/lawfirm-ascii.png")
+	}, "Police Station": {
+		"command": "view police",
+		"hard mode command": "view police -hard",
+		"name": "Police Station",
+		"difficulty": "Easy",
+		"unlocked": false,
+		"hard mode unlocked": false,
+		"targets": [
+			{
+				"name": "Secretary",
+				"difficulty": "Easy",
+				"command": "hack secretary",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.SECRETARY_CACHE
+			},
+			{
+				"name": "Cop",
+				"difficulty": "Easy",
+				"command": "hack cop",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.COP_CACHE
+			},
+			{
+				"name": "Detective",
+				"difficulty": "Medium",
+				"command": "hack detective",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.DETECTIVE_CACHE
+			},
+			{
+				"name": "Sergeant",
+				"difficulty": "Medium",
+				"command": "hack sergeant",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.SERGEANT_CACHE
+			},
+			{
+				"name": "Captain",
+				"difficulty": "Hard",
+				"command": "hack captain",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.CAPTAIN_CACHE
+			}
+		],
+		"art": preload("res://art/police-station-ascii.png")
+	}, "Government": {
+		"command": "view government",
+		"hard mode command": "view government -hard",
+		"name": "Government",
+		"difficulty": "Hard",
+		"unlocked": false,
+		"hard mode unlocked": false,
+		"targets": [
+			{
+				"name": "Secretary",
+				"difficulty": "Easy",
+				"command": "hack secretary",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.SECRETARY_CACHE
+			},
+			{
+				"name": "Cop",
+				"difficulty": "Easy",
+				"command": "hack cop",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.COP_CACHE
+			},
+			{
+				"name": "Detective",
+				"difficulty": "Medium",
+				"command": "hack detective",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.DETECTIVE_CACHE
+			},
+			{
+				"name": "Sergeant",
+				"difficulty": "Medium",
+				"command": "hack sergeant",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.SERGEANT_CACHE
+			},
+			{
+				"name": "Captain",
+				"difficulty": "Hard",
+				"command": "hack captain",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.CAPTAIN_CACHE
+			}
+		],
+		"art": preload("res://art/university-ascii.png")
 	}
 }
 
@@ -637,9 +591,8 @@ func get_hacking_target_by_command(command):
 
 func get_hacking_location_by_command(command):
 	for target in hacking_targets:
-		if hacking_targets[target].unlocked:
-			if hacking_targets[target]["command"] == command:
-				return hacking_targets[target]
+		if hacking_targets[target]["command"] == command or hacking_targets[target]["hard mode command"] == command:
+			return hacking_targets[target]
 	return {}
 
 	#var targets: Dictionary = Stats.get_hacking_targets_by_command(text)
@@ -759,13 +712,49 @@ func remove_vm_count(amount: int = 1):
 	if CURRENT_ALL_VMS < 0:
 		CURRENT_ALL_VMS = 0
 
+#func save_data() -> Dictionary:
+	#return {
+		#"system_tempature": system_tempature,
+		#"overheated": overheated
+	#}
+#
+#func load_data(data: Dictionary) -> void:
+	#system_tempature = float(data.get("system_tempature", system_tempature))
+	#overheated = bool(data.get("overheated", overheated))
+	#Signals.system_temp_updated(system_tempature)
+
+#Call with Stats.unlock_hard_mode("School")
+func unlock_hard_mode(location_key: String) -> void:
+	if not hacking_targets.has(location_key):
+		push_warning("Unknown hacking location: %s" % location_key)
+		return
+	hacking_targets[location_key]["hard mode unlocked"] = true
+
 func save_data() -> Dictionary:
+	var locations := {}
+	for location_key in hacking_targets:
+		locations[location_key] = {
+			"unlocked": hacking_targets[location_key].get("unlocked", false),
+			"hard mode unlocked": hacking_targets[location_key].get("hard mode unlocked", false)
+		}
+	
 	return {
 		"system_tempature": system_tempature,
-		"overheated": overheated
+		"overheated": overheated,
+		"hacking_locations": locations
 	}
 
 func load_data(data: Dictionary) -> void:
 	system_tempature = float(data.get("system_tempature", system_tempature))
 	overheated = bool(data.get("overheated", overheated))
+	
+	var locations: Dictionary = data.get("hacking_locations", {})
+	for location_key in locations:
+		if not hacking_targets.has(location_key):
+			continue
+		var location: Dictionary = hacking_targets[location_key]
+		var saved: Dictionary = locations[location_key]
+		location["unlocked"] = bool(saved.get("unlocked", location["unlocked"]))
+		location["hard mode unlocked"] = bool(saved.get("hard mode unlocked", location["hard mode unlocked"]))
+	
 	Signals.system_temp_updated(system_tempature)

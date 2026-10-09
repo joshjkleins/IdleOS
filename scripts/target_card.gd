@@ -4,7 +4,15 @@ var target
 
 func update_info(info):
 	target = info
-	$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "Command: '" + info["command"] + "'\n" + "Hard mode command: '" + info['hard mode command'] + "'"
+	if info.unlocked:
+		var reg_cmd = "Command: '" + info["command"] + "'"
+		var hm_cmd = "\n" + "[color=#666666]Hard mode command: '" + info['hard mode command'] + "'[/color]"
+		if info['hard mode unlocked']:
+			hm_cmd = "\n" + "Hard mode command: '" + info['hard mode command'] + "'"
+			
+		$MarginContainer/VBoxContainer/VBoxContainer/Command.text = reg_cmd + hm_cmd
+	else:
+		$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "DEMO LOCKED"
 	$MarginContainer/VBoxContainer/VBoxContainer/Title.text = info["name"]
 	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
 	$MarginContainer/VBoxContainer/TextureRect.texture = info["art"]

@@ -77,7 +77,7 @@ func build_minor_skills():
 	#Update first container with accurate exp/lvl/name/color
 	skill_name.text = skill.SKILL.name
 	skill_name.add_theme_color_override("font_color", skill.SKILL.color)
-	skill_level.text = "lvl " + str(skill.SKILL.level)
+	skill_level.text = "lvl " + str(skill.SKILL.level) + "/" + str(Exp.MAX_LEVEL)
 	
 	#experience bar
 	var experience = Exp.get_xp_display(skill.SKILL)
@@ -164,7 +164,7 @@ func xp_gained():
 
 	skill_exp_bar.max_value = experience["needed"]
 	skill_exp_bar.value = experience["current"]
-	skill_level.text = "lvl " + str(skill.SKILL.level)
+	skill_level.text = "lvl " + str(skill.SKILL.level) + "/" + str(Exp.MAX_LEVEL)
 	skill_exp_label.text = experience["display"]
 
 func fade_out_major():

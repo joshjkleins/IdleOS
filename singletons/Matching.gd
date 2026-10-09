@@ -32,7 +32,7 @@ var CREDENTIAL = {
 	"tier name": "TIER I | CREDENTIAL",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 900,
+	"experience per level": 35,
 	"command": "match -cred",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
@@ -57,35 +57,164 @@ var CREDENTIAL = {
 	"signal": cred_cycle_completed
 }
 
-#var ACCOUNT = {
-	#"name": "Account",
-	#"tier name": "TIER I | ACCOUNT",
-	#"level": 1,
-	#"experience": 0,
-	#"experience per level": 900,
-	#"command": "match -account",
-	#"efficiency": 0.0,
-	#"efficiency rate": 0.002,
-	#"unlocked": false,
-	#"unlock level": 25,
-	#"base speed min": 0.3,
-	#"base speed max": 1.3,
-	#"overclock speed min": 0.2,
-	#"overclock speed max": 0.4,
-	#"overheat speed": 3.0,
-	#"heat": 1,
-	#"overclock heat": 1,
-	#"overheat heat": 1,
-	#"requirements": [Items.PINS, Items.ACCOUNT_NUMBERS],
-	#"resource gained": Items.ACCOUNT_ACCESS_TOKENS,
-	#"resource amount gained": 1,
-	#"description": "Creates account access token using PINs & Account numbers.",
-	#"efficiency description": "Chance to not consume a PIN or Account number.",
-	#"signal": account_cycle_completed
-#}
+
+var ACCOUNT = {
+	"name": "Account",
+	"tier name": "TIER I | ACCOUNT",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 35,
+	"command": "match -account",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 20,
+	"base speed min": 0.2,
+	"base speed max": 1.2,
+	"overclock speed min": 0.1,
+	"overclock speed max": 0.2,
+	"overheat speed": 3.0,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
+	"requirements": {
+		Items.PINS: 1, 
+		Items.ACCOUNT_NUMBERS: 1
+	},
+	"resource gained": Items.ACCOUNT_ACCESS_TOKENS,
+	"resource amount gained": 1,
+	"description": "Creates account access tokens using PINs and Account Numbers.",
+	#"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
+}
+
+var DEVICES = {
+	"name": "Devices",
+	"tier name": "TIER I | DEVICE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 35,
+	"command": "match -devices",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed min": 0.2,
+	"base speed max": 1.2,
+	"overclock speed min": 0.1,
+	"overclock speed max": 0.2,
+	"overheat speed": 3.0,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
+	"requirements": {
+		Items.USERNAMES: 1, 
+		Items.PASSWORDS: 1
+	},
+	"resource gained": Items.CREDENTIALS,
+	"resource amount gained": 1,
+	"description": "Creates credentials using passwords & usernames.",
+	#"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
+}
+
+var ENDPOINT = {
+	"name": "Endpoint",
+	"tier name": "TIER I | ENDPOINT",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 35,
+	"command": "match -endpoint",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed min": 0.2,
+	"base speed max": 1.2,
+	"overclock speed min": 0.1,
+	"overclock speed max": 0.2,
+	"overheat speed": 3.0,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
+	"requirements": {
+		Items.USERNAMES: 1, 
+		Items.PASSWORDS: 1
+	},
+	"resource gained": Items.CREDENTIALS,
+	"resource amount gained": 1,
+	"description": "Creates credentials using passwords & usernames.",
+	#"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
+}
+
+var PROFILES = {
+	"name": "Profile",
+	"tier name": "TIER I | PROFILES",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 35,
+	"command": "match -profile",
+	"efficiency": 0.03,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed min": 0.2,
+	"base speed max": 1.2,
+	"overclock speed min": 0.1,
+	"overclock speed max": 0.2,
+	"overheat speed": 3.0,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
+	"requirements": {
+		Items.USERNAMES: 1, 
+		Items.PASSWORDS: 1
+	},
+	"resource gained": Items.CREDENTIALS,
+	"resource amount gained": 1,
+	"description": "Creates credentials using passwords & usernames.",
+	#"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
+}
+
+var OPERATIONS = {
+	"name": "Operations",
+	"tier name": "TIER I | OPERATION",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 35,
+	"command": "match -operation",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed min": 0.2,
+	"base speed max": 1.2,
+	"overclock speed min": 0.1,
+	"overclock speed max": 0.2,
+	"overheat speed": 3.0,
+	"heat": 2.4,
+	"overclock heat": 2.7,
+	"overheat heat": 0.3,
+	"requirements": {
+		Items.USERNAMES: 1, 
+		Items.PASSWORDS: 1
+	},
+	"resource gained": Items.CREDENTIALS,
+	"resource amount gained": 1,
+	"description": "Creates credentials using passwords & usernames.",
+	#"efficiency description": "Chance to not consume a username or password.",
+	"signal": cred_cycle_completed
+}
 
 var minor_processes = [
-	CREDENTIAL
+	CREDENTIAL,
+	ACCOUNT,
+	DEVICES,
+	ENDPOINT,
+	PROFILES,
+	OPERATIONS,
 ]
 
 func signal_exp(_amount: int):

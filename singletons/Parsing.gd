@@ -50,7 +50,7 @@ var FOOTPRINT = {
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 10,
 	"command": "parse -footprint",
 	"display command": "parse -footprint=<item>",
 	"example commands": [
@@ -93,8 +93,7 @@ var CORRUPTION = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	#"requirements": { Items.LOGS: 1 }, #need to change this somehow to any Mining resource
-	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
+	"requirements": "???",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at a hacking resources contained within. If used on a Cache it will transform it to a Corrupted variant, significantly increasing the chance of decoding an item but has a 25% chance to destroy the rest of the cache after each item decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -118,7 +117,7 @@ var NETWORK = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1", #need to change this somehow to any Mining resource
+	"requirements": "???",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at finding VM tokens. If used on a Cache it will transform it to a Network variant, doubling all VM tokens found within.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -142,7 +141,7 @@ var EXTRACTION = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1", #need to change this somehow to any Mining resource
+	"requirements": "???",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] with an additional argument [target=username] to only find that resource. If used on a Cache it will transform it to a Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -284,8 +283,10 @@ func list_vm_commands() -> String:
 		if mp.unlocked:
 			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>"
 			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
+		else:
+			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "DEMO LOCKED[/color]\n"
 	
-	return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
+	#return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
 	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma seperated ex. ssh parsing footprint=logs, student cache[/color]"
 	return return_text
 

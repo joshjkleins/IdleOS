@@ -197,6 +197,10 @@ func handle_hack_command(text):
 		player_hacking_box.add_line_system("Example: hack student -overclock")
 		return
 	
+	if !target.unlocked:
+		player_hacking_box.add_line_error("Not available in Demo.")
+		return
+	
 	# Has requirements in inventory
 	if !_has_hacking_requirements(target):
 		await enemy_hacking_box.target_select_error(target)
@@ -231,7 +235,13 @@ func handle_back_command():
 			hacking_help_commands()
 
 func handle_view_command(text):
-	#var target: Dictionary = Stats.get_hacking_location_by_command(text)
+	var target: Dictionary = Stats.get_hacking_location_by_command(text)
+	if !target.unlocked:
+		player_hacking_box.add_line("Location not unlocked.")
+		return
+	if text.contains("-hard") and !target['hard mode unlocked']:
+		player_hacking_box.add_line("Hard mode for location not unlocked.")
+		return
 	var targets: Array = Stats.get_hacking_targets_by_command(text)
 	var location_name: String = Stats.get_hacking_location_name_by_command(text)
 	if targets.is_empty():
@@ -244,6 +254,8 @@ func handle_view_command(text):
 
 func hacking_ended():
 	#enemy_hacking_box.end_hack()
+	header_hacking_box.update_hacking_header()
+	header_hacking_box.update_modifiers_ui()
 	current_context = HackingContext.PERSONS
 	hacking_help_commands()
 	await enemy_hacking_box.hacking_to_persons()

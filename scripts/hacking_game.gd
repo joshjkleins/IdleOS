@@ -340,8 +340,9 @@ func counter():
 	_update_info_panel(info_text, c_red)
 	if Stats.current_anon <= 0.0:
 		lose()
-	
-	if is_anon_below_healing_threshold():
+		return
+
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
 		defending = true
 
 func add_heat(amount: float):
@@ -618,6 +619,8 @@ func _on_bandwidth_timer_timeout():
 			defense()
 
 func is_anon_below_healing_threshold() -> bool:
+	print("Current: " + str(Stats.current_anon))
+	print("Max: " + str(Stats.max_anon))
 	return Stats.current_anon * 100 <= Stats.max_anon * int(Stats.healing_threshold_auto_start * 100)
 
 func manual_defense():

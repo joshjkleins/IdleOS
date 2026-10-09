@@ -1,33 +1,6 @@
 extends Control
 
-#HACKING TODOS
-#actually balance Student hard mode
-#show more targets but as 'locked'
-#lock hard mode behind something. Either unlocked in apt or unlocked after so many student hacks
-#Show more locations but as 'locked' - should be same as compiling payloads
-
-#								FOR DEMO
-#---------------------------------------------------------------------------------------
-#add clarity to Decoding skill on how to decode a specific cache, command is decode -cache=student but not found anywhere
-# CAP skill/process levels to 10
-#adjust exp gain/requirements
-# show DEMO LOCKED random processes to display how much more of the game there is.
-# add logic to hide descriptions of processes not unlocked so i can figure out details later.
-# only 'unlockable' resources should be Cracking, Compiling, Decoding
-
-#INTRO
-#--------
-#First time launch, let everything download (skills, tempature, etc)
-#Add someone communicating with the player, first objective is to hack a student and get their parents CC info.
-#---------------------------------------------------------------------------------------
-
-#bug: cache decrypting ended safely showing twice (also should be 'Decoding ended safely'
-#bug: 'data mining safely finished' should be 'log mining safely finished'
-#bug: % not working at top of parsing logs
-#bug: when cracking in an ssh window - if the next queue isn't 5 full items then it shrinks the black bg of the window, showing the grey underneath. Solution: Always gneerate the height of 5 lines. Blank space is ok
-#bug: phishing not showing all lines when upgraded (works fine in ssh but not main terminal phishing)
-#bug ^: run phishing spear > upgrade lines > kill process > kills game
-
+#update upgrades
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
@@ -53,6 +26,8 @@ extends Control
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
 @onready var hud_monitor = $Panel/TrackingContainer/HUDMonitor
+@onready var overclock = $Panel/MarginContainer/TerminalRoot/Header/Overclock
+@onready var input_line_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -92,6 +67,7 @@ var current_player_input_context: PlayerInputContext = PlayerInputContext.NONE
 var awaiting_player_input: bool = false
 var accepting_player_inputs: bool = true
 var upgrade_package_selected = null
+var upload_awaiting_player_input: bool = false
 
 enum MarketContext {
 	MAIN,
@@ -151,14 +127,14 @@ func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	header.update()
-	input_line.grab_focus() #uncomment this when not testing hacking module
+	input_line.grab_focus()
 	
-	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
-	add_line(ContextCommands.demo_welcome_message())
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
+	if !Tutorial.show_intro:
+		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
@@ -175,6 +151,15 @@ func _ready():
 	##cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
+	
+	if Tutorial.show_intro:
+		accepting_player_inputs = false
+		header.visible = false
+		overclock.visible = false
+		input_line_container.visible = false
+		header.prepare_intro()
+		intro_to_game()
+
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -435,7 +420,12 @@ func universal_commands(text):
 		var names = item_names.split(",")
 		add_line(hud_monitor.remove_monitored_items(names))
 		return true
-		
+	
+	if text == "ls mods" or text == "ls mod":
+		#YOU ARE HERE - CREATE FUNCTION IN CONTEXTCOMMANDS TO LIST INVENTORY ITEMS SHOWING THEIR HACKING MOD POTENTIAL
+		add_line(Inventory.list_inventory_hacking_mods())
+		return true
+	
 	if text.begins_with("ls"):
 		var item_name = text.trim_prefix("ls").strip_edges()
 		
@@ -459,6 +449,10 @@ func universal_commands(text):
 		
 		return true
 	
+	if text.begins_with("upload"):
+		handle_upload_commands(text)
+		return true
+	
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
@@ -467,12 +461,21 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	if text.begins_with("add"):
-		var item_name = text.trim_prefix("add").strip_edges()
-		var item = Inventory.get_item_by_name(item_name)
-		if item != null:
-			Inventory.add_resource(item, 10)
-			return true
+	#if text.begins_with("add"):
+		#var item_name = text.trim_prefix("add").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.add_resource(item, 30)
+			#return true
+	#
+	#if text.begins_with("rm"):
+		#var item_name = text.trim_prefix("rm").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.remove_resource(item, Inventory.get_amount(item))
+			##Inventory.add_resource(item, 1)
+			#return true
+		#
 	
 	if text.begins_with("mod"):
 		if text == "mod" or text == "mods":
@@ -751,6 +754,28 @@ func return_to_root():
 	add_line(ContextCommands.info_command_text())
 	#add_line(ContextCommands.all_commands())
 
+func handle_upload_commands(text):
+	if text == "upload":
+		add_line(ContextCommands.upload_info())
+		return
+	
+	if process_running:
+		add_line("Kill current processes before uploading.")
+		return
+	if text.begins_with("upload"):
+		var item_name = text.trim_prefix("upload").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		
+		if item == null or item != Items.PARENTS_CREDIT_CARD:
+			add_line("Upload command not recognized. [color=#666666]example: upload parents credit card[/color]")
+			return
+		
+		if Inventory.get_amount(item) <= 0:
+			add_line("No Parents Credit Card found. Decode Student caches for a chance to find this item.")
+			return
+		
+		player_uploaded_proper_item()
+
 func handle_apt_commands(text):
 	if text == "apt":
 		add_line(ContextCommands.get_root_upgrades_text())
@@ -891,7 +916,7 @@ func handle_info_commands(text):
 	
 	if command.size() == 3:
 		if command[1].to_lower() == "hacking":
-			var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+			var locations = [Stats.hacking_targets["School"]]
 			for loc in locations:
 				if loc["name"].to_lower().replace(" ", "-") == command[2]:
 					add_line(ContextCommands.get_hack_target_info(loc))
@@ -916,7 +941,7 @@ func handle_info_commands(text):
 	add_line("-----------------")
 	add_line("info                        overview of all main skills                  [color=gray]ex. info[/color]")
 	add_line("info [skill]                overview of specific skill and processes     [color=gray]ex. info mining[/color]")
-	add_line("info [skill] [process]      overview of specific processes               [color=gray]ex. info mining logs[/color]")
+	add_line("info [skill] [process]      details of specific processes                [color=gray]ex. info mining logs[/color]")
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]
@@ -934,6 +959,12 @@ func handle_vm_token_commands(text):
 	var commands = text.split(" ")
 	
 	#LIST MINOR PROCESSES AVAILABLE FOR SSH/VM example: ssh mining -> list logs, quality logs, etc
+	if text == "ssh hacking":
+		add_line("Virtual Machines are not compatable with hacking.")
+		return
+	if text == "ssh defragging":
+		add_line("Virtual Machines are not compatable with defragging.")
+		return
 	if commands.size() == 2:
 		#is 2nd array index a skill name
 		for p in processes:
@@ -1210,7 +1241,7 @@ func data_mining_ended_safely():
 	process_running = false
 	Stats.overclocked = false
 	hud_process_running.process_killed()
-	add_line("Data mining safely finished.")
+	add_line("Mining safely finished.")
 
 ###################################################
 ################### PARSING #######################
@@ -1640,7 +1671,7 @@ func cache_decrypting_ended_safely():
 	process_running = false
 	Stats.overclocked = false
 	hud_process_running.process_killed()
-	add_line("Cache decrypting safely finished.")
+	add_line("Decoding safely finished.")
 
 func overclock_logic():
 	if !process_running: #no process running
@@ -2195,6 +2226,10 @@ func _input(event):
 	if event is InputEventMouseButton and event.pressed:
 		input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
+		if Tutorial.show_intro and event.keycode == KEY_ENTER and accepting_player_inputs:
+			install_idle_os()
+		if upload_awaiting_player_input and awaiting_player_input and event.keycode == KEY_ENTER:
+			finish_player_uploaded_proper_item()
 		if event.keycode == KEY_TAB:
 			#var completion
 			#if PLAYER_TABBED == 0:
@@ -2298,3 +2333,174 @@ func has_requirements(requirements: Dictionary) -> bool:
 			return false
 	
 	return true
+
+func intro_to_game():
+	await type_text("""WELCOME TO IDLE OPERATING SYSTEM.
+
+You have been granted access to IdleOS, a specialized operating system designed to provide you with the tools necessary to access the world's most valuable information.
+
+Your objective is simple:
+
+Gain access to information that could one day be used for the good of humankind.
+
+At present, your access is limited. Before you are trusted with more advanced operations, you will need to prove your proficiency with this tool.
+
+Fortunately, there are plenty of opportunities to demonstrate your abilities.
+
+To start, successfully hack a Student at the local School. 
+
+They're inexperienced and poorly secured. Surely this will be a simple task.
+
+It is likely you will be able to extract some Credit Card information from them.
+
+Upload that information if you come upon it and perhaps we will grant further access to more powerful tools.
+
+As for what's waiting beyond that...
+
+Let's just say the operating system contains everything you will need to obtain the world's most powerful information.
+
+But we'll get to that later.
+
+For now, let's see what you can do.
+
+
+
+press 'enter' to finish IdleOS install""")
+	accepting_player_inputs = true
+
+
+func type_text(text: String, characters_per_second: float = 250.0) -> void:
+	var delay := 1.0 / characters_per_second
+	
+	for i in text.length():
+		current_scrollback.append_text(text[i])
+		await get_tree().create_timer(delay).timeout
+
+func install_idle_os():
+	accepting_player_inputs = false
+	_clear_terminal()
+	header.modulate.a = 1.0
+	header.visible = true
+	for mp in major_processes:
+		var dl_text = "\nDownloading Module: " + mp.SKILL.name
+		await type_text(dl_text, 250.0)
+		await get_tree().create_timer(0.6).timeout
+		header.intro(mp)
+		await get_tree().create_timer(0.6).timeout
+			
+		add_line(mp.name + " install complete.")
+		await get_tree().create_timer(0.3).timeout
+		
+	await type_text("\nActivating system tempature UI", 50.0)
+	overclock.modulate.a = 0.0
+	overclock.visible = true
+	var tween = create_tween()
+	tween.tween_property(overclock, "modulate:a", 1.0, 1.5)
+	await tween.finished
+	
+	input_line_container.modulate.a = 0.0
+	input_line_container.visible = true
+	await type_text("\nCommand line interface active", 50.0)
+	var tween2 = create_tween()
+	tween2.tween_property(input_line_container, "modulate:a", 1.0, 1.5)
+	await tween2.finished
+	
+	await type_text("\nInstall of IdleOS complete. Clearing terminal.  Good luck.")
+	await get_tree().create_timer(2.0).timeout
+	
+	_clear_terminal()
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	
+	Tutorial.show_intro = false
+	SaveManager.save_game()
+
+	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+	add_line(ContextCommands.demo_welcome_message())
+	add_line("To get started, type `-h` in the terminal.")
+
+
+func player_uploaded_proper_item():
+	accepting_player_inputs = false
+	#tween for the following: header, overclock, input_line_container
+	#tween should just change opacity to 0.0 then set visibility to false
+	
+	_clear_terminal()
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		tween.tween_property(node, "modulate:a", 0.0, 0.5)
+
+	tween.chain().tween_callback(func():
+		for node in [header, overclock, input_line_container]:
+			node.visible = false
+	)
+	await tween.finished
+	await get_tree().create_timer(1.0).timeout
+	
+	add_line("[          ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=         ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[==        ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[===       ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[====      ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=====     ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[======    ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=======   ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[========  ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[========= ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[==========]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[color=green]Parents CC Successfully uploaded[/color]")
+	Inventory.remove_resource(Items.PARENTS_CREDIT_CARD, 1)
+	await type_text("""\n
+Well done. It seems you have what it takes after all.
+
+Unfortunately, the rest of IdleOS is still under development. Until version 1.0 is ready, we've prepared one final challenge to test your abilities.
+
+Think you've mastered the system? Try your hand at the Hard Mode Student. This opponent won't go down easily, and brute force alone won't be enough.
+
+You'll need to master Compiling to create powerful Hacking Mods, push your VMs to their full potential, upgrade versions, overclock, and spoof your way to victory.
+
+Good luck.
+
+
+press 'enter' to return to console""")
+
+	awaiting_player_input = true
+	upload_awaiting_player_input = true
+
+
+func finish_player_uploaded_proper_item():
+	awaiting_player_input = false
+	upload_awaiting_player_input = false
+	
+	_clear_terminal()
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		node.visible = true
+		node.modulate.a = 0.0
+
+	var tween2 = create_tween()
+	tween2.set_parallel(true)
+
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		tween2.tween_property(node, "modulate:a", 1.0, 0.3)
+
+	await tween2.finished
+	
+	###UNLOCK HARD MODE
+	Stats.unlock_hard_mode("School")
+	Tutorial.complete_event(Tutorial.TutorialEvent.UPLOAD_PARENTS_CC)
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	SaveManager.save_game()

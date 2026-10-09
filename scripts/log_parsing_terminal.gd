@@ -105,11 +105,11 @@ func parsing_item_loop(item: ItemData):
 			item_found = item.contained_items.pick_random()
 			Inventory.add_resource(item_found, 1)
 			update_bottom_row_player_amount(item)
-			if item == Items.ENCRYPTED_PASSWORDS:
+			if item_found == Items.ENCRYPTED_PASSWORDS:
 				Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS, 1)
-			if item == Items.USERNAMES:
+			if item_found == Items.USERNAMES:
 				Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_USERNAMES, 1)
-			if item == Items.IP_ADDRESS:
+			if item_found == Items.IP_ADDRESS:
 				Tutorial.track_event(Tutorial.TutorialEvent.OBTAIN_3_IP_ADDRESSES, 1)
 		
 		#CREATE AND ADD LOG LINE TO LIST
@@ -272,7 +272,8 @@ func set_labels(item: ItemData):
 		i.visible = false
 	
 	if item is not CacheData:
-		var percent_drop = int(item.contained_items.size() / 100)
+		var percent_drop = int((100.0 / item.contained_items.size()))
+		var percent_drop1 = int(item.contained_items.size() / 100.0 * 100.0)
 		for i in range(item.contained_items.size()):
 			var potential_item = item.contained_items[i]
 			
