@@ -69,7 +69,7 @@ var MOD = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 1,
+	"unlock level": 3,
 	"base speed": 2.0,
 	"overclock speed": 3.0,
 	"overheat speed": 1.0,

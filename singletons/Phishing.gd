@@ -74,7 +74,7 @@ var MOD = {
 	"efficiency": 0.001,
 	"efficiency rate": 0.0001,
 	"unlocked": false,
-	"unlock level": 8,
+	"unlock level": 5,
 	"cast time": 4.0,
 	"overclock cast time": 1.5,
 	"overheat cast time": 9.0,
