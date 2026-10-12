@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://be4bgvww8xhjx"]
 
-[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_0pp7s"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_7su1l"]
 
 [resource]
-script = ExtResource("1_0pp7s")
+script = ExtResource("1_7su1l")
 id = 4
 name = "Usernames"
 shortened_name = ""
-description = "Obtained from Parsing. Can be used in Matching to form a credential."
+description = "Obtained from Parsing. Can be used in Matching to make a credential."
 upgrade_ingredient = false
 value = 0
 parsable = false
-contained_items = Array[ExtResource("1_0pp7s")]([])
+contained_items = Array[ExtResource("1_7su1l")]([])
 color_type = 4
 obtained_from = Array[int]([2])
 obtained_from_additional_hint = ""

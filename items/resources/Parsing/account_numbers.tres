@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bokiyw84pwudb"]
 
-[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_v8kmh"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_dcqem"]
 
 [resource]
-script = ExtResource("1_v8kmh")
+script = ExtResource("1_dcqem")
 id = 81
 name = "Account Numbers"
 shortened_name = ""
-description = "Account numbers used to create account access tokens"
+description = "Obtained from Parsing. Can be used in Matching to form a Account Access Token."
 upgrade_ingredient = false
 value = 0
 parsable = false
-contained_items = Array[ExtResource("1_v8kmh")]([])
+contained_items = Array[ExtResource("1_dcqem")]([])
 color_type = 4
 obtained_from = Array[int]([2])
 obtained_from_additional_hint = ""

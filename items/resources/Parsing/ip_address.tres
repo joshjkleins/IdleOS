@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://y7cfa0st0xu8"]
 
-[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_nrdqy"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_vpm7e"]
 
 [resource]
-script = ExtResource("1_nrdqy")
+script = ExtResource("1_vpm7e")
 id = 6
 name = "IP address"
 shortened_name = ""
-description = "Obtained from Parsing through logs. Used to Compile payloads."
+description = "Obtained from Parsing. Used to Compile School payloads."
 upgrade_ingredient = false
 value = 0
 parsable = false
-contained_items = Array[ExtResource("1_nrdqy")]([])
+contained_items = Array[ExtResource("1_vpm7e")]([])
 color_type = 10
 obtained_from = Array[int]([2])
 obtained_from_additional_hint = ""

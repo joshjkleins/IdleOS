@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://mecdw40qxrx1"]
 
-[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_2epab"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_c15xl"]
 
 [resource]
-script = ExtResource("1_2epab")
+script = ExtResource("1_c15xl")
 id = 82
 name = "Account access tokens"
 shortened_name = "Account tokens"
-description = "Tokens used to create payloads"
+description = "A Matched Account Access Token and Routing Number. Used to Compile Bank payloads."
 upgrade_ingredient = false
 value = 0
 parsable = false
-contained_items = Array[ExtResource("1_2epab")]([])
+contained_items = Array[ExtResource("1_c15xl")]([])
 color_type = 10
 obtained_from = Array[int]([4])
 obtained_from_additional_hint = ""

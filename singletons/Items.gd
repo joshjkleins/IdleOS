@@ -19,6 +19,29 @@ extends Node
 # Once it is created and assigned in this file, go to Stats.gd and assign to appropriate target
 
 
+#SCHOOL > BANK > HOSPITAL > LAWFIRM > POLICE STATION > GOVERNMENT
+
+## ITEM ROADMAP
+# TIER 1 - SCHOOL
+# LOGS > IP, USERNAME, ENC PW > PW > CREDENTIAL > SCHOOL PAYLOD > CACHES
+#
+# TIER 2 - BANK
+# M:COOKIES > P:ACCOUNT NUMBERS, ENC PIN, ROUTING NUMBER > C:PIN > M:ACCOUNT ACCESS TOKEN > C:BANK PAYLOAD > H:CACHES
+#
+# TIER 3 - HOSPITAL
+# M:METADATA > P:STAFF IDs, ENCRYPTED BADGE HASH, MAC ADDRESS > C:BADGE HASH > M:ACCESS BADGE > C:HOSPITAL PAYLOAD > H:CACHES
+#
+# TIER 4 - LAWFIRM
+# M:ARCHIVES > P:CASE #, ENC SIGNATURE, EMAIL HEADER > C:DIGITAL SIGNATURE > M:SIGNED CERTIFICATE > C:LAWFIRM PAYLOAD > H:CACHES
+
+# TIER 5 - POLICE STATION
+# M:REPOS > P:BADGE #, ENCRYPTED SSH KEY, SUBNET MAP > C:PRIVATE KEYS > M:OFFICER AUTH KEYS > C:POLICE PAYLOAD > H:CACHES
+
+#TIER 6 - GOVERNMENT
+# M:DATABSES > P:CLEARANCE ID, ENCRYPTED BIO HASHES, GATEWAY ADDRESS > C:BIOMETRIC TEMPLATE > M: SECURITY CLEARANCE > C:GOVERNMENT PAYLOAD > H:CACHES
+
+
+
 enum ItemType {
 	DATA, #0
 	LOGS, #1
@@ -118,27 +141,88 @@ enum ItemType {
 	VM_COMPILING_TOKEN, #95
 	STUDENT_CACHE_FOOTPRINT, #96
 	SQL_BOOSTER, #97
+	ARCHIVES, #98
+	COOKIES, #99
+	DATABASES, #100
+	METADATA, #101
+	REPOSITORIES, #102
+	BADGE_HASH, #103
+	BIO_TEMPLATE, #104
+	DIGITAL_SIGNATURE, #105
+	PRIVATE_KEYS, #106
+	ACCESS_BADGE, #107
+	OFFICER_AUTH_KEYS, #108
+	SECURITY_CLEARANCE, #109
+	SIGNED_CERTIFICATE, #110
+	BADGE_NUMBER, #111
+	CASE_NUMBER, #112
+	CLEARANCE_ID, #113
+	EMAIL_HEADER, #114
+	ENCRYPTED_BIO_HASH, #115
+	ENCRYPTED_SIGNATURE, #116
+	ENCRYPTED_SSH_KEY, #117
+	GATEWAY_ADDRESS, #118
+	MAC_ADDRESS, #119
+	ROUTING_NUMBER, #120
+	STAFF_IDS, #121
+	SUBNET_MAP, #122
+	BANK_PAYLOAD, #123
+	GOVERNMENT_PAYLOAD, #124
+	HOSPITAL_PAYLOAD, #125
+	LAWFIRM_PAYLOAD, #126
+	POLICE_PAYLOAD, #127
+	ENCRYPTED_BADGE_HASH, #128
 }
 
-#items
 ### RESOURCES ###
 const DATA = preload("res://items/resources/data.tres")
-const LOGS = preload("res://items/resources/logs.tres")
-const ENCRYPTED_PASSWORDS = preload("res://items/resources/encrypted_passwords.tres")
-const PASSWORDS = preload("res://items/resources/passwords.tres")
-const USERNAMES = preload("res://items/resources/usernames.tres")
-const CREDENTIALS = preload("res://items/resources/credentials.tres")
-const IP_ADDRESS = preload("res://items/resources/ip_address.tres")
-const ENCRYPTED_PINS = preload("res://items/resources/encrypted_pins.tres")
-const PINS = preload("res://items/resources/pins.tres")
-const ACCOUNT_NUMBERS = preload("res://items/resources/account_numbers.tres")
-const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/account_access_tokens.tres")
+const LOGS = preload("res://items/resources/Mining/logs.tres")
+const ENCRYPTED_PASSWORDS = preload("res://items/resources/Parsing/encrypted_passwords.tres")
+const PASSWORDS = preload("res://items/resources/Cracking/passwords.tres")
+const USERNAMES = preload("res://items/resources/Parsing/usernames.tres")
+const CREDENTIALS = preload("res://items/resources/Matching/credentials.tres")
+const IP_ADDRESS = preload("res://items/resources/Parsing/ip_address.tres")
+const ENCRYPTED_PINS = preload("res://items/resources/Parsing/encrypted_pins.tres")
+const PINS = preload("res://items/resources/Cracking/pins.tres")
+const ACCOUNT_NUMBERS = preload("res://items/resources/Parsing/account_numbers.tres")
+const ACCOUNT_ACCESS_TOKENS = preload("res://items/resources/Matching/account_access_tokens.tres")
 const QUALITY_LOGS = preload("res://items/resources/quality_logs.tres")
+const ARCHIVES = preload("res://items/resources/Mining/archives.tres")
+const COOKIES = preload("res://items/resources/Mining/cookies.tres")
+const DATABASES = preload("res://items/resources/Mining/databases.tres")
+const METADATA = preload("res://items/resources/Mining/metadata.tres")
+const REPOSITORIES = preload("res://items/resources/Mining/repositories.tres")
+const BADGE_HASH = preload("res://items/resources/Cracking/badge_hash.tres")
+const BIO_TEMPLATE = preload("res://items/resources/Cracking/bio_template.tres")
+const DIGITAL_SIGNATURE = preload("res://items/resources/Cracking/digital_signature.tres")
+const PRIVATE_KEYS = preload("res://items/resources/Cracking/private_keys.tres")
+const ACCESS_BADGE = preload("res://items/resources/Matching/access_badge.tres")
+const OFFICER_AUTH_KEYS = preload("res://items/resources/Matching/officer_auth_keys.tres")
+const SECURITY_CLEARANCE = preload("res://items/resources/Matching/security_clearance.tres")
+const SIGNED_CERTIFICATE = preload("res://items/resources/Matching/signed_certificate.tres")
+const BADGE_NUMBER = preload("res://items/resources/Parsing/badge_number.tres")
+const CASE_NUMBER = preload("res://items/resources/Parsing/case_number.tres")
+const CLEARANCE_ID = preload("res://items/resources/Parsing/clearance_id.tres")
+const EMAIL_HEADER = preload("res://items/resources/Parsing/email_header.tres")
+const ENCRYPTED_BIO_HASH = preload("res://items/resources/Parsing/encrypted_bio_hash.tres")
+const ENCRYPTED_SIGNATURE = preload("res://items/resources/Parsing/encrypted_signature.tres")
+const ENCRYPTED_SSH_KEY = preload("res://items/resources/Parsing/encrypted_ssh_key.tres")
+const GATEWAY_ADDRESS = preload("res://items/resources/Parsing/gateway_address.tres")
+const MAC_ADDRESS = preload("res://items/resources/Parsing/mac_address.tres")
+const ROUTING_NUMBER = preload("res://items/resources/Parsing/routing_number.tres")
+const STAFF_IDS = preload("res://items/resources/Parsing/staff_ids.tres")
+const SUBNET_MAP = preload("res://items/resources/Parsing/subnet_map.tres")
+
 
 ### PAYLOADS ###
-const SCHOOL_PAYLOAD = preload("res://items/payloads/school_payload.tres")
-const SMALL_BUSINESS_PAYLOAD = preload("res://items/payloads/small_business_payload.tres")
-const LIBRARY_PAYLOAD = preload("res://items/payloads/library_payload.tres")
+const SCHOOL_PAYLOAD = preload("res://items/resources/Payloads/school_payload.tres")
+const SMALL_BUSINESS_PAYLOAD = preload("res://items/resources/Payloads/small_business_payload.tres")
+const LIBRARY_PAYLOAD = preload("res://items/resources/Payloads/library_payload.tres")
+const BANK_PAYLOAD = preload("res://items/resources/Payloads/bank_payload.tres")
+const GOVERNMENT_PAYLOAD = preload("res://items/resources/Payloads/government_payload.tres")
+const HOSPITAL_PAYLOAD = preload('res://items/resources/Payloads/hospital_payload.tres')
+const LAWFIRM_PAYLOAD = preload("res://items/resources/Payloads/lawfirm_payload.tres")
+const POLICE_PAYLOAD = preload("res://items/resources/Payloads/police_station_payload.tres")
 
 ### COMBAT ###
 const DDOS = preload("res://items/combat/ddos.tres")
@@ -363,4 +447,34 @@ const ITEM_MAP = {
 	ItemType.VM_COMPILING_TOKEN: VM_COMPILING_TOKEN,
 	ItemType.STUDENT_CACHE_FOOTPRINT: STUDENT_CACHE_FOOTPRINT,
 	ItemType.SQL_BOOSTER: SQL_BOOSTER,
+	ItemType.ARCHIVES: ARCHIVES,
+	ItemType.COOKIES: COOKIES,
+	ItemType.DATABASES: DATABASES,
+	ItemType.METADATA: METADATA,
+	ItemType.REPOSITORIES: REPOSITORIES,
+	ItemType.BADGE_HASH: BADGE_HASH,
+	ItemType.BIO_TEMPLATE: BIO_TEMPLATE,
+	ItemType.DIGITAL_SIGNATURE: DIGITAL_SIGNATURE,
+	ItemType.PRIVATE_KEYS: PRIVATE_KEYS,
+	ItemType.ACCESS_BADGE: ACCESS_BADGE,
+	ItemType.OFFICER_AUTH_KEYS: OFFICER_AUTH_KEYS,
+	ItemType.SECURITY_CLEARANCE: SECURITY_CLEARANCE,
+	ItemType.SIGNED_CERTIFICATE: SIGNED_CERTIFICATE,
+	ItemType.BADGE_NUMBER: BADGE_NUMBER,
+	ItemType.CASE_NUMBER: CASE_NUMBER,
+	ItemType.CLEARANCE_ID: CLEARANCE_ID,
+	ItemType.EMAIL_HEADER: EMAIL_HEADER,
+	ItemType.ENCRYPTED_BIO_HASH: ENCRYPTED_BIO_HASH,
+	ItemType.ENCRYPTED_SIGNATURE: ENCRYPTED_SIGNATURE,
+	ItemType.ENCRYPTED_SSH_KEY: ENCRYPTED_SSH_KEY,
+	ItemType.GATEWAY_ADDRESS: GATEWAY_ADDRESS,
+	ItemType.MAC_ADDRESS: MAC_ADDRESS,
+	ItemType.ROUTING_NUMBER: ROUTING_NUMBER,
+	ItemType.STAFF_IDS: STAFF_IDS,
+	ItemType.SUBNET_MAP: SUBNET_MAP,
+	ItemType.BANK_PAYLOAD: BANK_PAYLOAD,
+	ItemType.GOVERNMENT_PAYLOAD: GOVERNMENT_PAYLOAD,
+	ItemType.HOSPITAL_PAYLOAD: HOSPITAL_PAYLOAD,
+	ItemType.LAWFIRM_PAYLOAD: LAWFIRM_PAYLOAD,
+	ItemType.POLICE_PAYLOAD: POLICE_PAYLOAD,
 }
