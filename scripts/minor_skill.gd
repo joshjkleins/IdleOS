@@ -7,7 +7,7 @@ var current_skill
 func update(skill: Dictionary): #minor
 	current_skill = skill
 	$Unlocked/VBoxContainer/HBoxContainer/SkillName.text = skill.name
-	$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/99"
+	$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/" + str(Exp.MAX_LEVEL)
 	
 	$Locked/VBoxContainer/SkillName.text = skill.name
 	$Locked/VBoxContainer/UnlockLevel.text = "(lvl " + str(skill["unlock level"]) + ")"
@@ -33,7 +33,7 @@ func set_locked_state(locked: bool):
 #updates progress bar and 10/100 label and level label
 func update_exp(_amount: int):
 	if current_skill:
-		$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(current_skill.level) + "/99"
+		$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(current_skill.level) + "/" + str(Exp.MAX_LEVEL)
 		
 		var experience = Exp.get_xp_display(current_skill)
 		$Unlocked/VBoxContainer/SkillExpBar.max_value = experience["needed"]

@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://cwcgukqes7d5o"]
+[gd_scene load_steps=7 format=3 uid="uid://cwcgukqes7d5o"]
 
 [ext_resource type="Script" uid="uid://do4kdjtm8ch0u" path="res://scripts/header_hacking_box.gd" id="1_45qip"]
+[ext_resource type="PackedScene" uid="uid://brctrwa7m56um" path="res://scenes/hacking_mod_row.tscn" id="2_t63x0"]
 [ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="2_yc4e7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0tax"]
@@ -119,6 +120,14 @@ theme_override_font_sizes/font_size = 12
 text = "+120"
 horizontal_alignment = 2
 
+[node name="DefraggedDetails" type="RichTextLabel" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/default_color = Color(0, 0.866667, 0, 1)
+theme_override_font_sizes/normal_font_size = 10
+text = "defragged 29:13"
+fit_content = true
+
 [node name="VSeparator" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
@@ -202,6 +211,24 @@ theme_override_font_sizes/font_size = 12
 text = "School Payloads"
 horizontal_alignment = 1
 
+[node name="VSeparator3" type="VSeparator" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_yc4e7")
+
+[node name="ModifiersContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer"]
+layout_mode = 2
+
+[node name="ModifiersTitle" type="Label" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Temporary Modifiers 0/2"
+
+[node name="Modifiers" type="VBoxContainer" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer"]
+layout_mode = 2
+
+[node name="HackingModRow" parent="PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer/Modifiers" instance=ExtResource("2_t63x0")]
+layout_mode = 2
+
 [node name="Overclock" parent="PanelContainer/MarginContainer/HBoxContainer" instance=ExtResource("2_yc4e7")]
 layout_mode = 2
 size_flags_horizontal = 10
@@ -220,4 +247,7 @@ scroll_active = false
 [node name="ExpLabelTimer" type="Timer" parent="."]
 one_shot = true
 
+[node name="DefragBonusTimer" type="Timer" parent="."]
+
 [connection signal="timeout" from="ExpLabelTimer" to="." method="_on_exp_label_timer_timeout"]
+[connection signal="timeout" from="DefragBonusTimer" to="." method="_on_defrag_bonus_timer_timeout"]

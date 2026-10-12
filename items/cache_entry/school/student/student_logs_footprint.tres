@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://dgen65k3qp2e7"]
+
+[ext_resource type="Resource" uid="uid://0clcrm3pt51j" path="res://items/resources/logs.tres" id="1_0g0wo"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_rusly"]
+
+[resource]
+script = ExtResource("2_rusly")
+item = ExtResource("1_0g0wo")
+min_quantity = 50
+max_quantity = 100
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

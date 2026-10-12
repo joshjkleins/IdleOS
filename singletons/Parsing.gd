@@ -28,13 +28,37 @@ var SKILL = {
 	"sfx": "parsing_item_received"
 }
 
+#TIER I
+#Footprint - 
+# From Mining Item: chance for 1 of 5 items (typically related to all other Skills to be used)
+# From Cache: changes type from Student Cache to Student Cache (footprint) - Doubles IP address, username, encrypted password, password found in caches
+#TIER II
+#Corruption -
+# From Mining Item: small chance for hacking items (SQL injectors, packet spoof, hacking upgrade items)
+# From Cache: Much higher chance to find items in cache, but 25% chance to destroy cache after each its found.
+#Tier III
+#Network -
+# From Mining Item: small chance to find Compiled payload of that tier
+# From Cache Item: if cache contains VM Tokens, double the amount found.
+#Tier IV
+#Extraction -
+# From Mining Item: take additional argument to start, looks for that specific item
+# From Cache Item: Student Cache > Student Cache (Extraction) : If a rare item is decoded, find 4 additional copies
+
 var FOOTPRINT = {
 	"name": "Footprint",
 	"tier name": "TIER I | LOGS",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 10,
 	"command": "parse -footprint",
+	"display command": "parse -footprint=<item>",
+	"example commands": [
+		{ 'cmd': 'parse -footprint=logs', 'description': 'Mining item' },
+		{ 'cmd': 'parse -footprint=student cache', 'description': 'Cache item' },
+		{ 'cmd': 'parse -footprint=logs, student cache', 'description': 'Queueing up multiple items' },
+	],
+	"ssh command": "ssh parsing footprint",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
@@ -45,19 +69,90 @@ var FOOTPRINT = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": Items.LOGS,
-	"resource gained": [
-		{ "item": Items.USERNAMES, "min": 1, "max": 1, "weight": 33 },
-		{ "item": Items.ENCRYPTED_PASSWORDS, "min": 1, "max": 1, "weight": 33 },
-		{ "item": Items.IP_ADDRESS, "min": 1, "max": 1, "weight": 33 },
-	],
-	"description": "Parses through logs for a chance to gain random resources. Requires Logs.",
+	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
+	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
+	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at resources contained within. If used on a Cache it will transform it to a Footprint variant, doubling basic resources gained but removing any chance at finding the rare upgrade material inside the cache.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var CORRUPTION = {
+	"name": "Corruption",
+	"tier name": "TIER II | CORRUPTION",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -corruption",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 25,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
+	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at a hacking resources contained within. If used on a Cache it will transform it to a Corrupted variant, significantly increasing the chance of decoding an item but has a 25% chance to destroy the rest of the cache after each item decoded.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var NETWORK = {
+	"name": "Network",
+	"tier name": "TIER III | NETWORK",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -network",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 45,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
+	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at finding VM tokens. If used on a Cache it will transform it to a Network variant, doubling all VM tokens found within.",
+	"efficiency description": "Increases chance of finding a resource per row.",
+	"signal": basic_cycle_completed
+}
+
+var EXTRACTION = {
+	"name": "Extraction",
+	"tier name": "TIER IV | EXTRACTION",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 200,
+	"command": "parse -extraction",
+	"efficiency": 0.15,
+	"efficiency rate": 0.0012,
+	"unlocked": false,
+	"unlock level": 60,
+	"base speed": 0.4,
+	"overclock speed": 0.1,
+	"overheat speed": 3.0,
+	"heat": 0.6,
+	"overclock heat": 0.8,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
+	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] with an additional argument [target=username] to only find that resource. If used on a Cache it will transform it to a Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
 	"signal": basic_cycle_completed
 }
 
 var minor_processes = [
-	FOOTPRINT
+	FOOTPRINT,
+	CORRUPTION,
+	NETWORK,
+	EXTRACTION
 ]
 
 func signal_exp(_amount: int):
@@ -110,37 +205,119 @@ func get_weighted_item(pool: Array) -> Dictionary:
 			
 	return pool[0]
 
-func create_vm_window(minor_process, repeat) -> Window:
+func filter_parsable_items(items_arr: Array[ItemData]) -> Array[ItemData]:
+	var return_items: Array[ItemData] = []
+	for item in items_arr:
+		if item.parsable:
+			return_items.append(item)
+		
+	return return_items
+
+#Takes player command (parse -footprint=logs) and checks if item is legit, can be parsed, player has in inventory, and returns relavent message
+func parse_through_parse_start_command(command: String, process: Dictionary) -> Dictionary:
+	var return_dictionary = { "valid": false, "items_to_parse": [], "message": "" }
+	
+	#PARSE OUT ITEMS
+	var items_string
+	if command.begins_with('ssh'):
+		items_string = command.trim_prefix(process['ssh command'])
+	else:
+		items_string = command.trim_prefix(process['command'])
+
+	if !items_string.begins_with("="):
+		if command.begins_with('ssh'):
+			return_dictionary.message = "Command not recognized. [color=666666]example ssh parse command: ssh parsing footprint=logs[/color]"
+		else:
+			return_dictionary.message = "Command not recognized. [color=666666]example parse command: parse -footprint=logs[/color]"
+		return return_dictionary
+	
+	var items = items_string.trim_prefix("=").split(",")
+	var items_arr: Array[ItemData] = []
+	for item in items:
+		var current_item = Inventory.get_item_by_name(item)
+		if current_item != null:
+			items_arr.append(current_item)
+	
+	#CHECK IF THEY PROVIDED ACTUAL ITEM
+	if items_arr.is_empty():
+		if command.begins_with('ssh'):
+			return_dictionary.message = "Item not found. [color=666666]example ssh parse command: ssh parsing footprint=logs[/color]"
+		else:
+			return_dictionary.message = "Item not found. [color=666666]example parse command: parse -footprint=logs[/color]"
+		return return_dictionary
+	
+	var parsable_items = filter_parsable_items(items_arr)
+	
+	#CHECK IF ITEM PROVIDED IS PARSABLE
+	if parsable_items.is_empty():
+		return_dictionary.message = "ERROR: items provided are not compatable with parsing."
+		return return_dictionary
+	
+	#IF NOT ALL ITEMS ARE PARSABLE JUST REMOVE THOSE AND LET USER KNOW
+	if items_arr != parsable_items:
+		return_dictionary.message = "Not all items provided are compatable with parsing. \nWill parse the following items \n-------------------------------------------------------\n"
+		for item in parsable_items:
+			return_dictionary.message += item.name + "\n"
+	
+	return_dictionary.valid = true
+	return_dictionary.items_to_parse = parsable_items
+	
+	return return_dictionary
+
+func get_cache_transform_target(process: Dictionary, cache: CacheData) -> CacheData:
+	if process == FOOTPRINT and cache == Items.STUDENT_CACHE:
+		#Inventory.remove_resource(Items.STUDENT_CACHE, 1)
+		#Inventory.add_resource(Items.STUDENT_CACHE_FOOTPRINT, 1)
+		return Items.STUDENT_CACHE_FOOTPRINT
+	
+	return null
+
+func list_vm_commands() -> String:
+	var first_col = 20
+	var second_col = 30
+	var return_text = ""
+	#return_text += SKILL.name + "\n\n"
+	return_text += '\nProcess' + " ".repeat(first_col - 'process'.length()) + 'Run command\n'
+	return_text += "-".repeat(first_col + second_col) + "\n"
+	for mp in minor_processes:
+		if mp.unlocked:
+			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>"
+			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
+		else:
+			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "DEMO LOCKED[/color]\n"
+	
+	#return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
+	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma seperated ex. ssh parsing footprint=logs, student cache[/color]"
+	return return_text
+
+
+func create_vm_window(minor_process, items_to_parse) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
-	new_window.repeat = repeat
+	new_window.repeat = true
 	
 	#new_window.set_cooling_reduction(VM_COOLING_REDUCTION)
-	new_window.set_repeat(repeat)
+	new_window.set_repeat(true)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Parsing, minor_process)
-	
 	new_window.add_child(content_instance)
-	
-	new_window.size = content_instance.size
-	new_window.min_size = content_instance.size
 	
 	new_window.close_requested.connect(func(): 
 		CURRENT_VMS -= 1
 		Stats.CURRENT_ALL_VMS -= 1
-		#new_window.remove_cooling_reduction()
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
-		content_instance.set_parse_type(minor_process, true)
-		content_instance.start()
+		content_instance.set_parse_type(minor_process, items_to_parse, true)
+		content_instance.begin()
 	)
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1
 	return new_window
+
 
 func save_data() -> Dictionary:
 	return {

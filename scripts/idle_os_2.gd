@@ -1,5 +1,9 @@
 extends Control
 
+#update upgrades
+
+#MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
+
 #STEPS FOR ADDING NEW MODULE
 #1. ADD TO CONTEXT ENUM
 #2. ADD TO GET_CONTEXT_LEAD FUNC
@@ -22,6 +26,8 @@ extends Control
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
 @onready var hud_monitor = $Panel/TrackingContainer/HUDMonitor
+@onready var overclock = $Panel/MarginContainer/TerminalRoot/Header/Overclock
+@onready var input_line_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
 @onready var mining_scene = preload("res://scenes/data_mining_terminal.tscn")
@@ -61,6 +67,7 @@ var current_player_input_context: PlayerInputContext = PlayerInputContext.NONE
 var awaiting_player_input: bool = false
 var accepting_player_inputs: bool = true
 var upgrade_package_selected = null
+var upload_awaiting_player_input: bool = false
 
 enum MarketContext {
 	MAIN,
@@ -112,18 +119,22 @@ var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remov
 
 var NOTIFY_OF_OVERHEAT: bool = false
 
+#player_tabbed is so player can press tab for a different option if one exists
+var PLAYER_TABBED: int = 0
+var SAVED_LAST_SUBMITTED: String = ""
+
 func _ready():
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	header.update()
-	input_line.grab_focus() #uncomment this when not testing hacking module
+	input_line.grab_focus()
 	
-	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
-	add_line(ContextCommands.playtest_welcome_message())
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
+	if !Tutorial.show_intro:
+		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	
 	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
 	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
 	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
@@ -140,6 +151,15 @@ func _ready():
 	##cooling timer
 	cooling_timer.wait_time = Stats.cooling_frequency
 	cooling_timer.start()
+	
+	if Tutorial.show_intro:
+		accepting_player_inputs = false
+		header.visible = false
+		overclock.visible = false
+		input_line_container.visible = false
+		header.prepare_intro()
+		intro_to_game()
+
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
@@ -198,6 +218,7 @@ func add_new_scrollback():
 
 #player submits text
 func _on_input_line_text_submitted(new_text):
+	PLAYER_TABBED = 0
 	if !accepting_player_inputs:
 		input_line.clear()
 		return
@@ -211,10 +232,37 @@ func _on_input_line_text_submitted(new_text):
 			input_line.clear()
 		return
 			
-	var text_with_lead = get_context_lead() + new_text
+	var text_with_lead = get_context_lead() + " " + new_text
 	input_line.clear()
 	add_line(text_with_lead)
 	command_history.append(new_text)
+	
+	if new_text == "sudo rm -rf":
+		add_line("UNINSTALLING PROCESSES")
+		for process in major_processes:
+			add_line(process.SKILL.name + ".....removed")
+			await get_tree().create_timer(0.1).timeout
+		
+		add_line("REMOVING ITEMS")
+		for item in Inventory.inventory:
+			add_line("Deleting " + item.name + " x" + str(Inventory.get_amount(item)))
+			await get_tree().create_timer(0.2).timeout
+		
+		add_line("Uninstalling upgrades....")
+		for upgrade in Upgrades.all_upgrades:
+			for u in upgrade.upgrades:
+				for level in u.levels:
+					if level.unlocked:
+						add_line(u.id + "......uninstalled")
+						await get_tree().create_timer(0.4).timeout
+		
+		add_line("SAVING")
+		await get_tree().create_timer(0.8).timeout
+		add_line("GOODBYE")
+		await get_tree().create_timer(1.2).timeout
+		SaveManager.save_game()
+		get_tree().quit()
+	
 	if !universal_commands(new_text):
 		match current_context:
 			Context.ROOT:
@@ -349,6 +397,7 @@ func universal_commands(text):
 			return true
 		add_line(Settings.handle_settings_command(text))
 		return true
+	
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
@@ -365,12 +414,18 @@ func universal_commands(text):
 		
 		if item_names in ["-a", "-all", "all"]:
 			add_line(hud_monitor.remove_all())
+			Tutorial.complete_event(Tutorial.TutorialEvent.UNTRACK_ITEMS)
 			return true
 		
 		var names = item_names.split(",")
 		add_line(hud_monitor.remove_monitored_items(names))
 		return true
-		
+	
+	if text == "ls mods" or text == "ls mod":
+		#YOU ARE HERE - CREATE FUNCTION IN CONTEXTCOMMANDS TO LIST INVENTORY ITEMS SHOWING THEIR HACKING MOD POTENTIAL
+		add_line(Inventory.list_inventory_hacking_mods())
+		return true
+	
 	if text.begins_with("ls"):
 		var item_name = text.trim_prefix("ls").strip_edges()
 		
@@ -394,17 +449,97 @@ func universal_commands(text):
 		
 		return true
 	
-	#if text.begins_with("add"):
-		#var item_name = text.trim_prefix("add").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.add_resource(item, 1)
-			#return true
-		
+	if text.begins_with("upload"):
+		handle_upload_commands(text)
+		return true
 	
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
+	
+	if text.begins_with("cd"):
+		handle_cd_commands(text)
+		return true
+	
+	#if text.begins_with("add"):
+		#var item_name = text.trim_prefix("add").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.add_resource(item, 30)
+			#return true
+	#
+	#if text.begins_with("rm"):
+		#var item_name = text.trim_prefix("rm").strip_edges()
+		#var item = Inventory.get_item_by_name(item_name)
+		#if item != null:
+			#Inventory.remove_resource(item, Inventory.get_amount(item))
+			##Inventory.add_resource(item, 1)
+			#return true
+		#
+	
+	if text.begins_with("mod"):
+		if text == "mod" or text == "mods":
+			add_line(ContextCommands.get_mod_command())
+			return true
+		
+		if text.begins_with("mod -rm"):
+			#NO MODS ACTIVE TO REMOVE
+			if HackingMods.current_mods.is_empty():
+				add_line("No mods available to remove.")
+				return true
+			
+			#CONFIRM ID IS AN INT
+			var id_to_remove = text.trim_prefix("mod -rm").strip_edges()
+			if !id_to_remove.is_valid_int():
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
+				return true
+			
+			#CONFIRM ID IS IN RANGE OF CURRENT ACTIVE MODS SIZE
+			if HackingMods.current_mods.size() < int(id_to_remove) + 1 or int(id_to_remove) < 0:
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
+				return true
+			
+			var mod_to_remove = HackingMods.current_mods.keys()[int(id_to_remove)]
+			HackingMods.remove_mod(mod_to_remove)
+			add_line(HackingMods.get_mod_name(mod_to_remove) + " mod deleted.")
+			return true
+		
+		if text.begins_with("mod -add"):
+			#check player even has mod items
+			if !Inventory.has_mod_item():
+				add_line("No mod items found in inventory.")
+				return true
+			
+			if HackingMods.at_max_mods():
+				add_line("Error: maximum active Hacking Mods reached. Use the 'mod -rm <id>' command to remove active Hacking Mods.")
+				return true
+			
+			#verify number after -add
+			var id_to_add = text.trim_prefix("mod -add").strip_edges()
+			if !id_to_add.is_valid_int():
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
+				return true
+			
+			#Confirm number is usable 
+			var mod_items = Inventory.get_hacking_mods_items()
+			var valid_id = mod_items.size()
+			
+			if int(id_to_add) < 0 or int(id_to_add) >= valid_id:
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
+				return true
+			
+			var item_mod_to_add = mod_items[int(id_to_add)]
+			
+			if HackingMods.has_mod(item_mod_to_add.hacking_mod_type):
+				add_line("Error: Hacking Mod of this type already active. Mods of similar type cannot stack. Use 'mod -rm <id>' to remove first to replace.")
+				return true
+				
+			HackingMods.add_mod(item_mod_to_add)
+			Inventory.remove_resource(item_mod_to_add, 1)
+			add_line(item_mod_to_add.name + " added.")
+			return true
+			
+			
 	match text:
 		"-h", "help":
 			add_line(ContextCommands.get_help())
@@ -422,6 +557,9 @@ func universal_commands(text):
 		"process -h":
 			add_line(ContextCommands.process_commands())
 			return true
+		"version", "v":
+			add_line(ContextCommands.get_build_version())
+			return true
 		"ps":
 			if current_process_info == {}:
 				add_line("No process current running.")
@@ -434,8 +572,8 @@ func universal_commands(text):
 		"date":
 			add_line(ContextCommands.get_date_command())
 			return true
-		"playtest":
-			add_line(ContextCommands.playtest_welcome_message())
+		"demo":
+			add_line(ContextCommands.demo_welcome_message())
 			return true
 		"discord -c":
 			var discord_link = "https://discord.gg/bWFwUsF9a"
@@ -459,6 +597,15 @@ func universal_commands(text):
 				add_line("No active process to stop.")
 			Stats.overclocked = false
 			return true
+		"stop -s", "kill -s":
+			if current_process:
+				add_line("Stopping process after current cycle completion.")
+				current_process.stop_safely()
+				Tutorial.complete_event(Tutorial.TutorialEvent.STOP_MINING_PROCESS)
+				return true
+			else:
+				add_line("No active process to stop.")
+				return true
 		"focus":
 			if current_process:
 				bring_process_to_bottom()
@@ -490,12 +637,33 @@ func universal_commands(text):
 			add_line(ContextCommands.system_commands())
 			return true
 
-#Root context commands
-func root_commands(text):
-	text = text.to_lower().strip_edges()
+func handle_cd_commands(text):
+	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context == Context.ROOT:
+		add_line("Already at root.")
+		return
+	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context != Context.ROOT:
+		return_to_root()
+		return
+
+	text = text.trim_prefix("cd").strip_edges()
+
+	var move_up = false
+
+	if text.begins_with("../"):
+		move_up = true
+		text = text.trim_prefix("../")
+
+	var goal_destination = text.strip_edges()
 	
-	match text:
-		"load mining", "cd mining":
+	if goal_destination == get_context_name_string(current_context).to_lower():
+		add_line("Already in %s skill." % goal_destination)
+		return
+	
+	if current_context != Context.ROOT and !move_up:
+		add_line("Must move up a directory with 'cd ..'")
+		return
+	match goal_destination:
+		"mining":
 			add_line("[ .. ] loading data mining module")
 			#header.update_header(Mining)
 			header.display_skill(Mining)
@@ -503,7 +671,7 @@ func root_commands(text):
 			update_context(Context.MINING)
 			add_line(ContextCommands.get_help_text(Mining))
 			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_MINING)
-		"load parsing", "cd parsing":
+		"parsing":
 			add_line("[ .. ] loading parsing module")
 			#header.update_header(Parsing)
 			header.display_skill(Parsing)
@@ -511,23 +679,23 @@ func root_commands(text):
 			update_context(Context.PARSING)
 			add_line(ContextCommands.get_help_text(Parsing))
 			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_PARSING)
-		"load cracking", "cd cracking":
+		"cracking":
 			add_line("[ .. ] loading cracking module")
 			#header.update_header(Cracking)
 			header.display_skill(Cracking)
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			add_line(ContextCommands.get_help_text(Cracking))
-		"load matching", "cd matching":
+		"matching":
 			add_line("[ .. ] loading matching module")
 			#header.update_header(Matching)
 			header.display_skill(Matching)
 			add_line("[ OK ] matching module loaded")
 			update_context(Context.MATCHING)
 			add_line(ContextCommands.get_help_text(Matching))
-		"load hacking", "cd hacking":
+		"hacking":
 			if process_running:
-				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.")
+				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.[/color]")
 				return
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
@@ -537,34 +705,28 @@ func root_commands(text):
 			await loading.show_loading()
 			hacking.module_loaded()
 			current_context = Context.HACKING
-		#"marketplace -auth": #Go to marketplace
-			#add_line("[ .. ] requesting permissions")
-			#add_line("[ OK ] permission granted")
-			#add_line("Connected to online marketplace")
-			#update_context(Context.MARKETPLACE)
-			#add_line(Marketplace.marketplace_welcome())
-		"load decoding", "cd decoding":
+		"decoding":
 			add_line("[ .. ] loading decoding module")
 			#header.update_header(Decoding)
 			header.display_skill(Decoding)
 			add_line("[ OK ] decoding module loaded")
 			update_context(Context.DECODING)
 			add_line(ContextCommands.get_help_text(Decoding))
-		"load phishing", "cd phishing":
+		"phishing":
 			add_line("[ .. ] loading phishing module")
 			#header.update_header(Phishing)
 			header.display_skill(Phishing)
 			add_line("[ OK ] phishing module loaded")
 			update_context(Context.PHISHING)
 			add_line(ContextCommands.get_help_text(Phishing))
-		"load defragging", "cd defragging":
+		"defragging":
 			add_line("[ .. ] loading defragging module")
 			#header.update_header(Defragging)
 			header.display_defragging()
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
 			add_line(ContextCommands.get_help_text(Defragging))
-		"load compiling", "cd compiling":
+		"compiling":
 			add_line("[ .. ] loading compiling module")
 			header.display_skill(Compiling)
 			update_context(Context.COMPILING)
@@ -575,6 +737,15 @@ func root_commands(text):
 				add_line("Cannot find path %s. [color=#666666]example cd command: cd mining[/color]" % nt)
 			else:
 				add_line("Command not found")
+		
+
+#Root context commands
+func root_commands(text):
+	text = text.to_lower().strip_edges()
+	if text == "overclock":
+		add_line("Overclocking requires a process running in the main terminal (not VM window).")
+	else:
+		add_line("Command not found")
 
 func return_to_root():
 	header.update()
@@ -582,6 +753,28 @@ func return_to_root():
 	add_line(Ascii.root)
 	add_line(ContextCommands.info_command_text())
 	#add_line(ContextCommands.all_commands())
+
+func handle_upload_commands(text):
+	if text == "upload":
+		add_line(ContextCommands.upload_info())
+		return
+	
+	if process_running:
+		add_line("Kill current processes before uploading.")
+		return
+	if text.begins_with("upload"):
+		var item_name = text.trim_prefix("upload").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		
+		if item == null or item != Items.PARENTS_CREDIT_CARD:
+			add_line("Upload command not recognized. [color=#666666]example: upload parents credit card[/color]")
+			return
+		
+		if Inventory.get_amount(item) <= 0:
+			add_line("No Parents Credit Card found. Decode Student caches for a chance to find this item.")
+			return
+		
+		player_uploaded_proper_item()
 
 func handle_apt_commands(text):
 	if text == "apt":
@@ -702,10 +895,19 @@ func handle_info_commands(text):
 		add_line("info command not recognized")
 		return
 	
+	#INFO FOR SKILL
 	if command.size() == 2:
 		for p in major_processes:
 			var n = p.SKILL.name.to_lower()
 			if command[1] == n:
+				if p == Hacking:
+					add_line(ContextCommands.get_help_text_hacking(Hacking))
+					return
+				
+				if p == Defragging:
+					add_line(ContextCommands.get_help_text_defragging(Defragging))
+					return
+				
 				
 				add_line(ContextCommands.get_help_text(p))
 				if n == "mining":
@@ -714,7 +916,7 @@ func handle_info_commands(text):
 	
 	if command.size() == 3:
 		if command[1].to_lower() == "hacking":
-			var locations = [Stats.hacking_targets["School"], Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+			var locations = [Stats.hacking_targets["School"]]
 			for loc in locations:
 				if loc["name"].to_lower().replace(" ", "-") == command[2]:
 					add_line(ContextCommands.get_hack_target_info(loc))
@@ -739,7 +941,7 @@ func handle_info_commands(text):
 	add_line("-----------------")
 	add_line("info                        overview of all main skills                  [color=gray]ex. info[/color]")
 	add_line("info [skill]                overview of specific skill and processes     [color=gray]ex. info mining[/color]")
-	add_line("info [skill] [process]      overview of specific processes               [color=gray]ex. info mining logs[/color]")
+	add_line("info [skill] [process]      details of specific processes                [color=gray]ex. info mining logs[/color]")
 
 ##VM TOKENS
 #command vm [process] [minor process] [optional flag -r]
@@ -757,16 +959,28 @@ func handle_vm_token_commands(text):
 	var commands = text.split(" ")
 	
 	#LIST MINOR PROCESSES AVAILABLE FOR SSH/VM example: ssh mining -> list logs, quality logs, etc
+	if text == "ssh hacking":
+		add_line("Virtual Machines are not compatable with hacking.")
+		return
+	if text == "ssh defragging":
+		add_line("Virtual Machines are not compatable with defragging.")
+		return
 	if commands.size() == 2:
 		#is 2nd array index a skill name
 		for p in processes:
 			if commands[1] == p.SKILL.name.to_lower():
-				add_line(ContextCommands.list_vm_terminals_for_skill(p))
+				target_process = p
+				match p:
+					Parsing:
+						add_line(Parsing.list_vm_commands())
+					_:
+						add_line(ContextCommands.list_vm_terminals_for_skill(p))
+					
 				return
 	#confirm commands size
-	if commands.size() < 3 or commands.size() > 4:
-		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
-		return
+	#if commands.size() < 3 or commands.size() > 4:
+		#add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
+		#return
 	
 		
 	#find major process
@@ -774,18 +988,17 @@ func handle_vm_token_commands(text):
 		if p.SKILL.name.to_lower() == commands[1]:
 			target_process = p
 	if target_process == null:
-		add_line("process not recognized")
+		add_line(commands[1] + " not a recognized skill.")
 		return
 	
 	#find minor process
 	var target_minor_process = null
-	if commands[2].is_valid_int():
-		if int(commands[2]) >= 0 and int(commands[2]) < target_process.minor_processes.size():
-			target_minor_process = target_process.minor_processes[int(commands[2])]
-	else:
-		for mp in target_process.minor_processes:
-			if commands[2] == mp.name.to_lower():
-				target_minor_process = mp
+
+	for mp in target_process.minor_processes:
+		if commands[2].split("=")[0] == mp.name.to_lower():
+			target_minor_process = mp
+			break
+		
 	if target_minor_process == null:
 		add_line(target_process.name + " process not recognized")
 		return
@@ -798,25 +1011,138 @@ func handle_vm_token_commands(text):
 		add_line("Process is not unlocked")
 		return
 	
-	if !target_process.has_requirements(target_minor_process):
-		add_line(target_process.missing_requirements_text(target_minor_process))
-		return
+	if target_process != Parsing and target_process != Cracking and target_process != Compiling:
+		if !target_process.has_requirements(target_minor_process):
+			add_line(target_process.missing_requirements_text(target_minor_process))
+			return
+		
 	#check # of vm processes running
 	if target_process.CURRENT_VMS >= target_process.MAX_VMS:
 		add_line("Maximum virtual machines running.")
 		return
 	
 	if Stats.CURRENT_ALL_VMS >= Stats.MAX_ALL_VMS:
-		add_line("Maximum total virtual machines running.")
+		add_line("Maximum total virtual machines running. Upgrade [color=#14B8A6]System[/color] with 'apt' to increase capacity.")
 		return
+	
+	#target_process = Decoding | Mining | Parsing etc
+	#target_minor_process = Decoding.CACHE | Mining.LOGS | Parsing.FOOTPRINT etc
+	var new_window
+	if target_process == Decoding:
+		var cache_item = null
+		if commands[2].contains("="):
+			var provided_cache_name = text.split("=")
+			cache_item = Inventory.get_item_by_name(provided_cache_name[1])
+			if cache_item == null:
+				add_line("Cache name not recognized. [color=666666]example: ssh decoding cache=student cache[/color]")
+				return
+			
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, true, cache_item)
+	
+	elif target_process == Parsing:
+		var parsed_cmd = Parsing.parse_through_parse_start_command(text, target_minor_process) #returns dictionary with properties: 'valid' bool, 'items_to_parse' [items], 'message' string
 		
+		if !parsed_cmd.valid:
+			add_line(parsed_cmd.message)
+			return
+		
+		if parsed_cmd.message != "":
+			add_line(parsed_cmd.message)
+		
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse)
 	
-	Inventory.remove_resource(target_process.vm_token, 1)
+	elif target_process == Compiling:
+		if target_minor_process == Compiling.MOD:
+			if !text.contains("="):
+				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			var item_string = text.split("=")
+			if item_string.size() <= 1:
+				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			var item = Inventory.get_item_by_name(item_string[1])
+			if item == null:
+				add_line("Item not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+				return
+			
+			if item.hacking_mod_item:
+				add_line("ERROR: cannot further Compile hacking mod.")
+				return
+			var amount_needed = item.hacking_mod_consumed
+			if Inventory.get_amount(item) < amount_needed:
+				add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
+				return
+			
+			if HackingMods.at_max_mods():
+				add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
+				return
+			
+			#check if type of mod already exists on player and confirm overwriting
+			if HackingMods.has_mod(item.hacking_mod_type):
+				add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
+				return
+				
+			Inventory.remove_resource(target_process.vm_token, 1)
+			new_window = target_process.create_vm_window(target_minor_process, item)
+		else:
+			var missing = false
+			for req in target_minor_process["requirements"]:
+				if Inventory.get_amount(req) < target_minor_process['requirements'][req]:
+					add_line("Missing required resource: " + req.name + " x" + str(target_minor_process['requirements'][req]))
+					missing = true
+			if missing:
+				return
+			
+			Inventory.remove_resource(target_process.vm_token, 1)
+			new_window = target_process.create_vm_window(target_minor_process)
 	
-	var new_window = target_process.create_vm_window(target_minor_process, true)
+	elif target_process == Cracking:
+		var use_item = null
+		var create_item = null
+		if target_minor_process == Cracking.VM:
+			#example command: crack -vm use=mining create=parsing
+			var flags = text.trim_prefix(target_minor_process["ssh command"]).strip_edges()
+			#confirm command has proper flags (use/create)
+			var parts = flags.split(" ")
+			if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+				add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+				return
+			
+			#get items from the commands
+			use_item = Inventory.get_vm_token_by_skill_name(parts[0].trim_prefix("use="))
+			create_item = Inventory.get_vm_token_by_skill_name(parts[1].trim_prefix("create="))
+			
+			if use_item == null or create_item == null:
+				add_line("ERROR: 'cracking -vm' token name not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+				return
+			
+			#confirm the player has at least 3 of the 'use' items (4 if using a 'cracking' vm token)
+			if use_item == Cracking.vm_token and Inventory.get_amount(use_item) < 4:
+				add_line("ERROR: not enough " + use_item.name + ". Requires 4 to start cracking in VM window (3 to crack + 1 to run window). Current amount: " + str(Inventory.get_amount(use_item)))
+				return
+			if Inventory.get_amount(use_item) < 3:
+				add_line("ERROR: not enough " + use_item.name + ". Requires 3 to crack. Current amount: " + str(Inventory.get_amount(use_item)))
+				return
+			
+			#pass the use/create items to start_cracking
+			#start_cracking(target_minor_process, use_item, create_item)
+		
+		else:
+			if !target_process.has_requirements(target_minor_process):
+				add_line(target_process.missing_requirements_text(target_minor_process))
+				return
+			#start_cracking(target_minor_process)
+		
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, use_item, create_item)
+			
+	else:
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, true)
 	
 	add_child(new_window)
-
 
 	var parent_window = get_window()
 	var center_pos = parent_window.position + parent_window.size - new_window.size
@@ -825,8 +1151,8 @@ func handle_vm_token_commands(text):
 	new_window.transient = false
 	new_window.always_on_top = true
 	new_window.start()
-	new_window.size = new_window.min_size
 	await get_tree().process_frame
+	new_window.size = new_window.get_child(2).custom_minimum_size
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
 
@@ -868,8 +1194,8 @@ func mining_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
-			add_line("Finishing current data mine...")
+		"stop -s", "kill -s":
+			add_line("Finishing current mine...")
 			current_process.stop_safely()
 		"focus":
 			if current_process:
@@ -877,7 +1203,7 @@ func mining_commands(text):
 				Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"overclock":
 			overclock_logic()
@@ -915,7 +1241,7 @@ func data_mining_ended_safely():
 	process_running = false
 	Stats.overclocked = false
 	hud_process_running.process_killed()
-	add_line("Data mining safely finished.")
+	add_line("Mining safely finished.")
 
 ###################################################
 ################### PARSING #######################
@@ -923,12 +1249,35 @@ func data_mining_ended_safely():
 func log_parsing_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Parsing.minor_processes:
-		if text == ms["command"]:
-			if !process_running:
-				start_parsing(ms)
-			else:
+		#if text begins with command
+		#if it equal exactly then add_line("Missing target item") example: parse -footprint=logs, parse -footprint=all
+		#strip out command, try to get inventory item from leftover command
+		#check if player has item
+		#add item to argument
+		if text.begins_with(ms['command']):
+			#CHECK IF PROCESS IS UNLOCKED
+			if !ms.unlocked:
+				add_line("ERROR: requires parsing level " + str(ms["unlock level"]))
+				return
+			
+			#CHECK IF ANOTHER PROCESS IS RUNNING
+			if process_running:
 				add_line(ContextCommands.process_already_running_text())
+				return
+			
+			#already remvoe ms command
+			var parsed_cmd = Parsing.parse_through_parse_start_command(text, ms) #returns dictionary with properties: 'valid' bool, 'items_to_parse' [items], 'message' string
+			
+			if !parsed_cmd.valid:
+				add_line(parsed_cmd.message)
+				return
+			
+			if parsed_cmd.message != "":
+				add_line(parsed_cmd.message)
+			
+			start_parsing(ms, parsed_cmd.items_to_parse)
 			return
+	
 	match text:
 		"stop":
 			process_running = false
@@ -941,7 +1290,7 @@ func log_parsing_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current log...")
 			current_process.stop_safely()
 		"focus":
@@ -949,7 +1298,7 @@ func log_parsing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Parsing")
@@ -974,20 +1323,32 @@ func log_parsing_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_parsing(minor_process: Dictionary):
-	if !minor_process.unlocked:
-		add_line("Requires parsing level " + str(minor_process["unlock level"]))
+#HERE!!
+func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
+	#if !minor_process.unlocked:
+		#add_line("Requires parsing level " + str(minor_process["unlock level"]))
+		#return
+	#if !has_requirements(minor_process.requirements):
+		#add_line("No logs found.")
+		#return
+	
+	var has_at_least_one_item = false
+	for item in items_to_parse:
+		if Inventory.get_amount(item) > 0:
+			has_at_least_one_item = true
+	
+	if !has_at_least_one_item:
+		add_line("ERROR: item(s) listed not found in inventory.")
 		return
-	if Inventory.get_amount(minor_process["requirements"]) <= 0:
-		add_line("No logs found.")
-		return
+	
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
 	terminal_body_container.add_child(new_log_parsing_terminal)
-	new_log_parsing_terminal.set_parse_type(minor_process)
+	new_log_parsing_terminal.set_parse_type(minor_process, items_to_parse)
 	process_running = true
 	current_process = new_log_parsing_terminal
 	current_process_info = minor_process
-	new_log_parsing_terminal.start()
+	#new_log_parsing_terminal.start()
+	new_log_parsing_terminal.begin()
 	hud_process_running.process_started(Parsing, minor_process)
 	add_new_scrollback()
 
@@ -1006,11 +1367,39 @@ func log_parsing_ended_safely():
 func password_unscramble_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Cracking.minor_processes:
-		if text == ms["command"]:
-			if !process_running:
-				start_cracking(ms)
-			else:
+		if text.begins_with(ms["command"]):
+			if process_running:
 				add_line(ContextCommands.process_already_running_text())
+				return
+			
+			
+			if ms == Cracking.VM:
+				#example command: crack -vm use=mining create=parsing
+				var flags = text.trim_prefix(ms["command"]).strip_edges()
+				#confirm command has proper flags (use/create)
+				var parts = flags.split(" ")
+				if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+					add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+					return
+				
+				#get items from the commands
+				var use_item = Inventory.get_vm_token_by_skill_name(parts[0].trim_prefix("use="))
+				var create_item = Inventory.get_vm_token_by_skill_name(parts[1].trim_prefix("create="))
+				
+				if use_item == null or create_item == null:
+					add_line("ERROR: 'cracking -vm' token name not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
+					return
+				
+				#confirm the player has at least 3 of the 'use' items
+				if Inventory.get_amount(use_item) < 3:
+					add_line("ERROR: not enough " + use_item.name + ". Requires 3 to crack. Current amount: " + str(Inventory.get_amount(use_item)))
+					return
+				
+				#pass the use/create items to start_cracking
+				start_cracking(ms, use_item, create_item)
+			
+			else:
+				start_cracking(ms)
 			return
 	match text:
 		"stop":
@@ -1024,7 +1413,7 @@ func password_unscramble_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current password...")
 			current_process.stop_safely()
 		"focus":
@@ -1032,7 +1421,7 @@ func password_unscramble_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Cracking")
@@ -1057,16 +1446,18 @@ func password_unscramble_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_cracking(minor_process: Dictionary):
+func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create_item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
-	if Inventory.get_amount(minor_process["requirements"]) <= 0:
-		add_line(minor_process["requirements"]["name"] + " not found")
-		return
+	#check if requirements are dictionary because if requirements are a String then player is using vm cracking command and initial item check already happened
+	if minor_process.requirements is Dictionary:
+		if !has_requirements(minor_process.requirements):
+			add_line(minor_process.requirements.keys()[0].name + " not found")
+			return
 	var new_pw_cracking_terminal = pw_cracking_scene.instantiate()
 	terminal_body_container.add_child(new_pw_cracking_terminal)
-	new_pw_cracking_terminal.set_cracking_type(minor_process)
+	new_pw_cracking_terminal.set_cracking_type(minor_process, false, use_item, create_item)
 	process_running = true
 	current_process = new_pw_cracking_terminal
 	current_process_info = minor_process
@@ -1115,7 +1506,7 @@ func cred_matching_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current match...")
 			current_process.stop_safely()
 		"focus":
@@ -1123,7 +1514,7 @@ func cred_matching_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Matching")
@@ -1178,16 +1569,42 @@ func cred_matching_ended_safely():
 ###################################################
 func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
+
 	for ms in Decoding.minor_processes:
 		if text == ms["command"]:
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
+				
 			if !Inventory.has_cache():
 				add_line("No caches found.")
 				return
-				
+			
 			start_cache_decrypting(ms)
+			return
+		
+		if text.begins_with(ms["command"] + "="):
+			var cache_target = text.trim_prefix(ms["command"] + "=").strip_edges()
+			
+			if process_running:
+				add_line(ContextCommands.process_already_running_text())
+				return
+				
+			if cache_target.is_empty():
+				add_line("Please specify a cache.")
+				return
+			
+			var cache_item = Inventory.get_item_by_name(cache_target)
+			if cache_item == null:
+				add_line(cache_target + " cache not found.")
+				return
+			
+			# cache_target will be:
+			# "student"
+			# "vice principal"
+			# etc.
+			
+			start_cache_decrypting(ms, cache_item)
 			return
 	
 	match text:
@@ -1202,7 +1619,7 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current cache...")
 			current_process.stop_safely()
 		"focus":
@@ -1210,7 +1627,7 @@ func cache_decrypting_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Cache Decrypting")
@@ -1232,14 +1649,14 @@ func cache_decrypting_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_cache_decrypting(minor_process):
+func start_cache_decrypting(minor_process, cache_item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
 		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
 	terminal_body_container.add_child(new_cache_decrypt_terminal)
-	new_cache_decrypt_terminal.set_cache_type(minor_process)
+	new_cache_decrypt_terminal.set_cache_type(minor_process, false, cache_item)
 	process_running = true
 	current_process = new_cache_decrypt_terminal
 	current_process_info = minor_process
@@ -1254,7 +1671,7 @@ func cache_decrypting_ended_safely():
 	process_running = false
 	Stats.overclocked = false
 	hud_process_running.process_killed()
-	add_line("Cache decrypting safely finished.")
+	add_line("Decoding safely finished.")
 
 func overclock_logic():
 	if !process_running: #no process running
@@ -1302,7 +1719,7 @@ func phishing_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current phishing attempt...")
 			current_process.stop_safely()
 		"focus":
@@ -1310,7 +1727,7 @@ func phishing_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("Module: Phishing")
@@ -1356,20 +1773,53 @@ func phishing_ended_safely():
 func compiling_commands(text):
 	text = text.to_lower().strip_edges()
 	for ms in Compiling.minor_processes:
-		if text == ms["command"]:
+		if text.begins_with(ms["command"]):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-			var missing = false
-			for req in ms["requirements"]:
-				if Inventory.get_amount(req.item) < req.amount:
-					add_line("Missing required resource: " + req.item.name + " x" + str(req.amount))
-					missing = true
-			if missing:
-				return
 			
-			start_compiling(ms)
-			return
+			if ms == Compiling.MOD:
+				if !text.contains("="):
+					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				var item_string = text.split("=")
+				if item_string.size() <= 1:
+					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				var item = Inventory.get_item_by_name(item_string[1])
+				if item == null:
+					add_line("Item not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+					return
+				
+				if item.hacking_mod_item:
+					add_line("ERROR: cannot further Compile hacking mod.")
+					return
+				var amount_needed = item.hacking_mod_consumed
+				if Inventory.get_amount(item) < amount_needed:
+					add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
+					return
+				
+				if HackingMods.at_max_mods():
+					add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
+					return
+				
+				#check if type of mod already exists on player and confirm overwriting
+				if HackingMods.has_mod(item.hacking_mod_type):
+					add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
+					return
+				start_compiling(ms, item)
+				return
+			else:
+				var missing = false
+				for req in ms["requirements"]:
+					if Inventory.get_amount(req) < ms['requirements'][req]:
+						add_line("Missing required resource: " + req.name + " x" + str(ms['requirements'][req]))
+						missing = true
+				if missing:
+					return
+				
+				start_compiling(ms)
+				return
 	match text:
 		"stop":
 			unstick_current_process()
@@ -1382,7 +1832,7 @@ func compiling_commands(text):
 			else:
 				add_line("No active process to stop.")
 			Stats.overclocked = false
-		"stop -s":
+		"stop -s", "kill -s":
 			add_line("Finishing current compile...")
 			current_process.stop_safely()
 		"focus":
@@ -1390,7 +1840,7 @@ func compiling_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"overclock":
 			overclock_logic()
@@ -1406,7 +1856,7 @@ func compiling_commands(text):
 			else:
 				add_line("Command not found")
 
-func start_compiling(minor_process: Dictionary):
+func start_compiling(minor_process: Dictionary, item: ItemData = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
@@ -1416,7 +1866,7 @@ func start_compiling(minor_process: Dictionary):
 	process_running = true
 	current_process = new_compiling_terminal
 	current_process_info = minor_process
-	new_compiling_terminal.start(minor_process)
+	new_compiling_terminal.start(minor_process, false, item)
 	hud_process_running.process_started(Compiling, minor_process)
 	add_new_scrollback()
 
@@ -1444,7 +1894,7 @@ func defragging_commands(text):
 				add_line(ms.name + " defragging not unlocked. Purchase from marketplace.")
 				return
 			if Defragging.on_cooldown():
-				add_line("Defragging module is currently cooling down.")
+				add_line("Defragging is currently cooling down.")
 				return
 			start_defragging(ms)
 			return
@@ -1465,7 +1915,7 @@ func defragging_commands(text):
 				bring_process_to_bottom()
 			else:
 				add_line("No process found to focus")
-		"root", "..", "cd ..":
+		"root", "..", "cd ..", "cd ../":
 			return_to_root()
 		"info":
 			add_line("???")
@@ -1773,10 +2223,29 @@ func _move_caret_to_end():
 
 #handle up/down input for history commands
 func _input(event):
+	if event is InputEventMouseButton and event.pressed:
+		input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
+		if Tutorial.show_intro and event.keycode == KEY_ENTER and accepting_player_inputs:
+			install_idle_os()
+		if upload_awaiting_player_input and awaiting_player_input and event.keycode == KEY_ENTER:
+			finish_player_uploaded_proper_item()
 		if event.keycode == KEY_TAB:
+			#var completion
+			#if PLAYER_TABBED == 0:
+				#SAVED_LAST_SUBMITTED = input_line.text
+				#completion = CommandRegistry.get_completions(input_line.text, PLAYER_TABBED, get_context_name_string(current_context))
+			#else:
+				#if SAVED_LAST_SUBMITTED == "":
+					#SAVED_LAST_SUBMITTED = input_line.text
+				#completion = CommandRegistry.get_completions(SAVED_LAST_SUBMITTED, PLAYER_TABBED, get_context_name_string(current_context))
+			#input_line.text = completion
+			#input_line.caret_column = input_line.text.length()
+			#PLAYER_TABBED += 1
 			get_viewport().set_input_as_handled()
 			return
+		if event.keycode == KEY_BACKSPACE:
+			PLAYER_TABBED = 0
 	if current_context != Context.HACKING:
 		if event is InputEventKey and event.pressed:
 			if event.keycode == Key.KEY_UP:
@@ -1800,6 +2269,7 @@ func _navigate_history(delta: int):
 
 func _on_hacking_start_loading() -> void:
 	header.update()
+	update_context(Context.ROOT)
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true
@@ -1808,7 +2278,6 @@ func _on_hacking_start_loading() -> void:
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	tween.parallel().tween_property(hud_monitor, "modulate:a", 1.0, 1.0)
 	await tween.finished
-	current_context = Context.ROOT
 
 func _on_cooling_timer_timeout():
 	var amount_to_cool = Stats.cooling_amount
@@ -1847,7 +2316,7 @@ func _kill_current_process():
 
 func system_cooled_out_of_overheat_range():
 	NOTIFY_OF_OVERHEAT = false
-	add_line("[color=blue]System no longer overheated.[/color]")
+	add_line("[color=#5599FF]System no longer overheated.[/color]")
 
 func overheat_terminal_notice():
 	if NOTIFY_OF_OVERHEAT:
@@ -1856,3 +2325,182 @@ func overheat_terminal_notice():
 		NOTIFY_OF_OVERHEAT = true
 		add_line("[color=red]SYSTEM OVERHEATED - ALL PROCESSES SLOWED[/color]")
 		add_line("Cool system to < 80 to resume processes as normal.")
+
+
+func has_requirements(requirements: Dictionary) -> bool:
+	for item in requirements:
+		if Inventory.get_amount(item) < requirements[item]:
+			return false
+	
+	return true
+
+func intro_to_game():
+	await type_text("""WELCOME TO IDLE OPERATING SYSTEM.
+
+You have been granted access to IdleOS, a specialized operating system designed to provide you with the tools necessary to access the world's most valuable information.
+
+Your objective is simple:
+
+Gain access to information that could one day be used for the good of humankind.
+
+At present, your access is limited. Before you are trusted with more advanced operations, you will need to prove your proficiency with this tool.
+
+Fortunately, there are plenty of opportunities to demonstrate your abilities.
+
+To start, successfully hack a Student at the local School. 
+
+They're inexperienced and poorly secured. Surely this will be a simple task.
+
+It is likely you will be able to extract some Credit Card information from them.
+
+Upload that information if you come upon it and perhaps we will grant further access to more powerful tools.
+
+As for what's waiting beyond that...
+
+Let's just say the operating system contains everything you will need to obtain the world's most powerful information.
+
+But we'll get to that later.
+
+For now, let's see what you can do.
+
+
+
+press 'enter' to finish IdleOS install""")
+	accepting_player_inputs = true
+
+
+func type_text(text: String, characters_per_second: float = 250.0) -> void:
+	var delay := 1.0 / characters_per_second
+	
+	for i in text.length():
+		current_scrollback.append_text(text[i])
+		await get_tree().create_timer(delay).timeout
+
+func install_idle_os():
+	accepting_player_inputs = false
+	_clear_terminal()
+	header.modulate.a = 1.0
+	header.visible = true
+	for mp in major_processes:
+		var dl_text = "\nDownloading Module: " + mp.SKILL.name
+		await type_text(dl_text, 250.0)
+		await get_tree().create_timer(0.6).timeout
+		header.intro(mp)
+		await get_tree().create_timer(0.6).timeout
+			
+		add_line(mp.name + " install complete.")
+		await get_tree().create_timer(0.3).timeout
+		
+	await type_text("\nActivating system tempature UI", 50.0)
+	overclock.modulate.a = 0.0
+	overclock.visible = true
+	var tween = create_tween()
+	tween.tween_property(overclock, "modulate:a", 1.0, 1.5)
+	await tween.finished
+	
+	input_line_container.modulate.a = 0.0
+	input_line_container.visible = true
+	await type_text("\nCommand line interface active", 50.0)
+	var tween2 = create_tween()
+	tween2.tween_property(input_line_container, "modulate:a", 1.0, 1.5)
+	await tween2.finished
+	
+	await type_text("\nInstall of IdleOS complete. Clearing terminal.  Good luck.")
+	await get_tree().create_timer(2.0).timeout
+	
+	_clear_terminal()
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	
+	Tutorial.show_intro = false
+	SaveManager.save_game()
+
+	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
+	add_line(ContextCommands.demo_welcome_message())
+	add_line("To get started, type `-h` in the terminal.")
+
+
+func player_uploaded_proper_item():
+	accepting_player_inputs = false
+	#tween for the following: header, overclock, input_line_container
+	#tween should just change opacity to 0.0 then set visibility to false
+	
+	_clear_terminal()
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		tween.tween_property(node, "modulate:a", 0.0, 0.5)
+
+	tween.chain().tween_callback(func():
+		for node in [header, overclock, input_line_container]:
+			node.visible = false
+	)
+	await tween.finished
+	await get_tree().create_timer(1.0).timeout
+	
+	add_line("[          ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=         ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[==        ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[===       ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[====      ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=====     ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[======    ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[=======   ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[========  ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[========= ]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[==========]")
+	await get_tree().create_timer(0.1).timeout
+	add_line("[color=green]Parents CC Successfully uploaded[/color]")
+	Inventory.remove_resource(Items.PARENTS_CREDIT_CARD, 1)
+	await type_text("""\n
+Well done. It seems you have what it takes after all.
+
+Unfortunately, the rest of IdleOS is still under development. Until version 1.0 is ready, we've prepared one final challenge to test your abilities.
+
+Think you've mastered the system? Try your hand at the Hard Mode Student. This opponent won't go down easily, and brute force alone won't be enough.
+
+You'll need to master Compiling to create powerful Hacking Mods, push your VMs to their full potential, upgrade versions, overclock, and spoof your way to victory.
+
+Good luck.
+
+
+press 'enter' to return to console""")
+
+	awaiting_player_input = true
+	upload_awaiting_player_input = true
+
+
+func finish_player_uploaded_proper_item():
+	awaiting_player_input = false
+	upload_awaiting_player_input = false
+	
+	_clear_terminal()
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		node.visible = true
+		node.modulate.a = 0.0
+
+	var tween2 = create_tween()
+	tween2.set_parallel(true)
+
+	for node in [header, overclock, input_line_container, hud_monitor]:
+		tween2.tween_property(node, "modulate:a", 1.0, 0.3)
+
+	await tween2.finished
+	
+	###UNLOCK HARD MODE
+	Stats.unlock_hard_mode("School")
+	Tutorial.complete_event(Tutorial.TutorialEvent.UPLOAD_PARENTS_CC)
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	SaveManager.save_game()

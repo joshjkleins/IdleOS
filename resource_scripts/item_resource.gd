@@ -8,6 +8,8 @@ extends Resource
 @export var description: String
 @export var upgrade_ingredient: bool
 @export var value: int
+@export var parsable: bool
+@export var contained_items: Array[ItemData]
 
 
 enum ItemColor {
@@ -27,6 +29,12 @@ enum ItemColor {
 @export var color_type: ItemColor
 @export var obtained_from: Array[ItemColor] = []
 @export var obtained_from_additional_hint: String = ""
+
+@export var hacking_mod_type: HackingMods.MOD_TYPE
+@export var hacking_mod_value: float
+@export var hacking_mod_duration: int
+@export var hacking_mod_consumed: int
+@export var hacking_mod_item: bool = false
 
 func get_obtained_from_skills() -> Array:
 	var result = []

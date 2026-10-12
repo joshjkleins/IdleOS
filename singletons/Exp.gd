@@ -4,7 +4,7 @@ signal gained_xp_signal
 signal exp_updated_signal
 
 
-const MAX_LEVEL: int = 99
+const MAX_LEVEL: int = 10
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]
@@ -63,9 +63,12 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 	
 	#MAJOR LEVEL UPDATES
 	while major.SKILL["level"] < major_new_level:
+		print('leveled up')
 		major.SKILL["level"] += 1
 		major.SKILL["level up signal"].emit()
 		Audiomanager.play_sfx("level_up")
+		if major != Hacking:
+			Inventory.add_resource(major.vm_token, 1)
 		if major.SKILL.has("efficiency"):
 			major.SKILL["efficiency"] += major.SKILL["efficiency rate"]
 

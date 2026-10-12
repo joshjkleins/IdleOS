@@ -31,8 +31,10 @@ func _ready():
 func strip_bbcode(text: String) -> String:
 	return _bbcode_regex.sub(text, "", true)
 
-func pad_text(text: String, width: int) -> String:
-	var visible_length = strip_bbcode(text).length()
+func pad_text(text: String, width: int, strip_bbc: bool = true) -> String:
+	var visible_length = text.length()
+	if strip_bbc:
+		visible_length = strip_bbcode(text).length()
 
 	if visible_length >= width:
 		return text
@@ -42,7 +44,236 @@ func pad_text(text: String, width: int) -> String:
 func tab_space() -> String:
 	return "  "
 
+func get_modifier_info_text(skill: Node) -> String:
+	if skill == Defragging:
+		return ""
+	var l_mod = 16
+	var l_status = 14
+	var l_cmd = 45
+	var l_effect = 44
+	var text = ""
+	text += "┌────────────────────────────────────────────────────── MODIFIERS ───────────────────────────────────────────────────────┐\n"
+	text += "│ " + pad_text('MODIFIER', l_mod) + pad_text('STATUS', l_status) + pad_text('COMMAND', l_cmd) + pad_text('EFFECT', l_effect) + '│\n'
+	text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
+			 
+	var modifier_name = ["Overclock"]
+	var status
+	if Upgrades.can_overclock(skill):
+		status = ["UNLOCKED"]
+	else:
+		status = ["LOCKED"]
+	
+	var command = ["While process is active use 'overclock'",  "Stop with 'overclock -kill'"]
+	var command_new_line_start_pos = l_mod + l_status
+	
+	var effect = ["Increase speed & heat output."]
+	
+	var text_components = [modifier_name, status, command, effect]
+	var widths = [l_mod, l_status, l_cmd, l_effect]
+	var line_count = find_largest_array(text_components).size()
+
+	for i in range(line_count):
+		var line = "│ "
+		for c in range(text_components.size()):
+			var col = text_components[c]
+			var cell = col[i] if i < col.size() else ""
+			line += pad_text(cell, widths[c])
+		text += line + "│\n"
+
+	text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
+	return text
+
+
+func find_largest_array(matrix: Array) -> Array:
+	if matrix.is_empty():
+		return [] # Return an empty array if the main array is empty
+
+	var largest_arr: Array = matrix[0]
+
+	for i in range(1, matrix.size()):
+		if matrix[i].size() > largest_arr.size():
+			largest_arr = matrix[i]
+
+	return largest_arr
+
+
 func get_help_text(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
+
+	# DETERMINE COLUMN SIZES
+	# 0 = Process
+	# 1 = Status
+	# 2 = Unlock LVL
+	# 3 = Efficiency
+	# 4 = Eff/Level
+	# 5 = Run Command
+	# 6 = Info Command
+	# 7 = Required Items
+	var cols_size = [7, 0, 0, 0, 10, 12, 0, 15]
+
+	for p in skill.minor_processes:
+		# PROCESS NAME
+		cols_size[0] = max(cols_size[0], p.name.length())
+		
+		# STATUS
+		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
+		cols_size[1] = max(cols_size[1], status.length())
+		
+		# UNLOCK LEVEL
+		cols_size[2] = max(cols_size[2], "UNLOCK".length())
+		
+		# EFFICIENCY
+		
+		var efficiency = "%.1f%%" % (p.efficiency * 100.0)
+		cols_size[3] = max(cols_size[3], efficiency.length())
+		
+		# EFFICIENCY / LEVEL
+		#cols_size[4] = 5 # Something like 8.0% or 0.1%
+		
+		# RUN COMMAND
+		if p.has('display command'):
+			cols_size[5] = max(cols_size[5], p['display command'].length())
+		else:
+			cols_size[5] = max(cols_size[5], p.command.length())
+		
+		# INFO COMMAND
+		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
+		cols_size[6] = max(cols_size[6], info_cmd.length())
+		
+		# REQUIRED ITEMS
+		var req_items = get_requirements_text(p)
+		cols_size[7] = max(cols_size[7], req_items.length())
+
+
+	# TOP BORDER
+	text += "┌"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┬"
+			text += "─"
+	text += "┐\n"
+
+
+	# HEADER
+	text += "│ "
+	text += pad_text("PROCESS", cols_size[0]) + "     | "
+	text += pad_text("STATUS", cols_size[1]) + "     | "
+	text += pad_text("UNLOCK", cols_size[2]) + "     | "
+	text += pad_text("EFF", cols_size[3]) + "     | "
+	text += pad_text("EFF/LVL", cols_size[4]) + "     | "
+	text += pad_text("RUN COMMAND", cols_size[5]) + "     | "
+	text += pad_text("INFO COMMAND", cols_size[6]) + "     | "
+	text += pad_text("REQUIRED ITEMS", cols_size[7]) + "     │\n"
+
+
+	# HEADER SEPARATOR
+	text += "├"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┼"
+			text += "─"
+	text += "┤\n"
+	
+	
+	# PROCESS ROWS
+	for p in skill.minor_processes:
+		var status
+		if p.unlocked:
+			status = "ONLINE"
+		else:
+			status = "OFFLINE" if p['unlock level'] <= 10 else "DEMO LOCKED"
+
+		var efficiency = "-"
+		var efficiency_rate = "-"
+		var run_command = "-"
+		var info_cmd = "-"
+		var req_items = "-"
+
+		if p['unlock level'] <= 10:
+			efficiency = "%.1f%%" % (p.efficiency * 100.0)
+			efficiency_rate = "%.1f%%" % (p['efficiency rate'] * 100.0)
+			run_command = p['display command'] if p.has('display command') else p.command
+			info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
+			req_items = get_requirements_text(p)
+
+		var line_to_add = ""
+		line_to_add += "│ "
+		line_to_add += pad_text(p.name, cols_size[0]) + "     | "
+		line_to_add += pad_text(status, cols_size[1]) + "     | "
+		line_to_add += pad_text(str(p['unlock level']), cols_size[2]) + "     | "
+		line_to_add += pad_text(efficiency, cols_size[3]) + "     | "
+		line_to_add += pad_text(efficiency_rate, cols_size[4]) + "     | "
+		line_to_add += pad_text(run_command, cols_size[5], false) + "     | "
+		line_to_add += pad_text(info_cmd, cols_size[6]) + "     | "
+		line_to_add += pad_text(req_items, cols_size[7]) + "     │"
+
+		if !p.unlocked:
+			text += "[color=#666666]" + line_to_add + "[/color]\n"
+		else:
+			text += line_to_add + "\n"
+			
+			
+	# BOTTOM BORDER
+	text += "└"
+	for i in cols_size.size():
+		text += "─".repeat(cols_size[i] + 6)
+		if i < cols_size.size() - 1:
+			#text += "┴"
+			text += "─"
+	text += "┘\n"
+
+	return text + "\n\n" + get_modifier_info_text(skill)
+
+
+
+func get_requirements_text(p: Dictionary) -> String:
+	if p.requirements is String:
+		return p.requirements
+	if p.requirements.is_empty():
+		return "-"
+	
+	var requirements = []
+	
+	for item in p.requirements:
+		requirements.append("%s x%s" % [item.name, p.requirements[item]])
+	
+	return ", ".join(requirements)
+
+func get_help_text_defragging(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
+	text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
+	text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+	for p in skill.minor_processes:
+		text += _build_defrag_process_row(p, skill)
+	text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
+	
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return final_text
+
+func get_help_text_hacking(skill: Node) -> String:
+	var text = get_ascii_text(skill)
+	text += "┌─────────────────────────────────────────────────────────────────────────────────────┐\n"
+	text += "│ LOCATION                  REQ                      INFO                             │\n"
+	text += "├─────────────────────────────────────────────────────────────────────────────────────┤\n"
+	
+	var locations = [Stats.hacking_targets["School"]] #, Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+
+	for location in locations:
+		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
+		text += "│ %-25s %-25s %-31s │\n" % [
+			location["name"],
+			location["required payload"].name,
+			info_text
+		]
+	text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return final_text
+
+func get_help_text_2(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	if skill != Defragging:
 		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
@@ -82,11 +313,15 @@ func get_help_text(skill: Node) -> String:
 		text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
 	else:
 		text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
-
-	return _wrap_center_lines(text)
+	
+	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	return final_text
 
 func _wrap_center(text: String) -> String:
 	return "[center]" + text + "[/center]"
+
+func _wrap_pad_left(text: String) -> String:
+	return "[indent]" + text + "[/indent]"
 
 func _wrap_center_lines(text: String) -> String:
 	var lines = text.split("\n")
@@ -118,7 +353,8 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	
 	if skill == Defragging:
 		var time = str(p["bonus time"]) + " min"
-		var eff = "x" + str(p["bonus efficiency"])
+		#var eff = "x" + str(p["bonus efficiency"])
+		var eff = "x" + String.num(p["bonus efficiency"], 2)
 		if unlocked:
 			return "│ %-14s %-11s %-12s %-9s %-35s %-40s │\n" % [
 				p["name"],
@@ -219,6 +455,9 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 func get_mp_info(skill: Node, process: Dictionary) -> String:
 	if skill == Defragging:
 		return get_mp_dfg_info(skill, process)
+	
+	if process['unlock level'] > 10:
+		return "ERROR: process not available."
 	###INFO
 	var return_text = "\nPROCESS\n"
 	var color_string = skill.SKILL.color.to_html()
@@ -241,10 +480,12 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 				requirements_list[item.item.name] = item.amount
 			else:
 				requirements_list[item.name] = 1
+	if process["requirements"] is Dictionary:
+		requirements_list = process["requirements"]
 	elif process["requirements"] is ItemData:
 		requirements_list[process["requirements"].name] = 1
-	elif process["requirements"] == "cache":
-		requirements_list["Any cache"] = 1
+	elif process["requirements"] is String:
+		requirements_list[process["requirements"]] = 1
 	else:
 		requirements_list["???"] = 1
 	
@@ -258,9 +499,13 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		var prefix = "├─ "
 		if i == requirements_list.size() - 1:
 			prefix = "└─ "
-		return_text += prefix + item + " x" + str(requirements_list[item]) + "\n"
+		if item is String:
+			return_text += prefix + item + "\n"
+		else:
+			return_text += prefix + item.name + " x" + str(requirements_list[item]) + "\n"
 		i += 1
-		
+	
+	
 	return_text += "\n"
 	
 	###REWARDS
@@ -283,11 +528,26 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 			var dots_amount = 35 - item_name.length()
 			return_text += "├─ " + item_name + ".".repeat(dots_amount) + item.description + "\n"
 		
+		elif process["resource gained"] is String:
+			var text = process["resource gained"]
+			return_text += "├─ " + text + "\n"
+		
 		var vm = skill.vm_token
 		var vm_name = vm.name + " (1%)"
 		var dots_amount = 35 - vm_name.length()
 		return_text += "└─ " + vm_name + ".".repeat(dots_amount) + vm.description + "\n"
 	
+	if process.has('example commands'):
+		return_text += "\nEXAMPLE COMMANDS\n"
+		
+		var j = 0
+		for example_text in process['example commands']:
+			var prefix = "├─"
+			if j == process['example commands'].size() - 1:
+				prefix = "└─"
+			var dots_length = 45 - example_text.cmd.length()
+			return_text += prefix + " " +  example_text.cmd + ".".repeat(dots_length) + example_text.description + "\n"
+			j += 1
 	return return_text
 
 func info_command_text():
@@ -297,7 +557,7 @@ func info_command_text():
 	var l_lvl = 6
 	var l_exp = 18
 	var l_cmd = 20
-	return_string += pad_text("SKILL", l_name) + pad_text("UPGRADE", l_upgrades) + pad_text("LVL", l_lvl) + pad_text("COMMAND(from root)", l_cmd) + "\n"
+	return_string += pad_text("SKILL", l_name) + pad_text("VERSION", l_upgrades) + pad_text("LVL", l_lvl) + pad_text("COMMAND(from root)", l_cmd) + "\n"
 	return_string += "-".repeat(l_name + l_upgrades + l_lvl + l_cmd) + "\n"
 	var skills = [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling, Defragging]
 	for s in skills:
@@ -312,7 +572,12 @@ func info_command_text():
 			var name_s = "[color=#%s]%s[/color]" % [color_string, s.SKILL.name]
 			return_string += pad_text(name_s, l_name) + pad_text(version, l_upgrades) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(s.SKILL.command, l_cmd) + "\n"
 	
+	if Tutorial.is_tutorial_complete():
+		return_string += "\n\nUse 'apt <skill>' to see version upgrades. [color=#666666]example: apt mining[/color]\n"
+		return_string += "Use 'apt system' to see general system upgrades.\n"
 	return return_string
+
+
 
 func get_hack_target_info(location: Dictionary):
 	var return_text = ""
@@ -345,16 +610,27 @@ func list_vm_terminals_for_skill(skill: Node):
 	return_text += pad_text("Process", first_col) + pad_text("Run command", second_col) + "\n"
 	return_text += "-".repeat(first_col + second_col) + "\n"
 	for mp in skill.minor_processes:
-		var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
-		return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
+		if mp.unlocked:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
+		elif !mp.unlocked and mp['unlock level'] <= 10:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			var text_line = "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("OFFLINE", second_col) + "[/color]\n"
+			return_text += text_line
+		else:
+			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("DEMO LOCKED", second_col) + "[/color]\n"
+			
+			
 	return return_text
 
 func ssh_commands(major_processes: Array) -> String:
 	var first_col = 15
 	var second_col = 20
 	var third_col = 25
-	var return_text = "SSH Commands\n\n"
-	return_text += pad_text("Skill", first_col) + pad_text("Tokens", second_col) + pad_text("Info", third_col) + "\n"
+
+	var return_text = "\n\nSSH Commands\n\n"
+	return_text += pad_text("Skill", first_col) + pad_text("VM Tokens", second_col) + pad_text("Info", third_col) + "\n"
 	return_text += "-".repeat(first_col + second_col + third_col) + "\n"
 	
 	for p in major_processes:
@@ -363,7 +639,9 @@ func ssh_commands(major_processes: Array) -> String:
 		var info_command = "ssh " + p.SKILL.name.to_lower()
 		var tokens = str(Inventory.get_amount(p.vm_token))
 		return_text += pad_text(s_name, first_col) + pad_text(tokens, second_col) + pad_text(info_command, third_col) + "\n"
-
+		
+	return_text += "\nVM Tokens can be used to run processes in a seperate pop-up window.\nEach window consumes a VM token to run for 30 seconds.\n"
+	return_text += "If there are additional VM tokens they will be consumed to run for an additional 30 seconds until the window is exited out of or you run out of VM Tokens for that skill."
 	return return_text
 	
 
@@ -377,7 +655,7 @@ func ssh_help_commands() -> String:
 |   ssh                          List available VM tokens            |
 |   ssh <skill>                  List ssh run commands               |
 |   ssh <skill> <process>        Consume VM token to run process     |
-|                                in seperate window                  |
+|                                in separate window                  |
 |   ssh -h                       Show this list of commands          |
 |____________________________________________________________________|
 """
@@ -412,41 +690,43 @@ func process_commands() -> String:
 
 func get_help() -> String:
 	var text := """
- ____________________________________________________________________
-|                                                                    |
-|                          IDLEOS COMMANDS                           |
-|____________________________________________________________________|
-|                                                                    |
-| SKILLS / TRAVERSAL                                                 |
-|   cd <skill>                   Navigate to a skill                 |
-|   cd ..                        Return to root                      |
-|   tree                         Display skill hierarchy             |
-|   info                         Display additional skill info       |
-|                                                                    |
-| ITEMS                                                              |
-|   ls                           List items                          |
-|   ls <item>                    Item details                        |
-|   track <item>, <item>         Track item(s) (comma seperated)     |
-|   untrack <item>               Remove tracking                     |
-|                                                                    |
-| UPGRADES                                                           |
-|   apt                          Upgrade package manager             |
-|                                                                    |
-| DOCUMENTATION                                                      |
-|   tutorial                     Show tutorial checklist             |
-|   -h                           Display this list                   |
-|   process -h                   List process commands               |
-|   ssh -h                       List ssh commands                   |
-|                                                                    |
-| SETTINGS                                                           |
-|   settings                     Player settings menu                |
-|                                                                    |
-| SYSTEM                                                             |
-|   date                         Show date and time                  |
-|   clear                        Clear terminal                      |
-|   system                       Show system information             |
-|   quit -s                      Save and quit                       |
-|____________________________________________________________________|
+ _____________________________________________________________________
+|                                                                     |
+|                          IDLEOS COMMANDS                            |
+|_____________________________________________________________________|
+|                                                                     |
+| SKILLS / TRAVERSAL                                                  |
+|   cd <skill>                   Navigate to a skill                  |
+|   cd ..                        Return to root                       |
+|   tree                         Display skill hierarchy              |
+|   info                         Display additional skill info        |
+|                                                                     |
+| ITEMS                                                               |
+|   ls                           List items                           |
+|   ls <item>                    Item details                         |
+|   ls mods                      List current items Hacking mod stats |
+|   track <item>, <item>         Track item(s) (comma separated)      |
+|   untrack <item>               Remove tracking                      |
+|                                                                     |
+| UPGRADES                                                            |
+|   apt                          Upgrade package manager              |
+|   mod                          Hacking mod manager                  |
+|                                                                     |
+| DOCUMENTATION                                                       |
+|   tutorial                     Show tutorial checklist              |
+|   -h                           Display this list                    |
+|   process -h                   List process commands                |
+|   ssh -h                       List ssh commands                    |
+|                                                                     |
+| SETTINGS                                                            |
+|   settings                     Player settings menu                 |
+|                                                                     |
+| SYSTEM                                                              |
+|   date                         Show date and time                   |
+|   clear                        Clear terminal                       |
+|   system                       Show system information              |
+|   quit -s                      Save and quit                        |
+|_____________________________________________________________________|
 """
 	return text
 
@@ -459,7 +739,8 @@ func get_ascii_tree(current_context: String) -> String:
 		Phishing,
 		Compiling,
 		Hacking,
-		Decoding
+		Decoding,
+		Defragging
 	]
 	
 	var text = "\nIDLEOS\n"
@@ -555,9 +836,10 @@ func get_root_upgrades_text() -> String:
 	##LOOPING THROUGH MAJOR SKILLS
 	for upgrade in Upgrades.all_upgrades:
 		var skill = upgrade.skill
+		var skill_version = Upgrades.get_skill_version(upgrade.skill)
 		var color_string = skill.SKILL.color.to_html()
 		var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-		return_text += colored_name + " v" + str(upgrade.version) + "\n"
+		return_text += colored_name + " v" + str(skill_version) + "\n"
 		
 		##LOOPING THROUGH UPGRADES ARRAY [SPEED, EFFICIENCY, ETC]
 		
@@ -581,43 +863,76 @@ func get_root_upgrades_text() -> String:
 		return_text += "\n"
 	
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt <package>' for package information.\n"
-	return_text += "Use 'apt install <package>' to install.\n"
-	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.\n"
+	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.   [color=#666666]apt mining[/color]\n"
+	return_text += "Use 'apt <package>' for package information.                      [color=#666666]apt mining.speed[/color]\n"
+	return_text += "Use 'apt install <package>' to install.                           [color=#666666]apt install mining.speed[/color]\n"
 	
 	return return_text
 
 func get_skill_upgrades_text(upgrade):
-	var return_text = ""
-	return_text += "\nAvailable upgrades:\n\n"
-	
+	var return_text = "\nAvailable upgrades:\n\n"
+	var skill_version = Upgrades.get_skill_version(upgrade.skill)
 	var skill = upgrade.skill
 	var color_string = skill.SKILL.color.to_html()
 	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-	return_text += colored_name + " v" + str(upgrade.version) + "\n"
-	var i = 0
-	for upgrade_info in upgrade.upgrades:
-		#get current level
+
+	return_text += colored_name + " v" + str(skill_version) + "\n"
+	
+	for i in upgrade.upgrades.size():
+		var upgrade_info = upgrade.upgrades[i]
 		var current_level = 0
-		for lvl in upgrade_info.levels:
-			if lvl.unlocked:
+
+		# Find current level
+		for level in upgrade_info.levels:
+			if level.unlocked:
 				current_level += 1
-		#get prefix
-		var prefix = "├─ "
-		if i == upgrade.upgrades.size() - 1:
-			prefix = "└─ "
-		
-		#get dots
+
+		var is_last_upgrade = i == upgrade.upgrades.size() - 1
+		var prefix = "└─ " if is_last_upgrade else "├─ "
+
+		# Upgrade name + level
 		var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
-	
 		return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
-		i += 1
+
+		# Max level reached
+		if current_level >= upgrade_info.levels.size():
+			var max_prefix = "   └─ " if is_last_upgrade else "│  └─ "
+			return_text += max_prefix + "[color=yellow]MAX LEVEL[/color]\n"
+
+		else:
+			# Requirements for next level
+			var req = upgrade_info.levels[current_level].requirements
+
+			for j in req.size():
+				var is_last_requirement = j == req.size() - 1
+				var r_prefix = ""
+
+				if is_last_upgrade:
+					r_prefix = "   └─ " if is_last_requirement else "   ├─ "
+				else:
+					r_prefix = "│  └─ " if is_last_requirement else "│  ├─ "
+
+				var r = req[j]
+				var current_amount = Inventory.get_amount(r.item)
+				var amount_text = "%d/%d" % [current_amount, r.amount]
+
+				if current_amount >= r.amount:
+					amount_text = "[color=green]" + amount_text + "[/color]"
+				else:
+					amount_text = "[color=red]" + amount_text + "[/color]"
+
+				return_text += r_prefix + r.item.name + " " + amount_text + "\n"
+
+		if !is_last_upgrade:
+			return_text += "│\n"
+
 	return_text += "\n"
-	
 	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt info <package>' for package information.\n"
-	return_text += "Use 'apt install <package>' to install.\n"
-	
+
+	return_text += "Use 'apt <package>' for package information.       [color=#666666]apt mining.speed[/color]\n"
+	return_text += "Use 'apt install <package>' to install.            [color=#666666]apt install mining.speed[/color]\n\n"
+	return_text += "[color=#666666]remember to use 'ls <item>' for more information on where to obtain items.[/color]\n"
+
 	return return_text
 
 func get_upgrades_package_info(package_id: String) -> String:
@@ -773,19 +1088,19 @@ Bandwidth Restore: +%s/second
 """ % [tempature, cooling_amount, time, current_vms, max_vms, max_anon, m_band, bw_recov]
 
 
-func playtest_welcome_message():
+func demo_welcome_message():
 	return """
-WELCOME TO THE IDLEOS PLAYTEST
+WELCOME TO THE IDLEOS DEMO
 
-This is a playtest build, and your feedback is valuable.
-Please report any bugs, issues, or general feedback in the Discord:
+Thanks for playing IdleOS!
+
+Want to share your thoughts, suggestions, or see what others are saying?
+Join the IdleOS Discord:
 
 https://discord.gg/XnrH7zrdb
 
-Thanks for helping test IdleOS!
-
-To view this message again, use the 'playtest' command.
-To copy the discord link to your clipboard use 'discord -c'
+To view this message again, use the 'demo' command.
+To copy the Discord link to your clipboard, use 'discord -c'
 """
 
 func discord_message():
@@ -794,3 +1109,90 @@ Discord link: https://discord.gg/XnrH7zrdb
 
 To copy the discord link to your clipboard use 'discord -c'
 """
+
+func get_build_version() -> String:
+	return System.SKILL.version
+
+func get_mod_command() -> String:
+	#if HackingMods.current_mods.is_empty():
+		#return "No active Hacking Mods. Use the Mod process in the [color=" + Compiling.SKILL.color.to_html() + "]Compiling[/color] skill to Compile items into Hacking Mods."
+
+	var return_text = ""
+	var id_col = 5
+	var mod_col = 30
+	var mod_val = 8
+	
+	var active_mods_title = "\n| ACTIVE MODS " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)  + " |\n"
+	
+	return_text += "\n------------------"
+	return_text += active_mods_title
+	return_text += "------------------\n\n"
+	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
+	return_text += "--------------------------------------------------------------\n"
+
+	if HackingMods.current_mods.is_empty():
+		return_text += pad_text("-", id_col)
+		return_text += pad_text("-", mod_col)
+		return_text += pad_text("-", mod_val)
+		return_text += "-\n"
+	
+	else:
+
+		for i in range(HackingMods.current_mods.size()):
+			var mod_type = HackingMods.current_mods.keys()[i]
+			var mod = HackingMods.current_mods[mod_type]
+
+			var hmv = HackingMods.get_mod_value_text(mod_type, mod.value)
+			var hmn = HackingMods.get_mod_name(mod_type)
+			var hmd = mod.duration
+
+			return_text += pad_text("[" + str(i) + "]", id_col, false)
+			return_text += pad_text(hmn, mod_col)
+			return_text += pad_text(" " + hmv, mod_val)
+			return_text += str(hmd) + " hacks\n"
+	
+	return_text += "\n\n\n-------------"
+	return_text += "\n| MOD ITEMS |\n"
+	return_text += "-------------\n"
+	
+	
+	var mod_id_col = 5
+	var mod_name_col = 25
+	var mod_mod_col = 30
+	var mod_val_col = 8
+	
+	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("MOD", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
+	return_text += "----------------------------------------------------------------------------------\n"
+	if Inventory.has_mod_item():
+		var player_hacking_mods = Inventory.get_hacking_mods_items()
+		
+		if !player_hacking_mods.is_empty():
+			for i in player_hacking_mods.size(): #loop through hacking items
+				var mod = player_hacking_mods[i]
+				var mod_type = mod.hacking_mod_type
+
+				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
+				var hmn = HackingMods.get_mod_name(mod_type)
+				var hmd = mod.hacking_mod_duration
+
+				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
+				return_text += pad_text(mod.name, mod_name_col)
+				return_text += pad_text(hmn, mod_mod_col)
+				return_text += pad_text(hmv, mod_val_col)
+				return_text += str(hmd) + " hacks\n"
+		
+	else:
+		return_text += pad_text("-", mod_id_col)
+		return_text += pad_text("-", mod_name_col)
+		return_text += pad_text("-", mod_mod_col)
+		return_text += pad_text("-", mod_val_col)
+		return_text += "-"
+
+	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods.\n"
+	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n\n"
+	return return_text
+
+
+func upload_info():
+	var return_text = "\n\nAquire and upload the Parents Credit Card item. Obtain from Hacking the Student and Decoding the Student Cache.\n\nUse 'upload parents credit card' to upload once aquired."
+	return return_text

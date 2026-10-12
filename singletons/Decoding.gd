@@ -33,8 +33,13 @@ var CACHE = {
 	"name": "Cache",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 900,
+	"experience per level": 50,
 	"command": "decode -cache",
+	"display command": "decode -cache[=<cache item>]",
+	"example commands": [
+		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
+		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
+	],
 	"efficiency": 0.1,
 	"efficiency rate": 0.001,
 	"unlocked": true,
@@ -45,7 +50,7 @@ var CACHE = {
 	"heat": 3.2,
 	"overclock heat": 3.5,
 	"overheat heat": 0.3,
-	"requirements": "cache",
+	"requirements": "Cache x1", #handled within the decoding terminal script
 	"description": "Decrypt caches gained from hacking to reveal additional items.",
 	"efficiency description": "Chance to find rare item.",
 	"signal": cache_decode_cycle_completed
@@ -88,7 +93,7 @@ func has_requirements(_minor_process) -> bool:
 func missing_requirements_text(_minor_process) -> String:
 	return "Missing: Cache(any)"
 
-func create_vm_window(minor_process, repeat) -> Window:
+func create_vm_window(minor_process, repeat, cache_target: ItemData) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
@@ -111,7 +116,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 		new_window.queue_free()
 	)
 	new_window.about_to_popup.connect(func(): 
-		content_instance.set_cache_type(minor_process, true)
+		content_instance.set_cache_type(minor_process, true, cache_target)
 		content_instance.start_decrypting()
 	)
 	CURRENT_VMS += 1

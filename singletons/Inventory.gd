@@ -70,14 +70,32 @@ func list_specific_item(item: ItemData):
 	var hex = c.to_html(false)
 	
 	var main_use = "Main use: [color=#%s]%s[/color]" % [hex, mu_text]
-
+	
 	var text = "\n"
 	text += item_name + "\n"
 	text += amount + "\n"
 	text += description + "\n"
 	text += obtained_from + "\n"
 	text += main_use + "\n\n"
-
+	
+	if item.hacking_mod_duration != 0:
+		var hacking_mod_value = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var hacking_mod_name = HackingMods.get_mod_name(item.hacking_mod_type)
+		var hacking_mod_duration = "Duration: " + str(item.hacking_mod_duration) + " hack(s)"
+		var hacking_mod_required_amount = "Required amount: " + item.name + " x" + str(item.hacking_mod_consumed)
+		
+		var hacking_mod_display = "Hacking Modifications\n"
+		hacking_mod_display += "├─ " + hacking_mod_required_amount + "\n"
+		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
+		hacking_mod_display += "└─ " + hacking_mod_duration + "\n\n"
+		text += hacking_mod_display
+	
+	if item.contained_items.size() > 0:
+		var names = []
+		for i in item.contained_items:
+			names.append(i.name)
+		var all_names = ", ".join(names)
+		text += "Parsing these logs can find the following items: " + all_names + "\n\n"
 	
 	if item is CombatItem:
 		match item.type:
@@ -140,11 +158,19 @@ func get_item_by_name(item_name: String) -> ItemData:
 	item = Items.ITEM_NAME_MAP.get(name + "s")
 	if item != null:
 		return item
+		
+	item = Items.ITEM_NAME_MAP.get(name + "s cache")
+	if item != null:
+		return item
 	
 	item = Items.ITEM_NAME_MAP.get(name + "es")
 	if item != null:
 		return item
 	
+	item = Items.ITEM_NAME_MAP.get(name + "es cache")
+	if item != null:
+		return item
+		
 	# Player typed plural, stored item might be singular
 	if name.ends_with("es"):
 		item = Items.ITEM_NAME_MAP.get(name.left(-2))
@@ -208,7 +234,8 @@ func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
 
 	if not has_items:
 		return "You have no items."
-
+	
+	output += "\nuse 'ls <item>' for additional item information.\n\n"
 	return output
 
 func pad_text(value, width: int) -> String:
@@ -219,14 +246,20 @@ func pad_text(value, width: int) -> String:
 
 func get_cache() -> CacheData:
 	for i in inventory:
-		if i.name.contains("cache"):
+		if i.name.to_lower().contains("cache"):
 			return i
 	return null #should never hit this
 
 func has_cache() -> bool:
 	for i in inventory:
-		if i.name.contains("cache"):
+		if i.name.to_lower().contains("cache"):
 			return true
+	return false
+
+func has_specific_cache(cache_name: String) -> bool:
+	var item = get_item_by_name(cache_name)
+	if get_amount(item) > 0:
+		return true
 	return false
 
 func has_valuables() -> bool:
@@ -270,3 +303,54 @@ func load_data(data: Dictionary) -> void:
 			push_warning("Unknown item id in save: %s" % id_str)
 			continue
 		inventory[item] = int(raw[id_str])
+
+
+#example command: crack -vm use=mining create=parsing
+func get_vm_token_by_skill_name(skill_name: String) -> ItemData:
+	var skills_with_vm_tokens = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
+	for skill in skills_with_vm_tokens:
+		if skill_name.to_lower() == skill.SKILL.name.to_lower():
+			return skill.vm_token
+	return null
+
+
+func has_mod_item():
+	for i in inventory:
+		if i.hacking_mod_item:
+			return true
+	return false
+
+func get_hacking_mods_items() -> Array:
+	var hacking_items = []
+	if inventory.is_empty():
+		return hacking_items
+	
+	for i in inventory:
+		if i.hacking_mod_item:
+			hacking_items.append(i)
+	return hacking_items
+
+#Logs.....+5 damage.......10 hacks.......x100
+func list_inventory_hacking_mods():
+	if inventory.is_empty():
+		return "Inventory is empty."
+	
+	var col_1 = 5
+	var col_2 = 10
+	for item in inventory:
+		if item.name.length() > col_1:
+			col_1 = item.name.length()
+	col_1 += 5
+	var return_text = "\n\n"
+	return_text += pad_text("ITEM", col_1) + pad_text("HACKING MOD", 40) + pad_text("DURATION", 15) + pad_text("REQUIRED", 10) + pad_text("CURRENT AMOUNT", 20)
+	return_text += "\n" + "-".repeat(120)
+	for item in inventory:
+		var first_col = item.name + " ".repeat(col_1 - item.name.length())
+		var second_col = HackingMods.get_mod_name(item.hacking_mod_type) + " " + HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var third_col = str(int(item.hacking_mod_duration)) + " hacks"
+		#var fourth_col = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var fifth_col = "x" + str(item.hacking_mod_consumed)
+		var sixth_col = str(Inventory.get_amount(item))
+		
+		return_text += "\n" + pad_text(first_col, col_1) + pad_text(second_col, 40) + pad_text(third_col, 15) + pad_text(fifth_col, 10) + pad_text(sixth_col, 20)
+	return return_text

@@ -121,9 +121,11 @@ func get_potential_items(cache: CacheData) -> Dictionary:
 	var base_eff = Decoding.CACHE["efficiency"]
 	var eff = (base_eff + efficiency_upgrade) * defrag_bonus
 	
+	#rare item trigger
 	if randf() < eff:
-		var item = cache.rare_pool.pick_random()
-		loot[item.item] = 1
+		if !cache.rare_pool.is_empty():
+			var item = cache.rare_pool.pick_random()
+			loot[item.item] = 1
 	
 	return loot
 

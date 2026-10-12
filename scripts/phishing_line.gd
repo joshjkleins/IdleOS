@@ -118,6 +118,7 @@ func finished(caught: bool):
 		Exp.add_xp(Phishing, type, type["experience per level"])
 		Signals.update_hud(Phishing)
 		caught_something.emit(type)
+		Signals.phishing_item_caught_item(reward.item)
 		
 		if !safe_stop:
 			await get_tree().create_timer(1.0).timeout

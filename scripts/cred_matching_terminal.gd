@@ -12,6 +12,9 @@ extends PanelContainer
 @onready var userbox_name_label = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/UserboxNameLabel
 @onready var third_col = $MarginContainer/VBoxContainer/TopRow/ThirdCol
 
+@onready var resource_received_title = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/PlayerAmountReceived/ResourceReceivedTitle
+@onready var resource_received_amount = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/PlayerAmountReceived/ResourceReceivedAmount
+
 @onready var resource_one_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/UsernameBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceOneTitle
 @onready var resource_two_title = $MarginContainer/VBoxContainer/TopRow/FirstCol/PasswordBox/MarginContainer/VBoxContainer/HBoxContainer/ResourceTwoTitle
 @onready var tag_1 = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer/Tag/MarginContainer/Tag1
@@ -109,21 +112,10 @@ func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
 			current_type = MatchType.ACCOUNT
 			resource_one_title.text = "ACCOUNT #"
 			resource_two_title.text = "PIN"
-
-
-# func set_cred(p_type: Dictionary):
-# 	_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
-# 	type = p_type
-# 	current_type = MatchType.CREDENTIAL
-# 	resource_one_title.text = "USERNAME"
-# 	resource_two_title.text = "PASSWORD"
-
-# func set_account(p_type: Dictionary):
-# 	_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
-# 	type = p_type
-# 	current_type = MatchType.ACCOUNT
-# 	resource_one_title.text = "ACCOUNT #"
-# 	resource_two_title.text = "PIN"
+			
+			
+	resource_received_title.text = type["resource gained"].name.to_upper()
+	update_player_amount_received_labels()
 
 #sets text labels on each 'tag' in center column
 func _update_tags(tag_names: Array[String]):
@@ -254,8 +246,9 @@ func _begin_matching():
 	_repeat_loop()
 
 func _update_resource_amount_labels():
-	resource_amount_one.text = "x" + str(Inventory.get_amount(type["requirements"][0]))
-	resource_amount_two.text = "x" + str(Inventory.get_amount(type["requirements"][1]))
+	str(Inventory.get_amount(type.requirements.keys()[0]))
+	resource_amount_one.text = "x" + str(Inventory.get_amount(type.requirements.keys()[0]))
+	resource_amount_two.text = "x" + str(Inventory.get_amount(type.requirements.keys()[1]))
 
 func _get_speed() -> float:
 	var time
@@ -322,6 +315,7 @@ func _match_finished(): #add heat/resource/xp/emit signals
 		var max_q = 10 + int(Upgrades.MATCHING.version * 10.0)
 		quantity += randi_range(min_q, max_q)
 	Inventory.add_resource(type["resource gained"], quantity)
+	update_player_amount_received_labels()
 	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_3_CREDENTIALS, 1)
 	status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
 	status_image.texture = cred_image
@@ -391,3 +385,6 @@ func _get_efficiency_total():
 	var efficiency_upgrade = efficiency_matching_package.current
 	
 	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
+
+func update_player_amount_received_labels():
+	resource_received_amount.text = "x" + str(Inventory.get_amount(type["resource gained"]))

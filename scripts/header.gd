@@ -27,6 +27,23 @@ func _ready():
 	defragging.visible = true
 	update()
 
+func prepare_intro():
+	for n in major_skills.get_children():
+		n.visible = true
+		n.modulate.a = 0.0
+	defragging.visible = true
+	defragging.modulate.a = 0.0
+
+func intro(skill: Node):
+	for n in major_skills.get_children():
+		if n.skill == skill:
+			var tween = create_tween()
+			tween.tween_property(n, 'modulate:a', 1.0, 1.0)
+	if skill == Defragging:
+			var tween = create_tween()
+			tween.tween_property(defragging, 'modulate:a', 1.0, 1.0)
+		
+
 func update(): #called when player enters root directory (start of game and exiting processes)
 	mining.update()
 	parsing.update()
@@ -44,6 +61,8 @@ func display_skill(skill: Node): #called when player enters specific process
 		s.fade_out_major()
 		if skill == s.skill:
 			tar = s
+		else:
+			s.fade_out_minor()
 	defragging.fade_out_major()
 	await get_tree().create_timer(0.3).timeout
 	tar.show_details()

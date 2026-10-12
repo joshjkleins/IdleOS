@@ -47,7 +47,9 @@ text = "DIFFICULTY [x] [ ] [ ] [ ] [ ]"
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Command" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="Command" type="RichTextLabel" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
 text = "Command: view school"
+fit_content = true

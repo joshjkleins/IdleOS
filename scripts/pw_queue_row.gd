@@ -13,13 +13,26 @@ var yellow = Color("#D4A017")
 var grey = Color("#6b6b78")
 
 var uuid: String = ""
+var use_token: ItemData = null
+var create_token: ItemData = null
+var type
 
-func new_row():
-	current_status = CrackStatus.QUEUED
-	set_status_icon(current_status)
-	uuid = _generate_uuid()
-	$HBoxContainer/EncryptedPw.text = uuid
-	$CrackedStatus.text = "QUEUED"
+func new_row(c_type: Dictionary, use: ItemData = null, create: ItemData = null):
+	type = c_type
+	if type == Cracking.VM:
+		use_token = use
+		create_token = create
+		current_status = CrackStatus.QUEUED
+		set_status_icon(current_status)
+		uuid = use.name.replace(" ", "_").to_lower() + " x3"
+		$HBoxContainer/EncryptedPw.text = uuid
+		$CrackedStatus.text = "QUEUED"
+	else:
+		current_status = CrackStatus.QUEUED
+		set_status_icon(current_status)
+		uuid = _generate_uuid()
+		$HBoxContainer/EncryptedPw.text = uuid
+		$CrackedStatus.text = "QUEUED"
 
 func start_crack():
 	current_status = CrackStatus.CRACKING
@@ -29,12 +42,20 @@ func start_crack():
 	$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", green)
 
 func end_crack(word: String):
-	current_status = CrackStatus.CRACKED
-	set_status_icon(current_status)
-	$CrackedStatus.text = "CRACKED"
-	$HBoxContainer/EncryptedPw.text = uuid + "    " + word
-	$CrackedStatus.add_theme_color_override("font_color", green)
-	$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", grey)
+	if type == Cracking.VM:
+		current_status = CrackStatus.CRACKED
+		set_status_icon(current_status)
+		$CrackedStatus.text = "CRACKED"
+		$HBoxContainer/EncryptedPw.text = uuid + " -> " + create_token.name.replace(" ", "_").to_lower() + " x1"
+		$CrackedStatus.add_theme_color_override("font_color", green)
+		$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", grey)
+	else:
+		current_status = CrackStatus.CRACKED
+		set_status_icon(current_status)
+		$CrackedStatus.text = "CRACKED"
+		$HBoxContainer/EncryptedPw.text = uuid + "    " + word
+		$CrackedStatus.add_theme_color_override("font_color", green)
+		$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", grey)
 
 func set_status_icon(status: CrackStatus) -> void:
 	var icon_node := $HBoxContainer/StatusIcon

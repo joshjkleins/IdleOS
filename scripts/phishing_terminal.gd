@@ -2,12 +2,40 @@ extends VBoxContainer
 class_name PhishingTerminal
 
 @onready var phishing_line = preload("res://scenes/phishing_line.tscn")
+@onready var phishing_total_col = preload("res://scenes/phishing_total_col.tscn")
 @onready var active_lines_container = $ActiveLines/MarginContainer/VBoxContainer/ActiveLinesContainer
+@onready var totals_row = $ActiveLines/MarginContainer/VBoxContainer/TotalsRow
 
+var running: bool = false
 var is_window: bool = false
 var vm_lines = []
+var p_type
+
+
+func _my_lines() -> Array:
+	return vm_lines if is_window else Phishing.current_lines
+
+func _spawn_line() -> void:
+	var new_line = phishing_line.instantiate()
+	_my_lines().append(new_line)
+	active_lines_container.add_child(new_line)
+	new_line.line_ended_signal.connect(line_ended)
+	new_line.caught_something.connect(update_eff_label)
+	new_line.begin(p_type)
+
+func _connect_upgrade_signal() -> void:
+	running = true
+	if not Signals.phishing_lines_increase_upgrade_while_running_signal.is_connected(lines_upgrade_while_running):
+		Signals.phishing_lines_increase_upgrade_while_running_signal.connect(lines_upgrade_while_running)
+
+func _disconnect_upgrade_signal() -> void:
+	running = false
+	if Signals.phishing_lines_increase_upgrade_while_running_signal.is_connected(lines_upgrade_while_running):
+		Signals.phishing_lines_increase_upgrade_while_running_signal.disconnect(lines_upgrade_while_running)
+
 
 func cast_lines(type: Dictionary, lines: int):
+	p_type = type
 	if lines == -1:
 		cast_all_lines(type)
 	else:
@@ -31,39 +59,61 @@ func cast_lines(type: Dictionary, lines: int):
 #vm token specific
 func vm_cast_all_lines(type: Dictionary, window: bool = false):
 	is_window = window
+	p_type = type
+	_connect_upgrade_signal()
+	#Signals.phishing_lines_increase_upgrade_while_running_signal.connect(lines_upgrade_while_running)
 	var max_lines = _get_max_lines_count()
-	for i in range(max_lines):
-		var new_line = phishing_line.instantiate()
-		active_lines_container.add_child(new_line)
-		new_line.line_ended_signal.connect(line_ended)
-		vm_lines.append(new_line)
-	for line in vm_lines:
-		line.begin(type)
-	
-	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use"
+	while vm_lines.size() < _get_max_lines_count(): 
+		_spawn_line()
+	#for i in range(max_lines):
+		#var new_line = phishing_line.instantiate()
+		#active_lines_container.add_child(new_line)
+		#new_line.line_ended_signal.connect(line_ended)
+		#vm_lines.append(new_line)
+	#for line in vm_lines:
+		#line.begin(type)
+		#line.caught_something.connect(update_eff_label)
+		
+	#Build Totals label row so player has updated counts of all things they caught in inventory
+	for item in type["resource gained"]:
+		var new_col = phishing_total_col.instantiate()
+		new_col.set_item(item.item)
+		totals_row.add_child(new_col)
+	#update_eff_label(type)
+	#$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use"
+	update_eff_label(type)
 
 #casts all remaining available lines
+#ITS THIS ONE WHEN PHISH -SPEAR
 func cast_all_lines(type: Dictionary, window: bool = false):
+	p_type = type
+	#Signals.phishing_lines_increase_upgrade_while_running_signal.connect(lines_upgrade_while_running)
+	_connect_upgrade_signal()
 	is_window = window
 	var line_added = []
 	var max_lines = _get_max_lines_count()
-	while Phishing.current_lines.size() < max_lines:
-		var new_line = phishing_line.instantiate()
-		Phishing.current_lines.append(new_line)
-		active_lines_container.add_child(new_line)
-		new_line.line_ended_signal.connect(line_ended)
-		line_added.append(new_line)
-	for line in line_added:
-		line.begin(type)
-		line.caught_something.connect(update_eff_label)
+	while Phishing.current_lines.size() < max_lines: 
+		_spawn_line()
+	#while Phishing.current_lines.size() < max_lines:
+		#var new_line = phishing_line.instantiate()
+		#Phishing.current_lines.append(new_line)
+		#active_lines_container.add_child(new_line)
+		#new_line.line_ended_signal.connect(line_ended)
+		#line_added.append(new_line)
+	#for line in line_added:
+		#line.begin(type)
+		#line.caught_something.connect(update_eff_label)
 	
+	#Build Totals label row so player has updated counts of all things they caught in inventory
+	for item in type["resource gained"]:
+		var new_col = phishing_total_col.instantiate()
+		new_col.set_item(item.item)
+		totals_row.add_child(new_col)
 	update_eff_label(type)
 
 func update_eff_label(type):
-	var base_eff = _get_total_eff(type)
-	var eff_text = str(base_eff * 100.0).pad_decimals(1)
-	var max_lines = _get_max_lines_count()
-	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(Phishing.current_lines.size()) + "/" + str(max_lines) + " lines in use\n"
+	var eff_text = str(_get_total_eff(type) * 100.0).pad_decimals(1)
+	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text = str(_my_lines().size()) + "/" + str(_get_max_lines_count()) + " lines in use\n"
 	$ActiveLines/MarginContainer/VBoxContainer/SlotsLabel.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite.[/font_size][/color]"
 
 func _clear_lines():
@@ -79,12 +129,14 @@ func line_ended():
 		vm_lines.clear()
 		Phishing.CURRENT_VMS -= 1
 		Stats.remove_vm_count(1)
+		_disconnect_upgrade_signal()
 		get_parent().queue_free()
 	else:
 		for lines in Phishing.current_lines:
 			if lines.active:
 				return
 		remove_lines()
+		_disconnect_upgrade_signal()
 		Signals.end_phishing_safely()
 
 func stop():
@@ -98,6 +150,7 @@ func stop():
 			line.stop()
 
 func stop_safely():
+	running = false
 	if is_window:
 		for line in vm_lines:
 			line.stop_safely()
@@ -122,3 +175,11 @@ func _get_total_eff(type) -> float:
 	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
 	var base_eff = type["efficiency"]
 	return base_eff * defrag_bonus
+
+func lines_upgrade_while_running():
+	if not running:
+		return
+	# while, not if, so an upgrade of +2 (or a desynced count) fills every slot
+	while _my_lines().size() < _get_max_lines_count():
+		_spawn_line()
+	update_eff_label(p_type)

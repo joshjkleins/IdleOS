@@ -15,17 +15,39 @@ extends Control
 @onready var exp_added_label = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/HBoxContainer2/ExpAddedLabel
 @onready var exp_label_timer = $ExpLabelTimer
 
+@onready var defragged_details = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/MainSkillCol/VBoxContainer/DefraggedDetails
+@onready var defrag_bonus_timer = $DefragBonusTimer
+
+@onready var modifiers_title = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer/ModifiersTitle
+@onready var modifiers = $PanelContainer/MarginContainer/HBoxContainer/MainSkill/HBoxContainer/ModifiersContainer/Modifiers
+
+const hacking_mod_row: PackedScene = preload("res://scenes/hacking_mod_row.tscn")
+
 var fade_in_tween: Tween
 var fade_out_tween: Tween
 
 func _ready():
 	rtl.text = "[bgcolor=#0b0e11]" + title_text + "[/bgcolor]"
 	Exp.gained_xp_signal.connect(update_header_exp)
-	Signals.update_hacking_header_signal.connect(update_header_resources)
+	Signals.update_hacking_header_signal.connect(header_update_from_hacking_game)
+	defragged_details.text = ""
+	defragged_details.visible = false
 
 func update_hacking_header():
 	update_header_exp()
 	update_header_resources()
+	
+	if Stats.has_bonus(Hacking):
+		defragged_details.text = Stats.get_bonus_time_text(Hacking)
+		defragged_details.visible = true
+		efficiency.text = "%.2f%%" % (_get_total_effeciency() * 100.0)
+		defrag_bonus_timer.start()
+	else:
+		defragged_details.visible = false
+
+func header_update_from_hacking_game():
+	update_header_resources()
+	update_modifiers_ui()
 
 func update_header_resources():
 	offensive_item.text = str(Inventory.get_amount(Items.SQL_INJECTOR))
@@ -35,7 +57,7 @@ func update_header_resources():
 func update_header_exp(amount: int = 0):
 	var experience = Exp.get_xp_display(Hacking.SKILL)
 	skill_level.text = "LVL " + str(Hacking.SKILL.level)
-	efficiency.text = "%.2f%%" % (Hacking.SKILL.efficiency * 100.0)
+	efficiency.text = "%.2f%%" % (_get_total_effeciency() * 100.0)
 	skill_exp_bar.max_value = experience["needed"]
 	skill_exp_bar.value = experience["current"]
 	skill_exp_label.text = experience["display"]
@@ -74,3 +96,39 @@ func _cancel_tweens():
 
 func _on_exp_label_timer_timeout():
 	await _fade_out(exp_added_label)
+
+func _on_defrag_bonus_timer_timeout() -> void:
+	if Stats.has_bonus(Hacking):
+		var time_text = Stats.get_bonus_time_text(Hacking)
+		defragged_details.text = time_text
+	else:
+		defragged_details.visible = false
+		defrag_bonus_timer.stop()
+		efficiency.text = "%.2f%%" % (_get_total_effeciency() * 100.0)
+
+
+func _get_total_effeciency() -> float:
+	var base = Hacking.SKILL.efficiency
+	var defragging_bonus = Defragging.HACKING["bonus efficiency"] if Stats.has_bonus(Hacking) else 1.0
+	var mod_eff = 0.0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.EFFICIENCY):
+		mod_eff = HackingMods.get_mod_value(HackingMods.MOD_TYPE.EFFICIENCY)
+	
+	return snapped((base + mod_eff) * defragging_bonus, 0.01)
+
+
+func update_modifiers_ui():
+	modifiers_title.text = "Temporary Modifiers " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)
+	for m in modifiers.get_children():
+		m.queue_free()
+	
+	#m is enum number : Damage = 0 etc
+	for m in HackingMods.current_mods.keys():
+		var hacking_mod_value = HackingMods.get_mod_value_text(m, HackingMods.current_mods[m].value)
+		var hacking_mod_name = HackingMods.get_mod_name(m)
+		
+		var mod_row = hacking_mod_row.instantiate()
+		
+		mod_row.update(hacking_mod_name, hacking_mod_value, HackingMods.current_mods[m].duration)
+		modifiers.add_child(mod_row)
+		

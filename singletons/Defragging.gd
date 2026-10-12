@@ -140,3 +140,46 @@ func get_cd_time_text() -> String:
 	var seconds = remaining % 60
 
 	return "%02d:%02d" % [minutes, seconds]
+
+
+func save_data() -> Dictionary:
+	return {
+		"skill": {
+			"experience": SKILL.get("experience", 0),
+			"level": SKILL.get("level", 1),
+			"cooldown": SKILL.get("cooldown", 0),
+			"on cooldown": SKILL.get("on cooldown", false)
+		},
+		"upgrades": {
+			"mining": MINING.get("unlocked", false),
+			"parsing": PARSING.get("unlocked", false),
+			"cracking": CRACKING.get("unlocked", false),
+			"matching": MATCHING.get("unlocked", false),
+			"phishing": PHISHING.get("unlocked", false),
+			"hacking": HACKING.get("unlocked", false),
+			"decoding": DECODING.get("unlocked", false),
+			"compiling": COMPILING.get("unlocked", false)
+		}
+	}
+
+
+func load_data(data: Dictionary):
+	if data.has("skill"):
+		var skill_data = data["skill"]
+
+		SKILL["experience"] = skill_data.get("experience", 0)
+		SKILL["level"] = skill_data.get("level", 1)
+		SKILL["cooldown"] = skill_data.get("cooldown", 0)
+		SKILL["on cooldown"] = skill_data.get("on cooldown", false)
+
+	if data.has("upgrades"):
+		var upgrades = data["upgrades"]
+
+		MINING["unlocked"] = upgrades.get("mining", MINING["unlocked"])
+		PARSING["unlocked"] = upgrades.get("parsing", PARSING["unlocked"])
+		CRACKING["unlocked"] = upgrades.get("cracking", CRACKING["unlocked"])
+		MATCHING["unlocked"] = upgrades.get("matching", MATCHING["unlocked"])
+		PHISHING["unlocked"] = upgrades.get("phishing", PHISHING["unlocked"])
+		HACKING["unlocked"] = upgrades.get("hacking", HACKING["unlocked"])
+		DECODING["unlocked"] = upgrades.get("decoding", DECODING["unlocked"])
+		COMPILING["unlocked"] = upgrades.get("compiling", COMPILING["unlocked"])

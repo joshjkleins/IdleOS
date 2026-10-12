@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://cqylfii02rpj3"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_rxvwc"]
+
+[resource]
+script = ExtResource("1_rxvwc")
+id = 97
+name = "SQL Booster"
+shortened_name = ""
+description = "Hacking mod that increases SQL attack speed by 50%. Can be directly equipped with 'mod' commands."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_rxvwc")]([])
+color_type = 9
+obtained_from = Array[int]([5])
+obtained_from_additional_hint = "1% chance to find in Phishing for mods."
+hacking_mod_type = 6
+hacking_mod_value = 0.5
+hacking_mod_duration = 20
+hacking_mod_consumed = 1
+hacking_mod_item = true
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

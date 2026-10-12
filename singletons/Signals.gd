@@ -29,6 +29,9 @@ signal tutorial_event_completed_signal
 signal system_overheated_signal
 signal system_cooled_below_overheat_signal
 signal hacking_can_accept_player_commands_signal
+signal manual_packet_spoof_signal
+signal phishing_item_caught_item_signal
+signal phishing_lines_increase_upgrade_while_running_signal
 
 signal cooling_updated_signal
 func cooling_updated():
@@ -118,3 +121,12 @@ func system_cooled_below_overheat():
 
 func hacking_can_accept_player_commands(accept: bool):
 	hacking_can_accept_player_commands_signal.emit(accept)
+
+func manual_packet_spoof():
+	manual_packet_spoof_signal.emit()
+
+func phishing_item_caught_item(item):
+	phishing_item_caught_item_signal.emit(item)
+
+func phishing_lines_increase_upgrade_while_running():
+	phishing_lines_increase_upgrade_while_running_signal.emit()

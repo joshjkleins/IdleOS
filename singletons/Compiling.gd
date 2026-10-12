@@ -31,7 +31,7 @@ var SCHOOL = {
 	"tier name": "TIER I | CACHE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 900,
+	"experience per level": 25,
 	"command": "compile -school",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
@@ -43,39 +43,174 @@ var SCHOOL = {
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": [ { "item": Items.IP_ADDRESS, "amount": 1 }, { "item": Items.CREDENTIALS, "amount": 1 } ],
+	"requirements": {
+		Items.IP_ADDRESS: 1,
+		Items.CREDENTIALS: 1
+	},
 	"resource gained": Items.SCHOOL_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
 }
 
-#var SMALL_BUSINESS = {
-	#"name": "Small Business",
-	#"tier name": "TIER I | CACHE",
-	#"level": 1,
-	#"experience": 0,
-	#"experience per level": 900,
-	#"command": "compile -small-business",
-	#"efficiency": 0.03,
-	#"efficiency rate": 0.001,
-	#"unlocked": true,
-	#"unlock level": 1,
-	#"base speed": 10.0,
-	#"overclock speed": 2.0,
-	#"overheat speed": 0.2,
-	#"heat": 5,
-	#"overclock heat": 7,
-	#"overheat heat": 2,
-	#"requirements": [ { "item": Items.IP_ADDRESS, "amount": 5 }, { "item": Items.ACCOUNT_ACCESS_TOKENS, "amount": 2 } ],
-	#"resource gained": Items.SMALL_BUSINESS_PAYLOAD,
-	#"description": "Compile resources to create a payload used to hack targets.",
-	#"efficiency description": "?????",
-	#"signal": compile_cycle_complete
-#}
+var MOD = {
+	"name": "Mod",
+	"tier name": "TIER II | MOD",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 100,
+	"command": "compile -mod",
+	"ssh command": "ssh compiling mod",
+	"display command": "compile -mod=<item>",
+	"example commands": [
+		{'cmd': 'compile -mod=logs', 'description': 'Uses 10 Logs to grant a hacking modification for 1 hack.'},
+		{'cmd': 'compile -mod=ip address', 'description': 'Uses 10 IP Addresses to grant a hacking modification for 1 hack.'}
+	],
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 3,
+	"base speed": 2.0,
+	"overclock speed": 3.0,
+	"overheat speed": 1.0,
+	"heat": 20.0,
+	"overclock heat": 30.0,
+	"overheat heat": 0.3,
+	"requirements": "Any item. Use 'ls <item>' to view details of each item.",
+	"resource gained": "Temporary Hacking Modification",
+	"description": "Compile resources into temporary hacking modifications.",
+	"efficiency description": "?",
+	"signal": compile_cycle_complete
+}
+
+var BANK = {
+	"name": "Bank",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -bank",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 20,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var HOSPITAL = {
+	"name": "Hospital",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -hospital",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 30,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var LAWFIRM = {
+	"name": "Lawfirm",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -lawfirm",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 40,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var POLICE = {
+	"name": "Police",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -police",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 60,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
+
+var GOVERNMENT = {
+	"name": "Government",
+	"tier name": "TIER I | CACHE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 900,
+	"command": "compile -government",
+	"efficiency": 0.01,
+	"efficiency rate": 0.001,
+	"unlocked": false,
+	"unlock level": 80,
+	"base speed": 10.0,
+	"overclock speed": 20.0,
+	"overheat speed": 3.0,
+	"heat": 1.5,
+	"overclock heat": 1.9,
+	"overheat heat": 0.3,
+	"requirements": "???",
+	"resource gained": "???",
+	"description": "Compile resources to create a payload used to hack targets.",
+	"efficiency description": "?????",
+	"signal": compile_cycle_complete
+}
 
 var minor_processes = [
-	SCHOOL
+	SCHOOL,
+	MOD,
+	BANK,
+	HOSPITAL,
+	LAWFIRM,
+	POLICE,
+	GOVERNMENT
 ]
 
 func signal_exp(_amount: int):
@@ -117,14 +252,14 @@ func missing_requirements_text(minor_process) -> String:
 	#if upgrade_stat["name"].to_lower() == "vm duration":
 		#VM_UPTIME += upgrade_stat["increase per level"]
 
-func create_vm_window(minor_process, repeat) -> Window:
+func create_vm_window(minor_process, item: ItemData = null) -> Window:
 	var content_instance = terminal_scene.instantiate()
 	var new_window = vm_window.instantiate()
 	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
 	new_window.wrap_controls = true
-	new_window.repeat = repeat
+	new_window.repeat = true
 	
-	new_window.set_repeat(repeat)
+	new_window.set_repeat(true)
 	new_window.set_time(VM_UPTIME)
 	new_window.set_token(vm_token)
 	new_window.set_processes(Parsing, minor_process)
@@ -141,7 +276,7 @@ func create_vm_window(minor_process, repeat) -> Window:
 	)
 	new_window.about_to_popup.connect(func(): 
 		#content_instance.set_parse_type(minor_process, true)
-		content_instance.start(minor_process, true)
+		content_instance.start(minor_process, true, item)
 	)
 	CURRENT_VMS += 1
 	Stats.CURRENT_ALL_VMS += 1

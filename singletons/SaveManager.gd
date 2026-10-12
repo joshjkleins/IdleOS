@@ -34,8 +34,10 @@ func save_game() -> void:
 		"decoding": Decoding.save_data(),
 		"compiling": Compiling.save_data(),
 		"hacking": Hacking.save_data(),
+		"defragging": Defragging.save_data(),
 		"tutorial": Tutorial.save_data(),
 		"stats": Stats.save_data(),
+		"mods": HackingMods.save_data(),
 	}
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
@@ -56,6 +58,11 @@ func debug_print_save() -> void:
 	var file := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.READ)
 	print(file.get_as_text())
 	file.close()
+
+func has_saved_game() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	return true
 
 func load_game() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH):
@@ -83,8 +90,12 @@ func load_game() -> bool:
 	Decoding.load_data(data.get("decoding", {}))
 	Compiling.load_data(data.get("compiling", {}))
 	Hacking.load_data(data.get("hacking", {}))
+	Defragging.load_data(data.get("defragging", {}))
 	Tutorial.load_data(data.get("tutorial", {}))
 	Stats.load_data(data.get("stats", {}))
+	HackingMods.load_data(data.get("mods", {}))
+	
+	print(data.get("mods"))
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
 	if tracked_panel:

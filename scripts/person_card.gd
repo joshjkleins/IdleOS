@@ -9,12 +9,18 @@ func update_info(info):
 	var sb = $"MarginContainer/VBoxContainer/RowOne/DifficultyContainer".get_theme_stylebox("panel").duplicate()
 	sb.bg_color = _get_difficulty_color(info.difficulty)
 	$MarginContainer/VBoxContainer/RowOne/DifficultyContainer.add_theme_stylebox_override("panel", sb)
-	$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = info.command
+	if info.unlocked:
+		$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = info.command
+	else:
+		$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = "DEMO LOCKED"
 	$MarginContainer/VBoxContainer/GridContainer/IntegrityBox/MarginContainer/VBoxContainer/IntegrityAmount.text = str(info.integrity)
 	$MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/FirewallAmount.text = str(info.firewall)
 	$MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/CounterAmount.text = str(info.counter)
 	$MarginContainer/VBoxContainer/GridContainer/AttackSpeedBox/MarginContainer/VBoxContainer/SpeedAmount.text = str(info["counter speed"])
-	$MarginContainer/VBoxContainer/HBoxContainer/Reward.text = info.loot.name
+	var loot_text = info.loot.name
+	if info.has('loot quantity'):
+		loot_text += " x" + str(info['loot quantity'])
+	$MarginContainer/VBoxContainer/HBoxContainer/Reward.text = loot_text
 	
 	if $MarginContainer/VBoxContainer/RequirementsRow.get_children().size() > 0:
 		for node in $MarginContainer/VBoxContainer/RequirementsRow.get_children():
@@ -40,7 +46,6 @@ func update_info(info):
 	if $MarginContainer/VBoxContainer/LootContainer.get_children().size() > 0:
 		for n in $MarginContainer/VBoxContainer/LootContainer.get_children():
 			n.queue_free()
-	
 	#var loot_row = load("res://scenes/loot_row.tscn")
 	#for loot in info.loot.entries:
 		#var new_row = loot_row.instantiate()
