@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=2 format=3 uid="uid://vkt1ehgkp1iv"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_4ngw8"]
+
+[resource]
+script = ExtResource("1_4ngw8")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

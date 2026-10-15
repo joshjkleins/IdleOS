@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://c10hex7wl3jju"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_ovpo1"]
+[ext_resource type="Resource" uid="uid://cfx82ma30nro0" path="res://items/valuables/bank/safe_deposit_box_registry.tres" id="1_td2t1"]
+
+[resource]
+script = ExtResource("1_ovpo1")
+item = ExtResource("1_td2t1")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

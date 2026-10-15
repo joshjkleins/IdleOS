@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://be1kfwbb7nfvj"]
+
+[ext_resource type="Resource" uid="uid://dcwclc67mecy4" path="res://items/combat/packet_spoof.tres" id="1_bfts2"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_37wby"]
+
+[resource]
+script = ExtResource("2_37wby")
+item = ExtResource("1_bfts2")
+min_quantity = 10
+max_quantity = 20
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

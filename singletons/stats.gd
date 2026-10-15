@@ -180,147 +180,6 @@ var hacking_targets = {
 			}
 		],
 		"art": preload("res://art/school-ascii.png")
-	}, "Bank": {
-		"command": "view library",
-		"hard mode command": "view library -hard",
-		"name": "Bank",
-		"unlocked": false,
-		"hard mode unlocked": false,
-		"difficulty": "Easy",
-		"required payload": Items.LIBRARY_PAYLOAD,
-		"targets": [
-			{
-				"name": "Patreon",
-				"difficulty": "Easy",
-				"command": "hack patreon",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 1},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.PATRON_CACHE
-			},
-			{
-				"name": "Volunteer",
-				"difficulty": "Easy",
-				"command": "hack volunteer",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 2},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.VOLUNTEER_CACHE
-			},
-			{
-				"name": "Assistant Librarian",
-				"difficulty": "Medium",
-				"command": "hack assistant-librarian",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 3},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.ASSISTANT_LIBRARIAN_CACHE
-			},
-			{
-				"name": "Head Librarian",
-				"difficulty": "Medium",
-				"command": "hack head-librarian",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 4},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.HEAD_LIBRARIAN_CACHE
-			},
-			{
-				"name": "Director",
-				"difficulty": "Hard",
-				"command": "hack director",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 5},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
-				"loot": Items.DIRECTOR_CACHE
-			}
-		],
-		"art": preload("res://art/library-ascii.png")
-	}, "Hospital": {
-		"command": "view hospital",
-		"hard mode command": "view hospital -hard",
-		"name": "Hospital",
-		"unlocked": false,
-		"hard mode unlocked": false,
-		"difficulty": "Easy",
-		"targets": [
-			{
-				"name": "Receptionist",
-				"difficulty": "Easy",
-				"command": "hack receptionist",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.RECEPTIONIST_CACHE
-			},
-			{
-				"name": "Orderly",
-				"difficulty": "Easy",
-				"command": "hack orderly",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.ORDERLY_CACHE
-			},
-			{
-				"name": "Nurse",
-				"difficulty": "Medium",
-				"command": "hack nurse",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.NURSE_CACHE
-			},
-			{
-				"name": "Doctor",
-				"difficulty": "Medium",
-				"command": "hack doctor",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.DOCTOR_CACHE
-			},
-			{
-				"name": "Chief of Medicine",
-				"difficulty": "Hard",
-				"command": "hack chief-medicine",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
-				"loot": Items.CHIEF_OF_MEDICINE_CACHE
-			}
-		],
-		"art": preload("res://art/hospital-ascii.png")
 	}, "Lawfirm": {
 		"command": "view lawfirm",
 		"hard mode command": "view lawfirm -hard",
@@ -328,6 +187,7 @@ var hacking_targets = {
 		"unlocked": false,
 		"hard mode unlocked": false,
 		"difficulty": "Easy",
+		"required payload": Items.LAWFIRM_PAYLOAD,
 		"targets": [
 			{
 				"name": "Legal Assistant",
@@ -386,6 +246,148 @@ var hacking_targets = {
 			}
 		],
 		"art": preload("res://art/lawfirm-ascii.png")
+	}, "Hospital": {
+		"command": "view hospital",
+		"hard mode command": "view hospital -hard",
+		"name": "Hospital",
+		"unlocked": false,
+		"hard mode unlocked": false,
+		"difficulty": "Easy",
+		"required payload": Items.HOSPITAL_PAYLOAD,
+		"targets": [
+			{
+				"name": "Receptionist",
+				"difficulty": "Easy",
+				"command": "hack receptionist",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.RECEPTIONIST_CACHE
+			},
+			{
+				"name": "Orderly",
+				"difficulty": "Easy",
+				"command": "hack orderly",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.ORDERLY_CACHE
+			},
+			{
+				"name": "Nurse",
+				"difficulty": "Medium",
+				"command": "hack nurse",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.NURSE_CACHE
+			},
+			{
+				"name": "Doctor",
+				"difficulty": "Medium",
+				"command": "hack doctor",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.DOCTOR_CACHE
+			},
+			{
+				"name": "Chief of Medicine",
+				"difficulty": "Hard",
+				"command": "hack chief-medicine",
+				"heat": 10,
+				"exp": 600,
+				"time to hack": 2.0,
+				"overheat time to hack": 10.0,
+				"overclock time to hack": 0.5,
+				"loot": Items.CHIEF_OF_MEDICINE_CACHE
+			}
+		],
+		"art": preload("res://art/hospital-ascii.png"), 
+	}, "Bank": {
+		"command": "view bank",
+		"hard mode command": "view bank -hard",
+		"name": "Bank",
+		"unlocked": false,
+		"hard mode unlocked": false,
+		"difficulty": "Easy",
+		"required payload": Items.BANK_PAYLOAD,
+		"targets": [
+			{
+				"name": "Teller",
+				"difficulty": "Easy",
+				"command": "hack teller",
+				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 1},
+				"heat": 10,
+				"exp": 600,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.TELLER_CACHE
+			},
+			{
+				"name": "Loan Officer",
+				"difficulty": "Easy",
+				"command": "hack loan-officer",
+				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 2},
+				"heat": 10,
+				"exp": 600,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.LOAN_OFFICER_CACHE
+			},
+			{
+				"name": "Branch Manager",
+				"difficulty": "Medium",
+				"command": "hack branch-manager",
+				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 3},
+				"heat": 10,
+				"exp": 600,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.BRANCH_MANAGER_CACHE
+			},
+			{
+				"name": "Security",
+				"difficulty": "Medium",
+				"command": "hack security",
+				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 4},
+				"heat": 10,
+				"exp": 600,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.SECURITY_CACHE
+			},
+			{
+				"name": "Chief Financial Officer",
+				"difficulty": "Hard",
+				"command": "hack cfo",
+				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 5},
+				"heat": 10,
+				"exp": 600,
+				"integrity": 200,
+				"firewall": 30,
+				"counter": 12,
+				"counter speed": 20.0,
+				"loot": Items.CFO_CACHE
+			}
+		],
+		"art": preload("res://art/library-ascii.png")
 	}, "Police Station": {
 		"command": "view police",
 		"hard mode command": "view police -hard",
@@ -393,6 +395,7 @@ var hacking_targets = {
 		"difficulty": "Easy",
 		"unlocked": false,
 		"hard mode unlocked": false,
+		"required payload": Items.POLICE_PAYLOAD,
 		"targets": [
 			{
 				"name": "Secretary",
@@ -458,61 +461,62 @@ var hacking_targets = {
 		"difficulty": "Hard",
 		"unlocked": false,
 		"hard mode unlocked": false,
+		"required payload": Items.GOVERNMENT_PAYLOAD,
 		"targets": [
 			{
-				"name": "Secretary",
+				"name": "Clerk",
 				"difficulty": "Easy",
-				"command": "hack secretary",
+				"command": "hack clerk",
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.SECRETARY_CACHE
+				"loot": Items.CLERK_CACHE
 			},
 			{
-				"name": "Cop",
+				"name": "Analyst",
 				"difficulty": "Easy",
-				"command": "hack cop",
+				"command": "hack analyst",
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.COP_CACHE
+				"loot": Items.ANALYST_CACHE
 			},
 			{
-				"name": "Detective",
+				"name": "Ambassador",
 				"difficulty": "Medium",
-				"command": "hack detective",
+				"command": "hack ambassador",
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.DETECTIVE_CACHE
+				"loot": Items.AMBASSADOR_CACHE
 			},
 			{
-				"name": "Sergeant",
+				"name": "Vice President",
 				"difficulty": "Medium",
-				"command": "hack sergeant",
+				"command": "hack vice-president",
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.SERGEANT_CACHE
+				"loot": Items.VICE_PRESIDENT_CACHE
 			},
 			{
-				"name": "Captain",
+				"name": "President",
 				"difficulty": "Hard",
-				"command": "hack captain",
+				"command": "hack president",
 				"heat": 10,
 				"exp": 600,
 				"time to hack": 2.0,
 				"overheat time to hack": 10.0,
 				"overclock time to hack": 0.5,
-				"loot": Items.CAPTAIN_CACHE
+				"loot": Items.PRESIDENT_CACHE
 			}
 		],
 		"art": preload("res://art/university-ascii.png")

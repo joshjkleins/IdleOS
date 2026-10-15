@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://4vecq4a7q5v1"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_m12ou"]
+[ext_resource type="Resource" uid="uid://oj1s44vus3up" path="res://items/resources/Parsing/subnet_map.tres" id="1_qwufl"]
+
+[resource]
+script = ExtResource("1_m12ou")
+item = ExtResource("1_qwufl")
+min_quantity = 25
+max_quantity = 50
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

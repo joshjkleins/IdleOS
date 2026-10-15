@@ -40,6 +40,92 @@ extends Node
 #TIER 6 - GOVERNMENT
 # M:DATABSES > P:CLEARANCE ID, ENCRYPTED BIO HASHES, GATEWAY ADDRESS > C:BIOMETRIC TEMPLATE > M: SECURITY CLEARANCE > C:GOVERNMENT PAYLOAD > H:CACHES
 
+#LAWFIRM: ARCHIVES ------- CASE NUMBER, ENCRYPTED SIGNATURE, EMAIL HEADER ---------------- DIGITAL SIGNATURE -------------- SIGNED CERTIFICATE ----------- LAWFIRM PAYLOAD ----------
+
+
+#mining item tiers 
+#1: logs
+#2: archives
+#3: metadata
+#4: cookies
+#5: repositories
+#6: databases
+
+#parsing item tiers 
+# LOCATION ITEM | ENCRYPTED ITEM | IDENTITY ITEM
+#1: ip address, enc password, username
+#2: case number, encrypted signature, email header
+#3: staff id, encrypted badge hash, mac address
+#4: account number, enc pin, routing number
+#5: badge number, encrypted ssh key, subnet map
+#6: clearance id, encrypted bio hashes, gateway address
+
+#cracking item tiers 
+#1: password
+#2: digital signature
+#3: badge hash
+#4: PIN
+#5: private keys
+#6: biometric template
+
+#matching item tiers 
+#1: credentials
+#2: signed certificate
+#3: access badge
+#4: account access tokens
+#5: officer auth keys
+#6: security clearance
+
+#payload item tiers 
+#1: school
+#2: lawfirm
+#3: hospital
+#4: bank
+#5: police
+#6: government
+
+#target 1 : encrypted item, mining item, match item (username), TOKEN, RARE ITEM
+#target 2 :  mining item, unencrypted item, match item (username), TOKEN, RARE ITEM
+#target 3 : matched (cred) item, compile item (ip address), packet spoof, TOKEN, RARE ITEM
+#target 4: compile item (ip address), payload, sql injector, TOKEN, RARE ITEM
+#target 5: targets 1-4 caches, rare item
+
+#lawfirm:
+#legal assistant: encrypted signature: 25-50 | archives: 25-50 | email header: 25-50 | vm mining token | rare item
+#paralegal: archives 25-50 | digital signature 25-50 | email header, vm parsing token | rare item
+#associate attorney: signed cert | case number | packet spoof | vm cracking token | rare item
+#lawyer: case number | lawfirm payload | sql injector, vm compiling token | rare item
+#partner: caches 1-4, rare item
+
+#hospital
+#items: metadata | staff id | encrypted badge hash | mac address | badge hash | access badge | hospital payload
+#receptionist: metadata | encrytped badge hash | mac address | vm crackign token | rare item
+#orderly: metadata, badge hash, mac address | vm compiling token | rare item
+#nurse: access badge | staff id | packet spoof | vm mining token | rare item
+#doctor: staff id | hospital payload | sql injector | vm phishing token | rare item
+#chief of medicine:  targets 1-4 caches, rare item
+
+#bank
+#Teller : encrypted pin | cookies | routing number | vm phishing token | rare item
+#Loan Officer: cookies | PIN | routing num | vm cracking token | rare item
+#Branch Manager: account access token | account number | packet spoof | vm mining token | rare item
+#Security Admin: account number | bank payload | sql injector | vm cracking token | rare item
+#Chief Financial Officer: targets 1-4 caches, rare item
+
+#police #5
+#secretary: enc ssh key | repositories | subnet map | mining token | rare item
+#cop: repositories | private keys | subnet map | phishing token | rare item
+#detective: officer auth keys | badge number | packet spoof | parsing token | rare item
+#sergeant: badge number | police payload | sql injector | vm cracking token | rare item
+#captain: targets 1-4 caches, rare item
+
+#items: MINING (databases) -- LOCATION (IP) (clearance id) -- ENCR (pw) (enc bio hashes) -- IDENTITY (username) (gateway address) -- CRACK (biometric template) -- MATCH (secrutiy clearance)
+#government
+#clerk: enc bio hash | databases | gateway address | vm decoding token | rare item
+#analyst: databases | biometric template | gateway address | vm phishing token | rare item
+#ambassador: security clearance | clearance ID | packet spoof | vm mining token | rare item
+#vice president clearance ID | gov payload | sql injector | vm parsing token | rare item
+#president: caches 1-4 | nuclear codes
 
 
 enum ItemType {
@@ -172,6 +258,205 @@ enum ItemType {
 	LAWFIRM_PAYLOAD, #126
 	POLICE_PAYLOAD, #127
 	ENCRYPTED_BADGE_HASH, #128
+	CASH_DRAWER_CODES, #129
+	TELLER_CACHE, #130
+	SECURITY_CACHE, #131
+	LOAN_OFFICER_CACHE, #132
+	BRANCH_MANAGER_CACHE, #133
+	CFO_CACHE, #134,
+	CREDIT_RECORDS, #135
+	SAFE_DEPOSIT_BOX_REGISTERY, #136
+	SWIFT_MASTER_KEY, #137
+	VAULT_OVERRIDE, #138
+	CLERK_CACHE, #139
+	ANALYST_CACHE, #140
+	AMBASSADOR_CACHE, #141
+	VICE_PRESIDENT_CACHE, #142
+	PRESIDENT_CACHE, #143
+	REGISTER_VOTER_DB, #144 clerk
+	CIA_BRIEF, #145 ANALYST
+	BLACK_BUDGET_LEDGER, #146 ambassador
+	DEEP_COVER_IDS, #147 vice pres
+	NUKE_CODES, #148 pres
+	STUDENT_CACHE_CORRUPTION, #149 <-----------------------HERE
+	STUDENT_CACHE_NETWORK, #150
+	STUDENT_CACHE_EXTRACTION, #151
+	ADMIN_CACHE_FOOTPRINT, #152
+	ADMIN_CACHE_CORRUPTION, #153
+	ADMIN_CACHE_NETWORK, #154
+	ADMIN_CACHE_EXTRACTION, #155
+	VICE_PRINCIPAL_CACHE_FOOTPRINT, #156
+	VICE_PRINCIPAL_CACHE_CORRUPTION, #157
+	VICE_PRINCIPAL_CACHE_NETWORK, #158
+	VICE_PRINCIPAL_CACHE_EXTRACTION, #159
+	PRINCIPAL_CACHE_FOOTPRINT, #160
+	PRINCIPAL_CACHE_CORRUPTION, #161
+	PRINCIPAL_CACHE_NETWORK, #162
+	PRINCIPAL_CACHE_EXTRACTION, #163
+	SUPERINTENDENT_CACHE_FOOTPRINT, #164
+	SUPERINTENDENT_CACHE_CORRUPTION, #165
+	SUPERINTENDENT_CACHE_NETWORK, #166
+	SUPERINTENDENT_CACHE_EXTRACTION, #167
+	PATRON_CACHE_FOOTPRINT, #168
+	PATRON_CACHE_CORRUPTION, #169
+	PATRON_CACHE_NETWORK, #170
+	PATRON_CACHE_EXTRACTION, #171
+	VOLUNTEER_CACHE_FOOTPRINT, #172
+	VOLUNTEER_CACHE_CORRUPTION, #173
+	VOLUNTEER_CACHE_NETWORK, #174
+	VOLUNTEER_CACHE_EXTRACTION, #175
+	ASSISTANT_LIBRARIAN_CACHE_FOOTPRINT, #176
+	ASSISTANT_LIBRARIAN_CACHE_CORRUPTION, #177
+	ASSISTANT_LIBRARIAN_CACHE_NETWORK, #178
+	ASSISTANT_LIBRARIAN_CACHE_EXTRACTION, #179
+	HEAD_LIBRARIAN_CACHE_FOOTPRINT, #180
+	HEAD_LIBRARIAN_CACHE_CORRUPTION, #181
+	HEAD_LIBRARIAN_CACHE_NETWORK, #182
+	HEAD_LIBRARIAN_CACHE_EXTRACTION, #183
+	DIRECTOR_CACHE_FOOTPRINT, #184
+	DIRECTOR_CACHE_CORRUPTION, #185
+	DIRECTOR_CACHE_NETWORK, #186
+	DIRECTOR_CACHE_EXTRACTION, #187
+	WORKER_CACHE_FOOTPRINT, #188
+	WORKER_CACHE_CORRUPTION, #189
+	WORKER_CACHE_NETWORK, #190
+	WORKER_CACHE_EXTRACTION, #191
+	SUPERVISOR_CACHE_FOOTPRINT, #192
+	SUPERVISOR_CACHE_CORRUPTION, #193
+	SUPERVISOR_CACHE_NETWORK, #194
+	SUPERVISOR_CACHE_EXTRACTION, #195
+	MANAGER_CACHE_FOOTPRINT, #196
+	MANAGER_CACHE_CORRUPTION, #197
+	MANAGER_CACHE_NETWORK, #198
+	MANAGER_CACHE_EXTRACTION, #199
+	HUMAN_RESOURCES_CACHE_FOOTPRINT, #200
+	HUMAN_RESOURCES_CACHE_CORRUPTION, #201
+	HUMAN_RESOURCES_CACHE_NETWORK, #202
+	HUMAN_RESOURCES_CACHE_EXTRACTION, #203
+	OWNER_CACHE_FOOTPRINT, #204
+	OWNER_CACHE_CORRUPTION, #205
+	OWNER_CACHE_NETWORK, #206
+	OWNER_CACHE_EXTRACTION, #207
+	TEACHERS_ASSISTANT_CACHE_FOOTPRINT, #208
+	TEACHERS_ASSISTANT_CACHE_CORRUPTION, #209
+	TEACHERS_ASSISTANT_CACHE_NETWORK, #210
+	TEACHERS_ASSISTANT_CACHE_EXTRACTION, #211
+	PROFESSOR_CACHE_FOOTPRINT, #212
+	PROFESSOR_CACHE_CORRUPTION, #213
+	PROFESSOR_CACHE_NETWORK, #214
+	PROFESSOR_CACHE_EXTRACTION, #215
+	DEPARTMENT_CHAIR_CACHE_FOOTPRINT, #216
+	DEPARTMENT_CHAIR_CACHE_CORRUPTION, #217
+	DEPARTMENT_CHAIR_CACHE_NETWORK, #218
+	DEPARTMENT_CHAIR_CACHE_EXTRACTION, #219
+	DEAN_CACHE_FOOTPRINT, #220
+	DEAN_CACHE_CORRUPTION, #221
+	DEAN_CACHE_NETWORK, #222
+	DEAN_CACHE_EXTRACTION, #223
+	UNIVERSITY_PRESIDENT_CACHE_FOOTPRINT, #224
+	UNIVERSITY_PRESIDENT_CACHE_CORRUPTION, #225
+	UNIVERSITY_PRESIDENT_CACHE_NETWORK, #226
+	UNIVERSITY_PRESIDENT_CACHE_EXTRACTION, #227
+	RECEPTIONIST_CACHE_FOOTPRINT, #228
+	RECEPTIONIST_CACHE_CORRUPTION, #229
+	RECEPTIONIST_CACHE_NETWORK, #230
+	RECEPTIONIST_CACHE_EXTRACTION, #231
+	ORDERLY_CACHE_FOOTPRINT, #232
+	ORDERLY_CACHE_CORRUPTION, #233
+	ORDERLY_CACHE_NETWORK, #234
+	ORDERLY_CACHE_EXTRACTION, #235
+	NURSE_CACHE_FOOTPRINT, #236
+	NURSE_CACHE_CORRUPTION, #237
+	NURSE_CACHE_NETWORK, #238
+	NURSE_CACHE_EXTRACTION, #239
+	DOCTOR_CACHE_FOOTPRINT, #240
+	DOCTOR_CACHE_CORRUPTION, #241
+	DOCTOR_CACHE_NETWORK, #242
+	DOCTOR_CACHE_EXTRACTION, #243
+	CHIEF_OF_MEDICINE_CACHE_FOOTPRINT, #244
+	CHIEF_OF_MEDICINE_CACHE_CORRUPTION, #245
+	CHIEF_OF_MEDICINE_CACHE_NETWORK, #246
+	CHIEF_OF_MEDICINE_CACHE_EXTRACTION, #247
+	SECRETARY_CACHE_FOOTPRINT, #248
+	SECRETARY_CACHE_CORRUPTION, #249
+	SECRETARY_CACHE_NETWORK, #250
+	SECRETARY_CACHE_EXTRACTION, #251
+	COP_CACHE_FOOTPRINT, #252
+	COP_CACHE_CORRUPTION, #253
+	COP_CACHE_NETWORK, #254
+	COP_CACHE_EXTRACTION, #255
+	DETECTIVE_CACHE_FOOTPRINT, #256
+	DETECTIVE_CACHE_CORRUPTION, #257
+	DETECTIVE_CACHE_NETWORK, #258
+	DETECTIVE_CACHE_EXTRACTION, #259
+	SERGEANT_CACHE_FOOTPRINT, #260
+	SERGEANT_CACHE_CORRUPTION, #261
+	SERGEANT_CACHE_NETWORK, #262
+	SERGEANT_CACHE_EXTRACTION, #263
+	CAPTAIN_CACHE_FOOTPRINT, #264
+	CAPTAIN_CACHE_CORRUPTION, #265
+	CAPTAIN_CACHE_NETWORK, #266
+	CAPTAIN_CACHE_EXTRACTION, #267
+	LEGAL_ASSISTANT_CACHE_FOOTPRINT, #268
+	LEGAL_ASSISTANT_CACHE_CORRUPTION, #269
+	LEGAL_ASSISTANT_CACHE_NETWORK, #270
+	LEGAL_ASSISTANT_CACHE_EXTRACTION, #271
+	PARALEGAL_CACHE_FOOTPRINT, #272
+	PARALEGAL_CACHE_CORRUPTION, #273
+	PARALEGAL_CACHE_NETWORK, #274
+	PARALEGAL_CACHE_EXTRACTION, #275
+	ASSOCIATE_ATTORNEY_CACHE_FOOTPRINT, #276
+	ASSOCIATE_ATTORNEY_CACHE_CORRUPTION, #277
+	ASSOCIATE_ATTORNEY_CACHE_NETWORK, #278
+	ASSOCIATE_ATTORNEY_CACHE_EXTRACTION, #279
+	LAWYER_CACHE_FOOTPRINT, #280
+	LAWYER_CACHE_CORRUPTION, #281
+	LAWYER_CACHE_NETWORK, #282
+	LAWYER_CACHE_EXTRACTION, #283
+	PARTNER_CACHE_FOOTPRINT, #284
+	PARTNER_CACHE_CORRUPTION, #285
+	PARTNER_CACHE_NETWORK, #286
+	PARTNER_CACHE_EXTRACTION, #287
+	TELLER_CACHE_FOOTPRINT, #288
+	TELLER_CACHE_CORRUPTION, #289
+	TELLER_CACHE_NETWORK, #290
+	TELLER_CACHE_EXTRACTION, #291
+	SECURITY_CACHE_FOOTPRINT, #292
+	SECURITY_CACHE_CORRUPTION, #293
+	SECURITY_CACHE_NETWORK, #294
+	SECURITY_CACHE_EXTRACTION, #295
+	LOAN_OFFICER_CACHE_FOOTPRINT, #296
+	LOAN_OFFICER_CACHE_CORRUPTION, #297
+	LOAN_OFFICER_CACHE_NETWORK, #298
+	LOAN_OFFICER_CACHE_EXTRACTION, #299
+	BRANCH_MANAGER_CACHE_FOOTPRINT, #300
+	BRANCH_MANAGER_CACHE_CORRUPTION, #301
+	BRANCH_MANAGER_CACHE_NETWORK, #302
+	BRANCH_MANAGER_CACHE_EXTRACTION, #303
+	CFO_CACHE_FOOTPRINT, #304
+	CFO_CACHE_CORRUPTION, #305
+	CFO_CACHE_NETWORK, #306
+	CFO_CACHE_EXTRACTION, #307
+	CLERK_CACHE_FOOTPRINT, #308
+	CLERK_CACHE_CORRUPTION, #309
+	CLERK_CACHE_NETWORK, #310
+	CLERK_CACHE_EXTRACTION, #311
+	ANALYST_CACHE_FOOTPRINT, #312
+	ANALYST_CACHE_CORRUPTION, #313
+	ANALYST_CACHE_NETWORK, #314
+	ANALYST_CACHE_EXTRACTION, #315
+	AMBASSADOR_CACHE_FOOTPRINT, #316
+	AMBASSADOR_CACHE_CORRUPTION, #317
+	AMBASSADOR_CACHE_NETWORK, #318
+	AMBASSADOR_CACHE_EXTRACTION, #319
+	VICE_PRESIDENT_CACHE_FOOTPRINT, #320
+	VICE_PRESIDENT_CACHE_CORRUPTION, #321
+	VICE_PRESIDENT_CACHE_NETWORK, #322
+	VICE_PRESIDENT_CACHE_EXTRACTION, #323
+	PRESIDENT_CACHE_FOOTPRINT, #324
+	PRESIDENT_CACHE_CORRUPTION, #325
+	PRESIDENT_CACHE_NETWORK, #326
+	PRESIDENT_CACHE_EXTRACTION, #327
 }
 
 ### RESOURCES ###
@@ -212,6 +497,28 @@ const MAC_ADDRESS = preload("res://items/resources/Parsing/mac_address.tres")
 const ROUTING_NUMBER = preload("res://items/resources/Parsing/routing_number.tres")
 const STAFF_IDS = preload("res://items/resources/Parsing/staff_ids.tres")
 const SUBNET_MAP = preload("res://items/resources/Parsing/subnet_map.tres")
+
+const ENCRYPTED_BADGE_HASH = preload("res://items/resources/Parsing/encrypted_badge_hash.tres") #128 <-- HERE? NEED TO ADD BELOW
+const CASH_DRAWER_CODES = preload("res://items/valuables/bank/cash_drawer_override_code.tres") #129
+const TELLER_CACHE = preload("res://items/cache_data/bank/teller_cache.tres") #130
+const SECURITY_CACHE = preload("res://items/cache_data/bank/security_cache.tres") #131
+const LOAN_OFFICER_CACHE = preload("res://items/cache_data/bank/officer_cache.tres") #132
+const BRANCH_MANAGER_CACHE = preload("res://items/cache_data/bank/manager_cache.tres") #133
+const CFO_CACHE = preload("res://items/cache_data/bank/cfo_cache.tres") #134
+const CREDIT_RECORDS = preload("res://items/valuables/bank/credit_records.tres") #135
+const SAFE_DEPOSIT_BOX_REGISTERY = preload("res://items/valuables/bank/safe_deposit_box_registry.tres") #136
+const SWIFT_MASTER_KEY = preload("res://items/valuables/bank/swift_master_key.tres") #137
+const VAULT_OVERRIDE = preload("res://items/valuables/bank/vault_override.tres") #138
+const CLERK_CACHE = preload("res://items/cache_data/government/clerk_cache.tres") #139
+const ANALYST_CACHE = preload("res://items/cache_data/government/analyst_cache.tres") #140
+const AMBASSADOR_CACHE = preload("res://items/cache_data/government/ambassador_cache.tres") #141
+const VICE_PRESIDENT_CACHE = preload("res://items/cache_data/government/vice_president_cache.tres") #142
+const PRESIDENT_CACHE = preload("res://items/cache_data/government/president_cache.tres") #143
+const REGISTER_VOTER_DB = preload("res://items/valuables/government/register_voter_db.tres") #144 clerk
+const CIA_BRIEF = preload("res://items/valuables/government/cia_brief.tres") #145 ANALYST
+const BLACK_BUDGET_LEDGER = preload("res://items/valuables/government/black_budget_ledger.tres") #146 ambassador
+const DEEP_COVER_IDS = preload("res://items/valuables/government/deep_cover_ids.tres") #147 vice pres
+const NUKE_CODES = preload("res://items/valuables/government/nuke_codes.tres") #148 pres
 
 
 ### PAYLOADS ###
@@ -299,6 +606,25 @@ const PRINCIPAL_CACHE = preload("res://items/cache_data/school/principal_cache.t
 const SUPERINTENDENT_CACHE = preload("res://items/cache_data/school/superintendent_cache.tres")
 
 const STUDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/school/student_cache_footprint.tres")
+const STUDENT_CACHE_CORRUPTION = preload("res://items/cache_data/school/student_cache_corruption.tres") #149
+const STUDENT_CACHE_NETWORK = preload("res://items/cache_data/school/student_cache_network.tres") #150
+const STUDENT_CACHE_EXTRACTION = preload("res://items/cache_data/school/student_cache_extraction.tres") #151
+const ADMIN_CACHE_FOOTPRINT = preload("res://items/cache_data/school/admin_cache_footprint.tres") #152
+const ADMIN_CACHE_CORRUPTION = preload("res://items/cache_data/school/admin_cache_corruption.tres") #153
+const ADMIN_CACHE_NETWORK = preload("res://items/cache_data/school/admin_cache_network.tres") #154
+const ADMIN_CACHE_EXTRACTION = preload("res://items/cache_data/school/admin_cache_extraction.tres") #155
+const VICE_PRINCIPAL_CACHE_FOOTPRINT = preload("res://items/cache_data/school/vice_principal_cache_footprint.tres") #156
+const VICE_PRINCIPAL_CACHE_CORRUPTION = preload("res://items/cache_data/school/vice_principal_cache_corruption.tres") #157
+const VICE_PRINCIPAL_CACHE_NETWORK = preload("res://items/cache_data/school/vice_principal_cache_network.tres") #158
+const VICE_PRINCIPAL_CACHE_EXTRACTION = preload("res://items/cache_data/school/vice_principal_cache_extraction.tres") #159
+const PRINCIPAL_CACHE_FOOTPRINT = preload("res://items/cache_data/school/principal_cache_footprint.tres") #160
+const PRINCIPAL_CACHE_CORRUPTION = preload("res://items/cache_data/school/principal_cache_corruption.tres") #161
+const PRINCIPAL_CACHE_NETWORK = preload("res://items/cache_data/school/principal_cache_network.tres") #162
+const PRINCIPAL_CACHE_EXTRACTION = preload("res://items/cache_data/school/principal_cache_extraction.tres") #163
+const SUPERINTENDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/school/superintendent_cache_footprint.tres") #164
+const SUPERINTENDENT_CACHE_CORRUPTION = preload("res://items/cache_data/school/superintendent_cache_corruption.tres") #165
+const SUPERINTENDENT_CACHE_NETWORK = preload("res://items/cache_data/school/superintendent_cache_network.tres") #166
+const SUPERINTENDENT_CACHE_EXTRACTION = preload("res://items/cache_data/school/superintendent_cache_extraction.tres") #167
 
 #library
 const PATRON_CACHE = preload("res://items/cache_data/library/patron_cache.tres")
@@ -306,6 +632,26 @@ const VOLUNTEER_CACHE = preload("res://items/cache_data/library/volunteer_cache.
 const ASSISTANT_LIBRARIAN_CACHE = preload("res://items/cache_data/library/assistant_librarian_cache.tres")
 const HEAD_LIBRARIAN_CACHE = preload("res://items/cache_data/library/head_librarian_cache.tres")
 const DIRECTOR_CACHE = preload("res://items/cache_data/library/director_cache.tres")
+const PATRON_CACHE_FOOTPRINT = preload("res://items/cache_data/library/patron_cache_footprint.tres") #168
+const PATRON_CACHE_CORRUPTION = preload("res://items/cache_data/library/patron_cache_corruption.tres") #169
+const PATRON_CACHE_NETWORK = preload("res://items/cache_data/library/patron_cache_network.tres") #170
+const PATRON_CACHE_EXTRACTION = preload("res://items/cache_data/library/patron_cache_extraction.tres") #171
+const VOLUNTEER_CACHE_FOOTPRINT = preload("res://items/cache_data/library/volunteer_cache_footprint.tres") #172
+const VOLUNTEER_CACHE_CORRUPTION = preload("res://items/cache_data/library/volunteer_cache_corruption.tres") #173
+const VOLUNTEER_CACHE_NETWORK = preload("res://items/cache_data/library/volunteer_cache_network.tres") #174
+const VOLUNTEER_CACHE_EXTRACTION = preload("res://items/cache_data/library/volunteer_cache_extraction.tres") #175
+const ASSISTANT_LIBRARIAN_CACHE_FOOTPRINT = preload("res://items/cache_data/library/assistant_librarian_cache_footprint.tres") #176
+const ASSISTANT_LIBRARIAN_CACHE_CORRUPTION = preload("res://items/cache_data/library/assistant_librarian_cache_corruption.tres") #177
+const ASSISTANT_LIBRARIAN_CACHE_NETWORK = preload("res://items/cache_data/library/assistant_librarian_cache_network.tres") #178
+const ASSISTANT_LIBRARIAN_CACHE_EXTRACTION = preload("res://items/cache_data/library/assistant_librarian_cache_extraction.tres") #179
+const HEAD_LIBRARIAN_CACHE_FOOTPRINT = preload("res://items/cache_data/library/head_librarian_cache_footprint.tres") #180
+const HEAD_LIBRARIAN_CACHE_CORRUPTION = preload("res://items/cache_data/library/head_librarian_cache_corruption.tres") #181
+const HEAD_LIBRARIAN_CACHE_NETWORK = preload("res://items/cache_data/library/head_librarian_cache_network.tres") #182
+const HEAD_LIBRARIAN_CACHE_EXTRACTION = preload("res://items/cache_data/library/head_librarian_cache_extraction.tres") #183
+const DIRECTOR_CACHE_FOOTPRINT = preload("res://items/cache_data/library/director_cache_footprint.tres") #184
+const DIRECTOR_CACHE_CORRUPTION = preload("res://items/cache_data/library/director_cache_corruption.tres") #185
+const DIRECTOR_CACHE_NETWORK = preload("res://items/cache_data/library/director_cache_network.tres") #186
+const DIRECTOR_CACHE_EXTRACTION = preload("res://items/cache_data/library/director_cache_extraction.tres") #187
 
 #small business
 const WORKER_CACHE = preload("res://items/cache_data/small_business/worker_cache.tres")
@@ -313,6 +659,26 @@ const SUPERVISOR_CACHE = preload("res://items/cache_data/small_business/supervis
 const MANAGER_CACHE = preload("res://items/cache_data/small_business/manager_cache.tres")
 const HUMAN_RESOURCES_CACHE = preload("res://items/cache_data/small_business/human_resources_cache.tres")
 const OWNER_CACHE = preload("res://items/cache_data/small_business/owner_cache.tres")
+const WORKER_CACHE_FOOTPRINT = preload("res://items/cache_data/small_business/worker_cache_footprint.tres") #188
+const WORKER_CACHE_CORRUPTION = preload("res://items/cache_data/small_business/worker_cache_corruption.tres") #189
+const WORKER_CACHE_NETWORK = preload("res://items/cache_data/small_business/worker_cache_network.tres") #190
+const WORKER_CACHE_EXTRACTION = preload("res://items/cache_data/small_business/worker_cache_extraction.tres") #191
+const SUPERVISOR_CACHE_FOOTPRINT = preload("res://items/cache_data/small_business/supervisor_cache_footprint.tres") #192
+const SUPERVISOR_CACHE_CORRUPTION = preload("res://items/cache_data/small_business/supervisor_cache_corruption.tres") #193
+const SUPERVISOR_CACHE_NETWORK = preload("res://items/cache_data/small_business/supervisor_cache_network.tres") #194
+const SUPERVISOR_CACHE_EXTRACTION = preload("res://items/cache_data/small_business/supervisor_cache_extraction.tres") #195
+const MANAGER_CACHE_FOOTPRINT = preload("res://items/cache_data/small_business/manager_cache_footprint.tres") #196
+const MANAGER_CACHE_CORRUPTION = preload("res://items/cache_data/small_business/manager_cache_corruption.tres") #197
+const MANAGER_CACHE_NETWORK = preload("res://items/cache_data/small_business/manager_cache_network.tres") #198
+const MANAGER_CACHE_EXTRACTION = preload("res://items/cache_data/small_business/manager_cache_extraction.tres") #199
+const HUMAN_RESOURCES_CACHE_FOOTPRINT = preload("res://items/cache_data/small_business/human_resources_cache_footprint.tres") #200
+const HUMAN_RESOURCES_CACHE_CORRUPTION = preload("res://items/cache_data/small_business/human_resources_cache_corruption.tres") #201
+const HUMAN_RESOURCES_CACHE_NETWORK = preload("res://items/cache_data/small_business/human_resources_cache_network.tres") #202
+const HUMAN_RESOURCES_CACHE_EXTRACTION = preload("res://items/cache_data/small_business/human_resources_cache_extraction.tres") #203
+const OWNER_CACHE_FOOTPRINT = preload("res://items/cache_data/small_business/owner_cache_footprint.tres") #204
+const OWNER_CACHE_CORRUPTION = preload("res://items/cache_data/small_business/owner_cache_corruption.tres") #205
+const OWNER_CACHE_NETWORK = preload("res://items/cache_data/small_business/owner_cache_network.tres") #206
+const OWNER_CACHE_EXTRACTION = preload("res://items/cache_data/small_business/owner_cache_extraction.tres") #207
 
 #university
 const TEACHERS_ASSISTANT_CACHE = preload("res://items/cache_data/university/teachers_assistant_cache.tres")
@@ -320,6 +686,26 @@ const PROFESSOR_CACHE = preload("res://items/cache_data/university/professor_cac
 const DEPARTMENT_CHAIR_CACHE = preload("res://items/cache_data/university/department_chair_cache.tres")
 const DEAN_CACHE = preload("res://items/cache_data/university/dean_cache.tres")
 const UNIVERSITY_PRESIDENT_CACHE = preload("res://items/cache_data/university/university_president_cache.tres")
+const TEACHERS_ASSISTANT_CACHE_FOOTPRINT = preload("res://items/cache_data/university/teachers_assistant_cache_footprint.tres") #208
+const TEACHERS_ASSISTANT_CACHE_CORRUPTION = preload("res://items/cache_data/university/teachers_assistant_cache_corruption.tres") #209
+const TEACHERS_ASSISTANT_CACHE_NETWORK = preload("res://items/cache_data/university/teachers_assistant_cache_network.tres") #210
+const TEACHERS_ASSISTANT_CACHE_EXTRACTION = preload("res://items/cache_data/university/teachers_assistant_cache_extraction.tres") #211
+const PROFESSOR_CACHE_FOOTPRINT = preload("res://items/cache_data/university/professor_cache_footprint.tres") #212
+const PROFESSOR_CACHE_CORRUPTION = preload("res://items/cache_data/university/professor_cache_corruption.tres") #213
+const PROFESSOR_CACHE_NETWORK = preload("res://items/cache_data/university/professor_cache_network.tres") #214
+const PROFESSOR_CACHE_EXTRACTION = preload("res://items/cache_data/university/professor_cache_extraction.tres") #215
+const DEPARTMENT_CHAIR_CACHE_FOOTPRINT = preload("res://items/cache_data/university/department_chair_cache_footprint.tres") #216
+const DEPARTMENT_CHAIR_CACHE_CORRUPTION = preload("res://items/cache_data/university/department_chair_cache_corruption.tres") #217
+const DEPARTMENT_CHAIR_CACHE_NETWORK = preload("res://items/cache_data/university/department_chair_cache_network.tres") #218
+const DEPARTMENT_CHAIR_CACHE_EXTRACTION = preload("res://items/cache_data/university/department_chair_cache_extraction.tres") #219
+const DEAN_CACHE_FOOTPRINT = preload("res://items/cache_data/university/dean_cache_footprint.tres") #220
+const DEAN_CACHE_CORRUPTION = preload("res://items/cache_data/university/dean_cache_corruption.tres") #221
+const DEAN_CACHE_NETWORK = preload("res://items/cache_data/university/dean_cache_network.tres") #222
+const DEAN_CACHE_EXTRACTION = preload("res://items/cache_data/university/dean_cache_extraction.tres") #223
+const UNIVERSITY_PRESIDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/university/university_president_cache_footprint.tres") #224
+const UNIVERSITY_PRESIDENT_CACHE_CORRUPTION = preload("res://items/cache_data/university/university_president_cache_corruption.tres") #225
+const UNIVERSITY_PRESIDENT_CACHE_NETWORK = preload("res://items/cache_data/university/university_president_cache_network.tres") #226
+const UNIVERSITY_PRESIDENT_CACHE_EXTRACTION = preload("res://items/cache_data/university/university_president_cache_extraction.tres") #227
 
 #hospital
 const RECEPTIONIST_CACHE = preload("res://items/cache_data/hospital/receptionist_cache.tres")
@@ -327,6 +713,26 @@ const ORDERLY_CACHE = preload("res://items/cache_data/hospital/orderly_cache.tre
 const NURSE_CACHE = preload("res://items/cache_data/hospital/nurse_cache.tres")
 const DOCTOR_CACHE = preload("res://items/cache_data/hospital/doctor_cache.tres")
 const CHIEF_OF_MEDICINE_CACHE = preload("res://items/cache_data/hospital/chief_of_medicine_cache.tres")
+const RECEPTIONIST_CACHE_FOOTPRINT = preload("res://items/cache_data/hospital/receptionist_cache_footprint.tres") #228
+const RECEPTIONIST_CACHE_CORRUPTION = preload("res://items/cache_data/hospital/receptionist_cache_corruption.tres") #229
+const RECEPTIONIST_CACHE_NETWORK = preload("res://items/cache_data/hospital/receptionist_cache_network.tres") #230
+const RECEPTIONIST_CACHE_EXTRACTION = preload("res://items/cache_data/hospital/receptionist_cache_extraction.tres") #231
+const ORDERLY_CACHE_FOOTPRINT = preload("res://items/cache_data/hospital/orderly_cache_footprint.tres") #232
+const ORDERLY_CACHE_CORRUPTION = preload("res://items/cache_data/hospital/orderly_cache_corruption.tres") #233
+const ORDERLY_CACHE_NETWORK = preload("res://items/cache_data/hospital/orderly_cache_network.tres") #234
+const ORDERLY_CACHE_EXTRACTION = preload("res://items/cache_data/hospital/orderly_cache_extraction.tres") #235
+const NURSE_CACHE_FOOTPRINT = preload("res://items/cache_data/hospital/nurse_cache_footprint.tres") #236
+const NURSE_CACHE_CORRUPTION = preload("res://items/cache_data/hospital/nurse_cache_corruption.tres") #237
+const NURSE_CACHE_NETWORK = preload("res://items/cache_data/hospital/nurse_cache_network.tres") #238
+const NURSE_CACHE_EXTRACTION = preload("res://items/cache_data/hospital/nurse_cache_extraction.tres") #239
+const DOCTOR_CACHE_FOOTPRINT = preload("res://items/cache_data/hospital/doctor_cache_footprint.tres") #240
+const DOCTOR_CACHE_CORRUPTION = preload("res://items/cache_data/hospital/doctor_cache_corruption.tres") #241
+const DOCTOR_CACHE_NETWORK = preload("res://items/cache_data/hospital/doctor_cache_network.tres") #242
+const DOCTOR_CACHE_EXTRACTION = preload("res://items/cache_data/hospital/doctor_cache_extraction.tres") #243
+const CHIEF_OF_MEDICINE_CACHE_FOOTPRINT = preload("res://items/cache_data/hospital/chief_of_medicine_cache_footprint.tres") #244
+const CHIEF_OF_MEDICINE_CACHE_CORRUPTION = preload("res://items/cache_data/hospital/chief_of_medicine_cache_corruption.tres") #245
+const CHIEF_OF_MEDICINE_CACHE_NETWORK = preload("res://items/cache_data/hospital/chief_of_medicine_cache_network.tres") #246
+const CHIEF_OF_MEDICINE_CACHE_EXTRACTION = preload("res://items/cache_data/hospital/chief_of_medicine_cache_extraction.tres") #247
 
 #police station
 const SECRETARY_CACHE = preload("res://items/cache_data/police_station/secretary_cache.tres")
@@ -334,6 +740,26 @@ const COP_CACHE = preload("res://items/cache_data/police_station/cop_cache.tres"
 const DETECTIVE_CACHE = preload("res://items/cache_data/police_station/detective_cache.tres")
 const SERGEANT_CACHE = preload("res://items/cache_data/police_station/sergeant_cache.tres")
 const CAPTAIN_CACHE = preload("res://items/cache_data/police_station/captain_cache.tres")
+const SECRETARY_CACHE_FOOTPRINT = preload("res://items/cache_data/police_station/secretary_cache_footprint.tres") #248
+const SECRETARY_CACHE_CORRUPTION = preload("res://items/cache_data/police_station/secretary_cache_corruption.tres") #249
+const SECRETARY_CACHE_NETWORK = preload("res://items/cache_data/police_station/secretary_cache_network.tres") #250
+const SECRETARY_CACHE_EXTRACTION = preload("res://items/cache_data/police_station/secretary_cache_extraction.tres") #251
+const COP_CACHE_FOOTPRINT = preload("res://items/cache_data/police_station/cop_cache_footprint.tres") #252
+const COP_CACHE_CORRUPTION = preload("res://items/cache_data/police_station/cop_cache_corruption.tres") #253
+const COP_CACHE_NETWORK = preload("res://items/cache_data/police_station/cop_cache_network.tres") #254
+const COP_CACHE_EXTRACTION = preload("res://items/cache_data/police_station/cop_cache_extraction.tres") #255
+const DETECTIVE_CACHE_FOOTPRINT = preload("res://items/cache_data/police_station/detective_cache_footprint.tres") #256
+const DETECTIVE_CACHE_CORRUPTION = preload("res://items/cache_data/police_station/detective_cache_corruption.tres") #257
+const DETECTIVE_CACHE_NETWORK = preload("res://items/cache_data/police_station/detective_cache_network.tres") #258
+const DETECTIVE_CACHE_EXTRACTION = preload("res://items/cache_data/police_station/detective_cache_extraction.tres") #259
+const SERGEANT_CACHE_FOOTPRINT = preload("res://items/cache_data/police_station/sergeant_cache_footprint.tres") #260
+const SERGEANT_CACHE_CORRUPTION = preload("res://items/cache_data/police_station/sergeant_cache_corruption.tres") #261
+const SERGEANT_CACHE_NETWORK = preload("res://items/cache_data/police_station/sergeant_cache_network.tres") #262
+const SERGEANT_CACHE_EXTRACTION = preload("res://items/cache_data/police_station/sergeant_cache_extraction.tres") #263
+const CAPTAIN_CACHE_FOOTPRINT = preload("res://items/cache_data/police_station/captain_cache_footprint.tres") #264
+const CAPTAIN_CACHE_CORRUPTION = preload("res://items/cache_data/police_station/captain_cache_corruption.tres") #265
+const CAPTAIN_CACHE_NETWORK = preload("res://items/cache_data/police_station/captain_cache_network.tres") #266
+const CAPTAIN_CACHE_EXTRACTION = preload("res://items/cache_data/police_station/captain_cache_extraction.tres") #267
 
 #law firm
 const LEGAL_ASSISTANT_CACHE = preload("res://items/cache_data/law_firm/legal_assistant_cache.tres")
@@ -341,6 +767,69 @@ const PARALEGAL_CACHE = preload("res://items/cache_data/law_firm/paralegal_cache
 const ASSOCIATE_ATTORNEY_CACHE = preload("res://items/cache_data/law_firm/associate_attorney_cache.tres")
 const LAWYER_CACHE = preload("res://items/cache_data/law_firm/lawyer_cache.tres")
 const PARTNER_CACHE = preload("res://items/cache_data/law_firm/partner_cache.tres")
+const LEGAL_ASSISTANT_CACHE_FOOTPRINT = preload("res://items/cache_data/law_firm/legal_assistant_cache_footprint.tres") #268
+const LEGAL_ASSISTANT_CACHE_CORRUPTION = preload("res://items/cache_data/law_firm/legal_assistant_cache_corruption.tres") #269
+const LEGAL_ASSISTANT_CACHE_NETWORK = preload("res://items/cache_data/law_firm/legal_assistant_cache_network.tres") #270
+const LEGAL_ASSISTANT_CACHE_EXTRACTION = preload("res://items/cache_data/law_firm/legal_assistant_cache_extraction.tres") #271
+const PARALEGAL_CACHE_FOOTPRINT = preload("res://items/cache_data/law_firm/paralegal_cache_footprint.tres") #272
+const PARALEGAL_CACHE_CORRUPTION = preload("res://items/cache_data/law_firm/paralegal_cache_corruption.tres") #273
+const PARALEGAL_CACHE_NETWORK = preload("res://items/cache_data/law_firm/paralegal_cache_network.tres") #274
+const PARALEGAL_CACHE_EXTRACTION = preload("res://items/cache_data/law_firm/paralegal_cache_extraction.tres") #275
+const ASSOCIATE_ATTORNEY_CACHE_FOOTPRINT = preload("res://items/cache_data/law_firm/associate_attorney_cache_footprint.tres") #276
+const ASSOCIATE_ATTORNEY_CACHE_CORRUPTION = preload("res://items/cache_data/law_firm/associate_attorney_cache_corruption.tres") #277
+const ASSOCIATE_ATTORNEY_CACHE_NETWORK = preload("res://items/cache_data/law_firm/associate_attorney_cache_network.tres") #278
+const ASSOCIATE_ATTORNEY_CACHE_EXTRACTION = preload("res://items/cache_data/law_firm/associate_attorney_cache_extraction.tres") #279
+const LAWYER_CACHE_FOOTPRINT = preload("res://items/cache_data/law_firm/lawyer_cache_footprint.tres") #280
+const LAWYER_CACHE_CORRUPTION = preload("res://items/cache_data/law_firm/lawyer_cache_corruption.tres") #281
+const LAWYER_CACHE_NETWORK = preload("res://items/cache_data/law_firm/lawyer_cache_network.tres") #282
+const LAWYER_CACHE_EXTRACTION = preload("res://items/cache_data/law_firm/lawyer_cache_extraction.tres") #283
+const PARTNER_CACHE_FOOTPRINT = preload("res://items/cache_data/law_firm/partner_cache_footprint.tres") #284
+const PARTNER_CACHE_CORRUPTION = preload("res://items/cache_data/law_firm/partner_cache_corruption.tres") #285
+const PARTNER_CACHE_NETWORK = preload("res://items/cache_data/law_firm/partner_cache_network.tres") #286
+const PARTNER_CACHE_EXTRACTION = preload("res://items/cache_data/law_firm/partner_cache_extraction.tres") #287
+
+#bank
+const TELLER_CACHE_FOOTPRINT = preload("res://items/cache_data/bank/teller_cache_footprint.tres") #288
+const TELLER_CACHE_CORRUPTION = preload("res://items/cache_data/bank/teller_cache_corruption.tres") #289
+const TELLER_CACHE_NETWORK = preload("res://items/cache_data/bank/teller_cache_network.tres") #290
+const TELLER_CACHE_EXTRACTION = preload("res://items/cache_data/bank/teller_cache_extraction.tres") #291
+const SECURITY_CACHE_FOOTPRINT = preload("res://items/cache_data/bank/security_cache_footprint.tres") #292
+const SECURITY_CACHE_CORRUPTION = preload("res://items/cache_data/bank/security_cache_corruption.tres") #293
+const SECURITY_CACHE_NETWORK = preload("res://items/cache_data/bank/security_cache_network.tres") #294
+const SECURITY_CACHE_EXTRACTION = preload("res://items/cache_data/bank/security_cache_extraction.tres") #295
+const LOAN_OFFICER_CACHE_FOOTPRINT = preload("res://items/cache_data/bank/officer_cache_footprint.tres") #296
+const LOAN_OFFICER_CACHE_CORRUPTION = preload("res://items/cache_data/bank/officer_cache_corruption.tres") #297
+const LOAN_OFFICER_CACHE_NETWORK = preload("res://items/cache_data/bank/officer_cache_network.tres") #298
+const LOAN_OFFICER_CACHE_EXTRACTION = preload("res://items/cache_data/bank/officer_cache_extraction.tres") #299
+const BRANCH_MANAGER_CACHE_FOOTPRINT = preload("res://items/cache_data/bank/manager_cache_footprint.tres") #300
+const BRANCH_MANAGER_CACHE_CORRUPTION = preload("res://items/cache_data/bank/manager_cache_corruption.tres") #301
+const BRANCH_MANAGER_CACHE_NETWORK = preload("res://items/cache_data/bank/manager_cache_network.tres") #302
+const BRANCH_MANAGER_CACHE_EXTRACTION = preload("res://items/cache_data/bank/manager_cache_extraction.tres") #303
+const CFO_CACHE_FOOTPRINT = preload("res://items/cache_data/bank/cfo_cache_footprint.tres") #304
+const CFO_CACHE_CORRUPTION = preload("res://items/cache_data/bank/cfo_cache_corruption.tres") #305
+const CFO_CACHE_NETWORK = preload("res://items/cache_data/bank/cfo_cache_network.tres") #306
+const CFO_CACHE_EXTRACTION = preload("res://items/cache_data/bank/cfo_cache_extraction.tres") #307
+#government
+const CLERK_CACHE_FOOTPRINT = preload("res://items/cache_data/government/clerk_cache_footprint.tres") #308
+const CLERK_CACHE_CORRUPTION = preload("res://items/cache_data/government/clerk_cache_corruption.tres") #309
+const CLERK_CACHE_NETWORK = preload("res://items/cache_data/government/clerk_cache_network.tres") #310
+const CLERK_CACHE_EXTRACTION = preload("res://items/cache_data/government/clerk_cache_extraction.tres") #311
+const ANALYST_CACHE_FOOTPRINT = preload("res://items/cache_data/government/analyst_cache_footprint.tres") #312
+const ANALYST_CACHE_CORRUPTION = preload("res://items/cache_data/government/analyst_cache_corruption.tres") #313
+const ANALYST_CACHE_NETWORK = preload("res://items/cache_data/government/analyst_cache_network.tres") #314
+const ANALYST_CACHE_EXTRACTION = preload("res://items/cache_data/government/analyst_cache_extraction.tres") #315
+const AMBASSADOR_CACHE_FOOTPRINT = preload("res://items/cache_data/government/ambassador_cache_footprint.tres") #316
+const AMBASSADOR_CACHE_CORRUPTION = preload("res://items/cache_data/government/ambassador_cache_corruption.tres") #317
+const AMBASSADOR_CACHE_NETWORK = preload("res://items/cache_data/government/ambassador_cache_network.tres") #318
+const AMBASSADOR_CACHE_EXTRACTION = preload("res://items/cache_data/government/ambassador_cache_extraction.tres") #319
+const VICE_PRESIDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/government/vice_president_cache_footprint.tres") #320
+const VICE_PRESIDENT_CACHE_CORRUPTION = preload("res://items/cache_data/government/vice_president_cache_corruption.tres") #321
+const VICE_PRESIDENT_CACHE_NETWORK = preload("res://items/cache_data/government/vice_president_cache_network.tres") #322
+const VICE_PRESIDENT_CACHE_EXTRACTION = preload("res://items/cache_data/government/vice_president_cache_extraction.tres") #323
+const PRESIDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/government/president_cache_footprint.tres") #324
+const PRESIDENT_CACHE_CORRUPTION = preload("res://items/cache_data/government/president_cache_corruption.tres") #325
+const PRESIDENT_CACHE_NETWORK = preload("res://items/cache_data/government/president_cache_network.tres") #326
+const PRESIDENT_CACHE_EXTRACTION = preload("res://items/cache_data/government/president_cache_extraction.tres") #327
 
 var ITEM_NAME_MAP = {}
 
@@ -477,4 +966,204 @@ const ITEM_MAP = {
 	ItemType.HOSPITAL_PAYLOAD: HOSPITAL_PAYLOAD,
 	ItemType.LAWFIRM_PAYLOAD: LAWFIRM_PAYLOAD,
 	ItemType.POLICE_PAYLOAD: POLICE_PAYLOAD,
+	ItemType.ENCRYPTED_BADGE_HASH: ENCRYPTED_BADGE_HASH, #128
+	ItemType.CASH_DRAWER_CODES: CASH_DRAWER_CODES, #129
+	ItemType.TELLER_CACHE: TELLER_CACHE, #130
+	ItemType.SECURITY_CACHE: SECURITY_CACHE, #131
+	ItemType.LOAN_OFFICER_CACHE: LOAN_OFFICER_CACHE, #132
+	ItemType.BRANCH_MANAGER_CACHE: BRANCH_MANAGER_CACHE, #133
+	ItemType.CFO_CACHE: CFO_CACHE, #134,
+	ItemType.CREDIT_RECORDS: CREDIT_RECORDS, #135
+	ItemType.SAFE_DEPOSIT_BOX_REGISTERY: SAFE_DEPOSIT_BOX_REGISTERY, #136
+	ItemType.SWIFT_MASTER_KEY: SWIFT_MASTER_KEY, #137
+	ItemType.VAULT_OVERRIDE: VAULT_OVERRIDE, #138
+	ItemType.CLERK_CACHE: CLERK_CACHE, #139
+	ItemType.ANALYST_CACHE: ANALYST_CACHE, #140
+	ItemType.AMBASSADOR_CACHE: AMBASSADOR_CACHE, #141
+	ItemType.VICE_PRESIDENT_CACHE: VICE_PRESIDENT_CACHE, #142
+	ItemType.PRESIDENT_CACHE: PRESIDENT_CACHE, #143
+	ItemType.REGISTER_VOTER_DB: REGISTER_VOTER_DB, #144 clerk
+	ItemType.CIA_BRIEF: CIA_BRIEF, #145 ANALYST
+	ItemType.BLACK_BUDGET_LEDGER: BLACK_BUDGET_LEDGER, #146 ambassador
+	ItemType.DEEP_COVER_IDS: DEEP_COVER_IDS, #147 vice pres
+	ItemType.NUKE_CODES: NUKE_CODES, #148 pres
+	ItemType.STUDENT_CACHE_CORRUPTION: STUDENT_CACHE_CORRUPTION, #149
+	ItemType.STUDENT_CACHE_NETWORK: STUDENT_CACHE_NETWORK, #150
+	ItemType.STUDENT_CACHE_EXTRACTION: STUDENT_CACHE_EXTRACTION, #151
+	ItemType.ADMIN_CACHE_FOOTPRINT: ADMIN_CACHE_FOOTPRINT, #152
+	ItemType.ADMIN_CACHE_CORRUPTION: ADMIN_CACHE_CORRUPTION, #153
+	ItemType.ADMIN_CACHE_NETWORK: ADMIN_CACHE_NETWORK, #154
+	ItemType.ADMIN_CACHE_EXTRACTION: ADMIN_CACHE_EXTRACTION, #155
+	ItemType.VICE_PRINCIPAL_CACHE_FOOTPRINT: VICE_PRINCIPAL_CACHE_FOOTPRINT, #156
+	ItemType.VICE_PRINCIPAL_CACHE_CORRUPTION: VICE_PRINCIPAL_CACHE_CORRUPTION, #157
+	ItemType.VICE_PRINCIPAL_CACHE_NETWORK: VICE_PRINCIPAL_CACHE_NETWORK, #158
+	ItemType.VICE_PRINCIPAL_CACHE_EXTRACTION: VICE_PRINCIPAL_CACHE_EXTRACTION, #159
+	ItemType.PRINCIPAL_CACHE_FOOTPRINT: PRINCIPAL_CACHE_FOOTPRINT, #160
+	ItemType.PRINCIPAL_CACHE_CORRUPTION: PRINCIPAL_CACHE_CORRUPTION, #161
+	ItemType.PRINCIPAL_CACHE_NETWORK: PRINCIPAL_CACHE_NETWORK, #162
+	ItemType.PRINCIPAL_CACHE_EXTRACTION: PRINCIPAL_CACHE_EXTRACTION, #163
+	ItemType.SUPERINTENDENT_CACHE_FOOTPRINT: SUPERINTENDENT_CACHE_FOOTPRINT, #164
+	ItemType.SUPERINTENDENT_CACHE_CORRUPTION: SUPERINTENDENT_CACHE_CORRUPTION, #165
+	ItemType.SUPERINTENDENT_CACHE_NETWORK: SUPERINTENDENT_CACHE_NETWORK, #166
+	ItemType.SUPERINTENDENT_CACHE_EXTRACTION: SUPERINTENDENT_CACHE_EXTRACTION, #167
+	ItemType.PATRON_CACHE_FOOTPRINT: PATRON_CACHE_FOOTPRINT, #168
+	ItemType.PATRON_CACHE_CORRUPTION: PATRON_CACHE_CORRUPTION, #169
+	ItemType.PATRON_CACHE_NETWORK: PATRON_CACHE_NETWORK, #170
+	ItemType.PATRON_CACHE_EXTRACTION: PATRON_CACHE_EXTRACTION, #171
+	ItemType.VOLUNTEER_CACHE_FOOTPRINT: VOLUNTEER_CACHE_FOOTPRINT, #172
+	ItemType.VOLUNTEER_CACHE_CORRUPTION: VOLUNTEER_CACHE_CORRUPTION, #173
+	ItemType.VOLUNTEER_CACHE_NETWORK: VOLUNTEER_CACHE_NETWORK, #174
+	ItemType.VOLUNTEER_CACHE_EXTRACTION: VOLUNTEER_CACHE_EXTRACTION, #175
+	ItemType.ASSISTANT_LIBRARIAN_CACHE_FOOTPRINT: ASSISTANT_LIBRARIAN_CACHE_FOOTPRINT, #176
+	ItemType.ASSISTANT_LIBRARIAN_CACHE_CORRUPTION: ASSISTANT_LIBRARIAN_CACHE_CORRUPTION, #177
+	ItemType.ASSISTANT_LIBRARIAN_CACHE_NETWORK: ASSISTANT_LIBRARIAN_CACHE_NETWORK, #178
+	ItemType.ASSISTANT_LIBRARIAN_CACHE_EXTRACTION: ASSISTANT_LIBRARIAN_CACHE_EXTRACTION, #179
+	ItemType.HEAD_LIBRARIAN_CACHE_FOOTPRINT: HEAD_LIBRARIAN_CACHE_FOOTPRINT, #180
+	ItemType.HEAD_LIBRARIAN_CACHE_CORRUPTION: HEAD_LIBRARIAN_CACHE_CORRUPTION, #181
+	ItemType.HEAD_LIBRARIAN_CACHE_NETWORK: HEAD_LIBRARIAN_CACHE_NETWORK, #182
+	ItemType.HEAD_LIBRARIAN_CACHE_EXTRACTION: HEAD_LIBRARIAN_CACHE_EXTRACTION, #183
+	ItemType.DIRECTOR_CACHE_FOOTPRINT: DIRECTOR_CACHE_FOOTPRINT, #184
+	ItemType.DIRECTOR_CACHE_CORRUPTION: DIRECTOR_CACHE_CORRUPTION, #185
+	ItemType.DIRECTOR_CACHE_NETWORK: DIRECTOR_CACHE_NETWORK, #186
+	ItemType.DIRECTOR_CACHE_EXTRACTION: DIRECTOR_CACHE_EXTRACTION, #187
+	ItemType.WORKER_CACHE_FOOTPRINT: WORKER_CACHE_FOOTPRINT, #188
+	ItemType.WORKER_CACHE_CORRUPTION: WORKER_CACHE_CORRUPTION, #189
+	ItemType.WORKER_CACHE_NETWORK: WORKER_CACHE_NETWORK, #190
+	ItemType.WORKER_CACHE_EXTRACTION: WORKER_CACHE_EXTRACTION, #191
+	ItemType.SUPERVISOR_CACHE_FOOTPRINT: SUPERVISOR_CACHE_FOOTPRINT, #192
+	ItemType.SUPERVISOR_CACHE_CORRUPTION: SUPERVISOR_CACHE_CORRUPTION, #193
+	ItemType.SUPERVISOR_CACHE_NETWORK: SUPERVISOR_CACHE_NETWORK, #194
+	ItemType.SUPERVISOR_CACHE_EXTRACTION: SUPERVISOR_CACHE_EXTRACTION, #195
+	ItemType.MANAGER_CACHE_FOOTPRINT: MANAGER_CACHE_FOOTPRINT, #196
+	ItemType.MANAGER_CACHE_CORRUPTION: MANAGER_CACHE_CORRUPTION, #197
+	ItemType.MANAGER_CACHE_NETWORK: MANAGER_CACHE_NETWORK, #198
+	ItemType.MANAGER_CACHE_EXTRACTION: MANAGER_CACHE_EXTRACTION, #199
+	ItemType.HUMAN_RESOURCES_CACHE_FOOTPRINT: HUMAN_RESOURCES_CACHE_FOOTPRINT, #200
+	ItemType.HUMAN_RESOURCES_CACHE_CORRUPTION: HUMAN_RESOURCES_CACHE_CORRUPTION, #201
+	ItemType.HUMAN_RESOURCES_CACHE_NETWORK: HUMAN_RESOURCES_CACHE_NETWORK, #202
+	ItemType.HUMAN_RESOURCES_CACHE_EXTRACTION: HUMAN_RESOURCES_CACHE_EXTRACTION, #203
+	ItemType.OWNER_CACHE_FOOTPRINT: OWNER_CACHE_FOOTPRINT, #204
+	ItemType.OWNER_CACHE_CORRUPTION: OWNER_CACHE_CORRUPTION, #205
+	ItemType.OWNER_CACHE_NETWORK: OWNER_CACHE_NETWORK, #206
+	ItemType.OWNER_CACHE_EXTRACTION: OWNER_CACHE_EXTRACTION, #207
+	ItemType.TEACHERS_ASSISTANT_CACHE_FOOTPRINT: TEACHERS_ASSISTANT_CACHE_FOOTPRINT, #208
+	ItemType.TEACHERS_ASSISTANT_CACHE_CORRUPTION: TEACHERS_ASSISTANT_CACHE_CORRUPTION, #209
+	ItemType.TEACHERS_ASSISTANT_CACHE_NETWORK: TEACHERS_ASSISTANT_CACHE_NETWORK, #210
+	ItemType.TEACHERS_ASSISTANT_CACHE_EXTRACTION: TEACHERS_ASSISTANT_CACHE_EXTRACTION, #211
+	ItemType.PROFESSOR_CACHE_FOOTPRINT: PROFESSOR_CACHE_FOOTPRINT, #212
+	ItemType.PROFESSOR_CACHE_CORRUPTION: PROFESSOR_CACHE_CORRUPTION, #213
+	ItemType.PROFESSOR_CACHE_NETWORK: PROFESSOR_CACHE_NETWORK, #214
+	ItemType.PROFESSOR_CACHE_EXTRACTION: PROFESSOR_CACHE_EXTRACTION, #215
+	ItemType.DEPARTMENT_CHAIR_CACHE_FOOTPRINT: DEPARTMENT_CHAIR_CACHE_FOOTPRINT, #216
+	ItemType.DEPARTMENT_CHAIR_CACHE_CORRUPTION: DEPARTMENT_CHAIR_CACHE_CORRUPTION, #217
+	ItemType.DEPARTMENT_CHAIR_CACHE_NETWORK: DEPARTMENT_CHAIR_CACHE_NETWORK, #218
+	ItemType.DEPARTMENT_CHAIR_CACHE_EXTRACTION: DEPARTMENT_CHAIR_CACHE_EXTRACTION, #219
+	ItemType.DEAN_CACHE_FOOTPRINT: DEAN_CACHE_FOOTPRINT, #220
+	ItemType.DEAN_CACHE_CORRUPTION: DEAN_CACHE_CORRUPTION, #221
+	ItemType.DEAN_CACHE_NETWORK: DEAN_CACHE_NETWORK, #222
+	ItemType.DEAN_CACHE_EXTRACTION: DEAN_CACHE_EXTRACTION, #223
+	ItemType.UNIVERSITY_PRESIDENT_CACHE_FOOTPRINT: UNIVERSITY_PRESIDENT_CACHE_FOOTPRINT, #224
+	ItemType.UNIVERSITY_PRESIDENT_CACHE_CORRUPTION: UNIVERSITY_PRESIDENT_CACHE_CORRUPTION, #225
+	ItemType.UNIVERSITY_PRESIDENT_CACHE_NETWORK: UNIVERSITY_PRESIDENT_CACHE_NETWORK, #226
+	ItemType.UNIVERSITY_PRESIDENT_CACHE_EXTRACTION: UNIVERSITY_PRESIDENT_CACHE_EXTRACTION, #227
+	ItemType.RECEPTIONIST_CACHE_FOOTPRINT: RECEPTIONIST_CACHE_FOOTPRINT, #228
+	ItemType.RECEPTIONIST_CACHE_CORRUPTION: RECEPTIONIST_CACHE_CORRUPTION, #229
+	ItemType.RECEPTIONIST_CACHE_NETWORK: RECEPTIONIST_CACHE_NETWORK, #230
+	ItemType.RECEPTIONIST_CACHE_EXTRACTION: RECEPTIONIST_CACHE_EXTRACTION, #231
+	ItemType.ORDERLY_CACHE_FOOTPRINT: ORDERLY_CACHE_FOOTPRINT, #232
+	ItemType.ORDERLY_CACHE_CORRUPTION: ORDERLY_CACHE_CORRUPTION, #233
+	ItemType.ORDERLY_CACHE_NETWORK: ORDERLY_CACHE_NETWORK, #234
+	ItemType.ORDERLY_CACHE_EXTRACTION: ORDERLY_CACHE_EXTRACTION, #235
+	ItemType.NURSE_CACHE_FOOTPRINT: NURSE_CACHE_FOOTPRINT, #236
+	ItemType.NURSE_CACHE_CORRUPTION: NURSE_CACHE_CORRUPTION, #237
+	ItemType.NURSE_CACHE_NETWORK: NURSE_CACHE_NETWORK, #238
+	ItemType.NURSE_CACHE_EXTRACTION: NURSE_CACHE_EXTRACTION, #239
+	ItemType.DOCTOR_CACHE_FOOTPRINT: DOCTOR_CACHE_FOOTPRINT, #240
+	ItemType.DOCTOR_CACHE_CORRUPTION: DOCTOR_CACHE_CORRUPTION, #241
+	ItemType.DOCTOR_CACHE_NETWORK: DOCTOR_CACHE_NETWORK, #242
+	ItemType.DOCTOR_CACHE_EXTRACTION: DOCTOR_CACHE_EXTRACTION, #243
+	ItemType.CHIEF_OF_MEDICINE_CACHE_FOOTPRINT: CHIEF_OF_MEDICINE_CACHE_FOOTPRINT, #244
+	ItemType.CHIEF_OF_MEDICINE_CACHE_CORRUPTION: CHIEF_OF_MEDICINE_CACHE_CORRUPTION, #245
+	ItemType.CHIEF_OF_MEDICINE_CACHE_NETWORK: CHIEF_OF_MEDICINE_CACHE_NETWORK, #246
+	ItemType.CHIEF_OF_MEDICINE_CACHE_EXTRACTION: CHIEF_OF_MEDICINE_CACHE_EXTRACTION, #247
+	ItemType.SECRETARY_CACHE_FOOTPRINT: SECRETARY_CACHE_FOOTPRINT, #248
+	ItemType.SECRETARY_CACHE_CORRUPTION: SECRETARY_CACHE_CORRUPTION, #249
+	ItemType.SECRETARY_CACHE_NETWORK: SECRETARY_CACHE_NETWORK, #250
+	ItemType.SECRETARY_CACHE_EXTRACTION: SECRETARY_CACHE_EXTRACTION, #251
+	ItemType.COP_CACHE_FOOTPRINT: COP_CACHE_FOOTPRINT, #252
+	ItemType.COP_CACHE_CORRUPTION: COP_CACHE_CORRUPTION, #253
+	ItemType.COP_CACHE_NETWORK: COP_CACHE_NETWORK, #254
+	ItemType.COP_CACHE_EXTRACTION: COP_CACHE_EXTRACTION, #255
+	ItemType.DETECTIVE_CACHE_FOOTPRINT: DETECTIVE_CACHE_FOOTPRINT, #256
+	ItemType.DETECTIVE_CACHE_CORRUPTION: DETECTIVE_CACHE_CORRUPTION, #257
+	ItemType.DETECTIVE_CACHE_NETWORK: DETECTIVE_CACHE_NETWORK, #258
+	ItemType.DETECTIVE_CACHE_EXTRACTION: DETECTIVE_CACHE_EXTRACTION, #259
+	ItemType.SERGEANT_CACHE_FOOTPRINT: SERGEANT_CACHE_FOOTPRINT, #260
+	ItemType.SERGEANT_CACHE_CORRUPTION: SERGEANT_CACHE_CORRUPTION, #261
+	ItemType.SERGEANT_CACHE_NETWORK: SERGEANT_CACHE_NETWORK, #262
+	ItemType.SERGEANT_CACHE_EXTRACTION: SERGEANT_CACHE_EXTRACTION, #263
+	ItemType.CAPTAIN_CACHE_FOOTPRINT: CAPTAIN_CACHE_FOOTPRINT, #264
+	ItemType.CAPTAIN_CACHE_CORRUPTION: CAPTAIN_CACHE_CORRUPTION, #265
+	ItemType.CAPTAIN_CACHE_NETWORK: CAPTAIN_CACHE_NETWORK, #266
+	ItemType.CAPTAIN_CACHE_EXTRACTION: CAPTAIN_CACHE_EXTRACTION, #267
+	ItemType.LEGAL_ASSISTANT_CACHE_FOOTPRINT: LEGAL_ASSISTANT_CACHE_FOOTPRINT, #268
+	ItemType.LEGAL_ASSISTANT_CACHE_CORRUPTION: LEGAL_ASSISTANT_CACHE_CORRUPTION, #269
+	ItemType.LEGAL_ASSISTANT_CACHE_NETWORK: LEGAL_ASSISTANT_CACHE_NETWORK, #270
+	ItemType.LEGAL_ASSISTANT_CACHE_EXTRACTION: LEGAL_ASSISTANT_CACHE_EXTRACTION, #271
+	ItemType.PARALEGAL_CACHE_FOOTPRINT: PARALEGAL_CACHE_FOOTPRINT, #272
+	ItemType.PARALEGAL_CACHE_CORRUPTION: PARALEGAL_CACHE_CORRUPTION, #273
+	ItemType.PARALEGAL_CACHE_NETWORK: PARALEGAL_CACHE_NETWORK, #274
+	ItemType.PARALEGAL_CACHE_EXTRACTION: PARALEGAL_CACHE_EXTRACTION, #275
+	ItemType.ASSOCIATE_ATTORNEY_CACHE_FOOTPRINT: ASSOCIATE_ATTORNEY_CACHE_FOOTPRINT, #276
+	ItemType.ASSOCIATE_ATTORNEY_CACHE_CORRUPTION: ASSOCIATE_ATTORNEY_CACHE_CORRUPTION, #277
+	ItemType.ASSOCIATE_ATTORNEY_CACHE_NETWORK: ASSOCIATE_ATTORNEY_CACHE_NETWORK, #278
+	ItemType.ASSOCIATE_ATTORNEY_CACHE_EXTRACTION: ASSOCIATE_ATTORNEY_CACHE_EXTRACTION, #279
+	ItemType.LAWYER_CACHE_FOOTPRINT: LAWYER_CACHE_FOOTPRINT, #280
+	ItemType.LAWYER_CACHE_CORRUPTION: LAWYER_CACHE_CORRUPTION, #281
+	ItemType.LAWYER_CACHE_NETWORK: LAWYER_CACHE_NETWORK, #282
+	ItemType.LAWYER_CACHE_EXTRACTION: LAWYER_CACHE_EXTRACTION, #283
+	ItemType.PARTNER_CACHE_FOOTPRINT: PARTNER_CACHE_FOOTPRINT, #284
+	ItemType.PARTNER_CACHE_CORRUPTION: PARTNER_CACHE_CORRUPTION, #285
+	ItemType.PARTNER_CACHE_NETWORK: PARTNER_CACHE_NETWORK, #286
+	ItemType.PARTNER_CACHE_EXTRACTION: PARTNER_CACHE_EXTRACTION, #287
+	ItemType.TELLER_CACHE_FOOTPRINT: TELLER_CACHE_FOOTPRINT, #288
+	ItemType.TELLER_CACHE_CORRUPTION: TELLER_CACHE_CORRUPTION, #289
+	ItemType.TELLER_CACHE_NETWORK: TELLER_CACHE_NETWORK, #290
+	ItemType.TELLER_CACHE_EXTRACTION: TELLER_CACHE_EXTRACTION, #291
+	ItemType.SECURITY_CACHE_FOOTPRINT: SECURITY_CACHE_FOOTPRINT, #292
+	ItemType.SECURITY_CACHE_CORRUPTION: SECURITY_CACHE_CORRUPTION, #293
+	ItemType.SECURITY_CACHE_NETWORK: SECURITY_CACHE_NETWORK, #294
+	ItemType.SECURITY_CACHE_EXTRACTION: SECURITY_CACHE_EXTRACTION, #295
+	ItemType.LOAN_OFFICER_CACHE_FOOTPRINT: LOAN_OFFICER_CACHE_FOOTPRINT, #296
+	ItemType.LOAN_OFFICER_CACHE_CORRUPTION: LOAN_OFFICER_CACHE_CORRUPTION, #297
+	ItemType.LOAN_OFFICER_CACHE_NETWORK: LOAN_OFFICER_CACHE_NETWORK, #298
+	ItemType.LOAN_OFFICER_CACHE_EXTRACTION: LOAN_OFFICER_CACHE_EXTRACTION, #299
+	ItemType.BRANCH_MANAGER_CACHE_FOOTPRINT: BRANCH_MANAGER_CACHE_FOOTPRINT, #300
+	ItemType.BRANCH_MANAGER_CACHE_CORRUPTION: BRANCH_MANAGER_CACHE_CORRUPTION, #301
+	ItemType.BRANCH_MANAGER_CACHE_NETWORK: BRANCH_MANAGER_CACHE_NETWORK, #302
+	ItemType.BRANCH_MANAGER_CACHE_EXTRACTION: BRANCH_MANAGER_CACHE_EXTRACTION, #303
+	ItemType.CFO_CACHE_FOOTPRINT: CFO_CACHE_FOOTPRINT, #304
+	ItemType.CFO_CACHE_CORRUPTION: CFO_CACHE_CORRUPTION, #305
+	ItemType.CFO_CACHE_NETWORK: CFO_CACHE_NETWORK, #306
+	ItemType.CFO_CACHE_EXTRACTION: CFO_CACHE_EXTRACTION, #307
+	ItemType.CLERK_CACHE_FOOTPRINT: CLERK_CACHE_FOOTPRINT, #308
+	ItemType.CLERK_CACHE_CORRUPTION: CLERK_CACHE_CORRUPTION, #309
+	ItemType.CLERK_CACHE_NETWORK: CLERK_CACHE_NETWORK, #310
+	ItemType.CLERK_CACHE_EXTRACTION: CLERK_CACHE_EXTRACTION, #311
+	ItemType.ANALYST_CACHE_FOOTPRINT: ANALYST_CACHE_FOOTPRINT, #312
+	ItemType.ANALYST_CACHE_CORRUPTION: ANALYST_CACHE_CORRUPTION, #313
+	ItemType.ANALYST_CACHE_NETWORK: ANALYST_CACHE_NETWORK, #314
+	ItemType.ANALYST_CACHE_EXTRACTION: ANALYST_CACHE_EXTRACTION, #315
+	ItemType.AMBASSADOR_CACHE_FOOTPRINT: AMBASSADOR_CACHE_FOOTPRINT, #316
+	ItemType.AMBASSADOR_CACHE_CORRUPTION: AMBASSADOR_CACHE_CORRUPTION, #317
+	ItemType.AMBASSADOR_CACHE_NETWORK: AMBASSADOR_CACHE_NETWORK, #318
+	ItemType.AMBASSADOR_CACHE_EXTRACTION: AMBASSADOR_CACHE_EXTRACTION, #319
+	ItemType.VICE_PRESIDENT_CACHE_FOOTPRINT: VICE_PRESIDENT_CACHE_FOOTPRINT, #320
+	ItemType.VICE_PRESIDENT_CACHE_CORRUPTION: VICE_PRESIDENT_CACHE_CORRUPTION, #321
+	ItemType.VICE_PRESIDENT_CACHE_NETWORK: VICE_PRESIDENT_CACHE_NETWORK, #322
+	ItemType.VICE_PRESIDENT_CACHE_EXTRACTION: VICE_PRESIDENT_CACHE_EXTRACTION, #323
+	ItemType.PRESIDENT_CACHE_FOOTPRINT: PRESIDENT_CACHE_FOOTPRINT, #324
+	ItemType.PRESIDENT_CACHE_CORRUPTION: PRESIDENT_CACHE_CORRUPTION, #325
+	ItemType.PRESIDENT_CACHE_NETWORK: PRESIDENT_CACHE_NETWORK, #326
+	ItemType.PRESIDENT_CACHE_EXTRACTION: PRESIDENT_CACHE_EXTRACTION, #327
 }

@@ -35,15 +35,21 @@ var SKILL = {
 #TIER II
 #Corruption -
 # From Mining Item: small chance for hacking items (SQL injectors, packet spoof, hacking upgrade items)
-# From Cache: Much higher chance to find items in cache, but 25% chance to destroy cache after each its found.
+# From Cache: Much higher chance to find items in cache, but 20% chance to destroy cache after each its found.
 #Tier III
 #Network -
-# From Mining Item: small chance to find Compiled payload of that tier
-# From Cache Item: if cache contains VM Tokens, double the amount found.
+# From Mining Item: small chance to find random VM token
+# From Cache Item: caches now have a chance to find VM tokens
 #Tier IV
 #Extraction -
 # From Mining Item: take additional argument to start, looks for that specific item
 # From Cache Item: Student Cache > Student Cache (Extraction) : If a rare item is decoded, find 4 additional copies
+
+
+#footprint - doubles basic resources
+#corruption - high chance of finding items, 25% chance to find nothing else
+#Network - doubles VM tokens found
+#Extraction - rare material x 4 (if found)
 
 var FOOTPRINT = {
 	"name": "Footprint",

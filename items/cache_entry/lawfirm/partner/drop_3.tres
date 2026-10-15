@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://ctyu6hr6eex05"]
+
+[ext_resource type="Resource" uid="uid://cmlalywof0isq" path="res://items/cache_data/law_firm/associate_attorney_cache.tres" id="1_dylad"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_ysot6"]
+
+[resource]
+script = ExtResource("2_ysot6")
+item = ExtResource("1_dylad")
+min_quantity = 3
+max_quantity = 7
+drop_chance = 0.4
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

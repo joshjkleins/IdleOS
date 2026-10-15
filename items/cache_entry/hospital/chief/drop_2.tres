@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://bom7w5lkqv0a6"]
+
+[ext_resource type="Resource" uid="uid://bh42kmsevp3bm" path="res://items/cache_data/hospital/orderly_cache.tres" id="1_kvwd4"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_vo82r"]
+
+[resource]
+script = ExtResource("2_vo82r")
+item = ExtResource("1_kvwd4")
+min_quantity = 3
+max_quantity = 7
+drop_chance = 0.4
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

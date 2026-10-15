@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://ddevps3l2enu8"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_5a5bf"]
+[ext_resource type="Resource" uid="uid://dgw6uof1pg7l4" path="res://items/valuables/bank/swift_master_key.tres" id="1_n6860"]
+
+[resource]
+script = ExtResource("1_5a5bf")
+item = ExtResource("1_n6860")
+min_quantity = 1
+max_quantity = 1
+drop_chance = 1.0
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

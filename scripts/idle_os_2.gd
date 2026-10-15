@@ -1,7 +1,13 @@
 extends Control
 
 #FINAL TODO LIST FOR 1.0
-#ADD ALL ITEMS FOR ALL TIERS : CACHES + VARIANTS, HACKING MODS
+#ADD ALL ITEMS FOR ALL TIERS : VARIANTS, HACKING MODS : 
+#TODO Add parsing variants of each cache | remove VM tokens from cache drops 
+# update ls student cache footprint to not show drop rate for rare item, 
+#student cache network with add vm token chance, 
+#student cache extraction 4x rare material
+
+#REMOVE DEMO LOCKS
 #ADD THEM TO PROPER SKILLS + RECIPES
 #FLUSH OUT UPLOAD MECHANIC
 #OFFLINE PROGRESSION

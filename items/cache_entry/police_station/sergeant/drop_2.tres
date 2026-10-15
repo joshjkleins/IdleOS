@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://dblacank4afv8"]
+
+[ext_resource type="Resource" uid="uid://dqsd0ckrn3c3l" path="res://items/resources/Payloads/police_station_payload.tres" id="1_jtu2v"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_v7tft"]
+
+[resource]
+script = ExtResource("1_v7tft")
+item = ExtResource("1_jtu2v")
+min_quantity = 25
+max_quantity = 50
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

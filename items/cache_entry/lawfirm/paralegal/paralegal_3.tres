@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://j5jjw4bgu5en"]
+
+[ext_resource type="Resource" uid="uid://b71xw504yucne" path="res://items/resources/Parsing/email_header.tres" id="1_aj4dv"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_xvkfi"]
+
+[resource]
+script = ExtResource("2_xvkfi")
+item = ExtResource("1_aj4dv")
+min_quantity = 25
+max_quantity = 50
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"
