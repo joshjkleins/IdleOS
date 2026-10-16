@@ -141,7 +141,7 @@ var CRACKING = {
 		{ 
 			"name": "Overclock",
 			"id": "cracking.overclock",
-			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"description": "Allows overclocking of Cracking, increasing speed and heat output.",
 			"current": false,
 			"levels": [ 
 				{
@@ -193,7 +193,7 @@ var MATCHING = {
 		{ 
 			"name": "Overclock",
 			"id": "matching.overclock",
-			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"description": "Allows overclocking of Matching, increasing speed and heat output.",
 			"current": false,
 			"levels": [ 
 				{
@@ -249,7 +249,7 @@ var PHISHING = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "parsing.overclock", 
+					"id": "phishing.overclock", 
 					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 25 }],
 					"amount": true,
 					"unlocked": false
@@ -330,21 +330,21 @@ var HACKING = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "hacking.firewall", 
+					"id": "hacking.healing", 
 					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
 				},
 				{
 					"level": 2,
-					"id": "hacking.firewall", 
+					"id": "hacking.healing", 
 					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
 				},
 				{
 					"level": 3,
-					"id": "hacking.firewall", 
+					"id": "hacking.healing", 
 					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 80 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 5,
 					"unlocked": false
@@ -419,7 +419,7 @@ var HACKING = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "hacking.overclock", 
+					"id": "hacking.recursive_hacking", 
 					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 3 }],
 					"amount": true,
 					"unlocked": false
@@ -466,7 +466,7 @@ var DECODING = {
 		{ 
 			"name": "Overclock",
 			"id": "decoding.overclock",
-			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"description": "Allows overclocking of Decoding, increasing speed and heat output.",
 			"current": false,
 			"levels": [ 
 				{
@@ -518,7 +518,7 @@ var COMPILING = {
 		{ 
 			"name": "Overclock",
 			"id": "compiling.overclock",
-			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
+			"description": "Allows overclocking of Compiling, increasing speed and heat output.",
 			"current": false,
 			"levels": [ 
 				{
@@ -606,14 +606,14 @@ var SYSTEM = {
 			"levels": [ 
 				{
 					"level": 1,
-					"id": "system.vm_windows", 
+					"id": "system.heat_reduction", 
 					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 5 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 0.1,
 					"unlocked": false
 				},
 				{
 					"level": 2,
-					"id": "system.vm_windows", 
+					"id": "system.heat_reduction", 
 					"requirements":[{"item": Items.STUDENT_CACHE, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
 					"amount": 0.1,
 					"unlocked": false

@@ -156,14 +156,14 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	Signals.end_log_parsing_safely_signal.connect(log_parsing_ended_safely)
-	Signals.end_pw_cracking_safely_signal.connect(password_cracking_ended_safely)
-	Signals.end_cache_decrypting_safely_signal.connect(cache_decrypting_ended_safely)
-	Signals.end_phishing_safely_signal.connect(phishing_ended_safely)
-	Signals.end_data_mining_safely_signal.connect(data_mining_ended_safely)
-	Signals.end_cred_matching_safely_signal.connect(cred_matching_ended_safely)
-	Signals.end_compiling_safely_signal.connect(compiling_ended_safely)
-	Signals.defrag_finished_signal.connect(defrag_finished)
+	Signals.end_log_parsing_safely_signal.connect(_on_process_ended.bind("Parsing safely finished."))
+	Signals.end_pw_cracking_safely_signal.connect(_on_process_ended.bind("Password cracking safely finished."))
+	Signals.end_cache_decrypting_safely_signal.connect(_on_process_ended.bind("Decoding safely finished."))
+	Signals.end_phishing_safely_signal.connect(_on_process_ended.bind("Phishing process finished."))
+	Signals.end_data_mining_safely_signal.connect(_on_process_ended.bind("Mining safely finished."))
+	Signals.end_cred_matching_safely_signal.connect(_on_process_ended.bind("Matching safely finished."))
+	Signals.end_compiling_safely_signal.connect(_on_process_ended.bind("Compiling stopped."))
+	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 	Signals.system_overheated_signal.connect(overheat_terminal_notice)
@@ -746,7 +746,7 @@ func handle_cd_commands(text):
 			header.display_defragging()
 			add_line("[ OK ] defragging module loaded")
 			update_context(Context.DEFRAGGING)
-			add_line(ContextCommands.get_help_text(Defragging))
+			add_line(ContextCommands.get_help_text_defragging(Defragging))
 		"compiling":
 			add_line("[ .. ] loading compiling module")
 			header.display_skill(Compiling)
@@ -1091,6 +1091,9 @@ func handle_vm_token_commands(text):
 			if item.hacking_mod_item:
 				add_line("ERROR: cannot further Compile hacking mod.")
 				return
+			if !item.is_compilable_mod():
+				add_line("ERROR: " + item.name + " cannot be compiled into a Hacking Mod.")
+				return
 			var amount_needed = item.hacking_mod_consumed
 			if Inventory.get_amount(item) < amount_needed:
 				add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
@@ -1126,8 +1129,8 @@ func handle_vm_token_commands(text):
 			#example command: crack -vm use=mining create=parsing
 			var flags = text.trim_prefix(target_minor_process["ssh command"]).strip_edges()
 			#confirm command has proper flags (use/create)
-			var parts = flags.split(" ")
-			if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+			var parts = flags.split(" ", false)
+			if parts.size() < 2 or !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
 				add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
 				return
 			
@@ -1193,6 +1196,72 @@ func unstick_current_process():
 		add_new_scrollback()
 
 ###################################################
+########### SHARED SKILL PROCESS COMMANDS #########
+###################################################
+## Commands every skill context shares (stop, stop -s, focus, cd .., overclock).
+## safe_stop_message: line shown for 'stop -s'. Empty means safe stop isn't supported.
+func _handle_process_commands(text: String, safe_stop_message: String, can_overclock: bool = true) -> void:
+	match text:
+		"stop":
+			unstick_current_process()
+			process_running = false
+			if current_process:
+				add_line("Killing process immediately")
+				current_process.stop()
+				current_process = null
+				current_process_info = {}
+			else:
+				add_line("No active process to stop.")
+			Stats.overclocked = false
+		"stop -s", "kill -s":
+			if safe_stop_message == "":
+				add_line("Safe stop not available for this process. Use 'stop'.")
+				return
+			if !current_process:
+				add_line("No active process to stop.")
+				return
+			add_line(safe_stop_message)
+			current_process.stop_safely()
+		"focus":
+			if current_process:
+				bring_process_to_bottom()
+				if current_context == Context.MINING:
+					Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
+			else:
+				add_line("No process found to focus")
+		"root", "..", "cd ..", "cd ../":
+			return_to_root()
+		"overclock":
+			if can_overclock:
+				overclock_logic()
+			else:
+				add_line("Overclock not available for this process.")
+		"overclock -kill":
+			if !can_overclock:
+				add_line("Overclock not available for this process.")
+				return
+			if !Stats.overclocked:
+				add_line("Not currently overclocking.")
+			if Stats.overclocked and process_running:
+				add_line("Killing overclock.")
+			Stats.overclocked = false
+		_:
+			if text.begins_with("cd"):
+				add_line(ContextCommands.cd_not_at_root())
+			else:
+				add_line("Command not found")
+
+## Called when any skill terminal finishes or stops safely.
+func _on_process_ended(message: String) -> void:
+	unstick_current_process()
+	current_process = null
+	current_process_info = {}
+	process_running = false
+	Stats.overclocked = false
+	hud_process_running.process_killed()
+	add_line(message)
+
+###################################################
 ################### MINING ########################
 ###################################################
 func mining_commands(text):
@@ -1204,41 +1273,8 @@ func mining_commands(text):
 			else:
 				add_line(ContextCommands.process_already_running_text())
 			return
-	match text:
-		"stop":
-			process_running = false
-			unstick_current_process()
-			if current_process:
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current mine...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-				Tutorial.complete_event(Tutorial.TutorialEvent.USE_FOCUS)
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current mine...")
+
 
 func start_log_mining(minor_process: Dictionary):
 	if !minor_process.unlocked:
@@ -1254,15 +1290,6 @@ func start_log_mining(minor_process: Dictionary):
 	hud_process_running.process_started(Mining, minor_process)
 	add_new_scrollback()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_MINING_LOG)
-
-func data_mining_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Mining safely finished.")
 
 ###################################################
 ################### PARSING #######################
@@ -1299,52 +1326,8 @@ func log_parsing_commands(text):
 			start_parsing(ms, parsed_cmd.items_to_parse)
 			return
 	
-	match text:
-		"stop":
-			process_running = false
-			unstick_current_process()
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current log...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("Module: Parsing")
-			add_line("Level:         " + str(Parsing["level"]))
-			#Level
-			#Experience
-			add_line("Experience:    " + str(Parsing["experience"]) + " / " + str(Stats.xp_for_level(Parsing["level"] + 1)))
-			#Effeciency
-			var eff = Parsing["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Parsing["efficiency description"])
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current log...")
 
-#HERE!!
 func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
 	#if !minor_process.unlocked:
 		#add_line("Requires parsing level " + str(minor_process["unlock level"]))
@@ -1373,15 +1356,6 @@ func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
 	hud_process_running.process_started(Parsing, minor_process)
 	add_new_scrollback()
 
-func log_parsing_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Parsing safely finished.")
-
 ###################################################
 #################### CRACKING #####################
 ###################################################
@@ -1398,8 +1372,8 @@ func password_unscramble_commands(text):
 				#example command: crack -vm use=mining create=parsing
 				var flags = text.trim_prefix(ms["command"]).strip_edges()
 				#confirm command has proper flags (use/create)
-				var parts = flags.split(" ")
-				if !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
+				var parts = flags.split(" ", false)
+				if parts.size() < 2 or !parts[0].begins_with("use=") or !parts[1].begins_with("create="):
 					add_line("ERROR: 'cracking -vm' command not recognized. [color=#666666]example: crack -vm use=mining create=parsing")
 					return
 				
@@ -1422,50 +1396,8 @@ func password_unscramble_commands(text):
 			else:
 				start_cracking(ms)
 			return
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current password...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("Module: Cracking")
-			add_line("Level:         " + str(Stats.player_stats["Cracking"]["level"]))
-			#Level
-			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Cracking"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cracking"]["level"] + 1)))
-			#Effeciency
-			var eff = Stats.player_stats["Cracking"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cracking"]["efficiency description"])
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current password...")
+
 
 func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create_item: ItemData = null):
 	if !minor_process.unlocked:
@@ -1485,15 +1417,6 @@ func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create
 	new_pw_cracking_terminal.start()
 	hud_process_running.process_started(Cracking, minor_process)
 	add_new_scrollback()
-
-func password_cracking_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Password cracking safely finished.")
 
 ###################################################
 ################### CRED MATCHING #################
@@ -1515,50 +1438,8 @@ func cred_matching_commands(text):
 			
 			start_matching(ms)
 			return
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current match...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("Module: Matching")
-			add_line("Level:         " + str(Stats.player_stats["Credential Matching"]["level"]))
-			#Level
-			#Experience
-			add_line("Experience:    " + str(Stats.player_stats["Credential Matching"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Credential Matching"]["level"] + 1)))
-			#Effeciency
-			var eff = Stats.player_stats["Credential Matching"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Credential Matching"]["efficiency description"])
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current match...")
+
 
 func start_matching(minor_process):
 	if !minor_process.unlocked:
@@ -1574,16 +1455,6 @@ func start_matching(minor_process):
 	new_cred_matching_terminal.start()
 	hud_process_running.process_started(Matching, minor_process)
 	add_new_scrollback()
-
-func cred_matching_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Matching safely finished.")
-	
 
 ###################################################
 ############### CACHE DECRYPTING ##################
@@ -1628,47 +1499,8 @@ func cache_decrypting_commands(text):
 			start_cache_decrypting(ms, cache_item)
 			return
 	
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current cache...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("Module: Cache Decrypting")
-			add_line("Level:         " + str(Stats.player_stats["Cache Decrypting"]["level"]))
-			add_line("Experience:    " + str(Stats.player_stats["Cache Decrypting"]["experience"]) + " / " + str(Stats.xp_for_level(Stats.player_stats["Cache Decrypting"]["level"] + 1)))
-			var eff = Stats.player_stats["Cache Decrypting"]["efficiency"]
-			add_line("Efficiency:    " + str(float(eff * 100.0)) + "%     " + Stats.player_stats["Cache Decrypting"]["efficiency description"])
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current cache...")
+
 
 func start_cache_decrypting(minor_process, cache_item: ItemData = null):
 	if !minor_process.unlocked:
@@ -1684,15 +1516,6 @@ func start_cache_decrypting(minor_process, cache_item: ItemData = null):
 	new_cache_decrypt_terminal.start_decrypting()
 	hud_process_running.process_started(Decoding, minor_process)
 	add_new_scrollback()
-
-func cache_decrypting_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Decoding safely finished.")
 
 func overclock_logic():
 	if !process_running: #no process running
@@ -1728,43 +1551,8 @@ func phishing_commands(text):
 				
 			cast_line(ms, -1)
 			return
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current phishing attempt...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("Module: Phishing")
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current phishing attempt...")
+
 
 func cast_line(type: Dictionary, t_lines: int):
 	if current_process is PhishingTerminal:
@@ -1778,15 +1566,6 @@ func cast_line(type: Dictionary, t_lines: int):
 		new_phishing_terminal.cast_lines(type, t_lines)
 		hud_process_running.process_started(Phishing, type)
 		add_new_scrollback()
-
-func phishing_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Phishing process finished.")
 
 ###################################################
 ################### COMPILING #####################
@@ -1815,6 +1594,9 @@ func compiling_commands(text):
 				if item.hacking_mod_item:
 					add_line("ERROR: cannot further Compile hacking mod.")
 					return
+				if !item.is_compilable_mod():
+					add_line("ERROR: " + item.name + " cannot be compiled into a Hacking Mod.")
+					return
 				var amount_needed = item.hacking_mod_consumed
 				if Inventory.get_amount(item) < amount_needed:
 					add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
@@ -1841,41 +1623,8 @@ func compiling_commands(text):
 				
 				start_compiling(ms)
 				return
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"stop -s", "kill -s":
-			add_line("Finishing current compile...")
-			current_process.stop_safely()
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"overclock":
-			overclock_logic()
-		"overclock -kill":
-			if !Stats.overclocked:
-				add_line("Not currently overclocking.")
-			if Stats.overclocked and process_running:
-				add_line("Killing overclock.")
-			Stats.overclocked = false
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "Finishing current compile...")
+
 
 func start_compiling(minor_process: Dictionary, item: ItemData = null):
 	if !minor_process.unlocked:
@@ -1890,15 +1639,6 @@ func start_compiling(minor_process: Dictionary, item: ItemData = null):
 	new_compiling_terminal.start(minor_process, false, item)
 	hud_process_running.process_started(Compiling, minor_process)
 	add_new_scrollback()
-
-func compiling_ended_safely():
-	unstick_current_process()
-	current_process = null
-	current_process_info = {}
-	process_running = false
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Compiling stopped.")
 
 ###################################################
 ################### DEFRAGGING ####################
@@ -1919,34 +1659,8 @@ func defragging_commands(text):
 				return
 			start_defragging(ms)
 			return
-	match text:
-		"stop":
-			unstick_current_process()
-			process_running = false
-			if current_process:
-				add_line("Killing process immediately")
-				current_process.stop()
-				current_process = null
-				current_process_info = {}
-			else:
-				add_line("No active process to stop.")
-			Stats.overclocked = false
-		"focus":
-			if current_process:
-				bring_process_to_bottom()
-			else:
-				add_line("No process found to focus")
-		"root", "..", "cd ..", "cd ../":
-			return_to_root()
-		"info":
-			add_line("???")
-		"overclock":
-			add_line("Overclock not available for defragging.")
-		_:
-			if text.begins_with("cd"):
-				add_line(ContextCommands.cd_not_at_root())
-			else:
-				add_line("Command not found")
+	_handle_process_commands(text, "", false)
+
 
 func start_defragging(minor_skill: Dictionary):
 	if !Defragging.has_requirements(minor_skill):
@@ -1961,15 +1675,6 @@ func start_defragging(minor_skill: Dictionary):
 	new_defrag_terminal.start(minor_skill)
 	hud_process_running.process_started(Defragging, minor_skill)
 	add_new_scrollback()
-
-func defrag_finished():
-	unstick_current_process()
-	process_running = false
-	current_process = null
-	current_process_info = {}
-	Stats.overclocked = false
-	hud_process_running.process_killed()
-	add_line("Defragging process ended.")
 
 ###################################################
 ################# MARKETPLACE #####################

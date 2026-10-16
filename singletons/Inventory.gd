@@ -345,6 +345,8 @@ func list_inventory_hacking_mods():
 	return_text += pad_text("ITEM", col_1) + pad_text("HACKING MOD", 40) + pad_text("DURATION", 15) + pad_text("REQUIRED", 10) + pad_text("CURRENT AMOUNT", 20)
 	return_text += "\n" + "-".repeat(120)
 	for item in inventory:
+		if !item.is_compilable_mod():
+			continue
 		var first_col = item.name + " ".repeat(col_1 - item.name.length())
 		var second_col = HackingMods.get_mod_name(item.hacking_mod_type) + " " + HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
 		var third_col = str(int(item.hacking_mod_duration)) + " hacks"

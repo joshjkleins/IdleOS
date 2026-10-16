@@ -197,7 +197,7 @@ func handle_hack_command(text):
 		player_hacking_box.add_line_system("Example: hack student -overclock")
 		return
 	
-	if !target.unlocked:
+	if !target.get("unlocked", false):
 		player_hacking_box.add_line_error("Not available in Demo.")
 		return
 	
@@ -236,10 +236,13 @@ func handle_back_command():
 
 func handle_view_command(text):
 	var target: Dictionary = Stats.get_hacking_location_by_command(text)
-	if !target.unlocked:
+	if target.is_empty():
+		player_hacking_box.add_line("Not a valid location.")
+		return
+	if !target.get("unlocked", false):
 		player_hacking_box.add_line("Location not unlocked.")
 		return
-	if text.contains("-hard") and !target['hard mode unlocked']:
+	if text.contains("-hard") and !target.get("hard mode unlocked", false):
 		player_hacking_box.add_line("Hard mode for location not unlocked.")
 		return
 	var targets: Array = Stats.get_hacking_targets_by_command(text)

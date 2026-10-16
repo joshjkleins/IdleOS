@@ -30,7 +30,7 @@ enum ItemColor {
 @export var obtained_from: Array[ItemColor] = []
 @export var obtained_from_additional_hint: String = ""
 
-@export var hacking_mod_type: HackingMods.MOD_TYPE
+@export var hacking_mod_type: HackingMods.MOD_TYPE = HackingMods.MOD_TYPE.NONE
 @export var hacking_mod_value: float
 @export var hacking_mod_duration: int
 @export var hacking_mod_consumed: int
@@ -41,3 +41,7 @@ func get_obtained_from_skills() -> Array:
 	for s in obtained_from:
 		result.append(ItemColor.keys()[s].capitalize())
 	return result
+
+## True when this item can be compiled into a Hacking Mod.
+func is_compilable_mod() -> bool:
+	return hacking_mod_type != HackingMods.MOD_TYPE.NONE and hacking_mod_consumed > 0 and not hacking_mod_item
