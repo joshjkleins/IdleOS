@@ -18,6 +18,7 @@ var process_data: Dictionary     # the minor process dict (Mining.LOGS, ...)
 var in_vm: bool = false
 var running: bool = false
 var stop_requested: bool = false
+var _stopped: bool = false       # stop() may be called twice (safe stop + "stop" command)
 
 # session stats, reset by begin_run()
 var session_time: float = 0.0
@@ -32,6 +33,7 @@ func setup_process(p_skill: Node, data: Dictionary, p_in_vm: bool = false) -> vo
 func begin_run() -> void:
 	running = true
 	stop_requested = false
+	_stopped = false
 	session_time = 0.0
 	session_cycles = 0
 	session_yield = 0
@@ -95,6 +97,9 @@ func finish_safely() -> void:
 
 ## Stop immediately. In a VM this also closes the window.
 func stop() -> void:
+	if _stopped:
+		return
+	_stopped = true
 	running = false
 	_on_stopped()
 	if in_vm:

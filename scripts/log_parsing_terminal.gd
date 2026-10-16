@@ -1,4 +1,6 @@
-extends PanelContainer
+extends BaseTerminal
+## Parsing terminal: each parsed item prints 10 log lines; each line rolls efficiency for a find.
+## Caches instead re-roll red lines until all are green, then transform into the next cache.
 
 ###MAJOR CHANGE
 #Need to update how parsing works when its parsing a cache vs a Mine item
@@ -22,24 +24,14 @@ extends PanelContainer
 
 const MAX_LOG_LINES = 10
 
-var process_running: bool = false
-var end_safely: bool = false
-var is_window: bool = false
 
-var type: Dictionary
 
-var base_speed
-var overclock_speed
-var overheat_speed
-
-var stopped_once: bool = false
 var items_to_parse: Array[ItemData] = []
 var item_to_parse_index: int = 0
 var item_to_transform_to: CacheData = null
 
 func set_parse_type(p_type: Dictionary, items_for_parsing: Array[ItemData], i_window = false):
-	type = p_type
-	is_window = i_window
+	setup_process(Parsing, p_type, i_window)
 	items_to_parse = items_for_parsing
 	
 	#Hide all labels to dynamically build them based on related items (found and in player inventory)
@@ -48,40 +40,29 @@ func set_parse_type(p_type: Dictionary, items_for_parsing: Array[ItemData], i_wi
 	
 	var eff = _get_total_effeciency()
 	chance_per_line_label.text = "%.1f%%" % (eff * 100.0)
-	#speed
-	var speed_parsing_package = Upgrades.get_package_info("parsing.speed")
-	var speed_upgrade = speed_parsing_package.current
-	base_speed = type["base speed"] / (1.0 + speed_upgrade)
-	overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
-	overheat_speed = type["overheat speed"]
 
 func begin():
-	#reset properties
-	end_safely = false
+	begin_run()
 	_reset_logs()
-	process_running = true
 	
-	while process_running:
-		if end_safely:
-			end_process_safely()
+	while running:
+		if stop_requested:
+			finish_safely()
 			break
 		
 		var current_item = get_current_item_to_parse() #gets item passed to process, if multiple items then it will loop through until all of them are empty from player inventory
 		
 		if current_item == null:
 			#finishes naturally by running out of items to parse
-			if is_window: #vm window ran out > shutdown
-				stop()
-			else:
-				Signals.end_log_parsing_safely()
+			finish_safely() # in a VM this closes the window, otherwise tells the main terminal
 			break
 		
 		if current_item is CacheData:
-			item_to_transform_to = Parsing.get_cache_transform_target(type, current_item)
+			item_to_transform_to = Parsing.get_cache_transform_target(process_data, current_item)
 		#update labels (current amount of parsed item, items to be found, % rates)
 		set_labels(current_item) #updates visibility / item names / amounts
 		
-		while Inventory.get_amount(current_item) > 0 and process_running and !end_safely:
+		while Inventory.get_amount(current_item) > 0 and running and !stop_requested:
 			_reset_logs()
 			#main reason to split these loops is because of item removal. Cache item isn't removed/added until its looped multiple times, item loop is removed right away
 			if current_item is CacheData:
@@ -93,7 +74,7 @@ func parsing_item_loop(item: ItemData):
 	Inventory.remove_resource(item, 1)
 	update_top_row_player_amount(item)
 	
-	var heat_used
+	var heat_mode := Mode.NORMAL
 	#LOOP 10 TIMES FOR EACH 'PARSE' ITEM
 	for i in range(MAX_LOG_LINES):
 		var new_log_line = log_line_scene.instantiate()
@@ -117,30 +98,22 @@ func parsing_item_loop(item: ItemData):
 		logs_container.add_child(new_log_line)
 		
 		#APPLY WAIT FOR LOG LINE AND MEASURE HEAT
-		if Stats.overheated:
-			await get_tree().create_timer(overheat_speed).timeout
-			heat_used = type["overheat heat"]
-		elif Stats.overclocked and Upgrades.can_overclock(Parsing):
-			await get_tree().create_timer(overclock_speed).timeout
-			heat_used = type["overclock heat"]
-		else:
-			await get_tree().create_timer(base_speed).timeout
-			heat_used = type["heat"]
+		heat_mode = await _wait_step()
 		
-		if !process_running:
-			Stats.update_tempature(heat_used)
+		if !running:
+			apply_heat(heat_mode)
 			break
 	
-	if process_running:
+	if running:
 		if randf() <= 0.01:
 			Inventory.add_resource(Items.VM_PARSING_TOKEN, 1)
-		if process_running:
-			_finished_log(heat_used)
+		if running:
+			_finished_log(heat_mode)
 
 func parsing_cache_loop(item: ItemData):
 	update_top_row_player_amount(item)
 	
-	var heat_used
+	var heat_mode := Mode.NORMAL
 	#INITIAL LOOP OF 10 LINES
 	for i in range(MAX_LOG_LINES):
 		var new_log_line = log_line_scene.instantiate()
@@ -151,42 +124,26 @@ func parsing_cache_loop(item: ItemData):
 		logs_container.add_child(new_log_line)
 		
 		#APPLY WAIT FOR LOG LINE AND MEASURE HEAT
-		if Stats.overheated:
-			await get_tree().create_timer(overheat_speed).timeout
-			heat_used = type["overheat heat"]
-		elif Stats.overclocked and Upgrades.can_overclock(Parsing):
-			await get_tree().create_timer(overclock_speed).timeout
-			heat_used = type["overclock heat"]
-		else:
-			await get_tree().create_timer(base_speed).timeout
-			heat_used = type["heat"]
+		heat_mode = await _wait_step()
 		
-		if !process_running:
-			Stats.update_tempature(heat_used)
+		if !running:
+			apply_heat(heat_mode)
 			break
 		
-	while !is_log_finished() and process_running:
+	while !is_log_finished() and running:
 		var remaining_logs = get_red_logs()
 		var eff = _get_total_effeciency()
 		for log_line in remaining_logs:
 			log_line.cache_update(randf() < eff)
 			
 			#APPLY WAIT FOR LOG LINE AND MEASURE HEAT
-			if Stats.overheated:
-				await get_tree().create_timer(overheat_speed).timeout
-				heat_used = type["overheat heat"]
-			elif Stats.overclocked and Upgrades.can_overclock(Parsing):
-				await get_tree().create_timer(overclock_speed).timeout
-				heat_used = type["overclock heat"]
-			else:
-				await get_tree().create_timer(base_speed).timeout
-				heat_used = type["heat"]
+			heat_mode = await _wait_step()
 			
-			if !process_running:
-				Stats.update_tempature(heat_used)
+			if !running:
+				apply_heat(heat_mode)
 				break
 	
-	if process_running:
+	if running:
 		if is_log_finished():
 			Inventory.remove_resource(item, 1)
 			Inventory.add_resource(item_to_transform_to, 1)
@@ -195,8 +152,8 @@ func parsing_cache_loop(item: ItemData):
 		
 		if randf() <= 0.01:
 			Inventory.add_resource(Items.VM_PARSING_TOKEN, 1)
-		if process_running:
-			_finished_log(heat_used)
+		if running:
+			_finished_log(heat_mode)
 
 func get_red_logs() -> Array:
 	var remaining_logs = []
@@ -211,29 +168,22 @@ func is_log_finished() -> bool:
 			return false
 	return true
 
-func stop():
-	if stopped_once:
-		return
-	
-	stopped_once = true
-	end_safely = false
-	process_running = false
-	if is_window:
-		VMManager.release(self) # frees the VM window (and this terminal)
+## One log line's wait at the current speed. Returns the mode it ran in (decides heat).
+func _wait_step() -> Mode:
+	var mode := get_mode()
+	await get_tree().create_timer(get_step_time(mode)).timeout
+	return mode
 
-func stop_safely():
-	end_safely = true
-
-func _finished_log(heat_used: float):
-	type.signal.emit(1)
+func _finished_log(heat_mode: Mode):
+	process_data.signal.emit(1)
 	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_20_LOGS, 1)
-	Exp.add_xp(Parsing, type, type["experience per level"])
+	Exp.add_xp(Parsing, process_data, process_data["experience per level"])
 	Signals.update_hud(Parsing)
 
 	var eff = _get_total_effeciency()
 	chance_per_line_label.text = "%.1f%%" % (eff * 100)
-	Stats.update_tempature(heat_used)
-	#if !end_safely:
+	apply_heat(heat_mode)
+	#if !stop_requested:
 		#_reset_logs()
 
 func _reset_logs():
@@ -241,7 +191,7 @@ func _reset_logs():
 		n.queue_free()
 
 func _get_total_effeciency() -> float:
-	var base = type["efficiency"]
+	var base = process_data["efficiency"]
 	var upgrades = Upgrades.get_package_info("parsing.efficiency")
 	var defragging_bonus = Defragging.PARSING["bonus efficiency"] if Stats.has_bonus(Parsing) else 1.0
 	
@@ -249,8 +199,8 @@ func _get_total_effeciency() -> float:
 
 
 func update_total_player_labels():
-	for i in range(type["resource gained"].size()):
-		var item = type["resource gained"][i]
+	for i in range(process_data["resource gained"].size()):
+		var item = process_data["resource gained"][i]
 		var total_label = player_total_labels.get_child(i)
 		total_label.get_child(0).text = item.item.name.to_upper() + " TOTAL"
 		total_label.get_child(1).text = str(Inventory.get_amount(item.item))
@@ -327,7 +277,7 @@ func update_top_row_player_amount(item: ItemData):
 		amount_label.text = "x" + str(Inventory.get_amount(item))
 
 func has_requirements() -> bool:
-	var requirements = type.requirements
+	var requirements = process_data.requirements
 	for item in requirements:
 		if Inventory.get_amount(item) < requirements[item]:
 			return false
@@ -335,16 +285,10 @@ func has_requirements() -> bool:
 	return true
 
 func remove_requirements() -> void:
-	var requirements = type.requirements
+	var requirements = process_data.requirements
 	for item in requirements:
 		if Inventory.get_amount(item) >= requirements[item]:
 			Inventory.remove_resource(item, requirements[item])
-
-func end_process_safely():
-	process_running = false
-	if !is_window:
-		Signals.end_log_parsing_safely()
-	stop()
 
 func get_current_item_to_parse() -> ItemData:
 	if items_to_parse.is_empty():

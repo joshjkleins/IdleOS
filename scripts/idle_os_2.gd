@@ -50,7 +50,6 @@ extends Control
 @onready var hud_monitor = $Panel/SystemDock/VBox/TrackedSection/HUDMonitor
 @onready var vm_layer = $VMLayer
 @onready var overclock = $Panel/SystemDock/VBox/SystemTemp #temperature widget (lives in the side panel)
-@onready var header_row = $Panel/MarginContainer/TerminalRoot/Header
 @onready var input_line_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
@@ -159,7 +158,6 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	Signals.end_log_parsing_safely_signal.connect(_on_process_ended.bind("Parsing safely finished."))
 	Signals.end_pw_cracking_safely_signal.connect(_on_process_ended.bind("Password cracking safely finished."))
 	Signals.end_cache_decrypting_safely_signal.connect(_on_process_ended.bind("Decoding safely finished."))
 	Signals.end_phishing_safely_signal.connect(_on_process_ended.bind("Phishing process finished."))
@@ -169,8 +167,6 @@ func _ready():
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	VMManager.set_host(vm_layer)
-	header_row.resized.connect(_layout_side_panel)
-	_layout_side_panel.call_deferred()
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 	Signals.system_overheated_signal.connect(overheat_terminal_notice)
 	Signals.system_cooled_below_overheat_signal.connect(system_cooled_out_of_overheat_range)
@@ -1238,10 +1234,6 @@ func vm_help_text() -> String:
    Tip: click a VM in the dock to minimize/restore it.
 """
 
-## Side panel starts right under the header row, whatever height the header ends up.
-func _layout_side_panel() -> void:
-	system_dock.offset_top = header_row.get_global_rect().end.y - system_dock.get_parent().global_position.y
-
 func grab_all_focus():
 	get_window().grab_focus()
 	input_line.grab_focus()
@@ -1316,6 +1308,7 @@ func _handle_process_commands(text: String, safe_stop_message: String, can_overc
 ## Messages for terminals built on BaseTerminal (they send Signals.process_ended_safely(skill)).
 const PROCESS_ENDED_MESSAGES = {
 	"Mining": "Mining safely finished.",
+	"Parsing": "Parsing safely finished.",
 }
 
 func _on_skill_process_ended(skill: Node) -> void:
