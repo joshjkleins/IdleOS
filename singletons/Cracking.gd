@@ -9,7 +9,7 @@ signal cracking_level_up_signal
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_CRACKING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 6.0
+@onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/pw_cracking_terminal.tscn")

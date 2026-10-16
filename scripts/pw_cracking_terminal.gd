@@ -1,4 +1,7 @@
-extends Control
+extends BaseTerminal
+## Cracking terminal: a queue of up to 5 encrypted items; each crack scrambles the boxes and
+## reveals one character per speed step. Efficiency gives a chance to crack instantly.
+## What the boxes show depends on the process: see CRACK_FORMATS / _get_format().
 
 @onready var queue_container = $MarginContainer/VBoxContainer/QueueRow/QueueContainer
 @onready var queue_info = $MarginContainer/VBoxContainer/QueueRow/QueueInfo
@@ -17,190 +20,127 @@ extends Control
 
 @export var pw_row: PackedScene
 
-var process_running: bool = false
+const PW_LENGTH: int = 4
+const CHARS_ALNUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const CHARS_DIGITS = "1234567890"
+
 var amount_cracked: int = 0
 var letter_boxes: Array = []
-var PW_LENGTH: int = 4
 var current_crack_line
 var prog_bar_tween: Tween
-var end_safely: bool = false
-var is_window: bool
+var crack_format: Dictionary # {"charset": String, "secret": Callable}
 
 var use_token: ItemData = null
 var create_token: ItemData = null
 
-var type: Dictionary
-
 func set_cracking_type(p_type: Dictionary, window: bool = false, use_item: ItemData = null, create_item: ItemData = null):
-	is_window = window
-	type = p_type
+	setup_process(Cracking, p_type, window)
 	use_token = use_item
 	create_token = create_item
 	letter_boxes = [letter_box, letter_box_2, letter_box_3, letter_box_4]
-	match type.name.to_lower():
-		"password":
-			set_pw()
+	crack_format = _get_format(p_type)
+	for box in letter_boxes:
+		box.charset = crack_format.charset
+
+## How each cracking process fills its boxes: scramble characters + how the answer is picked.
+## New processes (badge hash, bio template, digital signature, private keys) add a case here.
+func _get_format(p_type: Dictionary) -> Dictionary:
+	match str(p_type.name).to_lower():
 		"pin":
-			set_pin()
-
-func set_pw():
-	for i in letter_boxes:
-		i.is_pin = false
-
-func set_pin():
-	for i in letter_boxes:
-		i.is_pin = true
+			return {"charset": CHARS_DIGITS, "secret": func(): return "%04d" % (randi() % 10000)}
+		"vm":
+			return {"charset": CHARS_ALNUM, "secret": func(): return Cracking.get_vm_cracking_word(create_token)}
+		_: # password
+			return {"charset": CHARS_ALNUM, "secret": func(): return Cracking.random_four_digit_words.pick_random()}
 
 func start():
-	if !has_requirements():
-		return
-	
-	#SETUP
-	process_running = true
-	end_safely = false
+	begin_run()
 	progress_bar.value = 0
 	amount_cracked = 0
-	if type == Cracking.VM:
-		remaining_label.text = str(int(Inventory.get_amount(get_requirements()) / 3))
-	else:
-		remaining_label.text = str(Inventory.get_amount(get_requirements()))
+	_update_remaining_label()
 	cracked_label.text = str(amount_cracked)
-	title_label.text = type["name"] + " Cracking"
-	
+	title_label.text = process_data["name"] + " Cracking"
 	set_player_amount_labels()
-	
-	var speed_cracking_package = Upgrades.get_package_info("cracking.speed")
-	var speed_upgrade = speed_cracking_package.current
-	var speed = type["base speed"] / (1.0 + speed_upgrade)
-	var overheat_speed = type["overheat speed"]
-	var overclock_speed = type["overclock speed"] / (1.0 + speed_upgrade)
-	
-	var base_eff = _get_total_efficiency()
-	efficiency.text = str(base_eff * 100.0) + "%"
-	
-	while has_requirements() and process_running:
+	efficiency.text = str(_get_total_efficiency() * 100.0) + "%"
+
+	if !has_requirements():
+		finish_safely() # nothing to crack (previously a VM window would stay open forever)
+		return
+
+	while has_requirements() and running:
 		_clean_queue()
 		var lines_per_page = get_lines_queue_per_page()
-		#var pw_per_page = clamp(Inventory.get_amount(get_requirements()), 0, 5)
-		queue_info.text = type["name"].to_upper() + " CRACKING - QUEUE (" + str(lines_per_page) + ")"
+		queue_info.text = process_data["name"].to_upper() + " CRACKING - QUEUE (" + str(lines_per_page) + ")"
 		for i in range(lines_per_page):
 			_generate_initial_queue()
-		#END SETUP
-		
-		#PW LOOP
-		
-		for j in range(lines_per_page): #LOOP THROUGH QUEUE OF 10(MAX)
+
+		for j in range(lines_per_page): # crack through the queue (max 5)
 			if !has_requirements():
 				break
-			if end_safely:
-				process_running = false
-				if is_window:
-					stop()
-				else:
-					Signals.end_pw_cracking_safely()
+			if stop_requested:
+				finish_safely()
 				break
-			if !process_running:
+			if !running:
 				break
 			_start_next_crack()
 			_start_scrambling()
-			var current_word
-			if type == Cracking.VM:
-				current_word = Cracking.get_vm_cracking_word(create_token)
-			elif letter_boxes[0].is_pin:
-				var random_number = randi() % 10000
-				current_word = "%04d" % random_number
-			else:
-				current_word = Cracking.random_four_digit_words.pick_random()
-			
-			
-			var max_heat_used: float = 0
-			#var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-			#base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
-			var eff =  _get_total_efficiency()
+			var current_word: String = crack_format.secret.call()
+
+			var max_heat_used: float = 0.0 # instant cracks add no heat
+			var eff = _get_total_efficiency()
 			efficiency.text = str(eff * 100) + "%"
-			if randf() < eff:
-				if process_running:
-					_update_progress_bar(4, 0.1)
-					await get_tree().create_timer(0.1).timeout
-					if !process_running:
-						break
-					for i in range(PW_LENGTH):
-						_reveal_letter(i,current_word[i])
-				_end_current_crack(current_word)
-				_successful_crack(max_heat_used)
-				progress_bar.value = 0
+			var instant: bool = randf() < eff
+			if instant:
+				# instant crack
+				_update_progress_bar(PW_LENGTH, 0.1)
+				await get_tree().create_timer(0.1).timeout
+				if !running:
+					break
+				for i in range(PW_LENGTH):
+					_reveal_letter(i, current_word[i])
 			else:
-				for i in range(PW_LENGTH): #LOOP THROUGH LETTERS (4)
-					if process_running:
-						
-						if Stats.overheated:
-							var heat = type["overheat heat"]
-							if heat > max_heat_used:
-								max_heat_used = heat
-							_update_progress_bar(i, overheat_speed)
-							await get_tree().create_timer(overheat_speed).timeout
-						elif Stats.overclocked and Upgrades.can_overclock(Cracking):
-							var heat = type["overclock heat"]
-							if heat > max_heat_used:
-								max_heat_used = heat
-							_update_progress_bar(i, overclock_speed)
-							await get_tree().create_timer(overclock_speed).timeout
-						else:
-							var heat = type["heat"]
-							if heat > max_heat_used:
-								max_heat_used = heat
-							_update_progress_bar(i, speed)
-							await get_tree().create_timer(speed).timeout
-						if !process_running:
-							break
-						_reveal_letter(i,current_word[i])
-				
-				if !process_running:
+				for i in range(PW_LENGTH): # one character per speed step
+					var mode := get_mode()
+					max_heat_used = max(max_heat_used, get_heat(mode))
+					var step_time := get_step_time(mode)
+					_update_progress_bar(i, step_time)
+					await get_tree().create_timer(step_time).timeout
+					if !running:
 						break
-				_end_current_crack(current_word)
-				_successful_crack(max_heat_used)
-				progress_bar.value = 0
-	
-	if process_running:
+					_reveal_letter(i, current_word[i])
+				if !running:
+					break
+			_end_current_crack(current_word, instant)
+			_successful_crack(max_heat_used)
+			progress_bar.value = 0
+
+	if running:
 		_finished()
 
-func stop():
-	end_safely = false
-	process_running = false
-	if prog_bar_tween.is_running():
+func _on_stopped():
+	if prog_bar_tween and prog_bar_tween.is_valid():
 		prog_bar_tween.kill()
 	progress_bar.value = 0
-	for n in letter_boxes:
-		n.stop_scramble()
-	if is_window:
-		VMManager.release(self) # frees the VM window (and this terminal)
-
-func stop_safely():
-	end_safely = true
+	for box in letter_boxes:
+		if box.scramble: # blank boxes killed mid-crack, keep the last revealed answer
+			box.stop_scramble()
 
 func _update_progress_bar(fill: int, time: float):
-	if process_running:
+	if running:
 		if prog_bar_tween:
 			prog_bar_tween.kill()
 		var target_fill = (fill + 1) * 25
 		prog_bar_tween = create_tween()
-		prog_bar_tween.tween_property(progress_bar, "value", target_fill, time - 0.1)
+		prog_bar_tween.tween_property(progress_bar, "value", target_fill, max(0.01, time - 0.1))
 
+## Ran out of items to crack.
 func _finished():
-	if is_window:
-		stop()
-		return
-	if !has_requirements():
-		if type == Cracking.VM:
+	if !in_vm and !has_requirements():
+		if process_data == Cracking.VM:
 			cracking_current_status.text = "All available " + use_token.name + " cracked to " + create_token.name
 		else:
 			cracking_current_status.text = "All " + get_requirements().name + " cracked."
-	
-	if Stats.overclocked:
-		Stats.overclocked = false
-	
-	prog_bar_tween.kill()
-	Signals.end_pw_cracking_safely()
+	finish_safely()
 
 func _reveal_letter(index: int, letter: String):
 	letter_boxes[index].reveal(letter)
@@ -210,19 +150,18 @@ func _start_scrambling():
 		n.start_scramble()
 
 func _clean_queue():
-	if queue_container.get_child_count() > 0:
-		for n in queue_container.get_children():
-			n.queue_free()
+	for n in queue_container.get_children():
+		n.queue_free()
 
 func _generate_initial_queue():
 	var new_row = pw_row.instantiate()
-	new_row.new_row(type, use_token, create_token)
+	new_row.new_row(process_data, use_token, create_token)
 	queue_container.add_child(new_row)
 
-func _end_current_crack(word) -> void:
+func _end_current_crack(word, instant: bool = false) -> void:
 	for n in queue_container.get_children():
 		if n.current_status == n.CrackStatus.CRACKING:
-			n.end_crack(word)
+			n.end_crack(word, instant)
 			return
 
 func _start_next_crack() -> void:
@@ -234,9 +173,9 @@ func _start_next_crack() -> void:
 			return
 
 func _successful_crack(heat: float):
-	type.signal.emit(1)
-	
-	if type == Cracking.VM:
+	process_data.signal.emit(1)
+
+	if process_data == Cracking.VM:
 		if Inventory.get_amount(use_token) >= 3:
 			remove_requirements()
 			Inventory.add_resource(create_token, 1)
@@ -244,91 +183,77 @@ func _successful_crack(heat: float):
 			stop()
 	else:
 		remove_requirements()
-		Inventory.add_resource(type["resource gained"], 1)
+		Inventory.add_resource(process_data["resource gained"], 1)
 	set_player_amount_labels()
-	if type == Cracking.PASSWORD:
+	if process_data == Cracking.PASSWORD:
 		Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
+	record_cycle(1)
 	Stats.update_tempature(heat)
-	Exp.add_xp(Cracking, type, type["experience per level"])
-	
-	#var defrag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-	#var base_eff = type["efficiency"] + Cracking.process_upgrades["efficiency"]["amount"]
-	var eff = _get_total_efficiency()
-	efficiency.text = str(eff * 100) + "%"
-	
+	Exp.add_xp(Cracking, process_data, process_data["experience per level"])
+	efficiency.text = str(_get_total_efficiency() * 100) + "%"
+
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)
 	Signals.update_hud(Cracking)
-	
-	if type == Cracking.VM:
+	_update_remaining_label()
+	cracked_label.text = str(amount_cracked)
+
+func _update_remaining_label():
+	if process_data == Cracking.VM:
 		remaining_label.text = str(int(Inventory.get_amount(get_requirements()) / 3))
 	else:
 		remaining_label.text = str(Inventory.get_amount(get_requirements()))
-	cracked_label.text = str(amount_cracked)
 
 func _on_progress_bar_value_changed(value):
-	if process_running:
+	if running:
 		progress_bar_label.text = str(int(value)) + "%"
 
 func _get_total_efficiency() -> float:
 	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-	var base_eff = type["efficiency"]
-	var efficiency_cracking_package = Upgrades.get_package_info("cracking.efficiency")
-	var efficiency_upgrade = efficiency_cracking_package.current
-	
-	return (base_eff + efficiency_upgrade) * frag_bonus
-
+	var efficiency_upgrade = Upgrades.get_package_info("cracking.efficiency").current
+	return (process_data["efficiency"] + efficiency_upgrade) * frag_bonus
 
 func set_player_amount_labels():
 	var required_item_label = player_amount_labels.get_child(0)
 	var received_item_label = player_amount_labels.get_child(1)
-	
 	var required_item = get_requirements()
 	var received_item = get_item_received()
-	
 	required_item_label.get_child(0).text = required_item.name
 	received_item_label.get_child(0).text = received_item.name
-	
 	required_item_label.get_child(1).text = str(Inventory.get_amount(required_item))
 	received_item_label.get_child(1).text = str(Inventory.get_amount(received_item))
 
 func has_requirements() -> bool:
-	if type == Cracking.VM:
-		if Inventory.get_amount(use_token) < 3:
+	if process_data == Cracking.VM:
+		return Inventory.get_amount(use_token) >= 3
+	var requirements = process_data.requirements
+	for item in requirements:
+		if Inventory.get_amount(item) < requirements[item]:
 			return false
-	else:
-		var requirements = type.requirements
-		for item in requirements:
-			if Inventory.get_amount(item) < requirements[item]:
-				return false
-	
 	return true
 
 func remove_requirements() -> void:
-	if type == Cracking.VM:
+	if process_data == Cracking.VM:
 		if Inventory.get_amount(use_token) >= 3:
 			Inventory.remove_resource(use_token, 3)
 	else:
-		var requirements = type.requirements
+		var requirements = process_data.requirements
 		for item in requirements:
 			if Inventory.get_amount(item) >= requirements[item]:
 				Inventory.remove_resource(item, requirements[item])
 
 func get_requirements() -> ItemData:
-	if type == Cracking.VM:
+	if process_data == Cracking.VM:
 		return use_token
-	else:
-		return type.requirements.keys()[0]
+	return process_data.requirements.keys()[0]
 
 func get_item_received() -> ItemData:
-	if type == Cracking.VM:
+	if process_data == Cracking.VM:
 		return create_token
-	else:
-		return type["resource gained"]
+	return process_data["resource gained"]
 
 func get_lines_queue_per_page() -> int:
-	if type == Cracking.VM:
+	if process_data == Cracking.VM:
 		return clamp(int(Inventory.get_amount(get_requirements()) / 3), 0, 5)
-	else:
-		return clamp(Inventory.get_amount(get_requirements()), 0, 5)
+	return clamp(Inventory.get_amount(get_requirements()), 0, 5)

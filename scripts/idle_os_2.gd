@@ -158,12 +158,9 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	Signals.end_pw_cracking_safely_signal.connect(_on_process_ended.bind("Password cracking safely finished."))
 	Signals.end_cache_decrypting_safely_signal.connect(_on_process_ended.bind("Decoding safely finished."))
 	Signals.end_phishing_safely_signal.connect(_on_process_ended.bind("Phishing process finished."))
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
-	Signals.end_cred_matching_safely_signal.connect(_on_process_ended.bind("Matching safely finished."))
-	Signals.end_compiling_safely_signal.connect(_on_process_ended.bind("Compiling stopped."))
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	VMManager.set_host(vm_layer)
@@ -1309,6 +1306,9 @@ func _handle_process_commands(text: String, safe_stop_message: String, can_overc
 const PROCESS_ENDED_MESSAGES = {
 	"Mining": "Mining safely finished.",
 	"Parsing": "Parsing safely finished.",
+	"Cracking": "Password cracking safely finished.",
+	"Matching": "Matching safely finished.",
+	"Compiling": "Compiling stopped.",
 }
 
 func _on_skill_process_ended(skill: Node) -> void:

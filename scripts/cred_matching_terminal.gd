@@ -1,4 +1,6 @@
-extends PanelContainer
+extends BaseTerminal
+## Matching terminal: consumes one of each required item, walks 4 stages of terminal messages
+## (each message one speed step), then assembles the result. Efficiency rolls bonus quantity.
 
 #@onready var user_row_container = $MarginContainer/VBoxContainer/BottomRow/VBoxContainer/UserRowContainer
 @onready var main_bar = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar
@@ -69,8 +71,6 @@ var credential_messages: Array[String] = [
 var terminal_messages = [db_lookup_messages, auth_messages, pentest_messages, credential_messages]
 var intervals #how much each message fills up progress bar
 
-var process_running: bool = false
-var safely_stop: bool = false
 
 var green = Color("#3b8f68")
 var grey = Color("#6b6b78")
@@ -92,15 +92,13 @@ var TAG_COLORS = [
 	Color("#8B5CF6")
 ]
 
-var type #which minor process
-var is_window: bool = false
 
 enum MatchType {CREDENTIAL, ACCOUNT}
+var _cycle_mode: Mode = Mode.NORMAL # worst mode seen this match (decides heat)
 var current_type: MatchType
 
 func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
-	type = p_type
-	is_window = window
+	setup_process(Matching, p_type, window)
 	match p_type.name.to_lower():
 		"credential":
 			_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
@@ -114,7 +112,7 @@ func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
 			resource_two_title.text = "PIN"
 			
 			
-	resource_received_title.text = type["resource gained"].name.to_upper()
+	resource_received_title.text = process_data["resource gained"].name.to_upper()
 	update_player_amount_received_labels()
 
 #sets text labels on each 'tag' in center column
@@ -130,13 +128,13 @@ func _set_interval_time(): #calculate interval time
 	intervals = 100.0 / isize
 
 func _has_requirements() -> bool:
-	for item in type["requirements"]:
+	for item in process_data["requirements"]:
 		if Inventory.get_amount(item) <= 0:
 			return false
 	return true
 
 func _consume_required_items():
-	for item in type["requirements"]:
+	for item in process_data["requirements"]:
 		Inventory.remove_resource(item, 1)
 
 func _update_username_password_labels():
@@ -156,8 +154,7 @@ func _update_efficiency_label():
 	efficiency_label.text = "chance for extra (eff): %.1f%%" % (eff * 100.0)
 
 func start():
-	process_running = true
-	safely_stop = false
+	begin_run()
 	sb = third_col.get_theme_stylebox("panel")
 	if !_has_requirements():
 		_finished()
@@ -169,13 +166,6 @@ func start():
 	_update_resource_amount_labels()
 	_update_username_password_labels()
 	_begin_matching()
-
-func stop():
-	process_running = false
-	safely_stop = false
-
-func stop_safely():
-	safely_stop = true
 
 func _repeat_loop():
 	if !_has_requirements():
@@ -191,18 +181,14 @@ func _repeat_loop():
 	_begin_matching()
 
 
+## Ran out of items or was asked to stop safely.
 func _finished():
-	process_running = false
-	safely_stop = false
-	if is_window:
-		VMManager.release(self) # frees the VM window (and this terminal)
-	else:
-		Signals.end_cred_matching_safely()
+	finish_safely()
 
 func _begin_matching():
-	if !process_running:
-		_finished()
+	if !running:
 		return
+	_cycle_mode = Mode.NORMAL
 	#get current_row
 	third_col.add_theme_stylebox_override("panel", sb)
 	main_bar.value = 0.0
@@ -213,8 +199,7 @@ func _begin_matching():
 		_update_tag_color(i)
 		for message in terminal_messages[i]: #loop through each message in each message array (6 at time)
 			await _update_matching_terminal(message)
-			if !process_running:
-				_finished()
+			if !running:
 				return
 		
 		match i: #do different things for each iteration
@@ -235,41 +220,25 @@ func _begin_matching():
 	
 	_match_finished()
 	await get_tree().create_timer(0.3).timeout
-	if !process_running:
-		_finished()
+	if !running:
 		return
-	if safely_stop:
+	if stop_requested:
 		_finished()
 		return
 	_repeat_loop()
 
 func _update_resource_amount_labels():
-	str(Inventory.get_amount(type.requirements.keys()[0]))
-	resource_amount_one.text = "x" + str(Inventory.get_amount(type.requirements.keys()[0]))
-	resource_amount_two.text = "x" + str(Inventory.get_amount(type.requirements.keys()[1]))
-
-func _get_speed() -> float:
-	var time
-	var speed_matching_package = Upgrades.get_package_info("matching.speed")
-	var speed_upgrade = speed_matching_package.current 
-	if Stats.overheated:
-		time = type["overheat speed"]
-	elif Stats.overclocked and Upgrades.can_overclock(Matching):
-		var time_min = type["overclock speed min"] / (1.0 + speed_upgrade)
-		var time_max = type["overclock speed max"] / (1.0 + speed_upgrade)
-		time = randf_range(time_min, time_max)
-	else:
-		var time_min = type["base speed min"] / (1.0 + speed_upgrade)
-		var time_max = type["base speed max"] / (1.0 + speed_upgrade)
-		time = randf_range(time_min, time_max)
-	
-	return time
+	str(Inventory.get_amount(process_data.requirements.keys()[0]))
+	resource_amount_one.text = "x" + str(Inventory.get_amount(process_data.requirements.keys()[0]))
+	resource_amount_two.text = "x" + str(Inventory.get_amount(process_data.requirements.keys()[1]))
 
 func _update_matching_terminal(message):
 	terminal_label.text += message + "\n"
 	terminal_scroll.scroll_vertical = terminal_scroll.get_v_scroll_bar().max_value
 	var tween = create_tween()
-	tween.tween_property(main_bar, "value", main_bar.value + intervals, _get_speed())
+	var mode := get_mode()
+	_cycle_mode = worst_mode(_cycle_mode, mode)
+	tween.tween_property(main_bar, "value", main_bar.value + intervals, get_step_time(mode))
 	await tween.finished
 
 func _update_tag_color(index: int):
@@ -299,31 +268,24 @@ func _choose_username(): #sets current iteration username variable
 	
 
 func _match_finished(): #add heat/resource/xp/emit signals
-	var heat
-	if Stats.overclocked:
-		heat = type["overclock heat"]
-	elif Stats.overheated:
-		heat = type["overheat heat"]
-	else:
-		heat = type["heat"]
 	var quantity = 1
 	var total_eff = _get_efficiency_total()
 	if randf() <= total_eff:
 		var min_q = 3 + int(Upgrades.MATCHING.version * 10.0)
 		var max_q = 10 + int(Upgrades.MATCHING.version * 10.0)
 		quantity += randi_range(min_q, max_q)
-	Inventory.add_resource(type["resource gained"], quantity)
+	Inventory.add_resource(process_data["resource gained"], quantity)
 	update_player_amount_received_labels()
 	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_3_CREDENTIALS, 1)
-	status_title.text = type["resource gained"]["name"].to_upper() + " ASSEMBLED"
+	status_title.text = process_data["resource gained"]["name"].to_upper() + " ASSEMBLED"
 	status_image.texture = cred_image
 	var og_box = third_col.get_theme_stylebox("panel").duplicate()
 	og_box.border_color = s_border_col
 	third_col.add_theme_stylebox_override("panel", og_box)
 		
-	Stats.update_tempature(heat)
-	type.signal.emit(1)
-	Exp.add_xp(Matching, type, type["experience per level"])
+	apply_heat(_cycle_mode) # same rules as every skill: overclock heat only when overclock is unlocked
+	process_data.signal.emit(1)
+	Exp.add_xp(Matching, process_data, process_data["experience per level"])
 	
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_MATCHING_TOKEN, 1)
@@ -376,7 +338,7 @@ func _on_main_bar_value_changed(value):
 	status_progress_bar.text = "%.1f%%" % value
 
 func _get_efficiency_total():
-	var base_efficiency = type["efficiency"]
+	var base_efficiency = process_data["efficiency"]
 	var defrag_multiplier = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
 	
 	var efficiency_matching_package = Upgrades.get_package_info("matching.efficiency")
@@ -385,4 +347,4 @@ func _get_efficiency_total():
 	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
 
 func update_player_amount_received_labels():
-	resource_received_amount.text = "x" + str(Inventory.get_amount(type["resource gained"]))
+	resource_received_amount.text = "x" + str(Inventory.get_amount(process_data["resource gained"]))

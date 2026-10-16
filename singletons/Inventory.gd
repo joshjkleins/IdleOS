@@ -35,7 +35,7 @@ func remove_resource(resource: ItemData, amount: int) -> bool:
 	if inventory[resource] <= 0:
 		inventory.erase(resource)
 	
-	Signals.item_removed(resource)
+	Signals.item_removed(resource, amount)
 	return true
 
 func _matches_filter(resource, filter: InventoryFilter) -> bool:

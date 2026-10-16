@@ -11,6 +11,10 @@ var current_status = CrackStatus.QUEUED
 var green = Color("#30a14e")
 var yellow = Color("#D4A017")
 var grey = Color("#6b6b78")
+var blue = Color("#3ab0f0")
+
+## Status shown when efficiency cracks an item instantly.
+const INSTANT_TEXT = "BYPASSED"
 
 var uuid: String = ""
 var use_token: ItemData = null
@@ -41,20 +45,20 @@ func start_crack():
 	$CrackedStatus.add_theme_color_override("font_color", yellow)
 	$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", green)
 
-func end_crack(word: String):
+func end_crack(word: String, instant: bool = false):
 	if type == Cracking.VM:
 		current_status = CrackStatus.CRACKED
 		set_status_icon(current_status)
-		$CrackedStatus.text = "CRACKED"
+		$CrackedStatus.text = INSTANT_TEXT if instant else "CRACKED"
 		$HBoxContainer/EncryptedPw.text = uuid + " -> " + create_token.name.replace(" ", "_").to_lower() + " x1"
-		$CrackedStatus.add_theme_color_override("font_color", green)
+		$CrackedStatus.add_theme_color_override("font_color", blue if instant else green)
 		$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", grey)
 	else:
 		current_status = CrackStatus.CRACKED
 		set_status_icon(current_status)
-		$CrackedStatus.text = "CRACKED"
+		$CrackedStatus.text = INSTANT_TEXT if instant else "CRACKED"
 		$HBoxContainer/EncryptedPw.text = uuid + "    " + word
-		$CrackedStatus.add_theme_color_override("font_color", green)
+		$CrackedStatus.add_theme_color_override("font_color", blue if instant else green)
 		$HBoxContainer/EncryptedPw.add_theme_color_override("font_color", grey)
 
 func set_status_icon(status: CrackStatus) -> void:

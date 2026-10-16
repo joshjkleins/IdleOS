@@ -101,9 +101,9 @@ func item_added(item: ItemData, amount: int):
 	SaveManager.mark_dirty()
 	item_added_signal.emit(item, amount)
 
-func item_removed(item: ItemData):
+func item_removed(item: ItemData, amount: int = 0):
 	SaveManager.mark_dirty()
-	item_removed_signal.emit(item)
+	item_removed_signal.emit(item, amount)
 
 #message: you lost, #type: "Error", "Success"
 func update_hack_console(message: String):

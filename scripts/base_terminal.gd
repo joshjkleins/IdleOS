@@ -57,15 +57,32 @@ static func worst_mode(a: Mode, b: Mode) -> Mode:
 
 ## Seconds per step from the process dict. Speed upgrades shorten normal + overclock steps,
 ## overheat speed is a fixed penalty.
+## Supports fixed speeds ("base speed") or random ranges ("base speed min" / "base speed max").
 func get_step_time(mode: Mode) -> float:
 	var speed_upgrade = get_speed_upgrade()
 	match mode:
 		Mode.OVERHEATED:
-			return process_data["overheat speed"]
+			return _speed_value("overheat speed")
 		Mode.OVERCLOCKED:
-			return process_data["overclock speed"] / (1.0 + speed_upgrade)
+			return _speed_value("overclock speed") / (1.0 + speed_upgrade)
 		_:
-			return process_data["base speed"] / (1.0 + speed_upgrade)
+			return _speed_value("base speed") / (1.0 + speed_upgrade)
+
+func _speed_value(key: String) -> float:
+	if process_data.has(key):
+		return process_data[key]
+	return randf_range(process_data[key + " min"], process_data[key + " max"])
+
+## For terminals whose speed is a fill RATE (units per second, e.g. Compiling's bar) instead of
+## seconds per step: the speed upgrade multiplies the rate so the bar fills faster.
+func get_fill_rate(mode: Mode) -> float:
+	match mode:
+		Mode.OVERHEATED:
+			return _speed_value("overheat speed")
+		Mode.OVERCLOCKED:
+			return _speed_value("overclock speed") * (1.0 + get_speed_upgrade())
+		_:
+			return _speed_value("base speed") * (1.0 + get_speed_upgrade())
 
 func get_speed_upgrade() -> float:
 	var package = Upgrades.get_package_info(skill.SKILL.name.to_lower() + ".speed")

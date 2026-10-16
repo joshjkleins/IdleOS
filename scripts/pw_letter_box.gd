@@ -2,11 +2,9 @@ extends Panel
 
 @onready var scramble_timer = $ScrambleTimer
 
-var password_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-var pin_characters = "1234567890"
+## Characters this box flickers through while scrambling (set by the cracking format).
+var charset: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 var scramble: bool = false
-
-var is_pin: bool = false
 
 func update_letter(letter):
 	$MarginContainer/VBoxContainer/Letter.text = letter
@@ -21,10 +19,7 @@ func _on_scramble_timer_timeout():
 	else:
 		scramble_timer.wait_time = 0.1
 	if scramble:
-		if is_pin:
-			update_letter(pin_characters[randi() % pin_characters.length()])
-		else:
-			update_letter(password_characters[randi() % password_characters.length()])
+		update_letter(charset[randi() % charset.length()])
 	
 
 func reveal(letter: String):
