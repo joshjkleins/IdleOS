@@ -148,9 +148,7 @@ func update_items_gained(item, amount):
 
 func _vm_finish():
 	if is_window:
-		Stats.remove_vm_count(1)
-		Decoding.CURRENT_VMS -= 1
-		get_parent().queue_free()
+		VMManager.release(self) # frees the VM window (and this terminal)
 
 func stop():
 	safe_stop = false

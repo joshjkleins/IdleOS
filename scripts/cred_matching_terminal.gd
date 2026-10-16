@@ -195,9 +195,7 @@ func _finished():
 	process_running = false
 	safely_stop = false
 	if is_window:
-		Matching.CURRENT_VMS -= 1
-		Stats.remove_vm_count(1)
-		get_parent().queue_free()
+		VMManager.release(self) # frees the VM window (and this terminal)
 	else:
 		Signals.end_cred_matching_safely()
 

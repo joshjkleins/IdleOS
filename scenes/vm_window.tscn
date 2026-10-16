@@ -1,18 +1,106 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqnokkei616n3"]
+[gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" uid="uid://cd108wr6agqvs" path="res://scripts/vm_window.gd" id="1_7m12v"]
+[ext_resource type="Script" path="res://scripts/vm_window.gd" id="1_vmw"]
 
-[node name="VMWindow" type="Window"]
-unresizable = true
-content_scale_mode = 1
-content_scale_aspect = 1
-script = ExtResource("1_7m12v")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
+bg_color = Color(0.0313726, 0.0392157, 0.0509804, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.22, 0.28, 1)
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 10
+shadow_offset = Vector2(0, 4)
 
-[node name="Timer" type="Timer" parent="."]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar"]
+bg_color = Color(0.0627451, 0.0784314, 0.0980392, 1)
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btnhover"]
+bg_color = Color(1, 1, 1, 0.08)
+
+[node name="VMWindow" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_frame")
+script = ExtResource("1_vmw")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TitleBar" type="PanelContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 13
+theme_override_styles/panel = SubResource("StyleBoxFlat_bar")
+
+[node name="HBox" type="HBoxContainer" parent="VBox/TitleBar"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Dot" type="ColorRect" parent="VBox/TitleBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(7, 7)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="VBox/TitleBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.82, 0.86, 1)
+theme_override_font_sizes/font_size = 11
+text = "vm-01  mining://logs"
+
+[node name="StatusLabel" type="Label" parent="VBox/TitleBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.45, 0.5, 0.55, 1)
+theme_override_font_sizes/font_size = 11
+text = "30s  tok:1"
+
+[node name="MinimizeButton" type="Button" parent="VBox/TitleBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+tooltip_text = "Minimize to dock"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.55, 0.6, 0.65, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btnhover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btnhover")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn")
+text = "_"
+
+[node name="CloseButton" type="Button" parent="VBox/TitleBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+tooltip_text = "Kill VM (token is not refunded)"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.55, 0.6, 0.65, 1)
+theme_override_colors/font_hover_color = Color(0.92, 0.36, 0.36, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btnhover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btnhover")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn")
+text = "x"
+
+[node name="Content" type="MarginContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RunTimer" type="Timer" parent="."]
 one_shot = true
-
-[node name="CountdownTimer" type="Timer" parent="."]
-
-[connection signal="focus_entered" from="." to="." method="_on_focus_entered"]
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
-[connection signal="timeout" from="CountdownTimer" to="." method="_on_countdown_timer_timeout"]

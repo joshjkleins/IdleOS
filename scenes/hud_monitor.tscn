@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bfkq17que2cnb" path="res://scripts/hud_monitor.gd" id="1_cxjsk"]
 
 [node name="HUDMonitor" type="PanelContainer"]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(0, 0)
 script = ExtResource("1_cxjsk")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -15,31 +15,35 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/LabelsContainer"]
 visible = false
 layout_mode = 2
-size_flags_horizontal = 9
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.72, 0.76, 0.8, 1)
 text = "IP Address=4"
-horizontal_alignment = 2
+horizontal_alignment = 0
 
 [node name="Label2" type="Label" parent="MarginContainer/LabelsContainer"]
 visible = false
 layout_mode = 2
-size_flags_horizontal = 9
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.72, 0.76, 0.8, 1)
 text = "IP Address=4"
-horizontal_alignment = 2
+horizontal_alignment = 0
 
 [node name="Label3" type="Label" parent="MarginContainer/LabelsContainer"]
 visible = false
 layout_mode = 2
-size_flags_horizontal = 9
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.72, 0.76, 0.8, 1)
 text = "IP Address=4"
-horizontal_alignment = 2
+horizontal_alignment = 0
 
 [node name="Label4" type="Label" parent="MarginContainer/LabelsContainer"]
 visible = false
 layout_mode = 2
-size_flags_horizontal = 9
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.72, 0.76, 0.8, 1)
 text = "IP Address=4"
-horizontal_alignment = 2
+horizontal_alignment = 0

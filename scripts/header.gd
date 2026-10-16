@@ -64,6 +64,7 @@ func display_skill(skill: Node): #called when player enters specific process
 		else:
 			s.fade_out_minor()
 	defragging.fade_out_major()
+	defragging.fade_out_minor() #hide defrag process list when moving ../skill from defragging
 	await get_tree().create_timer(0.3).timeout
 	tar.show_details()
 	tar.fade_in_minor()
@@ -72,6 +73,7 @@ func display_defragging(): #special for defragging since it isn't like other ski
 	defragging.update_skills() #check to see if player unlocked any defrag processes
 	for s in major_skills.get_children():
 		s.fade_out_major()
+		s.fade_out_minor() #hide previous skill details when moving ../defragging from a skill
 	defragging.fade_out_major()
 	await get_tree().create_timer(0.3).timeout
 	defragging.fade_in_minor()

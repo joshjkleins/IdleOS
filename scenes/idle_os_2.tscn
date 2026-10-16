@@ -1,11 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://g3kf6mnbkbca"]
+[gd_scene load_steps=12 format=3 uid="uid://g3kf6mnbkbca"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
 [ext_resource type="PackedScene" uid="uid://cawbutc5qs2ck" path="res://scenes/hud_2.tscn" id="3_h30m8"]
-[ext_resource type="PackedScene" uid="uid://denbt4caomtn5" path="res://scenes/overclock.tscn" id="3_sd1y4"]
 [ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
-[ext_resource type="PackedScene" uid="uid://cmkmq8hglqsu4" path="res://scenes/hud_monitor.tscn" id="4_7qmxk"]
+[ext_resource type="PackedScene" path="res://scenes/system_dock.tscn" id="4_7qmxk"]
 [ext_resource type="PackedScene" uid="uid://nvkps616p7hs" path="res://scenes/hud_process_running.tscn" id="4_hvrtx"]
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
 [ext_resource type="PackedScene" uid="uid://jigcp4xroy7d" path="res://scenes/loading.tscn" id="4_u0uic"]
@@ -62,13 +61,11 @@ size_flags_horizontal = 3
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="Overclock" parent="Panel/MarginContainer/TerminalRoot/Header" instance=ExtResource("3_sd1y4")]
-layout_mode = 2
-
 [node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/TerminalRoot"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 300
 
 [node name="TerminalGrandparent" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
 layout_mode = 2
@@ -120,21 +117,25 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 
-[node name="TrackingContainer" type="Control" parent="Panel"]
-custom_minimum_size = Vector2(200, 0)
+[node name="SystemDock" parent="Panel" instance=ExtResource("4_7qmxk")]
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -229.0
-offset_top = 93.0
-offset_right = -29.0
-offset_bottom = 172.0
+anchor_bottom = 1.0
+offset_left = -284.0
+offset_top = 80.0
 grow_horizontal = 0
+grow_vertical = 2
 
-[node name="HUDMonitor" parent="Panel/TrackingContainer" instance=ExtResource("4_7qmxk")]
-layout_mode = 2
-offset_right = 200.0
+[node name="VMLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Timers" type="Node2D" parent="."]
 position = Vector2(8, 8)

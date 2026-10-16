@@ -127,10 +127,8 @@ func line_ended():
 			if lines.active:
 				return
 		vm_lines.clear()
-		Phishing.CURRENT_VMS -= 1
-		Stats.remove_vm_count(1)
 		_disconnect_upgrade_signal()
-		get_parent().queue_free()
+		VMManager.release(self) # frees the VM window (and this terminal)
 	else:
 		for lines in Phishing.current_lines:
 			if lines.active:

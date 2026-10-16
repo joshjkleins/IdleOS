@@ -13,7 +13,6 @@ var vm_token = Items.VM_MINING_TOKEN
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/data_mining_terminal.tscn")
-var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -197,38 +196,11 @@ func has_requirements(_minor_process) -> bool:
 func missing_requirements_text(_minor_process) -> String:
 	return ""
 
-func create_vm_window(minor_process, repeat) -> Window:
-	var content_instance = terminal_scene.instantiate()
-	var new_window = vm_window.instantiate()
-	new_window.title = "MINING | " + minor_process.name + " | Tokens used: " + str(1)
-	new_window.wrap_controls = true
-	new_window.repeat = repeat
-	
-	#new_window.set_cooling_reduction(VM_COOLING_REDUCTION)
-	new_window.set_repeat(repeat)
-	new_window.set_time(VM_UPTIME)
-	new_window.set_token(vm_token)
-	new_window.set_processes(Mining, minor_process)
-	
-	new_window.add_child(content_instance)
-	
-	new_window.size = content_instance.size
-	new_window.min_size = content_instance.size
-	
-	new_window.close_requested.connect(func():
-		#THIS ONLY HAPPENS WHEN PLAYER CLOSES WINDOW MANUALLY
-		CURRENT_VMS -= 1
-		Stats.remove_vm_count(1)
-		#new_window.remove_cooling_reduction()
-		new_window.queue_free()
-	)
-	new_window.about_to_popup.connect(func(): 
-		content_instance.set_mine_type(minor_process, true)
-		content_instance.start_data_mining()
-	)
-	CURRENT_VMS += 1
-	Stats.CURRENT_ALL_VMS += 1
-	return new_window
+func create_vm_window(minor_process, repeat) -> VMWindow:
+	var setup = func(t):
+		t.set_mine_type(minor_process, true)
+		t.start_data_mining()
+	return VMManager.open(self, minor_process, terminal_scene.instantiate(), setup, repeat)
 
 
 func save_data() -> Dictionary:

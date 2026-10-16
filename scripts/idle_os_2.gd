@@ -46,8 +46,11 @@ extends Control
 #@onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
 @onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
-@onready var hud_monitor = $Panel/TrackingContainer/HUDMonitor
-@onready var overclock = $Panel/MarginContainer/TerminalRoot/Header/Overclock
+@onready var system_dock = $Panel/SystemDock
+@onready var hud_monitor = $Panel/SystemDock/VBox/TrackedSection/HUDMonitor
+@onready var vm_layer = $VMLayer
+@onready var overclock = $Panel/SystemDock/VBox/SystemTemp #temperature widget (lives in the side panel)
+@onready var header_row = $Panel/MarginContainer/TerminalRoot/Header
 @onready var input_line_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")
@@ -165,6 +168,9 @@ func _ready():
 	Signals.end_compiling_safely_signal.connect(_on_process_ended.bind("Compiling stopped."))
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
+	VMManager.set_host(vm_layer)
+	header_row.resized.connect(_layout_side_panel)
+	_layout_side_panel.call_deferred()
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 	Signals.system_overheated_signal.connect(overheat_terminal_notice)
 	Signals.system_cooled_below_overheat_signal.connect(system_cooled_out_of_overheat_range)
@@ -422,6 +428,9 @@ func universal_commands(text):
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
+	if text == "vm" or text.begins_with("vm "):
+		handle_vm_commands(text)
+		return true
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
@@ -482,20 +491,20 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	#if text.begins_with("add"):
-		#var item_name = text.trim_prefix("add").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.add_resource(item, 30)
-			#return true
+	if text.begins_with("add"):
+		var item_name = text.trim_prefix("add").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.add_resource(item, 1)
+			return true
 	#
-	#if text.begins_with("rm"):
-		#var item_name = text.trim_prefix("rm").strip_edges()
-		#var item = Inventory.get_item_by_name(item_name)
-		#if item != null:
-			#Inventory.remove_resource(item, Inventory.get_amount(item))
-			##Inventory.add_resource(item, 1)
-			#return true
+	if text.begins_with("rm"):
+		var item_name = text.trim_prefix("rm").strip_edges()
+		var item = Inventory.get_item_by_name(item_name)
+		if item != null:
+			Inventory.remove_resource(item, Inventory.get_amount(item))
+			#Inventory.add_resource(item, 1)
+			return true
 		#
 	
 	if text.begins_with("mod"):
@@ -720,7 +729,7 @@ func handle_cd_commands(text):
 				return
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-			tween.parallel().tween_property(hud_monitor, "modulate:a", 0.0, 0.5)
+			tween.parallel().tween_property(system_dock, "modulate:a", 0.0, 0.5)
 			await tween.finished
 			terminal_root.visible = false
 			await loading.show_loading()
@@ -970,6 +979,7 @@ func handle_info_commands(text):
 func handle_vm_token_commands(text):
 	if text == "ssh -h":
 		add_line(ContextCommands.ssh_help_commands())
+		add_line(vm_help_text())
 		return
 		
 	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
@@ -1166,19 +1176,71 @@ func handle_vm_token_commands(text):
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true)
 	
-	add_child(new_window)
-
-	var parent_window = get_window()
-	var center_pos = parent_window.position + parent_window.size - new_window.size
-	new_window.position = center_pos
-	new_window.popup_centered()
-	new_window.transient = false
-	new_window.always_on_top = true
-	new_window.start()
-	await get_tree().process_frame
-	new_window.size = new_window.get_child(2).custom_minimum_size
+	if new_window:
+		add_line("Started [color=#%s]vm-%02d[/color] %s / %s. Use 'vm -h' to manage VM windows." % [target_process.SKILL.color.to_html(false), new_window.vm_id, target_process.SKILL.name, target_minor_process.name])
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
+
+## vm ls | vm show <id|all> | vm hide <id|all> | vm kill <id|all> | vm -h
+func handle_vm_commands(text: String) -> void:
+	var parts = text.split(" ", false)
+	if parts.size() == 1 or parts[1] == "-h":
+		add_line(vm_help_text())
+		return
+	var action = parts[1]
+	if action == "ls":
+		add_line(vm_list_text())
+		return
+	if !(action in ["show", "hide", "kill"]):
+		add_line("Unknown vm command. Use 'vm -h'.")
+		return
+	if parts.size() < 3:
+		add_line("Missing VM id. [color=#666666]example: vm %s 1  |  vm %s all[/color]" % [action, action])
+		return
+	var targets: Array[VMWindow] = []
+	if parts[2] == "all":
+		targets.assign(VMManager.vms)
+	elif parts[2].trim_prefix("vm-").is_valid_int():
+		var vm = VMManager.get_vm(int(parts[2].trim_prefix("vm-")))
+		if vm:
+			targets.append(vm)
+	if targets.is_empty():
+		add_line("No VM found for '%s'. Use 'vm ls' to see running VMs." % parts[2])
+		return
+	for vm in targets:
+		match action:
+			"show":
+				VMManager.set_minimized(vm, false)
+			"hide":
+				VMManager.set_minimized(vm, true)
+			"kill":
+				add_line("Killed vm-%02d (%s / %s)." % [vm.vm_id, vm.skill.SKILL.name, vm.minor_process.name])
+				VMManager.release(vm)
+	if action != "kill":
+		add_line("%s %d VM window%s." % ["Restored" if action == "show" else "Minimized", targets.size(), "" if targets.size() == 1 else "s"])
+
+func vm_list_text() -> String:
+	if VMManager.vms.is_empty():
+		return "No VMs running. Start one with 'ssh <skill> <process>'."
+	var text = "ID      SKILL        PROCESS          TIME   TOKENS  STATE\n"
+	for vm in VMManager.vms:
+		text += "%-8s%-13s%-17s%-7s%-8s%s\n" % ["vm-%02d" % vm.vm_id, vm.skill.SKILL.name, str(vm.minor_process.name), str(vm.get_seconds_left()) + "s", str(vm.tokens_used), "minimized" if !vm.visible else ("stopping" if vm.stopping else "running")]
+	text += "%d/%d VMs running" % [VMManager.vms.size(), Stats.MAX_ALL_VMS]
+	return text
+
+func vm_help_text() -> String:
+	return """
+ VM WINDOW COMMANDS
+   vm ls                    List running VMs
+   vm hide <id|all>         Minimize VM window(s) to the dock
+   vm show <id|all>         Restore VM window(s)
+   vm kill <id|all>         Stop VM(s) immediately (no token refund)
+   Tip: click a VM in the dock to minimize/restore it.
+"""
+
+## Side panel starts right under the header row, whatever height the header ends up.
+func _layout_side_panel() -> void:
+	system_dock.offset_top = header_row.get_global_rect().end.y - system_dock.get_parent().global_position.y
 
 func grab_all_focus():
 	get_window().grab_focus()
@@ -2002,7 +2064,7 @@ func _on_hacking_start_loading() -> void:
 	input_line.grab_focus()
 	var tween = create_tween()
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
-	tween.parallel().tween_property(hud_monitor, "modulate:a", 1.0, 1.0)
+	tween.parallel().tween_property(system_dock, "modulate:a", 1.0, 1.0)
 	await tween.finished
 
 func _on_cooling_timer_timeout():
@@ -2155,7 +2217,7 @@ func player_uploaded_proper_item():
 	var tween = create_tween()
 	tween.set_parallel(true)
 
-	for node in [header, overclock, input_line_container, hud_monitor]:
+	for node in [header, overclock, input_line_container, system_dock]:
 		tween.tween_property(node, "modulate:a", 0.0, 0.5)
 
 	tween.chain().tween_callback(func():
@@ -2212,14 +2274,14 @@ func finish_player_uploaded_proper_item():
 	upload_awaiting_player_input = false
 	
 	_clear_terminal()
-	for node in [header, overclock, input_line_container, hud_monitor]:
+	for node in [header, overclock, input_line_container, system_dock]:
 		node.visible = true
 		node.modulate.a = 0.0
 
 	var tween2 = create_tween()
 	tween2.set_parallel(true)
 
-	for node in [header, overclock, input_line_container, hud_monitor]:
+	for node in [header, overclock, input_line_container, system_dock]:
 		tween2.tween_property(node, "modulate:a", 1.0, 0.3)
 
 	await tween2.finished

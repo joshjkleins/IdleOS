@@ -219,9 +219,7 @@ func stop():
 	end_safely = false
 	process_running = false
 	if is_window:
-		Parsing.CURRENT_VMS -= 1
-		Stats.remove_vm_count(1)
-		get_parent().queue_free()
+		VMManager.release(self) # frees the VM window (and this terminal)
 
 func stop_safely():
 	end_safely = true

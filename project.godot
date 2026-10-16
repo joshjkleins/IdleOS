@@ -53,6 +53,7 @@ Audiomanager="*res://singletons/Audiomanager.gd"
 Settings="*res://singletons/Settings.gd"
 CommandRegistry="*res://singletons/CommandRegistry.gd"
 HackingMods="*res://singletons/HackingMods.gd"
+VMManager="*res://singletons/VMManager.gd"
 
 [display]
 

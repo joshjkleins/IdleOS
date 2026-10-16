@@ -19,7 +19,7 @@ func update_monitored_items_hud(item: ItemData, _amount: int = 0):
 	
 	if index >= 0:
 		var labels = labels_container.get_children()
-		labels[index].text = item.name + "=" + str(Inventory.get_amount(item))
+		labels[index].text = _format_row(item)
 	SaveManager.mark_dirty()
 
 func add_monitored_item(item: ItemData) -> String:
@@ -168,10 +168,22 @@ func refresh_items():
 	for i in range(MONITOR_SIZE):
 		if i < tracked_items.size():
 			var item = tracked_items[i]
-			labels[i].text = item.name + "=" + str(Inventory.get_amount(item))
+			labels[i].text = _format_row(item)
 			labels[i].visible = true
 		else:
 			labels[i].visible = false
+
+const ROW_WIDTH = 30 # characters (monospace font)
+
+## "Logs ................... 500"
+func _format_row(item: ItemData) -> String:
+	var amount = str(Inventory.get_amount(item))
+	var name_text = item.name
+	var max_name = ROW_WIDTH - amount.length() - 2
+	if name_text.length() > max_name:
+		name_text = name_text.substr(0, max_name - 1) + "~"
+	var dots = ROW_WIDTH - name_text.length() - amount.length() - 2
+	return name_text + " " + ".".repeat(max(1, dots)) + " " + amount
 
 enum TextColor { SUCCESS, WARNING, ERROR }
 

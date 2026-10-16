@@ -13,7 +13,6 @@ var vm_token = Items.VM_CRACKING_TOKEN
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/pw_cracking_terminal.tscn")
-var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -219,35 +218,11 @@ func has_requirements(minor_process) -> bool:
 func missing_requirements_text(minor_process) -> String:
 	return "Missing " + minor_process["requirements"].name
 
-func create_vm_window(minor_process, use_token: ItemData = null, create_token: ItemData = null) -> Window:
-	var content_instance = terminal_scene.instantiate()
-	var new_window = vm_window.instantiate()
-	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
-	new_window.wrap_controls = true
-	new_window.repeat = true
-	
-	new_window.set_repeat(true)
-	new_window.set_time(VM_UPTIME)
-	new_window.set_token(vm_token)
-	new_window.set_processes(Cracking, minor_process)
-	
-	new_window.add_child(content_instance)
-	
-	new_window.size = content_instance.size
-	new_window.min_size = content_instance.size
-	
-	new_window.close_requested.connect(func(): 
-		CURRENT_VMS -= 1
-		Stats.CURRENT_ALL_VMS -= 1
-		new_window.queue_free()
-	)
-	new_window.about_to_popup.connect(func(): 
-		content_instance.set_cracking_type(minor_process, true, use_token, create_token)
-		content_instance.start()
-	)
-	CURRENT_VMS += 1
-	Stats.CURRENT_ALL_VMS += 1
-	return new_window
+func create_vm_window(minor_process, use_token: ItemData = null, create_token: ItemData = null) -> VMWindow:
+	var setup = func(t):
+		t.set_cracking_type(minor_process, true, use_token, create_token)
+		t.start()
+	return VMManager.open(self, minor_process, terminal_scene.instantiate(), setup, true)
 
 
 func save_data() -> Dictionary:

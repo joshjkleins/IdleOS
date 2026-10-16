@@ -14,7 +14,6 @@ var vm_token = Items.VM_PARSING_TOKEN
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/log_parsing_terminal.tscn")
-var vm_window = preload("res://scenes/vm_window.tscn")
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -297,32 +296,11 @@ func list_vm_commands() -> String:
 	return return_text
 
 
-func create_vm_window(minor_process, items_to_parse) -> Window:
-	var content_instance = terminal_scene.instantiate()
-	var new_window = vm_window.instantiate()
-	new_window.title = SKILL.name + " | " + minor_process.name + " | Tokens used: " + str(1)
-	new_window.wrap_controls = true
-	new_window.repeat = true
-	
-	#new_window.set_cooling_reduction(VM_COOLING_REDUCTION)
-	new_window.set_repeat(true)
-	new_window.set_time(VM_UPTIME)
-	new_window.set_token(vm_token)
-	new_window.set_processes(Parsing, minor_process)
-	new_window.add_child(content_instance)
-	
-	new_window.close_requested.connect(func(): 
-		CURRENT_VMS -= 1
-		Stats.CURRENT_ALL_VMS -= 1
-		new_window.queue_free()
-	)
-	new_window.about_to_popup.connect(func(): 
-		content_instance.set_parse_type(minor_process, items_to_parse, true)
-		content_instance.begin()
-	)
-	CURRENT_VMS += 1
-	Stats.CURRENT_ALL_VMS += 1
-	return new_window
+func create_vm_window(minor_process, items_to_parse) -> VMWindow:
+	var setup = func(t):
+		t.set_parse_type(minor_process, items_to_parse, true)
+		t.begin()
+	return VMManager.open(self, minor_process, terminal_scene.instantiate(), setup, true)
 
 
 func save_data() -> Dictionary:

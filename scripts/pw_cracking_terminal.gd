@@ -173,9 +173,7 @@ func stop():
 	for n in letter_boxes:
 		n.stop_scramble()
 	if is_window:
-		Cracking.CURRENT_VMS -= 1
-		Stats.remove_vm_count(1)
-		get_parent().queue_free()
+		VMManager.release(self) # frees the VM window (and this terminal)
 
 func stop_safely():
 	end_safely = true
