@@ -89,7 +89,7 @@ func _update_state() -> void:
 		hint = "processes slowed · cool to %d°C" % int(OVERCLOCK_LIMIT)
 	elif Stats.overclocked:
 		text = "OVERCLOCKED"; color = C_OC
-		hint = "2x speed · extra heat per action"
+		hint = "increased speed · extra heat per cycle"
 	elif temperature >= OVERCLOCK_LIMIT:
 		text = "HOT"; color = C_HOT
 		hint = "overclock locked until < %d°C" % int(OVERCLOCK_LIMIT)

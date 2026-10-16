@@ -1,4 +1,5 @@
-extends PanelContainer
+extends BaseTerminal
+## Mining terminal: fills a 20-segment bar, each segment one speed step; a full bar = one cycle.
 
 
 @onready var blinking_timer = $BlinkingTimer
@@ -54,168 +55,92 @@ var styleHead     : StyleBoxFlat
 var panel_segments: Array = []
 var percent_label_tween: Tween
 
-var process_running: bool = false
-var blink_on: bool = false
-var session_yield: int = 0
-var session_rate: float = 0.0
-var session_cycle: int = 0
-var session_time: float = 0.0
-
-var end_safely: bool = false
-
-var BASE_SPEED: float = 0.0
-var OVERCLOCK_SPEED: float = 0.0
-var OVERHEAT_SPEED: float = 0.0
-var HEAT: float = 0
-var OVERCLOCK_HEAT: float = 0
-var OVERHEAT_HEAT: float = 0
 var RESOURCE_GAIN: ItemData
 var EXP_PER_COMPLETION: int = 0
-var EFFICIENCY_RATE: float = 0.0
-var TYPE: Dictionary
-var is_window: bool = false
 
 func _process(delta):
-	if process_running:
-		session_time += delta
-		time_label.text = _format_time(session_time)
+	super(delta)
+	if running:
+		time_label.text = format_time(session_time)
 
 func set_mine_type(type: Dictionary, window: bool = false):
-	is_window = window
-	TYPE = type
-	var speed_mining_package = Upgrades.get_package_info("mining.speed")
-	var speed_upgrade = speed_mining_package.current 
-
-	BASE_SPEED = type["base speed"] / (1.0 + speed_upgrade)
-	OVERCLOCK_SPEED = type["overclock speed"] / (1.0 + speed_upgrade)
-	OVERHEAT_SPEED = type["overheat speed"]
-	HEAT = type["heat"]
-	OVERCLOCK_HEAT = type["overclock heat"]
-	OVERHEAT_HEAT = type["overheat heat"]
+	setup_process(Mining, type, window)
 	RESOURCE_GAIN = type["resource gained"]
 	EXP_PER_COMPLETION = type["experience per level"]
 	tier.text = type["tier name"]
 	yield_title_label.text = type["name"].to_upper() + " YIELD"
 	title.text = "MINING " + type["name"].to_upper()
-	
 	total_label_title.text = "TOTAL " + type["name"].to_upper()
 	total_label_amount.text = str(Inventory.get_amount(RESOURCE_GAIN))
 
 func start_data_mining():
-	process_running = true
+	begin_run()
 	_reset_info()
 	_create_progress_row()
 	blinking_timer.start()
-	end_safely = false
-	while process_running:
-		if end_safely:
-			if !is_window:
-				Signals.end_data_mining_safely()
-			stop()
+	while running:
+		if stop_requested:
+			finish_safely()
 			break
-		var overclocked = false
-		var overheated = false
+		var cycle_mode := Mode.NORMAL
 		for i in range(SEGMENTS):
 			_set_progress(i)
-			
-			if Stats.overheated:
-				await get_tree().create_timer(OVERHEAT_SPEED).timeout
-				overheated = true
-			elif Stats.overclocked and Upgrades.can_overclock(Mining):
-				await get_tree().create_timer(OVERCLOCK_SPEED).timeout
-				overclocked = true
-			else:
-				await get_tree().create_timer(BASE_SPEED).timeout
-			if !process_running:
+			var mode := get_mode()
+			cycle_mode = worst_mode(cycle_mode, mode)
+			await get_tree().create_timer(get_step_time(mode)).timeout
+			if !running:
 				break
-		if process_running:
-			_cycle_complete(overclocked, overheated)
+		if running:
+			_cycle_complete(cycle_mode)
 
-func stop():
-	process_running = false
+func _on_stopped():
 	blinking_timer.stop()
-	if is_window:
-		VMManager.release(self) # frees the VM window (and this terminal)
 
-func stop_safely():
-	end_safely = true
+func _cycle_complete(cycle_mode: Mode):
+	apply_heat(cycle_mode)
 
-func _cycle_complete(overclocked: bool, overheated: bool):
-	if overheated:
-		Stats.update_tempature(OVERHEAT_HEAT)
-	elif overclocked:
-		Stats.update_tempature(OVERCLOCK_HEAT)
-	else:
-		Stats.update_tempature(HEAT)
-	
 	var reward_quantity_gained = _get_reward_quantity()
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
 	total_label_amount.text = str(Inventory.get_amount(RESOURCE_GAIN))
 	Tutorial.track_event(Tutorial.TutorialEvent.MINE_20_LOGS, reward_quantity_gained)
 	if randf() <= 0.01:
 		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)
-	TYPE.signal.emit(reward_quantity_gained)
-	Exp.add_xp(Mining, TYPE, EXP_PER_COMPLETION)
+	process_data.signal.emit(reward_quantity_gained)
+	Exp.add_xp(Mining, process_data, EXP_PER_COMPLETION)
 	Signals.update_hud(Mining)
-	session_cycle += 1
-	session_yield += reward_quantity_gained
-	cycles_label.text = str(session_cycle)
+	record_cycle(reward_quantity_gained)
+	cycles_label.text = str(session_cycles)
 	data_yield_label.text = str(session_yield)
 
 	_update_efficiency_label()
 	level_label.text = str(Mining.SKILL["level"])
 
 func _get_mining_efficiency_total():
-	var base_efficiency = TYPE["efficiency"]
+	var base_efficiency = process_data["efficiency"]
 	var defrag_multiplier = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
-	
-	var efficiency_mining_package = Upgrades.get_package_info("mining.efficiency")
-	var efficiency_upgrade = efficiency_mining_package.current
-	
+	var efficiency_upgrade = Upgrades.get_package_info("mining.efficiency").current
 	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
 
+## 1 + one extra per full point of efficiency + a roll for the leftover fraction.
 func _get_reward_quantity() -> int:
 	var eff = _get_mining_efficiency_total()
-	
 	var quant = 1
-
-	# Guaranteed bonus for each full point of efficiency
 	var guaranteed = int(eff)
 	quant += guaranteed
-	eff -= guaranteed  # leftover fractional part, e.g. 0.5
-
-	# Probabilistic roll for the remaining fraction
-	if eff > 0.0:
-		if randf() <= eff:
-			quant += 1
-	
+	eff -= guaranteed
+	if eff > 0.0 and randf() <= eff:
+		quant += 1
 	return quant
 
 func _reset_info():
-	blink_on = false
-	session_yield = 0
-	session_rate = 0.0
-	session_cycle = 0
-	session_time = 0.0
 	_update_efficiency_label()
-
 	level_label.text = str(Mining.SKILL["level"])
 
 func _update_efficiency_label():
-	var eff_label_text = ""
-	var c_efficiency = _get_mining_efficiency_total()
-	eff_label_text = str(c_efficiency * 100.0) + "%"
-
-	efficiency_label.text = eff_label_text
+	efficiency_label.text = str(_get_mining_efficiency_total() * 100.0) + "%"
 
 func _on_blinking_timer_timeout():
 	pass
-	#if blink_on:
-		#running_label.add_theme_color_override("font_color", COLOR_TEXT_NAME)
-		#blink_on = false
-	#else:
-		#running_label.add_theme_color_override("font_color", COLOR_TEXT_DIM)
-		#blink_on = true
 
 func _create_progress_row():
 	styleEmpty  = _make_style(COLOR_SEG_EMPTY,  COLOR_SEG_EMPTY_BDR)
@@ -223,6 +148,7 @@ func _create_progress_row():
 	styleHead   = _make_style(COLOR_SEG_HEAD,   COLOR_SEG_HEAD_BDR)
 	for n in progress_row.get_children():
 		n.queue_free()
+	panel_segments.clear()
 	for i in range(SEGMENTS):
 		var p = Panel.new()
 		p.custom_minimum_size = Vector2(0, 18)
@@ -247,8 +173,6 @@ func _set_progress(filled: int):
 			panel_segments[i].add_theme_stylebox_override("panel", styleHead)
 		else:
 			panel_segments[i].add_theme_stylebox_override("panel", styleEmpty)
-			
-	
 	if filled >= SEGMENTS:
 		_reset_progress_row()
 
@@ -257,13 +181,4 @@ func _reset_progress_row():
 		n.add_theme_stylebox_override("panel", styleEmpty)
 
 func _update_label(num: int):
-	var nn = float(num) / float(SEGMENTS) * 100.0
-	percent_label.text = str(int(nn)) + "%"
-
-func _format_time(total_seconds: float) -> String:
-	var seconds: int = int(total_seconds) % 60
-	var minutes: int = int(total_seconds / 60) % 60
-	var hours: int = int(total_seconds / 3600)
-	
-	# %02d pads the number with a leading zero if it's a single digit
-	return "%02d:%02d:%02d" % [hours, minutes, seconds]
+	percent_label.text = str(int(float(num) / float(SEGMENTS) * 100.0)) + "%"

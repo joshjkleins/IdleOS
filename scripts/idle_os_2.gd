@@ -45,7 +45,7 @@ extends Control
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 #@onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
-@onready var hud_process_running = $Panel/MarginContainer/TerminalRoot/Header/HUDProcessRunning
+@onready var hud_process_running = $Panel/SystemDock/VBox/HUDProcessRunning
 @onready var system_dock = $Panel/SystemDock
 @onready var hud_monitor = $Panel/SystemDock/VBox/TrackedSection/HUDMonitor
 @onready var vm_layer = $VMLayer
@@ -163,7 +163,7 @@ func _ready():
 	Signals.end_pw_cracking_safely_signal.connect(_on_process_ended.bind("Password cracking safely finished."))
 	Signals.end_cache_decrypting_safely_signal.connect(_on_process_ended.bind("Decoding safely finished."))
 	Signals.end_phishing_safely_signal.connect(_on_process_ended.bind("Phishing process finished."))
-	Signals.end_data_mining_safely_signal.connect(_on_process_ended.bind("Mining safely finished."))
+	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.end_cred_matching_safely_signal.connect(_on_process_ended.bind("Matching safely finished."))
 	Signals.end_compiling_safely_signal.connect(_on_process_ended.bind("Compiling stopped."))
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
@@ -1312,6 +1312,14 @@ func _handle_process_commands(text: String, safe_stop_message: String, can_overc
 				add_line(ContextCommands.cd_not_at_root())
 			else:
 				add_line("Command not found")
+
+## Messages for terminals built on BaseTerminal (they send Signals.process_ended_safely(skill)).
+const PROCESS_ENDED_MESSAGES = {
+	"Mining": "Mining safely finished.",
+}
+
+func _on_skill_process_ended(skill: Node) -> void:
+	_on_process_ended(PROCESS_ENDED_MESSAGES.get(skill.SKILL.name, skill.SKILL.name + " process finished."))
 
 ## Called when any skill terminal finishes or stops safely.
 func _on_process_ended(message: String) -> void:

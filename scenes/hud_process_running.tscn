@@ -1,49 +1,65 @@
-[gd_scene load_steps=2 format=3 uid="uid://nvkps616p7hs"]
+[gd_scene load_steps=3 format=3 uid="uid://nvkps616p7hs"]
 
 [ext_resource type="Script" uid="uid://edw0ibt5vci0" path="res://scripts/hud_process_running.gd" id="1_46pb0"]
 
-[node name="HUDProcessRunning" type="PanelContainer"]
-custom_minimum_size = Vector2(140, 60)
-size_flags_horizontal = 10
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
+bg_color = Color(0.36, 0.42, 0.48, 0.12)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.36, 0.42, 0.48, 0.8)
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+
+[node name="HUDProcessRunning" type="VBoxContainer"]
+theme_override_constants/separation = 6
 script = ExtResource("1_46pb0")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 24
-
-[node name="CenterContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="Header" type="HBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="RunningLabel" type="Label" parent="MarginContainer/CenterContainer"]
+[node name="Title" type="Label" parent="Header"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "PROCESS RUNNING"
-horizontal_alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/CenterContainer"]
-layout_mode = 2
-alignment = 1
-
-[node name="SkillName" type="RichTextLabel" parent="MarginContainer/CenterContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/normal_font_size = 10
-bbcode_enabled = true
-text = "Mining"
-fit_content = true
-autowrap_mode = 0
-
-[node name="ProcessName" type="RichTextLabel" parent="MarginContainer/CenterContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/normal_font_size = 10
-bbcode_enabled = true
-text = "logs"
-fit_content = true
-autowrap_mode = 0
-
-[node name="TimeLabel" type="Label" parent="MarginContainer/CenterContainer"]
-layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
 theme_override_font_sizes/font_size = 10
-text = "0:00:00"
-horizontal_alignment = 1
+text = "PROCESS"
+
+[node name="StatusPill" type="PanelContainer" parent="Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
+
+[node name="StatusLabel" type="Label" parent="Header/StatusPill"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "IDLE"
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Dot" type="ColorRect" parent="Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(7, 7)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ProcessLabel" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+text = "mining://logs"
+clip_text = true
+
+[node name="TimeLabel" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.62, 0.72, 1)
+theme_override_font_sizes/font_size = 13
+text = "00:00"

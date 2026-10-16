@@ -17,6 +17,8 @@ signal end_log_parsing_safely_signal
 signal end_pw_cracking_safely_signal
 signal end_cache_decrypting_safely_signal
 signal end_data_mining_safely_signal
+## Generic "a skill process finished safely" for terminals built on BaseTerminal.
+signal process_ended_safely_signal(skill: Node)
 signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
@@ -76,6 +78,9 @@ func end_cache_decrypting_safely():
 
 func end_phishing_safely():
 	end_phishing_safely_signal.emit()
+
+func process_ended_safely(skill: Node):
+	process_ended_safely_signal.emit(skill)
 
 func end_data_mining_safely():
 	end_data_mining_safely_signal.emit()
