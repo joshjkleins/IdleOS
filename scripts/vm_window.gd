@@ -47,6 +47,15 @@ func _ready() -> void:
 	minimize_button.pressed.connect(func(): VMManager.set_minimized(self, true); Signals.vm_window_focused())
 	close_button.pressed.connect(func(): VMManager.release(self); Signals.vm_window_focused())
 	run_timer.timeout.connect(_on_run_timer_timeout)
+	# shrink-wrap to the terminal whenever its size needs change (a free-floating PanelContainer
+	# only ever grows on its own; e.g. Phishing's wrapped label reports a huge height for one frame)
+	minimum_size_changed.connect(_refit.call_deferred)
+
+func _refit() -> void:
+	if !is_inside_tree():
+		return
+	reset_size()
+	position = VMManager._clamp_to_host(self, position)
 
 func start() -> void:
 	run_timer.start(duration)

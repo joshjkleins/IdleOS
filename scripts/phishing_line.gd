@@ -4,11 +4,12 @@ signal line_ended_signal
 signal caught_something
 
 var type
+var terminal # PhishingTerminal: source of mode / timing / heat
 var pb_fill_tween: Tween
 var pb_drain_tween: Tween
 var active: bool = false
 var safe_stop: bool = false
-var did_overclock: bool = false
+var _download_mode = 0 # BaseTerminal.Mode the catch downloaded in (decides catch heat)
 
 func setup():
 	active = true
@@ -23,21 +24,20 @@ func setup():
 	$ProgressBar/TimeRemaining.text = "00:00:00"
 	$ProgressBar/TimeRemaining.visible = false
 
-func begin(p_type):
+func begin(p_type, p_terminal = null):
 	type = p_type
+	if p_terminal:
+		terminal = p_terminal
 	setup()
-	var cast_time = type["cast time"]
-	if Stats.overclocked and Upgrades.can_overclock(Phishing):
-		cast_time = type["overclock cast time"]
-	if Stats.overheated:
-		cast_time = type["overheat cast time"]
+	var cast_mode = terminal.get_mode()
+	var cast_time = terminal.pick_by_mode(cast_mode, "cast time", "overclock cast time", "overheat cast time")
 	pb_fill_tween = create_tween()
 	pb_fill_tween.tween_property($ProgressBar, "value", $ProgressBar.max_value, cast_time)
 	await pb_fill_tween.finished
 	if !active:
 		return
 	
-	add_heat()
+	terminal.apply_heat(cast_mode)
 	
 	var base_eff = _get_total_eff()
 	#var eff_text = str(base_eff * defrag_bonus * 100.0).pad_decimals(1) 
@@ -51,16 +51,8 @@ func begin(p_type):
 		$Status.text = "attempt successful, downloading information"
 		
 		pb_drain_tween = create_tween()
-		var time
-		if Stats.overheated:
-			did_overclock = false
-			time = type["overheated download time"]
-		elif Stats.overclocked:
-			did_overclock = true
-			time = type["overclocked download time"]
-		else:
-			did_overclock = false
-			time = type["download time"]
+		_download_mode = terminal.get_mode()
+		var time = terminal.pick_by_mode(_download_mode, "download time", "overclocked download time", "overheated download time")
 			
 		$ProgressBar.max_value = time
 		$ProgressBar.value = time
@@ -103,7 +95,7 @@ func finished(caught: bool):
 		#var item = type["resource gained"].pick_random()
 		
 		$Status.text = "+1 " + reward.item.name
-		add_heat()
+		terminal.apply_heat(_download_mode)
 		
 		#make this one either or since player should only be able to 'phish' in one thing
 		if randf() <= 0.01:
@@ -134,14 +126,6 @@ func finished(caught: bool):
 	if active:
 		begin(type)
 
-func add_heat():
-	if Stats.overheated:
-		Stats.update_tempature(type["overheat heat"])
-	elif did_overclock:
-		Stats.update_tempature(type["overclock heat"])
-	else:
-		Stats.update_tempature(type["heat"])
-
 func kill_tweens():
 	if pb_fill_tween:
 		if pb_fill_tween.is_valid():
@@ -153,6 +137,8 @@ func kill_tweens():
 				pb_drain_tween.kill()
 
 func stop():
+	if !active:
+		return
 	active = false
 	kill_tweens()
 	process_done()

@@ -26,7 +26,8 @@ func all_commands() -> String:
 var _bbcode_regex := RegEx.new()
 
 func _ready():
-	_bbcode_regex.compile("\\[[^\\]]+\\]")
+	# only real bbcode tags, so literal brackets like "decode -cache[=<cache item>]" are measured as shown
+	_bbcode_regex.compile("\\[/?(color|bgcolor|fgcolor|font_size|font|outline_size|outline_color|b|i|u|s|code|url|center|right|left|fill|indent|wave|shake|rainbow|pulse|tornado|fade|img|hint|lb|rb)(=[^\\]]*)?( [^\\]]*)?\\]")
 
 func strip_bbcode(text: String) -> String:
 	return _bbcode_regex.sub(text, "", true)
@@ -97,134 +98,128 @@ func find_largest_array(matrix: Array) -> Array:
 	return largest_arr
 
 
+## Max characters per terminal line, kept up to date by idle_os_2 when the terminal resizes.
+## Tables built with build_table() shrink to fit this.
+var max_line_chars: int = 999
+
+## Builds a bordered table that fits max_line_chars.
+## columns: [{"title": String, "drop": int}] - drop 0 = always keep; higher numbers are dropped first when space runs out.
+## rows: Array of Array[String] (cells may contain bbcode). row_colors: optional hex per row ("" = none).
+## Fitting order: tighten gaps -> drop columns with drop >= 3 -> trim columns to their "min" -> drop the rest -> trim anything.
+## Optional per column: "min" (int) = how far it may be trimmed (with "~") before optional columns are dropped.
+func build_table(columns: Array, rows: Array, row_colors: Array = []) -> String:
+	var active: Array = range(columns.size())
+	var widths: Array = []
+	for c in columns.size():
+		var w = columns[c].title.length()
+		for row in rows:
+			w = max(w, strip_bbcode(str(row[c])).length())
+		widths.append(w)
+
+	var gap = 5
+	var line_len = func(cols: Array, g: int) -> int:
+		var total = 2 + 1 # "│ " ... "│"
+		for i in cols.size():
+			total += widths[cols[i]] + g + (2 if i < cols.size() - 1 else 0)
+		return total
+
+	# 1) tighten gaps
+	while line_len.call(active, gap) > max_line_chars and gap > 1:
+		gap -= 1
+	# 2) shrink to fit: drop low-value columns (drop >= 3) first, then trim columns that allow it
+	#    (down to their "min"), then drop the remaining optional columns, then trim anything.
+	while line_len.call(active, gap) > max_line_chars:
+		var victim = -1
+		for c in active:
+			if columns[c].get("drop", 0) > 0 and (victim == -1 or columns[c].drop > columns[victim].drop):
+				victim = c
+		if victim != -1 and columns[victim].drop >= 3:
+			active.erase(victim)
+			continue
+		var trim = -1
+		for c in active:
+			var min_w = columns[c].get("min", widths[c])
+			if widths[c] > min_w and (trim == -1 or widths[c] > widths[trim]):
+				trim = c
+		if trim != -1:
+			widths[trim] -= 1
+			continue
+		if victim != -1:
+			active.erase(victim)
+			continue
+		var widest = active[0]
+		for c in active:
+			if widths[c] > widths[widest]:
+				widest = c
+		if widths[widest] <= 6:
+			break
+		widths[widest] -= 1
+
+	var inner = line_len.call(active, gap) - 2
+	var text = "┌" + "─".repeat(inner) + "┐\n"
+	var header_cells = []
+	for c in active:
+		header_cells.append(columns[c].title)
+	text += _table_row(header_cells, active, widths, gap) + "\n"
+	text += "├" + "─".repeat(inner) + "┤\n"
+	for r in rows.size():
+		var cells = []
+		for c in active:
+			cells.append(rows[r][c])
+		var line = _table_row(cells, active, widths, gap)
+		var col = row_colors[r] if r < row_colors.size() else ""
+		text += ("[color=%s]%s[/color]" % [col, line] if col != "" else line) + "\n"
+	text += "└" + "─".repeat(inner) + "┘\n"
+	return text
+
+func _table_row(cells: Array, active: Array, widths: Array, gap: int) -> String:
+	var line = "│ "
+	for i in active.size():
+		var w = widths[active[i]]
+		var cell = str(cells[i])
+		var plain = strip_bbcode(cell)
+		if plain.length() > w:
+			cell = plain.substr(0, max(1, w - 1)) + "~"
+		line += pad_text(cell, w) + " ".repeat(gap) + ("| " if i < active.size() - 1 else "│")
+	return line
+
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 
-	# DETERMINE COLUMN SIZES
-	# 0 = Process
-	# 1 = Status
-	# 2 = Unlock LVL
-	# 3 = Efficiency
-	# 4 = Eff/Level
-	# 5 = Run Command
-	# 6 = Info Command
-	# 7 = Required Items
-	var cols_size = [7, 0, 0, 0, 10, 12, 0, 15]
-
-	for p in skill.minor_processes:
-		# PROCESS NAME
-		cols_size[0] = max(cols_size[0], p.name.length())
-		
-		# STATUS
-		var status = "ONLINE" if p.unlocked else "DEMO LOCKED"
-		cols_size[1] = max(cols_size[1], status.length())
-		
-		# UNLOCK LEVEL
-		cols_size[2] = max(cols_size[2], "UNLOCK".length())
-		
-		# EFFICIENCY
-		
-		var efficiency = "%.1f%%" % (p.efficiency * 100.0)
-		cols_size[3] = max(cols_size[3], efficiency.length())
-		
-		# EFFICIENCY / LEVEL
-		#cols_size[4] = 5 # Something like 8.0% or 0.1%
-		
-		# RUN COMMAND
-		if p.has('display command'):
-			cols_size[5] = max(cols_size[5], p['display command'].length())
-		else:
-			cols_size[5] = max(cols_size[5], p.command.length())
-		
-		# INFO COMMAND
-		var info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
-		cols_size[6] = max(cols_size[6], info_cmd.length())
-		
-		# REQUIRED ITEMS
-		var req_items = get_requirements_text(p)
-		cols_size[7] = max(cols_size[7], req_items.length())
-
-
-	# TOP BORDER
-	text += "┌"
-	for i in cols_size.size():
-		text += "─".repeat(cols_size[i] + 6)
-		if i < cols_size.size() - 1:
-			#text += "┬"
-			text += "─"
-	text += "┐\n"
-
-
-	# HEADER
-	text += "│ "
-	text += pad_text("PROCESS", cols_size[0]) + "     | "
-	text += pad_text("STATUS", cols_size[1]) + "     | "
-	text += pad_text("UNLOCK", cols_size[2]) + "     | "
-	text += pad_text("EFF", cols_size[3]) + "     | "
-	text += pad_text("EFF/LVL", cols_size[4]) + "     | "
-	text += pad_text("RUN COMMAND", cols_size[5]) + "     | "
-	text += pad_text("INFO COMMAND", cols_size[6]) + "     | "
-	text += pad_text("REQUIRED ITEMS", cols_size[7]) + "     │\n"
-
-
-	# HEADER SEPARATOR
-	text += "├"
-	for i in cols_size.size():
-		text += "─".repeat(cols_size[i] + 6)
-		if i < cols_size.size() - 1:
-			#text += "┼"
-			text += "─"
-	text += "┤\n"
-	
-	
-	# PROCESS ROWS
+	var columns = [
+		{"title": "PROCESS", "drop": 0},
+		{"title": "STATUS", "drop": 0},
+		{"title": "UNLOCK", "drop": 2},
+		{"title": "EFF", "drop": 0},
+		{"title": "EFF/LVL", "drop": 3},
+		{"title": "RUN COMMAND", "drop": 0, "min": 16},
+		{"title": "INFO COMMAND", "drop": 4},
+		{"title": "REQUIRED ITEMS", "drop": 1, "min": 20},
+	]
+	var rows = []
+	var row_colors = []
 	for p in skill.minor_processes:
 		var status
 		if p.unlocked:
 			status = "ONLINE"
 		else:
 			status = "OFFLINE" if p['unlock level'] <= 10 else "DEMO LOCKED"
-
 		var efficiency = "-"
 		var efficiency_rate = "-"
 		var run_command = "-"
 		var info_cmd = "-"
 		var req_items = "-"
-
 		if p['unlock level'] <= 10:
 			efficiency = "%.1f%%" % (p.efficiency * 100.0)
 			efficiency_rate = "%.1f%%" % (p['efficiency rate'] * 100.0)
 			run_command = p['display command'] if p.has('display command') else p.command
 			info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
 			req_items = get_requirements_text(p)
+		rows.append([p.name, status, str(p['unlock level']), efficiency, efficiency_rate, run_command, info_cmd, req_items])
+		row_colors.append("" if p.unlocked else "#666666")
 
-		var line_to_add = ""
-		line_to_add += "│ "
-		line_to_add += pad_text(p.name, cols_size[0]) + "     | "
-		line_to_add += pad_text(status, cols_size[1]) + "     | "
-		line_to_add += pad_text(str(p['unlock level']), cols_size[2]) + "     | "
-		line_to_add += pad_text(efficiency, cols_size[3]) + "     | "
-		line_to_add += pad_text(efficiency_rate, cols_size[4]) + "     | "
-		line_to_add += pad_text(run_command, cols_size[5], false) + "     | "
-		line_to_add += pad_text(info_cmd, cols_size[6]) + "     | "
-		line_to_add += pad_text(req_items, cols_size[7]) + "     │"
-
-		if !p.unlocked:
-			text += "[color=#666666]" + line_to_add + "[/color]\n"
-		else:
-			text += line_to_add + "\n"
-			
-			
-	# BOTTOM BORDER
-	text += "└"
-	for i in cols_size.size():
-		text += "─".repeat(cols_size[i] + 6)
-		if i < cols_size.size() - 1:
-			#text += "┴"
-			text += "─"
-	text += "┘\n"
-
+	text += build_table(columns, rows, row_colors)
 	return text + "\n\n" + get_modifier_info_text(skill)
 
 
@@ -725,6 +720,8 @@ func get_help() -> String:
 |   date                         Show date and time                   |
 |   clear                        Clear terminal                       |
 |   system                       Show system information              |
+|   panel                        Collapse / expand the side panel     |
+|   vm -h                        List VM window commands              |
 |   quit -s                      Save and quit                        |
 |_____________________________________________________________________|
 """

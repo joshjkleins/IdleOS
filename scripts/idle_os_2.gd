@@ -1,9 +1,6 @@
 extends Control
 
 #FINAL TODO LIST FOR 1.0
-# update ls student cache footprint to not show drop rate for rare item, 
-#student cache network with add vm token chance, 
-#student cache extraction 4x rare material
 
 #REMOVE DEMO LOCKS
 #ADD ALL TIER ITEMS TO PROPER SKILLS + RECIPES (Mining, Cracking, Matching, Compiling)
@@ -147,6 +144,10 @@ var PLAYER_TABBED: int = 0
 var SAVED_LAST_SUBMITTED: String = ""
 
 func _ready():
+	# side panel width drives terminal margins + table width (connect before the save loads)
+	system_dock.width_changed.connect(_on_panel_width_changed)
+	terminal_body.resized.connect(_update_line_capacity)
+	_on_panel_width_changed(system_dock.get_panel_width())
 	current_scrollback = original_scrollback
 	update_context(Context.ROOT)
 	header.update()
@@ -158,8 +159,6 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
-	Signals.end_cache_decrypting_safely_signal.connect(_on_process_ended.bind("Decoding safely finished."))
-	Signals.end_phishing_safely_signal.connect(_on_process_ended.bind("Phishing process finished."))
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
@@ -420,6 +419,9 @@ func universal_commands(text):
 	
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
+		return true
+	if text == "panel" or text.begins_with("panel "):
+		handle_panel_commands(text)
 		return true
 	if text == "vm" or text.begins_with("vm "):
 		handle_vm_commands(text)
@@ -1231,6 +1233,35 @@ func vm_help_text() -> String:
    Tip: click a VM in the dock to minimize/restore it.
 """
 
+## panel | panel hide | panel show
+func handle_panel_commands(text: String) -> void:
+	match text:
+		"panel", "panel toggle":
+			system_dock.toggle()
+		"panel hide", "panel collapse":
+			system_dock.set_collapsed(true)
+		"panel show", "panel expand":
+			system_dock.set_collapsed(false)
+		_:
+			add_line("panel commands: [color=#888888]panel (toggle) | panel hide | panel show[/color]")
+			return
+	add_line("Side panel " + ("collapsed." if system_dock.collapsed else "expanded."))
+
+func _on_panel_width_changed(width: float) -> void:
+	$Panel/MarginContainer/TerminalRoot/MarginContainer.add_theme_constant_override("margin_right", int(width + 16))
+	$Panel/MarginContainer/TerminalRoot/Header/PanelSpacer.custom_minimum_size.x = width + 8
+	_update_line_capacity.call_deferred()
+
+## How many monospace characters fit on a terminal line; tables (ContextCommands.build_table) fit to this.
+func _update_line_capacity() -> void:
+	var font := get_theme_default_font()
+	var font_size := get_theme_default_font_size()
+	var char_width := font.get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	if char_width <= 0.0:
+		return
+	var usable: float = terminal_body.size.x - 24.0 # scrollbar + label margins
+	ContextCommands.max_line_chars = max(40, int(usable / char_width))
+
 func grab_all_focus():
 	get_window().grab_focus()
 	input_line.grab_focus()
@@ -1309,6 +1340,8 @@ const PROCESS_ENDED_MESSAGES = {
 	"Cracking": "Password cracking safely finished.",
 	"Matching": "Matching safely finished.",
 	"Compiling": "Compiling stopped.",
+	"Phishing": "Phishing process finished.",
+	"Decoding": "Decoding safely finished.",
 }
 
 func _on_skill_process_ended(skill: Node) -> void:

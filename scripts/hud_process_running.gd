@@ -14,6 +14,10 @@ const C_IDLE = Color(0.36, 0.42, 0.48, 1)
 var _start_time_msec: int = 0
 var _timer_running: bool = false
 var _pulse_tween: Tween
+var current_color: Color = C_IDLE
+
+func is_running() -> bool:
+	return _timer_running
 
 func _ready():
 	_set_idle()
@@ -24,6 +28,7 @@ func _process(_delta):
 
 func process_started(skill: Node, process: Dictionary):
 	dot.color = skill.SKILL.color
+	current_color = skill.SKILL.color
 	dot.visible = true
 	process_label.text = "%s://%s" % [skill.SKILL.name.to_lower(), str(process.name).to_lower().replace(" ", "-")]
 	process_label.add_theme_color_override("font_color", Color(0.85, 0.88, 0.91, 1))

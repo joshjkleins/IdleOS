@@ -12,6 +12,19 @@ extends PanelContainer
 @onready var system_separator: HSeparator = %SystemSeparator
 @onready var system_temp: SystemTemp = %SystemTemp
 
+@onready var full_view: VBoxContainer = $VBox
+@onready var compact_view: SystemDockCompact = %Compact
+@onready var collapse_button: Button = %CollapseButton
+@onready var process_section = %HUDProcessRunning
+
+## Emitted when the panel changes size so idle_os_2 can re-layout the terminal.
+signal width_changed(new_width: float)
+
+const EXPANDED_WIDTH = 284.0
+const COLLAPSED_WIDTH = 56.0
+
+var collapsed: bool = false
+
 const ROW_FONT_SIZE = 11
 const DIM = Color(0.45, 0.5, 0.55, 1)
 const TEXT = Color(0.8, 0.84, 0.88, 1)
@@ -26,10 +39,44 @@ func _ready() -> void:
 		monitor_margin.add_theme_constant_override("margin_" + side, 0)
 	VMManager.vms_changed.connect(_rebuild_rows)
 	_rebuild_rows()
+	add_to_group("system_dock")
+	collapse_button.pressed.connect(func(): set_collapsed(true); Signals.vm_window_focused())
+	compact_view.expand_requested.connect(func(): set_collapsed(false); Signals.vm_window_focused())
+	_apply_collapsed()
+
+func get_panel_width() -> float:
+	return COLLAPSED_WIDTH if collapsed else EXPANDED_WIDTH
+
+func set_collapsed(value: bool) -> void:
+	if collapsed == value:
+		return
+	collapsed = value
+	_apply_collapsed()
+	SaveManager.mark_dirty()
+
+func toggle() -> void:
+	set_collapsed(!collapsed)
+
+func _apply_collapsed() -> void:
+	full_view.visible = !collapsed
+	compact_view.visible = collapsed
+	custom_minimum_size.x = get_panel_width()
+	offset_left = -get_panel_width()
+	width_changed.emit(get_panel_width())
+
+func save_data() -> Dictionary:
+	return {"collapsed": collapsed}
+
+func load_data(data: Dictionary) -> void:
+	set_collapsed(bool(data.get("collapsed", false)))
 
 func _process(delta: float) -> void:
 	_refresh_accum += delta
-	if _refresh_accum < 0.25:
+	if _refresh_accum < (0.05 if collapsed else 0.25):
+		return
+	if collapsed:
+		compact_view.refresh(process_section.is_running(), process_section.current_color, _refresh_accum)
+		_refresh_accum = 0.0
 		return
 	_refresh_accum = 0.0
 	_refresh_rows()

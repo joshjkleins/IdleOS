@@ -16,6 +16,12 @@ var terminal_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 
 var first_cache_decoded: bool = false
 
+## Chance for a cache's rare item (Decoding efficiency incl. upgrades + defrag bonus).
+func get_rare_chance() -> float:
+	var efficiency_upgrade = Upgrades.get_package_info("decoding.efficiency").current
+	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 1.0
+	return (CACHE["efficiency"] + efficiency_upgrade) * defrag_bonus
+
 #GENERAL MODULE DATA
 var SKILL = {
 	"name": "Decoding",
@@ -118,3 +124,70 @@ func load_data(data: Dictionary) -> void:
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
 	CACHE["efficiency"] = float(data.get("cache_efficiency", CACHE["efficiency"]))
 	first_cache_decoded = data.get("first_cache_decoded", false)
+
+#region cache variants
+## Drop rules for caches and their variants (tuning values are constants on CacheData).
+## `ls <cache>` uses get_drop_table(), decoding uses roll_loot(), so the two always agree.
+
+## Basic resources = everything except hacking mods, SQL injectors, packet spoofs, VM tokens and rare items.
+func is_basic_item(item: ItemData) -> bool:
+	if item.hacking_mod_item:
+		return false
+	if item == Items.SQL_INJECTOR or item == Items.PACKET_SPOOF:
+		return false
+	return not item in vm_tokens()
+
+func vm_tokens() -> Array:
+	return [Items.VM_MINING_TOKEN, Items.VM_PARSING_TOKEN, Items.VM_CRACKING_TOKEN, Items.VM_MATCHING_TOKEN,
+		Items.VM_PHISHING_TOKEN, Items.VM_DECODING_TOKEN, Items.VM_COMPILING_TOKEN]
+
+func _entry_range(cache: CacheData, entry: CacheEntry) -> Vector2i:
+	var mult = 1
+	if cache.get_variant() == CacheData.CacheVariant.FOOTPRINT and is_basic_item(entry.item):
+		mult = CacheData.FOOTPRINT_MULTIPLIER
+	return Vector2i(entry.min_quantity * mult, entry.max_quantity * mult)
+
+func _entry_chance(cache: CacheData, entry: CacheEntry) -> float:
+	var bonus = CacheData.CORRUPTION_DROP_BONUS if cache.get_variant() == CacheData.CacheVariant.CORRUPTION else 0.0
+	return min(1.0, entry.drop_chance + bonus)
+
+func get_cache_rare_chance(cache: CacheData, base_rare_chance: float) -> float:
+	match cache.get_variant():
+		CacheData.CacheVariant.FOOTPRINT:
+			return 0.0
+		CacheData.CacheVariant.CORRUPTION:
+			return min(1.0, base_rare_chance + CacheData.CORRUPTION_DROP_BONUS)
+	return base_rare_chance
+
+func _rare_amount(cache: CacheData) -> int:
+	if cache.get_variant() == CacheData.CacheVariant.EXTRACTION:
+		return 1 + CacheData.EXTRACTION_EXTRA_RARE
+	return 1
+
+## For `ls`: [{name, min, max, chance, rare}].
+func get_drop_table(cache: CacheData) -> Array:
+	var rows = []
+	for e in cache.entries:
+		var r = _entry_range(cache, e)
+		rows.append({"name": e.item.name, "min": r.x, "max": r.y, "chance": _entry_chance(cache, e), "rare": false})
+	if cache.get_variant() == CacheData.CacheVariant.NETWORK:
+		rows.append({"name": "Random VM token", "min": CacheData.NETWORK_VM_MIN, "max": CacheData.NETWORK_VM_MAX, "chance": CacheData.NETWORK_VM_CHANCE, "rare": false})
+	var rare_chance = get_cache_rare_chance(cache, get_rare_chance())
+	if rare_chance > 0.0:
+		for e in cache.rare_pool:
+			rows.append({"name": e.item.name, "min": _rare_amount(cache), "max": _rare_amount(cache), "chance": rare_chance, "rare": true})
+	return rows
+
+## Rolls one decode: [{item, amount, rare}] with the rare item (if any) last.
+func roll_loot(cache: CacheData) -> Array:
+	var loot = []
+	for e in cache.entries:
+		if randf() <= _entry_chance(cache, e):
+			var r = _entry_range(cache, e)
+			loot.append({"item": e.item, "amount": randi_range(r.x, r.y), "rare": false})
+	if cache.get_variant() == CacheData.CacheVariant.NETWORK and randf() <= CacheData.NETWORK_VM_CHANCE:
+		loot.append({"item": vm_tokens().pick_random(), "amount": randi_range(CacheData.NETWORK_VM_MIN, CacheData.NETWORK_VM_MAX), "rare": false})
+	if !cache.rare_pool.is_empty() and randf() < get_cache_rare_chance(cache, get_rare_chance()):
+		loot.append({"item": cache.rare_pool.pick_random().item, "amount": _rare_amount(cache), "rare": true})
+	return loot
+#endregion

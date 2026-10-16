@@ -14,32 +14,46 @@ var dump_info = {}
 var current_row: int = 0
 var current_index: int = 0
 
+var corrupted: bool = false # Corruption variant: set when a find corrupts the cache
+var items_found: int = 0
+var items_total: int = 0
+
 func reset():
 	current_row = 0
 	current_index = 0
+	corrupted = false
+	items_found = 0
+	items_total = 0
+
+func row_count() -> int:
+	return dump_info["codes"].size()
 
 #when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
 func build_dump(cache: CacheData):
 	dump_info = {}
-	var loot = get_potential_items(cache)
-	
-	var id_array = []
-	for i in range(DUMP_SIZE): #how many rows total (roughly 5 ish)
-		var hex_start = 10 * i
-		var formatted_str: String = "0x%04d" % hex_start
-		id_array.append(formatted_str)
-	dump_info["left"] = id_array
-	
-	dump_info["codes"] = {}
+	var loot: Array = get_potential_items(cache) # [{item, amount, rare}]
+	items_total = loot.size()
+
 	var all_codes: Array = []
-	for item_name in loot.keys():
-		var codes_array = get_item_hexes(item_name, loot[item_name])
-		all_codes.append(codes_array)
-	while all_codes.size() < DUMP_SIZE:
+	var rare_codes: Array = []
+	for drop in loot:
+		var codes_array = get_item_hexes(drop.item, drop.amount)
+		# Corruption: the rare row is decoded last, so a corruption can lose it
+		if drop.rare and cache.get_variant() == CacheData.CacheVariant.CORRUPTION:
+			rare_codes.append(codes_array)
+		else:
+			all_codes.append(codes_array)
+	while all_codes.size() + rare_codes.size() < DUMP_SIZE:
 		all_codes.append(get_random_hexes(HEX_CHARACTERS_SIZE))
-	
 	all_codes.shuffle()
-	
+	all_codes.append_array(rare_codes)
+
+	# one address per row; the dump grows past DUMP_SIZE when a cache has more drops
+	var id_array = []
+	for i in range(all_codes.size()):
+		id_array.append("0x%04d" % (10 * i))
+	dump_info["left"] = id_array
+
 	dump_info["codes"] = {}
 	for i in range(all_codes.size()):
 		dump_info["codes"][i] = all_codes[i]
@@ -47,7 +61,7 @@ func build_dump(cache: CacheData):
 #builds entire hex dump based on a combination of placeholder data and real data
 func render_dump() -> String:
 	hex_body = ""
-	for i in range(DUMP_SIZE):
+	for i in range(row_count()):
 		if i > current_row:
 			break
 		
@@ -93,41 +107,18 @@ func update_dump() -> bool:
 
 	return true
 
-func get_potential_items(cache: CacheData) -> Dictionary:
-	var loot = {}
-	
+## Returns [{item, amount, rare}] (rare last). Variant rules live in CacheData.roll_loot().
+func get_potential_items(cache: CacheData) -> Array:
+	# tutorial: the very first Student cache drops everything, including the rare item
 	if not Decoding.first_cache_decoded and cache == Items.STUDENT_CACHE:
+		var loot = []
 		for entry in cache.entries:
-			var quant = randi_range(entry.min_quantity, entry.max_quantity)
-			loot[entry.item] = quant
-		
-		var rare_item = cache.rare_pool.pick_random()
-		loot[rare_item.item] = 1
-		
+			loot.append({"item": entry.item, "amount": randi_range(entry.min_quantity, entry.max_quantity), "rare": false})
+		loot.append({"item": cache.rare_pool.pick_random().item, "amount": 1, "rare": true})
 		Decoding.first_cache_decoded = true
 		SaveManager.mark_dirty()
-		
 		return loot
-	
-	for item in cache.entries:
-		if randf() <= item.drop_chance:
-			var quant = randi_range(item.min_quantity, item.max_quantity)
-			loot[item.item] = quant
-	
-	# Rare items
-	var efficiency_decoding_package = Upgrades.get_package_info("decoding.efficiency")
-	var efficiency_upgrade = efficiency_decoding_package.current
-	var defrag_bonus = Defragging.DECODING["bonus efficiency"] if Stats.has_bonus(Decoding) else 1.0
-	var base_eff = Decoding.CACHE["efficiency"]
-	var eff = (base_eff + efficiency_upgrade) * defrag_bonus
-	
-	#rare item trigger
-	if randf() < eff:
-		if !cache.rare_pool.is_empty():
-			var item = cache.rare_pool.pick_random()
-			loot[item.item] = 1
-	
-	return loot
+	return Decoding.roll_loot(cache)
 
 func get_item_hexes(item, amount) -> Array:
 	var result: Array = []

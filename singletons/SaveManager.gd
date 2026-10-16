@@ -43,6 +43,9 @@ func save_game() -> void:
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
 	if tracked_panel:
 		data["tracked_items"] = tracked_panel.save_data()
+	var dock = get_tree().get_first_node_in_group("system_dock")
+	if dock:
+		data["system_dock"] = dock.save_data()
 	
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -100,6 +103,9 @@ func load_game() -> bool:
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
 	if tracked_panel:
 		tracked_panel.load_data(data.get("tracked_items", {}))
+	var dock = get_tree().get_first_node_in_group("system_dock")
+	if dock:
+		dock.load_data(data.get("system_dock", {}))
 	
 	save_loaded.emit()
 	return true

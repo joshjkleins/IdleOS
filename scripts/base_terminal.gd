@@ -1,5 +1,5 @@
 class_name BaseTerminal
-extends PanelContainer
+extends Container # Container so PanelContainer and VBoxContainer terminals can both extend it
 ## Shared lifecycle for skill terminals (Mining, Parsing, ...), whether they run in the
 ## main terminal or inside a VM window. Subclasses keep their own mechanics and UI and
 ## use these helpers for speed, heat, stopping and session stats.
@@ -83,6 +83,17 @@ func get_fill_rate(mode: Mode) -> float:
 			return _speed_value("overclock speed") * (1.0 + get_speed_upgrade())
 		_:
 			return _speed_value("base speed") * (1.0 + get_speed_upgrade())
+
+## Pick one of three process values by mode, for terminals with their own key names
+## (e.g. Phishing: "cast time" / "overclock cast time" / "overheat cast time").
+func pick_by_mode(mode: Mode, normal_key: String, overclock_key: String, overheat_key: String):
+	match mode:
+		Mode.OVERHEATED:
+			return process_data[overheat_key]
+		Mode.OVERCLOCKED:
+			return process_data[overclock_key]
+		_:
+			return process_data[normal_key]
 
 func get_speed_upgrade() -> float:
 	var package = Upgrades.get_package_info(skill.SKILL.name.to_lower() + ".speed")

@@ -110,36 +110,29 @@ func list_specific_item(item: ItemData):
 				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
 	
 	if item is CacheData:
+		if item.get_variant() != CacheData.CacheVariant.BASE:
+			text += "[color=#dd9426]" + item.get_variant_description() + "[/color]\n\n"
 		text += "Potential items\n"
-
+		var rows: Array = Decoding.get_drop_table(item)
 		var name_width = 0
-		for c_item in item.entries:
-			name_width = max(name_width, c_item.item.name.length())
-		for r_item in item.rare_pool:
-			name_width = max(name_width, r_item.item.name.length())
+		for row in rows:
+			name_width = max(name_width, row.name.length())
+		for row in rows:
+			text += _build_cache_item_row(row, name_width)
+		text += "\n"
 
-		for c_item in item.entries:
-			text += _build_cache_item_row(c_item, name_width)
-		for r_item in item.rare_pool:
-			text += _build_cache_item_row(r_item, name_width, true)
-			
-	
 	if item.name.contains("VM"):
 		text += "[color=#666666]for usage details use 'ssh -h'.[/color]\n"
 	return text
 
-func _build_cache_item_row(entry, name_width: int, rare_item: bool = false) -> String:
-	var ci_name = entry.item.name
-	var min_amount = entry.min_quantity
-	var max_amount = entry.max_quantity
-	var drop_chance = entry.drop_chance  # float: 0.3 (example)
-
-	var amount_text = "x%d" % min_amount if min_amount == max_amount else "x%d-%d" % [min_amount, max_amount]
-	#if rare item use Decoding efficiency for drop chance, otherwise just use cache entry drop chance
-	var chance_text = "%.0f%%" % (Decoding.CACHE["efficiency"] * 100) if rare_item else "%.0f%%" % (drop_chance * 100)
-
-	return "  %-*s   %-8s %6s\n" % [name_width, ci_name, amount_text, chance_text]
-
+## row: {name, min, max, chance, rare} from CacheData.get_drop_table()
+func _build_cache_item_row(row: Dictionary, name_width: int) -> String:
+	var amount_text = "x%d" % row.min if row.min == row.max else "x%d-%d" % [row.min, row.max]
+	var chance_text = "%.0f%%" % (row.chance * 100)
+	var line = "  %-*s   %-8s %6s" % [name_width, row.name, amount_text, chance_text]
+	if row.rare:
+		line += "  [color=#888888](rare)[/color]"
+	return line + "\n"
 
 func get_item_by_name(item_name: String) -> ItemData:
 	var name = item_name.to_lower().strip_edges()

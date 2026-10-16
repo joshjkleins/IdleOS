@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/system_dock.gd" id="1_dock"]
 [ext_resource type="PackedScene" uid="uid://cmkmq8hglqsu4" path="res://scenes/hud_monitor.tscn" id="2_mon"]
 [ext_resource type="PackedScene" path="res://scenes/system_temp.tscn" id="3_temp"]
 [ext_resource type="PackedScene" uid="uid://nvkps616p7hs" path="res://scenes/hud_process_running.tscn" id="5_proc"]
 [ext_resource type="PackedScene" path="res://scenes/item_ledger.tscn" id="6_ledger"]
+[ext_resource type="Script" path="res://scripts/system_dock_compact.gd" id="7_compact"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dock"]
 bg_color = Color(0.0352941, 0.0431373, 0.054902, 1)
@@ -25,6 +26,25 @@ script = ExtResource("1_dock")
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CollapseButton" type="Button" parent="VBox/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+tooltip_text = "Collapse panel  (or type 'panel')"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
+theme_override_font_sizes/font_size = 14
+text = "»"
+flat = true
 
 [node name="HUDProcessRunning" parent="VBox" instance=ExtResource("5_proc")]
 unique_name_in_owner = true
@@ -110,3 +130,9 @@ layout_mode = 2
 [node name="ItemLedger" parent="VBox" instance=ExtResource("6_ledger")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="Compact" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+script = ExtResource("7_compact")
