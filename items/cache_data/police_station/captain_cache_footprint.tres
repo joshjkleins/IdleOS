@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://b1ij7g64rltky"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_ksux4"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_lkwei"]
+[ext_resource type="Resource" uid="uid://0v21uw4f53yc" path="res://items/cache_entry/police_station/captain/drop_1.tres" id="3_i332l"]
+[ext_resource type="Resource" uid="uid://usg8vsmeg7wn" path="res://items/cache_entry/police_station/captain/drop_2.tres" id="4_27yfv"]
+[ext_resource type="Resource" uid="uid://cfvyo1ovkdo1d" path="res://items/cache_entry/police_station/captain/drop_3.tres" id="5_ci3bu"]
+[ext_resource type="Resource" uid="uid://dsl12bhgfxbvr" path="res://items/cache_entry/police_station/captain/drop_4.tres" id="6_iuqw7"]
+[ext_resource type="Resource" uid="uid://86fhv81x2tcs" path="res://items/cache_entry/police_station/captain/captain_corruption.tres" id="7_j6hn4"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_gljjq"]
+
+[resource]
+script = ExtResource("8_gljjq")
+entries = Array[ExtResource("2_lkwei")]([ExtResource("3_i332l"), ExtResource("4_27yfv"), ExtResource("5_ci3bu"), ExtResource("6_iuqw7")])
+rare_pool = Array[ExtResource("2_lkwei")]([ExtResource("7_j6hn4")])
+rare_drop_chance = 0.05
+id = 264
+name = "Captain cache Footprint"
+shortened_name = ""
+description = "Cache variant. Can be Decoded for double basic resources."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_ksux4")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 0
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://clac0iqx1wwnx"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_q751i"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_6ha6f"]
+[ext_resource type="Resource" uid="uid://bwjxwfc48fbeu" path="res://items/cache_entry/hospital/nurse/drop_1.tres" id="3_52tfb"]
+[ext_resource type="Resource" uid="uid://cyj7ff1cl2wuf" path="res://items/cache_entry/hospital/nurse/drop_2.tres" id="4_1hc3q"]
+[ext_resource type="Resource" uid="uid://dplbswjgfony" path="res://items/cache_entry/hospital/nurse/drop_3.tres" id="5_x0ewx"]
+[ext_resource type="Resource" uid="uid://dhjha5wcj0jro" path="res://items/cache_entry/hospital/nurse/nurse_prescription_creds.tres" id="6_i43rj"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_d1bko"]
+
+[resource]
+script = ExtResource("7_d1bko")
+entries = Array[ExtResource("2_6ha6f")]([ExtResource("3_52tfb"), ExtResource("4_1hc3q"), ExtResource("5_x0ewx")])
+rare_pool = Array[ExtResource("2_6ha6f")]([ExtResource("6_i43rj")])
+rare_drop_chance = 0.05
+id = 238
+name = "Nurse cache Network"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_q751i")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 0
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

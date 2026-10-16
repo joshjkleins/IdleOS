@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://dl6qd424y081f"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_xjcr3"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_freg6"]
+[ext_resource type="Resource" uid="uid://5c34xs6xhi5d" path="res://items/cache_entry/bank/teller/drop_1.tres" id="3_bo1d2"]
+[ext_resource type="Resource" uid="uid://81qitei7c00g" path="res://items/cache_entry/bank/teller/drop_2.tres" id="4_a8qb4"]
+[ext_resource type="Resource" uid="uid://ci7rq48aa8r05" path="res://items/cache_entry/bank/teller/drop_3.tres" id="5_nvhs7"]
+[ext_resource type="Resource" uid="uid://badpm2pyp4pyy" path="res://items/cache_entry/bank/teller/rare_item.tres" id="6_ffv5r"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_xxfbd"]
+
+[resource]
+script = ExtResource("7_xxfbd")
+entries = Array[ExtResource("2_freg6")]([ExtResource("3_bo1d2"), ExtResource("4_a8qb4"), ExtResource("5_nvhs7")])
+rare_pool = Array[ExtResource("2_freg6")]([ExtResource("6_ffv5r")])
+rare_drop_chance = 0.05
+id = 288
+name = "Teller Cache Footprint"
+shortened_name = ""
+description = "Cache variant. Can be Decoded for double basic resources."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_xjcr3")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 0
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

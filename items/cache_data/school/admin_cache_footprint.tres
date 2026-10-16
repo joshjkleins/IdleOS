@@ -1,26 +1,25 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://dx0p2xvjwea3v"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://br65nbud5vpau"]
 
 [ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_5invg"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_mk6vj"]
 [ext_resource type="Resource" uid="uid://dk03y5lhoek1v" path="res://items/cache_entry/school/admin/admin_logs.tres" id="3_mj27a"]
 [ext_resource type="Resource" uid="uid://brr7hiiwn3y7d" path="res://items/cache_entry/school/admin/admin_passwords.tres" id="4_f1ov6"]
 [ext_resource type="Resource" uid="uid://clgxgdhmiqv12" path="res://items/cache_entry/school/admin/admin_usernames.tres" id="5_gt7q4"]
-[ext_resource type="Resource" uid="uid://c1ql2oi0rd2ek" path="res://items/cache_entry/school/admin/admin_vm_parsing.tres" id="6_q7uhy"]
 [ext_resource type="Resource" uid="uid://koxaq76dt4uk" path="res://items/cache_entry/school/admin/admin_falsified_transcript_database.tres" id="7_42fc6"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_jtbd4"]
 
 [resource]
 script = ExtResource("8_jtbd4")
-entries = Array[ExtResource("2_mk6vj")]([ExtResource("3_mj27a"), ExtResource("4_f1ov6"), ExtResource("5_gt7q4"), ExtResource("6_q7uhy")])
+entries = Array[ExtResource("2_mk6vj")]([ExtResource("3_mj27a"), ExtResource("4_f1ov6"), ExtResource("5_gt7q4")])
 rare_pool = Array[ExtResource("2_mk6vj")]([ExtResource("7_42fc6")])
 rare_drop_chance = 0.05
-id = 10
-name = "Admin cache"
+id = 152
+name = "Admin cache Footprint"
 shortened_name = ""
-description = "Obtained from School Admin. Can be Decoded for a variety of resources or Parsed to transform into a different variant."
+description = "Cache variant. Can be Decoded for double basic resources."
 upgrade_ingredient = false
 value = 0
-parsable = true
+parsable = false
 contained_items = Array[ExtResource("1_5invg")]([])
 color_type = 7
 obtained_from = Array[int]([6])

@@ -1,26 +1,25 @@
-[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://dq780vaar55wd"]
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://bag4hqmsc0jg8"]
 
 [ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_axklh"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_f3p4w"]
 [ext_resource type="Resource" uid="uid://dk03y5lhoek1v" path="res://items/cache_entry/school/admin/admin_logs.tres" id="3_k3wfa"]
 [ext_resource type="Resource" uid="uid://brr7hiiwn3y7d" path="res://items/cache_entry/school/admin/admin_passwords.tres" id="4_7qbys"]
 [ext_resource type="Resource" uid="uid://clgxgdhmiqv12" path="res://items/cache_entry/school/admin/admin_usernames.tres" id="5_qkjhd"]
-[ext_resource type="Resource" uid="uid://c1ql2oi0rd2ek" path="res://items/cache_entry/school/admin/admin_vm_parsing.tres" id="6_dyn4w"]
 [ext_resource type="Resource" uid="uid://koxaq76dt4uk" path="res://items/cache_entry/school/admin/admin_falsified_transcript_database.tres" id="7_g0jl0"]
 [ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_7l27c"]
 
 [resource]
 script = ExtResource("8_7l27c")
-entries = Array[ExtResource("2_f3p4w")]([ExtResource("3_k3wfa"), ExtResource("4_7qbys"), ExtResource("5_qkjhd"), ExtResource("6_dyn4w")])
+entries = Array[ExtResource("2_f3p4w")]([ExtResource("3_k3wfa"), ExtResource("4_7qbys"), ExtResource("5_qkjhd")])
 rare_pool = Array[ExtResource("2_f3p4w")]([ExtResource("7_g0jl0")])
 rare_drop_chance = 0.05
-id = 10
-name = "Admin cache"
+id = 154
+name = "Admin cache Network"
 shortened_name = ""
-description = "Obtained from School Admin. Can be Decoded for a variety of resources or Parsed to transform into a different variant."
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
 upgrade_ingredient = false
 value = 0
-parsable = true
+parsable = false
 contained_items = Array[ExtResource("1_axklh")]([])
 color_type = 7
 obtained_from = Array[int]([6])

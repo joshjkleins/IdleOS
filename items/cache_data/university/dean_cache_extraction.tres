@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=5 format=3 uid="uid://cq3kqw8mni2ax"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_j16du"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_jhmew"]
+[ext_resource type="Resource" uid="uid://d1l7swshwpqwg" path="res://items/cache_entry/university/dean/dean_bribe_record.tres" id="3_ngw1b"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="4_ecvdh"]
+
+[resource]
+script = ExtResource("4_ecvdh")
+entries = Array[ExtResource("2_jhmew")]([])
+rare_pool = Array[ExtResource("2_jhmew")]([ExtResource("3_ngw1b")])
+rare_drop_chance = 0.05
+id = 223
+name = "Dean cache Extraction"
+shortened_name = ""
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_j16du")]([])
+color_type = 7
+obtained_from = Array[int]([])
+obtained_from_additional_hint = ""
+hacking_mod_type = 0
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

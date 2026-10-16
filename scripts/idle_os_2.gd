@@ -1,20 +1,27 @@
 extends Control
 
 #FINAL TODO LIST FOR 1.0
-#ADD ALL ITEMS FOR ALL TIERS : VARIANTS, HACKING MODS : 
-#TODO Add parsing variants of each cache | remove VM tokens from cache drops 
 # update ls student cache footprint to not show drop rate for rare item, 
 #student cache network with add vm token chance, 
 #student cache extraction 4x rare material
 
 #REMOVE DEMO LOCKS
-#ADD THEM TO PROPER SKILLS + RECIPES
+#ADD ALL TIER ITEMS TO PROPER SKILLS + RECIPES (Mining, Cracking, Matching, Compiling)
 #FLUSH OUT UPLOAD MECHANIC
 #OFFLINE PROGRESSION
 #STEAM ACHIEVEMENTS
 #CLOUD SAVING
 #BUILD OUT ENDING OF GAME
 #BUILD OUT HARD MODE FOR EACH TARGET
+
+#add more Hacking Mods
+
+#Stretch Goals
+# UI Refresh - make things cleaner/pop more, just general polish
+# Unique auto-battle interactions (poison, enemy healing, stun, firewall refresh, custom player inputs (DDoS, slow, crit))
+# Loop chart - shows the general loop of each Tier, for example: Mining > Parsing > Cracking > Matching > Compiling > Hacking < Phishing 
+#                                                                                                                   (down arrow)
+#                                                                                                                     Decoding > Upgrading
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
