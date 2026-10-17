@@ -27,7 +27,7 @@ var SKILL = {
 
 var SCHOOL = {
 	"name": "School",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER I | SCHOOL",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 25,
@@ -84,7 +84,7 @@ var MOD = {
 
 var BANK = {
 	"name": "Bank",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER V | BANK",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -92,15 +92,19 @@ var BANK = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 20,
+	"unlock level": 40,
 	"base speed": 10.0,
 	"overclock speed": 20.0,
 	"overheat speed": 3.0,
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": "???",
-	"resource gained": "???",
+	# PLACEHOLDER recipe (School recipe x tier) until this tier is designed
+	"requirements": {
+		Items.IP_ADDRESS: 4,
+		Items.CREDENTIALS: 4
+	},
+	"resource gained": Items.BANK_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
@@ -108,7 +112,7 @@ var BANK = {
 
 var HOSPITAL = {
 	"name": "Hospital",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER IV | HOSPITAL",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -123,8 +127,12 @@ var HOSPITAL = {
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": "???",
-	"resource gained": "???",
+	# PLACEHOLDER recipe (School recipe x tier) until this tier is designed
+	"requirements": {
+		Items.IP_ADDRESS: 3,
+		Items.CREDENTIALS: 3
+	},
+	"resource gained": Items.HOSPITAL_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
@@ -132,7 +140,7 @@ var HOSPITAL = {
 
 var LAWFIRM = {
 	"name": "Lawfirm",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER III | LAWFIRM",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -140,15 +148,19 @@ var LAWFIRM = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 40,
+	"unlock level": 20,
 	"base speed": 10.0,
 	"overclock speed": 20.0,
 	"overheat speed": 3.0,
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": "???",
-	"resource gained": "???",
+	# PLACEHOLDER recipe (School recipe x tier) until this tier is designed
+	"requirements": {
+		Items.IP_ADDRESS: 2,
+		Items.CREDENTIALS: 2
+	},
+	"resource gained": Items.LAWFIRM_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
@@ -156,7 +168,7 @@ var LAWFIRM = {
 
 var POLICE = {
 	"name": "Police",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER VI | POLICE",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -171,8 +183,12 @@ var POLICE = {
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": "???",
-	"resource gained": "???",
+	# PLACEHOLDER recipe (School recipe x tier) until this tier is designed
+	"requirements": {
+		Items.IP_ADDRESS: 5,
+		Items.CREDENTIALS: 5
+	},
+	"resource gained": Items.POLICE_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
@@ -180,7 +196,7 @@ var POLICE = {
 
 var GOVERNMENT = {
 	"name": "Government",
-	"tier name": "TIER I | CACHE",
+	"tier name": "TIER VII | GOVERNMENT",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
@@ -195,8 +211,12 @@ var GOVERNMENT = {
 	"heat": 1.5,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
-	"requirements": "???",
-	"resource gained": "???",
+	# PLACEHOLDER recipe (School recipe x tier) until this tier is designed
+	"requirements": {
+		Items.IP_ADDRESS: 6,
+		Items.CREDENTIALS: 6
+	},
+	"resource gained": Items.GOVERNMENT_PAYLOAD,
 	"description": "Compile resources to create a payload used to hack targets.",
 	"efficiency description": "?????",
 	"signal": compile_cycle_complete
@@ -205,9 +225,9 @@ var GOVERNMENT = {
 var minor_processes = [
 	SCHOOL,
 	MOD,
-	BANK,
-	HOSPITAL,
 	LAWFIRM,
+	HOSPITAL,
+	BANK,
 	POLICE,
 	GOVERNMENT
 ]
@@ -259,6 +279,7 @@ func create_vm_window(minor_process, item: ItemData = null) -> VMWindow:
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -274,3 +295,4 @@ func load_data(data: Dictionary) -> void:
 	SCHOOL["level"] = int(data.get("school_level", SCHOOL["level"]))
 	SCHOOL["experience"] = int(data.get("school_experience", SCHOOL["experience"]))
 	SCHOOL["efficiency"] = float(data.get("school_efficiency", SCHOOL["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

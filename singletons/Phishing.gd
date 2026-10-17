@@ -97,15 +97,19 @@ var MOD = {
 
 var WHALING = {
 	"name": "Whaling",
-	"tier name": "TIER I | WHALING",
+	"tier name": "TIER III | WHALING",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "phishing -whale",
+	"command": "phish -whale",
 	"efficiency": 0.2,
 	"efficiency rate": 0.003,
 	"unlocked": false,
 	"unlock level": 20,
+	# PLACEHOLDER timings/drops until this tier is designed
+	"cast time": 3.0,
+	"overclock cast time": 1.5,
+	"overheat cast time": 8.0,
 	"wait time min": 6.0,
 	"wait time max": 12.0,
 	"download time": 9.5,
@@ -114,7 +118,7 @@ var WHALING = {
 	"heat": 4,
 	"overclock heat": 7,
 	"overheat heat": 1,
-	"requirements": [],
+	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
@@ -127,15 +131,19 @@ var WHALING = {
 
 var SMISH = {
 	"name": "Smish",
-	"tier name": "TIER I | SMISH",
+	"tier name": "TIER IV | SMISH",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "phishing -smish",
+	"command": "phish -smish",
 	"efficiency": 0.2,
 	"efficiency rate": 0.003,
 	"unlocked": false,
 	"unlock level": 40,
+	# PLACEHOLDER timings/drops until this tier is designed
+	"cast time": 3.0,
+	"overclock cast time": 1.5,
+	"overheat cast time": 8.0,
 	"wait time min": 6.0,
 	"wait time max": 12.0,
 	"download time": 9.5,
@@ -144,7 +152,7 @@ var SMISH = {
 	"heat": 4,
 	"overclock heat": 7,
 	"overheat heat": 1,
-	"requirements": [],
+	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
@@ -157,15 +165,19 @@ var SMISH = {
 
 var TRAP = {
 	"name": "Trap",
-	"tier name": "TIER I | TRAP",
+	"tier name": "TIER V | TRAP",
 	"level": 1,
 	"experience": 0,
 	"experience per level": 200,
-	"command": "phishing -trap",
+	"command": "phish -trap",
 	"efficiency": 0.2,
 	"efficiency rate": 0.003,
 	"unlocked": false,
 	"unlock level": 60,
+	# PLACEHOLDER timings/drops until this tier is designed
+	"cast time": 3.0,
+	"overclock cast time": 1.5,
+	"overheat cast time": 8.0,
 	"wait time min": 6.0,
 	"wait time max": 12.0,
 	"download time": 9.5,
@@ -174,7 +186,7 @@ var TRAP = {
 	"heat": 4,
 	"overclock heat": 7,
 	"overheat heat": 1,
-	"requirements": [],
+	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 5 },
@@ -239,6 +251,7 @@ func create_vm_window(minor_process, repeat) -> VMWindow:
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -254,3 +267,4 @@ func load_data(data: Dictionary) -> void:
 	SPEAR["level"] = int(data.get("spear_level", SPEAR["level"]))
 	SPEAR["experience"] = int(data.get("spear_experience", SPEAR["experience"]))
 	SPEAR["efficiency"] = float(data.get("spear_efficiency", SPEAR["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

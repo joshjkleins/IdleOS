@@ -88,6 +88,8 @@ var CORRUPTION = {
 	"experience": 0,
 	"experience per level": 200,
 	"command": "parse -corruption",
+	"display command": "parse -corruption=<item>",
+	"ssh command": "ssh parsing corruption",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": false,
@@ -98,7 +100,7 @@ var CORRUPTION = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": "???",
+	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at a hacking resources contained within. If used on a Cache it will transform it to a Corrupted variant, significantly increasing the chance of decoding an item but has a 25% chance to destroy the rest of the cache after each item decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -112,6 +114,8 @@ var NETWORK = {
 	"experience": 0,
 	"experience per level": 200,
 	"command": "parse -network",
+	"display command": "parse -network=<item>",
+	"ssh command": "ssh parsing network",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": false,
@@ -122,7 +126,7 @@ var NETWORK = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": "???",
+	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at finding VM tokens. If used on a Cache it will transform it to a Network variant, doubling all VM tokens found within.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -136,6 +140,8 @@ var EXTRACTION = {
 	"experience": 0,
 	"experience per level": 200,
 	"command": "parse -extraction",
+	"display command": "parse -extraction=<item>",
+	"ssh command": "ssh parsing extraction",
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": false,
@@ -146,7 +152,7 @@ var EXTRACTION = {
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
-	"requirements": "???",
+	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
 	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] with an additional argument [target=username] to only find that resource. If used on a Cache it will transform it to a Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
 	"efficiency description": "Increases chance of finding a resource per row.",
@@ -289,7 +295,7 @@ func list_vm_commands() -> String:
 			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>"
 			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
 		else:
-			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "DEMO LOCKED[/color]\n"
+			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "LOCKED (lvl %d)[/color]\n" % mp["unlock level"]
 	
 	#return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
 	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma seperated ex. ssh parsing footprint=logs, student cache[/color]"
@@ -305,6 +311,7 @@ func create_vm_window(minor_process, items_to_parse) -> VMWindow:
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -320,6 +327,7 @@ func load_data(data: Dictionary) -> void:
 	FOOTPRINT["level"] = int(data.get("footprint_level", FOOTPRINT["level"]))
 	FOOTPRINT["experience"] = int(data.get("footprint_experience", FOOTPRINT["experience"]))
 	FOOTPRINT["efficiency"] = float(data.get("footprint_efficiency", FOOTPRINT["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 
 var LOG_LINES = [

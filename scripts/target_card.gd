@@ -12,7 +12,7 @@ func update_info(info):
 			
 		$MarginContainer/VBoxContainer/VBoxContainer/Command.text = reg_cmd + hm_cmd
 	else:
-		$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "DEMO LOCKED"
+		$MarginContainer/VBoxContainer/VBoxContainer/Command.text = "LOCKED"
 	$MarginContainer/VBoxContainer/VBoxContainer/Title.text = info["name"]
 	$MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Difficulty.text = "Difficulty " + info["difficulty"]
 	$MarginContainer/VBoxContainer/TextureRect.texture = info["art"]

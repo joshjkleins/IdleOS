@@ -205,6 +205,7 @@ func create_vm_window(minor_process, repeat) -> VMWindow:
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -220,3 +221,4 @@ func load_data(data: Dictionary) -> void:
 	LOGS["level"] = int(data.get("logs_level", LOGS["level"]))
 	LOGS["experience"] = int(data.get("logs_experience", LOGS["experience"]))
 	LOGS["efficiency"] = float(data.get("logs_efficiency", LOGS["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

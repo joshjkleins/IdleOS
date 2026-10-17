@@ -99,7 +99,7 @@ var PIN = {
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
 	"requirements": {Items.ENCRYPTED_PINS: 1},
-	"resource gained": Items.PASSWORDS,
+	"resource gained": Items.PINS,
 	"resource amount gained": 1,
 	"description": "Cracks encrypted PINs, transforming them into PINs",
 	"efficiency description": "Chance to instantly crack PIN",
@@ -123,6 +123,7 @@ var API = {
 	"heat": 1.6,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
+	"not built": true, # TODO: needs Hashed API Key / API Key items
 	"requirements": "Hashed API key x1",
 	"resource gained": Items.PASSWORDS,
 	"resource amount gained": 1,
@@ -137,7 +138,7 @@ var ROOT = {
 	"level": 1,
 	"experience": 0,
 	"experience per level": 900,
-	"command": "crack -api",
+	"command": "crack -root",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
@@ -148,6 +149,7 @@ var ROOT = {
 	"heat": 1.6,
 	"overclock heat": 1.9,
 	"overheat heat": 0.3,
+	"not built": true, # TODO: needs Encrypted Root Key / Root Key items
 	"requirements": "Encrypted Root Key x1",
 	"resource gained": Items.PASSWORDS,
 	"resource amount gained": 1,
@@ -227,6 +229,7 @@ func create_vm_window(minor_process, use_token: ItemData = null, create_token: I
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -242,6 +245,7 @@ func load_data(data: Dictionary) -> void:
 	PASSWORD["level"] = int(data.get("password_level", PASSWORD["level"]))
 	PASSWORD["experience"] = int(data.get("password_experience", PASSWORD["experience"]))
 	PASSWORD["efficiency"] = float(data.get("password_efficiency", PASSWORD["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 
 var random_four_digit_words: Array = [

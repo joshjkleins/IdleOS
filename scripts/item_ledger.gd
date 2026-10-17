@@ -64,14 +64,17 @@ func _add_row(item: ItemData, amount: int, dir: int, now: float) -> void:
 	_rows.push_front(row)
 	while _rows.size() > MAX_ROWS:
 		var old = _rows.pop_back()
+		if old.has("tween") and old.tween.is_valid():
+			old.tween.kill() # its callbacks reference the label we're about to free
 		old.label.queue_free()
 	_restyle_ages()
 	var tween = create_tween()
+	row["tween"] = tween
 	tween.tween_method(func(p): _render_transfer(row, p), 0.0, 1.0, DOWNLOAD_TIME if dir > 0 else UPLOAD_TIME)
 	tween.tween_callback(func():
 		row.settled = true
 		_render_settled(row)
-		_flash(label))
+		_flash(row.label))
 
 func _file_name(item: ItemData) -> String:
 	return item.name.to_lower().replace(" ", "_") + ".dat"

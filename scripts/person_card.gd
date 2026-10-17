@@ -12,7 +12,7 @@ func update_info(info):
 	if info.unlocked:
 		$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = info.command
 	else:
-		$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = "DEMO LOCKED"
+		$MarginContainer/VBoxContainer/RowTwo/MarginContainer/HBoxContainer/Command.text = "LOCKED"
 	$MarginContainer/VBoxContainer/GridContainer/IntegrityBox/MarginContainer/VBoxContainer/IntegrityAmount.text = str(info.integrity)
 	$MarginContainer/VBoxContainer/GridContainer/FirewallBox/MarginContainer/VBoxContainer/FirewallAmount.text = str(info.firewall)
 	$MarginContainer/VBoxContainer/GridContainer/CounterattackBox/MarginContainer/VBoxContainer/CounterAmount.text = str(info.counter)

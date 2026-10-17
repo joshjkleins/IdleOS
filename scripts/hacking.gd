@@ -198,7 +198,7 @@ func handle_hack_command(text):
 		return
 	
 	if !target.get("unlocked", false):
-		player_hacking_box.add_line_error("Not available in Demo.")
+		player_hacking_box.add_line_error("Target is locked.")
 		return
 	
 	# Has requirements in inventory

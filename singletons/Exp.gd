@@ -4,7 +4,7 @@ signal gained_xp_signal
 signal exp_updated_signal
 
 
-const MAX_LEVEL: int = 10
+const MAX_LEVEL: int = 99 # highest process unlock level is 80 (Compiling: Government)
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]
@@ -65,6 +65,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 	while major.SKILL["level"] < major_new_level:
 		print('leveled up')
 		major.SKILL["level"] += 1
+		refresh_process_unlocks(major)
 		major.SKILL["level up signal"].emit()
 		Audiomanager.play_sfx("level_up")
 		if major != Hacking:
@@ -96,3 +97,45 @@ func on_level_up(skill_data: Dictionary):
 	skill_data["efficiency"] += skill_data["efficiency increase rate"]
 	print("Leveled up!")
 	print("Current process" + " is level " + str(int(skill_data.level)))
+
+
+#region process unlocks + saving
+## Processes unlock once their skill reaches "unlock level" (and never re-lock).
+## (The old header did this as a side effect of displaying a skill; now it happens on level up + load.)
+func refresh_process_unlocks(major) -> void:
+	for p in major.minor_processes:
+		if major.SKILL.level >= p.get("unlock level", 1):
+			p["unlocked"] = true
+
+func refresh_all_process_unlocks() -> void:
+	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
+		refresh_process_unlocks(major)
+
+## Every process's progress, keyed by process name (skills used to save only their first process).
+func processes_save_data(major) -> Dictionary:
+	var out := {}
+	for p in major.minor_processes:
+		out[str(p.name)] = {
+			"level": p.get("level", 1),
+			"experience": p.get("experience", 0),
+			"efficiency": p.get("efficiency", 0.0),
+			"unlocked": p.get("unlocked", false),
+		}
+	return out
+
+func processes_load_data(major, data: Dictionary) -> void:
+	for p in major.minor_processes:
+		var saved: Dictionary = data.get(str(p.name), {})
+		if saved.is_empty():
+			continue
+		p["level"] = int(saved.get("level", p.get("level", 1)))
+		p["experience"] = int(saved.get("experience", p.get("experience", 0)))
+		if p.has("efficiency"):
+			p["efficiency"] = float(saved.get("efficiency", p["efficiency"]))
+		p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
+	refresh_process_unlocks(major)
+
+func _ready() -> void:
+	SaveManager.save_loaded.connect(refresh_all_process_unlocks)
+	refresh_all_process_unlocks.call_deferred()
+#endregion

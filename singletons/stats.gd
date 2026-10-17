@@ -2,7 +2,7 @@ extends Node
 
 signal gained_xp_signal
 
-const MAX_LEVEL = 10
+const MAX_LEVEL = 99 # keep in sync with Exp.MAX_LEVEL (legacy helpers below; Exp owns leveling)
 
 var MAX_TEMP = 100.0
 var MIN_TEMP = 30.0
@@ -27,7 +27,7 @@ var hacking_targets = {
 		"hard mode command": "view school -hard",
 		"name": "School",
 		"unlocked": true,
-		"hard mode unlocked": false,
+		"hard mode unlocked": true,
 		"difficulty": "Easy",
 		"required payload": Items.SCHOOL_PAYLOAD,
 		"targets": [
@@ -48,7 +48,7 @@ var hacking_targets = {
 			{
 				"name": "Administrator",
 				"difficulty": "Easy",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack administrator",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
 				"heat": 0.9,
@@ -62,7 +62,7 @@ var hacking_targets = {
 			{
 				"name": "Vice Principal",
 				"difficulty": "Medium",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack vice-principal",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
 				"heat": 1.0,
@@ -76,7 +76,7 @@ var hacking_targets = {
 			{
 				"name": "Principal",
 				"difficulty": "Medium",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack principal",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
 				"heat": 1.3,
@@ -90,7 +90,7 @@ var hacking_targets = {
 			{
 				"name": "Superintendent",
 				"difficulty": "Hard",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
 				"heat": 2.0,
@@ -121,7 +121,7 @@ var hacking_targets = {
 			{ #insane amount of integrity, needs speed + dmg
 				"name": "Administrator",
 				"difficulty": "Hard",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack administrator",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 20},
 				"heat": 0.9,
@@ -136,7 +136,7 @@ var hacking_targets = {
 			{ #huge firewall, needs firewall reduction + damage
 				"name": "Vice Principal",
 				"difficulty": "Hard",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack vice-principal",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 25 },
 				"heat": 1.0,
@@ -151,7 +151,7 @@ var hacking_targets = {
 			{ #hits slow and hard, needs restore to win
 				"name": "Principal",
 				"difficulty": "Hard",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack principal",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 30},
 				"heat": 1.3,
@@ -166,7 +166,7 @@ var hacking_targets = {
 			{ #hits fast and weak, damage reduction + restore
 				"name": "Superintendent",
 				"difficulty": "Hard",
-				"unlocked": false,
+				"unlocked": true,
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 35},
 				"heat": 2.0,
@@ -184,64 +184,80 @@ var hacking_targets = {
 		"command": "view lawfirm",
 		"hard mode command": "view lawfirm -hard",
 		"name": "Lawfirm",
-		"unlocked": false,
+		"unlocked": true,
 		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.LAWFIRM_PAYLOAD,
+		"hard mode targets": [], # none built yet
 		"targets": [
-			{
+			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
 				"name": "Legal Assistant",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack legal-assistant",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 1},
+				"heat": 0.7,
+				"exp": 200,
+				"integrity": 200,
+				"firewall": 20,
+				"counter": 10,
+				"counter speed": 16.0,
 				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
 				"name": "Paralegal",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack paralegal",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 2},
+				"heat": 1.1,
+				"exp": 2400,
+				"integrity": 240,
+				"firewall": 26,
+				"counter": 14,
+				"counter speed": 16.0,
 				"loot": Items.PARALEGAL_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
 				"name": "Associate Attorney",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack associate-attorney",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 3},
+				"heat": 1.2,
+				"exp": 3600,
+				"integrity": 280,
+				"firewall": 30,
+				"counter": 18,
+				"counter speed": 16.0,
 				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
 				"name": "Lawyer",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack lawyer",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 4},
+				"heat": 1.5,
+				"exp": 4800,
+				"integrity": 320,
+				"firewall": 40,
+				"counter": 12,
+				"counter speed": 30.0,
 				"loot": Items.LAWYER_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
 				"name": "Partner",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack partner",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 5},
+				"heat": 2.2,
+				"exp": 6000,
+				"integrity": 400,
+				"firewall": 60,
+				"counter": 24,
+				"counter speed": 20.0,
 				"loot": Items.PARTNER_CACHE
 			}
 		],
@@ -250,64 +266,80 @@ var hacking_targets = {
 		"command": "view hospital",
 		"hard mode command": "view hospital -hard",
 		"name": "Hospital",
-		"unlocked": false,
+		"unlocked": true,
 		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.HOSPITAL_PAYLOAD,
+		"hard mode targets": [], # none built yet
 		"targets": [
-			{
+			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
 				"name": "Receptionist",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack receptionist",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 1},
+				"heat": 0.9,
+				"exp": 350,
+				"integrity": 350,
+				"firewall": 35,
+				"counter": 18,
+				"counter speed": 16.0,
 				"loot": Items.RECEPTIONIST_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
 				"name": "Orderly",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack orderly",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 2},
+				"heat": 1.3,
+				"exp": 4200,
+				"integrity": 420,
+				"firewall": 45,
+				"counter": 24,
+				"counter speed": 16.0,
 				"loot": Items.ORDERLY_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
 				"name": "Nurse",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack nurse",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 3},
+				"heat": 1.4,
+				"exp": 6300,
+				"integrity": 490,
+				"firewall": 52,
+				"counter": 32,
+				"counter speed": 16.0,
 				"loot": Items.NURSE_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
 				"name": "Doctor",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack doctor",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 4},
+				"heat": 1.7,
+				"exp": 8400,
+				"integrity": 560,
+				"firewall": 70,
+				"counter": 21,
+				"counter speed": 30.0,
 				"loot": Items.DOCTOR_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
 				"name": "Chief of Medicine",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack chief-medicine",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 5},
+				"heat": 2.4,
+				"exp": 10500,
+				"integrity": 700,
+				"firewall": 105,
+				"counter": 42,
+				"counter speed": 20.0,
 				"loot": Items.CHIEF_OF_MEDICINE_CACHE
 			}
 		],
@@ -316,73 +348,79 @@ var hacking_targets = {
 		"command": "view bank",
 		"hard mode command": "view bank -hard",
 		"name": "Bank",
-		"unlocked": false,
+		"unlocked": true,
 		"hard mode unlocked": false,
 		"difficulty": "Easy",
 		"required payload": Items.BANK_PAYLOAD,
+		"hard mode targets": [], # none built yet
 		"targets": [
-			{
+			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
 				"name": "Teller",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack teller",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 1},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 1},
+				"heat": 1.1,
+				"exp": 550,
+				"integrity": 550,
+				"firewall": 55,
+				"counter": 28,
+				"counter speed": 16.0,
 				"loot": Items.TELLER_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
 				"name": "Loan Officer",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack loan-officer",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 2},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 2},
+				"heat": 1.5,
+				"exp": 6600,
+				"integrity": 660,
+				"firewall": 71,
+				"counter": 38,
+				"counter speed": 16.0,
 				"loot": Items.LOAN_OFFICER_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
 				"name": "Branch Manager",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack branch-manager",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 3},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 3},
+				"heat": 1.6,
+				"exp": 9900,
+				"integrity": 770,
+				"firewall": 82,
+				"counter": 50,
+				"counter speed": 16.0,
 				"loot": Items.BRANCH_MANAGER_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
 				"name": "Security",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack security",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 4},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
-				"counter speed": 20.0,
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 4},
+				"heat": 1.9,
+				"exp": 13200,
+				"integrity": 880,
+				"firewall": 110,
+				"counter": 33,
+				"counter speed": 30.0,
 				"loot": Items.SECURITY_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
 				"name": "Chief Financial Officer",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack cfo",
-				"requirements": {"item": Items.LIBRARY_PAYLOAD, "amount": 5},
-				"heat": 10,
-				"exp": 600,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 5},
+				"heat": 2.6,
+				"exp": 16500,
+				"integrity": 1100,
+				"firewall": 165,
+				"counter": 66,
 				"counter speed": 20.0,
 				"loot": Items.CFO_CACHE
 			}
@@ -393,63 +431,79 @@ var hacking_targets = {
 		"hard mode command": "view police -hard",
 		"name": "Police Station",
 		"difficulty": "Easy",
-		"unlocked": false,
+		"unlocked": true,
 		"hard mode unlocked": false,
 		"required payload": Items.POLICE_PAYLOAD,
+		"hard mode targets": [], # none built yet
 		"targets": [
-			{
+			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
 				"name": "Secretary",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack secretary",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 1},
+				"heat": 1.3,
+				"exp": 800,
+				"integrity": 800,
+				"firewall": 80,
+				"counter": 40,
+				"counter speed": 16.0,
 				"loot": Items.SECRETARY_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
 				"name": "Cop",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack cop",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 2},
+				"heat": 1.7,
+				"exp": 9600,
+				"integrity": 960,
+				"firewall": 104,
+				"counter": 56,
+				"counter speed": 16.0,
 				"loot": Items.COP_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
 				"name": "Detective",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack detective",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 3},
+				"heat": 1.8,
+				"exp": 14400,
+				"integrity": 1120,
+				"firewall": 120,
+				"counter": 72,
+				"counter speed": 16.0,
 				"loot": Items.DETECTIVE_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
 				"name": "Sergeant",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack sergeant",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 4},
+				"heat": 2.1,
+				"exp": 19200,
+				"integrity": 1280,
+				"firewall": 160,
+				"counter": 48,
+				"counter speed": 30.0,
 				"loot": Items.SERGEANT_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
 				"name": "Captain",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack captain",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 5},
+				"heat": 2.8,
+				"exp": 24000,
+				"integrity": 1600,
+				"firewall": 240,
+				"counter": 96,
+				"counter speed": 20.0,
 				"loot": Items.CAPTAIN_CACHE
 			}
 		],
@@ -459,63 +513,79 @@ var hacking_targets = {
 		"hard mode command": "view government -hard",
 		"name": "Government",
 		"difficulty": "Hard",
-		"unlocked": false,
+		"unlocked": true,
 		"hard mode unlocked": false,
 		"required payload": Items.GOVERNMENT_PAYLOAD,
+		"hard mode targets": [], # none built yet
 		"targets": [
-			{
+			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
 				"name": "Clerk",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack clerk",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 1},
+				"heat": 1.5,
+				"exp": 1200,
+				"integrity": 1200,
+				"firewall": 120,
+				"counter": 60,
+				"counter speed": 16.0,
 				"loot": Items.CLERK_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
 				"name": "Analyst",
 				"difficulty": "Easy",
+				"unlocked": true,
 				"command": "hack analyst",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 2},
+				"heat": 1.9,
+				"exp": 14400,
+				"integrity": 1440,
+				"firewall": 156,
+				"counter": 84,
+				"counter speed": 16.0,
 				"loot": Items.ANALYST_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
 				"name": "Ambassador",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack ambassador",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 3},
+				"heat": 2.0,
+				"exp": 21600,
+				"integrity": 1680,
+				"firewall": 180,
+				"counter": 108,
+				"counter speed": 16.0,
 				"loot": Items.AMBASSADOR_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
 				"name": "Vice President",
 				"difficulty": "Medium",
+				"unlocked": true,
 				"command": "hack vice-president",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 4},
+				"heat": 2.3,
+				"exp": 28800,
+				"integrity": 1920,
+				"firewall": 240,
+				"counter": 72,
+				"counter speed": 30.0,
 				"loot": Items.VICE_PRESIDENT_CACHE
 			},
-			{
+			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
 				"name": "President",
 				"difficulty": "Hard",
+				"unlocked": true,
 				"command": "hack president",
-				"heat": 10,
-				"exp": 600,
-				"time to hack": 2.0,
-				"overheat time to hack": 10.0,
-				"overclock time to hack": 0.5,
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 5},
+				"heat": 3.0,
+				"exp": 36000,
+				"integrity": 2400,
+				"firewall": 360,
+				"counter": 144,
+				"counter speed": 20.0,
 				"loot": Items.PRESIDENT_CACHE
 			}
 		],
@@ -758,7 +828,9 @@ func load_data(data: Dictionary) -> void:
 			continue
 		var location: Dictionary = hacking_targets[location_key]
 		var saved: Dictionary = locations[location_key]
-		location["unlocked"] = bool(saved.get("unlocked", location["unlocked"]))
-		location["hard mode unlocked"] = bool(saved.get("hard mode unlocked", location["hard mode unlocked"]))
+		# OR with the default: everything is open while progression is redesigned, so old demo saves
+		# (which stored "unlocked": false) can't re-lock locations. Revisit when unlock progression lands.
+		location["unlocked"] = location["unlocked"] or bool(saved.get("unlocked", false))
+		location["hard mode unlocked"] = location["hard mode unlocked"] or bool(saved.get("hard mode unlocked", false))
 	
 	Signals.system_temp_updated(system_tempature)

@@ -155,6 +155,7 @@ var minor_processes = [SCHOOL]
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -166,3 +167,4 @@ func load_data(data: Dictionary) -> void:
 	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	SKILL["efficiency"] = float(data.get("skill_efficiency", SKILL["efficiency"]))
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

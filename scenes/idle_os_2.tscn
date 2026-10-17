@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_u0uic"]
 [ext_resource type="Script" uid="uid://00r6cl2cuul2" path="res://scripts/idle_os_2.gd" id="2_u0uic"]
-[ext_resource type="PackedScene" uid="uid://cawbutc5qs2ck" path="res://scenes/hud_2.tscn" id="3_h30m8"]
+[ext_resource type="PackedScene" path="res://scenes/skill_header.tscn" id="3_h30m8"]
 [ext_resource type="PackedScene" uid="uid://bhrvmj4mmd54r" path="res://scenes/hacking.tscn" id="3_wp27s"]
 [ext_resource type="PackedScene" path="res://scenes/system_dock.tscn" id="4_7qmxk"]
 [ext_resource type="PackedScene" uid="uid://bg1seox0aiii6" path="res://scenes/scrollback.tscn" id="4_s42mw"]
@@ -64,7 +64,7 @@ mouse_filter = 2
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 8
-theme_override_constants/margin_right = 300
+theme_override_constants/margin_right = 276
 
 [node name="TerminalGrandparent" type="VBoxContainer" parent="Panel/MarginContainer/TerminalRoot/MarginContainer"]
 layout_mode = 2

@@ -107,6 +107,7 @@ func create_vm_window(minor_process, repeat, cache_target: ItemData) -> VMWindow
 
 func save_data() -> Dictionary:
 	return {
+		"processes": Exp.processes_save_data(self),
 		"bonus_expires_at": bonus_expires_at,
 		"skill_level": SKILL["level"],
 		"skill_experience": SKILL["experience"],
@@ -124,12 +125,14 @@ func load_data(data: Dictionary) -> void:
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
 	CACHE["efficiency"] = float(data.get("cache_efficiency", CACHE["efficiency"]))
 	first_cache_decoded = data.get("first_cache_decoded", false)
+	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 #region cache variants
 ## Drop rules for caches and their variants (tuning values are constants on CacheData).
 ## `ls <cache>` uses get_drop_table(), decoding uses roll_loot(), so the two always agree.
 
 ## Basic resources = everything except hacking mods, SQL injectors, packet spoofs, VM tokens and rare items.
+
 func is_basic_item(item: ItemData) -> bool:
 	if item.hacking_mod_item:
 		return false

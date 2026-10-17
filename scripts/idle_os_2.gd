@@ -2,7 +2,6 @@ extends Control
 
 #FINAL TODO LIST FOR 1.0
 
-#REMOVE DEMO LOCKS
 #ADD ALL TIER ITEMS TO PROPER SKILLS + RECIPES (Mining, Cracking, Matching, Compiling)
 #FLUSH OUT UPLOAD MECHANIC
 #OFFLINE PROGRESSION
@@ -941,7 +940,7 @@ func handle_info_commands(text):
 	
 	if command.size() == 3:
 		if command[1].to_lower() == "hacking":
-			var locations = [Stats.hacking_targets["School"]]
+			var locations = Stats.hacking_targets.values()
 			for loc in locations:
 				if loc["name"].to_lower().replace(" ", "-") == command[2]:
 					add_line(ContextCommands.get_hack_target_info(loc))
@@ -1035,6 +1034,10 @@ func handle_vm_token_commands(text):
 	
 	if !target_minor_process.unlocked:
 		add_line("Process is not unlocked")
+		return
+	
+	if target_minor_process.get("not built", false):
+		add_line(ContextCommands.not_built_text(target_minor_process))
 		return
 	
 	if target_process != Parsing and target_process != Cracking and target_process != Compiling:
@@ -1248,7 +1251,9 @@ func handle_panel_commands(text: String) -> void:
 	add_line("Side panel " + ("collapsed." if system_dock.collapsed else "expanded."))
 
 func _on_panel_width_changed(width: float) -> void:
-	$Panel/MarginContainer/TerminalRoot/MarginContainer.add_theme_constant_override("margin_right", int(width + 16))
+	# terminal ends exactly at the panel border (Panel/MarginContainer already adds 8px on the right),
+	# so the scrollbar sits right against the panel with no dead gap
+	$Panel/MarginContainer/TerminalRoot/MarginContainer.add_theme_constant_override("margin_right", int(width - 8))
 	$Panel/MarginContainer/TerminalRoot/Header/PanelSpacer.custom_minimum_size.x = width + 8
 	_update_line_capacity.call_deferred()
 
@@ -1462,7 +1467,9 @@ func password_unscramble_commands(text):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-			
+			if ms.get("not built", false):
+				add_line(ContextCommands.not_built_text(ms))
+				return
 			
 			if ms == Cracking.VM:
 				#example command: crack -vm use=mining create=parsing

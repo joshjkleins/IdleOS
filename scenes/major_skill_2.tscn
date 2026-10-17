@@ -1,7 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dfuopx8mx2056"]
+[gd_scene load_steps=6 format=3 uid="uid://hcmktj63br2f"]
 
 [ext_resource type="Theme" uid="uid://bxn4varkeqdbj" path="res://theme/TerminalTheme.tres" id="1_y1y7u"]
-[ext_resource type="Script" uid="uid://dewnos2yonx5" path="res://scripts/major_skill_2.gd" id="2_uvpc6"]
+[ext_resource type="Script" path="res://scripts/major_skill_2.gd" id="2_uvpc6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1lln8"]
 bg_color = Color(0.0431373, 0.054902, 0.0666667, 1)

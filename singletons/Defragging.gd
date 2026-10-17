@@ -120,12 +120,20 @@ func has_requirements(skill: Dictionary):
 		return false
 	return true
 
+const COOLDOWN_MINUTES = 20
+
 func activate_cooldown():
 	SKILL["on cooldown"] = true
 	var now = Time.get_unix_time_from_system()
-	var minute = 60
-	SKILL["cooldown"] = now + (20 * minute) #30 min = 30 * 60
+	SKILL["cooldown"] = now + (COOLDOWN_MINUTES * 60)
 	on_cooldown_signal.emit()
+
+## 0.0 right after defragging -> 1.0 when defragging is available again (header "charging" bar).
+func get_cooldown_progress() -> float:
+	if !on_cooldown():
+		return 1.0
+	var remaining = SKILL["cooldown"] - Time.get_unix_time_from_system()
+	return clamp(1.0 - remaining / (COOLDOWN_MINUTES * 60.0), 0.0, 1.0)
 
 func on_cooldown() -> bool:
 	return Time.get_unix_time_from_system() < SKILL["cooldown"]

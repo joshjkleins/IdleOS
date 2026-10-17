@@ -201,16 +201,13 @@ func get_help_text(skill: Node) -> String:
 	var row_colors = []
 	for p in skill.minor_processes:
 		var status
-		if p.unlocked:
-			status = "ONLINE"
-		else:
-			status = "OFFLINE" if p['unlock level'] <= 10 else "DEMO LOCKED"
+		status = "ONLINE" if p.unlocked else "LOCKED"
 		var efficiency = "-"
 		var efficiency_rate = "-"
 		var run_command = "-"
 		var info_cmd = "-"
 		var req_items = "-"
-		if p['unlock level'] <= 10:
+		if true: # details shown for every process (unlock level is in the UNLOCK column)
 			efficiency = "%.1f%%" % (p.efficiency * 100.0)
 			efficiency_rate = "%.1f%%" % (p['efficiency rate'] * 100.0)
 			run_command = p['display command'] if p.has('display command') else p.command
@@ -255,7 +252,7 @@ func get_help_text_hacking(skill: Node) -> String:
 	text += "│ LOCATION                  REQ                      INFO                             │\n"
 	text += "├─────────────────────────────────────────────────────────────────────────────────────┤\n"
 	
-	var locations = [Stats.hacking_targets["School"]] #, Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+	var locations = Stats.hacking_targets.values()
 
 	for location in locations:
 		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
@@ -286,7 +283,7 @@ func get_help_text_2(skill: Node) -> String:
 		text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
 
 	if skill == Hacking:
-		var locations = [Stats.hacking_targets["School"]] #, Stats.hacking_targets["Library"], Stats.hacking_targets["Small Business"]]
+		var locations = Stats.hacking_targets.values()
 
 		for location in locations:
 			var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), location["name"].to_lower()]
@@ -451,8 +448,6 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 	if skill == Defragging:
 		return get_mp_dfg_info(skill, process)
 	
-	if process['unlock level'] > 10:
-		return "ERROR: process not available."
 	###INFO
 	var return_text = "\nPROCESS\n"
 	var color_string = skill.SKILL.color.to_html()
@@ -608,13 +603,8 @@ func list_vm_terminals_for_skill(skill: Node):
 		if mp.unlocked:
 			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
 			return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
-		elif !mp.unlocked and mp['unlock level'] <= 10:
-			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
-			var text_line = "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("OFFLINE", second_col) + "[/color]\n"
-			return_text += text_line
 		else:
-			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
-			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("DEMO LOCKED", second_col) + "[/color]\n"
+			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("LOCKED (lvl %d)" % mp['unlock level'], second_col) + "[/color]\n"
 			
 			
 	return return_text
@@ -1193,3 +1183,7 @@ func get_mod_command() -> String:
 func upload_info():
 	var return_text = "\n\nAquire and upload the Parents Credit Card item. Obtain from Hacking the Student and Decoding the Student Cache.\n\nUse 'upload parents credit card' to upload once aquired."
 	return return_text
+
+
+func not_built_text(minor_process: Dictionary) -> String:
+	return "[color=#888888]" + str(minor_process.name) + " isn't built yet — it arrives with a later tier.[/color]"

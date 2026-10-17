@@ -13,17 +13,10 @@ signal update_hacking_header_signal
 signal end_hacking_safely_signal
 signal item_found_in_cache_signal
 signal update_module_header_signal
-signal end_log_parsing_safely_signal
-signal end_pw_cracking_safely_signal
-signal end_cache_decrypting_safely_signal
-signal end_data_mining_safely_signal
 ## Generic "a skill process finished safely" for terminals built on BaseTerminal.
 signal process_ended_safely_signal(skill: Node)
-signal end_cred_matching_safely_signal
 signal update_hud_signal
 signal update_hud_root_signal
-signal end_phishing_safely_signal
-signal end_compiling_safely_signal
 signal item_added_signal
 signal item_removed_signal
 signal update_console_signal #used from hacking_game to update main console in hack module
@@ -67,29 +60,8 @@ func item_found_in_cache(item, amount):
 func update_module_header(process_name: String): #Log Parsing, Cache Decrypting, etc
 	update_module_header_signal.emit(process_name)
 
-func end_log_parsing_safely():
-	end_log_parsing_safely_signal.emit()
-
-func end_pw_cracking_safely():
-	end_pw_cracking_safely_signal.emit()
-
-func end_cache_decrypting_safely():
-	end_cache_decrypting_safely_signal.emit()
-
-func end_phishing_safely():
-	end_phishing_safely_signal.emit()
-
 func process_ended_safely(skill: Node):
 	process_ended_safely_signal.emit(skill)
-
-func end_data_mining_safely():
-	end_data_mining_safely_signal.emit()
-
-func end_cred_matching_safely():
-	end_cred_matching_safely_signal.emit()
-
-func end_compiling_safely():
-	end_compiling_safely_signal.emit()
 
 func update_hud(skill): #SINGLTON AS PARAM
 	update_hud_signal.emit(skill)
