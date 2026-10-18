@@ -1,7 +1,7 @@
 extends PanelContainer
 ## Top header. Root view: one card per skill (level, segmented xp bar, xp %, best EFF, defrag timer).
 ## Skill view: a main card for the skill + one card per process (level, bar, EFF, locked/unlock level).
-## Views switch in one step (fade whole header out -> rebuild -> fade in) so there's no flicker.
+## Views switch in one step (collapse -> rebuild -> open -> text fades in) so there's no flicker.
 ## API used by idle_os_2: update(), display_skill(skill), display_defragging(), prepare_intro(), intro(skill)
 
 const SKILLS_ORDER = ["Mining", "Parsing", "Cracking", "Matching", "Phishing", "Hacking", "Decoding", "Compiling"]
@@ -31,6 +31,7 @@ func _ready() -> void:
 		skill.SKILL["level up signal"].connect(_on_level_up.bind(skill))
 	Exp.exp_updated_signal.connect(_on_process_xp)
 	SaveManager.save_loaded.connect(func(): _rebuild())
+	Upgrades.installed.connect(_on_upgrade_installed)
 	var tick := Timer.new()
 	tick.wait_time = 1.0
 	tick.autostart = true
@@ -48,18 +49,44 @@ func display_skill(skill: Node) -> void:
 func display_defragging() -> void:
 	_switch_to(Defragging)
 
+## Switch animation: collapse up (height), then right-to-left (width); rebuild; open left-to-right,
+## then top-down; then fade the card text in.
+const COLLAPSE_V = 0.12
+const COLLAPSE_H = 0.14
+const OPEN_H = 0.16
+const OPEN_V = 0.14
+const TEXT_FADE = 0.18
+const MIN_Y = 0.06 # a thin line stays while collapsed sideways
+
 func _switch_to(skill: Node) -> void:
 	current_skill = skill
 	_view_token += 1
 	var token = _view_token
 	if _switch_tween:
 		_switch_tween.kill()
+	row.pivot_offset = Vector2.ZERO # collapse toward the top-left corner
+	row.modulate.a = 1.0
 	_switch_tween = create_tween()
-	_switch_tween.tween_property(row, "modulate:a", 0.0, FADE)
+	# tween_method sets the whole scale every frame: the header (a Container) resets the row's scale
+	# whenever it lays the row out again, e.g. right after the rebuild
+	var start_y = row.scale.y
+	_switch_tween.tween_method(func(y): row.scale = Vector2(1.0, y), start_y, MIN_Y, COLLAPSE_V).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_switch_tween.tween_method(func(x): row.scale = Vector2(x, MIN_Y), 1.0, 0.0, COLLAPSE_H).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_switch_tween.tween_callback(func():
-		if token == _view_token: # a newer switch supersedes this one
-			_rebuild())
-	_switch_tween.tween_property(row, "modulate:a", 1.0, FADE)
+		if token != _view_token: # a newer switch supersedes this one
+			return
+		_rebuild()
+		_set_card_text_alpha(0.0)
+		(func(): row.scale = Vector2(0.0, MIN_Y)).call_deferred()) # after the layout pass the rebuild queued
+	_switch_tween.tween_method(func(x): row.scale = Vector2(x, MIN_Y), 0.0, 1.0, OPEN_H).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_switch_tween.tween_method(func(y): row.scale = Vector2(1.0, y), MIN_Y, 1.0, OPEN_V).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_switch_tween.tween_method(_set_card_text_alpha, 0.0, 1.0, TEXT_FADE)
+
+## Fades each card's contents (text + bar) without touching the card panels.
+func _set_card_text_alpha(a: float) -> void:
+	for card in row.get_children():
+		if card.get_child_count() > 0 and card.get_child(0) is CanvasItem:
+			card.get_child(0).modulate.a = a
 
 func _rebuild() -> void:
 	if current_skill == null:
@@ -100,7 +127,7 @@ func _fill_root_card(card: HeaderCard) -> void:
 		return
 	var skill = card.skill
 	if skill == Defragging:
-		card.title_label.text = "Defrag"
+		card.title_label.text = "Defragging"
 		card.level_label.text = ""
 		_fill_defrag_charge(card)
 		return
@@ -109,7 +136,7 @@ func _fill_root_card(card: HeaderCard) -> void:
 	card.level_label.text = "LV %d" % skill.SKILL.level
 	card.bar.value = xp.progress
 	card.set_footer(card.left_label, _left_footer(skill, xp), Stats.has_bonus(skill))
-	card.right_label.text = "" # efficiency is per process: shown in the skill view only
+	card.right_label.text = Upgrades.get_skill_version(skill) # apt version (efficiency is per process: skill view)
 #endregion
 
 #region skill view
@@ -138,7 +165,7 @@ func _fill_main_card() -> void:
 	main_card.level_label.text = "LV %d/%d" % [skill.SKILL.level, Exp.MAX_LEVEL]
 	main_card.bar.value = xp.progress
 	main_card.left_label.text = ("MAX LEVEL" if xp.display == "MAX" else "%s xp" % xp.display.replace("/", " / "))
-	main_card.set_footer(main_card.right_label, _bonus_text(skill), Stats.has_bonus(skill))
+	main_card.set_footer(main_card.right_label, Upgrades.get_skill_version(skill))
 
 func _fill_process_card(card: HeaderCard) -> void:
 	if card.celebrating:
@@ -168,7 +195,7 @@ func _build_defrag_detail() -> void:
 		var card := HeaderCard.new()
 		card.skill = Defragging
 		card.process = p
-		var target_color: Color = p.skill.SKILL.color if p.has("skill") else C_DEFRAG
+		var target_color: Color = p.get("color", C_DEFRAG)
 		card.build(target_color, false, 140.0)
 		row.add_child(card)
 		detail_cards.append(card)
@@ -186,12 +213,12 @@ func _fill_defrag_detail() -> void:
 			card.set_locked(true, "LOCKED")
 			continue
 		card.set_locked(false)
-		var active = Stats.has_bonus(p.skill)
-		card.level_label.text = "x%.2f" % p.get("bonus efficiency", 1.0)
+		var active = Defragging.is_active(p)
+		card.level_label.text = p.get("bonus label", "")
 		card.level_label.add_theme_color_override("font_color", HeaderCard.C_BONUS if active else HeaderCard.C_TEXT)
 		card.bar.value = 1.0 if active else 0.0
-		card.set_footer(card.left_label, ("ACTIVE " + Stats.get_bonus_time_text(p.skill)) if active else "%dm boost" % int(p.get("bonus time", 0)), active)
-		card.set_footer(card.right_label, "EFF", active)
+		card.set_footer(card.left_label, ("ACTIVE " + Stats.get_bonus_time_text(p)) if active else Stats.boost_minutes_text() + " boost", active)
+		card.set_footer(card.right_label, "", active)
 
 ## Defrag "charging" bar: fills as the cooldown runs down, full + bright when available.
 func _fill_defrag_charge(card: HeaderCard) -> void:
@@ -200,6 +227,11 @@ func _fill_defrag_charge(card: HeaderCard) -> void:
 	card.bar.color = C_DEFRAG.lightened(0.15) if ready else C_DEFRAG.darkened(0.12)
 	if abs(card.bar.value - charge) > 0.001:
 		card.bar.animate_to(charge, 0.9) # smooth tick between 1s refreshes
+	var boosts = Defragging.get_active()
+	if !boosts.is_empty(): # a boost is running: show it (and its time left) on the defrag card
+		card.set_footer(card.left_label, "%s %s" % [boosts[0].name.to_upper(), Stats.get_bonus_time_text(boosts[0])], true)
+		card.set_footer(card.right_label, "" if ready else "%d%%" % int(charge * 100))
+		return
 	if ready:
 		card.left_label.text = "available"
 		card.left_label.add_theme_color_override("font_color", C_DEFRAG.lightened(0.3))
@@ -299,6 +331,19 @@ func intro(skill: Node) -> void:
 #endregion
 
 #region helpers
+## apt install: refresh the skill's version on its header card and pop the new number
+func _on_upgrade_installed(p: Dictionary, _level: Dictionary) -> void:
+	var skill = Upgrades.skill_for_group(p.group)
+	if skill == null:
+		return
+	var v = Upgrades.version_text(p.group)
+	if root_cards.has(skill) and current_skill == null:
+		root_cards[skill].right_label.text = v
+		root_cards[skill].show_note("▲ " + v)
+	if main_card and main_card.skill == skill:
+		main_card.set_footer(main_card.right_label, v)
+		main_card.show_note("▲ " + v)
+
 func _left_footer(skill: Node, xp: Dictionary) -> String:
 	if Stats.has_bonus(skill):
 		return "DFG " + Stats.get_bonus_time_text(skill)

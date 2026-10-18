@@ -26,194 +26,208 @@ var SKILL = {
 	"sfx": "matching_item_received"
 }
 
+## Tiers follow the hacking locations: School > Lawfirm > Hospital > Bank > Police > Government.
+## Each match pairs that tier's identifier (Parsing) with its cracked item (Cracking).
+## Pacing follows Mining: each tier matches 1.5x slower, tuned for +50% matching speed per tier from upgrades.
 var CREDENTIAL = {
 	"name": "Credential",
 	"tier name": "TIER I | CREDENTIAL",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 35,
+	"experience per level": 67, # xp per match
 	"command": "match -cred",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed min": 0.2,
+	"base speed min": 0.2, # seconds per terminal message (24 per match)
 	"base speed max": 1.2,
 	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
+	"overclock speed max": 0.6,
+	"overheat speed": 1.75,
 	"heat": 2.4,
 	"overclock heat": 2.7,
 	"overheat heat": 0.3,
+	"vm token chance": 0.01, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
-		Items.USERNAMES: 1, 
+		Items.USERNAMES: 1,
 		Items.PASSWORDS: 1
 	},
 	"resource gained": Items.CREDENTIALS,
 	"resource amount gained": 1,
-	"description": "Creates credentials using passwords & usernames.",
-	#"efficiency description": "Chance to not consume a username or password.",
+	"match theme": "credential", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Matches usernames to cracked passwords, creating credentials.",
+	"efficiency description": "Chance to assemble extra.",
 	"signal": cred_cycle_completed
 }
 
+var CERTIFICATE = {
+	"name": "Certificate",
+	"tier name": "TIER II | CERTIFICATE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 155, # xp per match
+	"command": "match -cert",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 15,
+	"base speed min": 0.3, # seconds per terminal message (24 per match)
+	"base speed max": 1.8,
+	"overclock speed min": 0.15,
+	"overclock speed max": 0.9,
+	"overheat speed": 2.625,
+	"heat": 3.6,
+	"overclock heat": 4.05,
+	"overheat heat": 0.45,
+	"vm token chance": 0.015, # per match; scales with match length so tokens/hour stay level
+	"requirements": {
+		Items.CASE_NUMBER: 1,
+		Items.DIGITAL_SIGNATURE: 1
+	},
+	"resource gained": Items.SIGNED_CERTIFICATE,
+	"resource amount gained": 1,
+	"match theme": "certificate", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Binds a digital signature to a case number, forging a signed certificate.",
+	"efficiency description": "Chance to assemble extra.",
+	"signal": cred_cycle_completed
+}
+
+var BADGE = {
+	"name": "Badge",
+	"tier name": "TIER III | BADGE",
+	"level": 1,
+	"experience": 0,
+	"experience per level": 300, # xp per match
+	"command": "match -badge",
+	"efficiency": 0.0,
+	"efficiency rate": 0.002,
+	"unlocked": false,
+	"unlock level": 30,
+	"base speed min": 0.45, # seconds per terminal message (24 per match)
+	"base speed max": 2.7,
+	"overclock speed min": 0.225,
+	"overclock speed max": 1.35,
+	"overheat speed": 3.938,
+	"heat": 5.4,
+	"overclock heat": 6.08,
+	"overheat heat": 0.67,
+	"vm token chance": 0.0225, # per match; scales with match length so tokens/hour stay level
+	"requirements": {
+		Items.STAFF_IDS: 1,
+		Items.BADGE_HASH: 1
+	},
+	"resource gained": Items.ACCESS_BADGE,
+	"resource amount gained": 1,
+	"match theme": "badge", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Pairs a staff ID with its cracked badge hash, provisioning an access badge.",
+	"efficiency description": "Chance to assemble extra.",
+	"signal": cred_cycle_completed
+}
 
 var ACCOUNT = {
 	"name": "Account",
-	"tier name": "TIER I | ACCOUNT",
+	"tier name": "TIER IV | ACCOUNT",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 35,
+	"experience per level": 530, # xp per match
 	"command": "match -account",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 20,
-	"base speed min": 0.2,
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
+	"unlock level": 45,
+	"base speed min": 0.675, # seconds per terminal message (24 per match)
+	"base speed max": 4.05,
+	"overclock speed min": 0.338,
+	"overclock speed max": 2.025,
+	"overheat speed": 5.906,
+	"heat": 8.1,
+	"overclock heat": 9.11,
+	"overheat heat": 1.01,
+	"vm token chance": 0.0338, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
-		Items.PINS: 1, 
-		Items.ACCOUNT_NUMBERS: 1
+		Items.ACCOUNT_NUMBERS: 1,
+		Items.PINS: 1
 	},
 	"resource gained": Items.ACCOUNT_ACCESS_TOKENS,
 	"resource amount gained": 1,
-	"description": "Creates account access tokens using PINs and Account Numbers.",
-	#"efficiency description": "Chance to not consume a username or password.",
+	"match theme": "account", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Pairs an account number with its cracked PIN, minting account access tokens.",
+	"efficiency description": "Chance to assemble extra.",
 	"signal": cred_cycle_completed
 }
 
-var DEVICES = {
-	"name": "Devices",
-	"tier name": "TIER I | DEVICE",
+var OFFICER = {
+	"name": "Officer",
+	"tier name": "TIER V | OFFICER",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 35,
-	"command": "match -devices",
+	"experience per level": 885, # xp per match
+	"command": "match -officer",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 40,
-	"base speed min": 0.2,
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
+	"unlock level": 60,
+	"base speed min": 1.012, # seconds per terminal message (24 per match)
+	"base speed max": 6.075,
+	"overclock speed min": 0.506,
+	"overclock speed max": 3.038,
+	"overheat speed": 8.859,
+	"heat": 12.15,
+	"overclock heat": 13.67,
+	"overheat heat": 1.52,
+	"vm token chance": 0.0506, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
-		Items.USERNAMES: 1, 
-		Items.PASSWORDS: 1
+		Items.BADGE_NUMBER: 1,
+		Items.PRIVATE_KEYS: 1
 	},
-	"resource gained": Items.CREDENTIALS,
+	"resource gained": Items.OFFICER_AUTH_KEYS,
 	"resource amount gained": 1,
-	"description": "Creates credentials using passwords & usernames.",
-	#"efficiency description": "Chance to not consume a username or password.",
+	"match theme": "officer", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Binds a private key to an officer badge number, creating officer auth keys.",
+	"efficiency description": "Chance to assemble extra.",
 	"signal": cred_cycle_completed
 }
 
-var ENDPOINT = {
-	"name": "Endpoint",
-	"tier name": "TIER I | ENDPOINT",
+var CLEARANCE = {
+	"name": "Clearance",
+	"tier name": "TIER VI | CLEARANCE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 35,
-	"command": "match -endpoint",
+	"experience per level": 1410, # xp per match
+	"command": "match -clearance",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 40,
-	"base speed min": 0.2,
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
+	"unlock level": 75,
+	"base speed min": 1.519, # seconds per terminal message (24 per match)
+	"base speed max": 9.112,
+	"overclock speed min": 0.759,
+	"overclock speed max": 4.556,
+	"overheat speed": 13.289,
+	"heat": 18.22,
+	"overclock heat": 20.5,
+	"overheat heat": 2.28,
+	"vm token chance": 0.0759, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
-		Items.USERNAMES: 1, 
-		Items.PASSWORDS: 1
+		Items.CLEARANCE_ID: 1,
+		Items.BIO_TEMPLATE: 1
 	},
-	"resource gained": Items.CREDENTIALS,
+	"resource gained": Items.SECURITY_CLEARANCE,
 	"resource amount gained": 1,
-	"description": "Creates credentials using passwords & usernames.",
-	#"efficiency description": "Chance to not consume a username or password.",
-	"signal": cred_cycle_completed
-}
-
-var PROFILES = {
-	"name": "Profile",
-	"tier name": "TIER I | PROFILES",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 35,
-	"command": "match -profile",
-	"efficiency": 0.03,
-	"efficiency rate": 0.002,
-	"unlocked": false,
-	"unlock level": 40,
-	"base speed min": 0.2,
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
-	"requirements": {
-		Items.USERNAMES: 1, 
-		Items.PASSWORDS: 1
-	},
-	"resource gained": Items.CREDENTIALS,
-	"resource amount gained": 1,
-	"description": "Creates credentials using passwords & usernames.",
-	#"efficiency description": "Chance to not consume a username or password.",
-	"signal": cred_cycle_completed
-}
-
-var OPERATIONS = {
-	"name": "Operations",
-	"tier name": "TIER I | OPERATION",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 35,
-	"command": "match -operation",
-	"efficiency": 0.0,
-	"efficiency rate": 0.002,
-	"unlocked": false,
-	"unlock level": 40,
-	"base speed min": 0.2,
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.2,
-	"overheat speed": 3.0,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
-	"requirements": {
-		Items.USERNAMES: 1, 
-		Items.PASSWORDS: 1
-	},
-	"resource gained": Items.CREDENTIALS,
-	"resource amount gained": 1,
-	"description": "Creates credentials using passwords & usernames.",
-	#"efficiency description": "Chance to not consume a username or password.",
+	"match theme": "clearance", # terminal tags/messages, see cred_matching_terminal.gd THEMES
+	"description": "Binds a biometric template to a clearance ID, granting security clearance.",
+	"efficiency description": "Chance to assemble extra.",
 	"signal": cred_cycle_completed
 }
 
 var minor_processes = [
 	CREDENTIAL,
+	CERTIFICATE,
+	BADGE,
 	ACCOUNT,
-	DEVICES,
-	ENDPOINT,
-	PROFILES,
-	OPERATIONS,
+	OFFICER,
+	CLEARANCE,
 ]
 
 func signal_exp(_amount: int):
@@ -243,9 +257,9 @@ func signal_exp(_amount: int):
 
 func has_requirements(minor_process) -> bool:
 	for item in minor_process["requirements"]:
-		if Inventory.get_amount(item) > 0:
-			return true
-	return false
+		if Inventory.get_amount(item) <= 0:
+			return false
+	return true
 
 func missing_requirements_text(minor_process) -> String:
 	var return_text = "Missing:"

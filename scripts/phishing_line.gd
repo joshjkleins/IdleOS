@@ -29,6 +29,9 @@ func begin(p_type, p_terminal = null):
 	if p_terminal:
 		terminal = p_terminal
 	setup()
+	var baited: bool = terminal.take_bait()
+	if baited:
+		$Status.text = "sending phishing attempt (baited)"
 	var cast_mode = terminal.get_mode()
 	var cast_time = terminal.pick_by_mode(cast_mode, "cast time", "overclock cast time", "overheat cast time")
 	pb_fill_tween = create_tween()
@@ -45,8 +48,8 @@ func begin(p_type, p_terminal = null):
 	await get_tree().create_timer(randf_range(type["wait time min"], type["wait time max"])).timeout
 	if !active:
 		return
-	var eff = base_eff
-	if randf() <= eff: #success
+	var eff = terminal.get_bite_chance(baited)
+	if randf() < eff: #success
 		$ProgressBar/TimeRemaining.visible = true
 		$Status.text = "attempt successful, downloading information"
 		
@@ -154,6 +157,6 @@ func _on_progress_bar_value_changed(value):
 
 func _get_total_eff() -> float:
 	###NOTE : NO PHISHING EFFICIENCY UPGRADE YET. if efficiency upgrade is added to APT then need to add here too
-	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var defrag_bonus = 1.0 # defrag no longer boosts skills
 	var base_eff = type["efficiency"]
-	return base_eff * defrag_bonus
+	return min(base_eff * defrag_bonus, 1.0)

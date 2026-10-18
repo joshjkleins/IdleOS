@@ -105,7 +105,7 @@ var tutorial_tasks := {
 	
 	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Requires a VM Token. For more info on SSH commands, use 'ssh'.",
 	
-	TutorialEvent.UPLOAD_PARENTS_CC: "Upload a Parents Credit Card item with 'upload <item>' or 'upload parents credit card'"
+	TutorialEvent.UPLOAD_PARENTS_CC: "Upload a Parents Credit Card: package it with 'decode -package=parents credit card', then 'upload -parents credit card'. Type 'upload' to see the full upload goal."
 }
 
 var tutorial_progress: Dictionary = {}
@@ -287,3 +287,13 @@ func load_data(data: Dictionary) -> void:
 		completed_events.append(int(v))
 	
 	show_intro = data.get("show_intro", true)
+
+
+func _ready():
+	(func(): Uploads.item_uploaded.connect(_on_item_uploaded)).call_deferred() # Uploads loads after Tutorial
+
+
+## Tutorial's last step: first Parents Credit Card uploaded through the Uploads system.
+func _on_item_uploaded(item: ItemData) -> void:
+	if item == Items.PARENTS_CREDIT_CARD:
+		complete_event(TutorialEvent.UPLOAD_PARENTS_CC)

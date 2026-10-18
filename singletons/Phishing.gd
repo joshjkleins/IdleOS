@@ -36,6 +36,11 @@ var SPEAR = {
 	"experience": 0,
 	"experience per level": 60,
 	"command": "phish -spear",
+	"display command": "phish -spear [bait=<item>]",
+	"example commands": [
+		{ 'cmd': 'phish -spear', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -spear bait=logs', 'description': 'Each cast uses 1 Mining item: bite chance x1.10 (Logs) up to x1.35 (Databases)' },
+	],
 	"efficiency": 0.3,
 	"efficiency rate": 0.005,
 	"unlocked": true,
@@ -70,6 +75,11 @@ var MOD = {
 	"experience": 0,
 	"experience per level": 1000,
 	"command": "phish -mod",
+	"display command": "phish -mod [bait=<item>]",
+	"example commands": [
+		{ 'cmd': 'phish -mod', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 1 Mining item: bite chance x1.10 (Logs) up to x1.35 (Databases)' },
+	],
 	"efficiency": 0.001,
 	"efficiency rate": 0.0001,
 	"unlocked": false,
@@ -91,7 +101,7 @@ var MOD = {
 	],
 	"resource amount gained": 1,
 	"description": "A risky phishing attempt with a slim chance of uncovering a powerful Hacking Modification.",
-	"efficiency description": "Chance for successful bite.",
+	"efficiency description": "Chance for successful bite",
 	"signal": spear_cycle_completed
 }
 
@@ -100,24 +110,29 @@ var WHALING = {
 	"tier name": "TIER III | WHALING",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 230,
 	"command": "phish -whale",
-	"efficiency": 0.2,
-	"efficiency rate": 0.003,
+	"display command": "phish -whale [bait=<item>]",
+	"example commands": [
+		{ 'cmd': 'phish -whale', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each cast uses 1 Mining item: bite chance x1.10 (Logs) up to x1.35 (Databases)' },
+	],
+	"efficiency": 0.25,
+	"efficiency rate": 0.005,
 	"unlocked": false,
-	"unlock level": 20,
-	# PLACEHOLDER timings/drops until this tier is designed
+	"unlock level": 15,
+	# PLACEHOLDER: same catches as Spear until this tier's role is designed; paced like the other skills
 	"cast time": 3.0,
 	"overclock cast time": 1.5,
-	"overheat cast time": 8.0,
-	"wait time min": 6.0,
-	"wait time max": 12.0,
-	"download time": 9.5,
-	"overclocked download time": 5.0,
-	"overheated download time": 25.5,
-	"heat": 4,
-	"overclock heat": 7,
-	"overheat heat": 1,
+	"overheat cast time": 7.5,
+	"wait time min": 7.5,
+	"wait time max": 15.0,
+	"download time": 11.25,
+	"overclocked download time": 5.62,
+	"overheated download time": 28.12,
+	"heat": 0.45,
+	"overclock heat": 0.9,
+	"overheat heat": 0.15,
 	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
@@ -134,24 +149,29 @@ var SMISH = {
 	"tier name": "TIER IV | SMISH",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 800,
 	"command": "phish -smish",
+	"display command": "phish -smish [bait=<item>]",
+	"example commands": [
+		{ 'cmd': 'phish -smish', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -smish bait=logs', 'description': 'Each cast uses 1 Mining item: bite chance x1.10 (Logs) up to x1.35 (Databases)' },
+	],
 	"efficiency": 0.2,
-	"efficiency rate": 0.003,
+	"efficiency rate": 0.005,
 	"unlocked": false,
-	"unlock level": 40,
-	# PLACEHOLDER timings/drops until this tier is designed
-	"cast time": 3.0,
-	"overclock cast time": 1.5,
-	"overheat cast time": 8.0,
-	"wait time min": 6.0,
-	"wait time max": 12.0,
-	"download time": 9.5,
-	"overclocked download time": 5.0,
-	"overheated download time": 25.5,
-	"heat": 4,
-	"overclock heat": 7,
-	"overheat heat": 1,
+	"unlock level": 35,
+	# PLACEHOLDER: same catches as Spear until this tier's role is designed; paced like the other skills
+	"cast time": 4.5,
+	"overclock cast time": 2.25,
+	"overheat cast time": 11.25,
+	"wait time min": 11.25,
+	"wait time max": 22.5,
+	"download time": 16.88,
+	"overclocked download time": 8.44,
+	"overheated download time": 42.19,
+	"heat": 0.67,
+	"overclock heat": 1.35,
+	"overheat heat": 0.23,
 	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
@@ -168,24 +188,29 @@ var TRAP = {
 	"tier name": "TIER V | TRAP",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 2300,
 	"command": "phish -trap",
-	"efficiency": 0.2,
-	"efficiency rate": 0.003,
+	"display command": "phish -trap [bait=<item>]",
+	"example commands": [
+		{ 'cmd': 'phish -trap', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -trap bait=logs', 'description': 'Each cast uses 1 Mining item: bite chance x1.10 (Logs) up to x1.35 (Databases)' },
+	],
+	"efficiency": 0.15,
+	"efficiency rate": 0.005,
 	"unlocked": false,
-	"unlock level": 60,
-	# PLACEHOLDER timings/drops until this tier is designed
-	"cast time": 3.0,
-	"overclock cast time": 1.5,
-	"overheat cast time": 8.0,
-	"wait time min": 6.0,
-	"wait time max": 12.0,
-	"download time": 9.5,
-	"overclocked download time": 5.0,
-	"overheated download time": 25.5,
-	"heat": 4,
-	"overclock heat": 7,
-	"overheat heat": 1,
+	"unlock level": 55,
+	# PLACEHOLDER: same catches as Spear until this tier's role is designed; paced like the other skills
+	"cast time": 6.75,
+	"overclock cast time": 3.38,
+	"overheat cast time": 16.88,
+	"wait time min": 16.88,
+	"wait time max": 33.75,
+	"download time": 25.31,
+	"overclocked download time": 12.66,
+	"overheated download time": 63.28,
+	"heat": 1.01,
+	"overclock heat": 2.02,
+	"overheat heat": 0.34,
 	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 95 },
@@ -196,6 +221,38 @@ var TRAP = {
 	"efficiency description": "Chance for successful bite",
 	"signal": whale_cycle_completed
 }
+
+## BAIT: any Mining item can be attached to a cast (phish -spear bait=logs). Each cast uses one and
+## multiplies the bite chance: x1.10 for a tier 1 item (Logs), x1.15 for tier 2, ... x1.35 for tier 6.
+## Multiplicative so rare catches (Mod) stay rare. Bite chance is capped at 100%.
+const BAIT_BASE_BONUS = 0.05
+const BAIT_BONUS_PER_TIER = 0.05
+
+func is_bait(item: ItemData) -> bool:
+	for mp in Mining.minor_processes:
+		if mp["resource gained"] == item:
+			return true
+	return false
+
+func get_bait_multiplier(bait: ItemData) -> float:
+	return 1.0 + BAIT_BASE_BONUS + BAIT_BONUS_PER_TIER * bait.tier if bait else 1.0
+
+## Splits "phish -spear bait=logs" into the command and the bait item. {"command", "bait", "error"}
+func parse_bait(text: String) -> Dictionary:
+	var out = {"command": text.strip_edges(), "bait": null, "error": ""}
+	var at = text.find(" bait=")
+	if at == -1:
+		return out
+	out.command = text.substr(0, at).strip_edges()
+	var bait_name = text.substr(at + " bait=".length()).strip_edges()
+	var bait = Inventory.get_item_by_name(bait_name)
+	if bait == null:
+		out.error = "Bait item not found: " + bait_name
+	elif !is_bait(bait):
+		out.error = bait.name + " can't be used as bait. Any Mining item works (logs, archives, metadata...)."
+	else:
+		out.bait = bait
+	return out
 
 var minor_processes = [
 	SPEAR,
@@ -243,9 +300,9 @@ func has_requirements(_minor_process) -> bool:
 func missing_requirements_text(_minor_process) -> String:
 	return ""
 
-func create_vm_window(minor_process, repeat) -> VMWindow:
+func create_vm_window(minor_process, repeat, bait: ItemData = null) -> VMWindow:
 	var setup = func(t):
-		t.vm_cast_all_lines(minor_process, true)
+		t.vm_cast_all_lines(minor_process, true, bait)
 	return VMManager.open(self, minor_process, terminal_scene.instantiate(), setup, repeat)
 
 

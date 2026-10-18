@@ -29,6 +29,7 @@ signal phishing_item_caught_item_signal
 signal phishing_lines_increase_upgrade_while_running_signal
 
 signal cooling_updated_signal
+signal system_message_signal(text: String) # main terminal prints it (e.g. Watchdog switching overclock off)
 func cooling_updated():
 	cooling_updated_signal.emit()
 

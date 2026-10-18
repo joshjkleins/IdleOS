@@ -1,899 +1,388 @@
 extends Node
+## Upgrade packages ('apt'), loaded from data/upgrades.json.
+## That file is exported from tools/upgrades/idleos_upgrades.xlsx (the balance sheet):
+##   python3 tools/upgrades/export_upgrades.py tools/upgrades/idleos_upgrades.xlsx data/upgrades.json
+##
+## Model: 9 groups (System + 8 skills) x 6 tiers x 10 installs. Every install is +0.1 version, so a
+## finished tier lands on a clean v1.0 ... v6.0. A package is one track ("mining.speed") whose levels
+## span the tiers; capstones are one-level packages. A tier's installs open when that location is
+## unlocked (upload goal), and can be bought in any order; the tier's 10th install is its MAJOR release.
+##
+## Callers read effects with get_package_info(id).current (sum of installed values, or true for a
+## capstone) or the helpers below.
 
-var MINING = {
-	"skill": Mining,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "mining.speed",
-			"description": "Increases mining speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "mining.speed", 
-					"requirements": [{"item": Items.LOGS, "amount": 100 }],
-					"amount": 0.50,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "mining.efficiency",
-			"description": "Increases mining efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "mining.efficiency", 
-					"requirements": [{ "item": Items.LOGS, "amount": 200 }],
-					"amount": 1.5,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "mining.overclock",
-			"description": "Allows overclocking of Mining, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "mining.overclock", 
-					"requirements": [{"item": Items.LOGS, "amount": 75 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
+const DATA_PATH := "res://data/upgrades.json"
+const INSTALLS_PER_TIER := 10
+const VM_TOKEN_COST := "@vm_tokens" # cost paid with any VM tokens
+
+## TESTING: every tier's installs are open without unlocking locations. Turn off before release.
+const DEV_UNLOCK_ALL_TIERS := true
+
+## Groups whose effects are wired up in code. The rest are listed in apt but can't be installed yet
+## (skills are migrated one at a time).
+const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking"]
+
+## Packages that aren't in the new data but are still read by code that hasn't been migrated yet.
+const LEGACY_DEFAULTS := {
+	"hacking.max_anonymity": 100,    # becomes Hacking-level based in the Hacking step
+	"hacking.recursive_hacking": true, # '-r' is always available (no upgrade in the new plan)
+	"hacking.overclock": true,         # hacking overclock (x2 bandwidth regen) has no unlock in the new plan
 }
 
-var PARSING = {
-	"skill": Parsing,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "parsing.speed",
-			"description": "Increases parsing speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "parsing.speed", 
-					"requirements": [{"item": Items.IP_ADDRESS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }],
-					"amount": 0.35,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "parsing.efficiency",
-			"description": "Increases parsing efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "parsing.efficiency", 
-					"requirements": [{"item": Items.IP_ADDRESS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }],
-					"amount": 0.05,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "parsing.overclock",
-			"description": "Allows overclocking of Parsing, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "parsing.overclock", 
-					"requirements": [{"item": Items.USERNAMES, "amount": 50 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 50 }, {"item": Items.IP_ADDRESS, "amount": 50 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+const BASE_COOLING := -0.1          # C per cooling tick before upgrades
+const BASE_VM_WINDOWS := 1
+const BASE_OVERHEAT_CLEAR := 80.0   # overheat clears at this temp (Thermal Paste raises it)
+const BASE_DEFRAG_MINUTES := 10.0   # Defrag Duration raises it
+const BASE_DEFRAG_COOLDOWN := 40.0  # Defrag Cooldown lowers it; they meet at max (25/25)
 
-var CRACKING = {
-	"skill": Cracking,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "cracking.speed",
-			"description": "Increases cracking speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "cracking.speed", 
-					"requirements": [{"item": Items.PASSWORDS, "amount": 50 }],
-					"amount": 0.3,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "cracking.efficiency",
-			"description": "Increases cracking efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "cracking.efficiency", 
-					"requirements": [{ "item": Items.PASSWORDS, "amount": 100 }],
-					"amount": 0.08,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "cracking.overclock",
-			"description": "Allows overclocking of Cracking, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "cracking.overclock", 
-					"requirements": [{ "item": Items.PASSWORDS, "amount": 80 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+signal installed(package: Dictionary, level: Dictionary)
 
-var MATCHING = {
-	"skill": Matching,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "matching.speed",
-			"description": "Increases matching speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "matching.speed", 
-					"requirements": [{"item": Items.CREDENTIALS, "amount": 25 }],
-					"amount": 0.25,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "matching.efficiency",
-			"description": "Increases matching efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "matching.efficiency", 
-					"requirements": [{ "item": Items.CREDENTIALS, "amount": 55 }],
-					"amount": 0.08,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "matching.overclock",
-			"description": "Allows overclocking of Matching, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "matching.overclock", 
-					"requirements": [{ "item": Items.CREDENTIALS, "amount": 100 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+var groups: Array = []          # group names in display order
+var packages: Dictionary = {}   # id -> package
+var _by_group: Dictionary = {}  # group -> [package ids], in sheet order
+var _items: Dictionary = {}     # item name (lower) -> ItemData, filled on first use
 
-var PHISHING = {
-	"skill": Phishing,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Lines",
-			"id": "phishing.lines",
-			"description": "Increases max number of lines.",
-			"current": 0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "phishing.lines", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 20 }],
-					"amount": 1,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "phishing.lines", 
-					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 50 }, {"item": Items.PACKET_SPOOF, "amount": 10 }],
-					"amount": 1,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "phishing.lines", 
-					"requirements":[ {"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 2 }],
-					"amount": 1,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "phishing.overclock",
-			"description": "Allows overclocking of Phishing, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "phishing.overclock", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 100 }, {"item": Items.PACKET_SPOOF, "amount": 25 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+func _init() -> void:
+	_load_data() # in _init so autoloads that read upgrades in their _ready (Stats) see the packages
 
-var HACKING = {
-	"skill": Hacking,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Damage",
-			"id": "hacking.damage",
-			"description": "Adds additional damage that SQL Injector's do to enemy integrity.",
-			"current": 0,
-			"display percentage": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.damage", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }],
-					"amount": 3,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "hacking.damage", 
-					"requirements":[ {"item": Items.STUDENT_CACHE, "amount": 10 }],
-					"amount": 7,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "hacking.damage", 
-					"requirements": [{"item": Items.STUDENT_CACHE_FOOTPRINT, "amount": 10 }],
-					"amount": 10,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Firewall",
-			"id": "hacking.firewall",
-			"description": "Increases SQL Injector damage to firewall.",
-			"current": 0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.firewall", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 20 }, {"item": Items.LOGS, "amount": 55 }],
-					"amount": 2,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "hacking.firewall", 
-					"requirements":[{"item": Items.SQL_INJECTOR, "amount": 40 }, {"item": Items.LOGS, "amount": 85 }],
-					"amount": 3,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "hacking.firewall", 
-					"requirements": [{"item": Items.SQL_INJECTOR, "amount": 60 }, {"item": Items.LOGS, "amount": 200 }],
-					"amount": 4,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Healing",
-			"id": "hacking.healing",
-			"description": "Increases amount of anonymity restored by Packet Spoofs.",
-			"current": 0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.healing", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": 5,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "hacking.healing", 
-					"requirements":[ {"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": 5,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "hacking.healing", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 80 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": 5,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Bandwidth Recovery",
-			"id": "hacking.bandwidth_recovery",
-			"description": "Increases amount of bandwidth recoverd per second.",
-			"current": 0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.bandwidth_recovery", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 25 }, {"item": Items.SQL_INJECTOR, "amount": 25 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1}],
-					"amount": 2,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Max Bandwidth",
-			"id": "hacking.max_bandwidth",
-			"description": "Increases max bandwidth.",
-			"current": 0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.max_bandwidth", 
-					"requirements": [{"item": Items.PASSWORDS, "amount": 120 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 120 }],
-					"amount": 10,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Max Anonymity",
-			"id": "hacking.max_anonymity",
-			"description": "Increases max anonymity.",
-			"current": 100,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.max_anonymity", 
-					"requirements": [{"item": Items.IP_ADDRESS, "amount": 150 }, {"item": Items.USERNAMES, "amount": 150 }],
-					"amount": 100,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "hacking.overclock",
-			"description": "Allows overclocking of Hacking, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.overclock", 
-					"requirements": [{"item": Items.PARENTS_CREDIT_CARD, "amount": 3 }, {"item": Items.STUDENT_CACHE, "amount": 10 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Recursive hacking",
-			"id": "hacking.recursive_hacking",
-			"description": "Allows for '-r' to be used when initiating a hack to automatically repeat the hack when finished until out of required resources.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "hacking.recursive_hacking", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 3 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+func _ready() -> void:
+	apply_effects.call_deferred()
 
-var DECODING = {
-	"skill": Decoding,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "decoding.speed",
-			"description": "Increases decoding speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "decoding.speed", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }],
-					"amount": 0.4,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "decoding.efficiency",
-			"description": "Increases decoding efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "decoding.efficiency", 
-					"requirements": [{ "item": Items.STUDENT_CACHE_FOOTPRINT, "amount": 10 }],
-					"amount": 0.05,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "decoding.overclock",
-			"description": "Allows overclocking of Decoding, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "decoding.overclock", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 10 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+#region data
+func _load_data() -> void:
+	var f = FileAccess.open(DATA_PATH, FileAccess.READ)
+	if f == null:
+		push_error("Upgrades: can't open " + DATA_PATH)
+		return
+	var d = JSON.parse_string(f.get_as_text())
+	if !(d is Dictionary):
+		push_error("Upgrades: bad JSON in " + DATA_PATH)
+		return
+	groups = d.get("groups", [])
+	for p in d.get("packages", []):
+		p["installed"] = 0
+		p["current"] = false if p.type == "capstone" else 0.0
+		packages[p.id] = p
+		if !_by_group.has(p.group):
+			_by_group[p.group] = []
+		_by_group[p.group].append(p.id)
 
-var COMPILING = {
-	"skill": Compiling,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Speed",
-			"id": "compiling.speed",
-			"description": "Increases compiling speed.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "compiling.speed", 
-					"requirements": [{"item": Items.SCHOOL_PAYLOAD, "amount": 25 }],
-					"amount": 0.25,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Efficiency",
-			"id": "compiling.efficiency",
-			"description": "Increases compiling efficiency.",
-			"current": 0.0,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "compiling.efficiency", 
-					"requirements": [{"item": Items.SCHOOL_PAYLOAD, "amount": 75 }],
-					"amount": 0.07,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overclock",
-			"id": "compiling.overclock",
-			"description": "Allows overclocking of Compiling, increasing speed and heat output.",
-			"current": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "compiling.overclock", 
-					"requirements": [{"item": Items.SCHOOL_PAYLOAD, "amount": 200 }],
-					"amount": true,
-					"unlocked": false
-				},
-			]
-		}
-	],
-}
+## ItemData for a cost name (case-insensitive), or null.
+func get_item(name: String) -> ItemData:
+	if _items.is_empty():
+		for i in Items.ITEM_MAP.values():
+			_items[i.name.to_lower()] = i
+	return _items.get(name.to_lower())
 
-var SYSTEM = {
-	"skill": System,
-	"version": 0.1,
-	"upgrades": [
-		{ 
-			"name": "Cooling Amount",
-			"id": "system.cooling_amount",
-			"description": "Increases amount cooled per second.",
-			"current": -0.1,
-			"display percentage": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "system.cooling_amount", 
-					"requirements": [{"item": Items.LOGS, "amount": 20 }, {"item": Items.ENCRYPTED_PASSWORDS, "amount": 20 }, {"item": Items.IP_ADDRESS, "amount": 20 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": -0.1,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "system.cooling_amount", 
-					"requirements":[{"item": Items.PASSWORDS, "amount": 50 }, {"item": Items.USERNAMES, "amount": 50 }, {"item": Items.CREDENTIALS, "amount": 50 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": -0.1,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "system.cooling_amount", 
-					"requirements": [{"item": Items.PACKET_SPOOF, "amount": 30 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": -0.1,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "VM Windows",
-			"id": "system.vm_windows",
-			"description": "Increases max amount of VM windows that can be running at once.",
-			"current": 1,
-			"display percentage": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "system.vm_windows", 
-					"requirements": [{"item": Items.VM_MINING_TOKEN, "amount": 3 }],
-					"amount": 2,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "system.vm_windows", 
-					"requirements":[ {"item": Items.VM_PARSING_TOKEN, "amount": 3 }, {"item": Items.VM_CRACKING_TOKEN, "amount": 3 }],
-					"amount": 2,
-					"unlocked": false
-				},
-				{
-					"level": 3,
-					"id": "system.vm_windows", 
-					"requirements": [{"item": Items.VM_PHISHING_TOKEN, "amount": 5 }, {"item": Items.VM_MATCHING_TOKEN, "amount": 5 }, {"item": Items.VM_COMPILING_TOKEN, "amount": 5 }],
-					"amount": 2,
-					"unlocked": false
-				}
-			]
-		},
-		{ 
-			"name": "Heat Reduction",
-			"id": "system.heat_reduction",
-			"description": "Applies base heat reduction to all heat applications.",
-			"current": 0.0,
-			"display percentage": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "system.heat_reduction", 
-					"requirements": [{"item": Items.STUDENT_CACHE, "amount": 5 }, {"item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": 0.1,
-					"unlocked": false
-				},
-				{
-					"level": 2,
-					"id": "system.heat_reduction", 
-					"requirements":[{"item": Items.STUDENT_CACHE, "amount": 15 }, { "item": Items.PARENTS_CREDIT_CARD, "amount": 1 }],
-					"amount": 0.1,
-					"unlocked": false
-				},
-			]
-		},
-		{ 
-			"name": "Overheat Fan",
-			"id": "system.overheat_fan",
-			"description": "Optimize system fan to increase cooling while overheated by 0.3/second.",
-			"current": false,
-			"display percentage": false,
-			"levels": [ 
-				{
-					"level": 1,
-					"id": "system.overheat_fan", 
-					"requirements": [{"item": Items.LOGS, "amount": 50 }],
-					"amount": true,
-					"unlocked": false
-				}
-			]
-		},
-	],
-}
+func group_packages(group: String) -> Array:
+	return _by_group.get(group, []).map(func(id): return packages[id])
 
-var all_upgrades = [ SYSTEM, MINING, PARSING, CRACKING, MATCHING, PHISHING, HACKING, DECODING, COMPILING ]
+func get_package_info(id: String) -> Dictionary:
+	if packages.has(id):
+		return packages[id]
+	if LEGACY_DEFAULTS.has(id):
+		return {"id": id, "current": LEGACY_DEFAULTS[id]}
+	return {"id": id, "current": 0}
 
+func is_valid_package(id: String) -> bool:
+	return packages.has(id)
 
-func save_data() -> Dictionary:
-	var data := {}
-	for skill_data in all_upgrades:
-		for upgrade in skill_data["upgrades"]:
-			var unlocked_levels := []
-			for level in upgrade["levels"]:
-				if level["unlocked"]:
-					unlocked_levels.append(level["level"])
-			data[upgrade["id"]] = {
-				"current": upgrade["current"],
-				"unlocked_levels": unlocked_levels
-			}
-	return data
+## numeric total of a track (0 when not installed)
+func cur(id: String) -> float:
+	var p = packages.get(id)
+	if p == null or p.type == "capstone":
+		return 0.0
+	return float(p.current)
 
-func load_data(data: Dictionary) -> void:
-	for skill_data in all_upgrades:
-		for upgrade in skill_data["upgrades"]:
-			if not data.has(upgrade["id"]):
-				continue
+## true once a capstone is installed
+func has(id: String) -> bool:
+	var p = packages.get(id)
+	return p != null and p.installed > 0
+#endregion
 
-			var saved: Dictionary = data[upgrade["id"]]
+#region groups, versions, tiers
+var _skills: Dictionary = {}
+func skill_for_group(group: String) -> Node:
+	if _skills.is_empty():
+		for s in [System, Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling, Hacking]:
+			_skills[s.SKILL.name] = s
+	return _skills.get(group)
 
-			if saved.has("current"):
-				var loaded_value = saved["current"]
-				var default_value = upgrade["current"]
+func group_for_skill(skill: Node) -> String:
+	return skill.SKILL.name if skill and "SKILL" in skill else ""
 
-				if default_value is bool:
-					upgrade["current"] = bool(loaded_value)
-				elif default_value is int:
-					upgrade["current"] = int(loaded_value)
-				elif default_value is float:
-					upgrade["current"] = float(loaded_value)
-				else:
-					upgrade["current"] = loaded_value
+func group_color(group: String) -> Color:
+	var s = skill_for_group(group)
+	return s.SKILL.color if s else Color.WHITE
 
-			var unlocked_levels: Array = []
-			for v in saved.get("unlocked_levels", []):
-				unlocked_levels.append(int(v))
+func installed_count(group: String) -> int:
+	var n = 0
+	for p in group_packages(group):
+		n += p.installed
+	return n
 
-			for level in upgrade["levels"]:
-				level["unlocked"] = level["level"] in unlocked_levels
+func version(group: String) -> float:
+	return installed_count(group) / float(INSTALLS_PER_TIER)
 
-			_apply_stat_effects(upgrade)
+func version_text(group: String) -> String:
+	return "v%.1f" % version(group)
 
-func get_package_info(package_id):
-	for up in all_upgrades:
-		for i in up.upgrades:
-			if i.id == package_id:
-				return i
+## older callers: version of a skill node
+func get_skill_version(skill: Node) -> String:
+	return version_text(group_for_skill(skill))
 
-func get_skill_from_package_id(package_id):
-	for up in all_upgrades:
-		for i in up.upgrades:
-			if i.id == package_id:
-				var col = up.skill.SKILL.color
-				var color = col.to_html()
-				var colored_name = "[color=#%s]%s[/color]" % [color, up.skill.SKILL.name]
-				return colored_name
+## how many of <group>'s installs in <tier> are done (0-10)
+func tier_installed(group: String, tier: int) -> int:
+	var n = 0
+	for p in group_packages(group):
+		for i in p.installed:
+			if int(p.levels[i].tier) == tier:
+				n += 1
+	return n
 
-func get_skill_level_from_package_id(package_id):
-	var level = 0
-	var max_level = 0
-	for up in all_upgrades:
-		for i in up.upgrades:
-			if i.id == package_id:
-				#i = compelete package
-				max_level = i.levels.size()
-				for lvl in i.levels:
-					if lvl.unlocked:
-						level += 1
-				
-				return str(level) + "/" + str(max_level)
+func tier_unlocked(tier: int) -> bool:
+	if DEV_UNLOCK_ALL_TIERS:
+		return true
+	var locs = Stats.hacking_targets.values()
+	return tier >= 1 and tier <= locs.size() and locs[tier - 1].get("unlocked", false)
 
+func tier_name(tier: int) -> String:
+	var keys = Stats.hacking_targets.keys()
+	return keys[tier - 1] if tier >= 1 and tier <= keys.size() else "Tier %d" % tier
 
-func get_current_effect_total_from_package(package) -> String:
-	if package.current is float:
-		if package.has('display percentage'):
-			if package["display percentage"] == false:
-				return str(package.current)
-				
-		return "%.2f%%" % (package.current * 100)
-		
-		return str(package.current)
-	
-	if package.current is bool or package.current is int:
-		return str(package.current)
+## lowest tier of <group> that isn't finished (7 when everything is installed)
+func working_tier(group: String) -> int:
+	for t in range(1, 7):
+		if tier_installed(group, t) < INSTALLS_PER_TIER:
+			return t
+	return 7
 
-	return "?"
+func is_wired(group: String) -> bool:
+	return group in WIRED_GROUPS
+#endregion
 
-func get_next_effect_total_from_package(package) -> String:
-	if package.current is float:
-		for lvl in package.levels:
-			if !lvl.unlocked:
-				if package.has('display percentage'):
-					if package["display percentage"] == false:
-						return str(package.current + lvl.amount)
-				return "%.2f%%" % ((package.current + lvl.amount) * 100)
-				
-				
-		return "At max level"
-	
-	if package.current is bool:
-		for lvl in package.levels:
-			if !lvl.unlocked:
-				return str(lvl.amount)
-		return "At max level"
-	
-	if package.current is int:
-		for lvl in package.levels:
-			if !lvl.unlocked:
-				return str(package.current + lvl.amount)
-		return "At max level"
-	return "?"
-	
+#region installing
+func next_level(p: Dictionary) -> Dictionary:
+	return p.levels[p.installed] if p.installed < p.levels.size() else {}
 
-func get_upgrade_requirement_from_package(package) -> Array:
-	for lvl in package.levels:
-		if lvl.unlocked == false:
-			return lvl.requirements
-	return []
+func is_at_max_level(id: String) -> bool:
+	var p = packages.get(id)
+	return p == null or p.installed >= p.levels.size()
 
-func is_valid_package(package_name: String) -> bool:
-	for upgrade in all_upgrades:
-		for package in upgrade.upgrades:
-			if package.id == package_name:
-				return true
-	return false
+## [{name, have, need}] for a level's costs
+func cost_rows(level: Dictionary) -> Array:
+	var rows = []
+	for c in level.get("costs", []):
+		if c.item == VM_TOKEN_COST:
+			rows.append({"name": "VM tokens (any)", "have": vm_token_total(), "need": int(c.amount)})
+		else:
+			var it = get_item(c.item)
+			rows.append({"name": it.name if it else c.item + " (?)", "have": Inventory.get_amount(it) if it else 0, "need": int(c.amount)})
+	return rows
 
-
-func has_upgrade_requirements(package_name: String) -> bool:
-	var package = get_package_info(package_name)
-	for level in package.levels:
-		if !level.unlocked:
-			for req in level.requirements:
-				if Inventory.get_amount(req.item) < req.amount:
-					return false
-			break
-	return true
-
-func is_at_max_level(package_name: String) -> bool:
-	var package = get_package_info(package_name)
-	for level in package.levels:
-		if !level.unlocked:
+func can_afford(level: Dictionary) -> bool:
+	for r in cost_rows(level):
+		if r.have < r.need:
 			return false
 	return true
 
-func get_version_from_package(package) -> float:
-	for upgrade in all_upgrades:
-		for pack in upgrade.upgrades:
-			if package == pack:
-				return upgrade.version
-	return -1.0
+## "" when <p>'s next level can be installed now, otherwise the reason
+func install_block_reason(p: Dictionary) -> String:
+	if !is_wired(p.group):
+		return "%s upgrades arrive in a later update (not wired up yet)." % p.group
+	var lvl = next_level(p)
+	if lvl.is_empty():
+		return "Package fully upgraded."
+	if !tier_unlocked(int(lvl.tier)):
+		return "Requires %s access (Tier %d)." % [tier_name(int(lvl.tier)), int(lvl.tier)]
+	if int(lvl.tier) > working_tier(p.group):
+		return "Finish Tier %d first (%s v%d.0)." % [working_tier(p.group), p.group, working_tier(p.group)]
+	if !can_afford(lvl):
+		return "Missing requirements."
+	return ""
 
-func increase_version_from_package(package):
-	for upgrade in all_upgrades:
-		for pack in upgrade.upgrades:
-			if package == pack:
-				upgrade.version += 0.1
-				return
+func vm_token_total() -> int:
+	var n = 0
+	for t in Decoding.vm_tokens():
+		n += Inventory.get_amount(t)
+	return n
 
-func get_skill_version(skill: Node) -> float:
-	for upgrade in all_upgrades:
-		if upgrade.skill == skill:
-			return calculate_version(upgrade)
-	return 0.1
+## pays <amount> VM tokens, taking from the largest stacks first
+func _pay_vm_tokens(amount: int) -> void:
+	var left = amount
+	while left > 0:
+		var best: ItemData = null
+		for t in Decoding.vm_tokens():
+			if best == null or Inventory.get_amount(t) > Inventory.get_amount(best):
+				best = t
+		var take = min(left, Inventory.get_amount(best))
+		if take <= 0:
+			return
+		Inventory.remove_resource(best, take)
+		left -= take
 
-func calculate_version(skill: Dictionary) -> float:
-	var version = 0.1
-	for upgrade in skill.upgrades:
-		for level in upgrade.levels:
-			if level.unlocked:
-				version += 0.1
-	return version
+## Installs <p>'s next level (call install_block_reason first).
+## Returns {level, version_before, version_after, tier, major, before, after}.
+func install(p: Dictionary) -> Dictionary:
+	var lvl = next_level(p)
+	var v_before = version(p.group)
+	for c in lvl.costs:
+		if c.item == VM_TOKEN_COST:
+			_pay_vm_tokens(int(c.amount))
+		else:
+			Inventory.remove_resource(get_item(c.item), int(c.amount))
+	p.installed += 1
+	_recompute(p)
+	apply_effects(p.id)
+	SaveManager.mark_dirty()
+	if p.id == "mining.overclock":
+		Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
+	installed.emit(p, lvl)
+	var tier = int(lvl.tier)
+	return {"level": lvl, "version_before": v_before, "version_after": version(p.group), "tier": tier,
+		"major": tier_installed(p.group, tier) == INSTALLS_PER_TIER, "before": lvl.before, "after": lvl.after}
 
-func unlock_next_level(package):
-	for lvl in package.levels:
-		if !lvl.unlocked:
-			lvl.unlocked = true
-			if package.current is float or package.current is int:
-				package.current += lvl.amount
-				
-				#Specific upgrades that need to happen (cooling etc)
-				match package.id:
-					"system.cooling_amount":
-						Stats.cooling_amount = package.current
-						Stats.cooling_updated()
-					"system.vm_windows":
-						Stats.MAX_ALL_VMS = package.current
-					"system.heat_reduction":
-						Stats.HEAT_REDUCTION = package.current
-					"hacking.max_anonymity":
-						Stats.set_max_anon()
-					"phishing.lines":
-						Signals.phishing_lines_increase_upgrade_while_running()
-				return
-			if package.current is bool:
-				if package.id == "mining.overclock":
-					Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
-				package.current = lvl.amount
-				
-				#Specific upgrades that need to happen (bool)
-				match package.id:
-					"system.overheat_fan":
-						Stats.OVERHEAT_FAN = package.current
-				return
+func _recompute(p: Dictionary) -> void:
+	if p.type == "capstone":
+		p.current = p.installed > 0
+		return
+	var total = 0.0
+	for i in p.installed:
+		total += float(p.levels[i].value)
+	p.current = total
 
-func _apply_stat_effects(package) -> void:
-	match package.id:
-		"system.cooling_amount":
-			Stats.cooling_amount = package.current
-			Stats.cooling_updated()
-		"system.vm_windows":
-			Stats.MAX_ALL_VMS = package.current
-		"system.heat_reduction":
-			Stats.HEAT_REDUCTION = package.current
-		"hacking.max_anonymity":
-			Stats.set_max_anon()
-		"system.overheat_fan":
-			Stats.OVERHEAT_FAN = package.current
+## Everything 'apt install <group>' would install right now, in order, paying as it goes:
+## [{package, level}]. Resources are reserved as each one is picked, and a track's next level in the
+## same tier counts once the one before it is picked.
+func plan_bulk(group_list: Array) -> Array:
+	var plan = []
+	var spent = {} # item name -> reserved amount ("@vm_tokens" for any token)
+	var picked = {} # package id -> extra levels picked
+	var progress = true
+	while progress:
+		progress = false
+		for g in group_list:
+			if !is_wired(g):
+				continue
+			for p in group_packages(g):
+				var idx = p.installed + picked.get(p.id, 0)
+				if idx >= p.levels.size():
+					continue
+				var lvl = p.levels[idx]
+				var tier = int(lvl.tier)
+				if !tier_unlocked(tier) or tier > _planned_working_tier(g, plan):
+					continue
+				if !_affordable_with(lvl, spent):
+					continue
+				for c in lvl.costs:
+					spent[c.item] = spent.get(c.item, 0) + int(c.amount)
+				picked[p.id] = picked.get(p.id, 0) + 1
+				plan.append({"package": p, "level": lvl})
+				progress = true
+	return plan
 
-func package_aquired(package):
-	increase_version_from_package(package)
-	unlock_next_level(package)
+## working tier counting installs already in <plan>
+func _planned_working_tier(group: String, plan: Array) -> int:
+	for t in range(1, 7):
+		var n = tier_installed(group, t)
+		for e in plan:
+			if e.package.group == group and int(e.level.tier) == t:
+				n += 1
+		if n < INSTALLS_PER_TIER:
+			return t
+	return 7
 
-func get_completion_text(package: Dictionary) -> String:
-	var version = get_version_from_package(package)
-	var next_version = version + 0.1
-	var skill_name = get_skill_from_package_id(package.id)
-	var skill_level = get_skill_level_from_package_id(package.id)
-	var current_effect = get_current_effect_total_from_package(package)
-	var next_effect = get_next_effect_total_from_package(package)
-	
-	var upgrade_effect_text = "+" + current_effect + " -> +" + next_effect if current_effect is float else current_effect + " -> " + next_effect
-	var stripped_skill_name_of_bbc = ContextCommands.strip_bbcode(skill_name)
-	var skill_line = "+ " + skill_name + " ".repeat(15 - stripped_skill_name_of_bbc.length()) + "v" + str(version) + " -> v" + str(next_version)
-	var upgrade_line = "+ " + package.name + " ".repeat(15 - package.name.length()) + upgrade_effect_text
-	var return_text = """
-────────────────────────────────────────
- UPGRADE PACKAGE INSTALLED SUCCESSFULLY
-────────────────────────────────────────
+func _affordable_with(level: Dictionary, spent: Dictionary) -> bool:
+	for c in level.costs:
+		var have = vm_token_total() if c.item == VM_TOKEN_COST else Inventory.get_amount(get_item(c.item))
+		if have - spent.get(c.item, 0) < int(c.amount):
+			return false
+	return true
 
-%s
-%s
+## the tier's installs, for the MAJOR RELEASE changelog: [{name, after}]
+func changelog(group: String, tier: int) -> Array:
+	var out = []
+	for p in group_packages(group):
+		for i in p.installed:
+			if int(p.levels[i].tier) == tier:
+				out.append({"name": p.name, "after": p.levels[i].after, "type": p.type})
+	return out
+#endregion
 
-""" % [skill_line, upgrade_line]
-	return return_text
+#region effects
+## Pushes upgrade values into the systems that cache them. <id> = the package just installed ("" = all).
+func apply_effects(id: String = "") -> void:
+	Stats.cooling_amount = BASE_COOLING - cur("system.cooling_amount")
+	Stats.MAX_ALL_VMS = BASE_VM_WINDOWS + int(cur("system.vm_windows"))
+	Stats.HEAT_REDUCTION = cur("system.heat_reduction")
+	Stats.OVERHEAT_FAN = has("system.overheat_fan")
+	Stats.cooling_updated()
+	Stats.set_max_anon()
+	HackingMods.refresh_slots()
+	if id == "phishing.lines":
+		Signals.phishing_lines_increase_upgrade_while_running()
+
+func get_overheat_clear_temp() -> float:
+	return BASE_OVERHEAT_CLEAR + cur("system.thermal_paste")
+
+func get_defrag_minutes() -> float:
+	return BASE_DEFRAG_MINUTES + cur("system.defrag_duration")
+
+func get_defrag_cooldown_minutes() -> float:
+	return max(get_defrag_minutes(), BASE_DEFRAG_COOLDOWN - cur("system.defrag_cooldown"))
+
+## Scheduler: VM tokens last longer
+func vm_uptime_multiplier() -> float:
+	return 1.0 + cur("system.scheduler")
+
+## Load Balancer / Server Rack: heat from processes running in VMs
+func vm_heat_multiplier() -> float:
+	if has("system.server_rack"):
+		return 0.0
+	if has("system.load_balancer"):
+		return 0.5
+	return 1.0
+
+## Background Services: offline progression cap in hours (used once offline progression exists)
+func offline_cap_hours() -> float:
+	return cur("system.background_services")
 
 func can_overclock(skill: Node) -> bool:
-	#return true
-	for upgrade in all_upgrades:
-		if upgrade.skill == skill:
-			for u_type in upgrade.upgrades:
-				if u_type.name == "Overclock":
-					return u_type.current
+	if skill == null:
+		return false
+	if skill == Hacking:
+		return true
+	return has(group_for_skill(skill).to_lower() + ".overclock")
+
+func any_overclock_unlocked() -> bool:
+	for g in groups:
+		if has(g.to_lower() + ".overclock"):
+			return true
 	return false
+#endregion
+
+#region save
+func save_data() -> Dictionary:
+	var installed_counts = {}
+	for id in packages:
+		if packages[id].installed > 0:
+			installed_counts[id] = packages[id].installed
+	return {"format": 2, "installed": installed_counts}
+
+## Saves from the old upgrade system (no "format": 2) start fresh at v0.0.
+func load_data(data: Dictionary) -> void:
+	for id in packages:
+		packages[id].installed = 0
+		_recompute(packages[id])
+	if int(data.get("format", 0)) == 2:
+		var saved: Dictionary = data.get("installed", {})
+		for id in saved:
+			if packages.has(id):
+				var p = packages[id]
+				p.installed = clamp(int(saved[id]), 0, p.levels.size())
+				_recompute(p)
+	apply_effects()
+
+func installed_package_ids() -> Array:
+	return packages.keys().filter(func(id): return packages[id].installed > 0)
+#endregion

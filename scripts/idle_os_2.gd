@@ -85,6 +85,7 @@ enum PlayerInputContext {
 var current_player_input_context: PlayerInputContext = PlayerInputContext.NONE
 var awaiting_player_input: bool = false
 var accepting_player_inputs: bool = true
+var upgrade_bulk_plan: Array = [] # apt install <skill>/all: [{package, level}]
 var upgrade_package_selected = null
 var upload_awaiting_player_input: bool = false
 
@@ -143,6 +144,7 @@ var PLAYER_TABBED: int = 0
 var SAVED_LAST_SUBMITTED: String = ""
 
 func _ready():
+	Signals.system_message_signal.connect(add_line)
 	# side panel width drives terminal margins + table width (connect before the save loads)
 	system_dock.width_changed.connect(_on_panel_width_changed)
 	terminal_body.resized.connect(_update_line_capacity)
@@ -181,7 +183,7 @@ func _ready():
 
 #update previous lines
 func set_line(index: int, text: String, scroll_to_line: bool = false):
-	if index < lines.size():
+	if index >= 0 and index < lines.size():
 		lines[index] = text
 	update_terminal(scroll_to_line)
 
@@ -267,12 +269,9 @@ func _on_input_line_text_submitted(new_text):
 			await get_tree().create_timer(0.2).timeout
 		
 		add_line("Uninstalling upgrades....")
-		for upgrade in Upgrades.all_upgrades:
-			for u in upgrade.upgrades:
-				for level in u.levels:
-					if level.unlocked:
-						add_line(u.id + "......uninstalled")
-						await get_tree().create_timer(0.4).timeout
+		for id in Upgrades.installed_package_ids():
+			add_line(id + "......uninstalled")
+			await get_tree().create_timer(0.4).timeout
 		
 		add_line("SAVING")
 		await get_tree().create_timer(0.8).timeout
@@ -425,6 +424,12 @@ func universal_commands(text):
 	if text == "vm" or text.begins_with("vm "):
 		handle_vm_commands(text)
 		return true
+	if text == "intel" or text.begins_with("intel "):
+		add_line(Decoding.intel_command_text(text.trim_prefix("intel")))
+		return true
+	if text == "upload" or text.begins_with("upload ") or text.begins_with("unpack"):
+		handle_upload_commands(text)
+		return true
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
@@ -445,6 +450,14 @@ func universal_commands(text):
 		add_line(hud_monitor.remove_monitored_items(names))
 		return true
 	
+	if text in ["ls -h", "ls help", "ls -types", "ls types"]:
+		add_line(Exploits.glossary_text())
+		return true
+
+	if text == "run" or text.begins_with("run "):
+		add_line(Exploits.list_text(false))
+		return true
+
 	if text == "ls mods" or text == "ls mod":
 		#YOU ARE HERE - CREATE FUNCTION IN CONTEXTCOMMANDS TO LIST INVENTORY ITEMS SHOWING THEIR HACKING MOD POTENTIAL
 		add_line(Inventory.list_inventory_hacking_mods())
@@ -473,10 +486,6 @@ func universal_commands(text):
 		
 		return true
 	
-	if text.begins_with("upload"):
-		handle_upload_commands(text)
-		return true
-	
 	if text.begins_with("apt"):
 		handle_apt_commands(text)
 		return true
@@ -489,7 +498,7 @@ func universal_commands(text):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
-			Inventory.add_resource(item, 1)
+			Inventory.add_resource(item, 100)
 			return true
 	#
 	if text.begins_with("rm"):
@@ -652,8 +661,8 @@ func universal_commands(text):
 				add_line("No process running")
 			return true
 		"quit -s", "quit", "exit", "exit -s":
-			SaveManager.save_game()
-			get_tree().quit()
+			quit_game()
+			return true
 		#"cmds":
 			#add_line(ContextCommands.all_commands())
 			#return true
@@ -778,7 +787,9 @@ func return_to_root():
 	add_line(ContextCommands.info_command_text())
 	#add_line(ContextCommands.all_commands())
 
-func handle_upload_commands(text):
+## LEGACY demo ending ('upload parents credit card'), replaced by the Uploads system (handle_upload_commands).
+## Kept for reference: player_uploaded_proper_item() still plays the old ending if called.
+func _legacy_demo_upload_commands(text):
 	if text == "upload":
 		add_line(ContextCommands.upload_info())
 		return
@@ -801,62 +812,62 @@ func handle_upload_commands(text):
 		player_uploaded_proper_item()
 
 func handle_apt_commands(text):
-	if text == "apt":
+	var parts = Array(text.strip_edges().split(" ", false))
+	if parts.size() == 1:
 		add_line(ContextCommands.get_root_upgrades_text())
 		return
-	
-	var t_array = text.split(" ")
-	
-	if t_array.size() == 2:
-		#check if its an "apt <skill>" command
-		for upgrade_name in Upgrades.all_upgrades:
-			if t_array[1].to_lower() == upgrade_name.skill.SKILL.name.to_lower():
-				add_line(ContextCommands.get_skill_upgrades_text(upgrade_name))
+	if parts.size() == 2:
+		var arg = parts[1].to_lower()
+		for g in Upgrades.groups:
+			if arg == g.to_lower():
+				add_line(ContextCommands.get_skill_upgrades_text(g))
 				return
-		#see if [1] is a valid package to get info from
-		if !Upgrades.is_valid_package(t_array[1]):
-			add_line("Package not found. [color=#666666]example: apt mining.speed[/color]")
+		if !Upgrades.is_valid_package(arg):
+			add_line("Package not found. [color=#666666]example: apt system · apt system.cooling_amount[/color]")
 			return
-			
-		add_line(ContextCommands.get_upgrades_package_info(t_array[1]))
+		add_line(ContextCommands.get_upgrades_package_info(arg))
 		return
-			
-	if t_array.size() != 3 and t_array.size() != 2:
-		add_line("Apt command not recognized. [color=#666666]example: apt mining.speed[/color]")
-		return
-		
-	if !Upgrades.is_valid_package(t_array[2]):
-		add_line("Package not found. [color=#666666]example: apt install mining.speed[/color]")
-		return
-	if t_array[1] == "install":
-		if Upgrades.is_at_max_level(t_array[2]):
-			add_line("Package fully upgraded.")
+	if parts.size() >= 3 and parts[1] == "install":
+		var id = parts[2].to_lower()
+		# bulk: 'apt install system' / 'apt install system -a' / 'apt install all' / 'apt install -a'
+		var bulk_groups = []
+		if id in ["all", "-a"]:
+			bulk_groups = Upgrades.groups.duplicate()
+		else:
+			for g in Upgrades.groups:
+				if id == g.to_lower():
+					bulk_groups = [g]
+		if !bulk_groups.is_empty():
+			_apt_prepare_bulk(bulk_groups)
 			return
-		
-		var package = Upgrades.get_package_info(t_array[2])
-		var req = Upgrades.get_upgrade_requirement_from_package(package)
-		if !Upgrades.has_upgrade_requirements(t_array[2]):
+		if !Upgrades.is_valid_package(id):
+			add_line("Package not found. [color=#666666]example: apt install system.cooling_amount[/color]")
+			return
+		var package = Upgrades.get_package_info(id)
+		var reason = Upgrades.install_block_reason(package)
+		if reason == "Missing requirements.":
 			add_line("\nRequirements missing")
-			for r in req:
-				var player_amount = Inventory.get_amount(r.item)
-				if player_amount < r.amount:
-					add_line(r.item.name + " [color=red]" + str(player_amount) + "/" + str(r.amount) + "[/color]")
-				else:
-					add_line(r.item.name + " [color=green]" + str(player_amount) + "/" + str(r.amount) + "[/color]")
+			for r in Upgrades.cost_rows(Upgrades.next_level(package)):
+				add_line("%s [color=%s]%d/%d[/color]" % [r.name, "green" if r.have >= r.need else "red", r.have, r.need])
 			return
-			
-		#at this point player has requirements and the package can be upgraded
-		add_line("Preparing to install " + t_array[2] + " package.")
-		add_line("This upgrade will consume the following:")
-		for r in req:
-			add_line(r.item.name + " x" + str(r.amount))
-		add_line("[color=green]Are you sure you want install this package?[/color] y/n")
+		if reason != "":
+			add_line(reason)
+			return
+		var lvl = Upgrades.next_level(package)
+		add_line("Preparing to install %s (%s, Tier %d)" % [id, package.name, int(lvl.tier)])
+		if package.type == "capstone":
+			add_line("  [color=#ffc24a]%s[/color]" % lvl.effect)
+		else:
+			add_line("  %s -> [color=#4ec994]%s[/color]" % [lvl.before, lvl.after])
+		add_line("This upgrade will consume:")
+		for r in Upgrades.cost_rows(lvl):
+			add_line("  %s x%d" % [r.name, r.need])
+		add_line("[color=green]Install this package?[/color] y/n")
 		awaiting_player_input = true
 		current_player_input_context = PlayerInputContext.UPGRADES
 		upgrade_package_selected = package
 		return
-	
-	add_line("apt command not recognized. Use 'apt' for upgrade manager.")
+	add_line("apt command not recognized. Use 'apt' for the package manager.")
 
 ##player gave acceptable input
 func accept_player_input(text):
@@ -866,43 +877,159 @@ func accept_player_input(text):
 			return
 		PlayerInputContext.UPGRADES:
 			if text == "y":
-				await apply_apt_package_upgrade()
+				if !upgrade_bulk_plan.is_empty():
+					await apply_apt_bulk_upgrade()
+				else:
+					await apply_apt_package_upgrade()
+			upgrade_bulk_plan = []
 			upgrade_package_selected = null
 			current_player_input_context = PlayerInputContext.NONE
 			awaiting_player_input = false
 
+## apt-style install: package lists, unpack with a progress bar, setup, then the before/after box
+## and, when it finishes a tier, the MAJOR RELEASE banner with that tier's changelog.
 func apply_apt_package_upgrade():
-	#RECONFIRM PLAYER HAS REQUIREMENTS
-	var req = Upgrades.get_upgrade_requirement_from_package(upgrade_package_selected)
-	for r in req:
-		if Inventory.get_amount(r.item) < r.amount:
-			add_line("You no longer have required resources for this upgrade. Terminating install.")
-			return
-	#REMOVE REQUIREMENTS FROM PLAYER
-	for r in req:
-		Inventory.remove_resource(r.item, r.amount)
-		add_line("removing " + r.item.name + " x" + str(r.amount))
-	
+	var package = upgrade_package_selected
+	if Upgrades.install_block_reason(package) != "":
+		add_line("You no longer have the required resources for this upgrade. Terminating install.")
+		return
 	accepting_player_inputs = false
-	add_line("downloading updated package...")
-	await bro_wait(0.2)
-	add_line("unpacking update packages..")
-	await bro_wait(0.6)
-	add_line("installing upgrades")
-	await bro_wait(2.0)
-	add_line("configuring optimal settings")
-	await bro_wait(0.8)
-	add_line("upgrade complete")
-	var completion_text = Upgrades.get_completion_text(upgrade_package_selected)
-
-	add_line(completion_text)
-	
-	Upgrades.package_aquired(upgrade_package_selected)
+	var lvl = Upgrades.next_level(package)
+	var pkg_name = package.id.replace(".", "-").replace("_", "-")
+	var new_version = Upgrades.version(package.group) + 0.1
+	add_line("Reading package lists... Done")
+	await bro_wait(0.25)
+	add_line("Unpacking %s (%.1f) ..." % [pkg_name, new_version])
+	var bar_index = await _add_live_line(_apt_progress_text(0))
+	for step in range(1, 11):
+		await bro_wait(0.09)
+		set_line(bar_index, _apt_progress_text(step * 10))
+	add_line("Setting up %s (%.1f) ..." % [pkg_name, new_version])
+	await bro_wait(0.3)
+	var result = Upgrades.install(package)
+	var g_color = Upgrades.group_color(package.group).to_html(false)
+	var box = "\n[color=#4ec994]────────────────────────────────────────[/color]\n"
+	box += " [color=#4ec994]PACKAGE INSTALLED[/color]\n"
+	box += "[color=#4ec994]────────────────────────────────────────[/color]\n"
+	box += " [color=#%s]%s[/color]  v%.1f -> [color=#4ec994]v%.1f[/color]\n" % [g_color, package.group, result.version_before, result.version_after]
+	if package.type == "capstone":
+		box += " [color=#ffc24a]%s[/color]  %s\n" % [package.name, lvl.effect]
+	else:
+		box += " %s  %s -> [color=#4ec994]%s[/color]\n" % [package.name, lvl.before, lvl.after]
+	add_line(box)
+	if result.major:
+		await _wait_for_output()
+		await bro_wait(0.4)
+		add_line(_major_release_text(package.group, result.tier))
 	accepting_player_inputs = true
-	#do awaits, add_line(ascii progress bar download (maybe multiple)) and random text
-	# apply upgrades (i'll do this)
-	#satisfying finish
-	#unlock player
+
+## 'apt install <skill>' / 'all': one confirmation for everything ready
+func _apt_prepare_bulk(bulk_groups: Array) -> void:
+	var plan = Upgrades.plan_bulk(bulk_groups)
+	var label = "all skills" if bulk_groups.size() > 1 else bulk_groups[0]
+	if plan.is_empty():
+		var wired = bulk_groups.filter(func(g): return Upgrades.is_wired(g))
+		if wired.is_empty():
+			add_line("%s upgrades can be installed once %s migrated." % [label, "they are" if bulk_groups.size() > 1 else "it is"])
+		else:
+			add_line("Nothing ready to install for %s. [color=#666666]'apt %s' shows what's missing.[/color]" % [label, wired[0].to_lower()])
+		return
+	add_line("Ready to install %d package%s for %s:" % [plan.size(), "" if plan.size() == 1 else "s", label])
+	var totals = {}
+	var order = []
+	for e in plan:
+		var p = e.package
+		var lvl = e.level
+		var change = ("%s -> %s" % [lvl.before, lvl.after]) if p.type != "capstone" else str(lvl.effect)
+		add_line("  [color=#%s]%s[/color]  %s  [color=#888888]%s[/color]" % [Upgrades.group_color(p.group).to_html(false), p.group, p.name, change])
+		for c in lvl.costs:
+			if !totals.has(c.item):
+				order.append(c.item)
+			totals[c.item] = totals.get(c.item, 0) + int(c.amount)
+	var cost_parts = []
+	for k in order:
+		var n = "VM tokens (any)" if k == Upgrades.VM_TOKEN_COST else Upgrades.get_item(k).name
+		cost_parts.append("%s x%d" % [n, totals[k]])
+	add_line("This will consume: " + ", ".join(cost_parts))
+	add_line("[color=green]Install all?[/color] y/n")
+	upgrade_bulk_plan = plan
+	awaiting_player_input = true
+	current_player_input_context = PlayerInputContext.UPGRADES
+
+## installs a bulk plan with one shortened sequence, one summary box, and MAJOR banners
+func apply_apt_bulk_upgrade():
+	accepting_player_inputs = false
+	var plan = upgrade_bulk_plan
+	var v_before = {}
+	for e in plan:
+		v_before[e.package.group] = Upgrades.version(e.package.group)
+	add_line("Reading package lists... Done")
+	await bro_wait(0.2)
+	var bar_index = await _add_live_line(_apt_progress_text(0))
+	var done = []
+	var majors = []
+	for i in plan.size():
+		var e = plan[i]
+		var p = e.package
+		if Upgrades.install_block_reason(p) != "" or Upgrades.next_level(p) != e.level:
+			continue # something changed since the plan was made
+		var r = Upgrades.install(p)
+		done.append(e)
+		if r.major:
+			majors.append([p.group, r.tier])
+		set_line(bar_index, _apt_progress_text(int(100.0 * (i + 1) / plan.size())))
+		await bro_wait(0.06)
+	set_line(bar_index, _apt_progress_text(100))
+	add_line("Setting up %d package%s ..." % [done.size(), "" if done.size() == 1 else "s"])
+	await bro_wait(0.3)
+	var box = "\n[color=#4ec994]────────────────────────────────────────[/color]\n"
+	box += " [color=#4ec994]%d PACKAGE%s INSTALLED[/color]\n" % [done.size(), "" if done.size() == 1 else "S"]
+	box += "[color=#4ec994]────────────────────────────────────────[/color]\n"
+	for g in v_before:
+		box += " [color=#%s]%s[/color]  v%.1f -> [color=#4ec994]%s[/color]\n" % [Upgrades.group_color(g).to_html(false), g, v_before[g], Upgrades.version_text(g)]
+	for e in done:
+		var lvl = e.level
+		if e.package.type == "capstone":
+			box += "  [color=#ffc24a]%s[/color]  %s\n" % [e.package.name, lvl.effect]
+		else:
+			box += "  %s  %s -> [color=#4ec994]%s[/color]\n" % [e.package.name, lvl.before, lvl.after]
+	add_line(box)
+	for m in majors:
+		await _wait_for_output()
+		await bro_wait(0.4)
+		add_line(_major_release_text(m[0], m[1]))
+	accepting_player_inputs = true
+
+func _apt_progress_text(pct: int) -> String:
+	var filled = pct / 5
+	return "[color=#4ec994][%s%s][/color] %3d%%" % ["#".repeat(filled), "-".repeat(20 - filled), pct]
+
+func _major_release_text(group: String, tier: int) -> String:
+	var c = Upgrades.group_color(group).to_html(false)
+	var t = "\n[color=#ffc24a]════════════════════════════════════════[/color]\n"
+	t += "  [color=#ffc24a]MAJOR RELEASE[/color]  ·  [color=#%s]%s v%d.0[/color]\n" % [c, group.to_upper(), tier]
+	t += "[color=#ffc24a]════════════════════════════════════════[/color]\n"
+	t += " Changelog · Tier %d (%s)\n" % [tier, Upgrades.tier_name(tier)]
+	for e in Upgrades.changelog(group, tier):
+		t += "  [color=%s]+[/color] %s  [color=#888888]%s[/color]\n" % ["#ffc24a" if e.type == "capstone" else "#4ec994", e.name, e.after]
+	return t
+
+## Adds a line that will be updated in place with set_line (progress bars) and returns its index.
+## Every RICHTEXT_LABEL_LINE_LIMIT lines the terminal starts a new text block and clears 'lines', so the
+## line is put where the current block still has room; otherwise it could land in the old block and
+## leave the index pointing at nothing.
+func _add_live_line(text: String) -> int:
+	await _wait_for_output()
+	if lines.size() >= RICHTEXT_LABEL_LINE_LIMIT - 1:
+		add_new_scrollback()
+	add_line(text)
+	await _wait_for_output()
+	return lines.size() - 1
+
+## waits until queued add_line output has been printed (so set_line can target it)
+func _wait_for_output() -> void:
+	while processing_queue or !output_queue.is_empty():
+		await get_tree().process_frame
 
 func bro_wait(time: float):
 	await get_tree().create_timer(time).timeout
@@ -1058,16 +1185,13 @@ func handle_vm_token_commands(text):
 	#target_minor_process = Decoding.CACHE | Mining.LOGS | Parsing.FOOTPRINT etc
 	var new_window
 	if target_process == Decoding:
-		var cache_item = null
-		if commands[2].contains("="):
-			var provided_cache_name = text.split("=")
-			cache_item = Inventory.get_item_by_name(provided_cache_name[1])
-			if cache_item == null:
-				add_line("Cache name not recognized. [color=666666]example: ssh decoding cache=student cache[/color]")
-				return
-			
+		var arg_text = text.substr(text.find("=") + 1) if commands[2].contains("=") else ""
+		var check = Decoding.validate_start(target_minor_process, arg_text)
+		if !check.ok:
+			add_line(check.message)
+			return
 		Inventory.remove_resource(target_process.vm_token, 1)
-		new_window = target_process.create_vm_window(target_minor_process, true, cache_item)
+		new_window = target_process.create_vm_window(target_minor_process, true, check.arg)
 	
 	elif target_process == Parsing:
 		var parsed_cmd = Parsing.parse_through_parse_start_command(text, target_minor_process) #returns dictionary with properties: 'valid' bool, 'items_to_parse' [items], 'message' string
@@ -1080,8 +1204,15 @@ func handle_vm_token_commands(text):
 			add_line(parsed_cmd.message)
 		
 		Inventory.remove_resource(target_process.vm_token, 1)
-		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse)
+		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse, parsed_cmd.target)
 	
+	elif target_process == Compiling and target_minor_process == Compiling.ACCESS:
+		var check = Compiling.check_access(text.substr(text.find("=") + 1) if text.contains("=") else "")
+		if !check.ok:
+			add_line(check.message)
+			return
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, check.target)
 	elif target_process == Compiling:
 		if target_minor_process == Compiling.MOD:
 			if !text.contains("="):
@@ -1170,6 +1301,13 @@ func handle_vm_token_commands(text):
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, use_item, create_item)
 			
+	elif target_process == Phishing: # ssh phishing spear bait=logs
+		var parsed_bait = Phishing.parse_bait(text)
+		if parsed_bait.error != "":
+			add_line(parsed_bait.error)
+			return
+		Inventory.remove_resource(target_process.vm_token, 1)
+		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait)
 	else:
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true)
@@ -1178,6 +1316,34 @@ func handle_vm_token_commands(text):
 		add_line("Started [color=#%s]vm-%02d[/color] %s / %s. Use 'vm -h' to manage VM windows." % [target_process.SKILL.color.to_html(false), new_window.vm_id, target_process.SKILL.name, target_minor_process.name])
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
+
+## upload | upload -<item> | upload -all | unpack -<item>
+func handle_upload_commands(text: String) -> void:
+	if text == "upload" or text == "upload -h":
+		add_line(ContextCommands.upload_goal_text())
+		return
+	var is_unpack = text.begins_with("unpack")
+	var arg = text.trim_prefix("unpack" if is_unpack else "upload").strip_edges().trim_prefix("-").strip_edges()
+	if arg == "":
+		add_line("Name an item. [color=#666666]ex. upload -logs  |  upload -all  |  unpack -logs[/color]")
+		return
+	if !is_unpack and arg == "all":
+		var started = []
+		for item in Uploads.staged.keys():
+			if Uploads.start_upload(item) == "":
+				started.append(item.name)
+		add_line("Uploading: " + ", ".join(started) if !started.is_empty() else "Nothing packaged that the current goal still needs.")
+		return
+	var item = Inventory.get_item_by_name(arg)
+	if item == null:
+		add_line("Item not recognized: " + arg)
+		return
+	if is_unpack:
+		var n = Uploads.unpack(item)
+		add_line("Unpacked %d %s back to your inventory." % [n, item.name] if n > 0 else "No packaged " + item.name + ".")
+		return
+	var err = Uploads.start_upload(item)
+	add_line(err if err != "" else "Uploading %s: %d packaged, %ds each. Progress is in the side panel." % [item.name, Uploads.get_staged(item), int(Uploads.get_upload_seconds(item))])
 
 ## vm ls | vm show <id|all> | vm hide <id|all> | vm kill <id|all> | vm -h
 func handle_vm_commands(text: String) -> void:
@@ -1267,6 +1433,16 @@ func _update_line_capacity() -> void:
 	var usable: float = terminal_body.size.x - 24.0 # scrollbar + label margins
 	ContextCommands.max_line_chars = max(40, int(usable / char_width))
 
+## 'quit' / 'exit': save, say goodbye, close (same sign-off as the hacking console).
+func quit_game() -> void:
+	accepting_player_inputs = false
+	add_line("SAVING")
+	await get_tree().create_timer(0.8).timeout
+	add_line("GOODBYE")
+	await get_tree().create_timer(1.2).timeout
+	SaveManager.save_game()
+	get_tree().quit()
+
 func grab_all_focus():
 	get_window().grab_focus()
 	input_line.grab_focus()
@@ -1288,6 +1464,8 @@ func unstick_current_process():
 ## Commands every skill context shares (stop, stop -s, focus, cd .., overclock).
 ## safe_stop_message: line shown for 'stop -s'. Empty means safe stop isn't supported.
 func _handle_process_commands(text: String, safe_stop_message: String, can_overclock: bool = true) -> void:
+	if _handle_modifier_command(text):
+		return
 	match text:
 		"stop":
 			unstick_current_process()
@@ -1323,7 +1501,7 @@ func _handle_process_commands(text: String, safe_stop_message: String, can_overc
 				overclock_logic()
 			else:
 				add_line("Overclock not available for this process.")
-		"overclock -kill":
+		"overclock -kill", "overclock kill":
 			if !can_overclock:
 				add_line("Overclock not available for this process.")
 				return
@@ -1424,12 +1602,12 @@ func log_parsing_commands(text):
 			if parsed_cmd.message != "":
 				add_line(parsed_cmd.message)
 			
-			start_parsing(ms, parsed_cmd.items_to_parse)
+			start_parsing(ms, parsed_cmd.items_to_parse, parsed_cmd.target)
 			return
 	
 	_handle_process_commands(text, "Finishing current log...")
 
-func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
+func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData], target: ItemData = null):
 	#if !minor_process.unlocked:
 		#add_line("Requires parsing level " + str(minor_process["unlock level"]))
 		#return
@@ -1448,7 +1626,7 @@ func start_parsing(minor_process: Dictionary, items_to_parse: Array[ItemData]):
 	
 	var new_log_parsing_terminal = log_parsing_scene.instantiate()
 	terminal_body_container.add_child(new_log_parsing_terminal)
-	new_log_parsing_terminal.set_parse_type(minor_process, items_to_parse)
+	new_log_parsing_terminal.set_parse_type(minor_process, items_to_parse, false, target)
 	process_running = true
 	current_process = new_log_parsing_terminal
 	current_process_info = minor_process
@@ -1566,46 +1744,22 @@ func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
 
 	for ms in Decoding.minor_processes:
-		if text == ms["command"]:
+		if text == ms["command"] or text.begins_with(ms["command"] + "="):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-				
-			if !Inventory.has_cache():
-				add_line("No caches found.")
+			var arg_text = text.trim_prefix(ms["command"]).trim_prefix("=")
+			var check = Decoding.validate_start(ms, arg_text)
+			if !check.ok:
+				add_line(check.message)
 				return
-			
-			start_cache_decrypting(ms)
-			return
-		
-		if text.begins_with(ms["command"] + "="):
-			var cache_target = text.trim_prefix(ms["command"] + "=").strip_edges()
-			
-			if process_running:
-				add_line(ContextCommands.process_already_running_text())
-				return
-				
-			if cache_target.is_empty():
-				add_line("Please specify a cache.")
-				return
-			
-			var cache_item = Inventory.get_item_by_name(cache_target)
-			if cache_item == null:
-				add_line(cache_target + " cache not found.")
-				return
-			
-			# cache_target will be:
-			# "student"
-			# "vice principal"
-			# etc.
-			
-			start_cache_decrypting(ms, cache_item)
+			start_cache_decrypting(ms, check.arg)
 			return
 	
 	_handle_process_commands(text, "Finishing current cache...")
 
 
-func start_cache_decrypting(minor_process, cache_item: ItemData = null):
+func start_cache_decrypting(minor_process, cache_item = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
@@ -1620,9 +1774,58 @@ func start_cache_decrypting(minor_process, cache_item: ItemData = null):
 	hud_process_running.process_started(Decoding, minor_process)
 	add_new_scrollback()
 
+## Modifier commands from skill.MODIFIERS ('sift', 'sift -kill', ...). Returns true when <text> was one.
+## One modifier at a time per process, overclock included.
+func _handle_modifier_command(text: String) -> bool:
+	var parts = text.split(" ", false)
+	if parts.is_empty():
+		return false
+	var cmd = parts[0]
+	var kill = parts.size() > 1 and parts[1] in ["-kill", "kill"]
+	var major = _get_major_from_minor(current_process_info) if current_process_info else null
+	var mod: Dictionary = {}
+	var owner: Node = major
+	for s in ([major] if major else major_processes):
+		for m in s.get("MODIFIERS") if s and s.get("MODIFIERS") else []:
+			if m.command == cmd:
+				mod = m
+				owner = s
+	if mod.is_empty():
+		return false
+	if !Upgrades.has(mod.package):
+		var p = Upgrades.get_package_info(mod.package)
+		var tier = int(p.levels[0].tier) if p.has("levels") else 0
+		add_line("%s isn't unlocked yet: it's the %s v%d.0 capstone ('apt %s')." % [mod.name, owner.SKILL.name, tier, owner.SKILL.name.to_lower()])
+		return true
+	if !process_running or current_process == null or !("modifier" in current_process):
+		add_line("No process running in the main terminal to use %s on." % mod.name)
+		return true
+	if kill:
+		if current_process.has_modifier(cmd):
+			current_process.modifier = {}
+			add_line("%s stopped." % mod.name)
+		else:
+			add_line("%s isn't active." % mod.name)
+	else:
+		if current_process.has_modifier(cmd):
+			add_line("%s is already active." % mod.name)
+		elif Stats.overclocked:
+			add_line("Overclock is active. One modifier at a time: use 'overclock -kill' first.")
+		elif !current_process.modifier.is_empty():
+			add_line("%s is active. One modifier at a time: use '%s -kill' first." % [current_process.modifier.name, current_process.modifier.command])
+		else:
+			current_process.modifier = mod
+			add_line("[color=#4ec994]%s on.[/color] %s Stop with '%s -kill'." % [mod.name, mod.effect, cmd])
+	if current_process.has_method("_update_title"):
+		current_process._update_title()
+	return true
+
 func overclock_logic():
 	if !process_running: #no process running
 		add_line("No process running to overclock")
+		return
+	if current_process and "modifier" in current_process and !current_process.modifier.is_empty():
+		add_line("%s is active. One modifier at a time: use '%s -kill' first." % [current_process.modifier.name, current_process.modifier.command])
 		return
 	if Stats.overclocked: #already overclocked
 		add_line("System is already overclocked")
@@ -1630,11 +1833,12 @@ func overclock_logic():
 	if !Upgrades.can_overclock(_get_major_from_minor(current_process_info)):
 		add_line("Overclock not available. Check upgrade package manager with 'apt'.")
 		return
+	var limit = int(Upgrades.get_overheat_clear_temp())
 	if Stats.overheated: #overheated - still recovering
-		add_line("System has been overheated, needs to cool to below 80°C.")
+		add_line("System has been overheated, needs to cool to below %d°C." % limit)
 		return
-	if Stats.system_tempature >= 80: #cant overclock above 60
-		add_line("System tempature needs to cool to below 80°C before overclocking")
+	if Stats.system_tempature >= limit:
+		add_line("System tempature needs to cool to below %d°C before overclocking" % limit)
 		return
 	Stats.overclocked = true
 
@@ -1643,8 +1847,12 @@ func overclock_logic():
 ###################################################
 func phishing_commands(text):
 	text = text.to_lower().strip_edges()
+	var parsed_bait = Phishing.parse_bait(text) # "phish -spear bait=logs"
 	for ms in Phishing.minor_processes:
-		if text == ms["command"]:
+		if parsed_bait.command == ms["command"]:
+			if parsed_bait.error != "":
+				add_line(parsed_bait.error)
+				return
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
@@ -1652,21 +1860,21 @@ func phishing_commands(text):
 				add_line("Process not unlocked")
 				return
 				
-			cast_line(ms, -1)
+			cast_line(ms, -1, parsed_bait.bait)
 			return
 	_handle_process_commands(text, "Finishing current phishing attempt...")
 
 
-func cast_line(type: Dictionary, t_lines: int):
+func cast_line(type: Dictionary, t_lines: int, bait: ItemData = null):
 	if current_process is PhishingTerminal:
-		current_process.cast_lines(type, t_lines)
+		current_process.cast_lines(type, t_lines, bait)
 	else:
 		var new_phishing_terminal = phishing_scene.instantiate()
 		terminal_body_container.add_child(new_phishing_terminal)
 		process_running = true
 		current_process = new_phishing_terminal
 		current_process_info = type
-		new_phishing_terminal.cast_lines(type, t_lines)
+		new_phishing_terminal.cast_lines(type, t_lines, bait)
 		hud_process_running.process_started(Phishing, type)
 		add_new_scrollback()
 
@@ -1681,6 +1889,13 @@ func compiling_commands(text):
 				add_line(ContextCommands.process_already_running_text())
 				return
 			
+			if ms == Compiling.ACCESS:
+				var check = Compiling.check_access(text.trim_prefix(ms["command"]).trim_prefix("="))
+				if !check.ok:
+					add_line(check.message)
+					return
+				start_compiling(ms, check.target)
+				return
 			if ms == Compiling.MOD:
 				if !text.contains("="):
 					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
@@ -1729,7 +1944,7 @@ func compiling_commands(text):
 	_handle_process_commands(text, "Finishing current compile...")
 
 
-func start_compiling(minor_process: Dictionary, item: ItemData = null):
+func start_compiling(minor_process: Dictionary, item = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
@@ -2053,7 +2268,10 @@ func _move_caret_to_end():
 #handle up/down input for history commands
 func _input(event):
 	if event is InputEventMouseButton and event.pressed:
-		input_line.grab_focus()
+		if current_context == Context.HACKING:
+			hacking.player_hacking_box.input_line.grab_focus.call_deferred()
+		else:
+			input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
 		if Tutorial.show_intro and event.keycode == KEY_ENTER and accepting_player_inputs:
 			install_idle_os()
@@ -2109,10 +2327,18 @@ func _on_hacking_start_loading() -> void:
 	await tween.finished
 
 func _on_cooling_timer_timeout():
-	var amount_to_cool = Stats.cooling_amount
+	var amount_to_cool = Stats.get_cooling_amount()
 	if Stats.OVERHEAT_FAN and Stats.overheated:
 		amount_to_cool += -0.3
+	if Stats.overheated and Upgrades.has("system.liquid_cooling"):
+		amount_to_cool *= 2.0 # Liquid Cooling: overheat recovery twice as fast
+	elif Upgrades.has("system.idle_cooling") and _nothing_running():
+		amount_to_cool *= 2.0 # Idle Cooling
 	Stats.update_tempature(amount_to_cool)
+
+## Idle Cooling: no process in the main terminal, no VMs, no hack
+func _nothing_running() -> bool:
+	return !process_running and VMManager.vms.is_empty() and !(hacking and hacking.enemy_hacking_box.hacking_game.is_hacking)
 
 func _scroll_to_bottom():
 	await get_tree().process_frame

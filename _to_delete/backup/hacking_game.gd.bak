@@ -1,0 +1,675 @@
+extends VBoxContainer
+
+@onready var target_name_label = $TitleRow/HBoxContainer/TargetName
+@onready var target_label_2 = $StatsRow/HBoxContainer2/EnemySide/HBoxContainer/TargetLabel2
+@onready var status_label_box: PanelContainer = $TitleRow/HBoxContainer/StatusLabelBox
+@onready var status_label: Label = $TitleRow/HBoxContainer/StatusLabelBox/MarginContainer/StatusLabel
+@onready var bandwidth_timer = $BandwidthTimer
+@onready var offensive_item_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/OffensiveItemLabel
+@onready var defensive_item_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer/DefensiveItemLabel
+
+@onready var attack_amount_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AttackAmountLabel
+@onready var defense_amount_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer/DefenseAmountLabel
+
+@onready var anon_bar = $StatsRow/HBoxContainer2/PlayerSide/AnonBar
+@onready var band_bar = $StatsRow/HBoxContainer2/PlayerSide/BandBar
+@onready var integ_bar = $StatsRow/HBoxContainer2/EnemySide/IntegBar
+@onready var attack_bar = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackBar
+@onready var defense_bar = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseBar
+@onready var counter_bar = $AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/CounterBar
+@onready var firewall_bar = $StatsRow/HBoxContainer2/EnemySide/FirewallBar
+
+@onready var attack_dmg_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackDmgLabel
+@onready var attack_bandwidth_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackBandwidthLabel
+@onready var attack_firewall_label = $AttacksRow/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/AttackHelperTextRow/AttackFirewallLabel
+@onready var defense_restoer_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseRestoerLabel
+@onready var defense_bandwidth_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseBandwidthLabel
+@onready var defense_description_label = $AttacksRow/HBoxContainer/PanelContainer2/MarginContainer/VBoxContainer/DefenseHelperTextRow/DefenseDescriptionLabel
+@onready var counter_dmg_label = $AttacksRow/HBoxContainer/PanelContainer3/MarginContainer/VBoxContainer/CounterHelperTextRow/CounterDmgLabel
+
+@onready var yield_label = $BottomRow/HBoxContainer/YieldCol/YieldLabel
+
+@onready var anon_label = $StatsRow/HBoxContainer2/PlayerSide/AnonLabel
+@onready var band_label = $StatsRow/HBoxContainer2/PlayerSide/BandLabel
+@onready var integ_label = $StatsRow/HBoxContainer2/EnemySide/IntegLabel
+@onready var firewall_label = $StatsRow/HBoxContainer2/EnemySide/FirewallLabel
+@onready var labels_container = $BattleInfo/MarginContainer/ScrollContainer/LabelsContainer
+@onready var scroll_container = $BattleInfo/MarginContainer/ScrollContainer
+@onready var safe_exit_timer = $SafeExitTimer
+
+var c_green: Color = Color("#2a9a5a")
+var c_yellow: Color = Color("#c08020")
+var c_blue: Color = Color("#2878c8")
+var c_red: Color = Color("#d84040")
+var c_white: Color = Color("#FFF")
+
+var is_hacking: bool = false
+var player_is_alive: bool = true
+var attacking: bool = false
+var ATTACK_SPEED: float = 10.0
+var ATTACK_AMOUNT: int = 0
+var FIREWALL_DAMAGE: int = 0
+var ATTACK_BW_COST = 0
+var ATTACK_HEAT: float = 0.3
+var defending: bool = false
+var DEFEND_SPEED: float = 5.0
+var DEFEND_AMOUNT: int = 0
+var DEFEND_BW_COST: int = 0
+var DEFEND_HEAT: float = 0.5
+var COUNTER_SPEED: float = 12.0
+var COUNTER_AMOUNT: int = 2
+var COUNTER_HEAT: float = 0
+var EXP_AMOUNT: int = 0
+var BANDWIDTH_RECOVERY_RATE: int = 0
+var MAX_BANDWIDTH: int = 0
+
+var OVERCLOCK_VALUE: float = 1.0
+var OVERHEAT_VALUE: float = 1.0
+var NEXT_HEAT_APPLICATION: int = 0
+
+var INTEGRITY_AMOUNT: int = 0
+var FIREWALL_AMOUNT: int = 0
+var target_reward
+var target_reward_amount
+var target_name
+
+var reward_amount: int = 0
+var requirements
+var current_target: Dictionary = {} # the Stats target being hacked (intel is looked up per hack)
+
+var offensive_item
+var defensive_item
+var COMBAT_QUEUE = []
+
+var stop_hacking: bool = false
+
+var caches_gained: int = 0
+
+# Number of hacks remaining.
+# -1 means recursive/unlimited.
+var hacks_remaining: int = 1
+
+# If true, the hack starts in overclock mode.
+var start_overclock: bool = false
+
+func _ready():
+	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
+	Signals.end_hacking_signal.connect(kill_hack)
+	Signals.manual_packet_spoof_signal.connect(manual_defense)
+
+func _process(delta):
+	if is_hacking:
+		if Stats.overclocked:
+			OVERCLOCK_VALUE = 2.0 #x2 speed
+			OVERHEAT_VALUE = 1.0
+			NEXT_HEAT_APPLICATION = 2
+		elif Stats.overheated:
+			OVERCLOCK_VALUE = 0.5 #1/2 speed
+			OVERHEAT_VALUE = 2.0 #2x speed for enemy
+		else:
+			OVERCLOCK_VALUE = 1.0
+			OVERHEAT_VALUE = 1.0
+			
+		var mod_atk_spd = 1.0
+		if HackingMods.has_mod(HackingMods.MOD_TYPE.ATTACK_SPEED):
+			mod_atk_spd = 1.0 + HackingMods.get_mod_value(HackingMods.MOD_TYPE.ATTACK_SPEED)
+
+		var mod_counter_slow = 1.0
+		if HackingMods.has_mod(HackingMods.MOD_TYPE.COUNTER_SLOW):
+			mod_counter_slow = 1.0 + HackingMods.get_mod_value(HackingMods.MOD_TYPE.COUNTER_SLOW)
+			
+		if attacking:
+			attack_bar.value += ATTACK_SPEED * OVERCLOCK_VALUE * delta * mod_atk_spd
+		if defending:
+			defense_bar.value += DEFEND_SPEED * OVERCLOCK_VALUE * delta
+		if Stats.current_anon > 0:
+			counter_bar.value += COUNTER_SPEED * OVERHEAT_VALUE * delta / mod_counter_slow
+
+		if attack_bar.value >= attack_bar.max_value and attacking:
+			if has_bandwidth(ATTACK_BW_COST):
+				attack()
+			else:
+				queue_attack(offensive_item)
+
+		if defense_bar.value >= defense_bar.max_value and defending:
+			if has_bandwidth(DEFEND_BW_COST):
+				defense()
+			else:
+				queue_defense(defensive_item)
+
+		if counter_bar.value >= counter_bar.max_value:
+			counter()
+			counter_bar.value = 0.0
+
+func has_bandwidth(cost: int) -> bool:
+	return Hacking.current_bandwidth >= cost
+
+func queue_attack(item):
+	attacking = false
+	COMBAT_QUEUE.append(item)
+
+func queue_defense(item):
+	defending = false
+	COMBAT_QUEUE.append(item)
+
+# recursive: if true, a successful hack auto-restarts against the same
+# target instead of ending after a win (set via the "-r" command flag).
+#target, loadout, hack_count, overclock
+func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
+	current_target = target
+	caches_gained = 0
+	stop_hacking = false
+	
+	# Store how many hacks to perform.
+	# -1 means recursive/unlimited.
+	hacks_remaining = hack_count
+	
+	# Store whether this session should start overclocked.
+	start_overclock = overclock
+	Stats.overclocked = start_overclock
+	
+	offensive_item = loadout.offensive
+	defensive_item = loadout.defensive
+	var dmg_upgrade = Upgrades.get_package_info("hacking.damage")
+	
+	var mod_damage = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE):
+		mod_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE)
+	
+	ATTACK_AMOUNT = offensive_item.damage + dmg_upgrade.current + mod_damage
+	var firewall_upgrade = Upgrades.get_package_info("hacking.firewall")
+	FIREWALL_DAMAGE = offensive_item.firewall_damage + firewall_upgrade.current
+	ATTACK_SPEED = offensive_item.speed
+	ATTACK_BW_COST = offensive_item.bandwidth_cost
+
+	var bandwidth_upgrade = Upgrades.get_package_info("hacking.bandwidth_recovery")
+	BANDWIDTH_RECOVERY_RATE = Hacking.bandwidth_recovery_rate + bandwidth_upgrade.current
+
+	var max_b_upgrade = Upgrades.get_package_info("hacking.max_bandwidth")
+	MAX_BANDWIDTH = Hacking.max_bandwidth + max_b_upgrade.current
+
+	COUNTER_SPEED = target["counter speed"]
+	COMBAT_QUEUE.clear()
+	var healing_upgrade = Upgrades.get_package_info("hacking.healing")
+	DEFEND_AMOUNT = defensive_item.heal + healing_upgrade.current
+	DEFEND_SPEED = defensive_item.speed
+	DEFEND_BW_COST = defensive_item.bandwidth_cost
+	#anonymity
+	Stats.current_anon = Stats.max_anon
+	anon_bar.max_value = Stats.max_anon
+	anon_bar.value = Stats.current_anon
+	#integrity
+	integ_bar.max_value = target.integrity
+	integ_bar.value = 0
+	#bandwidth
+	Hacking.current_bandwidth = MAX_BANDWIDTH #reset bandwidth when starting to hack (not sure about this, could possibly be abused)
+	band_bar.max_value = MAX_BANDWIDTH
+	band_bar.value = Hacking.current_bandwidth
+	#firewall
+	firewall_bar.max_value = target.firewall
+	firewall_bar.value = 0
+	firewall_label.text = "--/--"
+	#set target
+	target_name_label.text = "-"
+	target_label_2.text = "-"
+	integ_label.text = "--/--"
+	#requirements
+	requirements = target.requirements
+	
+	attack_dmg_label.text = "DMG: --"
+	attack_bandwidth_label.text = "BANDWIDTH: --"
+	attack_firewall_label.text = "FIREWALL: --"
+	
+	defense_restoer_label.text = "RESTORE: --"
+	defense_bandwidth_label.text = "BANDWIDTH: --"
+	defense_description_label.text = "--"
+	
+	counter_dmg_label.text = "DMG: --"
+
+	update_status_label_badge("finding target", c_yellow)
+	#update # of sql injectors (attacks) and packet spoofer (heal)
+	offensive_item_label.text = offensive_item.name
+	defensive_item_label.text = defensive_item.name
+	attack_amount_label.text = "x" + str(Inventory.get_amount(offensive_item))
+	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
+
+	attack_bar.value = 0
+	defense_bar.value = 0
+	counter_bar.value = 0
+	
+	reward_amount = 0
+	update_bottom_row()
+	#clear combat terminal
+	if labels_container.get_children().size() > 0:
+		for n in labels_container.get_children():
+			n.queue_free()
+
+	COUNTER_AMOUNT = target["counter"]
+	COUNTER_HEAT = target["heat"]
+	EXP_AMOUNT = target["exp"]
+	INTEGRITY_AMOUNT = target["integrity"]
+	target_reward = target["loot"]
+	target_reward_amount = 1
+	if target.has('loot quantity'):
+		target_reward_amount = target['loot quantity']
+	target_name = target["name"]
+	FIREWALL_AMOUNT = target["firewall"]
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+		defending = true
+	if Inventory.get_amount(offensive_item) > 0:
+		attacking = true
+
+func attack():
+	var crit = 1.0
+	var eff = _get_total_efficiency()
+	if randf() <= eff:
+		crit = 2.0
+		
+	var raw_dmg = ATTACK_AMOUNT * crit
+	var actual_dmg = max(raw_dmg - firewall_bar.value, 0)
+	# only the portion of firewall that actually absorbed damage counts as "blocked"
+	var blocked = min(firewall_bar.value, raw_dmg)
+
+	var mod_firewall_damage = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FIREWALL_DAMAGE):
+		mod_firewall_damage = HackingMods.get_mod_value(HackingMods.MOD_TYPE.FIREWALL_DAMAGE)
+	firewall_bar.value -= FIREWALL_DAMAGE + mod_firewall_damage
+
+	Hacking.current_bandwidth -= ATTACK_BW_COST
+	if Hacking.current_bandwidth <= 0:
+		Hacking.current_bandwidth = 0
+
+	band_bar.value = Hacking.current_bandwidth
+	_update_info_panel("-" + str(ATTACK_BW_COST) + " bandwidth", c_blue)
+
+	integ_bar.value -= actual_dmg
+	add_heat(ATTACK_HEAT)
+	Inventory.remove_resource(offensive_item, 1)
+	Signals.update_hacking_header()
+	attack_amount_label.text = "x" + str(Inventory.get_amount(offensive_item))
+	if crit > 1:
+		_update_info_panel("efficiency caused hack to be extra effective", c_green)
+	var i_text = "sql_injector fires: integrity -" + str(int(actual_dmg)) + " (firewall blocked " + str(int(blocked)) + ")"
+	_update_info_panel(i_text, c_green)
+	_update_info_panel("firewall damaged: -" + str(FIREWALL_DAMAGE), c_yellow)
+	attacking = Inventory.get_amount(offensive_item) > 0
+	
+	if !attacking:
+		Signals.update_hack_console("\n\n[color=#e24b4a]OUT OF SQL INJECTORS - ABORT HACKING WITH 'KILL'[/color]\n")
+
+	attack_bar.value = 0.0
+	if integ_bar.value <= 0.0:
+		win()
+
+func defense():
+	var mod_restore = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.RESTORE):
+		mod_restore = HackingMods.get_mod_value(HackingMods.MOD_TYPE.RESTORE)
+	Stats.current_anon += DEFEND_AMOUNT + mod_restore
+	if Stats.current_anon > Stats.max_anon:
+		Stats.current_anon = Stats.max_anon
+	add_heat(DEFEND_HEAT)
+
+	Hacking.current_bandwidth -= DEFEND_BW_COST
+	if Hacking.current_bandwidth <= 0:
+		Hacking.current_bandwidth = 0
+
+	band_bar.value = Hacking.current_bandwidth
+	anon_bar.value = Stats.current_anon
+	Inventory.remove_resource(defensive_item, 1)
+	Signals.update_hacking_header()
+	defense_amount_label.text = "x" + str(Inventory.get_amount(defensive_item))
+	var info_text = "packet_spoof increased anonymity - anonymity +" + str(DEFEND_AMOUNT)
+	_update_info_panel(info_text, c_blue)
+	
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+		defending = Inventory.get_amount(defensive_item) > 0
+	else:
+		defending = false
+	defense_bar.value = 0.0
+
+func counter():
+	var mod_dmg_reduce = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.DAMAGE_REDUCTION):
+		mod_dmg_reduce = HackingMods.get_mod_value(HackingMods.MOD_TYPE.DAMAGE_REDUCTION)
+	
+	Stats.current_anon -= max(1, COUNTER_AMOUNT - mod_dmg_reduce) #MIM OF 1 DAMAGE
+	add_heat(COUNTER_HEAT)
+	if Stats.current_anon < 0.0:
+		Stats.current_anon = 0.0
+	anon_bar.value = Stats.current_anon
+	var info_text = "countermeasures taken: -" + str(COUNTER_AMOUNT) + " anonymity"
+	_update_info_panel(info_text, c_red)
+	if Stats.current_anon <= 0.0:
+		lose()
+		return
+
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+		defending = true
+
+func add_heat(amount: float):
+	if Stats.overheated:
+		Stats.update_tempature(0.3)
+		return
+	if NEXT_HEAT_APPLICATION > 0:
+		amount += NEXT_HEAT_APPLICATION
+		NEXT_HEAT_APPLICATION = 0
+
+	Stats.update_tempature(amount)
+	if Stats.overheated:
+		var messages = "[color=#e24b4a]SYSTEM OVERHEATED - ATTACKING SLOWED[/color]\n"
+		messages += "[color=#e24b4a]ENEMY COUNTERMEASURES INCREASED SIGNIFICANTLY[/color]\n"
+		Signals.update_hack_console(messages)
+
+func lose():
+	bandwidth_timer.stop()
+	is_hacking = false
+	attacking = false
+	defending = false
+	var messages = ""
+	messages += "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
+	if caches_gained > 0:
+		messages += "[color=#e24b4a]Items lost[/color]\n"
+		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
+	remove_mod_duration()
+	Signals.update_hack_console(messages)
+	await get_tree().create_timer(1.5).timeout
+	Signals.hacking_ended()
+
+func win():
+	is_hacking = false
+	attacking = false
+	defending = false
+	firewall_bar.value = 0
+	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
+	
+	caches_gained += target_reward_amount
+	reward_amount += target_reward_amount
+	Stats.record_win(current_target)
+	remove_mod_duration()
+	update_bottom_row()
+	_update_info_panel("target successfully hacked. +" + str(target_reward_amount) + " " + target_reward.name, c_blue)
+	_update_info_panel("-----------------------------------------------", c_white)
+	Exp.add_xp(Hacking, null, EXP_AMOUNT)
+	Signals.update_hacking_header()
+
+	# Decrease remaining hacks unless running recursively.
+	if hacks_remaining > 0:
+		hacks_remaining -= 1
+	
+	# Continue if there are more hacks remaining or recursive mode is active.
+	if hacks_remaining == -1 or hacks_remaining > 0:
+		reset()
+	else:
+		_finish_hack()
+
+# Ends the session after a win when not running recursively: bank the
+# rewards accumulated so far and signal that hacking has ended.
+func _finish_hack():
+	bandwidth_timer.stop()
+	is_hacking = false
+	attacking = false
+	defending = false
+	stop_hacking = true
+	Signals.update_hack_console("\n\n[color=#4ec994]SUCCESSFULLY HACKED " + target_name + "[/color]")
+	Signals.update_hack_console("[color=#4ec994]Gained " + target_reward.name + " x" + str(caches_gained) + "[/color]\n\n")
+	_grant_rewards()
+	_update_info_panel("hack complete, disconnecting", c_blue)
+	await get_tree().create_timer(1.0).timeout
+	#target_name
+
+	Signals.hacking_ended()
+
+func _notification(what: int) -> void:
+	# closing the window mid-session: keep targets already beaten (saved by SaveManager's close handler)
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and caches_gained > 0:
+		_grant_rewards()
+		SaveManager.save_game()
+
+func _grant_rewards():
+	if caches_gained > 0:
+		Inventory.add_resource(target_reward, caches_gained)
+		caches_gained = 0
+
+func reset():
+	attack_bar.value = 0
+	defense_bar.value = 0
+	counter_bar.value = 0
+	COMBAT_QUEUE.clear()
+	integ_bar.max_value = INTEGRITY_AMOUNT
+
+	integ_label.text = "--/--"
+	firewall_label.text = "--/--"
+	await prepare()
+
+func start_hack():
+	is_hacking = true
+	if Inventory.get_amount(offensive_item) > 0:
+		attacking = true
+	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+		defending = true
+	if bandwidth_timer.is_stopped():
+		bandwidth_timer.wait_time = Hacking.bandwidth_recovery_speed
+		bandwidth_timer.start()
+
+func _update_info_panel(message: String, color: Color):
+	var label = Label.new()
+
+	label.text = message
+
+	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_color_override("font_color", color)
+
+	labels_container.add_child(label)
+
+	if labels_container.get_children().size() > 50:
+		labels_container.get_children()[0].queue_free()
+
+	await get_tree().process_frame
+	scroll_container.scroll_vertical = scroll_container.get_v_scroll_bar().max_value
+
+func kill_hack():
+	end()
+	remove_mod_duration()
+	_grant_rewards()
+	Signals.hacking_ended()
+
+func kill_hack_safely():
+	safe_exit_timer.start()
+	_update_info_panel("Attempting to exit safely in approx. 6 seconds", c_yellow)
+
+func end():
+	bandwidth_timer.stop()
+	attacking = false
+	defending = false
+	is_hacking = false
+	stop_hacking = true
+	reward_amount = 0
+
+func _remove_required_resources():
+	Inventory.remove_resource(requirements.item, requirements.amount)
+	SaveManager.save_game() # spent payloads are saved right away: quitting mid-hack can't undo them
+	var remove_text = "removing " + requirements.item.name + " x" + str(requirements.amount)
+	_update_info_panel(remove_text, c_blue)
+
+func _has_requirements() -> bool:
+	return Inventory.get_amount(requirements.item) >= requirements.amount
+
+func prepare():
+	if !_has_requirements():
+		Stats.overclocked = false
+		_update_info_panel("Unable to find target", c_red)
+		Signals.update_hack_console("[color=#ef9f27]Missing required resources to hack " + target_name + ", aborting.[/color]\n")
+		if caches_gained > 0:
+			Signals.update_hack_console("\n\n[color=#4ec994]SUCCESSFULLY HACKED " + target_name + "[/color]")
+			Signals.update_hack_console("[color=#4ec994]Gained " + target_reward.name + " x" + str(caches_gained) + "[/color]\n\n")
+		await get_tree().create_timer(1.5).timeout
+		Stats.overclocked = false
+		Signals.hacking_ended()
+		return
+
+	target_name_label.text = "-"
+	target_label_2.text = "-"
+
+	attack_dmg_label.text = "DMG: --"
+	attack_bandwidth_label.text = "BANDWIDTH: --"
+	attack_firewall_label.text = "FIREWALL: --"
+	
+	defense_restoer_label.text = "RESTORE: --"
+	defense_bandwidth_label.text = "BANDWIDTH: --"
+	defense_description_label.text = "--"
+	
+	counter_dmg_label.text = "DMG: --"
+	
+	_update_info_panel("locating " + target_name, c_white)
+	await get_tree().create_timer(1.0).timeout
+	_update_info_panel("target found", c_white)
+	await get_tree().create_timer(0.3).timeout
+	update_status_label_badge("gaining access", c_blue)
+	await get_tree().create_timer(0.3).timeout
+	target_name_label.text = target_name
+	target_label_2.text = target_name
+	await get_tree().create_timer(0.3).timeout
+	_update_info_panel("using " + requirements.item.name + " to gain access", c_white)
+	await get_tree().create_timer(0.2).timeout
+	if stop_hacking:
+		return
+	update_bottom_row()
+	await get_tree().create_timer(0.5).timeout
+	_remove_required_resources()
+	_apply_intel()
+	Signals.update_hacking_header()
+	update_bottom_row()
+	_update_info_panel("access granted", c_green)
+	var tween = create_tween()
+	var firewall_tween = create_tween()
+	tween.tween_property(integ_bar, "value", integ_bar.max_value, 1.0)
+	firewall_tween.tween_property(firewall_bar, "value", firewall_bar.max_value, 1.0)
+	await tween.finished
+	await firewall_tween.finished
+	await get_tree().create_timer(0.2).timeout
+	_update_info_panel("starting hack", c_white)
+	update_status_label_badge("hacking", c_green)
+	
+	attack_dmg_label.text = "DMG: " + str(ATTACK_AMOUNT) #aaaaa
+	attack_bandwidth_label.text = "BANDWIDTH: " + str(ATTACK_BW_COST)
+	attack_firewall_label.text = "FIREWALL: " + str(FIREWALL_DAMAGE)
+	
+	defense_restoer_label.text = "RESTORE: " + str(DEFEND_AMOUNT)
+	defense_bandwidth_label.text = "BANDWIDTH: " + str(DEFEND_BW_COST)
+	defense_description_label.text = "STARTS WHEN BELOW 30% ANONYMITY"
+	
+	counter_dmg_label.text = "DMG: " + str(COUNTER_AMOUNT)
+
+	integ_bar.max_value = INTEGRITY_AMOUNT
+	integ_bar.value = INTEGRITY_AMOUNT
+	firewall_bar.max_value = FIREWALL_AMOUNT
+	
+	var mod_firewall_reduction = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FIREWALL_REDUCTION):
+		mod_firewall_reduction = HackingMods.get_mod_value(HackingMods.MOD_TYPE.FIREWALL_REDUCTION)
+		
+	firewall_bar.value = max(0, FIREWALL_AMOUNT - mod_firewall_reduction)
+	if stop_hacking:
+		return
+	start_hack()
+
+func _on_anon_bar_value_changed(value):
+	anon_label.text = "anonymity " + str(int(value)) + "/" + str(Stats.max_anon)
+
+func _on_band_bar_value_changed(value):
+	band_label.text = "bandwidth " + str(int(value)) + "/" + str(int(band_bar.max_value))
+
+func _on_integ_bar_value_changed(value):
+	integ_label.text = "integrity " + str(int(value)) + "/" + str(int(integ_bar.max_value))
+
+func _on_firewall_bar_value_changed(value):
+	firewall_label.text = "firewall " + str(int(value)) + "/" + str(int(firewall_bar.max_value))
+
+func update_bottom_row():
+	if reward_amount > 0:
+		yield_label.text = target_reward.name + " x" + str(reward_amount)
+	else:
+		yield_label.text = ""
+
+func _on_safe_exit_timer_timeout():
+	end()
+	_grant_rewards()
+	Signals.hacking_ended()
+
+func update_status_label_badge(text: String, color: Color):
+	var b = status_label_box.get_theme_stylebox("panel").duplicate()
+	b.bg_color = color
+	status_label.text = text
+	status_label_box.add_theme_stylebox_override("panel", b)
+
+func _on_bandwidth_timer_timeout():
+	if not is_hacking:
+		return
+		
+	var mod_band_recov = 0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.BAND_RATE):
+		mod_band_recov = HackingMods.get_mod_value(HackingMods.MOD_TYPE.BAND_RATE)
+		
+	Hacking.current_bandwidth += BANDWIDTH_RECOVERY_RATE + mod_band_recov
+	if Hacking.current_bandwidth > MAX_BANDWIDTH:
+		Hacking.current_bandwidth = MAX_BANDWIDTH
+	band_bar.value = Hacking.current_bandwidth
+
+	# process any queued attack/heal actions that were waiting on bandwidth
+	while COMBAT_QUEUE.size() > 0:
+		var queued_action = COMBAT_QUEUE.pop_front()
+
+		if queued_action.bandwidth_cost > Hacking.current_bandwidth:
+			COMBAT_QUEUE.push_front(queued_action)
+			break
+
+		if queued_action.type == "Attack":
+			attack()
+		elif queued_action.type == "Heal":
+			defense()
+
+func is_anon_below_healing_threshold() -> bool:
+	print("Current: " + str(Stats.current_anon))
+	print("Max: " + str(Stats.max_anon))
+	return Stats.current_anon * 100 <= Stats.max_anon * int(Stats.healing_threshold_auto_start * 100)
+
+func manual_defense():
+	if is_hacking and Inventory.get_amount(Items.PACKET_SPOOF) > 0 and !defending:
+		defending = true
+
+func _get_total_efficiency() -> float:
+	var base = Hacking.SKILL.efficiency
+	var frag_bonus = 1.0 # defrag no longer boosts skills
+	
+	var mod_eff = 0.0
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.EFFICIENCY):
+		mod_eff = HackingMods.get_mod_value(HackingMods.MOD_TYPE.EFFICIENCY)
+	
+	return snapped((base + mod_eff) * frag_bonus, 0.01)
+
+## Decoding intel: weakens this attempt's target stat and uses up one hack of intel.
+func _apply_intel() -> void:
+	# start from the target's real stats every attempt (intel only lasts its hacks)
+	FIREWALL_AMOUNT = current_target.get("firewall", FIREWALL_AMOUNT)
+	INTEGRITY_AMOUNT = current_target.get("integrity", INTEGRITY_AMOUNT)
+	COUNTER_AMOUNT = current_target.get("counter", COUNTER_AMOUNT)
+	COUNTER_SPEED = current_target.get("counter speed", COUNTER_SPEED)
+	var i = Decoding.use_intel(current_target)
+	if i.is_empty():
+		return
+	match i.stat:
+		"firewall":
+			FIREWALL_AMOUNT = max(0, FIREWALL_AMOUNT - i.amount)
+		"integrity":
+			INTEGRITY_AMOUNT = max(1, INTEGRITY_AMOUNT - i.amount)
+		"counter":
+			COUNTER_AMOUNT = max(0, COUNTER_AMOUNT - i.amount)
+		"counter speed":
+			COUNTER_SPEED = max(0.1, COUNTER_SPEED - i.amount)
+	integ_bar.max_value = INTEGRITY_AMOUNT
+	firewall_bar.max_value = FIREWALL_AMOUNT
+	_update_info_panel("intel: -%d %s (%d hack%s of intel left)" % [i.amount, i.stat, i.hacks_left, "" if i.hacks_left == 1 else "s"], c_blue)
+
+func remove_mod_duration():
+	HackingMods.remove_duration()

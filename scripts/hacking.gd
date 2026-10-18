@@ -62,6 +62,13 @@ func _on_player_hacking_box_command_entered(text):
 	if !can_accept_inputs:
 		return
 	
+	if text.to_lower().strip_edges() in ["quit", "exit", "quit -s", "exit -s"]:
+		quit_game()
+		return
+	var low = text.to_lower().strip_edges()
+	if low == "run" or low.begins_with("run "):
+		handle_run_command(low)
+		return
 	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
@@ -118,8 +125,8 @@ func _on_player_hacking_box_command_entered(text):
 							return
 							
 						Stats.overclocked = true
-						player_hacking_box.add_line_success("System overclocked. Speed and heat increased. Use 'overclock kill' to stop.")
-					"overclock -kill":
+						player_hacking_box.add_line_success("System overclocked. Bandwidth regen x2, heat increased. Use 'overclock -kill' to stop.")
+					"overclock -kill", "overclock kill":
 						if !Stats.overclocked:
 							player_hacking_box.add_line("Not currently overclocking.")
 						if Stats.overclocked:
@@ -132,6 +139,47 @@ func _on_player_hacking_box_command_entered(text):
 							Signals.manual_packet_spoof()
 					_:
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type 'kill'")
+
+## 'run' (list), 'run <item>' (use during a hack), 'run auto <item>' / 'run auto off'
+func handle_run_command(text: String) -> void:
+	var game = enemy_hacking_box.hacking_game
+	var in_hack = current_context == HackingContext.HACKING and game.is_hacking
+	var arg = text.substr(3).strip_edges()
+	if arg in ["", "-h", "list", "ls"]:
+		player_hacking_box.add_line(Exploits.list_text(in_hack))
+		return
+	if arg == "auto" or arg.begins_with("auto "):
+		var name = arg.substr(4).strip_edges()
+		if name == "":
+			player_hacking_box.add_line("Auto: " + (Exploits.get_item(Exploits.auto_id).name if Exploits.auto_id != "" else "off") + ". Set with 'run auto <item>', stop with 'run auto off'.")
+			return
+		if name in ["off", "stop", "none", "-kill"]:
+			Exploits.auto_id = ""
+			SaveManager.mark_dirty()
+			player_hacking_box.add_line("Auto use turned off.")
+			return
+		var auto_item = Exploits.find(name)
+		if auto_item == null:
+			player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % name)
+			return
+		Exploits.auto_id = auto_item.exploit_id
+		SaveManager.mark_dirty()
+		player_hacking_box.add_line_success("Auto: %s is used whenever it's useful and you have %d charge. Stop with 'run auto off'." % [auto_item.name, int(Exploits.cost(auto_item))])
+		if Inventory.get_amount(auto_item) <= 0:
+			player_hacking_box.add_line_warning("You don't have any %s yet." % auto_item.name)
+		return
+	var item = Exploits.find(arg)
+	if item == null:
+		player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % arg)
+		return
+	if !in_hack:
+		player_hacking_box.add_line_warning("One-time items can only be used during a hack.")
+		return
+	var err = game.use_exploit(item)
+	if err != "":
+		player_hacking_box.add_line_warning(err)
+	else:
+		player_hacking_box.add_line_success("%s used (%d left)." % [item.name, Inventory.get_amount(item)])
 
 func handle_hack_command(text):
 	var recursive: bool = false
@@ -198,7 +246,7 @@ func handle_hack_command(text):
 		return
 	
 	if !target.get("unlocked", false):
-		player_hacking_box.add_line_error("Target is locked.")
+		player_hacking_box.add_line_error("Target is locked: " + Stats.get_unlock_hint(target))
 		return
 	
 	# Has requirements in inventory
@@ -246,7 +294,7 @@ func handle_view_command(text):
 		player_hacking_box.add_line("Hard mode for location not unlocked.")
 		return
 	var targets: Array = Stats.get_hacking_targets_by_command(text)
-	var location_name: String = Stats.get_hacking_location_name_by_command(text)
+	var location_name: String = str(target.get("name", "")) + (" - hard mode" if text.contains("-hard") else "")
 	if targets.is_empty():
 		player_hacking_box.add_line("Not a valid location.")
 	else:
@@ -301,7 +349,7 @@ func hacking_help_commands():
 			var commands = [
 				["hack [target]", "Hack target once", "e.g. hack student"],
 				["hack [target]=[amount]", "Hack target a set number of times", "e.g. hack student=20"],
-				["hack [target] -overclock", "Hack target with overclock", "e.g. hack student -overclock"],
+				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
 				["cd ..", "Return to locations directory", "e.g. 'cd ..'"]
 			]
 
@@ -313,13 +361,34 @@ func hacking_help_commands():
 			if Upgrades.get_package_info("hacking.overclock").current:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
+					["run [item]", "Use a one-time item ('run' lists yours)."],
 					["kill", "Kills current hack attempt immediately."],
 					#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
-					["overclock", "Overclocks system to increase speed and heat output"],
-					["overclock -kill", "Stops overclocking"],
+					["overclock", "Doubles bandwidth regen (more heat per action)"],
+					["overclock -kill", "Stops overclocking ('overclock kill' works too)"],
 				]))
 			else:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
+					["run [item]", "Use a one-time item ('run' lists yours)."],
 					["kill", "Kills current hack attempt immediately."],
 				]))
+
+
+## 'quit' from the hacking console. Hacking doesn't run offline: a hack in progress is abandoned (its
+## payload was already used and saved when it started, so quitting can't be used to retry for free).
+## Targets already beaten this session are banked first.
+func quit_game() -> void:
+	can_accept_inputs = false
+	var game = enemy_hacking_box.hacking_game
+	if game.is_hacking:
+		player_hacking_box.add_line("Disconnecting: the hack in progress is abandoned.")
+		game.end()
+	Exploits.reset_charge()
+	game._grant_rewards()
+	player_hacking_box.add_line("SAVING")
+	await get_tree().create_timer(0.6).timeout
+	player_hacking_box.add_line("GOODBYE")
+	await get_tree().create_timer(0.8).timeout
+	SaveManager.save_game()
+	get_tree().quit()

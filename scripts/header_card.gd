@@ -118,6 +118,16 @@ func show_gain(amount: int) -> void:
 
 ## Level-up flair: flash the card in the accent color, sweep the bar, announce it in the card text.
 ## Emits level_up_finished when done so the header can refill the card.
+## brief popup in the footer, e.g. "v1.4" after an apt install
+func show_note(text: String) -> void:
+	float_label.text = text + "  "
+	if _float_tween:
+		_float_tween.kill()
+	float_label.modulate.a = 1.0
+	_float_tween = create_tween()
+	_float_tween.tween_interval(1.2)
+	_float_tween.tween_property(float_label, "modulate:a", 0.0, 0.6)
+
 func play_level_up(new_level_text: String, new_progress: float, big: bool = true) -> void:
 	var flash := StyleBoxFlat.new()
 	flash.bg_color = Color(accent, 0.35 if big else 0.25)

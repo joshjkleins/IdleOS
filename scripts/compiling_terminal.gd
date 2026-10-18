@@ -45,10 +45,22 @@ var _cycle_mode: Mode = Mode.NORMAL # worst mode seen this cycle (decides heat)
 
 
 var hacking_mod_item: ItemData = null
+var access_target: Dictionary = {} # ACCESS: the hacking target being unlocked
+var _reqs: Dictionary = {}         # what one compile consumes (ACCESS's depends on the target)
 
-func start(p_type: Dictionary, is_window: bool = false, resource_to_compile: ItemData = null):
+## arg: the item to turn into a mod (MOD) or the target dictionary to unlock (ACCESS).
+func start(p_type: Dictionary, is_window: bool = false, arg = null):
 	setup_process(Compiling, p_type, is_window)
-	hacking_mod_item = resource_to_compile
+	if arg is ItemData:
+		hacking_mod_item = arg
+	elif arg is Dictionary:
+		access_target = arg
+	_reqs = {}
+	if p_type == Compiling.ACCESS:
+		var check = Compiling.check_access(access_target.get("name", ""))
+		_reqs = check.requirements
+	elif p_type.requirements is Dictionary:
+		_reqs = p_type.requirements
 	fill_bar.value = 0.0
 	_build_item_containers(p_type)
 	_update_labels()
@@ -77,7 +89,7 @@ func _process(delta: float) -> void:
 			_update_scramble_labels() # snap to fully resolved token
 			_compile_payload()
 
-			if _has_resources_for_more() and !stop_requested and process_data != Compiling.MOD:
+			if _has_resources_for_more() and !stop_requested and process_data != Compiling.MOD and process_data != Compiling.ACCESS:
 				_pause_then_restart()
 			else:
 				_stop_compiling()
@@ -102,12 +114,23 @@ func _pause_then_restart() -> void:
 
 func _update_labels():
 	if process_data == Compiling.MOD:
+		payload_name.text = "HACKING MOD"
+	elif process_data == Compiling.ACCESS:
+		payload_name.text = "TARGET ACCESS"
+	else:
+		payload_name.text = str(process_data["resource gained"].name).to_upper()
+	if process_data == Compiling.MOD:
 		var hacking_mod_value = HackingMods.get_mod_value_text(hacking_mod_item.hacking_mod_type, hacking_mod_item.hacking_mod_value)
 		var hacking_mod_name = HackingMods.get_mod_name(hacking_mod_item.hacking_mod_type)
 		var hacking_mod_duration = "Duration: " + str(hacking_mod_item.hacking_mod_duration) + " hack(s)"
 		
 		payload_item.text = hacking_mod_name + " " + hacking_mod_value
 		amount_gained_label.text = hacking_mod_duration
+	elif process_data == Compiling.ACCESS:
+		payload_item.text = "ACCESS: " + str(access_target.get("name", "?"))
+		amount_gained_label.text = "UNLOCKED" if access_target.get("unlocked", false) else "unlocks the target"
+		for container in ingredients_container.get_children():
+			container.update_amount()
 	else:
 		payload_item.text = process_data["resource gained"].name
 		amount_gained_label.text = "x" + str(amount_gained)
@@ -156,16 +179,20 @@ func _compile_payload():
 			return
 		Inventory.remove_resource(hacking_mod_item, hacking_mod_item.hacking_mod_consumed)
 		HackingMods.add_mod(hacking_mod_item)
+	elif process_data == Compiling.ACCESS:
+		for req in _reqs:
+			Inventory.remove_resource(req, _reqs[req])
+		Stats.unlock_target(access_target)
 	else:
-		for req in process_data.requirements:
-			Inventory.remove_resource(req, process_data.requirements[req])
+		for req in _reqs:
+			Inventory.remove_resource(req, _reqs[req])
 
 		#GIVETH
 		var amount_to_gain = 1
 		Inventory.add_resource(process_data["resource gained"], amount_to_gain)
 		Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, 1)
 		amount_gained += amount_to_gain
-	if randf() <= 0.01:
+	if randf() <= process_data.get("vm token chance", 0.01):
 		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)
 
 	#UPDATETH
@@ -201,8 +228,10 @@ func _has_resources_for_more() -> bool:
 		if Inventory.get_amount(hacking_mod_item) >= hacking_mod_item.hacking_mod_consumed:
 			return true
 	else:
-		for req in process_data.requirements:
-			if Inventory.get_amount(req) < process_data.requirements[req]:
+		if process_data == Compiling.ACCESS and (access_target.is_empty() or access_target.get("unlocked", false)):
+			return false
+		for req in _reqs:
+			if Inventory.get_amount(req) < _reqs[req]:
 				return false
 		return true
 	return false
@@ -216,9 +245,9 @@ func _build_item_containers(p_type: Dictionary):
 		container.set_labels({"item": hacking_mod_item, "amount": hacking_mod_item.hacking_mod_consumed})
 		ingredients_container.add_child(container)
 	else:
-		for req in p_type.requirements:
+		for req in _reqs:
 			var container = item_container_scene.instantiate()
-			container.set_labels({"item": req, "amount": p_type.requirements[req]})
+			container.set_labels({"item": req, "amount": _reqs[req]})
 			ingredients_container.add_child(container)
 
 func _random_string(length: int, source_charset: String) -> String:
@@ -235,6 +264,6 @@ func _get_current_eff() -> float:
 	var efficiency_compiling_package = Upgrades.get_package_info("compiling.efficiency")
 	var efficiency_upgrade = efficiency_compiling_package.current
 	
-	var frag_bonus = Defragging.COMPILING["bonus efficiency"] if Stats.has_bonus(Compiling) else 1.0
+	var frag_bonus = 1.0 # defrag no longer boosts skills
 	
 	return (process_data["efficiency"] + efficiency_upgrade) * frag_bonus

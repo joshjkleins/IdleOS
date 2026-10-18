@@ -32,6 +32,8 @@ var crack_format: Dictionary # {"charset": String, "secret": Callable}
 
 var use_token: ItemData = null
 var create_token: ItemData = null
+var _head_start := 0.0     # Rainbow Tables: after an instant crack, the next crack's steps are this much shorter
+var _crack_seconds := 0.0  # real time the current crack took (VM tokens roll on time)
 
 func set_cracking_type(p_type: Dictionary, window: bool = false, use_item: ItemData = null, create_item: ItemData = null):
 	setup_process(Cracking, p_type, window)
@@ -42,16 +44,35 @@ func set_cracking_type(p_type: Dictionary, window: bool = false, use_item: ItemD
 	for box in letter_boxes:
 		box.charset = crack_format.charset
 
-## How each cracking process fills its boxes: scramble characters + how the answer is picked.
-## New processes (badge hash, bio template, digital signature, private keys) add a case here.
+## How each cracking process fills its 4 boxes ("crack boxes" in the process data): the characters
+## the boxes scramble through + how the cracked answer is picked. Each one fits what's being cracked.
+const CHARS_HEX = "0123456789ABCDEF"
+const CHARS_BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+const CHARS_GENOME = "ACGT"
+const BADGE_DEPTS = ["ER", "OR", "RN", "MD", "IC", "PH", "LB", "RX"] # hospital departments
+
 func _get_format(p_type: Dictionary) -> Dictionary:
-	match str(p_type.name).to_lower():
-		"pin":
+	match p_type.get("crack boxes", "word"):
+		"digits": # PIN: 4 digits
 			return {"charset": CHARS_DIGITS, "secret": func(): return "%04d" % (randi() % 10000)}
+		"hex": # digital signature: a hex block of the signature
+			return {"charset": CHARS_HEX, "secret": func(): return _random_from(CHARS_HEX, 4)}
+		"badge": # staff badge: department code + 2-digit staff number (ER07)
+			return {"charset": CHARS_ALNUM, "secret": func(): return BADGE_DEPTS.pick_random() + "%02d" % (randi() % 100)}
+		"base64": # private key: a chunk of base64 key material
+			return {"charset": CHARS_BASE64, "secret": func(): return _random_from(CHARS_BASE64, 4)}
+		"genome": # biometric template: a strand of the DNA profile
+			return {"charset": CHARS_GENOME, "secret": func(): return _random_from(CHARS_GENOME, 4)}
 		"vm":
 			return {"charset": CHARS_ALNUM, "secret": func(): return Cracking.get_vm_cracking_word(create_token)}
-		_: # password
+		_: # password: a 4-letter word
 			return {"charset": CHARS_ALNUM, "secret": func(): return Cracking.random_four_digit_words.pick_random()}
+
+func _random_from(chars: String, length: int) -> String:
+	var out := ""
+	for i in length:
+		out += chars[randi() % chars.length()]
+	return out
 
 func start():
 	begin_run()
@@ -59,7 +80,7 @@ func start():
 	amount_cracked = 0
 	_update_remaining_label()
 	cracked_label.text = str(amount_cracked)
-	title_label.text = process_data["name"] + " Cracking"
+	_update_title()
 	set_player_amount_labels()
 	efficiency.text = str(_get_total_efficiency() * 100.0) + "%"
 
@@ -90,19 +111,28 @@ func start():
 			var eff = _get_total_efficiency()
 			efficiency.text = str(eff * 100) + "%"
 			var instant: bool = randf() < eff
+			_crack_seconds = 0.0
 			if instant:
 				# instant crack
 				_update_progress_bar(PW_LENGTH, 0.1)
+				_crack_seconds = 0.1
 				await get_tree().create_timer(0.1).timeout
 				if !running:
 					break
 				for i in range(PW_LENGTH):
 					_reveal_letter(i, current_word[i])
 			else:
+				var head_start = _head_start
+				_head_start = 0.0
 				for i in range(PW_LENGTH): # one character per speed step
+					# Dictionary: a box can start already solved
+					if process_data != Cracking.VM and randf() < Upgrades.cur("cracking.dictionary"):
+						_reveal_letter(i, current_word[i])
+						continue
 					var mode := get_mode()
 					max_heat_used = max(max_heat_used, get_heat(mode))
-					var step_time := get_step_time(mode)
+					var step_time: float = get_step_time(mode) * (1.0 - head_start)
+					_crack_seconds += step_time
 					_update_progress_bar(i, step_time)
 					await get_tree().create_timer(step_time).timeout
 					if !running:
@@ -110,6 +140,8 @@ func start():
 					_reveal_letter(i, current_word[i])
 				if !running:
 					break
+			if instant:
+				_head_start = Upgrades.cur("cracking.rainbow_tables")
 			_end_current_crack(current_word, instant)
 			_successful_crack(max_heat_used)
 			progress_bar.value = 0
@@ -182,18 +214,27 @@ func _successful_crack(heat: float):
 		else:
 			stop()
 	else:
-		remove_requirements()
-		Inventory.add_resource(process_data["resource gained"], 1)
+		# Recovery: a chance the encrypted input isn't used up
+		if randf() >= Upgrades.cur("cracking.recovery"):
+			remove_requirements()
+		# Survey: half the output (XP doubled below)
+		if !has_modifier("survey") or randf() < 0.5:
+			Inventory.add_resource(process_data["resource gained"], 1)
+		# Cross-Reference: a chance to also produce the tier's matched item (skips Matching)
+		if has_modifier("crossref") and randf() < Cracking.CROSSREF_CHANCE:
+			var tier = Cracking.minor_processes.filter(func(p): return p != Cracking.VM).find(process_data) + 1
+			if tier > 0:
+				Inventory.add_resource(Decoding.get_tier_resources(tier)[5], 1)
 	set_player_amount_labels()
 	if process_data == Cracking.PASSWORD:
 		Tutorial.track_event(Tutorial.TutorialEvent.CRACK_3_PASSWORDS, 1)
 	amount_cracked += 1
 	record_cycle(1)
-	Stats.update_tempature(heat)
-	Exp.add_xp(Cracking, process_data, process_data["experience per level"])
+	Stats.update_tempature(scaled_heat(heat))
+	Exp.add_xp(Cracking, process_data, process_data["experience per level"] * (2 if has_modifier("survey") else 1))
 	efficiency.text = str(_get_total_efficiency() * 100) + "%"
 
-	if randf() <= 0.01:
+	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)
 	Signals.update_hud(Cracking)
 	_update_remaining_label()
@@ -210,9 +251,24 @@ func _on_progress_bar_value_changed(value):
 		progress_bar_label.text = str(int(value)) + "%"
 
 func _get_total_efficiency() -> float:
-	var frag_bonus = Defragging.CRACKING["bonus efficiency"] if Stats.has_bonus(Cracking) else 1.0
-	var efficiency_upgrade = Upgrades.get_package_info("cracking.efficiency").current
-	return (process_data["efficiency"] + efficiency_upgrade) * frag_bonus
+	var efficiency_upgrade = Upgrades.cur("cracking.efficiency")
+	return (process_data["efficiency"] + efficiency_upgrade) * (2.0 if has_modifier("analyze") else 1.0)
+
+## VM token chance for the crack just finished, rolled on time spent (speed upgrades, overclock and
+## instant cracks don't change tokens per hour): the process's chance is for a base-speed crack, scaled
+## by how long this one took. Keyring and Analyze double it.
+func _token_chance() -> float:
+	var base_crack = float(process_data.get("base speed", 3.0)) * PW_LENGTH
+	var chance = process_data.get("vm token chance", 0.01) * (_crack_seconds / max(0.001, base_crack))
+	if Upgrades.has("cracking.keyring"):
+		chance *= 2.0
+	if has_modifier("analyze"):
+		chance *= 2.0
+	return chance
+
+## "Password Cracking · ANALYZE" while a modifier runs
+func _update_title() -> void:
+	title_label.text = process_data["name"] + " Cracking" + ((" · " + modifier.name.to_upper()) if !modifier.is_empty() else "")
 
 func set_player_amount_labels():
 	var required_item_label = player_amount_labels.get_child(0)

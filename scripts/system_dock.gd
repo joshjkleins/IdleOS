@@ -31,18 +31,85 @@ const TEXT = Color(0.8, 0.84, 0.88, 1)
 
 var _rows := {} # VMWindow -> {button, name, status, bar}
 var _refresh_accum := 0.0
+var access_section: AccessSection
+var upload_section: UploadSection
+var vm_toggle: SectionToggle
+var vm_summary: HBoxContainer # collapsed VM view: one light per running VM
+var vm_collapsed := false
 
 func _ready() -> void:
 	# line tracked rows up with the section headers
 	var monitor_margin: MarginContainer = hud_monitor.get_node("MarginContainer")
 	for side in ["left", "top", "right", "bottom"]:
 		monitor_margin.add_theme_constant_override("margin_" + side, 0)
+	_add_upload_section()
+	_add_vm_toggle()
 	VMManager.vms_changed.connect(_rebuild_rows)
 	_rebuild_rows()
 	add_to_group("system_dock")
 	collapse_button.pressed.connect(func(): set_collapsed(true); Signals.vm_window_focused())
 	compact_view.expand_requested.connect(func(): set_collapsed(false); Signals.vm_window_focused())
 	_apply_collapsed()
+
+## UPLOADS sits under the VM list (built in code; see upload_section.gd).
+func _add_upload_section() -> void:
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep)
+	full_view.move_child(sep, vm_section.get_index() + 1)
+	var access := AccessSection.new()
+	access_section = access
+	full_view.add_child(access)
+	full_view.move_child(access, sep.get_index() + 1)
+	var sep2 := HSeparator.new()
+	sep2.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep2)
+	full_view.move_child(sep2, access.get_index() + 1)
+	sep = sep2
+	var section := UploadSection.new()
+	upload_section = section
+	section.size_flags_vertical = Control.SIZE_EXPAND_FILL # takes the free space (scrolls when VMs crowd it)
+	full_view.add_child(section)
+	full_view.move_child(section, sep.get_index() + 1)
+	var spacer = full_view.get_node_or_null("Spacer")
+	if spacer:
+		spacer.size_flags_vertical = Control.SIZE_FILL
+
+## ▾ on the VIRTUAL MACHINES header; collapsed it shows one small light per running VM.
+func _add_vm_toggle() -> void:
+	var header = vm_section.get_node("VMHeader")
+	vm_toggle = SectionToggle.new()
+	vm_toggle.toggled_section.connect(set_vm_collapsed)
+	header.add_child(vm_toggle)
+	header.move_child(vm_toggle, 0)
+	vm_summary = HBoxContainer.new()
+	vm_summary.add_theme_constant_override("separation", 4)
+	vm_summary.visible = false
+	vm_section.add_child(vm_summary)
+	vm_section.move_child(vm_summary, 1)
+
+func set_vm_collapsed(value: bool) -> void:
+	vm_collapsed = value
+	vm_toggle.set_collapsed(value)
+	vm_list.visible = !value
+	vm_summary.visible = value
+	_update_visibility()
+	SaveManager.mark_dirty()
+
+func _refresh_vm_summary() -> void:
+	for c in vm_summary.get_children():
+		c.queue_free()
+	if VMManager.vms.is_empty():
+		vm_summary.add_child(_label("none running"))
+		return
+	for vm in VMManager.vms:
+		var light := ColorRect.new()
+		light.custom_minimum_size = Vector2(8, 8)
+		light.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		light.color = vm.skill.SKILL.color if vm.visible else Color(vm.skill.SKILL.color, 0.35)
+		light.tooltip_text = "vm-%02d %s/%s  %ds" % [vm.vm_id, vm.skill.SKILL.name.to_lower(), str(vm.minor_process.name).to_lower(), vm.get_seconds_left()]
+		light.mouse_filter = Control.MOUSE_FILTER_PASS
+		vm_summary.add_child(light)
 
 func get_panel_width() -> float:
 	return COLLAPSED_WIDTH if collapsed else EXPANDED_WIDTH
@@ -65,10 +132,17 @@ func _apply_collapsed() -> void:
 	width_changed.emit(get_panel_width())
 
 func save_data() -> Dictionary:
-	return {"collapsed": collapsed}
+	return {
+		"collapsed": collapsed,
+		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "uploads": upload_section.collapsed},
+	}
 
 func load_data(data: Dictionary) -> void:
 	set_collapsed(bool(data.get("collapsed", false)))
+	var sections: Dictionary = data.get("sections", {})
+	set_vm_collapsed(bool(sections.get("vm", false)))
+	access_section.set_collapsed(bool(sections.get("access", false)))
+	upload_section.set_collapsed(bool(sections.get("uploads", false)))
 
 func _process(delta: float) -> void:
 	_refresh_accum += delta
@@ -90,7 +164,9 @@ func _update_visibility() -> void:
 	separator.visible = has_tracked and vms_unlocked
 	system_separator.visible = has_tracked or vms_unlocked
 	vm_count_label.text = "%d/%d" % [VMManager.vms.size(), Stats.MAX_ALL_VMS]
-	vm_empty_label.visible = VMManager.vms.is_empty()
+	vm_empty_label.visible = VMManager.vms.is_empty() and !vm_collapsed
+	if vm_collapsed:
+		_refresh_vm_summary()
 
 func _rebuild_rows() -> void:
 	for row in vm_list.get_children():

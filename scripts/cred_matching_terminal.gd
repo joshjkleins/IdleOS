@@ -93,25 +93,27 @@ var TAG_COLORS = [
 ]
 
 
-enum MatchType {CREDENTIAL, ACCOUNT}
+## Per-process look: the 4 stage tags, the two input titles, the stage-1 status and the ID shown.
+const THEMES = {
+	"credential": {"tags": ["username lookup", "password match", "pen testing", "credential confirm"], "inputs": ["USERNAME", "PASSWORD"], "match": "password match", "id": "username"},
+	"certificate": {"tags": ["case # lookup", "signature match", "pen testing", "certificate confirm"], "inputs": ["CASE #", "SIGNATURE"], "match": "signature match", "id": "case"},
+	"badge": {"tags": ["staff ID lookup", "badge hash match", "pen testing", "badge confirm"], "inputs": ["STAFF ID", "BADGE HASH"], "match": "badge hash match", "id": "staff"},
+	"account": {"tags": ["account # lookup", "PIN match", "pen testing", "account token confirm"], "inputs": ["ACCOUNT #", "PIN"], "match": "PIN match", "id": "account"},
+	"officer": {"tags": ["badge # lookup", "key match", "pen testing", "auth key confirm"], "inputs": ["BADGE #", "PRIVATE KEY"], "match": "key match", "id": "officer"},
+	"clearance": {"tags": ["clearance ID lookup", "biometric match", "pen testing", "clearance confirm"], "inputs": ["CLEARANCE ID", "BIO TEMPLATE"], "match": "biometric match", "id": "clearance"},
+}
+
 var _cycle_mode: Mode = Mode.NORMAL # worst mode seen this match (decides heat)
-var current_type: MatchType
+var match_theme: Dictionary
 
 func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
 	setup_process(Matching, p_type, window)
-	match p_type.name.to_lower():
-		"credential":
-			_update_tags(["username DB lookup", "authenticating password", "pen testing", "credential confirmation"])
-			current_type = MatchType.CREDENTIAL
-			resource_one_title.text = "USERNAME"
-			resource_two_title.text = "PASSWORD"
-		"account":
-			_update_tags(["account # lookup", "authenticating PIN", "pen testing", "account token confirmation"])
-			current_type = MatchType.ACCOUNT
-			resource_one_title.text = "ACCOUNT #"
-			resource_two_title.text = "PIN"
-			
-			
+	match_theme = THEMES.get(p_type.get("match theme", "credential"), THEMES.credential)
+	var tags: Array[String] = []
+	tags.assign(match_theme.tags)
+	_update_tags(tags)
+	resource_one_title.text = match_theme.inputs[0]
+	resource_two_title.text = match_theme.inputs[1]
 	resource_received_title.text = process_data["resource gained"].name.to_upper()
 	update_player_amount_received_labels()
 
@@ -177,7 +179,7 @@ func _repeat_loop():
 	_update_username_password_labels()
 	_update_last_col_username("-")
 	_update_last_col_pw("-")
-	_update_last_col_title("username lookup")
+	_update_last_col_title(match_theme.tags[0])
 	_begin_matching()
 
 
@@ -205,11 +207,7 @@ func _begin_matching():
 		match i: #do different things for each iteration
 			0:
 				_update_last_col_username(u_name)
-				match current_type:
-					MatchType.CREDENTIAL:
-						_update_last_col_title("password match")
-					MatchType.ACCOUNT:
-						_update_last_col_title("PIN match")
+				_update_last_col_title(match_theme.match)
 			1:
 				_update_last_col_pw("****")
 				_update_last_col_title("strength check")
@@ -259,20 +257,27 @@ func _generate_account_number() -> String:
 		account += str(randi() % 16)
 	return account
 
-func _choose_username(): #sets current iteration username variable
-	match current_type:
-		MatchType.CREDENTIAL:
+func _choose_username(): #sets the ID shown for this match (fits the process)
+	match match_theme.id:
+		"case":
+			u_name = "CV-%d-%04d" % [2020 + randi() % 7, randi() % 10000]
+		"staff":
+			u_name = "STF-%05d" % (randi() % 100000)
+		"account":
+			u_name = "%04d %04d %04d" % [randi() % 10000, randi() % 10000, randi() % 10000]
+		"officer":
+			u_name = "BDG #%04d" % (randi() % 10000)
+		"clearance":
+			u_name = ["CONF", "SEC", "TS"].pick_random() + "-%05d" % (randi() % 100000)
+		_:
 			u_name = Matching.RANDOM_USERNAMES.pick_random()
-		MatchType.ACCOUNT:
-			u_name = _generate_account_number()
-	
 
 func _match_finished(): #add heat/resource/xp/emit signals
 	var quantity = 1
 	var total_eff = _get_efficiency_total()
 	if randf() <= total_eff:
-		var min_q = 3 + int(Upgrades.MATCHING.version * 10.0)
-		var max_q = 10 + int(Upgrades.MATCHING.version * 10.0)
+		var min_q = 3 # (was + version x 10; replaced by Matching upgrade tracks)
+		var max_q = 10
 		quantity += randi_range(min_q, max_q)
 	Inventory.add_resource(process_data["resource gained"], quantity)
 	update_player_amount_received_labels()
@@ -287,7 +292,7 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	process_data.signal.emit(1)
 	Exp.add_xp(Matching, process_data, process_data["experience per level"])
 	
-	if randf() <= 0.01:
+	if randf() <= process_data.get("vm token chance", 0.01):
 		Inventory.add_resource(Items.VM_MATCHING_TOKEN, 1)
 	_update_efficiency_label()
 	Signals.update_hud(Matching)
@@ -339,7 +344,7 @@ func _on_main_bar_value_changed(value):
 
 func _get_efficiency_total():
 	var base_efficiency = process_data["efficiency"]
-	var defrag_multiplier = Defragging.MATCHING["bonus efficiency"] if Stats.has_bonus(Matching) else 1.0
+	var defrag_multiplier = 1.0 # defrag no longer boosts skills
 	
 	var efficiency_matching_package = Upgrades.get_package_info("matching.efficiency")
 	var efficiency_upgrade = efficiency_matching_package.current

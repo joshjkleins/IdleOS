@@ -97,6 +97,9 @@ func list_specific_item(item: ItemData):
 		var all_names = ", ".join(names)
 		text += "Parsing these logs can find the following items: " + all_names + "\n\n"
 	
+	if Exploits.is_exploit(item):
+		text += Exploits.info_text(item)
+
 	if item is CombatItem:
 		match item.type:
 			"Attack":

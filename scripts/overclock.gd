@@ -104,7 +104,7 @@ func _fade_out(label: Label):
 	label.queue_free()
 
 func update_cooling_rate_label():
-	var temp_per_second = Stats.cooling_amount / Stats.cooling_frequency
+	var temp_per_second = Stats.get_cooling_amount() / Stats.cooling_frequency
 	if temp_per_second >= 0.0:
 		temp_per_second = 0.0
 	

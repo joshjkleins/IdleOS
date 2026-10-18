@@ -134,6 +134,8 @@ func update_box_title(text: String):
 
 func get_hacking_target(target_name: String) -> Dictionary:
 	for person in persons_container.get_children():
+		if person.target == null or person.is_queued_for_deletion():
+			continue
 		if target_name == person.target.command:
 			return person.target
 	return {}

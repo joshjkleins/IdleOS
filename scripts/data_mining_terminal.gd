@@ -57,6 +57,7 @@ var percent_label_tween: Tween
 
 var RESOURCE_GAIN: ItemData
 var EXP_PER_COMPLETION: int = 0
+var _cycle_seconds := 0.0 # real time the current cycle took (VM tokens roll on time, not cycles)
 
 func _process(delta):
 	super(delta)
@@ -78,16 +79,24 @@ func start_data_mining():
 	_reset_info()
 	_create_progress_row()
 	blinking_timer.start()
+	var first := true
 	while running:
 		if stop_requested:
 			finish_safely()
 			break
 		var cycle_mode := Mode.NORMAL
-		for i in range(SEGMENTS):
+		_cycle_seconds = 0.0
+		_update_title()
+		# Pipelining: after the first cycle, the next one starts partly filled
+		var start = 0 if first else int(SEGMENTS * Upgrades.cur("mining.pipelining"))
+		first = false
+		for i in range(start, SEGMENTS):
 			_set_progress(i)
 			var mode := get_mode()
 			cycle_mode = worst_mode(cycle_mode, mode)
-			await get_tree().create_timer(get_step_time(mode)).timeout
+			var step = get_step_time(mode)
+			_cycle_seconds += step
+			await get_tree().create_timer(step).timeout
 			if !running:
 				break
 		if running:
@@ -100,13 +109,26 @@ func _cycle_complete(cycle_mode: Mode):
 	apply_heat(cycle_mode)
 
 	var reward_quantity_gained = _get_reward_quantity()
+	# Vein Detection: every Nth cycle doubles (N = 10 at the first level, one less per level)
+	var vein_levels = int(Upgrades.cur("mining.vein_detection"))
+	if vein_levels > 0 and (session_cycles + 1) % (11 - vein_levels) == 0:
+		reward_quantity_gained *= 2
+	# Survey: half the resources, double the XP
+	var xp = EXP_PER_COMPLETION
+	if has_modifier("survey"):
+		reward_quantity_gained = reward_quantity_gained / 2 + (1 if reward_quantity_gained % 2 == 1 and randf() < 0.5 else 0)
+		xp *= 2
 	Inventory.add_resource(RESOURCE_GAIN, reward_quantity_gained)
 	total_label_amount.text = str(Inventory.get_amount(RESOURCE_GAIN))
 	Tutorial.track_event(Tutorial.TutorialEvent.MINE_20_LOGS, reward_quantity_gained)
-	if randf() <= 0.01:
+	# Sift: a chance to also find one of this tier's Parsing items (skips a step)
+	if has_modifier("sift") and randf() < Mining.SIFT_CHANCE:
+		var tier_items = Decoding.get_tier_resources(Mining.minor_processes.find(process_data) + 1)
+		Inventory.add_resource(tier_items.slice(1, 4).pick_random(), 1)
+	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)
 	process_data.signal.emit(reward_quantity_gained)
-	Exp.add_xp(Mining, process_data, EXP_PER_COMPLETION)
+	Exp.add_xp(Mining, process_data, xp)
 	Signals.update_hud(Mining)
 	record_cycle(reward_quantity_gained)
 	cycles_label.text = str(session_cycles)
@@ -117,9 +139,24 @@ func _cycle_complete(cycle_mode: Mode):
 
 func _get_mining_efficiency_total():
 	var base_efficiency = process_data["efficiency"]
-	var defrag_multiplier = Defragging.MINING["bonus efficiency"] if Stats.has_bonus(Mining) else 1.0
-	var efficiency_upgrade = Upgrades.get_package_info("mining.efficiency").current
-	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
+	var efficiency_upgrade = Upgrades.cur("mining.efficiency")
+	return (base_efficiency + efficiency_upgrade) * (2.0 if has_modifier("prospect") else 1.0)
+
+## VM token chance for the cycle just finished. Rolled on time spent, so speed upgrades and overclock
+## don't change tokens per hour: the process's chance is for a base-speed cycle, scaled by how long
+## this cycle actually took. Deep Core and Prospect double it.
+func _token_chance() -> float:
+	var base_cycle = float(process_data.get("base speed", 0.4)) * SEGMENTS
+	var chance = process_data.get("vm token chance", 0.01) * (_cycle_seconds / max(0.001, base_cycle))
+	if Upgrades.has("mining.deep_core"):
+		chance *= 2.0
+	if has_modifier("prospect"):
+		chance *= 2.0
+	return chance
+
+## "MINING LOGS · SIFT" while a modifier runs
+func _update_title() -> void:
+	title.text = "MINING " + process_data["name"].to_upper() + ((" · " + modifier.name.to_upper()) if !modifier.is_empty() else "")
 
 ## 1 + one extra per full point of efficiency + a roll for the leftover fraction.
 func _get_reward_quantity() -> int:

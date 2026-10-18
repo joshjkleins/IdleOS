@@ -5,7 +5,9 @@ extends VBoxContainer
 
 const TEMP_MIN = 30.0
 const TEMP_MAX = 100.0
-const OVERCLOCK_LIMIT = 80.0
+## overheat clears / overclock allowed below this (80, raised by System's Thermal Paste)
+static func overclock_limit() -> float:
+	return Upgrades.get_overheat_clear_temp()
 const CRITICAL = 95.0
 const SEGMENTS = 35
 
@@ -32,12 +34,22 @@ var _pulse_time: float = 0.0
 
 func _ready() -> void:
 	Signals.system_temp_updated_signal.connect(_on_temp_updated)
+	Signals.system_temp_updated_signal.connect(func(_t): _update_rate()) # picks up Defragging: Cooling turning on/off
 	Signals.heat_added_signal.connect(_on_heat_added)
 	Signals.cooling_updated_signal.connect(_update_rate)
 	bar.draw.connect(_draw_bar)
 	heat_label.modulate.a = 0.0
 	_on_temp_updated(Stats.system_tempature)
 	_update_rate()
+	_update_version()
+	Upgrades.installed.connect(func(_p, _l): _update_version())
+	SaveManager.save_loaded.connect(_update_version) # the panel is built before the save loads
+
+## "SYSTEM  v1.4": System's apt version on the panel title
+func _update_version() -> void:
+	var title = get_node_or_null("Header/Title")
+	if title:
+		title.text = "SYSTEM  " + Upgrades.version_text("System")
 
 func _process(delta: float) -> void:
 	# overclock has no signal, so state is polled; also drives the overheat pulse
@@ -51,7 +63,7 @@ func _process(delta: float) -> void:
 static func zone_color(t: float) -> Color:
 	if t >= CRITICAL:
 		return C_CRIT
-	if t >= OVERCLOCK_LIMIT:
+	if t >= overclock_limit():
 		return C_HOT
 	if t >= 60.0:
 		return C_WARM
@@ -77,7 +89,7 @@ func _on_heat_added(amount: float) -> void:
 	_heat_tween.tween_callback(func(): _recent_heat = 0.0)
 
 func _update_rate() -> void:
-	var per_second = min(0.0, Stats.cooling_amount / Stats.cooling_frequency)
+	var per_second = min(0.0, Stats.get_cooling_amount() / Stats.cooling_frequency)
 	rate_label.text = "%.1f°C/s" % per_second
 
 func _update_state() -> void:
@@ -86,13 +98,13 @@ func _update_state() -> void:
 	var hint: String
 	if Stats.overheated:
 		text = "OVERHEATED"; color = C_CRIT
-		hint = "processes slowed · cool to %d°C" % int(OVERCLOCK_LIMIT)
+		hint = "processes slowed · cool to %d°C" % int(overclock_limit())
 	elif Stats.overclocked:
 		text = "OVERCLOCKED"; color = C_OC
 		hint = "increased speed · extra heat per cycle"
-	elif temperature >= OVERCLOCK_LIMIT:
+	elif temperature >= overclock_limit():
 		text = "HOT"; color = C_HOT
-		hint = "overclock locked until < %d°C" % int(OVERCLOCK_LIMIT)
+		hint = "overclock locked until < %d°C" % int(overclock_limit())
 	else:
 		text = "NOMINAL"; color = C_COOL
 		hint = "overclock available" if _any_overclock_unlocked() else "stable"
@@ -106,11 +118,7 @@ func _update_state() -> void:
 	hint_label.text = hint
 
 func _any_overclock_unlocked() -> bool:
-	for skill_upgrades in Upgrades.all_upgrades:
-		for u in skill_upgrades.upgrades:
-			if u.name == "Overclock" and u.current:
-				return true
-	return false
+	return Upgrades.any_overclock_unlocked()
 
 func _pct(t: float) -> float:
 	return clamp((t - TEMP_MIN) / (TEMP_MAX - TEMP_MIN), 0.0, 1.0)
@@ -129,7 +137,7 @@ func _draw_bar() -> void:
 		bar.draw_rect(Rect2(i * (seg_w + gap), 0, seg_w, h), col)
 	# threshold markers + labels under the bar
 	var font = get_theme_default_font()
-	for mark in [[OVERCLOCK_LIMIT, "OC %d" % int(OVERCLOCK_LIMIT)], [CRITICAL, "CRIT"]]:
+	for mark in [[overclock_limit(), "OC %d" % int(overclock_limit())], [CRITICAL, "CRIT"]]:
 		var x = _pct(mark[0]) * w
 		bar.draw_line(Vector2(x, -3), Vector2(x, h + 3), C_DIM, 1.0)
 		bar.draw_string(font, Vector2(x - 14, h + 14), mark[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_DIM)

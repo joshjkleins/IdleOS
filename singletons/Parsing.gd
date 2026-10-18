@@ -11,6 +11,27 @@ var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
 @onready var MAX_VMS = 7
 @onready var VM_UPTIME = 30.0
+
+## Modifier commands unlocked by Parsing capstones (see Mining.MODIFIERS for how they work).
+const MODIFIERS = [
+	{"command": "plaintext", "name": "Plaintext", "package": "parsing.plaintext", "speed": 0.5, "heat": 1.5,
+		"effect": "-50% speed, heat x1.5. Each encrypted find has a 10% chance to come out already cracked."},
+	{"command": "deep-read", "name": "Deep Read", "package": "parsing.deep_read", "speed": 0.6, "heat": 2.0,
+		"effect": "-40% speed, heat x2. Line find chance x2 and VM token chance x2."},
+	{"command": "survey", "name": "Survey", "package": "parsing.survey", "speed": 1.0, "heat": 1.0,
+		"effect": "Half finds, +100% Parsing XP."},
+]
+const PLAINTEXT_CHANCE := 0.10
+## Cold Cache: overclock and the modifiers add no extra heat
+const COOL_PACKAGE := "parsing.cold_cache"
+
+## the cracked item an encrypted item becomes (Encrypted passwords -> Passwords), or null
+func cracked_version(item: ItemData) -> ItemData:
+	for p in Cracking.minor_processes:
+		var req = p.get("requirements", {})
+		if req is Dictionary and req.has(item):
+			return p["resource gained"]
+	return null
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/log_parsing_terminal.tscn")
@@ -50,18 +71,22 @@ var SKILL = {
 #Network - doubles VM tokens found
 #Extraction - rare material x 4 (if found)
 
+## Every process works on every Mining item and turns any base cache into its variant. They aren't
+## upgrades of each other: Footprint feeds the main item chain, the rest are resource sinks for specific needs.
+## Pacing follows Mining: each tier's line is 1.5x slower, tuned for +50% parsing speed per tier from upgrades.
+## (A Mining item parses in 10 lines; "efficiency" is the chance per line.)
 var FOOTPRINT = {
 	"name": "Footprint",
-	"tier name": "TIER I | LOGS",
+	"tier name": "TIER I | FOOTPRINT",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 10,
+	"experience per level": 16, # xp per item parsed
 	"command": "parse -footprint",
 	"display command": "parse -footprint=<item>",
 	"example commands": [
 		{ 'cmd': 'parse -footprint=logs', 'description': 'Mining item' },
 		{ 'cmd': 'parse -footprint=student cache', 'description': 'Cache item' },
-		{ 'cmd': 'parse -footprint=logs, student cache', 'description': 'Queueing up multiple items' },
+		{ 'cmd': 'parse -footprint=logs, archives', 'description': 'Queueing up multiple items' },
 	],
 	"ssh command": "ssh parsing footprint",
 	"efficiency": 0.15,
@@ -69,15 +94,16 @@ var FOOTPRINT = {
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 0.4,
-	"overclock speed": 0.1,
-	"overheat speed": 3.0,
+	"overclock speed": 0.2,
+	"overheat speed": 1.0,
 	"heat": 0.6,
 	"overclock heat": 0.8,
 	"overheat heat": 0.3,
+	"vm token chance": 0.01, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
-	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
-	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at resources contained within. If used on a Cache it will transform it to a Footprint variant, doubling basic resources gained but removing any chance at finding the rare upgrade material inside the cache.",
-	"efficiency description": "Increases chance of finding a resource per row.",
+	"resource gained": "One of the items contained in <item>. Use 'ls <item>' to view them. [color=#666666]ex. ls logs[/color]",
+	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for an equal chance at any item contained within. If used on a Cache it will transform it to a Footprint variant, doubling basic resources gained but removing any chance at finding the rare upgrade material inside the cache.",
+	"efficiency description": "Chance to find an item per line.",
 	"signal": basic_cycle_completed
 }
 
@@ -86,24 +112,29 @@ var CORRUPTION = {
 	"tier name": "TIER II | CORRUPTION",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 37, # xp per item parsed
 	"command": "parse -corruption",
 	"display command": "parse -corruption=<item>",
+	"example commands": [
+		{ 'cmd': 'parse -corruption=logs', 'description': 'Mining item' },
+		{ 'cmd': 'parse -corruption=student cache', 'description': 'Cache item' },
+	],
 	"ssh command": "ssh parsing corruption",
-	"efficiency": 0.15,
-	"efficiency rate": 0.0012,
-	"unlocked": false,
-	"unlock level": 25,
-	"base speed": 0.4,
-	"overclock speed": 0.1,
-	"overheat speed": 3.0,
-	"heat": 0.6,
-	"overclock heat": 0.8,
-	"overheat heat": 0.3,
+	"efficiency": 0.05,
+	"efficiency rate": 0.001,
+	"unlocked": true,
+	"unlock level": 15,
+	"base speed": 0.6,
+	"overclock speed": 0.3,
+	"overheat speed": 1.5,
+	"heat": 0.9,
+	"overclock heat": 1.2,
+	"overheat heat": 0.45,
+	"vm token chance": 0.015, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
-	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
-	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a chance at a hacking resources contained within. If used on a Cache it will transform it to a Corrupted variant, significantly increasing the chance of decoding an item but has a 25% chance to destroy the rest of the cache after each item decoded.",
-	"efficiency description": "Increases chance of finding a resource per row.",
+	"resource gained": "SQL Injector 60% | Packet Spoof 38% | Hacking Mod of the item's tier 2%",
+	"description": "Corrupts any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at hacking resources: SQL Injectors (60%), Packet Spoofs (38%) or a random Hacking Mod of the item's tier (2%). Higher tier Mining items give +1% chance per line per tier. If used on a Cache it will transform it to a Corruption variant, significantly increasing the chance of decoding each item but with a chance to destroy the rest of the cache after each item decoded.",
+	"efficiency description": "Chance to find a hacking resource per line.",
 	"signal": basic_cycle_completed
 }
 
@@ -112,24 +143,30 @@ var NETWORK = {
 	"tier name": "TIER III | NETWORK",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 83, # xp per item parsed
 	"command": "parse -network",
 	"display command": "parse -network=<item>",
+	"example commands": [
+		{ 'cmd': 'parse -network=logs', 'description': 'Mining item' },
+		{ 'cmd': 'parse -network=student cache', 'description': 'Cache item' },
+	],
 	"ssh command": "ssh parsing network",
-	"efficiency": 0.15,
-	"efficiency rate": 0.0012,
-	"unlocked": false,
-	"unlock level": 45,
-	"base speed": 0.4,
-	"overclock speed": 0.1,
-	"overheat speed": 3.0,
-	"heat": 0.6,
-	"overclock heat": 0.8,
-	"overheat heat": 0.3,
+	"efficiency": 0.01,
+	"efficiency rate": 0.0003,
+	"efficiency upgrade scale": 0.2, # VM tokens are strong: parsing efficiency upgrades count at 20% here
+	"unlocked": true,
+	"unlock level": 35,
+	"base speed": 0.9,
+	"overclock speed": 0.45,
+	"overheat speed": 2.25,
+	"heat": 1.35,
+	"overclock heat": 1.8,
+	"overheat heat": 0.67,
+	"vm token chance": 0.0225, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
-	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
-	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at finding VM tokens. If used on a Cache it will transform it to a Network variant, doubling all VM tokens found within.",
-	"efficiency description": "Increases chance of finding a resource per row.",
+	"resource gained": "Random VM token (any skill), x Mining tier per find",
+	"description": "Sniffs any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at random VM tokens: one token per find from Logs, two from Archives, and so on up the Mining tiers. If used on a Cache it will transform it to a Network variant, giving it a chance to hold a stack of VM tokens.",
+	"efficiency description": "Chance to find a VM token per line.",
 	"signal": basic_cycle_completed
 }
 
@@ -138,24 +175,30 @@ var EXTRACTION = {
 	"tier name": "TIER IV | EXTRACTION",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 200,
+	"experience per level": 149, # xp per item parsed
 	"command": "parse -extraction",
-	"display command": "parse -extraction=<item>",
+	"display command": "parse -extraction=<item> target=<item>",
+	"example commands": [
+		{ 'cmd': 'parse -extraction=logs target=usernames', 'description': 'Only look for Usernames in Logs' },
+		{ 'cmd': 'parse -extraction=logs, archives target=ip address', 'description': 'target must be inside every item listed' },
+		{ 'cmd': 'parse -extraction=student cache', 'description': 'Cache item (no target needed)' },
+	],
 	"ssh command": "ssh parsing extraction",
-	"efficiency": 0.15,
-	"efficiency rate": 0.0012,
-	"unlocked": false,
-	"unlock level": 60,
-	"base speed": 0.4,
-	"overclock speed": 0.1,
-	"overheat speed": 3.0,
-	"heat": 0.6,
-	"overclock heat": 0.8,
-	"overheat heat": 0.3,
+	"efficiency": 0.08,
+	"efficiency rate": 0.0008,
+	"unlocked": true,
+	"unlock level": 55,
+	"base speed": 1.35,
+	"overclock speed": 0.675,
+	"overheat speed": 3.375,
+	"heat": 2.02,
+	"overclock heat": 2.7,
+	"overheat heat": 1.01,
+	"vm token chance": 0.0338, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
-	"resource gained": "Dependent on <item> parsed. Use 'ls <item>' to view resources that can be parsed out. [color=#666666]ex. ls logs[/color]",
-	"description": "Parses through any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] with an additional argument [target=username] to only find that resource. If used on a Cache it will transform it to a Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
-	"efficiency description": "Increases chance of finding a resource per row.",
+	"resource gained": "Only the target item",
+	"description": "Hunts through a [color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource for one specific item you choose with target=<item> (use 'ls <item>' to see what it holds). If used on a Cache it will transform it to an Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
+	"efficiency description": "Chance to find the target item per line.",
 	"signal": basic_cycle_completed
 }
 
@@ -226,7 +269,7 @@ func filter_parsable_items(items_arr: Array[ItemData]) -> Array[ItemData]:
 
 #Takes player command (parse -footprint=logs) and checks if item is legit, can be parsed, player has in inventory, and returns relavent message
 func parse_through_parse_start_command(command: String, process: Dictionary) -> Dictionary:
-	var return_dictionary = { "valid": false, "items_to_parse": [], "message": "" }
+	var return_dictionary = { "valid": false, "items_to_parse": [], "message": "", "target": null }
 	
 	#PARSE OUT ITEMS
 	var items_string
@@ -241,6 +284,20 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 		else:
 			return_dictionary.message = "Command not recognized. [color=666666]example parse command: parse -footprint=logs[/color]"
 		return return_dictionary
+	
+	#EXTRACTION: "parse -extraction=logs target=usernames"
+	var target: ItemData = null
+	var target_at = items_string.find(" target=")
+	if target_at != -1:
+		var target_name = items_string.substr(target_at + " target=".length())
+		items_string = items_string.substr(0, target_at)
+		if process != EXTRACTION:
+			return_dictionary.message = "target= only works with Extraction."
+			return return_dictionary
+		target = Inventory.get_item_by_name(target_name)
+		if target == null:
+			return_dictionary.message = "Target item not found: " + target_name.strip_edges()
+			return return_dictionary
 	
 	var items = items_string.trim_prefix("=").split(",")
 	var items_arr: Array[ItemData] = []
@@ -270,18 +327,123 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 		for item in parsable_items:
 			return_dictionary.message += item.name + "\n"
 	
+	#EXTRACTION needs a target that every Mining item listed actually contains (caches don't need one)
+	if process == EXTRACTION:
+		for item in parsable_items:
+			if item is CacheData:
+				continue
+			if target == null:
+				return_dictionary.message = "Extraction needs a target. [color=#666666]ex. parse -extraction=" + item.name.to_lower() + " target=" + item.contained_items[0].name.to_lower() + "[/color]"
+				return return_dictionary
+			if !item.contained_items.has(target):
+				var names = item.contained_items.map(func(c): return c.name.to_lower())
+				return_dictionary.message = item.name + " doesn't contain " + target.name + ". It holds: " + ", ".join(names)
+				return return_dictionary
+	
 	return_dictionary.valid = true
 	return_dictionary.items_to_parse = parsable_items
+	return_dictionary.target = target
 	
 	return return_dictionary
 
+#region drops
+## Corruption's finds, weights out of 100. "item": null = a random Hacking Mod.
+func get_corruption_pool() -> Array:
+	return [
+		{ "item": Items.SQL_INJECTOR, "weight": 60 },
+		{ "item": Items.PACKET_SPOOF, "weight": 38 },
+		{ "item": null, "weight": 2 },
+	]
+
+const CORRUPTION_TIER_BONUS = 0.01 # +1% chance per line for each Mining tier above Logs
+
+## Hacking mods Corruption can find in a Mining item of <tier>: that tier's mods. Until a tier has its
+## own mods it falls back to the highest tier below it that has some (today only tier 1: SQL Booster).
+func get_hacking_mod_items(tier: int = 0) -> Array:
+	var by_tier := {}
+	for item in Items.ITEM_MAP.values():
+		if item and item.hacking_mod_item:
+			by_tier.get_or_add(item.tier, []).append(item)
+	if tier <= 0:
+		var all := []
+		for t in by_tier: all.append_array(by_tier[t])
+		return all
+	for t in range(tier, 0, -1):
+		if by_tier.has(t):
+			return by_tier[t]
+	return []
+
+func _pool_tier(pool: Array, fallback: int) -> int:
+	return pool[0].tier if !pool.is_empty() else fallback
+
+## Extra chance per line from the Mining item's tier (Corruption only).
+func get_line_chance_bonus(process: Dictionary, item: ItemData) -> float:
+	if process == CORRUPTION and item is not CacheData:
+		return CORRUPTION_TIER_BONUS * (item.tier - 1)
+	return 0.0
+
+## How many of the found item one successful line gives (Network: one VM token per Mining tier).
+func get_find_amount(process: Dictionary, item: ItemData) -> int:
+	if process == NETWORK and item is not CacheData:
+		return item.tier
+	return 1
+
+func get_vm_tokens() -> Array:
+	return [Items.VM_MINING_TOKEN, Items.VM_PARSING_TOKEN, Items.VM_CRACKING_TOKEN, Items.VM_MATCHING_TOKEN,
+		Items.VM_PHISHING_TOKEN, Items.VM_DECODING_TOKEN, Items.VM_COMPILING_TOKEN]
+
+## What one successful line finds when <process> parses Mining item <item>.
+func roll_find(process: Dictionary, item: ItemData, target: ItemData = null) -> ItemData:
+	match process:
+		CORRUPTION:
+			var pick = get_weighted_item(get_corruption_pool())
+			if pick.item == null:
+				var mods = get_hacking_mod_items(item.tier)
+				return mods.pick_random() if !mods.is_empty() else Items.SQL_INJECTOR
+			return pick.item
+		NETWORK:
+			return get_vm_tokens().pick_random()
+		EXTRACTION:
+			return target
+	return item.contained_items.pick_random()
+
+## Rows for the terminal's "find" labels: [{ "name", "pct", "items" (counted for the totals row) }].
+func get_find_table(process: Dictionary, item: ItemData, target: ItemData = null) -> Array:
+	match process:
+		CORRUPTION:
+			return [
+				{ "name": Items.SQL_INJECTOR.name, "pct": 60, "items": [Items.SQL_INJECTOR] },
+				{ "name": Items.PACKET_SPOOF.name, "pct": 38, "items": [Items.PACKET_SPOOF] },
+				{ "name": "Hacking Mod (T%d)" % _pool_tier(get_hacking_mod_items(item.tier), item.tier), "pct": 2, "items": get_hacking_mod_items(item.tier) },
+			]
+		NETWORK:
+			# one row per token so the totals row shows exactly what the player has
+			var rows := []
+			for tok in get_vm_tokens():
+				rows.append({ "name": tok.name.replace("VM ", "").replace(" token", ""), "pct": -1, "items": [tok] })
+			return rows
+		EXTRACTION:
+			return [{ "name": target.name, "pct": 100, "items": [target] }]
+	var rows := []
+	for c in item.contained_items:
+		rows.append({ "name": c.name, "pct": int(100.0 / item.contained_items.size()), "items": [c] })
+	return rows
+#endregion
+
+#region cache variants
+var _items_by_path := {}
+
+## The variant this process turns a base cache into (student_cache -> student_cache_network), or null.
 func get_cache_transform_target(process: Dictionary, cache: CacheData) -> CacheData:
-	if process == FOOTPRINT and cache == Items.STUDENT_CACHE:
-		#Inventory.remove_resource(Items.STUDENT_CACHE, 1)
-		#Inventory.add_resource(Items.STUDENT_CACHE_FOOTPRINT, 1)
-		return Items.STUDENT_CACHE_FOOTPRINT
-	
-	return null
+	if cache == null or cache.get_variant() != CacheData.CacheVariant.BASE:
+		return null
+	if _items_by_path.is_empty():
+		for it in Items.ITEM_MAP.values():
+			if it:
+				_items_by_path[it.resource_path] = it
+	var path = cache.resource_path.trim_suffix(".tres") + "_" + str(process.name).to_lower() + ".tres"
+	return _items_by_path.get(path)
+#endregion
 
 func list_vm_commands() -> String:
 	var first_col = 20
@@ -292,7 +454,7 @@ func list_vm_commands() -> String:
 	return_text += "-".repeat(first_col + second_col) + "\n"
 	for mp in minor_processes:
 		if mp.unlocked:
-			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>"
+			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>" + (" target=<item>" if mp == EXTRACTION else "")
 			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
 		else:
 			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "LOCKED (lvl %d)[/color]\n" % mp["unlock level"]
@@ -302,9 +464,9 @@ func list_vm_commands() -> String:
 	return return_text
 
 
-func create_vm_window(minor_process, items_to_parse) -> VMWindow:
+func create_vm_window(minor_process, items_to_parse, target: ItemData = null) -> VMWindow:
 	var setup = func(t):
-		t.set_parse_type(minor_process, items_to_parse, true)
+		t.set_parse_type(minor_process, items_to_parse, true, target)
 		t.begin()
 	return VMManager.open(self, minor_process, terminal_scene.instantiate(), setup, true)
 

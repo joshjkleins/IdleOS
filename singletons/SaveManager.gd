@@ -38,6 +38,8 @@ func save_game() -> void:
 		"tutorial": Tutorial.save_data(),
 		"stats": Stats.save_data(),
 		"mods": HackingMods.save_data(),
+		"uploads": Uploads.save_data(),
+		"exploits": Exploits.save_data(),
 	}
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
@@ -97,6 +99,8 @@ func load_game() -> bool:
 	Tutorial.load_data(data.get("tutorial", {}))
 	Stats.load_data(data.get("stats", {}))
 	HackingMods.load_data(data.get("mods", {}))
+	Uploads.load_data(data.get("uploads", {}))
+	Exploits.load_data(data.get("exploits", {}))
 	
 	print(data.get("mods"))
 	

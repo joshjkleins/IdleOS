@@ -1,7 +1,8 @@
 class_name SystemDockCompact
 extends VBoxContainer
 ## Collapsed view of the side panel: just the essentials as small lights.
-##   « (expand) / process light / temperature + mini heat bar / one light per VM slot
+##   « (expand) / process light / temperature + mini heat bar / one light per VM slot /
+##   uploads (how many uploading + tier goal bar) / access (targets unlocked)
 
 const LIGHT = Vector2(12, 12)
 const C_EMPTY = Color(1, 1, 1, 0.08)
@@ -14,7 +15,11 @@ var process_light: Panel
 var temp_label: Label
 var heat_bar: Control
 var vm_box: VBoxContainer
+var upload_label: Label
+var upload_bar: Control
+var access_label: Label
 var _pulse := 0.0
+const C_UPLOAD = Color("#4ec9b0")
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 14)
@@ -51,6 +56,26 @@ func _ready() -> void:
 	vm_box.add_theme_constant_override("separation", 5)
 	add_child(vm_box)
 
+	add_child(_caption("UP"))
+	upload_label = Label.new()
+	upload_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	upload_label.add_theme_font_size_override("font_size", 11)
+	upload_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(upload_label)
+	upload_bar = Control.new()
+	upload_bar.custom_minimum_size = Vector2(8, 50)
+	upload_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	upload_bar.draw.connect(_draw_upload_bar)
+	add_child(upload_bar)
+
+	add_child(_caption("ACC"))
+	access_label = Label.new()
+	access_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	access_label.add_theme_font_size_override("font_size", 11)
+	access_label.add_theme_color_override("font_color", C_DIM.lightened(0.3))
+	access_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(access_label)
+
 ## Called by SystemDock a few times a second while collapsed.
 func refresh(process_running: bool, process_color: Color, delta: float) -> void:
 	_pulse += delta
@@ -85,6 +110,38 @@ func refresh(process_running: bool, process_color: Color, delta: float) -> void:
 		else:
 			_set_light(light, Color(0, 0, 0, 0), true)
 			light.tooltip_text = "empty VM slot"
+
+	# uploads: how many are uploading right now + the tier goal as a small vertical bar
+	var active = Uploads.active.size()
+	upload_label.text = "%d↑" % active
+	upload_label.add_theme_color_override("font_color", C_UPLOAD if active > 0 else C_DIM)
+	upload_label.tooltip_text = "T%d %s upload goal: %d%%  ·  %d uploading" % [Uploads.current_tier(), Uploads.get_location_name(Uploads.current_tier()), int(_upload_progress() * 100), active]
+	upload_bar.queue_redraw()
+
+	# access: targets unlocked
+	var unlocked = 0
+	var total = 0
+	for loc in Stats.hacking_targets:
+		for target in Stats.hacking_targets[loc].get("targets", []):
+			total += 1
+			if target.get("unlocked", false):
+				unlocked += 1
+	access_label.text = str(unlocked)
+	access_label.tooltip_text = "Hacking targets unlocked: %d/%d" % [unlocked, total]
+
+func _upload_progress() -> float:
+	var got = 0
+	var need = 0
+	for g in Uploads.get_goals():
+		got += min(Uploads.get_uploaded(g.item), g.amount)
+		need += g.amount
+	return float(got) / max(1, need)
+
+func _draw_upload_bar() -> void:
+	var h = upload_bar.size.y
+	var pct = _upload_progress()
+	upload_bar.draw_rect(Rect2(0, 0, upload_bar.size.x, h), C_EMPTY)
+	upload_bar.draw_rect(Rect2(0, h * (1.0 - pct), upload_bar.size.x, h * pct), C_UPLOAD)
 
 func _draw_heat_bar() -> void:
 	var segs = 15

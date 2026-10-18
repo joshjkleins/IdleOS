@@ -15,6 +15,7 @@ upgrade_ingredient = false
 value = 0
 parsable = true
 contained_items = Array[ExtResource("1_byi4v")]([ExtResource("2_h10mk"), ExtResource("3_gxqlf"), ExtResource("4_wxntj")])
+tier = 1
 color_type = 2
 obtained_from = Array[int]([1])
 obtained_from_additional_hint = ""

@@ -108,8 +108,31 @@ func refresh_process_unlocks(major) -> void:
 			p["unlocked"] = true
 
 func refresh_all_process_unlocks() -> void:
+	if DEV_MAX_ALL:
+		_dev_max_all()
 	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
 		refresh_process_unlocks(major)
+
+## TESTING: every skill and process at max level and unlocked (applied at startup and after every
+## load, so new processes are covered automatically). Turn off before release; saves made with it on
+## keep the levels.
+const DEV_MAX_ALL := true
+
+func _dev_max_all() -> void:
+	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
+		major.SKILL["level"] = MAX_LEVEL
+		major.SKILL["experience"] = max(major.SKILL["experience"], xp_for_level(MAX_LEVEL))
+		for p in major.minor_processes:
+			if !p.has("level"):
+				continue
+			var key = str(major.SKILL.name) + "/" + str(p.name)
+			if p.has("efficiency") and !_base_efficiency.has(key):
+				_base_efficiency[key] = float(p["efficiency"])
+			p["level"] = MAX_LEVEL
+			p["experience"] = max(int(p.get("experience", 0)), xp_for_level(MAX_LEVEL))
+			if p.has("efficiency"):
+				p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (MAX_LEVEL - 1)
+			p["unlocked"] = true
 
 ## Every process's progress, keyed by process name (skills used to save only their first process).
 func processes_save_data(major) -> Dictionary:
@@ -123,15 +146,21 @@ func processes_save_data(major) -> Dictionary:
 		}
 	return out
 
+var _base_efficiency := {} # "Skill/Process" -> efficiency as defined in code, captured before any load
+
 func processes_load_data(major, data: Dictionary) -> void:
 	for p in major.minor_processes:
+		var key = str(major.SKILL.name) + "/" + str(p.name)
+		if p.has("efficiency") and !_base_efficiency.has(key):
+			_base_efficiency[key] = float(p["efficiency"])
 		var saved: Dictionary = data.get(str(p.name), {})
 		if saved.is_empty():
 			continue
 		p["level"] = int(saved.get("level", p.get("level", 1)))
 		p["experience"] = int(saved.get("experience", p.get("experience", 0)))
+		# Efficiency comes from level (base + rate per level), so retuned bases apply to old saves too.
 		if p.has("efficiency"):
-			p["efficiency"] = float(saved.get("efficiency", p["efficiency"]))
+			p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (p["level"] - 1)
 		p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
 	refresh_process_unlocks(major)
 

@@ -212,7 +212,7 @@ enum ItemType {
 	ENCRYPTED_PINS, #80
 	ACCOUNT_NUMBERS, #81
 	ACCOUNT_ACCESS_TOKENS, #82
-	DDOS, #83
+	UNUSED_83, #83 (was DDoS, removed: slot kept so later item ids stay the same)
 	REFRESH_TOKEN, #84
 	QUALITY_LOGS, #85
 	VM_MINING_TOKEN, #86
@@ -457,6 +457,19 @@ enum ItemType {
 	PRESIDENT_CACHE_CORRUPTION, #325
 	PRESIDENT_CACHE_NETWORK, #326
 	PRESIDENT_CACHE_EXTRACTION, #327
+	# one-time hacking items (Exploits singleton)
+	PROXY_HOP, #328
+	LAG_SPIKE, #329
+	CEASE_DESIST, #330
+	THROTTLE_PATCH, #331
+	SLOW_DRIP, #332
+	BOOSTER_SHOT, #333
+	OVERDRAFT, #334
+	MARGIN_CALL, #335
+	ZERO_DAY, #336
+	GHOST_MODE, #337
+	REDACTION, #338
+	BLACKOUT, #339
 }
 
 ### RESOURCES ###
@@ -532,7 +545,6 @@ const LAWFIRM_PAYLOAD = preload("res://items/resources/Payloads/lawfirm_payload.
 const POLICE_PAYLOAD = preload("res://items/resources/Payloads/police_station_payload.tres")
 
 ### COMBAT ###
-const DDOS = preload("res://items/combat/ddos.tres")
 const SQL_INJECTOR = preload("res://items/combat/sql_injector.tres")
 const PACKET_SPOOF = preload("res://items/combat/packet_spoof.tres")
 
@@ -830,6 +842,18 @@ const PRESIDENT_CACHE_FOOTPRINT = preload("res://items/cache_data/government/pre
 const PRESIDENT_CACHE_CORRUPTION = preload("res://items/cache_data/government/president_cache_corruption.tres") #325
 const PRESIDENT_CACHE_NETWORK = preload("res://items/cache_data/government/president_cache_network.tres") #326
 const PRESIDENT_CACHE_EXTRACTION = preload("res://items/cache_data/government/president_cache_extraction.tres") #327
+const PROXY_HOP = preload("res://items/exploits/proxy_hop.tres") #328
+const LAG_SPIKE = preload("res://items/exploits/lag_spike.tres") #329
+const CEASE_DESIST = preload("res://items/exploits/cease_desist.tres") #330
+const THROTTLE_PATCH = preload("res://items/exploits/throttle_patch.tres") #331
+const SLOW_DRIP = preload("res://items/exploits/slow_drip.tres") #332
+const BOOSTER_SHOT = preload("res://items/exploits/booster_shot.tres") #333
+const OVERDRAFT = preload("res://items/exploits/overdraft.tres") #334
+const MARGIN_CALL = preload("res://items/exploits/margin_call.tres") #335
+const ZERO_DAY = preload("res://items/exploits/zero_day.tres") #336
+const GHOST_MODE = preload("res://items/exploits/ghost_mode.tres") #337
+const REDACTION = preload("res://items/exploits/redaction.tres") #338
+const BLACKOUT = preload("res://items/exploits/blackout.tres") #339
 
 var ITEM_NAME_MAP = {}
 
@@ -921,7 +945,6 @@ const ITEM_MAP = {
 	ItemType.ENCRYPTED_PINS: ENCRYPTED_PINS,
 	ItemType.ACCOUNT_NUMBERS: ACCOUNT_NUMBERS,
 	ItemType.ACCOUNT_ACCESS_TOKENS: ACCOUNT_ACCESS_TOKENS,
-	ItemType.DDOS: DDOS,
 	ItemType.REFRESH_TOKEN: REFRESH_TOKEN,
 	ItemType.QUALITY_LOGS: QUALITY_LOGS,
 	ItemType.VM_MINING_TOKEN: VM_MINING_TOKEN,
@@ -1166,4 +1189,16 @@ const ITEM_MAP = {
 	ItemType.PRESIDENT_CACHE_CORRUPTION: PRESIDENT_CACHE_CORRUPTION, #325
 	ItemType.PRESIDENT_CACHE_NETWORK: PRESIDENT_CACHE_NETWORK, #326
 	ItemType.PRESIDENT_CACHE_EXTRACTION: PRESIDENT_CACHE_EXTRACTION, #327
+	ItemType.PROXY_HOP: PROXY_HOP, #328
+	ItemType.LAG_SPIKE: LAG_SPIKE, #329
+	ItemType.CEASE_DESIST: CEASE_DESIST, #330
+	ItemType.THROTTLE_PATCH: THROTTLE_PATCH, #331
+	ItemType.SLOW_DRIP: SLOW_DRIP, #332
+	ItemType.BOOSTER_SHOT: BOOSTER_SHOT, #333
+	ItemType.OVERDRAFT: OVERDRAFT, #334
+	ItemType.MARGIN_CALL: MARGIN_CALL, #335
+	ItemType.ZERO_DAY: ZERO_DAY, #336
+	ItemType.GHOST_MODE: GHOST_MODE, #337
+	ItemType.REDACTION: REDACTION, #338
+	ItemType.BLACKOUT: BLACKOUT, #339
 }

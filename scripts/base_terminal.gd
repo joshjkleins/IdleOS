@@ -16,6 +16,7 @@ enum Mode { NORMAL, OVERCLOCKED, OVERHEATED }
 var skill: Node                  # Mining, Parsing, ...
 var process_data: Dictionary     # the minor process dict (Mining.LOGS, ...)
 var in_vm: bool = false
+var modifier: Dictionary = {}    # active modifier command (from skill.MODIFIERS), {} = none
 var running: bool = false
 var stop_requested: bool = false
 var _stopped: bool = false       # stop() may be called twice (safe stop + "stop" command)
@@ -64,9 +65,9 @@ func get_step_time(mode: Mode) -> float:
 		Mode.OVERHEATED:
 			return _speed_value("overheat speed")
 		Mode.OVERCLOCKED:
-			return _speed_value("overclock speed") / (1.0 + speed_upgrade)
+			return _speed_value("overclock speed") / (1.0 + speed_upgrade) / modifier_speed()
 		_:
-			return _speed_value("base speed") / (1.0 + speed_upgrade)
+			return _speed_value("base speed") / (1.0 + speed_upgrade) / modifier_speed()
 
 func _speed_value(key: String) -> float:
 	if process_data.has(key):
@@ -100,16 +101,44 @@ func get_speed_upgrade() -> float:
 	return package.current if package else 0.0
 
 func get_heat(mode: Mode) -> float:
+	var h: float
 	match mode:
 		Mode.OVERHEATED:
-			return process_data["overheat heat"]
+			h = process_data["overheat heat"]
 		Mode.OVERCLOCKED:
-			return process_data["overclock heat"]
+			h = process_data["heat"] if is_cooled() else process_data["overclock heat"]
 		_:
-			return process_data["heat"]
+			h = process_data["heat"]
+	if mode != Mode.OVERHEATED:
+		h *= modifier_heat()
+	# Heat Sink track (Mining): less heat from this skill
+	h *= 1.0 - Upgrades.cur(skill.SKILL.name.to_lower() + ".heat_sink")
+	return h
+
+## modifier speed multiplier (1.0 = none)
+func modifier_speed() -> float:
+	return float(modifier.get("speed", 1.0))
+
+## modifier heat multiplier; the skill's cool capstone (Cool Bits...) removes it
+func modifier_heat() -> float:
+	if modifier.is_empty() or is_cooled():
+		return 1.0
+	return float(modifier.get("heat", 1.0))
+
+## true once the skill's cool capstone is installed (no extra heat from overclock or modifiers)
+func is_cooled() -> bool:
+	var pkg = skill.get("COOL_PACKAGE") if skill else null
+	return pkg != null and Upgrades.has(pkg)
+
+func has_modifier(command: String) -> bool:
+	return modifier.get("command", "") == command
 
 func apply_heat(mode: Mode) -> void:
-	Stats.update_tempature(get_heat(mode))
+	Stats.update_tempature(scaled_heat(get_heat(mode)))
+
+## heat after System's VM capstones (Load Balancer halves VM heat, Server Rack removes it)
+func scaled_heat(heat: float) -> float:
+	return heat * (Upgrades.vm_heat_multiplier() if in_vm else 1.0)
 #endregion
 
 #region stopping

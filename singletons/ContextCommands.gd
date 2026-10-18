@@ -56,33 +56,46 @@ func get_modifier_info_text(skill: Node) -> String:
 	text += "┌────────────────────────────────────────────────────── MODIFIERS ───────────────────────────────────────────────────────┐\n"
 	text += "│ " + pad_text('MODIFIER', l_mod) + pad_text('STATUS', l_status) + pad_text('COMMAND', l_cmd) + pad_text('EFFECT', l_effect) + '│\n'
 	text += "├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n"
-			 
-	var modifier_name = ["Overclock"]
-	var status
-	if Upgrades.can_overclock(skill):
-		status = ["UNLOCKED"]
-	else:
-		status = ["LOCKED"]
-	
-	var command = ["While process is active use 'overclock'",  "Stop with 'overclock -kill'"]
-	var command_new_line_start_pos = l_mod + l_status
-	
-	var effect = ["Increase speed & heat output."]
-	
-	var text_components = [modifier_name, status, command, effect]
-	var widths = [l_mod, l_status, l_cmd, l_effect]
-	var line_count = find_largest_array(text_components).size()
-
-	for i in range(line_count):
-		var line = "│ "
-		for c in range(text_components.size()):
-			var col = text_components[c]
-			var cell = col[i] if i < col.size() else ""
-			line += pad_text(cell, widths[c])
-		text += line + "│\n"
-
+	# overclock first, then the skill's capstone modifiers (one at a time per process)
+	var group = skill.SKILL.name
+	var entries = [{"name": "Overclock", "unlocked": Upgrades.can_overclock(skill), "package": group.to_lower() + ".overclock",
+		"command": "overclock", "effect": "Increase speed & heat output."}]
+	for m in skill.get("MODIFIERS") if skill.get("MODIFIERS") else []:
+		entries.append({"name": m.name, "unlocked": Upgrades.has(m.package), "package": m.package, "command": m.command, "effect": m.effect})
+	for e in entries:
+		var p = Upgrades.get_package_info(e.package)
+		var unlock_at = ("at %s v%d.0" % [group, int(p.levels[0].tier)]) if p.has("levels") else ""
+		var status = ["UNLOCKED"] if e.unlocked else ["LOCKED", unlock_at]
+		var command = ["While process is active use '%s'" % e.command, "Stop with '%s -kill'" % e.command]
+		var effect = _wrap_words(e.effect, l_effect - 2)
+		var cols = [[e.name], status, command, effect]
+		var widths = [l_mod, l_status, l_cmd, l_effect]
+		var dim = !e.unlocked
+		for i in range(find_largest_array(cols).size()):
+			var line = ""
+			for c in range(cols.size()):
+				line += pad_text(cols[c][i] if i < cols[c].size() else "", widths[c])
+			text += "│ " + ("[color=#666666]%s[/color]" % line if dim else line) + "│\n"
+		if e != entries[-1]:
+			text += "│" + " ".repeat(120) + "│\n"
 	text += "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
+	if entries.size() > 1:
+		text += "[color=#666666]One modifier at a time per process (overclock included).[/color]\n"
 	return text
+
+## splits text into lines of at most <width> characters at word boundaries
+func _wrap_words(text: String, width: int) -> Array:
+	var lines = []
+	var cur = ""
+	for w in text.split(" ", false):
+		if cur.length() + w.length() + (1 if cur != "" else 0) > width:
+			lines.append(cur)
+			cur = w
+		else:
+			cur = w if cur == "" else cur + " " + w
+	if cur != "":
+		lines.append(cur)
+	return lines
 
 
 func find_largest_array(matrix: Array) -> Array:
@@ -185,7 +198,15 @@ func _table_row(cells: Array, active: Array, widths: Array, gap: int) -> String:
 
 func get_help_text(skill: Node) -> String:
 	var text = get_ascii_text(skill)
-	text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
+	# one line when every process uses efficiency the same way, otherwise a per-process list under the table
+	var eff_lines = []
+	var distinct = {}
+	for p in skill.minor_processes:
+		var d = p.get("efficiency description", skill.SKILL["efficiency description"])
+		distinct[d] = true
+		eff_lines.append([p.name, d])
+	if distinct.size() <= 1:
+		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 
 	var columns = [
 		{"title": "PROCESS", "drop": 0},
@@ -209,7 +230,8 @@ func get_help_text(skill: Node) -> String:
 		var req_items = "-"
 		if true: # details shown for every process (unlock level is in the UNLOCK column)
 			efficiency = "%.1f%%" % (p.efficiency * 100.0)
-			efficiency_rate = "%.1f%%" % (p['efficiency rate'] * 100.0)
+			var r = p["efficiency rate"] * 100.0
+			efficiency_rate = ("%.2f%%" if r < 0.1 else "%.1f%%") % r
 			run_command = p['display command'] if p.has('display command') else p.command
 			info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
 			req_items = get_requirements_text(p)
@@ -217,6 +239,10 @@ func get_help_text(skill: Node) -> String:
 		row_colors.append("" if p.unlocked else "#666666")
 
 	text += build_table(columns, rows, row_colors)
+	if distinct.size() > 1:
+		text += "\nEFFICIENCY (EFF) BY PROCESS\n"
+		for line in eff_lines:
+			text += "  %-12s %s\n" % line
 	return text + "\n\n" + get_modifier_info_text(skill)
 
 
@@ -236,15 +262,22 @@ func get_requirements_text(p: Dictionary) -> String:
 
 func get_help_text_defragging(skill: Node) -> String:
 	var text = get_ascii_text(skill)
-	text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
-	text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
-	text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
+	var columns = [
+		{"title": "PROCESS"},
+		{"title": "REQUIREMENT", "drop": 2},
+		{"title": "DURATION", "drop": 1},
+		{"title": "BONUS", "min": 20},
+		{"title": "COMMAND"},
+	]
+	var rows = []
+	var colors = []
 	for p in skill.minor_processes:
-		text += _build_defrag_process_row(p, skill)
-	text += "└───────────────────────────────────────────────────────────────────────────────────────┘\n"
-	
-	var final_text = text + "\n\n" + get_modifier_info_text(skill)
-	return final_text
+		var active = Defragging.is_active(p)
+		rows.append([p.name, p.requirements.item.name + " x" + str(p.requirements.amount), Stats.boost_minutes_text() + (" (ACTIVE " + Stats.get_bonus_time_text(p) + ")" if active else ""), p.get("bonus text", p.get("bonus label", "-")), p.command])
+		colors.append("#ffc24a" if active else ("" if p.unlocked else "#666666"))
+	text += build_table(columns, rows, colors)
+	text += "\n[color=#666666]One boost at a time: defragging shares a %d minute cooldown.[/color]" % int(Defragging.get_cooldown_minutes())
+	return text + "\n\n" + get_modifier_info_text(skill)
 
 func get_help_text_hacking(skill: Node) -> String:
 	var text = get_ascii_text(skill)
@@ -271,7 +304,7 @@ func get_help_text_2(skill: Node) -> String:
 		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 	if skill == Defragging:
 		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
-		text += "│ PROCESS        REQUIREMENT                DURATION     EFF       COMMAND              │\n"
+		text += "│ PROCESS        REQUIREMENT                DURATION     BONUS     COMMAND              │\n"
 		text += "├───────────────────────────────────────────────────────────────────────────────────────┤\n"
 	elif skill == Hacking:
 		text += "┌─────────────────────────────────────────────────────────────────────────────────────┐\n"
@@ -325,8 +358,8 @@ func _wrap_center_lines(text: String) -> String:
 func _build_defrag_process_row(p: Dictionary, skill: Node):
 	var name = p.name
 	var req = p.requirements.item.name + " x" + str(p.requirements.amount)
-	var duration = str(p["bonus time"]) + " min"
-	var eff = "x" + str(p["bonus efficiency"])
+	var duration = Stats.boost_minutes_text()
+	var eff = p.get("bonus label", "-")
 	var command = p.command
 	
 	return "│ %-14s %-26s %-12s %-9s %-20s │\n" % [
@@ -344,9 +377,9 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		status = "LOCKED"
 	
 	if skill == Defragging:
-		var time = str(p["bonus time"]) + " min"
+		var time = Stats.boost_minutes_text()
 		#var eff = "x" + str(p["bonus efficiency"])
-		var eff = "x" + String.num(p["bonus efficiency"], 2)
+		var eff = p.get("bonus label", "-")
 		if unlocked:
 			return "│ %-14s %-11s %-12s %-9s %-35s %-40s │\n" % [
 				p["name"],
@@ -366,11 +399,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 				"info " + skill.SKILL.name.to_lower() + " " + p["name"].to_lower().replace(" ", "-")
 			]
 	else:
-		var frag_bonus = 1.0
-		if Stats.has_bonus(skill):
-			for ms in Defragging.minor_processes:
-				if ms["skill"] == skill:
-					frag_bonus = ms["bonus efficiency"]
+		var frag_bonus = 1.0 # defrag no longer boosts skills
 		#var frag_bonus = Defragging.skill["bonus efficiency"] if Stats.has_bonus(skill) else 1.0
 		var base_eff = p["efficiency"]
 		var effr = str(p["efficiency rate"] * 100.0) + "%"
@@ -440,7 +469,7 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 	
 	##Rewards
 	return_text += "REWARDS\n"
-	return_text += "└─ " + process.name + " efficiency x" + str(process["bonus efficiency"]) + " for " + str(process["bonus time"]) + " minutes."
+	return_text += "└─ " + process.description + " Lasts " + Stats.boost_minutes_text() + "."
 	
 	return return_text
 
@@ -558,7 +587,7 @@ func info_command_text():
 		else:
 			var experience = Exp.get_xp_display(s.SKILL)
 			var color_string = s.SKILL.color.to_html()
-			var version = "v" + str(Upgrades.get_skill_version(s)) 
+			var version = Upgrades.get_skill_version(s)
 			var name_s = "[color=#%s]%s[/color]" % [color_string, s.SKILL.name]
 			return_string += pad_text(name_s, l_name) + pad_text(version, l_upgrades) + pad_text(str(s.SKILL.level), l_lvl) + pad_text(s.SKILL.command, l_cmd) + "\n"
 	
@@ -813,166 +842,150 @@ func get_date_command() -> String:
 		period
 	]
 
+#region apt (upgrade package manager)
+const APT_DIM := "#666666"
+const APT_OK := "#4ec994"
+const APT_BAD := "#e24b4a"
+const APT_GOLD := "#ffc24a"
+
+## 10-cell bar from background-colored spaces (no special glyphs needed)
+func apt_bar(done: int, total: int = 10, color: String = APT_OK) -> String:
+	var t = ""
+	if done > 0:
+		t += "[bgcolor=%s]%s[/bgcolor]" % [color, " ".repeat(done)]
+	if done < total:
+		t += "[bgcolor=#2a2f36]%s[/bgcolor]" % " ".repeat(total - done)
+	return t
+
+func _apt_group_name(group: String) -> String:
+	return "[color=#%s]%s[/color]" % [Upgrades.group_color(group).to_html(false), group]
+
+func _apt_cost_text(level: Dictionary) -> String:
+	var parts = []
+	for r in Upgrades.cost_rows(level):
+		parts.append("%s [color=%s]%s/%s[/color]" % [r.name, APT_OK if r.have >= r.need else APT_BAD, _short_num(r.have), _short_num(r.need)])
+	return ", ".join(parts)
+
+func _short_num(n: int) -> String:
+	if n >= 100000:
+		return "%dk" % int(n / 1000)
+	return str(n)
+
+## 'apt': every group with its version and current tier
 func get_root_upgrades_text() -> String:
-	var return_text = ""
-	
-	return_text += "\nIDLEOS PACKAGE MANAGER\n"
-	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Available upgrades:\n\n"
-	
-	##LOOPING THROUGH MAJOR SKILLS
-	for upgrade in Upgrades.all_upgrades:
-		var skill = upgrade.skill
-		var skill_version = Upgrades.get_skill_version(upgrade.skill)
-		var color_string = skill.SKILL.color.to_html()
-		var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-		return_text += colored_name + " v" + str(skill_version) + "\n"
-		
-		##LOOPING THROUGH UPGRADES ARRAY [SPEED, EFFICIENCY, ETC]
-		
-		var i = 0
-		for upgrade_info in upgrade.upgrades:
-			#get current level
-			var current_level = 0
-			for lvl in upgrade_info.levels:
-				if lvl.unlocked:
-					current_level += 1
-			#get prefix
-			var prefix = "├─ "
-			if i == upgrade.upgrades.size() - 1:
-				prefix = "└─ "
-			
-			#get dots
-			var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
-		
-			return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
-			i += 1
-		return_text += "\n"
-	
-	return_text += "────────────────────────────────────────────────────────\n\n"
-	return_text += "Use 'apt <skill>' to display upgrades only for specific skills.   [color=#666666]apt mining[/color]\n"
-	return_text += "Use 'apt <package>' for package information.                      [color=#666666]apt mining.speed[/color]\n"
-	return_text += "Use 'apt install <package>' to install.                           [color=#666666]apt install mining.speed[/color]\n"
-	
-	return return_text
-
-func get_skill_upgrades_text(upgrade):
-	var return_text = "\nAvailable upgrades:\n\n"
-	var skill_version = Upgrades.get_skill_version(upgrade.skill)
-	var skill = upgrade.skill
-	var color_string = skill.SKILL.color.to_html()
-	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
-
-	return_text += colored_name + " v" + str(skill_version) + "\n"
-	
-	for i in upgrade.upgrades.size():
-		var upgrade_info = upgrade.upgrades[i]
-		var current_level = 0
-
-		# Find current level
-		for level in upgrade_info.levels:
-			if level.unlocked:
-				current_level += 1
-
-		var is_last_upgrade = i == upgrade.upgrades.size() - 1
-		var prefix = "└─ " if is_last_upgrade else "├─ "
-
-		# Upgrade name + level
-		var u_name_w_dots = upgrade_info.id + ".".repeat(30 - upgrade_info.id.length())
-		return_text += prefix + u_name_w_dots + str(current_level) + "/" + str(upgrade_info.levels.size()) + "\n"
-
-		# Max level reached
-		if current_level >= upgrade_info.levels.size():
-			var max_prefix = "   └─ " if is_last_upgrade else "│  └─ "
-			return_text += max_prefix + "[color=yellow]MAX LEVEL[/color]\n"
-
+	var t = "\nIDLEOS PACKAGE MANAGER\n"
+	t += "[color=%s]Every install is +0.1 version. Finish a tier's 10 installs for a MAJOR release (v1.0, v2.0 ...). New tiers open with new locations.[/color]\n\n" % APT_DIM
+	var columns = [
+		{"title": "SKILL"}, {"title": "VERSION"}, {"title": "TIER"}, {"title": "PROGRESS", "drop": 1},
+		{"title": "READY"}, {"title": "COMMAND", "drop": 2},
+	]
+	var rows = []
+	var colors = []
+	for g in Upgrades.groups:
+		var wt = Upgrades.working_tier(g)
+		var tier_text = "complete" if wt > 6 else "%d · %s" % [wt, Upgrades.tier_name(wt)]
+		var done = 0 if wt > 6 else Upgrades.tier_installed(g, wt)
+		var ready = 0
+		var status = ""
+		if !Upgrades.is_wired(g):
+			status = "[color=%s]coming soon[/color]" % APT_DIM
+		elif wt <= 6 and !Upgrades.tier_unlocked(wt):
+			status = "[color=%s]tier locked[/color]" % APT_DIM
 		else:
-			# Requirements for next level
-			var req = upgrade_info.levels[current_level].requirements
+			for p in Upgrades.group_packages(g):
+				if Upgrades.install_block_reason(p) == "":
+					ready += 1
+			status = ("[color=%s]%d ready[/color]" % [APT_OK, ready]) if ready > 0 else "[color=%s]-[/color]" % APT_DIM
+		rows.append([_apt_group_name(g), Upgrades.version_text(g), tier_text,
+			(apt_bar(done) + " %d/10" % done) if wt <= 6 else apt_bar(10, 10, APT_GOLD), status, "apt " + g.to_lower()])
+		colors.append("")
+	t += build_table(columns, rows, colors)
+	t += "\n[color=%s]apt <skill>[/color] lists a skill's packages · [color=%s]apt install <skill>[/color] installs everything ready · [color=%s]apt install all[/color] for every skill" % [APT_OK, APT_OK, APT_OK]
+	t += "\n[color=%s]example: apt system · apt install system · apt install system.cooling_amount[/color]" % APT_DIM
+	return t
 
-			for j in req.size():
-				var is_last_requirement = j == req.size() - 1
-				var r_prefix = ""
+## 'apt <group>': the tier being worked on in full, finished tiers as one line each, then one line
+## for what opens next (later tiers stay hidden so this doesn't become a wall of text).
+func get_skill_upgrades_text(group: String) -> String:
+	var t = "\n[color=#%s]%s[/color]  %s\n" % [Upgrades.group_color(group).to_html(false), group.to_upper(), Upgrades.version_text(group)]
+	if !Upgrades.is_wired(group):
+		t += "[color=%s]%s upgrades can be installed once this skill is migrated.[/color]\n" % [APT_GOLD, group]
+	var wt = Upgrades.working_tier(group)
+	for tier in range(1, min(wt, 7)):
+		t += "[color=%s]TIER %d · %s[/color]  %s  [color=%s]complete · v%d.0[/color]\n" % [APT_DIM, tier, Upgrades.tier_name(tier).to_upper(), apt_bar(10, 10, APT_GOLD), APT_DIM, tier]
+	if wt > 6:
+		t += "\n[color=%s]Fully upgraded.[/color]" % APT_GOLD
+		return t
+	var done = Upgrades.tier_installed(group, wt)
+	var head = "TIER %d · %s" % [wt, Upgrades.tier_name(wt).to_upper()]
+	if !Upgrades.tier_unlocked(wt):
+		t += "\n[color=%s]%s  locked · opens with %s access (upload goal)[/color]\n" % [APT_DIM, head, Upgrades.tier_name(wt)]
+		return t
+	t += "\n%s  %s %d/10\n" % [head, apt_bar(done), done]
+	var columns = [{"title": "PACKAGE"}, {"title": "UPGRADE"}, {"title": "CHANGE", "min": 18}, {"title": "COST", "min": 20}, {"title": "STATUS"}]
+	var rows = []
+	var colors = []
+	var ready = 0
+	for p in Upgrades.group_packages(group):
+		var in_tier = p.levels.filter(func(l): return int(l.tier) == wt)
+		if in_tier.is_empty():
+			continue
+		var have_in_tier = 0
+		for i in p.installed:
+			if int(p.levels[i].tier) == wt:
+				have_in_tier += 1
+		var label = p.name + (" (MAJOR)" if p.type == "capstone" else "") + ("  %d/%d" % [have_in_tier, in_tier.size()] if in_tier.size() > 1 else "")
+		if have_in_tier >= in_tier.size():
+			rows.append([p.id, label, in_tier[-1].after, "", "installed"])
+			colors.append(APT_DIM)
+			continue
+		var lvl = Upgrades.next_level(p)
+		var reason = Upgrades.install_block_reason(p)
+		if reason == "":
+			ready += 1
+		var status = "[color=%s]READY[/color]" % APT_OK if reason == "" else ("[color=%s]missing items[/color]" % APT_BAD if reason == "Missing requirements." else "[color=%s]-[/color]" % APT_DIM)
+		var change = ("%s -> %s" % [lvl.before, lvl.after]) if p.type != "capstone" else str(lvl.effect)
+		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
+		colors.append("")
+	t += build_table(columns, rows, colors)
+	if wt < 6:
+		var nt = wt + 1
+		var opens = "after v%d.0" % wt if Upgrades.tier_unlocked(nt) else "with %s access and v%d.0" % [Upgrades.tier_name(nt), wt]
+		t += "[color=%s]Next: Tier %d · %s opens %s[/color]\n" % [APT_DIM, nt, Upgrades.tier_name(nt), opens]
+	if ready > 1:
+		t += "\n[color=%s]apt install %s[/color] installs all %d ready packages at once" % [APT_OK, group.to_lower(), ready]
+	t += "\n[color=%s]apt install <package>[/color] installs one · [color=%s]apt <package>[/color] for details" % [APT_OK, APT_OK]
+	return t
 
-				if is_last_upgrade:
-					r_prefix = "   └─ " if is_last_requirement else "   ├─ "
-				else:
-					r_prefix = "│  └─ " if is_last_requirement else "│  ├─ "
-
-				var r = req[j]
-				var current_amount = Inventory.get_amount(r.item)
-				var amount_text = "%d/%d" % [current_amount, r.amount]
-
-				if current_amount >= r.amount:
-					amount_text = "[color=green]" + amount_text + "[/color]"
-				else:
-					amount_text = "[color=red]" + amount_text + "[/color]"
-
-				return_text += r_prefix + r.item.name + " " + amount_text + "\n"
-
-		if !is_last_upgrade:
-			return_text += "│\n"
-
-	return_text += "\n"
-	return_text += "────────────────────────────────────────────────────────\n\n"
-
-	return_text += "Use 'apt <package>' for package information.       [color=#666666]apt mining.speed[/color]\n"
-	return_text += "Use 'apt install <package>' to install.            [color=#666666]apt install mining.speed[/color]\n\n"
-	return_text += "[color=#666666]remember to use 'ls <item>' for more information on where to obtain items.[/color]\n"
-
-	return return_text
-
+## 'apt <package>'
 func get_upgrades_package_info(package_id: String) -> String:
-	var package = Upgrades.get_package_info(package_id)
-	var skill_name = Upgrades.get_skill_from_package_id(package_id)
-	var skill_level = Upgrades.get_skill_level_from_package_id(package_id)
-	var current_effect = Upgrades.get_current_effect_total_from_package(package)
-	var next_effect = Upgrades.get_next_effect_total_from_package(package)
-	var requirements = Upgrades.get_upgrade_requirement_from_package(package)
-	
-	
-	if package == null:
+	if !Upgrades.is_valid_package(package_id):
 		return "Package id not found"
-	
-	var return_text = "────────────────────────────────────────────────────────\n"
-	return_text += "Package: %s\n" % package_id
-	return_text += "Skill: %s\n" % skill_name 
-	return_text += "Level: %s\n" % skill_level 
-	
-	return_text += "\nDescription:\n"
-	return_text += package.description + "\n"
-	
-	
-	return_text += "\nCurrent effect\n"
-	return_text += "└─ " + package.name + ": " + current_effect + "\n\n"
-		
-		
-	return_text += "Next upgrade\n"
-	return_text += "└─ " + package.name + ": " + next_effect + "\n\n"
-	
-	if !Upgrades.is_at_max_level(package_id):
-		return_text += "Requirements\n"
-		var i = 0
-		for r in requirements:
-			var prefix = "├─ "
-			if i == requirements.size() - 1:
-				prefix = "└─ "
-			var player_amount = Inventory.get_amount(r.item)
-			if player_amount < r.amount: #not enough
-				return_text += prefix + r.item.name + " [color=red]" + str(Inventory.get_amount(r.item)) + "/" + str(r.amount) + "[/color]\n"
-			else: #enough
-				return_text += prefix + r.item.name + " [color=green]" + str(Inventory.get_amount(r.item)) + "/" + str(r.amount) + "[/color]\n"
-			i += 1
-		
-		return_text += "\nInstall\n"
-		return_text += "└─ " + "apt install " + package.id + "\n"
-		
-		
-	return_text += "────────────────────────────────────────────────────────\n\n"
-	
-	
-	return return_text
-
+	var p = Upgrades.get_package_info(package_id)
+	var t = "\n%s  ·  %s  ·  %s\n" % [p.id, _apt_group_name(p.group), Upgrades.version_text(p.group)]
+	t += "%s%s\n" % [p.name, "  (MAJOR release capstone)" if p.type == "capstone" else ""]
+	t += "[color=%s]%s[/color]\n\n" % [APT_DIM, p.effect]
+	var columns = [{"title": "TIER"}, {"title": "VALUE"}, {"title": "AFTER", "min": 16}, {"title": "STATUS"}]
+	var rows = []
+	var colors = []
+	for i in p.levels.size():
+		var l = p.levels[i]
+		var status = "installed" if i < p.installed else ("NEXT" if i == p.installed else "")
+		if i >= p.installed and !Upgrades.tier_unlocked(int(l.tier)):
+			status = "locked"
+		rows.append(["%d · %s" % [int(l.tier), Upgrades.tier_name(int(l.tier))], str(l.label), str(l.after), status])
+		colors.append(APT_DIM if i < p.installed or status == "locked" else ("" if i == p.installed else APT_DIM))
+	t += build_table(columns, rows, colors)
+	var lvl = Upgrades.next_level(p)
+	if lvl.is_empty():
+		t += "\n[color=%s]Fully upgraded.[/color]" % APT_GOLD
+		return t
+	t += "\nNext: %s -> %s\n" % [lvl.before, lvl.after] if p.type != "capstone" else "\nNext: %s\n" % lvl.effect
+	t += "Cost: %s\n" % _apt_cost_text(lvl)
+	var reason = Upgrades.install_block_reason(p)
+	t += ("[color=%s]apt install %s[/color]" % [APT_OK, p.id]) if reason == "" else "[color=%s]%s[/color]" % [APT_DIM, reason]
+	return t
+#endregion
 
 func cd_not_at_root() -> String:
 	return "Return to root before navigating to different directory. \t[color=#666666]example: cd ..[/color]"
@@ -1187,3 +1200,19 @@ func upload_info():
 
 func not_built_text(minor_process: Dictionary) -> String:
 	return "[color=#888888]" + str(minor_process.name) + " isn't built yet — it arrives with a later tier.[/color]"
+
+
+## 'upload': the current tier's goal, what's uploaded, packaged and uploading.
+func upload_goal_text() -> String:
+	var tier = Uploads.current_tier()
+	var columns = [{"title": "ITEM"}, {"title": "UPLOADED"}, {"title": "PACKAGED"}, {"title": "IN INVENTORY", "drop": 1}, {"title": "STATUS"}]
+	var rows = []
+	var colors = []
+	for g in Uploads.get_goals(tier):
+		var up = Uploads.get_uploaded(g.item)
+		var status = "done" if up >= g.amount else ("uploading" if Uploads.is_uploading(g.item) else ("ready" if Uploads.get_staged(g.item) > 0 else "-"))
+		rows.append([g.item.name + (" (rare)" if g.rare else ""), "%d/%d" % [up, g.amount], str(Uploads.get_staged(g.item)), str(Inventory.get_amount(g.item)), status])
+		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
+	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
+	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -all)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
+	return header + build_table(columns, rows, colors) + footer

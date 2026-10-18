@@ -14,11 +14,6 @@ var available_offensive_items = {
 		"item": Items.SQL_INJECTOR,
 		"available": true
 	},
-	2: {
-		"id": 2,
-		"item": Items.DDOS,
-		"available": false
-	}
 }
 
 var available_defensive_items = {

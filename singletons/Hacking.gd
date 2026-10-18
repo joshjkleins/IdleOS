@@ -5,9 +5,9 @@ signal hacking_level_up_signal
 
 var current_anon = 100
 var max_anon = 100
-var current_bandwidth = 10
+var current_bandwidth: float = 10.0
 var max_bandwidth = 10
-var bandwidth_recovery_rate = 1
+var bandwidth_recovery_rate: float = 1.0 # per bandwidth_recovery_speed seconds, applied continuously
 var bandwidth_recovery_speed = 1.0
 
 # When the player earns the bonus

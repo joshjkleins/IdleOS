@@ -57,8 +57,13 @@ func _refit() -> void:
 	reset_size()
 	position = VMManager._clamp_to_host(self, position)
 
+## Seconds one token buys (skill uptime + Defragging: VM boost, checked each time a token is spent).
+func _token_duration() -> float:
+	duration = (skill.VM_UPTIME + Defragging.get_vm_uptime_bonus()) * Upgrades.vm_uptime_multiplier() # Scheduler
+	return duration
+
 func start() -> void:
-	run_timer.start(duration)
+	run_timer.start(_token_duration())
 	_update_status()
 
 func get_seconds_left() -> int:
@@ -87,7 +92,7 @@ func _on_run_timer_timeout() -> void:
 	if repeat and Inventory.get_amount(token) > 0:
 		tokens_used += 1
 		Inventory.remove_resource(token, 1)
-		run_timer.start(duration)
+		run_timer.start(_token_duration())
 	else:
 		stopping = true
 		_update_status()

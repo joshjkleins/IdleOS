@@ -54,6 +54,8 @@ Settings="*res://singletons/Settings.gd"
 CommandRegistry="*res://singletons/CommandRegistry.gd"
 HackingMods="*res://singletons/HackingMods.gd"
 VMManager="*res://singletons/VMManager.gd"
+Uploads="*res://singletons/Uploads.gd"
+Exploits="*res://singletons/Exploits.gd"
 
 [display]
 

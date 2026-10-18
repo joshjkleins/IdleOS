@@ -10,6 +10,9 @@ extends Resource
 @export var value: int
 @export var parsable: bool
 @export var contained_items: Array[ItemData]
+## Game tier the item belongs to (1 School, 2 Lawfirm, 3 Hospital, 4 Bank, 5 Police, 6 Government).
+## Mining items use it for Parsing (Corruption/Network); Hacking Mods use it to pick which tier drops them.
+@export_range(1, 6) var tier: int = 1
 
 
 enum ItemColor {
@@ -35,6 +38,9 @@ enum ItemColor {
 @export var hacking_mod_duration: int
 @export var hacking_mod_consumed: int
 @export var hacking_mod_item: bool = false
+
+## Set on one-time hacking items (used during a hack with 'run'). Effects live in the Exploits singleton.
+@export var exploit_id: String = ""
 
 func get_obtained_from_skills() -> Array:
 	var result = []

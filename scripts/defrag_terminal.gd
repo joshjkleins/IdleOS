@@ -179,7 +179,7 @@ func all_colored(sorted: Array):
 		await get_tree().create_timer(ORGANIZE_PANEL_WAIT).timeout
 
 func finished():
-	update_mini_terminal("Defragging of " + type.skill.name + " complete: " + type.description)
+	update_mini_terminal("Defragging " + type.name + " complete: " + type.description)
 	Stats.grant_bonus(type)
 	Defragging.activate_cooldown()
 	active = false

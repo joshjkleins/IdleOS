@@ -29,9 +29,9 @@ func row_count() -> int:
 	return dump_info["codes"].size()
 
 #when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
-func build_dump(cache: CacheData):
+func build_dump(cache: CacheData, process: Dictionary = {}):
 	dump_info = {}
-	var loot: Array = get_potential_items(cache) # [{item, amount, rare}]
+	var loot: Array = get_potential_items(cache, process) # [{item, amount, rare}]
 	items_total = loot.size()
 
 	var all_codes: Array = []
@@ -47,7 +47,25 @@ func build_dump(cache: CacheData):
 		all_codes.append(get_random_hexes(HEX_CHARACTERS_SIZE))
 	all_codes.shuffle()
 	all_codes.append_array(rare_codes)
+	_set_rows(all_codes)
 
+## A fixed sequence of lines, in order (Salvage / Package / Intel): each entry is {item, amount} for a
+## line that pays out when revealed, {"text": "..."} for a highlighted line, or null for a filler line.
+func build_rows(rows: Array) -> void:
+	dump_info = {}
+	items_total = 0
+	var codes: Array = []
+	for r in rows:
+		if r == null:
+			codes.append(get_random_hexes(HEX_CHARACTERS_SIZE))
+		elif r.has("item"):
+			items_total += 1
+			codes.append(get_item_hexes(r.item, r.amount))
+		else:
+			codes.append(get_text_hexes(r.text))
+	_set_rows(codes)
+
+func _set_rows(all_codes: Array) -> void:
 	# one address per row; the dump grows past DUMP_SIZE when a cache has more drops
 	var id_array = []
 	for i in range(all_codes.size()):
@@ -107,8 +125,8 @@ func update_dump() -> bool:
 
 	return true
 
-## Returns [{item, amount, rare}] (rare last). Variant rules live in CacheData.roll_loot().
-func get_potential_items(cache: CacheData) -> Array:
+## Returns [{item, amount, rare}] (rare last). Variant rules live in Decoding.roll_loot().
+func get_potential_items(cache: CacheData, process: Dictionary = {}) -> Array:
 	# tutorial: the very first Student cache drops everything, including the rare item
 	if not Decoding.first_cache_decoded and cache == Items.STUDENT_CACHE:
 		var loot = []
@@ -118,7 +136,7 @@ func get_potential_items(cache: CacheData) -> Array:
 		Decoding.first_cache_decoded = true
 		SaveManager.mark_dirty()
 		return loot
-	return Decoding.roll_loot(cache)
+	return Decoding.roll_loot(cache, process)
 
 func get_item_hexes(item, amount) -> Array:
 	var result: Array = []
@@ -165,6 +183,19 @@ func get_item_hexes(item, amount) -> Array:
 			var end_array = random_hex_array.slice(start)
 			result = beginning_array + item_hex_array + end_array
 	
+	return result
+
+## A highlighted line that pays nothing (e.g. an Intel find): the text shows in the ascii column.
+func get_text_hexes(text: String) -> Array:
+	var result: Array = []
+	var start = randi_range(0, max(0, HEX_CHARACTERS_SIZE - text.length()))
+	var filler = get_random_hexes(HEX_CHARACTERS_SIZE, false)
+	for i in HEX_CHARACTERS_SIZE:
+		var t = i - start
+		if t >= 0 and t < text.length():
+			result.append({"hex": "[color=#4ec9b0]%02X[/color]" % text.unicode_at(t), "char": "[color=#4ec9b0]" + text[t] + "[/color]"})
+		else:
+			result.append(filler[i])
 	return result
 
 func get_random_hexes(num: int, blank_lines: bool = true) -> Array:

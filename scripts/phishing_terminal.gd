@@ -11,17 +11,20 @@ extends BaseTerminal
 @onready var slots_label = $ActiveLines/MarginContainer/VBoxContainer/SlotsLabel
 
 var vm_lines = []
+var bait: ItemData = null # Mining item used up one per cast for a better bite chance
 
 ## Main terminal lines live in Phishing.current_lines; a VM keeps its own.
 func _my_lines() -> Array:
 	return vm_lines if in_vm else Phishing.current_lines
 
 ## Main terminal entry point (idle_os_2.cast_line). Always casts every available line.
-func cast_lines(p_type: Dictionary, _lines: int = -1):
+func cast_lines(p_type: Dictionary, _lines: int = -1, p_bait: ItemData = null):
+	bait = p_bait
 	_start(p_type, false)
 
 ## VM window entry point.
-func vm_cast_all_lines(p_type: Dictionary, window: bool = false):
+func vm_cast_all_lines(p_type: Dictionary, window: bool = false, p_bait: ItemData = null):
+	bait = p_bait
 	_start(p_type, window)
 
 func _start(p_type: Dictionary, window: bool) -> void:
@@ -54,9 +57,13 @@ func _disconnect_upgrade_signal() -> void:
 		Signals.phishing_lines_increase_upgrade_while_running_signal.disconnect(lines_upgrade_while_running)
 
 func update_eff_label(p_type = null):
-	var eff_text = str(_get_total_eff() * 100.0).pad_decimals(1)
+	var eff_text = str(get_bite_chance(false) * 100.0).pad_decimals(1)
 	slots_label.text = str(_my_lines().size()) + "/" + str(_get_max_lines_count()) + " lines in use\n"
-	slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite.[/font_size][/color]"
+	slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite."
+	if bait:
+		var baited = str(get_bite_chance(true) * 100.0).pad_decimals(1)
+		slots_label.text += "  BAIT: %s x%d (%s%% baited)" % [bait.name, Inventory.get_amount(bait), baited]
+	slots_label.text += "[/font_size][/color]"
 
 ## A line finished. Lines only end on their own after stop_safely(); once all are done, finish.
 func line_ended():
@@ -85,8 +92,21 @@ func _get_max_lines_count() -> int:
 
 func _get_total_eff() -> float:
 	###NOTE : NO PHISHING EFFICIENCY UPGRADE YET. if efficiency upgrade is added to APT then need to add here too
-	var defrag_bonus = Defragging.PHISHING["bonus efficiency"] if Stats.has_bonus(Phishing) else 1.0
+	var defrag_bonus = 1.0 # defrag no longer boosts skills
 	return process_data["efficiency"] * defrag_bonus
+
+## Bite chance for one cast, capped at 100%. Bait multiplies it (so rare catches stay rare).
+func get_bite_chance(baited: bool) -> float:
+	var chance = _get_total_eff() * (Phishing.get_bait_multiplier(bait) if baited else 1.0)
+	return min(chance, 1.0)
+
+## Called by a line as it casts: uses one bait if there is any left.
+func take_bait() -> bool:
+	if bait and Inventory.get_amount(bait) > 0:
+		Inventory.remove_resource(bait, 1)
+		update_eff_label()
+		return true
+	return false
 
 func lines_upgrade_while_running():
 	if !running or stop_requested:
