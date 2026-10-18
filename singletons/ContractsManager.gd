@@ -142,7 +142,7 @@ func create_phishing_contract() -> Contract:
 	contract.major_skill = Phishing
 	var skills_unlocked = []
 	for skill in Phishing.minor_processes:
-		if skill.unlocked:
+		if skill.unlocked and skill != Phishing.TRAP: # traps take 45 min each
 			skills_unlocked.append(skill)
 	contract.minor_skill = skills_unlocked.pick_random()
 	var lvl = Phishing.SKILL.level

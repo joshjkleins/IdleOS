@@ -154,14 +154,15 @@ func processes_load_data(major, data: Dictionary) -> void:
 		if p.has("efficiency") and !_base_efficiency.has(key):
 			_base_efficiency[key] = float(p["efficiency"])
 		var saved: Dictionary = data.get(str(p.name), {})
-		if saved.is_empty():
-			continue
-		p["level"] = int(saved.get("level", p.get("level", 1)))
-		p["experience"] = int(saved.get("experience", p.get("experience", 0)))
-		# Efficiency comes from level (base + rate per level), so retuned bases apply to old saves too.
+		if !saved.is_empty():
+			p["level"] = int(saved.get("level", p.get("level", 1)))
+			p["experience"] = int(saved.get("experience", p.get("experience", 0)))
+			p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
+		# Efficiency always comes from level (base + rate per level), never from the save: retuned bases
+		# apply to old saves, and saves inflated by the old legacy-key bug heal on load.
+		# (The base is captured above, so nothing may write "efficiency" before this runs.)
 		if p.has("efficiency"):
-			p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (p["level"] - 1)
-		p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
+			p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (p.get("level", 1) - 1)
 	refresh_process_unlocks(major)
 
 func _ready() -> void:

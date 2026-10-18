@@ -44,6 +44,7 @@ func _ready() -> void:
 		monitor_margin.add_theme_constant_override("margin_" + side, 0)
 	_add_upload_section()
 	_add_vm_toggle()
+	_add_trap_status()
 	VMManager.vms_changed.connect(_rebuild_rows)
 	_rebuild_rows()
 	add_to_group("system_dock")
@@ -74,6 +75,12 @@ func _add_upload_section() -> void:
 	var spacer = full_view.get_node_or_null("Spacer")
 	if spacer:
 		spacer.size_flags_vertical = Control.SIZE_FILL
+
+## Phishing trap: one small row under the temperature widget (hidden until Trap unlocks).
+func _add_trap_status() -> void:
+	var trap := TrapStatus.new()
+	full_view.add_child(trap)
+	full_view.move_child(trap, system_temp.get_index() + 1)
 
 ## ▾ on the VIRTUAL MACHINES header; collapsed it shows one small light per running VM.
 func _add_vm_toggle() -> void:

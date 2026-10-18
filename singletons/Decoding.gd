@@ -294,7 +294,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	CACHE["level"] = int(data.get("cache_level", CACHE["level"]))
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
-	CACHE["efficiency"] = float(data.get("cache_efficiency", CACHE["efficiency"]))
+	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	first_cache_decoded = data.get("first_cache_decoded", false)
 	intel = {}
 	var saved_intel: Dictionary = data.get("intel", {})

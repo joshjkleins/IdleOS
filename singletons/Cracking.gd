@@ -323,7 +323,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	PASSWORD["level"] = int(data.get("password_level", PASSWORD["level"]))
 	PASSWORD["experience"] = int(data.get("password_experience", PASSWORD["experience"]))
-	PASSWORD["efficiency"] = float(data.get("password_efficiency", PASSWORD["efficiency"]))
+	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 

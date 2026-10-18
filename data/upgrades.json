@@ -5639,7 +5639,7 @@
    "group": "Phishing",
    "name": "Speed",
    "type": "track",
-   "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+   "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
    "levels": [
     {
      "tier": 1,
@@ -5648,7 +5648,7 @@
      "label": "+16.7%",
      "before": "1 x speed",
      "after": "1.17 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5663,7 +5663,7 @@
      "label": "+16.7%",
      "before": "1.17 x speed",
      "after": "1.33 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5678,7 +5678,7 @@
      "label": "+16.7%",
      "before": "1.33 x speed",
      "after": "1.5 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5693,7 +5693,7 @@
      "label": "+25.0%",
      "before": "1.5 x speed",
      "after": "1.75 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5708,7 +5708,7 @@
      "label": "+25.0%",
      "before": "1.75 x speed",
      "after": "2.0 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5723,7 +5723,7 @@
      "label": "+25.0%",
      "before": "2.0 x speed",
      "after": "2.25 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5738,7 +5738,7 @@
      "label": "+37.5%",
      "before": "2.25 x speed",
      "after": "2.63 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5753,7 +5753,7 @@
      "label": "+37.5%",
      "before": "2.63 x speed",
      "after": "3.0 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5768,7 +5768,7 @@
      "label": "+37.5%",
      "before": "3.0 x speed",
      "after": "3.38 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5783,7 +5783,7 @@
      "label": "+56.2%",
      "before": "3.38 x speed",
      "after": "3.94 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5798,7 +5798,7 @@
      "label": "+56.2%",
      "before": "3.94 x speed",
      "after": "4.5 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5813,7 +5813,7 @@
      "label": "+56.2%",
      "before": "4.5 x speed",
      "after": "5.06 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5828,7 +5828,7 @@
      "label": "+84.4%",
      "before": "5.06 x speed",
      "after": "5.91 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5843,7 +5843,7 @@
      "label": "+84.4%",
      "before": "5.91 x speed",
      "after": "6.75 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5858,7 +5858,7 @@
      "label": "+84.4%",
      "before": "6.75 x speed",
      "after": "7.59 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5873,7 +5873,7 @@
      "label": "+126.6%",
      "before": "7.59 x speed",
      "after": "8.86 x speed",
-     "effect": "Cast / reel speed (each install ~14.5% faster than before it)",
+     "effect": "Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5888,7 +5888,7 @@
      "label": "+126.6%",
      "before": "8.86 x speed",
      "after": "10.13 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5903,7 +5903,7 @@
      "label": "+126.6%",
      "before": "10.13 x speed",
      "after": "11.39 x speed",
-     "effect": "Cast / reel speed",
+     "effect": "Phishing speed (not Trap fill)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5918,16 +5918,16 @@
    "group": "Phishing",
    "name": "Efficiency",
    "type": "track",
-   "effect": "Bite chance (on top of level efficiency); 20% at max",
+   "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
    "levels": [
     {
      "tier": 1,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "0 % bonus bite chance",
-     "after": "1.67 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "0 % of own efficiency",
+     "after": "1.67 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5939,10 +5939,10 @@
      "tier": 1,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "1.67 % bonus bite chance",
-     "after": "3.33 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "1.67 % of own efficiency",
+     "after": "3.33 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5954,10 +5954,10 @@
      "tier": 2,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "3.33 % bonus bite chance",
-     "after": "5 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "3.33 % of own efficiency",
+     "after": "5 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5969,10 +5969,10 @@
      "tier": 2,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "5 % bonus bite chance",
-     "after": "6.67 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "5 % of own efficiency",
+     "after": "6.67 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5984,10 +5984,10 @@
      "tier": 3,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "6.67 % bonus bite chance",
-     "after": "8.33 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "6.67 % of own efficiency",
+     "after": "8.33 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -5999,10 +5999,10 @@
      "tier": 3,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "8.33 % bonus bite chance",
-     "after": "10 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "8.33 % of own efficiency",
+     "after": "10 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6014,10 +6014,10 @@
      "tier": 4,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "10 % bonus bite chance",
-     "after": "11.67 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "10 % of own efficiency",
+     "after": "11.67 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6029,10 +6029,10 @@
      "tier": 4,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "11.67 % bonus bite chance",
-     "after": "13.33 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "11.67 % of own efficiency",
+     "after": "13.33 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6044,10 +6044,10 @@
      "tier": 5,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "13.33 % bonus bite chance",
-     "after": "15 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "13.33 % of own efficiency",
+     "after": "15 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6059,10 +6059,10 @@
      "tier": 5,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "15 % bonus bite chance",
-     "after": "16.67 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "15 % of own efficiency",
+     "after": "16.67 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6074,10 +6074,10 @@
      "tier": 6,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "16.67 % bonus bite chance",
-     "after": "18.33 % bonus bite chance",
-     "effect": "Bite chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "16.67 % of own efficiency",
+     "after": "18.33 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6089,10 +6089,10 @@
      "tier": 6,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "18.33 % bonus bite chance",
-     "after": "20 % bonus bite chance",
-     "effect": "Bite chance",
+     "label": "+1.67% of eff",
+     "before": "18.33 % of own efficiency",
+     "after": "20 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6107,7 +6107,7 @@
    "group": "Phishing",
    "name": "Lines",
    "type": "track",
-   "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+   "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
    "levels": [
     {
      "tier": 1,
@@ -6116,7 +6116,7 @@
      "label": "+1",
      "before": "0 extra lines",
      "after": "1 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6131,7 +6131,7 @@
      "label": "+1",
      "before": "1 extra lines",
      "after": "2 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6146,7 +6146,7 @@
      "label": "+1",
      "before": "2 extra lines",
      "after": "3 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6161,7 +6161,7 @@
      "label": "+1",
      "before": "3 extra lines",
      "after": "4 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6176,7 +6176,7 @@
      "label": "+1",
      "before": "4 extra lines",
      "after": "5 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6191,7 +6191,7 @@
      "label": "+1",
      "before": "5 extra lines",
      "after": "6 extra lines",
-     "effect": "Max simultaneous lines (one per tier: each line is a parallel cast)",
+     "effect": "Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6206,7 +6206,7 @@
    "group": "Phishing",
    "name": "Bait Power",
    "type": "track",
-   "effect": "Bait multiplier bonus",
+   "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
    "levels": [
     {
      "tier": 1,
@@ -6215,7 +6215,7 @@
      "label": "+5%",
      "before": "0 % bait bonus",
      "after": "5 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6230,7 +6230,7 @@
      "label": "+5%",
      "before": "5 % bait bonus",
      "after": "10 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6245,7 +6245,7 @@
      "label": "+5%",
      "before": "10 % bait bonus",
      "after": "15 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6260,7 +6260,7 @@
      "label": "+5%",
      "before": "15 % bait bonus",
      "after": "20 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6275,7 +6275,7 @@
      "label": "+5%",
      "before": "20 % bait bonus",
      "after": "25 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6290,7 +6290,7 @@
      "label": "+5%",
      "before": "25 % bait bonus",
      "after": "30 % bait bonus",
-     "effect": "Bait multiplier bonus",
+     "effect": "Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6305,7 +6305,7 @@
    "group": "Phishing",
    "name": "Bait Recycling",
    "type": "pointed",
-   "effect": "Chance a bait is not consumed on a cast",
+   "effect": "Chance a cast's 10 bait are not used up",
    "levels": [
     {
      "tier": 1,
@@ -6314,7 +6314,7 @@
      "label": "+5%",
      "before": "0 % bait kept",
      "after": "5 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6329,7 +6329,7 @@
      "label": "+5%",
      "before": "5 % bait kept",
      "after": "10 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6344,7 +6344,7 @@
      "label": "+5%",
      "before": "10 % bait kept",
      "after": "15 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6359,7 +6359,7 @@
      "label": "+5%",
      "before": "15 % bait kept",
      "after": "20 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6374,7 +6374,7 @@
      "label": "+5%",
      "before": "20 % bait kept",
      "after": "25 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6389,7 +6389,7 @@
      "label": "+5%",
      "before": "25 % bait kept",
      "after": "30 % bait kept",
-     "effect": "Chance a bait is not consumed on a cast",
+     "effect": "Chance a cast's 10 bait are not used up",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6404,7 +6404,7 @@
    "group": "Phishing",
    "name": "Quick Hook",
    "type": "pointed",
-   "effect": "Faster reel-in after a bite",
+   "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
    "levels": [
     {
      "tier": 1,
@@ -6413,7 +6413,7 @@
      "label": "-5% reel time",
      "before": "0 % faster reel",
      "after": "5 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6428,7 +6428,7 @@
      "label": "-5% reel time",
      "before": "5 % faster reel",
      "after": "10 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6443,7 +6443,7 @@
      "label": "-5% reel time",
      "before": "10 % faster reel",
      "after": "15 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6458,7 +6458,7 @@
      "label": "-5% reel time",
      "before": "15 % faster reel",
      "after": "20 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6473,7 +6473,7 @@
      "label": "-5% reel time",
      "before": "20 % faster reel",
      "after": "25 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6488,7 +6488,7 @@
      "label": "-5% reel time",
      "before": "25 % faster reel",
      "after": "30 % faster reel",
-     "effect": "Faster reel-in after a bite",
+     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6559,7 +6559,7 @@
    "group": "Phishing",
    "name": "Lure",
    "type": "capstone",
-   "effect": "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item",
+   "effect": "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item (not Trap)",
    "levels": [
     {
      "tier": 3,
@@ -6568,7 +6568,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item",
+     "effect": "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item (not Trap)",
      "costs": [
       {
        "item": "SQL Injector",
@@ -6587,7 +6587,7 @@
    "group": "Phishing",
    "name": "Chum",
    "type": "capstone",
-   "effect": "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2",
+   "effect": "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2 (not Trap)",
    "levels": [
     {
      "tier": 4,
@@ -6596,7 +6596,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2",
+     "effect": "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2 (not Trap)",
      "costs": [
       {
        "item": "SQL Injector",

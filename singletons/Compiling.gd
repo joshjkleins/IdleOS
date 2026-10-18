@@ -366,5 +366,5 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	SCHOOL["level"] = int(data.get("school_level", SCHOOL["level"]))
 	SCHOOL["experience"] = int(data.get("school_experience", SCHOOL["experience"]))
-	SCHOOL["efficiency"] = float(data.get("school_efficiency", SCHOOL["efficiency"]))
+	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

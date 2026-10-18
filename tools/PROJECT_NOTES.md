@@ -1,7 +1,7 @@
 # IdleOS — project notes for a fresh session
 
 Read this first. It covers how we work, how to test, the upgrade system, and what's left.
-Last updated: 2026-10-18, after the Cracking upgrade step.
+Last updated: 2026-10-18, after the Phishing upgrade step.
 
 ## Working conventions (from Josh)
 - Godot 4.4 project. On the linked computer it lives at `~/OneDrive/Documents/idle-os-prototype`;
@@ -17,6 +17,13 @@ Last updated: 2026-10-18, after the Cracking upgrade step.
 - Big changes: brainstorm/plan with him first, then implement **one skill at a time** so he can test.
 
 ## Testing setup (device shell)
+- **The device shell's home can be fresh in a new session** (Godot, `$HOME/new` and the old test scripts
+  were gone on 2026-10-18). Rebuild: download
+  `https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip`
+  to `$HOME`, unzip with python `zipfile`, `chmod +x`; `cp -r` the project to `$HOME/new` (drop `.git`,
+  `_to_delete`). Test scripts are now kept in the project at `tools/tests/` (has `.gdignore`, so Godot
+  skips them): copy them to `$HOME/new` root to run. The older ones (`cmd_test`, `vm_test`, `sweep`,
+  `minetest`, `parsetest`, `cracktest`, ...) were lost and are not in `tools/tests` yet.
 - Godot binary: `$HOME/Godot_v4.4.1-stable_linux.x86_64`.
 - Test copy of the project: `$HOME/new`. **Copy every edited file there before running tests**
   (`cp <file> $HOME/new/<file>`). Test scripts (`*.gd` + `*.tscn` pairs) live in `$HOME/new` root.
@@ -33,7 +40,9 @@ Last updated: 2026-10-18, after the Cracking upgrade step.
   (`--headless --path new --quit-after 1500`), sweeps `SWEEP=<skill> res://sweep.tscn`
   (mining, parsing, cracking, matching, phishing, decoding, compiling; ~85 s each) and
   `SWEEP=hack` (~170 s). All should print 0 SCRIPT ERROR and `>>> done`.
-- Useful existing tests: `minetest`, `parsetest`, `cracktest` (per-skill upgrade checks),
+- `matchtest` (Matching upgrade checks; `PART=1|2|3` splits it to fit 180 s) and `cmdmatch` (drives the
+  real terminal: `apt matching`, `cd matching`, `match -cred`, modifiers, `info matching`) are in `tools/tests/`.
+- Useful existing tests (lost, see above): `minetest`, `parsetest`, `cracktest` (per-skill upgrade checks),
   `apttest`, `bulktest`, `bartest` (apt flows), `exptest` (one-time items), `fshot2/fshot3` (fight renders).
 
 ## Godot gotchas we hit
@@ -88,18 +97,62 @@ Last updated: 2026-10-18, after the Cracking upgrade step.
   plaintext/deep-read/survey, Cold Cache.
 - Cracking: speed, efficiency, recovery, dictionary, rainbow tables, Keyring, modifiers
   crossref/analyze/survey, Cryo Rig.
+- Matching: speed, efficiency, recovery (rolled when inputs are consumed: the pair is kept), Auto-Correlate
+  (every step of a match x (1 - head start)), Hot Cache (streak per run, shown in the "confirmation
+  algorithm" subtitle, resets on stop), Rolodex, modifiers prebuild/correlate/survey (title shows
+  "MATCHING ENGINE · <MOD>"), Cold Storage. VM tokens now roll on time (were flat per match).
+  Measured at L99: 17.2 s/match base -> 0.46 s all tracks max; tokens/hour 2.14 unchanged by speed.
+- **Fixed: first-process efficiency compounding every launch** (Logs 26197%, Spear 1748%...). Skills'
+  `load_data` wrote the legacy `<process>_efficiency` key before `Exp.processes_load_data` snapshotted the
+  code base (the load runs in idle_os_2 `_ready`, before Exp's deferred snapshot). Legacy lines removed;
+  efficiency is always rebuilt from level, so old saves heal on load. Test: `tools/tests/efftest`.
+- **Phishing processes** (before its upgrades): order is Spear (T1, L1), Whaling (T2, L15), Smish (T3, L30),
+  Trap (T4, L45), Mod (UTILITY, L5). Each process has a "style" (lines / whale / smish / trap) that
+  `phishing_line.gd` branches on; the terminal runs 1 line for whale/smish/trap.
+  - Whaling: every line on one whale, reel = 120 s / lines; bundle 10-24 (85% SQL / 15% spoof); 5% one-time
+    exploit item from an unlocked tier. ~1.3x Spear's items/hour at L99.
+  - Smish: blast of 8 texts per line, replies at random times over 60 s; reply chance 3% (+0.05%/lvl);
+    each reply = 1 intel point (`Decoding.add_intel_point`) on `target=<target>` or a random unlocked
+    target that isn't maxed; all maxed -> 1 SQL Injector. `parse_bait` now also parses `target=`.
+  - Trap: 60 s setup in the terminal, then fills over 45 min of real (unix) time, also offline. State in
+    `Phishing.trap` (saved). `trap` / `trap collect` work from any context (also `phish -trap collect`).
+    Full haul 70 SQL + 15 spoofs; rare rolls only when full: exploit item at eff, hacking mod at eff/5.
+    Early collect = proportional basics, no rares. Not allowed in a VM, excluded from contracts.
+    Right panel row under PROCESS: `scripts/trap_status.gd` (code-built by system_dock).
+  - Mod pool = every hacking mod item whose `tier` is unlocked (`Phishing.mod_pool()`): new mods only need
+    a `.tres` with `hacking_mod_item = true` and the right `tier`.
+  - Bait: 10 Mining items per cast (whale cast / smish blast / trap), doubles what that cast brings in, and
+    still multiplies bite chance x1.10 (Logs) .. x1.35 (Databases). Warns if you have fewer than 10.
+  - VM tokens: bonus on top of the catch. "vm token chance" per attempt at base speed (+ "vm token per" for
+    info: 0.33% per cast, 5% per whale, 4% per blast, 100% on a full trap), scaled by time spent / base attempt
+    and by 3 / lines for Spear/Mod, so ~2/hr regardless of speed or lines. Info now shows each process's real
+    "vm token chance" for every skill (it was hardcoded "1%").
+  - Trap efficiency 15% -> 25% at L99 (rate 0.0010204); bait multiplies the rare chance on top.
+  - Display commands use (optional) not [optional]: `strip_bbcode` ate the brackets and broke table padding.
+  - Upgrade tiers are location tiers for every skill (the sheet's 6 Phishing tiers are correct).
+- **Phishing upgrades** (WIRED): PhishingTerminal helpers do the work for every style:
+  `step_seconds()` (speed + modifier speed on normal/overclock, Quick Hook on reels: Spear/Mod download,
+  Whaling reel, Smish reply window; overheat fixed), `wait_seconds()`, `catch_amount()` (bait x2, Chum x2,
+  Survey half), `catch_xp()`, `roll_lure()`, `take_bait()` (Bait Recycling), `modifier_block_reason()`
+  (no modifiers while setting a Trap; idle_os_2 checks it). Efficiency is RELATIVE:
+  `Phishing.get_efficiency(p)` = level efficiency x (1 + track), +20% of its own at max (Spear 59% -> 71%,
+  Trap 25% -> 30%). Bait Power adds to the bait multiplier. Speed applies to every step except Trap's fill.
+  Level rate 0.005 -> 0.003 (Spear, Whaling). Capstones: overclock, tackle_box (token x2, also Trap),
+  lure/chum/survey modifiers, deep_water (COOL_PACKAGE). Measured L99: Spear 400/h base, ~9,000/h all
+  tracks max (3 -> 9 lines); Whaling 490/h -> ~7,700/h.
+  - Sheet: Phishing wording updated in gen_upgrades.py; Inputs rate stays 330/h (measured L10 Spear 217/h
+    unbaited, 445/h baited; bait burns ~6.5k Logs/h vs ~3k/h supply, so ~320/h blended).
+  - gen_upgrades.py now saves next to itself (or to argv[1]). data/upgrades.json strips designer notes like
+    "(existing ...)" from effects, so after regenerating only the changed group was merged into the json
+    (regenerating everything would bring those notes back).
+- `info <skill>` MODIFIERS box: STATUS column 14 -> 18 (COMMAND 45 -> 41) so "at Matching v1.0" no longer
+  runs into the command text (affected every 8+ letter skill).
 
 ### Left (designs are in the sheet; wire one per step, add the group to WIRED_GROUPS)
-- **Matching:** speed, efficiency (20% max), recovery (20%), auto_correlate (+10% head start/tier),
-  hot_cache (+1% speed per consecutive match, cap +5%/tier, resets on stop). Capstones: overclock,
-  rolodex (token x2), prebuild (mod: -50% speed, heat x1.5, 5% chance per match to also make the tier's
-  payload), correlate (mod: -40% speed, efficiency x2, token x2, heat x2), survey, cold_storage.
-  The old version-based quantity bonus is already removed (3-10 extra on a proc).
-- **Phishing:** speed, efficiency (bite chance, 20% max), lines (+1/tier), bait_power (+5%),
+- ~~Phishing~~ DONE (kept for reference): speed, efficiency (bite chance, 20% max), lines (+1/tier), bait_power (+5%),
   bait_recycling (+5% bait kept), quick_hook (-5% reel). Capstones: overclock, tackle_box, lure (mod:
   -50% speed, heat x1.5, 3% per catch to also hook a hacking mod item), chum (mod: -40% speed, catches
-  doubled, token x2, heat x2), survey, deep_water. ALSO: the **bait loop** (bait uses 10 items per cast
-  and doubles the catch) and Phishing level efficiency rate 0.005 -> 0.003. Re-measure Phishing's rate
+  doubled, token x2, heat x2), survey, deep_water. All done. Re-measure Phishing's rate
   for the sheet afterwards.
 - **Decoding:** speed, efficiency (rare chance, +4% max), yield (+10% basics), rare_tracker (+0.25% rare
   chance per dry cache per tier level, resets on a rare), compression (+10% packaged), field_notes

@@ -49,8 +49,8 @@ func get_modifier_info_text(skill: Node) -> String:
 	if skill == Defragging:
 		return ""
 	var l_mod = 16
-	var l_status = 14
-	var l_cmd = 45
+	var l_status = 18 # fits "at Compiling v1.0" + a gap
+	var l_cmd = 41
 	var l_effect = 44
 	var text = ""
 	text += "┌────────────────────────────────────────────────────── MODIFIERS ───────────────────────────────────────────────────────┐\n"
@@ -552,8 +552,8 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 			return_text += "├─ " + text + "\n"
 		
 		var vm = skill.vm_token
-		var vm_name = vm.name + " (1%)"
-		var dots_amount = 35 - vm_name.length()
+		var vm_name = vm.name + " (%s%s)" % [_pct_text(float(process.get("vm token chance", 0.01))), (" " + process["vm token per"]) if process.has("vm token per") else ""]
+		var dots_amount = max(2, 35 - vm_name.length())
 		return_text += "└─ " + vm_name + ".".repeat(dots_amount) + vm.description + "\n"
 	
 	if process.has('example commands'):
@@ -568,6 +568,13 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 			return_text += prefix + " " +  example_text.cmd + ".".repeat(dots_length) + example_text.description + "\n"
 			j += 1
 	return return_text
+
+## 0.0033 -> "0.33%", 0.05 -> "5%", 1.0 -> "100%"
+func _pct_text(chance: float) -> String:
+	var pct = chance * 100.0
+	if is_equal_approx(pct, round(pct)):
+		return "%d%%" % roundi(pct)
+	return ("%.2f%%" if pct < 1.0 else "%.1f%%") % pct
 
 func info_command_text():
 	var return_string = ""

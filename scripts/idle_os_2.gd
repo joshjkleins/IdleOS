@@ -424,6 +424,9 @@ func universal_commands(text):
 	if text == "vm" or text.begins_with("vm "):
 		handle_vm_commands(text)
 		return true
+	if text == "trap" or text.begins_with("trap "):
+		add_line(Phishing.trap_command_text(text.trim_prefix("trap")))
+		return true
 	if text == "intel" or text.begins_with("intel "):
 		add_line(Decoding.intel_command_text(text.trim_prefix("intel")))
 		return true
@@ -1306,8 +1309,11 @@ func handle_vm_token_commands(text):
 		if parsed_bait.error != "":
 			add_line(parsed_bait.error)
 			return
+		if target_minor_process == Phishing.TRAP:
+			add_line("Traps don't need a VM: set one with 'phish -trap', it fills on its own.")
+			return
 		Inventory.remove_resource(target_process.vm_token, 1)
-		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait)
+		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait, parsed_bait.target)
 	else:
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, true)
@@ -1800,6 +1806,9 @@ func _handle_modifier_command(text: String) -> bool:
 	if !process_running or current_process == null or !("modifier" in current_process):
 		add_line("No process running in the main terminal to use %s on." % mod.name)
 		return true
+	if !kill and current_process.has_method("modifier_block_reason") and current_process.modifier_block_reason() != "":
+		add_line(current_process.modifier_block_reason())
+		return true
 	if kill:
 		if current_process.has_modifier(cmd):
 			current_process.modifier = {}
@@ -1847,34 +1856,44 @@ func overclock_logic():
 ###################################################
 func phishing_commands(text):
 	text = text.to_lower().strip_edges()
-	var parsed_bait = Phishing.parse_bait(text) # "phish -spear bait=logs"
+	if text == "phish -trap collect" or text == "phish -trap status":
+		add_line(Phishing.trap_command_text(text.trim_prefix("phish -trap")))
+		return
+	var parsed_bait = Phishing.parse_bait(text) # "phish -spear bait=logs", "phish -smish target=student"
 	for ms in Phishing.minor_processes:
 		if parsed_bait.command == ms["command"]:
 			if parsed_bait.error != "":
 				add_line(parsed_bait.error)
 				return
-			if process_running:
-				add_line(ContextCommands.process_already_running_text())
-				return
 			if !ms.unlocked:
 				add_line("Process not unlocked")
 				return
-				
-			cast_line(ms, -1, parsed_bait.bait)
+			if ms == Phishing.TRAP and Phishing.has_trap():
+				add_line(Phishing.trap_status_text())
+				return
+			if !parsed_bait.target.is_empty() and ms != Phishing.SMISH:
+				add_line("target= only works with Smish ('phish -smish target=<target>').")
+				return
+			if process_running:
+				add_line(ContextCommands.process_already_running_text())
+				return
+			if parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.BAIT_PER_CAST:
+				add_line("[color=#d29922]Only %d %s: bait needs %d per cast, so casts go out unbaited until you have more.[/color]" % [Inventory.get_amount(parsed_bait.bait), parsed_bait.bait.name, Phishing.BAIT_PER_CAST])
+			cast_line(ms, -1, parsed_bait.bait, parsed_bait.target)
 			return
 	_handle_process_commands(text, "Finishing current phishing attempt...")
 
 
-func cast_line(type: Dictionary, t_lines: int, bait: ItemData = null):
+func cast_line(type: Dictionary, t_lines: int, bait: ItemData = null, target: Dictionary = {}):
 	if current_process is PhishingTerminal:
-		current_process.cast_lines(type, t_lines, bait)
+		current_process.cast_lines(type, t_lines, bait, target)
 	else:
 		var new_phishing_terminal = phishing_scene.instantiate()
 		terminal_body_container.add_child(new_phishing_terminal)
 		process_running = true
 		current_process = new_phishing_terminal
 		current_process_info = type
-		new_phishing_terminal.cast_lines(type, t_lines, bait)
+		new_phishing_terminal.cast_lines(type, t_lines, bait, target)
 		hud_process_running.process_started(Phishing, type)
 		add_new_scrollback()
 

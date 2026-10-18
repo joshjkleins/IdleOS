@@ -20,7 +20,7 @@ const DEV_UNLOCK_ALL_TIERS := true
 
 ## Groups whose effects are wired up in code. The rest are listed in apt but can't be installed yet
 ## (skills are migrated one at a time).
-const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking"]
+const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking", "Matching", "Phishing"]
 
 ## Packages that aren't in the new data but are still read by code that hasn't been migrated yet.
 const LEGACY_DEFAULTS := {

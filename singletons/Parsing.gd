@@ -488,7 +488,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	FOOTPRINT["level"] = int(data.get("footprint_level", FOOTPRINT["level"]))
 	FOOTPRINT["experience"] = int(data.get("footprint_experience", FOOTPRINT["experience"]))
-	FOOTPRINT["efficiency"] = float(data.get("footprint_efficiency", FOOTPRINT["efficiency"]))
+	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 

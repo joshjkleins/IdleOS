@@ -186,20 +186,20 @@ GROUPS["Matching"] = [
          "Passive: Overclock, Prebuild and Correlate produce no extra heat"],"one-off",None),
 ]
 GROUPS["Phishing"] = [
-    (TRACK,"Speed","Cast / reel speed (each install ~14.5% faster than before it)",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
-    (TRACK,"Speed","Cast / reel speed",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
-    (TRACK,"Speed","Cast / reel speed",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
-    (TRACK,"Efficiency","Bite chance (on top of level efficiency); 20% at max","+1.67%",(0,20/12,"% bonus bite chance")),
-    (TRACK,"Efficiency","Bite chance","+1.67%",(0,20/12,"% bonus bite chance")),
-    (TRACK,"Lines","Max simultaneous lines (one per tier: each line is a parallel cast)","+1",(0,1,"extra lines")),
-    (TRACK,"Bait Power","Bait multiplier bonus","+5%",(0,5,"% bait bonus")),
-    (PTD,"Bait Recycling","Chance a bait is not consumed on a cast","+5%",(0,5,"% bait kept")),
-    (PTD,"Quick Hook","Faster reel-in after a bite","-5% reel time",(0,5,"% faster reel")),
+    (TRACK,"Speed","Phishing speed: casts, waits, reels, Smish sends/replies, Trap setup; not Trap's 45 min fill (each install ~14.5% faster than before it)",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
+    (TRACK,"Speed","Phishing speed (not Trap fill)",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
+    (TRACK,"Speed","Phishing speed (not Trap fill)",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
+    (TRACK,"Efficiency","Each process's efficiency x(1 + bonus): bite, reply or Trap rare chance; +20% of its own efficiency at max (59% -> 71%)","+1.67% of eff",(0,20/12,"% of own efficiency")),
+    (TRACK,"Efficiency","Process efficiency, relative (+20% of its own at max)","+1.67% of eff",(0,20/12,"% of own efficiency")),
+    (TRACK,"Lines","Max lines (Spear/Mod: one more parallel cast; Whaling: faster reel; Smish: +8 texts per blast)","+1",(0,1,"extra lines")),
+    (TRACK,"Bait Power","Bait bite-chance bonus (Logs x1.10 -> x1.15 ...)","+5%",(0,5,"% bait bonus")),
+    (PTD,"Bait Recycling","Chance a cast's 10 bait are not used up","+5%",(0,5,"% bait kept")),
+    (PTD,"Quick Hook","Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)","-5% reel time",(0,5,"% faster reel")),
     (CAP,["Overclock","Tackle Box","Lure","Chum","Survey","Deep Water"],
         ["MODIFIER 'overclock': faster, more heat (existing)",
          "Passive: VM Phishing token chance x2",
-         "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item",
-         "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2",
+         "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item (not Trap)",
+         "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2 (not Trap)",
          "MODIFIER 'survey': half catches, +100% Phishing XP",
          "Passive: Overclock, Lure and Chum produce no extra heat"],"one-off",None),
 ]
@@ -397,7 +397,7 @@ rates=[("mining","Tier mined item",570,"Measured: mine -logs, 8s cycles"),
  ("parsing","Tier address + encrypted + identifier (total)",930,"Measured: parse -footprint=logs"),
  ("cracking","Tier cracked item",375,"Measured: crack -password"),
  ("matching","Tier matched item",210,"Measured: match -cred"),
- ("phishing","SQL Injectors + Packet Spoofs",330,"Measured: phish -spear (90/10 split)"),
+ ("phishing","SQL Injectors + Packet Spoofs",330,"Measured L10 spear: 217/h unbaited, 445/h baited (~6.5k Logs/h); ~330/h with bait limited to ~3k Logs/h"),
  ("decoding","Tier mined item from caches",4500,"Measured 120 caches/h x ~37.5 Logs per Student cache"),
  ("compiling","Tier payload",420,"Measured: compile -school"),
  ("hacking","Tier's first-target cache",82,"Student fights ~44s each incl. access (earlier fight logs)"),
@@ -505,6 +505,9 @@ notes = [
  "    still matter late. Game value: 'efficiency rate' 0.005 -> 0.003 on Phishing processes.",
  "  • Per tier: Speed x3, Efficiency x2 (bite chance, 20% max), Lines x1 (+6 max), Bait Power (+5%), Bait Recycling (+5%),",
  "    Quick Hook (-5% reel), Capstone. Lines are one per tier because each line is a whole parallel cast.",
+ "  • Efficiency is relative (+20% of each process's own efficiency at max) so Smish (3-8% reply) and Trap",
+ "    (15-25% rare) scale with it too. Speed covers every Phishing step except Trap's fixed 45 min fill.",
+ "  • Processes: Spear (T1), Whaling (T2), Smish (T3), Trap (T4), Mod (utility). Upgrade tiers are location tiers.",
  "  • Capstones: Overclock, Tackle Box (token x2), Lure (mod), Chum (mod), Survey (mod), Deep Water.",
  "",
  "DECODING (decided)",
@@ -532,7 +535,8 @@ notes = [
  "  • Check (Tier 1, measured rates): ~3,300 Logs/h used as bait vs ~3,000/h from hacking + decoding;",
  "    ~600 SQL Injectors/h with bait vs ~570/h used by nonstop Student hacking.",
  "  • Logs from caches now have a competing use, so they're no longer free currency for Mining/Parsing upgrades.",
- "  • Phishing's rate on the Inputs tab (330/h) is without bait; re-measure once bait is implemented.",
+ "  • Re-measured with bait (L10 Spear): 217/h unbaited, 445/h baited, but bait burns ~6.5k Logs/h vs ~3k/h coming in,",
+ "    so bait is on ~46% of the time: ~320/h blended. The Inputs rate stays 330/h.",
  "",
  "OPEN FOR YOU TO CUT/ADD",
  "  • Rename any Pointed/Capstone. Change the 10-slot mix per group. Retune every value and cost in 'All Upgrades'.",
@@ -643,5 +647,6 @@ for col,w in zip("ABCDE",[12,13,7,14,13]): c2.column_dimensions[col].width=w
 for cc in range(1,6):
     c2.cell(c2.max_row,cc).font=Font(name=F,bold=True)
 
-wb.save("/tmp/claude-0/-home-claude/6216b83f-05d9-51bd-9178-97f54411dbf2/scratchpad/idleos_upgrades.xlsx")
+import os, sys
+wb.save(sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "idleos_upgrades.xlsx"))
 print("rows:", ws.max_row-1)

@@ -1,6 +1,8 @@
 extends BaseTerminal
 ## Matching terminal: consumes one of each required item, walks 4 stages of terminal messages
 ## (each message one speed step), then assembles the result. Efficiency rolls bonus quantity.
+## Upgrades: recovery (inputs kept), Auto-Correlate (head start on every match), Hot Cache (speed
+## streak), modifiers prebuild/correlate/survey, Rolodex (token x2), Cold Storage (no extra heat).
 
 #@onready var user_row_container = $MarginContainer/VBoxContainer/BottomRow/VBoxContainer/UserRowContainer
 @onready var main_bar = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/MainBar
@@ -31,6 +33,8 @@ extends BaseTerminal
 @onready var terminal_scroll = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll
 @onready var terminal_label = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Terminal/MarginContainer/TerminalScroll/VBoxContainer/TerminalLabel
 @onready var efficiency_label = $MarginContainer/VBoxContainer/TopRow/ThirdCol/MarginContainer/VBoxContainer/EfficiencyLabel
+@onready var title_label = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Label
+@onready var subtitle_label = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/Label2
 
 var db_lookup_messages: Array[String] = [
 	"[color=#555555][DB] [/color] [color=#79c0ff]QUERY    [/color] Scanning user index... [color=#bc8cff]0x4F2A[/color]",
@@ -104,6 +108,9 @@ const THEMES = {
 }
 
 var _cycle_mode: Mode = Mode.NORMAL # worst mode seen this match (decides heat)
+var _match_seconds := 0.0  # real time the current match took (VM tokens roll on time)
+var _head_start := 0.0     # Auto-Correlate: every step of this match is this much shorter
+var _streak: int = 0       # Hot Cache: consecutive matches this run (reset when stopped)
 var match_theme: Dictionary
 
 func set_type(p_type: Dictionary, window: bool = false): #param = minor skill
@@ -136,6 +143,9 @@ func _has_requirements() -> bool:
 	return true
 
 func _consume_required_items():
+	# Recovery: a chance the inputs aren't used up
+	if randf() < Upgrades.cur("matching.recovery"):
+		return
 	for item in process_data["requirements"]:
 		Inventory.remove_resource(item, 1)
 
@@ -157,6 +167,9 @@ func _update_efficiency_label():
 
 func start():
 	begin_run()
+	_streak = 0
+	_update_title()
+	_update_subtitle()
 	sb = third_col.get_theme_stylebox("panel")
 	if !_has_requirements():
 		_finished()
@@ -191,6 +204,8 @@ func _begin_matching():
 	if !running:
 		return
 	_cycle_mode = Mode.NORMAL
+	_match_seconds = 0.0
+	_head_start = Upgrades.cur("matching.auto_correlate")
 	#get current_row
 	third_col.add_theme_stylebox_override("panel", sb)
 	main_bar.value = 0.0
@@ -236,7 +251,9 @@ func _update_matching_terminal(message):
 	var tween = create_tween()
 	var mode := get_mode()
 	_cycle_mode = worst_mode(_cycle_mode, mode)
-	tween.tween_property(main_bar, "value", main_bar.value + intervals, get_step_time(mode))
+	var step: float = get_step_time(mode) * (1.0 - _head_start) / (1.0 + _hot_cache_bonus())
+	_match_seconds += step
+	tween.tween_property(main_bar, "value", main_bar.value + intervals, step)
 	await tween.finished
 
 func _update_tag_color(index: int):
@@ -276,10 +293,19 @@ func _match_finished(): #add heat/resource/xp/emit signals
 	var quantity = 1
 	var total_eff = _get_efficiency_total()
 	if randf() <= total_eff:
-		var min_q = 3 # (was + version x 10; replaced by Matching upgrade tracks)
-		var max_q = 10
-		quantity += randi_range(min_q, max_q)
-	Inventory.add_resource(process_data["resource gained"], quantity)
+		quantity += randi_range(3, 10) # extra on a proc
+	# Survey: half the output (coin flip on odd amounts), double the XP
+	var xp = process_data["experience per level"]
+	if has_modifier("survey"):
+		quantity = quantity / 2 + (1 if quantity % 2 == 1 and randf() < 0.5 else 0)
+		xp *= 2
+	if quantity > 0:
+		Inventory.add_resource(process_data["resource gained"], quantity)
+	# Prebuild: a chance to also produce the tier's payload (skips Compiling)
+	if has_modifier("prebuild") and randf() < Matching.PREBUILD_CHANCE:
+		var tier = Matching.minor_processes.find(process_data) + 1
+		if tier > 0:
+			Inventory.add_resource(Decoding.get_tier_resources(tier)[6], 1)
 	update_player_amount_received_labels()
 	Tutorial.track_event(Tutorial.TutorialEvent.MATCH_3_CREDENTIALS, 1)
 	status_title.text = process_data["resource gained"]["name"].to_upper() + " ASSEMBLED"
@@ -290,12 +316,48 @@ func _match_finished(): #add heat/resource/xp/emit signals
 		
 	apply_heat(_cycle_mode) # same rules as every skill: overclock heat only when overclock is unlocked
 	process_data.signal.emit(1)
-	Exp.add_xp(Matching, process_data, process_data["experience per level"])
+	record_cycle(quantity)
+	Exp.add_xp(Matching, process_data, xp)
 	
-	if randf() <= process_data.get("vm token chance", 0.01):
+	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_MATCHING_TOKEN, 1)
+	_streak += 1
+	_update_subtitle()
 	_update_efficiency_label()
 	Signals.update_hud(Matching)
+
+## Hot Cache: +1% speed per consecutive match this run, up to the installed cap
+func _hot_cache_bonus() -> float:
+	return min(_streak * Matching.HOT_CACHE_STEP, Upgrades.cur("matching.hot_cache"))
+
+## VM token chance for the match just finished, rolled on time spent (speed upgrades, overclock and
+## head starts don't change tokens per hour): the process's chance is for a base-speed match, scaled by
+## how long this one took. Rolodex and Correlate double it.
+func _token_chance() -> float:
+	var steps := 0
+	for msgs in terminal_messages:
+		steps += msgs.size()
+	var base_match = (float(process_data["base speed min"]) + float(process_data["base speed max"])) / 2.0 * steps
+	var chance = process_data.get("vm token chance", 0.01) * (_match_seconds / max(0.001, base_match))
+	if Upgrades.has("matching.rolodex"):
+		chance *= 2.0
+	if has_modifier("correlate"):
+		chance *= 2.0
+	return chance
+
+## "MATCHING ENGINE · PREBUILD" while a modifier runs
+func _update_title() -> void:
+	title_label.text = "MATCHING ENGINE" + ((" · " + modifier.name.to_upper()) if !modifier.is_empty() else "")
+
+## Shows the Hot Cache streak once the track is installed
+func _update_subtitle() -> void:
+	if Upgrades.cur("matching.hot_cache") > 0.0:
+		subtitle_label.text = "hot cache +%d%%" % roundi(_hot_cache_bonus() * 100.0)
+	else:
+		subtitle_label.text = "confirmation algorithm"
+
+func _on_stopped() -> void:
+	_streak = 0
 
 func generate_username_variations(base_username: String) -> Array[String]:
 	var variations: Array[String] = []
@@ -349,7 +411,7 @@ func _get_efficiency_total():
 	var efficiency_matching_package = Upgrades.get_package_info("matching.efficiency")
 	var efficiency_upgrade = efficiency_matching_package.current
 	
-	return (base_efficiency + efficiency_upgrade) * defrag_multiplier
+	return (base_efficiency + efficiency_upgrade) * defrag_multiplier * (2.0 if has_modifier("correlate") else 1.0)
 
 func update_player_amount_received_labels():
 	resource_received_amount.text = "x" + str(Inventory.get_amount(process_data["resource gained"]))

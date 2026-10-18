@@ -12,6 +12,21 @@ var vm_token = Items.VM_MATCHING_TOKEN
 @onready var VM_UPTIME = 30.0
 var CURRENT_VMS = 0
 
+## Modifier commands unlocked by Matching capstones (see Mining.MODIFIERS for how they work).
+const MODIFIERS = [
+	{"command": "prebuild", "name": "Prebuild", "package": "matching.prebuild", "speed": 0.5, "heat": 1.5,
+		"effect": "-50% speed, heat x1.5. Each match has a 5% chance to also produce the tier's payload."},
+	{"command": "correlate", "name": "Correlate", "package": "matching.correlate", "speed": 0.6, "heat": 2.0,
+		"effect": "-40% speed, heat x2. Efficiency x2 and VM token chance x2."},
+	{"command": "survey", "name": "Survey", "package": "matching.survey", "speed": 1.0, "heat": 1.0,
+		"effect": "Half output, +100% Matching XP."},
+]
+const PREBUILD_CHANCE := 0.05
+## Hot Cache: +1% speed per consecutive match, up to the installed cap
+const HOT_CACHE_STEP := 0.01
+## Cold Storage: overclock and the modifiers add no extra heat
+const COOL_PACKAGE := "matching.cold_storage"
+
 var terminal_scene = preload("res://scenes/cred_matching_terminal.tscn")
 
 #GENERAL MODULE DATA
@@ -293,7 +308,7 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	CREDENTIAL["level"] = int(data.get("credential_level", CREDENTIAL["level"]))
 	CREDENTIAL["experience"] = int(data.get("credential_experience", CREDENTIAL["experience"]))
-	CREDENTIAL["efficiency"] = float(data.get("credential_efficiency", CREDENTIAL["efficiency"]))
+	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 const RANDOM_USERNAMES := [
