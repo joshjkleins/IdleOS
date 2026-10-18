@@ -317,7 +317,8 @@ func save_data() -> Dictionary:
 	return {
 		"tutorial_progress": progress_out,
 		"completed_events": completed_out,
-		"show_intro": show_intro
+		"show_intro": show_intro,
+		"upload_baseline": upload_baseline,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -332,7 +333,9 @@ func load_data(data: Dictionary) -> void:
 		completed_events.append(int(v))
 	
 	show_intro = data.get("show_intro", true)
-	_complete_skipped_new_steps()
+	upload_baseline = data.get("upload_baseline", {})
+	if SaveManager.loaded_version < 2: # only saves from before the upload steps existed
+		_complete_skipped_new_steps()
 
 ## Saves from before the upload steps existed: a new step that sits before something the player already
 ## finished is marked done silently (they're past it), so returning players aren't sent back.
@@ -347,11 +350,62 @@ func _complete_skipped_new_steps() -> void:
 		if e > TutorialEvent.UPLOAD_PARENTS_CC and !completed_events.has(e):
 			completed_events.append(e)
 
+## Uploaded counts when 'tutorial reset' ran (item name -> amount), so earlier uploads don't tick the upload steps
+var upload_baseline: Dictionary = {}
+
+## Returning players: old saves (version < 2) with tutorial progress get a one-time note on load.
+func should_show_old_save_notice() -> bool:
+	return SaveManager.loaded_version < 2 and !completed_events.is_empty()
+
+func old_save_notice() -> String:
+	var m := "[color=yellow]WELCOME BACK[/color]\n"
+	m += "Your save is from an earlier version of the demo. Since then the tutorial has been rebuilt and uploads now unlock new locations.\n"
+	m += "Want a refresher? Type 'tutorial reset' to restart the tutorial. [color=#666666]Your items, levels and upgrades stay as they are.[/color]"
+	return m
+
+## 'tutorial reset': clears the checklist only. Steps this save can't redo (Mining upgrades maxed, an item's
+## upload goal already covered) are checked off so the player can't get stuck. Returns how many were skipped.
+func reset_tutorial() -> int:
+	completed_events.clear()
+	tutorial_progress.clear()
+	upload_baseline.clear()
+	for e in UPLOAD_STEPS:
+		var item: ItemData = UPLOAD_STEPS[e]
+		upload_baseline[item.name] = Uploads.get_uploaded(item)
+	var skip: Array = []
+	var mining_left := false
+	for p in Upgrades.group_packages("Mining"):
+		if !Upgrades.is_at_max_level(p.id):
+			mining_left = true
+	if !mining_left:
+		skip.append(TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
+	if !Uploads.is_goal_item(Items.LOGS) or Uploads.get_still_needed(Items.LOGS) < get_event_requirement(TutorialEvent.PACKAGE_5_LOGS):
+		skip.append(TutorialEvent.PACKAGE_5_LOGS)
+	for e in UPLOAD_STEPS:
+		var item: ItemData = UPLOAD_STEPS[e]
+		if !Uploads.is_goal_item(item) or (Uploads.get_still_needed(item) <= 0 and Uploads.get_staged(item) <= 0):
+			skip.append(e)
+	if !Uploads.is_goal_item(Items.PARENTS_CREDIT_CARD) or Uploads.get_still_needed(Items.PARENTS_CREDIT_CARD) <= 0:
+		skip.append(TutorialEvent.UPLOAD_PARENTS_CC)
+	for e in skip:
+		if !completed_events.has(e):
+			completed_events.append(e)
+	SaveManager.mark_dirty()
+	return skip.size()
+
+func reset_message(skipped: int) -> String:
+	var m := "[color=green]TUTORIAL RESTARTED[/color]\n"
+	m += "[color=gray]Checklist cleared. Items, levels and upgrades are untouched.[/color]\n"
+	if skipped > 0:
+		m += "[color=#666666]%d step%s your save can't redo (already maxed or uploaded) %s checked off.[/color]\n" % [skipped, "" if skipped == 1 else "s", "was" if skipped == 1 else "were"]
+	m += "\n[color=yellow]OBJECTIVE[/color]\n" + get_current_task()
+	return m
+
 ## Upload hooks: 'upload' status, packaged Logs, and each upload step once its item is uploading.
 func _on_uploads_changed() -> void:
 	for e in UPLOAD_STEPS:
 		var item = UPLOAD_STEPS[e]
-		if !completed_events.has(e) and (Uploads.is_uploading(item) or Uploads.get_uploaded(item) > 0):
+		if !completed_events.has(e) and (Uploads.is_uploading(item) or Uploads.get_uploaded(item) > int(upload_baseline.get(item.name, 0))):
 			complete_event(e)
 
 func on_items_packaged(item: ItemData, amount: int) -> void:

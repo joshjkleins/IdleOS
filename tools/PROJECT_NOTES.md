@@ -27,6 +27,12 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   store page in Steam where you can wishlist.
 - Student (Hard) first win: message in the main terminal (+ hack console); with uploads done it's "DEMO 100%
   COMPLETE". The send-off says 100% complete if the hard student was already beaten.
+- Old-save tutorial reset (2026-10-18): SaveManager.SAVE_VERSION = 2 (+ `loaded_version`). A save below 2 with
+  tutorial progress gets a one-time WELCOME BACK note on load (Tutorial.old_save_notice). `tutorial reset` /
+  `tutorial -r` clears the checklist only; steps the save can't redo (Mining upgrades maxed, an item's upload goal
+  covered) are auto-checked; `upload_baseline` keeps earlier uploads from ticking upload steps.
+  `_complete_skipped_new_steps` now only runs for version < 2 saves. Tests: tools/tests/tutreset, tutreset2.
+  Port to cdd too.
 - **PORT TO cdd (shared with the full game):** intro objective line; welcome goal statement (hack your first
   target, hacking = the big hauls); tutorial: VM step moved right after 'ls logs' with a free VM Mining token,
   overheating explained on the mine-35 step, 'cd ..' then 'cd decoding' on the package step, 'cd ../parsing'

@@ -1,11 +1,11 @@
 === SHORT DESCRIPTION (Steam limit: 300 characters) ===
 
-An idle hacking game played entirely through a real terminal. Run processes, spin up VM windows and compile your own Hacking Mods as you break your way from a school's network to government servers. Your operation keeps running even while you're offline.
+An idle hacking game played through a life-like terminal. Run processes, spin up VM windows and compile your own Hacking Mods as you break your way from a school's network to government servers.
 
 
 === ABOUT THIS GAME (paste into the Steamworks description field; uses Steam's formatting tags) ===
 
-IdleOS is an idle hacking game played through a real command line. Type commands, spin up virtual machines and build an operation that mines, parses, cracks and matches its way from a high school student's records to classified government servers, and keeps running whether you're watching or not.
+IdleOS is an idle hacking game played through a life-like command line. Type commands, spin up virtual machines and build an operation that mines, parses, cracks and matches its way from a high school student's records to classified government servers, and keeps running whether you're watching or not.
 
 [img]{STEAM_APP_IMAGE}/extras/vm_swarm.gif[/img]
 
@@ -36,7 +36,7 @@ Payloads get you in. Your build keeps you in. Fights play out automatically whil
 [*] Hard Mode targets for anyone who thinks they've mastered the system
 [/list]
 
-[img]{STEAM_APP_IMAGE}/extras/hacking_breach.gif[/img]
+[img]{STEAM_APP_IMAGE}/extras/auto_battle_a.gif[/img]
 
 [h2]Upgrade everything[/h2]
 Every skill has its own packages. apt install your way from v0.0 to v6.0 with 100+ upgrades: faster processes, better odds, more VM windows, and major-release capstones that unlock new modifier commands for each skill.
@@ -55,5 +55,5 @@ The free demo covers the School: every skill up to level 10, the Student and the
 === HOW TO ADD THE GIFS ===
 Steamworks > Store Page Admin > Description tab > "Images for description" (or the image upload button above the text box).
 Upload the five GIFs with these exact file names, then the [img] tags above will find them:
-  vm_swarm.gif, terminal_commands.gif, hacking_breach.gif, upgrades.gif, uploads_panel.gif
+  vm_swarm.gif, terminal_commands.gif, auto_battle_a.gif, upgrades.gif, uploads_panel.gif
 If Steam renames a file on upload, use the tag it gives you instead.

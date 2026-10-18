@@ -1080,7 +1080,7 @@ func get_tutorial() -> String:
 	
 	return_string += "────────────────────────────────────────────────────────\n\n"
 	
-	return_string += "Type 'tutorial' at any time to view progress.\n"
+	return_string += "Type 'tutorial' at any time to view progress. [color=#666666]'tutorial reset' starts it over.[/color]\n"
 	
 	return return_string
 

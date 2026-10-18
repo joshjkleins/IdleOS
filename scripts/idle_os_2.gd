@@ -162,6 +162,8 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
+		if Tutorial.should_show_old_save_notice():
+			add_line(Tutorial.old_save_notice())
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Uploads.tier_completed.connect(_demo_send_off)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
@@ -574,6 +576,9 @@ func universal_commands(text):
 			return true
 		"tutorial":
 			add_line(ContextCommands.get_tutorial())
+			return true
+		"tutorial reset", "tutorial -r":
+			add_line(Tutorial.reset_message(Tutorial.reset_tutorial()))
 			return true
 		"tree":
 			add_line(ContextCommands.get_ascii_tree(get_context_name_string(current_context)))
