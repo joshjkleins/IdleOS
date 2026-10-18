@@ -235,7 +235,7 @@ func install(p: Dictionary) -> Dictionary:
 	_recompute(p)
 	apply_effects(p.id)
 	SaveManager.mark_dirty()
-	if p.id == "mining.overclock":
+	if p.group == "Mining": # tutorial: first Mining upgrade (the enum name is from when it was Overclock)
 		Tutorial.complete_event(Tutorial.TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
 	installed.emit(p, lvl)
 	var tier = int(lvl.tier)

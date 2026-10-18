@@ -85,6 +85,7 @@ func is_tier_complete(tier: int) -> bool:
 #region staging
 func stage(item: ItemData, amount: int = 1) -> void:
 	staged[item] = get_staged(item) + amount
+	Tutorial.on_items_packaged(item, amount)
 	changed.emit()
 	SaveManager.mark_dirty()
 

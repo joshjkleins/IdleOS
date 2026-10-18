@@ -80,9 +80,10 @@ var PACKAGE = {
 	"experience": 0,
 	"experience per level": 10,
 	"command": "decode -package",
-	"display command": "decode -package=<item>",
+	"display command": "decode -package=<item> (<amount>)",
 	"example commands": [
 		{'cmd': 'decode -package=logs', 'description': 'Packages Logs one at a time for upload (stops once the goal is covered)'},
+		{'cmd': 'decode -package=logs 5', 'description': 'Packages 5 Logs, then stops'},
 		{'cmd': 'upload', 'description': 'Shows the current upload goal and what is packaged'}
 	],
 	"efficiency": 0.05,
@@ -410,6 +411,12 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 				return out
 			out.arg = target
 		"package":
+			# optional amount: 'decode -package=logs 5' packages 5 then stops
+			next_package_limit = 0
+			var words = arg_text.split(" ", false)
+			if words.size() > 1 and words[-1].is_valid_int():
+				next_package_limit = max(1, int(words[-1]))
+				arg_text = " ".join(words.slice(0, words.size() - 1))
 			var item = Inventory.get_item_by_name(arg_text) if arg_text != "" else null
 			if item == null:
 				out.message = "Name an item to package. [color=#666666]ex. decode -package=logs  (see 'upload' for the goal)[/color]"
@@ -426,6 +433,9 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 			out.arg = item
 	out.ok = true
 	return out
+
+## 'decode -package=<item> <amount>': read by the terminal that starts next (0 = until the goal is covered)
+var next_package_limit := 0
 
 #region intel
 ## Intel per target, saved: key -> {"amount": stat reduction, "hacks": hacks left}.

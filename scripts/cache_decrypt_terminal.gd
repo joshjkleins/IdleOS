@@ -20,8 +20,13 @@ var current_cache: CacheData = null
 
 ## p_type picks what gets decoded ("decode kind"): cache, skim, deep (caches), salvage, package (an item),
 ## intel (a hacking target). <arg> is the cache / item / target the command named (or null).
+var package_limit := 0 # Package: stop after this many (0 = until the goal is covered)
+
 func set_cache_type(p_type: Dictionary, window: bool = false, arg = null):
 	setup_process(Decoding, p_type, window)
+	if p_type.get("decode kind", "") == "package":
+		package_limit = Decoding.next_package_limit
+		Decoding.next_package_limit = 0
 	if arg is ItemData:
 		target_cache = arg
 	else:
@@ -188,12 +193,15 @@ func update_items_gained_label(label_name: String, amount: int) -> void:
 
 #region package
 func _run_package() -> void:
-	while running and target_cache and Inventory.get_amount(target_cache) > 0 and Uploads.get_still_needed(target_cache) > 0:
+	var packaged := 0
+	while running and target_cache and Inventory.get_amount(target_cache) > 0 and Uploads.get_still_needed(target_cache) > 0 and (package_limit <= 0 or packaged < package_limit):
 		if stop_requested:
 			return
 		cache_decrypt.reset()
-		# efficiency: package a second one in the same pass
-		var amount = 2 if (randf() < Decoding.get_efficiency(process_data) and Inventory.get_amount(target_cache) >= 2 and Uploads.get_still_needed(target_cache) >= 2) else 1
+		# efficiency: package a second one in the same pass (never past the amount asked for)
+		var room = package_limit - packaged if package_limit > 0 else 2
+		var amount = 2 if (room >= 2 and randf() < Decoding.get_efficiency(process_data) and Inventory.get_amount(target_cache) >= 2 and Uploads.get_still_needed(target_cache) >= 2) else 1
+		packaged += amount
 		Inventory.remove_resource(target_cache, amount)
 		cache_name.text = "Packaging %s  (%d left, %d still needed)" % [target_cache.name, Inventory.get_amount(target_cache), Uploads.get_still_needed(target_cache) - amount]
 		cache_decrypt.build_rows([{"item": target_cache, "amount": amount}])
@@ -206,7 +214,9 @@ func _run_package() -> void:
 			return
 		_cycle_done(cycle_mode)
 	if running and target_cache:
-		if Uploads.get_still_needed(target_cache) <= 0:
+		if package_limit > 0 and packaged >= package_limit:
+			cache_name.text = "Packaged %d %s. Start the upload with 'upload -%s'" % [packaged, target_cache.name, target_cache.name.to_lower()]
+		elif Uploads.get_still_needed(target_cache) <= 0:
 			cache_name.text = "%s packaged for this goal. Start the upload with 'upload -%s'" % [target_cache.name, target_cache.name.to_lower()]
 		else:
 			cache_name.text = "Out of %s to package" % target_cache.name

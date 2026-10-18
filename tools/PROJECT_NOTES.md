@@ -11,7 +11,7 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - **Josh commits himself.** Don't run git commits.
 - Leave `classes/` alone, except `classes/CacheDecrypting.gd`, which is in use.
 - Never run `pkill -f Godot_v4` (it kills the shell).
-- Testing flags stay ON while developing: `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
+- Testing flags stay ON while developing: `Tutorial.DEV_ALWAYS_SHOW_INTRO := true` (intro every launch), `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
   unlocked) and `Upgrades.DEV_UNLOCK_ALL_TIERS := true`. Turn both off before release.
 - Josh dislikes walls of text in the terminal: collapse/hide anything not actionable.
 - Big changes: brainstorm/plan with him first, then implement **one skill at a time** so he can test.
@@ -145,6 +145,23 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   - gen_upgrades.py now saves next to itself (or to argv[1]). data/upgrades.json strips designer notes like
     "(existing ...)" from effects, so after regenerating only the changed group was merged into the json
     (regenerating everything would bring those notes back).
+- **Intro + boot rework** (idle_os_2.gd, `#region intro + boot`): briefing in `INTRO_TEXT`, typed by
+  `type_text()` frame-rate independent at `INTRO_CPS` (140/s, short pause between paragraphs); any key
+  finishes typing (`_typing` / `_skip_requested`, handled first in `_input`). 'enter' runs
+  `install_idle_os()`: a boot log drawn straight into the label (`_boot_print/_boot_set`, not add_line, which
+  used to wipe the typed "Downloading Module" lines), header cards per module, then the right panel
+  section by section (each section's own alpha kept in meta "boot_alpha": separators are 0.35), then the
+  command line. Any key skips to `_finish_boot()`. ~6 s typing + ~5 s boot (was ~19 s + ~26 s).
+  The demo-end outro (player_uploaded_proper_item) also uses type_text, so it's skippable too.
+- **Tutorial revamp (uploads woven in):** `Tutorial.TUTORIAL_ORDER` is the order shown; the enum is only ids
+  (saved as numbers), so NEW EVENTS GO AT THE END of the enum. New steps: UPLOAD_INFO ('upload'),
+  PACKAGE_5_LOGS (`Uploads.stage` -> `Tutorial.on_items_packaged`), UPLOAD_LOGS / _IP_ADDRESS / _PASSWORD /
+  _CREDENTIAL / _SCHOOL_PAYLOAD (done once that item is uploading or uploaded, via `Uploads.changed`).
+  Counts worked backwards so uploads don't starve the next skill: mine 35, parse 30, enc pw 6, usernames 5,
+  IP 5, crack 6, match 5, compile 4 (old enum names like MINE_20_LOGS kept). UNLOCK_MINING_OVERCLOCK_WITH_APT
+  now = "install your first Mining upgrade" (any Mining install). Old saves: `_complete_skipped_new_steps()`
+  marks new steps done when the player is already past them. `decode -package=<item> <amount>` packages
+  that many then stops (`Decoding.next_package_limit` -> terminal `package_limit`). Test: tools/tests/tuttest.
 - `info <skill>` MODIFIERS box: STATUS column 14 -> 18 (COMMAND 45 -> 41) so "at Matching v1.0" no longer
   runs into the command text (affected every 8+ letter skill).
 

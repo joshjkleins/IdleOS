@@ -156,6 +156,8 @@ func _ready():
 	
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
+	if Tutorial.DEV_ALWAYS_SHOW_INTRO:
+		Tutorial.show_intro = true
 	if !Tutorial.show_intro:
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
@@ -175,8 +177,8 @@ func _ready():
 	if Tutorial.show_intro:
 		accepting_player_inputs = false
 		header.visible = false
-		overclock.visible = false
 		input_line_container.visible = false
+		system_dock.modulate.a = 0.0 # the boot sequence brings the panel in section by section
 		header.prepare_intro()
 		intro_to_game()
 
@@ -1327,6 +1329,7 @@ func handle_vm_token_commands(text):
 func handle_upload_commands(text: String) -> void:
 	if text == "upload" or text == "upload -h":
 		add_line(ContextCommands.upload_goal_text())
+		Tutorial.complete_event(Tutorial.TutorialEvent.UPLOAD_INFO)
 		return
 	var is_unpack = text.begins_with("unpack")
 	var arg = text.trim_prefix("unpack" if is_unpack else "upload").strip_edges().trim_prefix("-").strip_edges()
@@ -2292,6 +2295,10 @@ func _input(event):
 		else:
 			input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
+		if _typing or _booting:
+			_skip_requested = true # any key: finish the typing / boot sequence now
+			get_viewport().set_input_as_handled()
+			return
 		if Tutorial.show_intro and event.keycode == KEY_ENTER and accepting_player_inputs:
 			install_idle_os()
 		if upload_awaiting_player_input and awaiting_player_input and event.keycode == KEY_ENTER:
@@ -2408,90 +2415,218 @@ func has_requirements(requirements: Dictionary) -> bool:
 	
 	return true
 
+#region intro + boot
+## Intro: a short briefing typed out (any key finishes it), then 'enter' runs the boot sequence, which builds
+## the screen in the order it's used: skill modules (header cards), the system panel section by section,
+## then the command line. Any key during the boot finishes it instantly.
+const INTRO_CPS := 140.0          # typing speed (characters per second, frame-rate independent)
+const INTRO_PARAGRAPH_PAUSE := 0.18
+var _typing := false
+var _booting := false
+var _skip_requested := false
+
+const INTRO_TEXT := """[color=#33ff33]WELCOME TO IDLE OPERATING SYSTEM.[/color]
+
+You have been granted access to IdleOS: a specialized operating system built to reach the world's most valuable information.
+
+Your objective is simple: gain access to information that could one day be used for the good of humankind.
+
+At present, your access is limited. Prove your proficiency with this tool and you will be trusted with more.
+
+Start small. A [color=#e3b341]Student[/color] at the local [color=#e3b341]School[/color]. Inexperienced, poorly secured. Surely a simple task.
+
+You will likely extract some [color=#e3b341]credit card information[/color]. Upload it, and perhaps we will grant you access to more powerful tools.
+
+As for what waits beyond that... the operating system contains everything you will need.
+
+For now, let's see what you can do."""
+
 func intro_to_game():
-	await type_text("""WELCOME TO IDLE OPERATING SYSTEM.
-
-You have been granted access to IdleOS, a specialized operating system designed to provide you with the tools necessary to access the world's most valuable information.
-
-Your objective is simple:
-
-Gain access to information that could one day be used for the good of humankind.
-
-At present, your access is limited. Before you are trusted with more advanced operations, you will need to prove your proficiency with this tool.
-
-Fortunately, there are plenty of opportunities to demonstrate your abilities.
-
-To start, successfully hack a Student at the local School. 
-
-They're inexperienced and poorly secured. Surely this will be a simple task.
-
-It is likely you will be able to extract some Credit Card information from them.
-
-Upload that information if you come upon it and perhaps we will grant further access to more powerful tools.
-
-As for what's waiting beyond that...
-
-Let's just say the operating system contains everything you will need to obtain the world's most powerful information.
-
-But we'll get to that later.
-
-For now, let's see what you can do.
-
-
-
-press 'enter' to finish IdleOS install""")
+	await type_text(INTRO_TEXT)
+	current_scrollback.append_text("\n\n\n[color=#888888]press [color=#ffffff]enter[/color] to install IdleOS[/color]")
 	accepting_player_inputs = true
 
+## Types <text> (bbcode ok) into the terminal at <characters_per_second>, frame-rate independent.
+## Pauses briefly between paragraphs. Any key while typing finishes it at once.
+func type_text(text: String, characters_per_second: float = INTRO_CPS) -> void:
+	_typing = true
+	_skip_requested = false
+	var base: String = current_scrollback.text
+	var plain_len := _visible_length(text)
+	var shown := 0.0
+	var pause := 0.0
+	while shown < plain_len and !_skip_requested:
+		await get_tree().process_frame
+		var dt := get_process_delta_time()
+		if pause > 0.0:
+			pause -= dt
+			continue
+		var before := int(shown)
+		shown = min(shown + characters_per_second * dt, float(plain_len))
+		var cut := _bbcode_prefix(text, int(shown))
+		current_scrollback.text = base + cut + "[color=#33ff33]_[/color]"
+		if int(shown) > before and cut.ends_with("\n\n"):
+			pause = INTRO_PARAGRAPH_PAUSE
+	current_scrollback.text = base + text
+	_typing = false
+	_skip_requested = false
 
-func type_text(text: String, characters_per_second: float = 250.0) -> void:
-	var delay := 1.0 / characters_per_second
-	
-	for i in text.length():
-		current_scrollback.append_text(text[i])
-		await get_tree().create_timer(delay).timeout
+## visible characters in a bbcode string
+static func _visible_length(text: String) -> int:
+	var n := 0
+	var in_tag := false
+	for c in text:
+		if c == "[":
+			in_tag = true
+		elif c == "]" and in_tag:
+			in_tag = false
+		elif !in_tag:
+			n += 1
+	return n
+
+## the start of a bbcode string holding <count> visible characters, with its open tags closed
+static func _bbcode_prefix(text: String, count: int) -> String:
+	var out := ""
+	var n := 0
+	var i := 0
+	var open := 0
+	while i < text.length() and n < count:
+		var c = text[i]
+		if c == "[":
+			var close = text.find("]", i)
+			var tag = text.substr(i, close - i + 1)
+			open += -1 if tag.begins_with("[/") else 1
+			out += tag
+			i = close + 1
+			continue
+		out += c
+		n += 1
+		i += 1
+	# include closing tags that directly follow, then close anything still open
+	while i < text.length() and text.substr(i, 2) == "[/":
+		var close = text.find("]", i)
+		out += text.substr(i, close - i + 1)
+		open -= 1
+		i = close + 1
+	for k in max(0, open):
+		out += "[/color]"
+	return out
+
+## Boot log drawn straight into the terminal (not the add_line queue), so lines can update in place.
+var _boot_log: Array[String] = []
+func _boot_print(text: String) -> int:
+	_boot_log.append(text)
+	current_scrollback.text = "\n".join(_boot_log)
+	return _boot_log.size() - 1
+
+func _boot_set(index: int, text: String) -> void:
+	_boot_log[index] = text
+	current_scrollback.text = "\n".join(_boot_log)
+
+## waits <seconds>, or not at all once the player skipped
+func _boot_wait(seconds: float) -> void:
+	var t := 0.0
+	while t < seconds and !_skip_requested:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+
+const BOOT_OK := "[color=#4ec994][  OK  ][/color] "
+const BOOT_WAIT := "[color=#888888][  ..  ][/color] "
+
+## One boot step: "[ .. ] text" -> (callback) -> "[ OK ] text"
+func _boot_step(text: String, hold: float, on_ok: Callable = Callable()) -> void:
+	var i = _boot_print(BOOT_WAIT + text)
+	await _boot_wait(hold)
+	if on_ok.is_valid():
+		on_ok.call()
+	_boot_set(i, BOOT_OK + text)
+
+func _fade_in(node: CanvasItem, seconds: float) -> void:
+	node.visible = true
+	if _skip_requested:
+		node.modulate.a = 1.0
+		return
+	node.modulate.a = 0.0
+	create_tween().tween_property(node, "modulate:a", 1.0, seconds)
 
 func install_idle_os():
 	accepting_player_inputs = false
+	_booting = true
+	_skip_requested = false
 	_clear_terminal()
+	_boot_log.clear()
+	_boot_print("[color=#33ff33]IdleOS installer[/color]  [color=#666666](any key to skip)[/color]")
+	_boot_print("")
+	await _boot_step("Mounting kernel", 0.35)
+	await _boot_step("Verifying operator credentials", 0.35)
+	_boot_print("")
+	# skill modules: their header cards fade in as each one loads
 	header.modulate.a = 1.0
 	header.visible = true
 	for mp in major_processes:
-		var dl_text = "\nDownloading Module: " + mp.SKILL.name
-		await type_text(dl_text, 250.0)
-		await get_tree().create_timer(0.6).timeout
-		header.intro(mp)
-		await get_tree().create_timer(0.6).timeout
-			
-		add_line(mp.name + " install complete.")
-		await get_tree().create_timer(0.3).timeout
-		
-	await type_text("\nActivating system tempature UI", 50.0)
-	overclock.modulate.a = 0.0
-	overclock.visible = true
-	var tween = create_tween()
-	tween.tween_property(overclock, "modulate:a", 1.0, 1.5)
-	await tween.finished
-	
-	input_line_container.modulate.a = 0.0
+		var color = mp.SKILL.color.to_html(false)
+		await _boot_step("Loading module [color=#%s]%s[/color]" % [color, mp.SKILL.name], 0.14, func(): header.intro(mp))
+	_boot_print("")
+	# system panel: show it, then reveal its sections in order
+	var sections: Array = []
+	for c in system_dock.full_view.get_children():
+		if c is CanvasItem:
+			sections.append(c)
+			if !c.has_meta("boot_alpha"):
+				c.set_meta("boot_alpha", c.modulate.a) # separators are dimmed by design
+			c.modulate.a = 0.0
+	system_dock.modulate.a = 1.0
+	var panel_steps = [
+		["Starting process monitor", ["TopBar", "HUDProcessRunning", "ProcessSeparator"]],
+		["Calibrating thermal sensors", ["SystemTemp", "TrapStatus", "SystemSeparator", "TrackedSection", "Separator"]],
+		["Allocating virtual machines", ["VMSection"]],
+		["Opening access + upload channels", ["AccessSection", "UploadSection", "Spacer", "LedgerSeparator", "ItemLedger"]],
+	]
+	var shown_sections: Array = []
+	for step in panel_steps:
+		await _boot_step(step[0], 0.3, func():
+			for c in sections:
+				if c in shown_sections:
+					continue
+				var key = c.name if !(c is TrapStatus or c is AccessSection or c is UploadSection) else ("TrapStatus" if c is TrapStatus else ("AccessSection" if c is AccessSection else "UploadSection"))
+				if key in step[1]:
+					shown_sections.append(c)
+					var tw = create_tween()
+					tw.tween_property(c, "modulate:a", c.get_meta("boot_alpha", 1.0), 0.0 if _skip_requested else 0.4)
+		)
+	# anything not named above (separators built in code) comes in with the last step
+	for c in sections:
+		if !(c in shown_sections):
+			create_tween().tween_property(c, "modulate:a", c.get_meta("boot_alpha", 1.0), 0.0 if _skip_requested else 0.4)
+	await _boot_step("Command line interface", 0.3, func(): _fade_in(input_line_container, 0.5))
+	_boot_print("")
+	_boot_print("[color=#33ff33]IdleOS installed.[/color] Good luck.")
+	await _boot_wait(1.2)
+	_finish_boot()
+
+## End state of the boot (also what a skip lands on): everything visible, terminal cleared, welcome shown.
+func _finish_boot() -> void:
+	header.modulate.a = 1.0
+	header.visible = true
+	for skill in major_processes:
+		header.intro(skill)
+	system_dock.modulate.a = 1.0
+	for c in system_dock.full_view.get_children():
+		if c is CanvasItem:
+			c.modulate.a = c.get_meta("boot_alpha", 1.0)
 	input_line_container.visible = true
-	await type_text("\nCommand line interface active", 50.0)
-	var tween2 = create_tween()
-	tween2.tween_property(input_line_container, "modulate:a", 1.0, 1.5)
-	await tween2.finished
-	
-	await type_text("\nInstall of IdleOS complete. Clearing terminal.  Good luck.")
-	await get_tree().create_timer(2.0).timeout
-	
+	input_line_container.modulate.a = 1.0
+	_booting = false
+	_skip_requested = false
 	_clear_terminal()
 	accepting_player_inputs = true
 	input_line.grab_focus()
-	
 	Tutorial.show_intro = false
 	SaveManager.save_game()
-
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	add_line(ContextCommands.demo_welcome_message())
 	add_line("To get started, type `-h` in the terminal.")
+#endregion
 
 
 func player_uploaded_proper_item():
