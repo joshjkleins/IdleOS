@@ -65,7 +65,7 @@ func get_modifier_info_text(skill: Node) -> String:
 	for e in entries:
 		var p = Upgrades.get_package_info(e.package)
 		var unlock_at = ("at %s v%d.0" % [group, int(p.levels[0].tier)]) if p.has("levels") else ""
-		var status = ["UNLOCKED"] if e.unlocked else ["LOCKED", unlock_at]
+		var status = ["UNLOCKED"] if e.unlocked else ["FULL GAME"] # DEMO: capstone modifiers aren't in the demo
 		var command = ["While process is active use '%s'" % e.command, "Stop with '%s -kill'" % e.command]
 		var effect = _wrap_words(e.effect, l_effect - 2)
 		var cols = [[e.name], status, command, effect]
@@ -201,7 +201,10 @@ func get_help_text(skill: Node) -> String:
 	# one line when every process uses efficiency the same way, otherwise a per-process list under the table
 	var eff_lines = []
 	var distinct = {}
-	for p in skill.minor_processes:
+	var ordered = info_process_order(skill)
+	for p in ordered:
+		if !p.get("unlocked", false):
+			continue # only processes the player can run
 		var d = p.get("efficiency description", skill.SKILL["efficiency description"])
 		distinct[d] = true
 		eff_lines.append([p.name, d])
@@ -220,9 +223,9 @@ func get_help_text(skill: Node) -> String:
 	]
 	var rows = []
 	var row_colors = []
-	for p in skill.minor_processes:
+	for p in ordered:
 		var status
-		status = "ONLINE" if p.unlocked else "LOCKED"
+		status = "ONLINE" if p.unlocked else ("FULL GAME" if DemoRules.is_full_game_process(p) else "LOCKED")
 		var efficiency = "-"
 		var efficiency_rate = "-"
 		var run_command = "-"
@@ -246,6 +249,13 @@ func get_help_text(skill: Node) -> String:
 	return text + "\n\n" + get_modifier_info_text(skill)
 
 
+
+## Info table order: tier processes by unlock level, then utilities ("UTILITY | ...", "UPLOAD | ...") in their own order
+static func info_process_order(skill: Node) -> Array:
+	var tiers = skill.minor_processes.filter(func(p): return str(p.get("tier name", "TIER")).begins_with("TIER"))
+	var others = skill.minor_processes.filter(func(p): return !str(p.get("tier name", "TIER")).begins_with("TIER"))
+	tiers.sort_custom(func(a, b): return int(a.get("unlock level", 1)) < int(b.get("unlock level", 1)))
+	return tiers + others
 
 func get_requirements_text(p: Dictionary) -> String:
 	if p.requirements is String:
@@ -374,7 +384,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	var status = "ONLINE"
 
 	if not p["unlocked"]:
-		status = "LOCKED"
+		status = "FULL GAME" if DemoRules.is_full_game_process(p) else "LOCKED"
 	
 	if skill == Defragging:
 		var time = Stats.boost_minutes_text()
@@ -733,6 +743,14 @@ func get_help() -> String:
 |   apt                          Upgrade package manager              |
 |   mod                          Hacking mod manager                  |
 |                                                                     |
+| PROGRESS                                                            |
+|   upload                       Upload goal + what's packaged        |
+|   upload -<item>               Upload packaged items                |
+|   upload -a                    Upload everything packaged           |
+|   unpack -<item>               Return packaged items                |
+|   intel                        Intel on every hacking target        |
+|   intel <target>               Intel on one target                  |
+|                                                                     |
 | DOCUMENTATION                                                       |
 |   tutorial                     Show tutorial checklist              |
 |   -h                           Display this list                    |
@@ -895,7 +913,7 @@ func get_root_upgrades_text() -> String:
 		var ready = 0
 		var status = ""
 		if !Upgrades.is_wired(g):
-			status = "[color=%s]coming soon[/color]" % APT_DIM
+			status = DemoRules.full_game_tag()
 		elif wt <= 6 and !Upgrades.tier_unlocked(wt):
 			status = "[color=%s]tier locked[/color]" % APT_DIM
 		else:
@@ -916,7 +934,8 @@ func get_root_upgrades_text() -> String:
 func get_skill_upgrades_text(group: String) -> String:
 	var t = "\n[color=#%s]%s[/color]  %s\n" % [Upgrades.group_color(group).to_html(false), group.to_upper(), Upgrades.version_text(group)]
 	if !Upgrades.is_wired(group):
-		t += "[color=%s]%s upgrades can be installed once this skill is migrated.[/color]\n" % [APT_GOLD, group]
+		t += DemoRules.full_game_text(group + " upgrades", true) + "\n"
+		return t
 	var wt = Upgrades.working_tier(group)
 	for tier in range(1, min(wt, 7)):
 		t += "[color=%s]TIER %d · %s[/color]  %s  [color=%s]complete · v%d.0[/color]\n" % [APT_DIM, tier, Upgrades.tier_name(tier).to_upper(), apt_bar(10, 10, APT_GOLD), APT_DIM, tier]
@@ -955,10 +974,8 @@ func get_skill_upgrades_text(group: String) -> String:
 		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
 		colors.append("")
 	t += build_table(columns, rows, colors)
-	if wt < 6:
-		var nt = wt + 1
-		var opens = "after v%d.0" % wt if Upgrades.tier_unlocked(nt) else "with %s access and v%d.0" % [Upgrades.tier_name(nt), wt]
-		t += "[color=%s]Next: Tier %d · %s opens %s[/color]\n" % [APT_DIM, nt, Upgrades.tier_name(nt), opens]
+	# DEMO: what the full game adds
+	t += "%s [color=%s]+%d more %s packages in Tier 1, and 5 more tiers.[/color]\n" % [DemoRules.full_game_tag(), APT_DIM, Upgrades.demo_hidden.get(group, 0), group]
 	if ready > 1:
 		t += "\n[color=%s]apt install %s[/color] installs all %d ready packages at once" % [APT_OK, group.to_lower(), ready]
 	t += "\n[color=%s]apt install <package>[/color] installs one · [color=%s]apt <package>[/color] for details" % [APT_OK, APT_OK]
@@ -1099,15 +1116,18 @@ func demo_welcome_message():
 	return """
 WELCOME TO THE IDLEOS DEMO
 
-Thanks for playing IdleOS!
+Your first job: prepare and hack your first target, a [color=#e3b341]Student[/color] at the local School. The tutorial
+walks you through it one terminal command at a time, and teaches you the operating system on the way.
+Hacking is where the big hauls come from: every breached target drops a cache full of resources,
+far more than your processes make on their own. Your processes keep the hacks supplied.
 
-Want to share your thoughts, suggestions, or see what others are saying?
-Join the IdleOS Discord:
+This demo covers the School: every skill up to level 10, the Student, and the Student (Hard) once
+you've earned it. Demo goal: complete the School upload goal ('upload'). Progress carries over to the full game.
 
-https://discord.gg/XnrH7zrdb
+Enjoying it? Type [color=#e3b341]wishlist[/color] to open the IdleOS store page in Steam, where you can add it to your wishlist.
+Thoughts or suggestions? Join the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)
 
 To view this message again, use the 'demo' command.
-To copy the Discord link to your clipboard, use 'discord -c'
 """
 
 func discord_message():
@@ -1221,5 +1241,5 @@ func upload_goal_text() -> String:
 		rows.append([g.item.name + (" (rare)" if g.rare else ""), "%d/%d" % [up, g.amount], str(Uploads.get_staged(g.item)), str(Inventory.get_amount(g.item)), status])
 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
-	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -all)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
+	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -a for everything)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
 	return header + build_table(columns, rows, colors) + footer

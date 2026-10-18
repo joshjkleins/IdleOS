@@ -4,7 +4,7 @@ signal unlocks_changed # target / location unlocked, or a win recorded
 
 signal gained_xp_signal
 
-const MAX_LEVEL = 99 # keep in sync with Exp.MAX_LEVEL (legacy helpers below; Exp owns leveling)
+const MAX_LEVEL = DemoRules.LEVEL_CAP # keep in sync with Exp.MAX_LEVEL (legacy helpers below; Exp owns leveling)
 
 var MAX_TEMP = 100.0
 var MIN_TEMP = 30.0
@@ -878,6 +878,8 @@ func get_wins(target: Dictionary) -> int:
 func record_win(target: Dictionary) -> void:
 	var key = target_key(target)
 	wins[key] = int(wins.get(key, 0)) + 1
+	if key == DemoRules.TARGETS[1] and wins[key] == 1:
+		_demo_hard_beaten.call_deferred()
 	var hard = get_hard_counterpart(target)
 	if !hard.is_empty() and !hard.get("unlocked", false) and wins[key] >= HARD_UNLOCK_WINS:
 		hard["unlocked"] = true
@@ -902,6 +904,7 @@ func unlock_location(location_key: String) -> void:
 	unlocks_changed.emit()
 
 func _on_tier_completed(tier: int) -> void:
+	return # DEMO: finishing the School goal plays the send-off (idle_os_2) instead of opening the Lawfirm
 	var keys = hacking_targets.keys()
 	if tier < keys.size():
 		unlock_location(keys[tier]) # tier is 1-based, so this is the next location
@@ -929,6 +932,8 @@ func get_unlock_hint(target: Dictionary) -> String:
 	var p = target_place(target)
 	if p.is_empty():
 		return ""
+	if !(target_key(target) in DemoRules.TARGETS):
+		return "full game"
 	if !hacking_targets[p.location].get("unlocked", false):
 		return "unlocks with the %s location" % p.location
 	if p.hard:
@@ -943,6 +948,7 @@ func get_location_unlock_hint(location_key: String) -> String:
 	var i = keys.find(location_key)
 	if i <= 0:
 		return ""
+	return "full game" # DEMO
 	return "complete the %s upload goal" % keys[i - 1]
 
 func find_target_by_name(text: String, hard: bool = false) -> Dictionary:
@@ -1006,6 +1012,33 @@ func load_data(data: Dictionary) -> void:
 	var saved_wins: Dictionary = data.get("wins", {})
 	for k in saved_wins:
 		wins[k] = int(saved_wins[k])
+	_enforce_demo_unlocks()
 	unlocks_changed.emit()
+
+## DEMO: first Student (Hard) win. With the School uploads done too, that's the whole demo.
+func _demo_hard_beaten() -> void:
+	var done = Uploads.is_tier_complete(1)
+	var g = DemoRules.FULL_GAME_COLOR
+	var msg = "[color=#ee4a3a]════════════════════════════════\nSTUDENT (HARD) DEFEATED\n════════════════════════════════[/color]\n"
+	if done:
+		msg += "[color=#33ff33]DEMO 100%% COMPLETE.[/color] Uploads done, Student (Hard) down: you've beaten everything the demo has.\n"
+		msg += "The full game opens five more locations, each with its own targets and hard modes. Type [color=%s]wishlist[/color] to open the store page in Steam and add IdleOS to your wishlist. Thanks for playing!" % g
+	else:
+		msg += "Not many players get here. Finish the School upload goal ('upload') to complete the demo."
+	Signals.update_hack_console("[color=#ee4a3a]Student (Hard) defeated![/color] Check the main terminal when you're back.")
+	Signals.system_message_signal.emit(msg)
+
+## DEMO: only School, Student and Student (Hard) can be open, whatever an older save says.
+func _enforce_demo_unlocks() -> void:
+	var first = true
+	for loc in hacking_targets:
+		var l = hacking_targets[loc]
+		if !first:
+			l["unlocked"] = false
+		for list in ["targets", "hard mode targets"]:
+			for t in l.get(list, []):
+				if !(target_key(t) in DemoRules.TARGETS):
+					t["unlocked"] = false
+		first = false
 	
 	Signals.system_temp_updated(system_tempature)

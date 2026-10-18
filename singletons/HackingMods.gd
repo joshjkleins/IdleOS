@@ -1,7 +1,7 @@
 extends Node
 
 ## Mod slots: 1 to start, +1 per tier from the 'hacking.mod_slots' upgrade (one level per tier), max 7.
-const BASE_MOD_SLOTS := 1
+const BASE_MOD_SLOTS := 2 # DEMO: Student (Hard) expects 2 mods and the demo has no Hacking upgrades (full game: 1)
 const MAX_MOD_SLOTS := 7
 var max_mods: int = BASE_MOD_SLOTS
 

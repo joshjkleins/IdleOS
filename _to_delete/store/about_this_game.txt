@@ -1,0 +1,59 @@
+=== SHORT DESCRIPTION (Steam limit: 300 characters) ===
+
+An idle hacking game played entirely through a real terminal. Run processes, spin up VM windows and compile your own Hacking Mods as you break your way from a school's network to government servers. Your operation keeps running even while you're offline.
+
+
+=== ABOUT THIS GAME (paste into the Steamworks description field; uses Steam's formatting tags) ===
+
+IdleOS is an idle hacking game played through a real command line. Type commands, spin up virtual machines and build an operation that mines, parses, cracks and matches its way from a high school student's records to classified government servers, and keeps running whether you're watching or not.
+
+[img]{STEAM_APP_IMAGE}/extras/vm_swarm.gif[/img]
+
+[h2]Run the whole operation[/h2]
+Every skill feeds the next. Mine raw data, parse it into usernames and encrypted passwords, crack them, match them into credentials, then compile everything into the payloads you need to hack. Every process runs on its own, and VM windows let you keep several of them cranking at once.
+[list]
+[*] 42 processes across Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling and Hacking
+[*] Open VM windows to run processes side by side
+[*] Overclock for speed, but watch the temperature: overheat and everything slows to a crawl
+[*] Phish for combat supplies with Spear, Whaling, Smish and long-running Traps that keep filling even while the game is closed
+[/list]
+
+[h2]Keeps working while you're away[/h2]
+Close the game and your operation keeps going. Come back to processes that kept running, resources that kept piling up and progress waiting to be spent. Background Services upgrades extend how long IdleOS works offline, all the way up to 24 hours.
+
+[h2]Real terminal commands[/h2]
+No buttons, no menus. Everything happens in the terminal: cd into a skill, mine -logs to start a process, ssh cracking badge to fire up a VM, ls to check your haul. Quick to learn, satisfying to master.
+
+[img]{STEAM_APP_IMAGE}/extras/terminal_commands.gif[/img]
+
+[h2]Hacking auto-battler[/h2]
+Payloads get you in. Your build keeps you in. Fights play out automatically while you manage the battle: SQL Injectors chip through firewalls and integrity, Packet Spoofs keep your anonymity up, and the Hacking Mods you compile yourself change how every fight goes.
+[list]
+[*] 30 unique targets across 6 locations: School, Lawfirm, Hospital, Bank, Police and Government
+[*] Build your own Mods and equip them to take down tougher targets
+[*] One-time exploit items for when a fight turns against you
+[*] Gather intel on a target to weaken its defenses before you strike
+[*] Hard Mode targets for anyone who thinks they've mastered the system
+[/list]
+
+[img]{STEAM_APP_IMAGE}/extras/hacking_breach.gif[/img]
+
+[h2]Upgrade everything[/h2]
+Every skill has its own packages. apt install your way from v0.0 to v6.0 with 100+ upgrades: faster processes, better odds, more VM windows, and major-release capstones that unlock new modifier commands for each skill.
+
+[img]{STEAM_APP_IMAGE}/extras/upgrades.gif[/img]
+
+[h2]Upload your way up[/h2]
+Every location has an upload goal. Package what you've made, let it upload in the background, and complete the goal to gain access to the next location, with new targets, new processes and new upgrades waiting inside.
+
+[img]{STEAM_APP_IMAGE}/extras/uploads_panel.gif[/img]
+
+[h2]Try it now[/h2]
+The free demo covers the School: every skill up to level 10, the Student and the Student (Hard). Your progress carries over to the full game.
+
+
+=== HOW TO ADD THE GIFS ===
+Steamworks > Store Page Admin > Description tab > "Images for description" (or the image upload button above the text box).
+Upload the five GIFs with these exact file names, then the [img] tags above will find them:
+  vm_swarm.gif, terminal_commands.gif, hacking_breach.gif, upgrades.gif, uploads_panel.gif
+If Steam renames a file on upload, use the tag it gives you instead.

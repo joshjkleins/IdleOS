@@ -16,7 +16,7 @@ const INSTALLS_PER_TIER := 10
 const VM_TOKEN_COST := "@vm_tokens" # cost paid with any VM tokens
 
 ## TESTING: every tier's installs are open without unlocking locations. Turn off before release.
-const DEV_UNLOCK_ALL_TIERS := true
+const DEV_UNLOCK_ALL_TIERS := false
 
 ## Groups whose effects are wired up in code. The rest are listed in apt but can't be installed yet
 ## (skills are migrated one at a time).
@@ -41,6 +41,7 @@ var groups: Array = []          # group names in display order
 var packages: Dictionary = {}   # id -> package
 var _by_group: Dictionary = {}  # group -> [package ids], in sheet order
 var _items: Dictionary = {}     # item name (lower) -> ItemData, filled on first use
+var demo_hidden: Dictionary = {} # DEMO: group -> Tier 1 installs not in the demo
 
 func _init() -> void:
 	_load_data() # in _init so autoloads that read upgrades in their _ready (Stats) see the packages
@@ -60,6 +61,13 @@ func _load_data() -> void:
 		return
 	groups = d.get("groups", [])
 	for p in d.get("packages", []):
+		# DEMO: only the kept Tier 1 installs of wired groups (DemoRules); the rest is counted for the apt note
+		var kept = p.levels.filter(func(l): return p.group in WIRED_GROUPS and DemoRules.keeps_upgrade_level(p.group, l))
+		var t1 = p.levels.filter(func(l): return int(l.tier) == 1).size()
+		demo_hidden[p.group] = demo_hidden.get(p.group, 0) + t1 - kept.filter(func(l): return int(l.tier) == 1).size()
+		if kept.is_empty():
+			continue
+		p.levels = kept
 		p["installed"] = 0
 		p["current"] = false if p.type == "capstone" else 0.0
 		packages[p.id] = p

@@ -239,6 +239,9 @@ func check_access(target_name: String) -> Dictionary:
 	if t.get("unlocked", false):
 		out.message = t.name + " is already unlocked."
 		return out
+	if !(Stats.target_key(t) in DemoRules.TARGETS):
+		out.message = DemoRules.full_game_text("Hacking the " + t.name)
+		return out
 	var p = Stats.target_place(t)
 	if !Stats.hacking_targets[p.location].get("unlocked", false):
 		out.message = "%s is in a locked location: %s." % [t.name, Stats.get_location_unlock_hint(p.location)]

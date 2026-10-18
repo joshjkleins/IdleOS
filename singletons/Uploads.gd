@@ -9,13 +9,13 @@ signal changed           # staged / uploading / uploaded counts changed
 signal tier_completed(tier: int)
 signal item_uploaded(item: ItemData)
 
-const BASIC_GOAL = 200
-const RARE_GOAL = 10
+const BASIC_GOAL = DemoRules.UPLOAD_BASIC_GOAL # DEMO (full game: 200)
+const RARE_GOAL = DemoRules.UPLOAD_RARE_GOAL # DEMO (full game: 10)
 const UPLOAD_SECONDS = 15.0       # per basic resource (upgradable later)
 const RARE_UPLOAD_SECONDS = 60.0  # per rare item
 const UPLOAD_HEAT = 1.0           # system heat per basic resource uploaded
 const RARE_UPLOAD_HEAT = 3.0      # per rare item
-const MAX_TIER = 6
+const MAX_TIER = 1 # DEMO: School only (full game: 6)
 
 var staged := {}    # ItemData -> packaged, waiting to upload
 var uploaded := {}  # ItemData -> uploaded so far (counts toward goals)
@@ -38,6 +38,8 @@ func get_tier_rares(tier: int) -> Array:
 	var out := []
 	var loc = Stats.hacking_targets.get(get_location_name(tier), {})
 	for t in loc.get("targets", []):
+		if !(Stats.target_key(t) in DemoRules.TARGETS):
+			continue # DEMO: only rares the demo's targets can drop
 		var cache = t.get("loot")
 		if cache is CacheData:
 			for e in cache.rare_pool:

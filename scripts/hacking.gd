@@ -288,7 +288,7 @@ func handle_view_command(text):
 		player_hacking_box.add_line("Not a valid location.")
 		return
 	if !target.get("unlocked", false):
-		player_hacking_box.add_line("Location not unlocked.")
+		player_hacking_box.add_line(DemoRules.full_game_text("The " + str(target.get("name", "")) + " location"))
 		return
 	if text.contains("-hard") and !target.get("hard mode unlocked", false):
 		player_hacking_box.add_line("Hard mode for location not unlocked.")

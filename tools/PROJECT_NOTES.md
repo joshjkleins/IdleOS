@@ -3,6 +3,40 @@
 Read this first. It covers how we work, how to test, the upgrade system, and what's left.
 Last updated: 2026-10-18, after the Phishing upgrade step.
 
+## THIS BRANCH: demo-nextfest (Steam Next Fest demo, cut from cdd on 2026-10-18)
+- Full game work continues on `cdd`. Only demo-cut changes belong here; shared fixes go to cdd first.
+- Everything the demo keeps is in `scripts/demo_rules.gd` (DemoRules): level cap 10, School upload goal
+  50 basics / 2 rares (only rares the Student can drop: Parents credit card), upgrades = Tier 1 slots
+  [1, 4, 6] per wired skill and [1, 2, 3] for System (no capstones, so no overclock/modifiers), targets
+  School/Student + Student (Hard) (5 Student wins), store link + `wishlist` command.
+- Call sites (search "DEMO"): Exp.MAX_LEVEL + `_clamp_to_level_cap` (old saves keep XP, levels stop at 10),
+  stats.gd `_enforce_demo_unlocks` (relocks anything an old save opened) + `_on_tier_completed` returns early,
+  Uploads goals / MAX_TIER 1 / rares filtered to demo targets, Upgrades `_load_data` filters packages
+  (`demo_hidden` feeds the apt "+7 more ... in the full game" line), "FULL GAME" status/messages in
+  ContextCommands + idle_os_2 + hacking.gd + Compiling.check_access, `_demo_send_off` (idle_os_2) on
+  Uploads.tier_completed; `demo` replays it once the goal is done.
+- All DEV flags are OFF on this branch. HackingMods.BASE_MOD_SLOTS = 2 (Student Hard expects 2 mods; no Hacking upgrades in the demo).
+- Save compatibility: tools/tests/olddemo_save.json is a save made by the live Oct 8 demo (`demo` branch);
+  `oldsave` test loads it. Tutorial enum numbers 0-30 match the old demo exactly.
+- Fresh-save tutorial (scripted, process time only): Mining ~5 min, upload intro <1, Parsing ~2.5,
+  Cracking ~2, Matching ~2, Phishing ~4, Compiling ~1 -> Hacking at ~16 game-min.
+
+### Demo playtest notes round (2026-10-18 evening), on demo-nextfest
+- Goals now 100 basics / 5 Parents credit cards. "FULL GAME" messages say "<x> is only available in the full
+  game." (no wishlist call to action; the welcome and the send-off carry it). Wishlist text says it opens the
+  store page in Steam where you can wishlist.
+- Student (Hard) first win: message in the main terminal (+ hack console); with uploads done it's "DEMO 100%
+  COMPLETE". The send-off says 100% complete if the hard student was already beaten.
+- **PORT TO cdd (shared with the full game):** intro objective line; welcome goal statement (hack your first
+  target, hacking = the big hauls); tutorial: VM step moved right after 'ls logs' with a free VM Mining token,
+  overheating explained on the mine-35 step, 'cd ..' then 'cd decoding' on the package step, 'cd ../parsing'
+  on the parsing step, VM tip on the parse step, packaged items shown as +N in UPLOADS / 'unpack' on the upload
+  step, track text points at the side panel, new tutorial-complete text; packaging requires an amount until the
+  tutorial is done; clearer package header; 'upload -a'; '-h' PROGRESS section (upload / unpack / intel);
+  info table: tier processes by unlock level then utilities, efficiency list only for unlocked processes;
+  dev 'add' / 'rm' commands removed. (Files: idle_os_2.gd, Tutorial.gd, Decoding.gd, ContextCommands.gd,
+  cache_decrypt_terminal.gd. The demo-only parts in those files are marked DEMO / use DemoRules.)
+
 ## Working conventions (from Josh)
 - Godot 4.4 project. On the linked computer it lives at `~/OneDrive/Documents/idle-os-prototype`;
   in the device shell (`device_bash`) that's `$HOME/mnt/idle-os-prototype`.

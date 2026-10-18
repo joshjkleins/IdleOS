@@ -418,6 +418,9 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 				next_package_limit = max(1, int(words[-1]))
 				arg_text = " ".join(words.slice(0, words.size() - 1))
 			var item = Inventory.get_item_by_name(arg_text) if arg_text != "" else null
+			if item != null and next_package_limit == 0 and !Tutorial.is_tutorial_complete():
+				out.message = "Add how many to package, e.g. 'decode -package=%s 5'. During the tutorial, always package an exact amount so you keep enough for the next steps." % item.name.to_lower()
+				return out
 			if item == null:
 				out.message = "Name an item to package. [color=#666666]ex. decode -package=logs  (see 'upload' for the goal)[/color]"
 				return out
