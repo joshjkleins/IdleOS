@@ -115,10 +115,12 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 15 },
 				"heat": 0.5,
 				"exp": 4500,
-				"integrity": 500,
-				"firewall": 80,
-				"counter": 20,
-				"counter speed": 50.0,
+				# DEMO tuning (2026-10-19): was integrity 500 / firewall 80 / counter 20 / speed 50 (unbeatable in the
+				# demo). Simulated with the demo's mods: many 2-mod combinations win in ~45 s - 2.5 min, single mods lose.
+				"integrity": 450,
+				"firewall": 30,
+				"counter": 15,
+				"counter speed": 20.0,
 				"loot": Items.STUDENT_CACHE,
 				"loot quantity": 50,
 			},
