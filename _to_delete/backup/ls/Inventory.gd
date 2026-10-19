@@ -1,0 +1,354 @@
+extends Node
+
+enum InventoryFilter { ALL, CACHES, VALUABLES, RESOURCES }
+var inventory := {}
+
+func has_item_by_id(id: int) -> bool:
+	for i in inventory:
+		if i.id == id:
+			return true
+	return false
+
+func get_amount(resource: ItemData) -> int:
+	if inventory.has(resource):
+		return inventory[resource]
+	return 0
+
+func add_resource(resource: ItemData, amount):
+	if inventory.has(resource):
+		inventory[resource] += amount
+	else:
+		inventory[resource] = amount
+	var sfx_to_play = Audiomanager.get_sfx_from_item(resource)
+	if sfx_to_play != "":
+		Audiomanager.play_sfx(sfx_to_play, 0.05)
+	Signals.item_added(resource, amount)
+
+func remove_resource(resource: ItemData, amount: int) -> bool:
+	if not inventory.has(resource):
+		return false
+	if inventory[resource] < amount:
+		return false
+	
+	inventory[resource] -= amount
+	
+	if inventory[resource] <= 0:
+		inventory.erase(resource)
+	
+	Signals.item_removed(resource, amount)
+	return true
+
+func _matches_filter(resource, filter: InventoryFilter) -> bool:
+	match filter:
+		InventoryFilter.CACHES:
+			return resource.name.contains("cache")
+		#InventoryFilter.VALUABLES:
+			#return resource.valuable
+		InventoryFilter.RESOURCES:
+			return !resource.valuable and !resource.name.contains("cache")
+		_:
+			return true
+
+func list_specific_item(item: ItemData):
+	var item_name = "Name: " + item.name
+	var amount = "Current amount: " + str(get_amount(item))
+	var description = "Description: " + item.description
+	
+	var of = []
+	for i in item.obtained_from:
+		var text = item.ItemColor.keys()[i].capitalize()
+		var c = Palette.get_color(i)
+		var hex = c.to_html(false)
+		of.append("[color=#%s]%s[/color]" % [hex, text])
+	
+	var obtained_from = "Obtained from: " + ", ".join(of)
+	if item.obtained_from_additional_hint != "":
+		obtained_from += " - " + item.obtained_from_additional_hint
+	
+	var mu_text = item.ItemColor.keys()[item.color_type].capitalize()
+	var c = Palette.get_color(item.color_type)
+	var hex = c.to_html(false)
+	
+	var main_use = "Main use: [color=#%s]%s[/color]" % [hex, mu_text]
+	
+	var text = "\n"
+	text += item_name + "\n"
+	text += amount + "\n"
+	text += description + "\n"
+	text += obtained_from + "\n"
+	text += main_use + "\n\n"
+	
+	if item.hacking_mod_duration != 0:
+		var hacking_mod_value = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var hacking_mod_name = HackingMods.get_mod_name(item.hacking_mod_type)
+		var hacking_mod_duration = "Duration: " + str(item.hacking_mod_duration) + " hack(s)"
+		var hacking_mod_required_amount = "Required amount: " + item.name + " x" + str(item.hacking_mod_consumed)
+		
+		var hacking_mod_display = "Hacking Modifications\n"
+		hacking_mod_display += "├─ " + hacking_mod_required_amount + "\n"
+		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
+		hacking_mod_display += "└─ " + hacking_mod_duration + "\n\n"
+		text += hacking_mod_display
+	
+	if item.contained_items.size() > 0:
+		var names = []
+		for i in item.contained_items:
+			names.append(i.name)
+		var all_names = ", ".join(names)
+		text += "Parsing these logs can find the following items: " + all_names + "\n\n"
+	
+	if Exploits.is_exploit(item):
+		text += Exploits.info_text(item)
+
+	if item is CombatItem:
+		match item.type:
+			"Attack":
+				text += "Integrity damage: " + str(item.damage) + "\n"
+				text += "Firewall damage: " + str(item["firewall_damage"]) + "\n"
+				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
+				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
+			"Heal":
+				text += "Integrity restore: " + str(item.heal) + "\n"
+				text += "Bandwidth cost: " + str(item["bandwidth_cost"]) + "\n"
+				text += "Attack speed: " + get_combat_item_speed_text(item) + "/s\n"
+	
+	if item is CacheData:
+		if item.get_variant() != CacheData.CacheVariant.BASE:
+			text += "[color=#dd9426]" + item.get_variant_description() + "[/color]\n\n"
+		text += "Potential items\n"
+		var rows: Array = Decoding.get_drop_table(item)
+		var name_width = 0
+		for row in rows:
+			name_width = max(name_width, row.name.length())
+		for row in rows:
+			text += _build_cache_item_row(row, name_width)
+		text += "\n"
+
+	if item.name.contains("VM"):
+		text += "[color=#666666]for usage details use 'ssh -h'.[/color]\n"
+	return text
+
+## row: {name, min, max, chance, rare} from CacheData.get_drop_table()
+func _build_cache_item_row(row: Dictionary, name_width: int) -> String:
+	var amount_text = "x%d" % row.min if row.min == row.max else "x%d-%d" % [row.min, row.max]
+	var chance_text = "%.0f%%" % (row.chance * 100)
+	var line = "  %-*s   %-8s %6s" % [name_width, row.name, amount_text, chance_text]
+	if row.rare:
+		line += "  [color=#888888](rare)[/color]"
+	return line + "\n"
+
+func get_item_by_name(item_name: String) -> ItemData:
+	var name = item_name.to_lower().strip_edges()
+	
+	# Remove surrounding quotes
+	if name.begins_with('"') and name.ends_with('"'):
+		name = name.trim_prefix('"').trim_suffix('"').strip_edges()
+	if name.begins_with('\'') and name.ends_with('\''):
+		name = name.trim_prefix('\'').trim_suffix('\'').strip_edges()
+	# Exact match
+	var item = Items.ITEM_NAME_MAP.get(name)
+	if item != null:
+		return item
+	
+	# Player typed singular, stored item might be plural
+	item = Items.ITEM_NAME_MAP.get(name + "s")
+	if item != null:
+		return item
+		
+	item = Items.ITEM_NAME_MAP.get(name + "s cache")
+	if item != null:
+		return item
+	
+	item = Items.ITEM_NAME_MAP.get(name + "es")
+	if item != null:
+		return item
+	
+	item = Items.ITEM_NAME_MAP.get(name + "es cache")
+	if item != null:
+		return item
+		
+	# Player typed plural, stored item might be singular
+	if name.ends_with("es"):
+		item = Items.ITEM_NAME_MAP.get(name.left(-2))
+		if item != null:
+			return item
+	
+	if name.ends_with("s"):
+		item = Items.ITEM_NAME_MAP.get(name.left(-1))
+		if item != null:
+			return item
+	
+	return null
+
+func get_combat_item_speed_text(item: CombatItem) -> String:
+	var sp = 1.0 / (100.0 / item.speed)
+	return "%.2f" % sp
+
+func list_inventory(filter: InventoryFilter = InventoryFilter.ALL) -> String:
+	var amount_width = 15
+	var output = ""
+	var has_items := false
+
+	var max_name_length = 0
+	var resources := []
+
+	for resource in inventory.keys():
+		if inventory[resource] > 0 and _matches_filter(resource, filter):
+			resources.append(resource)
+
+			if resource.name.length() > max_name_length:
+				max_name_length = resource.name.length()
+
+	resources.sort_custom(func(a, b):
+		if a.color_type == b.color_type:
+			return a.name.nocasecmp_to(b.name) < 0
+		return a.color_type < b.color_type
+	)
+
+	var name_width = max_name_length + 5
+
+	output += pad_text("Items", name_width + 1)
+	output += pad_text("Amount", amount_width)
+	output += "Description\n"
+	output += pad_text("--------", name_width + 1)
+	output += pad_text("------", amount_width)
+	output += "-----------\n"
+
+	for resource in resources:
+		var amount: int = inventory[resource]
+
+		var c = Palette.get_color(resource.color_type)
+		var hex = c.to_html(false)
+
+		has_items = true
+		var temp_name = pad_text(resource.name, name_width)
+
+		output += "[color=%s]▍[/color]" % hex
+		output += temp_name
+		output += pad_text(str(amount), amount_width)
+		output += resource.description + "\n"
+
+	if not has_items:
+		return "You have no items."
+	
+	output += "\nuse 'ls <item>' for additional item information.\n\n"
+	return output
+
+func pad_text(value, width: int) -> String:
+	var text := str(value)
+	if text.length() >= width:
+		return text.substr(0, width)
+	return text + " ".repeat(width - text.length())
+
+func get_cache() -> CacheData:
+	for i in inventory:
+		if i.name.to_lower().contains("cache"):
+			return i
+	return null #should never hit this
+
+func has_cache() -> bool:
+	for i in inventory:
+		if i.name.to_lower().contains("cache"):
+			return true
+	return false
+
+func has_specific_cache(cache_name: String) -> bool:
+	var item = get_item_by_name(cache_name)
+	if get_amount(item) > 0:
+		return true
+	return false
+
+func has_valuables() -> bool:
+	for i in inventory:
+		if i.valuable:
+			return true
+	return false
+
+func has_intel() -> bool:
+	for i in inventory:
+		if i.upgrade_ingredient:
+			return true
+	return false
+
+func get_all_valuables() -> Array:
+	if !has_valuables():
+		return []
+	var vals = []
+	for i in inventory:
+		if i.valuable:
+			vals.append(i)
+	return vals
+
+func save_data() -> Dictionary:
+	var serializable := {}
+	for item in inventory:
+		serializable[str(item.id)] = inventory[item]
+	
+	return {
+		"inventory": serializable
+	}
+
+
+func load_data(data: Dictionary) -> void:
+	inventory.clear()
+	var raw: Dictionary = data.get("inventory", {})
+	for id_str in raw:
+		var id := int(id_str)
+		var item: ItemData = Items.ITEM_MAP.get(id)
+		if item == null:
+			push_warning("Unknown item id in save: %s" % id_str)
+			continue
+		inventory[item] = int(raw[id_str])
+
+
+#example command: crack -vm use=mining create=parsing
+func get_vm_token_by_skill_name(skill_name: String) -> ItemData:
+	var skills_with_vm_tokens = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
+	for skill in skills_with_vm_tokens:
+		if skill_name.to_lower() == skill.SKILL.name.to_lower():
+			return skill.vm_token
+	return null
+
+
+func has_mod_item():
+	for i in inventory:
+		if i.hacking_mod_item:
+			return true
+	return false
+
+func get_hacking_mods_items() -> Array:
+	var hacking_items = []
+	if inventory.is_empty():
+		return hacking_items
+	
+	for i in inventory:
+		if i.hacking_mod_item:
+			hacking_items.append(i)
+	return hacking_items
+
+#Logs.....+5 damage.......10 hacks.......x100
+func list_inventory_hacking_mods():
+	if inventory.is_empty():
+		return "Inventory is empty."
+	
+	var col_1 = 5
+	var col_2 = 10
+	for item in inventory:
+		if item.name.length() > col_1:
+			col_1 = item.name.length()
+	col_1 += 5
+	var return_text = "\n\n"
+	return_text += pad_text("ITEM", col_1) + pad_text("HACKING MOD", 40) + pad_text("DURATION", 15) + pad_text("REQUIRED", 10) + pad_text("CURRENT AMOUNT", 20)
+	return_text += "\n" + "-".repeat(120)
+	for item in inventory:
+		if !item.is_compilable_mod():
+			continue
+		var first_col = item.name + " ".repeat(col_1 - item.name.length())
+		var second_col = HackingMods.get_mod_name(item.hacking_mod_type) + " " + HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var third_col = str(int(item.hacking_mod_duration)) + " hacks"
+		#var fourth_col = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
+		var fifth_col = "x" + str(item.hacking_mod_consumed)
+		var sixth_col = str(Inventory.get_amount(item))
+		
+		return_text += "\n" + pad_text(first_col, col_1) + pad_text(second_col, 40) + pad_text(third_col, 15) + pad_text(fifth_col, 10) + pad_text(sixth_col, 20)
+	return return_text

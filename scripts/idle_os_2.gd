@@ -57,6 +57,7 @@ extends Control
 @onready var phishing_scene = preload("res://scenes/phishing_terminal.tscn")
 @onready var defrag_scene = preload("res://scenes/defrag_terminal.tscn")
 @onready var compiling_scene = preload("res://scenes/compiling_terminal.tscn")
+@onready var flow_chart_scene = preload("res://scenes/flow_chart.tscn")
 
 
 enum Context {
@@ -143,7 +144,11 @@ var NOTIFY_OF_OVERHEAT: bool = false
 var PLAYER_TABBED: int = 0
 var SAVED_LAST_SUBMITTED: String = ""
 
+## The command that started the main terminal's process (Offline resumes it): {"context", "text"}
+var main_command := {}
+
 func _ready():
+	add_to_group("main_os")
 	Signals.system_message_signal.connect(add_line)
 	# side panel width drives terminal margins + table width (connect before the save loads)
 	system_dock.width_changed.connect(_on_panel_width_changed)
@@ -156,6 +161,8 @@ func _ready():
 	
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
+	Offline.compute() # offline gains are applied right away (booting saves); shown after the boot
+	Uploads.tier_completed.connect(func(t): add_line(ContextCommands.tier_complete_text(t))) # (after compute: offline ones are in the download)
 	if Tutorial.DEV_ALWAYS_SHOW_INTRO:
 		Tutorial.show_intro = true
 	if !Tutorial.show_intro:
@@ -164,6 +171,7 @@ func _ready():
 		add_line("To get started, type `-h` in the terminal.")
 		if Tutorial.should_show_old_save_notice():
 			add_line(Tutorial.old_save_notice())
+		_offline_welcome.call_deferred()
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
@@ -227,6 +235,19 @@ func bring_process_to_bottom():
 			terminal_body_container.move_child(current_process, -1)
 			add_new_scrollback()
 
+## Posts a box-and-arrow chart (scenes/flow_chart.tscn) into the terminal, below any text still printing.
+## <setup> gets the chart and returns false when there's nothing to draw.
+func post_flow_chart(setup: Callable) -> void:
+	while processing_queue or !output_queue.is_empty():
+		await get_tree().process_frame
+	var chart = flow_chart_scene.instantiate()
+	terminal_body_container.add_child(chart)
+	if !setup.call(chart):
+		chart.queue_free()
+		return
+	add_new_scrollback()
+	_scroll_to_bottom.call_deferred()
+
 func add_new_scrollback():
 	lines.clear()
 	var ns = scrollback.instantiate()
@@ -284,6 +305,7 @@ func _on_input_line_text_submitted(new_text):
 		SaveManager.save_game()
 		get_tree().quit()
 	
+	var was_running = process_running
 	if !universal_commands(new_text):
 		match current_context:
 			Context.ROOT:
@@ -306,6 +328,8 @@ func _on_input_line_text_submitted(new_text):
 				defragging_commands(new_text)
 			Context.COMPILING:
 				compiling_commands(new_text)
+	if !was_running and process_running and current_process != null:
+		main_command = {"context": int(current_context), "text": new_text} # what Offline resumes
 
 	history_index = -1
 
@@ -443,6 +467,9 @@ func universal_commands(text):
 	if text.begins_with("info"):
 		handle_info_commands(text)
 		return true
+	if text == "flow":
+		post_flow_chart(func(c): return c.show_loop())
+		return true
 	if text.begins_with("track"):
 		var item_names = text.trim_prefix("track").strip_edges().split(",")
 		add_line(hud_monitor.add_monitored_items(item_names))
@@ -476,18 +503,20 @@ func universal_commands(text):
 	if text.begins_with("ls"):
 		var item_name = text.trim_prefix("ls").strip_edges()
 		
-		# Just "ls"
+		# Just "ls": grouped by type
 		if item_name.is_empty():
-			add_line(Inventory.list_inventory())
+			add_line(Inventory.list_inventory_grouped())
 			Tutorial.complete_event(Tutorial.TutorialEvent.LIST_ITEMS)
 			return true
 		
-		# "ls <item>"
+		# "ls <item>" (exact name), else filters / name search ("ls -caches school", "ls cred")
 		var item = Inventory.get_item_by_name(item_name)
-		
 		if item == null:
-			add_line("Item not found: " + item_name)
-			return true
+			var res = Inventory.list_filtered(item_name)
+			if res.single == null:
+				add_line(res.text)
+				return true
+			item = res.single
 		
 		add_line(Inventory.list_specific_item(item))
 		
@@ -1097,6 +1126,7 @@ func handle_info_commands(text):
 					for mp in p.minor_processes:
 						if command[2] == mp.name.to_lower().replace(" ", "-"):
 							add_line(ContextCommands.get_mp_info(p, mp))
+							post_flow_chart(func(c): return c.show_recipe(p, mp))
 							if p == Phishing and mp == Phishing.SPEAR:
 								Tutorial.complete_event(Tutorial.TutorialEvent.PHISH_SPEAR_INFO)
 							return
@@ -2592,8 +2622,105 @@ func _finish_boot() -> void:
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	add_line(ContextCommands.demo_welcome_message())
 	add_line("To get started, type `-h` in the terminal.")
+	_offline_welcome.call_deferred()
 #endregion
 
+
+#region offline welcome back
+## "While you were away" as a download: a sync header, then one row per resource whose count climbs from 0
+## to what was made offline behind a filling bar, then uploads / levels / notes, then the process resumes.
+## Not skippable: ~2.5 s per row (down to 1.2 s with many rows), a short beat between rows. XP gained per skill gets
+## a row of its own after the resources.
+const OFFLINE_C := "#33ff33"
+const OFFLINE_DIM := "#5c6b7a"
+const OFFLINE_BAR := 18
+
+func _offline_welcome() -> void:
+	var r: Dictionary = Offline.report
+	if r.is_empty():
+		return
+	Offline.report = {}
+	await _wait_for_output()
+	accepting_player_inputs = false
+	add_new_scrollback() # its own block below the welcome text (writing into current_scrollback replaced it)
+	var block = current_scrollback
+	add_new_scrollback()
+	var head = "\n[color=%s]IDLEOS :: RESTORING OFFLINE SESSION[/color]\n" % OFFLINE_C
+	head += "[color=%s]away %s%s%s[/color]\n" % [OFFLINE_DIM, Offline.format_time(r.away),
+		("  ·  offline cap %s (Background Services raises it)" % Offline.format_time(Offline.cap_seconds())) if r.capped else "",
+		("  ·  " + r.process) if r.process != "" else ""]
+	# connect / sync bar
+	for i in OFFLINE_BAR + 1:
+		block.text = head + "connecting  [color=%s]%s[/color][color=%s]%s[/color]" % [OFFLINE_C, "█".repeat(i), OFFLINE_DIM, "░".repeat(OFFLINE_BAR - i)]
+		await get_tree().create_timer(0.05).timeout
+	await get_tree().create_timer(0.3).timeout
+	head += "connected  [color=%s]session found · downloading offline progress[/color]\n\n" % OFFLINE_DIM
+	var rows: Array = r.gains.slice(0, 12).map(func(g): return {"name": g.item.name, "amount": g.amount})
+	for x in r.get("xp", []):
+		rows.append({"name": x.skill + " XP", "amount": x.amount, "xp": true})
+	var per_row = clamp(20.0 / max(1, rows.size()), 1.2, 2.5)
+	var done_text = ""
+	var name_w = 4
+	for g in rows:
+		name_w = max(name_w, g.name.length())
+	for g in rows:
+		var steps = 60
+		for k in steps + 1:
+			var f = 1.0 - pow(1.0 - float(k) / steps, 2.0) # ease out: quick start, settles at the end
+			var n = int(round(g.amount * f))
+			var filled = int(round(OFFLINE_BAR * f))
+			var line = "downloading  %s  [color=%s]%s[/color][color=%s]%s[/color]  [color=%s]+%s[/color]" % [
+				g.name.rpad(name_w), OFFLINE_C, "█".repeat(filled), OFFLINE_DIM, "░".repeat(OFFLINE_BAR - filled),
+				OFFLINE_C if k == steps else "#cccccc", _commas(n)]
+			block.text = head + done_text + line
+			await get_tree().create_timer(per_row / steps).timeout
+		done_text += "downloaded   %s  [color=%s]%s[/color]  [color=%s]+%s[/color]\n" % [g.name.rpad(name_w), OFFLINE_C, "█".repeat(OFFLINE_BAR), OFFLINE_C, _commas(g.amount)]
+		block.text = head + done_text
+		await get_tree().create_timer(0.25).timeout
+	if r.gains.size() > rows.size():
+		done_text += "[color=%s]+ %d more items ('ls')[/color]\n" % [OFFLINE_DIM, r.gains.size() - rows.size()]
+	var tail = ""
+	if !r.spent.is_empty():
+		tail += "[color=%s]used: %s[/color]\n" % [OFFLINE_DIM, ", ".join(r.spent.slice(0, 4).map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))]
+	if !r.staged.is_empty():
+		tail += "packaged: %s\n" % ", ".join(r.staged.map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))
+	for u in r.uploaded:
+		tail += "uploaded: %s %s%s\n" % [_commas(u.amount), u.item.name, ("  [color=%s]· goal complete[/color]" % OFFLINE_C) if u.done else ""]
+	for l in r.levels:
+		tail += "[color=%s]%s level %d -> %d[/color]%s\n" % [OFFLINE_C, l.skill, l.from, l.to,
+			("  [color=%s]+%d %s[/color]" % [OFFLINE_DIM, l.tokens, l.token.name]) if l.tokens > 0 and l.token else ""]
+	if r.trap >= 0.0:
+		tail += ("[color=%s]trap full: 'trap collect'[/color]\n" % OFFLINE_C) if r.trap >= 1.0 else ("trap: %d%% full  [color=%s](fills on real time)[/color]\n" % [int(r.trap * 100), OFFLINE_DIM])
+	for n in r.notes:
+		tail += "[color=%s]%s[/color]\n" % [OFFLINE_DIM, n]
+	if r.overheat:
+		var lost: Dictionary = r.get("lost", {})
+		var keys = lost.keys()
+		keys.sort_custom(func(a, b): return lost[a] > lost[b])
+		var what = ", ".join(keys.slice(0, 4).map(func(k): return "%s %s" % [_commas(lost[k]), k.name]))
+		tail += "[color=#e0c068]ran hot: overheating cost you %s[/color]\n" % (what if what != "" else "%d%% of the output" % int(Offline.OVERHEAT_PENALTY * 100))
+		tail += "[color=%s]  (-%d%%: the process makes more heat than your system cools; more cooling in 'apt system' fixes it)[/color]\n" % [OFFLINE_DIM, int(Offline.OVERHEAT_PENALTY * 100)]
+	block.text = head + done_text + ("\n" + tail if tail != "" else "")
+	await get_tree().create_timer(0.2).timeout
+	for t in r.tiers:
+		add_line(ContextCommands.tier_complete_text(t))
+		await _wait_for_output()
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	# resume the process that ran offline
+	if !r.resume.is_empty() and !process_running:
+		add_line("[color=%s]resuming '%s'[/color]" % [OFFLINE_DIM, r.resume.command])
+		update_context(int(r.resume.context))
+		_on_input_line_text_submitted(r.resume.command)
+
+static func _commas(n: int) -> String:
+	var s = str(abs(n))
+	var out = ""
+	while s.length() > 3:
+		out = "," + s.right(3) + out
+		s = s.left(s.length() - 3)
+	return ("-" if n < 0 else "") + s + out
+#endregion
 
 func player_uploaded_proper_item():
 	accepting_player_inputs = false

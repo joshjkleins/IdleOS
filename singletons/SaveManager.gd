@@ -43,6 +43,7 @@ func save_game() -> void:
 		"mods": HackingMods.save_data(),
 		"uploads": Uploads.save_data(),
 		"exploits": Exploits.save_data(),
+		"offline": Offline.save_data(),
 	}
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
@@ -105,6 +106,7 @@ func load_game() -> bool:
 	HackingMods.load_data(data.get("mods", {}))
 	Uploads.load_data(data.get("uploads", {}))
 	Exploits.load_data(data.get("exploits", {}))
+	Offline.load_data(data.get("offline", {})) # applied by Offline.compute() once idle_os_2 is ready
 	
 	print(data.get("mods"))
 	

@@ -314,16 +314,16 @@
    "group": "System",
    "name": "Background Services",
    "type": "track",
-   "effect": "Offline progression cap (0h until first install)",
+   "effect": "Offline progression cap: +2 h per install on top of the 1 h base (24 h max)",
    "levels": [
     {
      "tier": 1,
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "0 h offline cap",
-     "after": "2 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "0 h added to the 1 h offline cap",
+     "after": "2 h added to the 1 h offline cap",
+     "effect": "Offline progression cap: +2 h per install on top of the 1 h base (24 h max)",
      "costs": [
       {
        "item": "Logs",
@@ -336,8 +336,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "2 h offline cap",
-     "after": "4 h offline cap",
+     "before": "2 h added to the 1 h offline cap",
+     "after": "4 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {
@@ -351,9 +351,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "4 h offline cap",
-     "after": "6 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "4 h added to the 1 h offline cap",
+     "after": "6 h added to the 1 h offline cap",
+     "effect": "Offline progression cap",
      "costs": [
       {
        "item": "Archives",
@@ -366,8 +366,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "6 h offline cap",
-     "after": "8 h offline cap",
+     "before": "6 h added to the 1 h offline cap",
+     "after": "8 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {
@@ -381,9 +381,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "8 h offline cap",
-     "after": "10 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "8 h added to the 1 h offline cap",
+     "after": "10 h added to the 1 h offline cap",
+     "effect": "Offline progression cap",
      "costs": [
       {
        "item": "Metadata",
@@ -396,8 +396,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "10 h offline cap",
-     "after": "12 h offline cap",
+     "before": "10 h added to the 1 h offline cap",
+     "after": "12 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {
@@ -411,9 +411,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "12 h offline cap",
-     "after": "14 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "12 h added to the 1 h offline cap",
+     "after": "14 h added to the 1 h offline cap",
+     "effect": "Offline progression cap",
      "costs": [
       {
        "item": "Cookies",
@@ -426,8 +426,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "14 h offline cap",
-     "after": "16 h offline cap",
+     "before": "14 h added to the 1 h offline cap",
+     "after": "16 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {
@@ -441,9 +441,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "16 h offline cap",
-     "after": "18 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "16 h added to the 1 h offline cap",
+     "after": "18 h added to the 1 h offline cap",
+     "effect": "Offline progression cap",
      "costs": [
       {
        "item": "Repositories",
@@ -456,8 +456,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "18 h offline cap",
-     "after": "20 h offline cap",
+     "before": "18 h added to the 1 h offline cap",
+     "after": "20 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {
@@ -471,9 +471,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "20 h offline cap",
-     "after": "22 h offline cap",
-     "effect": "Offline progression cap (0h until first install)",
+     "before": "20 h added to the 1 h offline cap",
+     "after": "22 h added to the 1 h offline cap",
+     "effect": "Offline progression cap",
      "costs": [
       {
        "item": "Databases",
@@ -486,8 +486,8 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "22 h offline cap",
-     "after": "24 h offline cap",
+     "before": "22 h added to the 1 h offline cap",
+     "after": "24 h added to the 1 h offline cap",
      "effect": "Offline progression cap",
      "costs": [
       {

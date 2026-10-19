@@ -335,7 +335,7 @@ func vm_heat_multiplier() -> float:
 		return 0.5
 	return 1.0
 
-## Background Services: offline progression cap in hours (used once offline progression exists)
+## Background Services: hours added to the 1 h offline base (Offline.cap_seconds, 24 h max)
 func offline_cap_hours() -> float:
 	return cur("system.background_services")
 

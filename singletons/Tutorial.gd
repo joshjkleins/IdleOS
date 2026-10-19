@@ -2,7 +2,7 @@ extends Node
 
 var show_intro: bool = true
 ## TESTING: play the intro + boot on every launch (keeps the save). Turn off before release.
-const DEV_ALWAYS_SHOW_INTRO := true
+const DEV_ALWAYS_SHOW_INTRO := false
 
 enum TutorialEvent {
 	# Basic terminal

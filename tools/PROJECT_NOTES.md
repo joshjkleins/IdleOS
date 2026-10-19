@@ -33,8 +33,8 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - **Josh commits himself.** Don't run git commits.
 - Leave `classes/` alone, except `classes/CacheDecrypting.gd`, which is in use.
 - Never run `pkill -f Godot_v4` (it kills the shell).
-- Testing flags stay ON while developing: `Tutorial.DEV_ALWAYS_SHOW_INTRO := true` (intro every launch), `idle_os_2.DEV_ITEM_COMMANDS := true` (add/rm), `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
-  unlocked) and `Upgrades.DEV_UNLOCK_ALL_TIERS := true`. Turn both off before release.
+- Testing flags stay ON while developing: `idle_os_2.DEV_ITEM_COMMANDS := true` (add/rm), `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
+  unlocked) and `Upgrades.DEV_UNLOCK_ALL_TIERS := true`. Turn them off before release. `Tutorial.DEV_ALWAYS_SHOW_INTRO` (intro every launch) is OFF on cdd since 2026-10-19 (Josh).
 - Josh dislikes walls of text in the terminal: collapse/hide anything not actionable.
 - Big changes: brainstorm/plan with him first, then implement **one skill at a time** so he can test.
 
@@ -269,9 +269,78 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   (`HackingMods.MOD_BW_COST_BY_TIER`, Tier 1 = +2).
 - `ls -h` shows the item-type glossary.
 
+## Offline progression (built 2026-10-19) — singletons/Offline.gd (autoload)
+- Only the MAIN terminal process runs offline. VMs close on quit (no offline, no VM tokens offline), Hacking never
+  runs offline or resumes (quitting mid-hack reopens on the main terminal), Trap already fills on real time, and
+  `crack -vm`, Salvage and Deep Scan (VM-token processes) are online only. Defragging isn't a process.
+- Save: `Offline.save_data()` = quit time + `snapshot()` of the main terminal (skill, process, the command that started
+  it: idle_os_2.main_command {context, text}, captured in _on_input_line_text_submitted, + args: parse items /
+  extraction target, bait / smish target, cache / package item / intel target / package limit, mod item / access target).
+- Load: SaveManager calls Offline.load_data; idle_os_2._ready calls `Offline.compute()` right after load_game (before
+  the boot saves again). Time away is capped by `cap_seconds()` = 1 h base + Background Services (24 h max).
+- Rates are CALCULATED (Josh: measured rates would include overclock / modifiers / VMs): `_job()` builds one cycle per
+  skill at normal speed with upgrades (seconds, avg outputs, inputs, xp, heat); random ones average SAMPLES=300 virtual
+  cycles with the same helpers the terminals use (Parsing.roll_find, Decoding.roll_loot with the rare tracker restored,
+  phishing weighted rolls...). `_run()` = cycles limited by time and inputs, moving on to the next input when one runs
+  out (next cache / parse item, bait -> unbaited). Custom `apply` for Package (stages, still-needed + limit), Intel and
+  Smish (intel points), Compiling Mod (hacks to cap) and Access (stages; can finish and unlock offline). Compiling
+  bursts are folded into the fill time (`_compile_seconds`).
+- Heat: if one cycle's heat (heat sink + flat reduction) > System cooling over the same seconds -> outputs -10%
+  (OVERHEAT_PENALTY), shown as "ran hot". Temperature is reset to the minimum after.
+- Uploads continue at half speed (UPLOAD_SPEED) via Uploads._upload_one, so goals can complete offline.
+- Show: `idle_os_2._offline_welcome()` (after the welcome text, or after _finish_boot): "RESTORING OFFLINE SESSION",
+  a connect bar, then one row per gained resource whose count climbs from 0 behind a filling bar (~2.5 s a row,
+  1.2 s with many, count eases out; not skippable by design; XP gained per skill gets its own row after the resources), then used / packaged / uploaded / levels / notes / ran hot, then it
+  resumes the main command. Level-ups from offline XP give their VM token as usual (Josh: keep them) and the level line
+  shows it ("Mining level 5 -> 11  +6 VM mining token"). The Trap keeps filling on real time (collect stays manual):
+  the download shows "trap: N% full" / "trap full: 'trap collect'".
+- Upload goal complete: `ContextCommands.tier_complete_text(tier)` banner (what the next location opens: first target,
+  Tier N upgrades, next goal). Online it prints on Uploads.tier_completed (connected in idle_os_2._ready after
+  Offline.compute); goals finished offline print it after the download (report.tiers). Before this the full game
+  unlocked the next location silently (only the demo had a send-off).
+- Validated vs live (tools/tests/offtest, L99 base upgrades, per hour): Mining 1,896 live / 1,993 offline Logs,
+  Parsing within ~6%, Matching 480 / 478, Spear 372 / 380, Spear baited 832 / 815, Whaling 427 / 441, Decoding caches
+  6,597 / 6,709 Logs, Cracking 410 / 382, Compiling 818-960 live (bursts are rare: +-15% per hour) / 740 model.
+  tools/tests/offflow = save -> 2 h later -> download + resume (STEP=1 then STEP=2, SHOT=1 for screenshots).
+
+## Flow chart node (built 2026-10-19) — scenes/flow_chart.tscn + scripts/flow_chart.gd
+- A Control drawn with _draw (boxes, arrows, labels) posted into the scrollback like a process terminal,
+  via `idle_os_2.post_flow_chart(setup)` (waits for queued text to finish printing first).
+- `flow` -> `show_loop()`: hand-placed game-loop chart (layout matches Josh's approved mockup). Listed in `-h`.
+- `info <skill> <process>` -> `show_recipe(skill, process)`: auto layout from `Inventory.producer()`
+  (now returns "skill" too). Columns = steps from raw items, inputs that skip columns go on outer rows,
+  boxes show have/need (red when short). Replaced the text RECIPE tree (`Inventory.recipe_text` is now unused).
+- Drawn in design px, scaled to terminal width (never above 1x), fonts floor at 11.
+- Screens test: `tools/tests/flowshot`.
+
+## Balance pass (Josh's plan, after offline progression)
+- Order: resource rates per tier and process (with that tier's upgrades applied) -> combat (easy targets first) ->
+  combat hard (each fight needs more focus / detail). Compiling at max (~46k payloads/h) is either reined in or
+  paired with big resource sinks (Josh decides).
+- Demo Student (Hard) was retuned on demo-nextfest (2026-10-19): integrity 450, firewall 30, counter 15, speed 20
+  (was 500 / 80 / 20 / 50 = unbeatable with demo tools), and the VM Parsing token mod 25 -> 15 firewall reduction.
+  Simulated (tools/tests/hardtune + hardsim, run on a copy of the demo branch): 13/36 mod pairs win in ~45 s - 2.5 min,
+  single mods lose except VM Parsing token + full intel (~2 min). cdd still has the old Student (Hard) numbers and the
+  Parsing token at 25 (decide in the pass; cdd's Student (Hard) also has 145 max anon at L10 + % heals now).
+- Packet Spoof (5 heal per 12.5 s, 2 bw, first claim on bandwidth) is too weak for "spoof early" to matter: early
+  spoofing delays attacks more than it heals. Needs a spoof change (bandwidth priority / cost / heal) if early spoof
+  should be a skill. Firewall reboot (10 s after a break) is what stalls late fights.
+- Item tiers: item_resource.gd defaults `tier` to 1, so items without a set tier (incl. later-location caches) are
+  tier 1. Anything reading item.tier (Compiling mod SQL cost, MOD_BW_COST_BY_TIER, Phishing mod pool) needs the
+  right tiers set first. (The editor re-saving ~129 .tres with "tier = 1" is just the default written out.)
+
 ## Backlog (Josh's list, in order after upgrades)
-1. Offline progression (Background Services sets the cap; 24 h at max).
+1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
 2. Game-loop chart.
-3. `ls` filters (`ls school`, `ls cache`) and inventory display (items have a `tier` field).
+3. ~~`ls` filters~~ DONE 2026-10-19: Inventory.gd `item_type()` (cache / exploit / mod / token / combat / payload / rare /
+   resource, worked out from existing data, matches 'ls -h') and `item_tier()` (from the location the item comes from,
+   not the item's tier field). `ls` is grouped by type (`list_inventory_grouped`), filters combine (`list_filtered`):
+   -<type>, -<skill> (what it makes), school..government / t1..t6, name search ('ls cred'; one match shows details).
+   `ls <item>` adds Type + location and USED IN (`used_in_text`: process inputs, parsing, bait, decoding, mod compile,
+   hacking payloads, access rares, upload goal progress) and the mod block shows the per-hack compile cost.
+   The filter list prints under plain 'ls' (not in 'ls -h'). `ls -<skill>` = what the skill MAKES and USES (`skill_uses`, two sections). `info <skill> <process>` adds a
+   RECIPE tree (`Inventory.recipe_text` / `producer`): the full chain down to Mining with each step's command and what
+   you have (red below one cycle); parse finds have no amount (chance-based). `ls <item>` shows "Made from" + the info
+   command. Test: tools/tests/lstest. Some item descriptions are stale (Parents credit card: "Used as upgrade ingredient").
 - Later: unique combat interactions (maybe a final enemy per location, likely hard mode only),
   Phishing higher tiers (Whaling/Smish/Trap placeholders).

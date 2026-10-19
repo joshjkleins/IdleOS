@@ -730,6 +730,7 @@ func get_help() -> String:
 |   cd <skill>                   Navigate to a skill                  |
 |   cd ..                        Return to root                       |
 |   tree                         Display skill hierarchy              |
+|   flow                         Chart of the game loop               |
 |   info                         Display additional skill info        |
 |                                                                     |
 | ITEMS                                                               |
@@ -1227,6 +1228,21 @@ func not_built_text(minor_process: Dictionary) -> String:
 
 
 ## 'upload': the current tier's goal, what's uploaded, packaged and uploading.
+## Banner when a location's upload goal completes: what the next location opens up (online and in the offline download)
+func tier_complete_text(tier: int) -> String:
+	var done = Uploads.get_location_name(tier)
+	var t = "[color=#33ff33]════════════════════════════════════════\nUPLOAD GOAL COMPLETE  ·  %s\n════════════════════════════════════════[/color]\n" % done.to_upper()
+	if tier >= Uploads.MAX_TIER:
+		return t + "Every location's goal is uploaded. The whole network is yours."
+	var next = Uploads.get_location_name(tier + 1)
+	var loc = Stats.hacking_targets.get(next, {})
+	var first = loc.get("targets", [{}])[0].get("name", "?") if !loc.get("targets", []).is_empty() else "?"
+	t += "[color=#e3b341]%s UNLOCKED[/color]\n" % next.to_upper()
+	t += "  · new target: %s  [color=#666666](in Hacking: view %s)[/color]\n" % [first, next.to_lower()]
+	t += "  · Tier %d upgrades  [color=#666666](apt: each skill's v%d.0 installs open once v%d.0 is done)[/color]\n" % [tier + 1, tier + 1, tier]
+	t += "  · next upload goal: %s  [color=#666666]('upload')[/color]" % next
+	return t
+
 func upload_goal_text() -> String:
 	var tier = Uploads.current_tier()
 	var columns = [{"title": "ITEM"}, {"title": "UPLOADED"}, {"title": "PACKAGED"}, {"title": "IN INVENTORY", "drop": 1}, {"title": "STATUS"}]
