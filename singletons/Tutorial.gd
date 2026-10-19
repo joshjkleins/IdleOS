@@ -76,7 +76,7 @@ enum TutorialEvent {
 const TUTORIAL_ORDER = [
 	TutorialEvent.RUN_HELP_COMMAND, TutorialEvent.NAVIGATE_MINING, TutorialEvent.RUN_MINING_LOG,
 	TutorialEvent.INFO_COMMAND, TutorialEvent.INFO_MINING_COMMAND, TutorialEvent.USE_FOCUS, TutorialEvent.USE_STICKY,
-	TutorialEvent.LIST_ITEMS, TutorialEvent.LIST_LOG_DETAILS, TutorialEvent.MINE_20_LOGS, TutorialEvent.USE_UNSTICKY,
+	TutorialEvent.LIST_ITEMS, TutorialEvent.LIST_LOG_DETAILS, TutorialEvent.RUN_VM_WITH_SSH, TutorialEvent.MINE_20_LOGS, TutorialEvent.USE_UNSTICKY,
 	TutorialEvent.STOP_MINING_PROCESS,
 	TutorialEvent.UPLOAD_INFO, TutorialEvent.PACKAGE_5_LOGS, TutorialEvent.UPLOAD_LOGS,
 	TutorialEvent.NAVIGATE_PARSING, TutorialEvent.PARSE_20_LOGS, TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS,
@@ -87,7 +87,7 @@ const TUTORIAL_ORDER = [
 	TutorialEvent.PHISH_1_PACKET_SPOOFS, TutorialEvent.UNTRACK_ITEMS,
 	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, TutorialEvent.UPLOAD_SCHOOL_PAYLOAD,
 	TutorialEvent.NAVIGATE_HACKING, TutorialEvent.HACK_STUDENT, TutorialEvent.DECODE_1_STUDENT_CACHE,
-	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT, TutorialEvent.RUN_VM_WITH_SSH, TutorialEvent.UPLOAD_PARENTS_CC,
+	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT, TutorialEvent.UPLOAD_PARENTS_CC,
 ]
 
 ## Upload steps that finish once that item's upload is running (or has finished)
@@ -100,7 +100,7 @@ var UPLOAD_STEPS := {} # TutorialEvent -> ItemData, filled in _ready (Items is a
 
 
 var tutorial_tasks := {
-	TutorialEvent.RUN_HELP_COMMAND: "Type '-h' to see the available commands. If you're ever stuck, this is a good way to see your current command options.",
+	TutorialEvent.RUN_HELP_COMMAND: "This tutorial walks you through preparing and hacking your first target while you learn the terminal. Start by typing '-h' to see the available commands. If you're ever stuck, it's the quickest way to see your options.",
 	TutorialEvent.NAVIGATE_MINING: "Navigate to the Mining skill with 'cd mining'. Navigating in the terminal always uses the command 'cd', which stands for Change Directory, followed by where you'd like to go.",
 	TutorialEvent.RUN_MINING_LOG: "Each skill has processes you can run. The pattern to run a process is <singular skill name> -<process name>. Use the run command for the Logs process in Mining. 'mine -logs'",
 	
@@ -111,12 +111,12 @@ var tutorial_tasks := {
 	TutorialEvent.LIST_ITEMS: "Use 'ls' to see a list of your items. 'ls' stands for 'list' and will show everything you have obtained so far.",
 	TutorialEvent.LIST_LOG_DETAILS: "Use 'ls logs' to view information about your Logs item. Additional details for any item can be seen with 'ls <item name>', including where it's used, where it's obtained, drop rates, etc.",
 	
-	TutorialEvent.MINE_20_LOGS: "Mine 35 Logs. You'll parse 30 of them soon and upload the rest.",
+	TutorialEvent.MINE_20_LOGS: "Mine 35 Logs: you'll parse 30 of them soon and upload the rest. While you wait, keep an eye on the system temperature in the side panel. Every process adds heat, and at 100°C your system overheats: everything slows to a crawl until it cools back below 80°C. It cools on its own over time.",
 	TutorialEvent.USE_UNSTICKY: "Use 'unsticky' to unpin the mining process.",
 	TutorialEvent.STOP_MINING_PROCESS: "Stop the mining process with 'kill' or 'stop'. You can add the '-s' flag to wait until the end of the current cycle to safely end and prevent wasting resources. [kill -s]",
 	
-	TutorialEvent.NAVIGATE_PARSING: "Navigate to the Parsing skill. First, return to the root directory with 'cd ..', then go to the Parsing skill with 'cd parsing'.",
-	TutorialEvent.PARSE_20_LOGS: "Use 'parse -footprint=logs' to Parse through 30 logs with the Footprint process. This process requires 1 Log per cycle. It can also be used to transform Caches to different variants. If you ever need more information on a process use the 'INFO COMMAND' for more details and examples. ",
+	TutorialEvent.NAVIGATE_PARSING: "Head to Parsing. This time do it in one command: 'cd ../parsing' ('..' steps back up to the root, then into parsing).",
+	TutorialEvent.PARSE_20_LOGS: "Use 'parse -footprint=logs' to Parse through 30 logs with the Footprint process. This process requires 1 Log per cycle. It can also be used to transform Caches to different variants. If you ever need more information on a process use the 'INFO COMMAND' for more details and examples. Tip: VM tokens speed this up too. If you have a Parsing one, 'ssh parsing footprint=logs' runs a second parser in its own window.",
 	TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS: "Use the Footprint process to parse through logs and obtain 6 encrypted passwords.",
 	TutorialEvent.OBTAIN_3_USERNAMES: "Use the Footprint process to parse through logs and obtain 5 usernames.",
 	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Use the Footprint process to parse through logs and obtain 5 IP addresses.",
@@ -126,7 +126,7 @@ var tutorial_tasks := {
 	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 5 credentials. Matching takes 2 items and combines them. Matching a Username and Password gives you a credential used to build a payload for hacking.",
 	
 	TutorialEvent.PHISH_SPEAR_INFO: "Phishing can be used to obtain powerful Hacking items. Use 'info phishing spear' to view what can be obtained from spear phishing.",
-	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. Hint: 'track <item name>'. This keeps a live count in the top right corner of the terminal, below the system temperature.",
+	TutorialEvent.TRACK_SQL: "Track how many 'SQL Injectors' you have with the 'track' command. Hint: 'track <item name>'. This keeps a live count in the side panel, under the system temperature.",
 	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to Phishing and use the Spear skill to phish for 10 SQL Injectors. Learn more about SQL Injectors with 'ls sql injectors'.",
 	TutorialEvent.PHISH_1_PACKET_SPOOFS: "In Phishing, use the Spear skill to phish for 1 Packet Spoof. Learn more about Packet Spoofs with 'ls packet spoof'.",
 	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'. If you're tracking multiple items you want removed, you can remove them all with the '-a' flag. Ex. untrack -a",
@@ -139,13 +139,13 @@ var tutorial_tasks := {
 	
 	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT: "Install your first Mining upgrade. 'apt mining' lists the upgrades you can install right now, then 'apt install <package>' installs one (ex. 'apt install mining.speed'). Upgrades are paid in the skill's own resources: Mining's in Logs, so mine a few more if you're short.",
 	
-	TutorialEvent.RUN_VM_WITH_SSH: "Run a VM window with SSH commands. Requires a VM Token. For more info on SSH commands, use 'ssh'.",
+	TutorialEvent.RUN_VM_WITH_SSH: "You earn a VM token every time a skill levels up, and here's one to start. A VM token runs a process in its own window, alongside your main terminal. Use it to mine faster: 'ssh mining logs'. ('ssh' lists every VM command.)",
 	
 	TutorialEvent.UPLOAD_PARENTS_CC: "Upload a Parents Credit Card: package it with 'decode -package=parents credit card', then 'upload -parents credit card'. Type 'upload' to see the full upload goal.",
 
 	TutorialEvent.UPLOAD_INFO: "Uploading is how you earn access to new places. Each location has an upload goal: some of every resource you make there. Type 'upload' to see the School's goal (it's also the UPLOADS list in the side panel).",
-	TutorialEvent.PACKAGE_5_LOGS: "Items are packaged before they upload. Go to Decoding with 'cd ../decoding' and package 5 Logs: 'decode -package=logs 5'.",
-	TutorialEvent.UPLOAD_LOGS: "Start the upload with 'upload -logs'. Uploads run in the background, one item at a time, so you can move on while they finish. Watch them in the side panel.",
+	TutorialEvent.PACKAGE_5_LOGS: "Items are packaged before they upload, and packaging happens in Decoding. Return to the root directory with 'cd ..', then go to Decoding with 'cd decoding', and package exactly 5 Logs: 'decode -package=logs 5'. Always add the amount, so you keep enough for the next steps.",
+	TutorialEvent.UPLOAD_LOGS: "Your 5 packaged Logs now show as +5 next to Logs in the UPLOADS list in the side panel ('upload' lists them too; packaged something by mistake? 'unpack -logs' returns it). Start the upload with 'upload -logs'. Uploads run in the background, so you can move on while they finish.",
 	TutorialEvent.UPLOAD_IP_ADDRESS: "Every skill's output counts toward the goal. Package 1 IP Address ('decode -package=ip address 1' in Decoding) and upload it ('upload -ip address').",
 	TutorialEvent.UPLOAD_PASSWORD: "Package 1 Password ('decode -package=passwords 1') and upload it ('upload -passwords'). The rest go to Matching.",
 	TutorialEvent.UPLOAD_CREDENTIAL: "Package 1 Credential ('decode -package=credentials 1') and upload it ('upload -credentials').",
@@ -204,6 +204,9 @@ func complete_event(event: TutorialEvent) -> void:
 		return
 	
 	completed_events.append(event)
+	# the VM step comes right after 'ls logs': make sure there's a token to use
+	if event == TutorialEvent.LIST_LOG_DETAILS and !completed_events.has(TutorialEvent.RUN_VM_WITH_SSH) and Inventory.get_amount(Items.VM_MINING_TOKEN) < 1:
+		Inventory.add_resource(Items.VM_MINING_TOKEN, 1)
 	
 	var completed_task: String = tutorial_tasks[event]
 	var message := ""
@@ -214,11 +217,9 @@ func complete_event(event: TutorialEvent) -> void:
 		message += "[color=gray]All objectives completed.[/color]\n"
 		message += "[color=green]════════════════════════════════[/color]\n\n"
 		
-		message += "You have finished the full gameplay loop of IdleOS.\n"
-		message += "\nFrom here, you're on your own. Explore more processes, upgrade your versions, and see if you can become efficient enough to hack the Hard Mode Student."
-		message += "\n\nThanks for playing IdleOS! If you'd like to share your thoughts or join the community, come hang out in the Discord:"
-		message += "\nhttps://discord.gg/XnrH7zrdb"
-		message += "\n\nUse 'discord -c' to copy the Discord link."
+		message += "Congrats on completing the tutorial!\n"
+		message += "\nFrom here, you're on your own. Explore more processes, upgrade to better versions, complete the School uploads ('upload'), and try your hand at the Student (Hard)."
+		message += "\n\nThoughts or ideas? Come hang out in the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)"
 	else:
 		var next_task := get_current_task()
 		
@@ -244,11 +245,9 @@ func test_tutorial_complete():
 		message += "[color=gray]All objectives completed.[/color]\n"
 		message += "[color=green]════════════════════════════════[/color]\n\n"
 		
-		message += "You have finished the full gameplay loop of IdleOS.\n"
-		message += "\nFrom here, you're on your own. Explore more processes, upgrade your versions, and see if you can become efficient enough to hack the Hard Mode Student."
-		message += "\n\nThanks for playing IdleOS! If you'd like to share your thoughts or join the community, come hang out in the Discord:"
-		message += "\nhttps://discord.gg/XnrH7zrdb"
-		message += "\n\nUse 'discord -c' to copy the Discord link."
+		message += "Congrats on completing the tutorial!\n"
+		message += "\nFrom here, you're on your own. Explore more processes, upgrade to better versions, complete the School uploads ('upload'), and try your hand at the Student (Hard)."
+		message += "\n\nThoughts or ideas? Come hang out in the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)"
 	else:
 		var next_task := get_current_task()
 		
@@ -318,7 +317,8 @@ func save_data() -> Dictionary:
 	return {
 		"tutorial_progress": progress_out,
 		"completed_events": completed_out,
-		"show_intro": show_intro
+		"show_intro": show_intro,
+		"upload_baseline": upload_baseline,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -333,7 +333,9 @@ func load_data(data: Dictionary) -> void:
 		completed_events.append(int(v))
 	
 	show_intro = data.get("show_intro", true)
-	_complete_skipped_new_steps()
+	upload_baseline = data.get("upload_baseline", {})
+	if SaveManager.loaded_version < 2: # only saves from before the upload steps existed
+		_complete_skipped_new_steps()
 
 ## Saves from before the upload steps existed: a new step that sits before something the player already
 ## finished is marked done silently (they're past it), so returning players aren't sent back.
@@ -348,11 +350,62 @@ func _complete_skipped_new_steps() -> void:
 		if e > TutorialEvent.UPLOAD_PARENTS_CC and !completed_events.has(e):
 			completed_events.append(e)
 
+## Uploaded counts when 'tutorial reset' ran (item name -> amount), so earlier uploads don't tick the upload steps
+var upload_baseline: Dictionary = {}
+
+## Returning players: old saves (version < 2) with tutorial progress get a one-time note on load.
+func should_show_old_save_notice() -> bool:
+	return SaveManager.loaded_version < 2 and !completed_events.is_empty()
+
+func old_save_notice() -> String:
+	var m := "[color=yellow]WELCOME BACK[/color]\n"
+	m += "Your save is from an earlier version of the demo. Since then the tutorial has been rebuilt and uploads now unlock new locations.\n"
+	m += "Want a refresher? Type 'tutorial reset' to restart the tutorial. [color=#666666]Your items, levels and upgrades stay as they are.[/color]"
+	return m
+
+## 'tutorial reset': clears the checklist only. Steps this save can't redo (Mining upgrades maxed, an item's
+## upload goal already covered) are checked off so the player can't get stuck. Returns how many were skipped.
+func reset_tutorial() -> int:
+	completed_events.clear()
+	tutorial_progress.clear()
+	upload_baseline.clear()
+	for e in UPLOAD_STEPS:
+		var item: ItemData = UPLOAD_STEPS[e]
+		upload_baseline[item.name] = Uploads.get_uploaded(item)
+	var skip: Array = []
+	var mining_left := false
+	for p in Upgrades.group_packages("Mining"):
+		if !Upgrades.is_at_max_level(p.id):
+			mining_left = true
+	if !mining_left:
+		skip.append(TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT)
+	if !Uploads.is_goal_item(Items.LOGS) or Uploads.get_still_needed(Items.LOGS) < get_event_requirement(TutorialEvent.PACKAGE_5_LOGS):
+		skip.append(TutorialEvent.PACKAGE_5_LOGS)
+	for e in UPLOAD_STEPS:
+		var item: ItemData = UPLOAD_STEPS[e]
+		if !Uploads.is_goal_item(item) or (Uploads.get_still_needed(item) <= 0 and Uploads.get_staged(item) <= 0):
+			skip.append(e)
+	if !Uploads.is_goal_item(Items.PARENTS_CREDIT_CARD) or Uploads.get_still_needed(Items.PARENTS_CREDIT_CARD) <= 0:
+		skip.append(TutorialEvent.UPLOAD_PARENTS_CC)
+	for e in skip:
+		if !completed_events.has(e):
+			completed_events.append(e)
+	SaveManager.mark_dirty()
+	return skip.size()
+
+func reset_message(skipped: int) -> String:
+	var m := "[color=green]TUTORIAL RESTARTED[/color]\n"
+	m += "[color=gray]Checklist cleared. Items, levels and upgrades are untouched.[/color]\n"
+	if skipped > 0:
+		m += "[color=#666666]%d step%s your save can't redo (already maxed or uploaded) %s checked off.[/color]\n" % [skipped, "" if skipped == 1 else "s", "was" if skipped == 1 else "were"]
+	m += "\n[color=yellow]OBJECTIVE[/color]\n" + get_current_task()
+	return m
+
 ## Upload hooks: 'upload' status, packaged Logs, and each upload step once its item is uploading.
 func _on_uploads_changed() -> void:
 	for e in UPLOAD_STEPS:
 		var item = UPLOAD_STEPS[e]
-		if !completed_events.has(e) and (Uploads.is_uploading(item) or Uploads.get_uploaded(item) > 0):
+		if !completed_events.has(e) and (Uploads.is_uploading(item) or Uploads.get_uploaded(item) > int(upload_baseline.get(item.name, 0))):
 			complete_event(e)
 
 func on_items_packaged(item: ItemData, amount: int) -> void:

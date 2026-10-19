@@ -3,7 +3,10 @@ extends Node
 signal save_loaded
 
 const SAVE_PATH = "user://savegame.json"
-const SAVE_VERSION = 1
+## 2 = Oct 18 2026 demo (uploads woven into the tutorial). Older saves get the 'tutorial reset' notice.
+const SAVE_VERSION = 2
+## Version of the save that was loaded this session (0 = no save / fresh game)
+var loaded_version: int = SAVE_VERSION
 
 var dirty: bool = false
 var auto_save_interval: float = 15.0
@@ -83,6 +86,7 @@ func load_game() -> bool:
 		return false
 	
 	var data: Dictionary = parsed
+	loaded_version = int(data.get("version", 0))
 	_migrate_if_needed(data)
 	
 	Inventory.load_data(data.get("inventory", {}))

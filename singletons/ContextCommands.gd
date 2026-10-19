@@ -201,7 +201,10 @@ func get_help_text(skill: Node) -> String:
 	# one line when every process uses efficiency the same way, otherwise a per-process list under the table
 	var eff_lines = []
 	var distinct = {}
-	for p in skill.minor_processes:
+	var ordered = info_process_order(skill)
+	for p in ordered:
+		if !p.get("unlocked", false):
+			continue # only processes the player can run
 		var d = p.get("efficiency description", skill.SKILL["efficiency description"])
 		distinct[d] = true
 		eff_lines.append([p.name, d])
@@ -220,7 +223,7 @@ func get_help_text(skill: Node) -> String:
 	]
 	var rows = []
 	var row_colors = []
-	for p in skill.minor_processes:
+	for p in ordered:
 		var status
 		status = "ONLINE" if p.unlocked else "LOCKED"
 		var efficiency = "-"
@@ -246,6 +249,13 @@ func get_help_text(skill: Node) -> String:
 	return text + "\n\n" + get_modifier_info_text(skill)
 
 
+
+## Info table order: tier processes by unlock level, then utilities ("UTILITY | ...", "UPLOAD | ...") in their own order
+static func info_process_order(skill: Node) -> Array:
+	var tiers = skill.minor_processes.filter(func(p): return str(p.get("tier name", "TIER")).begins_with("TIER"))
+	var others = skill.minor_processes.filter(func(p): return !str(p.get("tier name", "TIER")).begins_with("TIER"))
+	tiers.sort_custom(func(a, b): return int(a.get("unlock level", 1)) < int(b.get("unlock level", 1)))
+	return tiers + others
 
 func get_requirements_text(p: Dictionary) -> String:
 	if p.requirements is String:
@@ -733,6 +743,14 @@ func get_help() -> String:
 |   apt                          Upgrade package manager              |
 |   mod                          Hacking mod manager                  |
 |                                                                     |
+| PROGRESS                                                            |
+|   upload                       Upload goal + what's packaged        |
+|   upload -<item>               Upload packaged items                |
+|   upload -a                    Upload everything packaged           |
+|   unpack -<item>               Return packaged items                |
+|   intel                        Intel on every hacking target        |
+|   intel <target>               Intel on one target                  |
+|                                                                     |
 | DOCUMENTATION                                                       |
 |   tutorial                     Show tutorial checklist              |
 |   -h                           Display this list                    |
@@ -1063,7 +1081,7 @@ func get_tutorial() -> String:
 	
 	return_string += "────────────────────────────────────────────────────────\n\n"
 	
-	return_string += "Type 'tutorial' at any time to view progress.\n"
+	return_string += "Type 'tutorial' at any time to view progress. [color=#666666]'tutorial reset' starts it over.[/color]\n"
 	
 	return return_string
 
@@ -1097,17 +1115,16 @@ Bandwidth Restore: +%s/second
 
 func demo_welcome_message():
 	return """
-WELCOME TO THE IDLEOS DEMO
+WELCOME TO IDLEOS
 
-Thanks for playing IdleOS!
+Your first job: prepare and hack your first target, a [color=#e3b341]Student[/color] at the local School. The tutorial
+walks you through it one terminal command at a time, and teaches you the operating system on the way.
+Hacking is where the big hauls come from: every breached target drops a cache full of resources,
+far more than your processes make on their own. Your processes keep the hacks supplied.
 
-Want to share your thoughts, suggestions, or see what others are saying?
-Join the IdleOS Discord:
-
-https://discord.gg/XnrH7zrdb
+Thoughts or suggestions? Join the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)
 
 To view this message again, use the 'demo' command.
-To copy the Discord link to your clipboard, use 'discord -c'
 """
 
 func discord_message():
@@ -1221,5 +1238,5 @@ func upload_goal_text() -> String:
 		rows.append([g.item.name + (" (rare)" if g.rare else ""), "%d/%d" % [up, g.amount], str(Uploads.get_staged(g.item)), str(Inventory.get_amount(g.item)), status])
 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
-	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -all)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
+	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -a for everything)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
 	return header + build_table(columns, rows, colors) + footer

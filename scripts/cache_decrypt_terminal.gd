@@ -203,7 +203,7 @@ func _run_package() -> void:
 		var amount = 2 if (room >= 2 and randf() < Decoding.get_efficiency(process_data) and Inventory.get_amount(target_cache) >= 2 and Uploads.get_still_needed(target_cache) >= 2) else 1
 		packaged += amount
 		Inventory.remove_resource(target_cache, amount)
-		cache_name.text = "Packaging %s  (%d left, %d still needed)" % [target_cache.name, Inventory.get_amount(target_cache), Uploads.get_still_needed(target_cache) - amount]
+		cache_name.text = "PACKAGING %s  ·  packaged %d%s  ·  %d left in inventory  ·  goal still needs %d" % [target_cache.name.to_upper(), packaged, ("/%d" % package_limit) if package_limit > 0 else "", Inventory.get_amount(target_cache), Uploads.get_still_needed(target_cache) - amount]
 		cache_decrypt.build_rows([{"item": target_cache, "amount": amount}])
 		hex_display.text = cache_decrypt.render_dump()
 		var cycle_mode := await _reveal_dump()

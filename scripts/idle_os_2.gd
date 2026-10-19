@@ -162,6 +162,8 @@ func _ready():
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
+		if Tutorial.should_show_old_save_notice():
+			add_line(Tutorial.old_save_notice())
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
@@ -408,6 +410,9 @@ func tutorial_event_completed(message: String):
 		return
 	add_line(message)
 
+## TESTING: 'add <item>' (+100) and 'rm <item>' (all). Turn off before release (the demo branch removed them).
+const DEV_ITEM_COMMANDS := true
+
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
 	if text.begins_with("settings"):
@@ -499,14 +504,14 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 	
-	if text.begins_with("add"):
+	if DEV_ITEM_COMMANDS and text.begins_with("add"):
 		var item_name = text.trim_prefix("add").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
 			Inventory.add_resource(item, 100)
 			return true
 	#
-	if text.begins_with("rm"):
+	if DEV_ITEM_COMMANDS and text.begins_with("rm"):
 		var item_name = text.trim_prefix("rm").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
 		if item != null:
@@ -585,6 +590,9 @@ func universal_commands(text):
 			return true
 		"tutorial":
 			add_line(ContextCommands.get_tutorial())
+			return true
+		"tutorial reset", "tutorial -r":
+			add_line(Tutorial.reset_message(Tutorial.reset_tutorial()))
 			return true
 		"tree":
 			add_line(ContextCommands.get_ascii_tree(get_context_name_string(current_context)))
@@ -1334,9 +1342,9 @@ func handle_upload_commands(text: String) -> void:
 	var is_unpack = text.begins_with("unpack")
 	var arg = text.trim_prefix("unpack" if is_unpack else "upload").strip_edges().trim_prefix("-").strip_edges()
 	if arg == "":
-		add_line("Name an item. [color=#666666]ex. upload -logs  |  upload -all  |  unpack -logs[/color]")
+		add_line("Name an item. [color=#666666]ex. upload -logs  |  upload -a  |  unpack -logs[/color]")
 		return
-	if !is_unpack and arg == "all":
+	if !is_unpack and (arg == "all" or arg == "a"):
 		var started = []
 		for item in Uploads.staged.keys():
 			if Uploads.start_upload(item) == "":
@@ -2429,7 +2437,7 @@ const INTRO_TEXT := """[color=#33ff33]WELCOME TO IDLE OPERATING SYSTEM.[/color]
 
 You have been granted access to IdleOS: a specialized operating system built to reach the world's most valuable information.
 
-Your objective is simple: gain access to information that could one day be used for the good of humankind.
+Your objective is simple: gain access to information, and use it to build a stronger system.
 
 At present, your access is limited. Prove your proficiency with this tool and you will be trusted with more.
 
@@ -2448,15 +2456,19 @@ func intro_to_game():
 
 ## Types <text> (bbcode ok) into the terminal at <characters_per_second>, frame-rate independent.
 ## Pauses briefly between paragraphs. Any key while typing finishes it at once.
-func type_text(text: String, characters_per_second: float = INTRO_CPS) -> void:
+func type_text(text: String, characters_per_second: float = INTRO_CPS, label: RichTextLabel = null) -> void:
+	if label == null:
+		label = current_scrollback
 	_typing = true
 	_skip_requested = false
-	var base: String = current_scrollback.text
+	var base: String = label.text
 	var plain_len := _visible_length(text)
 	var shown := 0.0
 	var pause := 0.0
 	while shown < plain_len and !_skip_requested:
 		await get_tree().process_frame
+		if !is_instance_valid(label):
+			break # the terminal dropped this block (lots of output): stop typing into it
 		var dt := get_process_delta_time()
 		if pause > 0.0:
 			pause -= dt
@@ -2464,10 +2476,11 @@ func type_text(text: String, characters_per_second: float = INTRO_CPS) -> void:
 		var before := int(shown)
 		shown = min(shown + characters_per_second * dt, float(plain_len))
 		var cut := _bbcode_prefix(text, int(shown))
-		current_scrollback.text = base + cut + "[color=#33ff33]_[/color]"
+		label.text = base + cut + "[color=#33ff33]_[/color]"
 		if int(shown) > before and cut.ends_with("\n\n"):
 			pause = INTRO_PARAGRAPH_PAUSE
-	current_scrollback.text = base + text
+	if is_instance_valid(label):
+		label.text = base + text
 	_typing = false
 	_skip_requested = false
 

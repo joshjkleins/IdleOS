@@ -3,6 +3,28 @@
 Read this first. It covers how we work, how to test, the upgrade system, and what's left.
 Last updated: 2026-10-18, after the Phishing upgrade step.
 
+## Demo branch: demo-nextfest (Steam Next Fest demo, live 2026-10-19)
+- The live demo is built from `demo-nextfest`. Demo hotfixes go there (export + upload to the demo app); if the
+  bug is shared, fix it on cdd too. The demo cut lives in `scripts/demo_rules.gd` (DemoRules, demo branch only):
+  level cap 10, School only (Student + Student Hard), Tier 1 slots [1, 4, 6] per wired skill and [1, 2, 3] for
+  System, upload goal 100 basics / 5 Parents credit cards, 2 mod slots, 'wishlist', the send-off on the School
+  goal. Its call sites are marked DEMO. Don't merge demo-nextfest into cdd (it would bring the cut with it).
+- **Ported to cdd on 2026-10-19** (everything shared from the demo playtest round): intro objective line;
+  welcome goal statement (demo_welcome_message, without the demo lines); tutorial rework (VM step right after
+  'ls logs' with a free VM Mining token, overheating on the mine-35 step, cd hints, VM tip on the parse step,
+  +N packaged in UPLOADS / 'unpack', side-panel track text, new tutorial-complete text); packaging needs an
+  amount until the tutorial is done; clearer package header; 'upload -a'; '-h' PROGRESS section; info table
+  order + efficiency list only for unlocked processes; type_text into a given label.
+- **Save version 2 + tutorial reset** (also on cdd): SaveManager.SAVE_VERSION = 2 + `loaded_version`. A save
+  below 2 with tutorial progress gets a one-time WELCOME BACK note; `tutorial reset` / `tutorial -r` clears the
+  checklist (steps a save can't redo are auto-checked, `upload_baseline` ignores earlier uploads);
+  `_complete_skipped_new_steps` only runs for version < 2. Demo saves carry over to the full game, so keep
+  reading version 2 saves the same way (bump the version only with a migration in `_migrate_if_needed`).
+- The dev 'add <item>' / 'rm <item>' commands stay on cdd behind `idle_os_2.DEV_ITEM_COMMANDS` (turn off before
+  release; the demo removed them).
+- Tests from the demo branch are in tools/tests: tutreset, tutreset2, oldsave (+ olddemo_save.json, a save from
+  the Oct 8 demo), notes_test, playtest. demotest and sendoff are demo-only (they use DemoRules / the send-off).
+
 ## Working conventions (from Josh)
 - Godot 4.4 project. On the linked computer it lives at `~/OneDrive/Documents/idle-os-prototype`;
   in the device shell (`device_bash`) that's `$HOME/mnt/idle-os-prototype`.
@@ -11,7 +33,7 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - **Josh commits himself.** Don't run git commits.
 - Leave `classes/` alone, except `classes/CacheDecrypting.gd`, which is in use.
 - Never run `pkill -f Godot_v4` (it kills the shell).
-- Testing flags stay ON while developing: `Tutorial.DEV_ALWAYS_SHOW_INTRO := true` (intro every launch), `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
+- Testing flags stay ON while developing: `Tutorial.DEV_ALWAYS_SHOW_INTRO := true` (intro every launch), `idle_os_2.DEV_ITEM_COMMANDS := true` (add/rm), `Exp.DEV_MAX_ALL := true` (all skills/processes level 99,
   unlocked) and `Upgrades.DEV_UNLOCK_ALL_TIERS := true`. Turn both off before release.
 - Josh dislikes walls of text in the terminal: collapse/hide anything not actionable.
 - Big changes: brainstorm/plan with him first, then implement **one skill at a time** so he can test.
