@@ -20,14 +20,8 @@ const DEV_UNLOCK_ALL_TIERS := true
 
 ## Groups whose effects are wired up in code. The rest are listed in apt but can't be installed yet
 ## (skills are migrated one at a time).
-const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking", "Matching", "Phishing"]
+const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking", "Matching", "Phishing", "Decoding", "Compiling", "Hacking"]
 
-## Packages that aren't in the new data but are still read by code that hasn't been migrated yet.
-const LEGACY_DEFAULTS := {
-	"hacking.max_anonymity": 100,    # becomes Hacking-level based in the Hacking step
-	"hacking.recursive_hacking": true, # '-r' is always available (no upgrade in the new plan)
-	"hacking.overclock": true,         # hacking overclock (x2 bandwidth regen) has no unlock in the new plan
-}
 
 const BASE_COOLING := -0.1          # C per cooling tick before upgrades
 const BASE_VM_WINDOWS := 1
@@ -80,8 +74,6 @@ func group_packages(group: String) -> Array:
 func get_package_info(id: String) -> Dictionary:
 	if packages.has(id):
 		return packages[id]
-	if LEGACY_DEFAULTS.has(id):
-		return {"id": id, "current": LEGACY_DEFAULTS[id]}
 	return {"id": id, "current": 0}
 
 func is_valid_package(id: String) -> bool:

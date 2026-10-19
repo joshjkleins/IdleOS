@@ -6950,16 +6950,16 @@
    "group": "Decoding",
    "name": "Efficiency",
    "type": "track",
-   "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+   "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
    "levels": [
     {
      "tier": 1,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "0 % bonus rare chance",
-     "after": "0.33 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "0 % of own efficiency",
+     "after": "1.67 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Logs",
@@ -6970,11 +6970,11 @@
     {
      "tier": 1,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "0.33 % bonus rare chance",
-     "after": "0.67 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "1.67 % of own efficiency",
+     "after": "3.33 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Logs",
@@ -6985,11 +6985,11 @@
     {
      "tier": 2,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "0.67 % bonus rare chance",
-     "after": "1 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "3.33 % of own efficiency",
+     "after": "5 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Archives",
@@ -7000,11 +7000,11 @@
     {
      "tier": 2,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "1 % bonus rare chance",
-     "after": "1.33 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "5 % of own efficiency",
+     "after": "6.67 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Archives",
@@ -7015,11 +7015,11 @@
     {
      "tier": 3,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "1.33 % bonus rare chance",
-     "after": "1.67 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "6.67 % of own efficiency",
+     "after": "8.33 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Metadata",
@@ -7030,11 +7030,11 @@
     {
      "tier": 3,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "1.67 % bonus rare chance",
-     "after": "2 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "8.33 % of own efficiency",
+     "after": "10 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Metadata",
@@ -7045,11 +7045,11 @@
     {
      "tier": 4,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "2 % bonus rare chance",
-     "after": "2.33 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "10 % of own efficiency",
+     "after": "11.67 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Cookies",
@@ -7060,11 +7060,11 @@
     {
      "tier": 4,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "2.33 % bonus rare chance",
-     "after": "2.67 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "11.67 % of own efficiency",
+     "after": "13.33 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Cookies",
@@ -7075,11 +7075,11 @@
     {
      "tier": 5,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "2.67 % bonus rare chance",
-     "after": "3 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "13.33 % of own efficiency",
+     "after": "15 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Repositories",
@@ -7090,11 +7090,11 @@
     {
      "tier": 5,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "3 % bonus rare chance",
-     "after": "3.33 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "15 % of own efficiency",
+     "after": "16.67 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Repositories",
@@ -7105,11 +7105,11 @@
     {
      "tier": 6,
      "slot": 4,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "3.33 % bonus rare chance",
-     "after": "3.67 % bonus rare chance",
-     "effect": "Rare-item chance (on top of level: 4% at L1 -> ~8% at L99); +4% at max so rares stay a 'yes!' moment",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "16.67 % of own efficiency",
+     "after": "18.33 % of own efficiency",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
      "costs": [
       {
        "item": "Databases",
@@ -7120,11 +7120,11 @@
     {
      "tier": 6,
      "slot": 5,
-     "value": 0.003333,
-     "label": "+0.33%",
-     "before": "3.67 % bonus rare chance",
-     "after": "4 % bonus rare chance",
-     "effect": "Rare-item chance",
+     "value": 0.016667,
+     "label": "+1.67% of eff",
+     "before": "18.33 % of own efficiency",
+     "after": "20 % of own efficiency",
+     "effect": "Process efficiency, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Databases",
@@ -7337,16 +7337,16 @@
    "group": "Decoding",
    "name": "Compression",
    "type": "pointed",
-   "effect": "Each Package pass packs more items toward uploads",
+   "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
    "levels": [
     {
      "tier": 1,
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "0 % more packaged",
-     "after": "10 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "0 % faster packaging",
+     "after": "10 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Logs",
@@ -7359,9 +7359,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "10 % more packaged",
-     "after": "20 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "10 % faster packaging",
+     "after": "20 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Archives",
@@ -7374,9 +7374,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "20 % more packaged",
-     "after": "30 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "20 % faster packaging",
+     "after": "30 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Metadata",
@@ -7389,9 +7389,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "30 % more packaged",
-     "after": "40 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "30 % faster packaging",
+     "after": "40 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Cookies",
@@ -7404,9 +7404,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "40 % more packaged",
-     "after": "50 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "40 % faster packaging",
+     "after": "50 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Repositories",
@@ -7419,9 +7419,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "50 % more packaged",
-     "after": "60 % more packaged",
-     "effect": "Each Package pass packs more items toward uploads",
+     "before": "50 % faster packaging",
+     "after": "60 % faster packaging",
+     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
      "costs": [
       {
        "item": "Databases",
@@ -7436,7 +7436,7 @@
    "group": "Decoding",
    "name": "Field Notes",
    "type": "pointed",
-   "effect": "Intel lasts more hacks",
+   "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
    "levels": [
     {
      "tier": 1,
@@ -7445,7 +7445,7 @@
      "label": "+1 hack",
      "before": "0 extra intel hacks",
      "after": "1 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Logs",
@@ -7460,7 +7460,7 @@
      "label": "+1 hack",
      "before": "1 extra intel hacks",
      "after": "2 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Archives",
@@ -7475,7 +7475,7 @@
      "label": "+1 hack",
      "before": "2 extra intel hacks",
      "after": "3 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Metadata",
@@ -7490,7 +7490,7 @@
      "label": "+1 hack",
      "before": "3 extra intel hacks",
      "after": "4 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Cookies",
@@ -7505,7 +7505,7 @@
      "label": "+1 hack",
      "before": "4 extra intel hacks",
      "after": "5 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Repositories",
@@ -7520,7 +7520,7 @@
      "label": "+1 hack",
      "before": "5 extra intel hacks",
      "after": "6 extra intel hacks",
-     "effect": "Intel lasts more hacks",
+     "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
        "item": "Databases",
@@ -7982,16 +7982,16 @@
    "group": "Compiling",
    "name": "Efficiency",
    "type": "track",
-   "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+   "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
    "levels": [
     {
      "tier": 1,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "0 % bonus burst chance",
-     "after": "1.67 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "0 % of own efficiency",
+     "after": "1.67 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "School payload",
@@ -8003,10 +8003,10 @@
      "tier": 1,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "1.67 % bonus burst chance",
-     "after": "3.33 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "1.67 % of own efficiency",
+     "after": "3.33 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "School payload",
@@ -8018,10 +8018,10 @@
      "tier": 2,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "3.33 % bonus burst chance",
-     "after": "5 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "3.33 % of own efficiency",
+     "after": "5 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8033,10 +8033,10 @@
      "tier": 2,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "5 % bonus burst chance",
-     "after": "6.67 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "5 % of own efficiency",
+     "after": "6.67 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8048,10 +8048,10 @@
      "tier": 3,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "6.67 % bonus burst chance",
-     "after": "8.33 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "6.67 % of own efficiency",
+     "after": "8.33 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8063,10 +8063,10 @@
      "tier": 3,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "8.33 % bonus burst chance",
-     "after": "10 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "8.33 % of own efficiency",
+     "after": "10 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8078,10 +8078,10 @@
      "tier": 4,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "10 % bonus burst chance",
-     "after": "11.67 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "10 % of own efficiency",
+     "after": "11.67 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8093,10 +8093,10 @@
      "tier": 4,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "11.67 % bonus burst chance",
-     "after": "13.33 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "11.67 % of own efficiency",
+     "after": "13.33 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8108,10 +8108,10 @@
      "tier": 5,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "13.33 % bonus burst chance",
-     "after": "15 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "13.33 % of own efficiency",
+     "after": "15 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "Police Payload",
@@ -8123,10 +8123,10 @@
      "tier": 5,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "15 % bonus burst chance",
-     "after": "16.67 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "15 % of own efficiency",
+     "after": "16.67 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Police Payload",
@@ -8138,10 +8138,10 @@
      "tier": 6,
      "slot": 4,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "16.67 % bonus burst chance",
-     "after": "18.33 % bonus burst chance",
-     "effect": "Speed-burst chance (on top of level efficiency); 20% at max",
+     "label": "+1.67% of eff",
+     "before": "16.67 % of own efficiency",
+     "after": "18.33 % of own efficiency",
+     "effect": "Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)",
      "costs": [
       {
        "item": "Government Payload",
@@ -8153,10 +8153,10 @@
      "tier": 6,
      "slot": 5,
      "value": 0.016667,
-     "label": "+1.67%",
-     "before": "18.33 % bonus burst chance",
-     "after": "20 % bonus burst chance",
-     "effect": "Speed-burst chance",
+     "label": "+1.67% of eff",
+     "before": "18.33 % of own efficiency",
+     "after": "20 % of own efficiency",
+     "effect": "Burst chance, relative (+20% of its own at max)",
      "costs": [
       {
        "item": "Government Payload",
@@ -8171,7 +8171,7 @@
    "group": "Compiling",
    "name": "Recovery",
    "type": "track",
-   "effect": "Chance the inputs are not consumed; 20% at max",
+   "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
    "levels": [
     {
      "tier": 1,
@@ -8180,7 +8180,7 @@
      "label": "+1.67%",
      "before": "0 % inputs kept",
      "after": "1.67 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "School payload",
@@ -8210,7 +8210,7 @@
      "label": "+1.67%",
      "before": "3.33 % inputs kept",
      "after": "5 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8240,7 +8240,7 @@
      "label": "+1.67%",
      "before": "6.67 % inputs kept",
      "after": "8.33 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8270,7 +8270,7 @@
      "label": "+1.67%",
      "before": "10 % inputs kept",
      "after": "11.67 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8300,7 +8300,7 @@
      "label": "+1.67%",
      "before": "13.33 % inputs kept",
      "after": "15 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "Police Payload",
@@ -8330,7 +8330,7 @@
      "label": "+1.67%",
      "before": "16.67 % inputs kept",
      "after": "18.33 % inputs kept",
-     "effect": "Chance the inputs are not consumed; 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
      "costs": [
       {
        "item": "Government Payload",
@@ -8459,7 +8459,7 @@
    "group": "Compiling",
    "name": "Mod Tuning",
    "type": "pointed",
-   "effect": "Compiled hacking mods are stronger",
+   "effect": "Hacking mods built with Mod are stronger",
    "levels": [
     {
      "tier": 1,
@@ -8468,7 +8468,7 @@
      "label": "+5%",
      "before": "0 % stronger compiled mods",
      "after": "5 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "School payload",
@@ -8483,7 +8483,7 @@
      "label": "+5%",
      "before": "5 % stronger compiled mods",
      "after": "10 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8498,7 +8498,7 @@
      "label": "+5%",
      "before": "10 % stronger compiled mods",
      "after": "15 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8513,7 +8513,7 @@
      "label": "+5%",
      "before": "15 % stronger compiled mods",
      "after": "20 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8528,7 +8528,7 @@
      "label": "+5%",
      "before": "20 % stronger compiled mods",
      "after": "25 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "Police Payload",
@@ -8543,7 +8543,7 @@
      "label": "+5%",
      "before": "25 % stronger compiled mods",
      "after": "30 % stronger compiled mods",
-     "effect": "Compiled hacking mods are stronger",
+     "effect": "Hacking mods built with Mod are stronger",
      "costs": [
       {
        "item": "Government Payload",
@@ -8558,7 +8558,7 @@
    "group": "Compiling",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': faster, more heat (not on Access)",
    "levels": [
     {
      "tier": 1,
@@ -8567,7 +8567,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': faster, more heat (not on Access)",
      "costs": [
       {
        "item": "School payload",
@@ -8614,7 +8614,7 @@
    "group": "Compiling",
    "name": "Debug Build",
    "type": "capstone",
-   "effect": "MODIFIER 'debug': -50% speed, heat x1.5; compiled mods last +50% hacks",
+   "effect": "MODIFIER 'debug': -50% speed, heat x1.5; Mod can build the mod up to +50% more hacks (Mod only)",
    "levels": [
     {
      "tier": 3,
@@ -8623,7 +8623,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'debug': -50% speed, heat x1.5; compiled mods last +50% hacks",
+     "effect": "MODIFIER 'debug': -50% speed, heat x1.5; Mod can build the mod up to +50% more hacks (Mod only)",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -9212,7 +9212,7 @@
    "group": "Hacking",
    "name": "Packet Spoof Healing",
    "type": "track",
-   "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+   "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
    "levels": [
     {
      "tier": 1,
@@ -9221,7 +9221,7 @@
      "label": "+1% of max anon",
      "before": "5 % of max anonymity per spoof",
      "after": "6 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Student cache",
@@ -9236,7 +9236,7 @@
      "label": "+1% of max anon",
      "before": "6 % of max anonymity per spoof",
      "after": "7 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Legal assistant cache",
@@ -9251,7 +9251,7 @@
      "label": "+1% of max anon",
      "before": "7 % of max anonymity per spoof",
      "after": "8 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Receptionist cache",
@@ -9266,7 +9266,7 @@
      "label": "+1% of max anon",
      "before": "8 % of max anonymity per spoof",
      "after": "9 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Teller Cache",
@@ -9281,7 +9281,7 @@
      "label": "+1% of max anon",
      "before": "9 % of max anonymity per spoof",
      "after": "10 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Secretary cache",
@@ -9296,7 +9296,7 @@
      "label": "+1% of max anon",
      "before": "10 % of max anonymity per spoof",
      "after": "11 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100)",
+     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
        "item": "Clerk Cache",
@@ -9692,7 +9692,7 @@
    "group": "Hacking",
    "name": "Siphon",
    "type": "capstone",
-   "effect": "Each SQL hit restores 1 anonymity",
+   "effect": "Each SQL hit restores 0.5% of max anonymity",
    "levels": [
     {
      "tier": 4,
@@ -9701,7 +9701,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "Each SQL hit restores 1 anonymity",
+     "effect": "Each SQL hit restores 0.5% of max anonymity",
      "costs": [
       {
        "item": "Teller Cache",

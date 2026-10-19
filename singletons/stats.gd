@@ -605,6 +605,7 @@ func _ready():
 	apply_default_unlocks()
 	(func(): Uploads.tier_completed.connect(_on_tier_completed)).call_deferred() # Uploads loads after Stats
 	Upgrades.apply_effects() # cooling, VM windows, heat reduction, overheat fan, max anonymity
+	(func(): Hacking.SKILL["level up signal"].connect(func(_a = null): set_max_anon())).call_deferred()
 
 ##############################
 ######## DEFRAG BONUS ########
@@ -791,8 +792,20 @@ func update_cooling_amount(amount_to_add: float):
 func cooling_updated():
 	Signals.cooling_updated()
 
+## Max anonymity (no upgrade): 100 + 5 per Hacking level above 1 + 100 per location unlocked past the first
+## (145 at L10, ~590 at L99 with only School, 1,090 with all six). Also refreshes the auto-spoof threshold.
+const BASE_MAX_ANON := 100
+const MAX_ANON_PER_LEVEL := 5
+const MAX_ANON_PER_LOCATION := 100
+const BASE_SPOOF_THRESHOLD := 0.3
+
 func set_max_anon():
-	max_anon = Upgrades.get_package_info("hacking.max_anonymity").current
+	var locs = 0
+	for loc in hacking_targets:
+		if hacking_targets[loc].get("unlocked", false):
+			locs += 1
+	max_anon = BASE_MAX_ANON + MAX_ANON_PER_LEVEL * (int(Hacking.SKILL.level) - 1) + MAX_ANON_PER_LOCATION * max(0, locs - 1)
+	healing_threshold_auto_start = BASE_SPOOF_THRESHOLD + Upgrades.cur("hacking.spoof_threshold")
 
 func remove_vm_count(amount: int = 1):
 	CURRENT_ALL_VMS -= amount
@@ -898,6 +911,7 @@ func unlock_location(location_key: String) -> void:
 	l["unlocked"] = true
 	if !l.get("targets", []).is_empty():
 		l.targets[0]["unlocked"] = true
+	set_max_anon()
 	SaveManager.mark_dirty()
 	unlocks_changed.emit()
 
@@ -1006,6 +1020,7 @@ func load_data(data: Dictionary) -> void:
 	var saved_wins: Dictionary = data.get("wins", {})
 	for k in saved_wins:
 		wins[k] = int(saved_wins[k])
+	set_max_anon()
 	unlocks_changed.emit()
 	
 	Signals.system_temp_updated(system_tempature)

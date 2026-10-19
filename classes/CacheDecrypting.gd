@@ -29,9 +29,9 @@ func row_count() -> int:
 	return dump_info["codes"].size()
 
 #when it is confirmed player has a cache, this function builds a 'dump' which is 3 arrays filled with the placeholder characters for the module (0x0000, ?? ??, |...|)
-func build_dump(cache: CacheData, process: Dictionary = {}):
+func build_dump(cache: CacheData, process: Dictionary = {}, mod: String = ""):
 	dump_info = {}
-	var loot: Array = get_potential_items(cache, process) # [{item, amount, rare}]
+	var loot: Array = get_potential_items(cache, process, mod) # [{item, amount, rare}]
 	items_total = loot.size()
 
 	var all_codes: Array = []
@@ -126,7 +126,7 @@ func update_dump() -> bool:
 	return true
 
 ## Returns [{item, amount, rare}] (rare last). Variant rules live in Decoding.roll_loot().
-func get_potential_items(cache: CacheData, process: Dictionary = {}) -> Array:
+func get_potential_items(cache: CacheData, process: Dictionary = {}, mod: String = "") -> Array:
 	# tutorial: the very first Student cache drops everything, including the rare item
 	if not Decoding.first_cache_decoded and cache == Items.STUDENT_CACHE:
 		var loot = []
@@ -136,7 +136,7 @@ func get_potential_items(cache: CacheData, process: Dictionary = {}) -> Array:
 		Decoding.first_cache_decoded = true
 		SaveManager.mark_dirty()
 		return loot
-	return Decoding.roll_loot(cache, process)
+	return Decoding.roll_loot(cache, process, mod)
 
 func get_item_hexes(item, amount) -> Array:
 	var result: Array = []

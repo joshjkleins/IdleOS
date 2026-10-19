@@ -61,7 +61,7 @@ func get_mod_description(mod: MOD_TYPE) -> String:
 		MOD_TYPE.FIREWALL_DAMAGE:
 			return "Increases firewall damage"
 		MOD_TYPE.RESTORE:
-			return "Increases Packet Spoof restore"
+			return "Packet Spoofs restore more: +X% of max anonymity"
 		MOD_TYPE.BAND_RATE:
 			return "Increases bandwith restore amount"
 		MOD_TYPE.ATTACK_SPEED:
@@ -108,7 +108,7 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 		MOD_TYPE.FIREWALL_DAMAGE:
 			return "+" + str(int(value))
 		MOD_TYPE.RESTORE:
-			return "+" + str(int(value))
+			return "+%d%%" % int(value) # percentage points of max anonymity
 		MOD_TYPE.BAND_RATE:
 			return "+" + str(int(value))
 		MOD_TYPE.ATTACK_SPEED:
@@ -137,6 +137,22 @@ func add_mod(item: ItemData) -> void:
 		"value": mod_value,
 		"tier": item.tier, # sets the extra SQL Injector bandwidth cost (MOD_BW_COST_BY_TIER)
 	}
+
+## Compiling's Mod process: one fill adds one hack. Equips the mod on the first fill (needs a free slot),
+## then extends it up to <cap> hacks; a stronger value (Mod Tuning) replaces a weaker one.
+## Returns the mod's hacks after the fill, or 0 when it couldn't be added (no slot).
+func extend_mod(item, value_mult: float, cap: int) -> int: # item: ItemData (untyped: ItemData refers to HackingMods)
+	var mod = item.hacking_mod_type
+	var value = item.hacking_mod_value * value_mult
+	if !current_mods.has(mod):
+		if at_max_mods():
+			return 0
+		current_mods[mod] = {"duration": 1, "value": value, "tier": item.tier}
+	else:
+		var m = current_mods[mod]
+		m.duration = min(max(int(m.duration), cap), int(m.duration) + 1)
+		m.value = max(float(m.value), value)
+	return int(current_mods[mod].duration) # (the caller marks the save dirty: SaveManager here would be a cyclic reference)
 
 func remove_duration() -> void:
 	for mod in current_mods:

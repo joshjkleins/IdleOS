@@ -89,6 +89,17 @@ var ATTACK_AMOUNT: int = 0
 var FIREWALL_DAMAGE: int = 0
 var ATTACK_BW_COST = 0
 var ATTACK_HEAT: float = 0.3
+const BASE_ATTACK_HEAT := 0.3
+const ATTACK_HEAT_PER_DAMAGE := 0.1
+var DEFEND_PCT: float = 0.05 # Packet Spoof heal as a fraction of max anonymity
+## Capstones
+const CLEAN_EXIT_KEEP := 0.5      # share of banked caches kept when traced
+const EVASION_CHANCE := 0.1       # countermeasure dodged
+const RECYCLER_CHANCE := 0.5      # SQL Injector not consumed
+const SIPHON_PCT := 0.005         # max anonymity restored per SQL hit
+const DEAD_MANS_RESTORE := 0.25   # once per session: survive a trace at 1, then restore this much
+const EXPLOIT_KIT_CHANCE := 0.5   # one-time item not consumed
+var dead_mans_used := false
 var defending: bool = false
 var DEFEND_SPEED: float = 5.0
 var DEFEND_AMOUNT: int = 0
@@ -318,8 +329,12 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 
 	COUNTER_SPEED = target["counter speed"]
 	COMBAT_QUEUE.clear()
-	var healing_upgrade = Upgrades.get_package_info("hacking.healing")
-	DEFEND_AMOUNT = defensive_item.heal + healing_upgrade.current
+	# Healing: a Packet Spoof restores a % of max anonymity (its "heal" 5 = 5%) + the Healing track
+	DEFEND_PCT = float(defensive_item.heal) / 100.0 + Upgrades.cur("hacking.healing")
+	DEFEND_AMOUNT = int(ceil(Stats.max_anon * DEFEND_PCT))
+	# Damage track: each install also adds attack heat (balances System cooling)
+	ATTACK_HEAT = BASE_ATTACK_HEAT + ATTACK_HEAT_PER_DAMAGE * int(Upgrades.get_package_info("hacking.damage").get("installed", 0))
+	dead_mans_used = false
 	DEFEND_SPEED = defensive_item.speed
 	DEFEND_BW_COST = defensive_item.bandwidth_cost
 
@@ -408,7 +423,15 @@ func attack():
 	integ_bar.value -= actual_dmg
 	Exploits.add_charge("crit" if crit > 1 else "attack")
 	add_heat(ATTACK_HEAT)
-	Inventory.remove_resource(offensive_item, 1)
+	var recycled = Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE
+	if !recycled:
+		Inventory.remove_resource(offensive_item, 1)
+	var siphoned = 0
+	if Upgrades.has("hacking.siphon"):
+		var before_anon = Stats.current_anon
+		Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * SIPHON_PCT))
+		siphoned = int(Stats.current_anon - before_anon)
+		anon_bar.value = Stats.current_anon
 	Signals.update_hacking_header()
 
 	# log: what hit what, and why it was bigger
@@ -430,6 +453,10 @@ func attack():
 		tags.append("+%d%% crit" % roundi(_mod(M.EFFICIENCY) * 100))
 	if !tags.is_empty():
 		line += "  " + _c("(MOD " + ", ".join(tags) + ")", C_MOD)
+	if recycled:
+		line += "  " + _c("(recycled)", C_EXP)
+	if siphoned > 0:
+		line += "  " + _c("+%d anonymity (siphon)" % siphoned, C_YOU)
 	line += "  " + _c("bw -%s" % _fmt(bw_cost) if bw_freeze_left <= 0.0 else "bw frozen", C_DIM)
 	_log("ATK", C_SQL, line)
 
@@ -459,8 +486,9 @@ func attack():
 	_refresh_panels()
 
 func defense():
-	var mod_restore = int(_mod(HackingMods.MOD_TYPE.RESTORE))
-	var amount = DEFEND_AMOUNT + mod_restore
+	# Restore mods add percentage points of max anonymity (+5 = +5%)
+	var mod_restore = int(ceil(Stats.max_anon * _mod(HackingMods.MOD_TYPE.RESTORE) / 100.0))
+	var amount = int(ceil(Stats.max_anon * DEFEND_PCT)) + mod_restore
 	var boosted = spoof_boost_left > 0.0
 	if boosted:
 		amount = int(amount * float(Exploits.DEFS.booster_shot.mult))
@@ -506,9 +534,18 @@ func counter():
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Ghost Mode, %d left)" % ghost_left, C_EXP)])
 		_float(anon_bar, "MISS", C_EXP, 15)
 		return
+	if Upgrades.has("hacking.evasion") and randf() < EVASION_CHANCE:
+		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("EVADED", C_EXP), _c("(Evasion)", C_DIM)])
+		_float(anon_bar, "EVADED", C_EXP, 15)
+		return
 	var reduce = int(_mod(M.DAMAGE_REDUCTION))
 	var dmg = max(1, COUNTER_AMOUNT - reduce) # min 1 damage
 	Stats.current_anon = max(0.0, Stats.current_anon - dmg)
+	var switched = false
+	if Stats.current_anon <= 0.0 and Upgrades.has("hacking.dead_mans_switch") and !dead_mans_used:
+		dead_mans_used = true
+		switched = true
+		Stats.current_anon = 1.0 + ceil(Stats.max_anon * DEAD_MANS_RESTORE)
 	add_heat(COUNTER_HEAT)
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("hit_taken")
@@ -521,6 +558,10 @@ func counter():
 	if firewall_down:
 		line += "  " + _c("(slowed: firewall down)", C_FW)
 	_log("CTR", C_CTR, line)
+	if switched:
+		_log("DEF", C_EXP, "DEAD MAN'S SWITCH: trace blocked at 1 anonymity, restored to %d/%d (once per session)" % [Stats.current_anon, Stats.max_anon])
+		_banner("DEAD MAN'S SWITCH", "trace blocked  ·  +25% anonymity", C_EXP, 0.9)
+		anon_bar.value = Stats.current_anon
 	_float(anon_bar, "-%d" % dmg, C_INTEG, 15)
 	_flash(anon_bar, Color(2.0, 1.2, 1.2), 0.3)
 	_flash(ctr_card.panel, Color(1.6, 1.15, 1.15), 0.2)
@@ -623,9 +664,16 @@ func lose():
 	_shake(you_card.panel, 9.0, 0.45)
 	update_status_label_badge("traced", C_INTEG)
 	var messages = "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
+	var kept = int(floor(caches_gained * CLEAN_EXIT_KEEP)) if Upgrades.has("hacking.clean_exit") else 0
+	if kept > 0:
+		Inventory.add_resource(target_reward, kept)
+		_log("SYS", C_EXP, "Clean Exit: kept %d of %d banked %s" % [kept, caches_gained, target_reward.name])
+		messages += "[color=#4ec994]Clean Exit kept %s x%d[/color]\n" % [target_reward.name, kept]
+		caches_gained -= kept
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]Items lost[/color]\n"
 		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
+	caches_gained = 0
 	remove_mod_duration()
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
@@ -965,7 +1013,7 @@ func _refresh_panels() -> void:
 	# Packet Spoof
 	spoof_card.count.text = "x" + _short(Inventory.get_amount(defensive_item))
 	spoof_card.stats.text = "   ".join([
-		_stat("RESTORE", str(int((DEFEND_AMOUNT + int(_mod(M.RESTORE))) * (float(Exploits.DEFS.booster_shot.mult) if spoof_boost_left > 0.0 else 1.0))), C_EXP if spoof_boost_left > 0.0 else (C_MOD if _mod(M.RESTORE) > 0 else C_TEXT)),
+		_stat("RESTORE", str(int((DEFEND_AMOUNT + int(ceil(Stats.max_anon * _mod(M.RESTORE) / 100.0))) * (float(Exploits.DEFS.booster_shot.mult) if spoof_boost_left > 0.0 else 1.0))), C_EXP if spoof_boost_left > 0.0 else (C_MOD if _mod(M.RESTORE) > 0 else C_TEXT)),
 		_stat("BW", str(DEFEND_BW_COST), C_TEXT),
 		_stat("EVERY", _secs(100.0 / max(0.001, DEFEND_SPEED)), C_TEXT)])
 	_set_rtl(spoof_card.mods, _mods_text([M.RESTORE]))
@@ -1114,12 +1162,15 @@ func use_exploit(item: ItemData, auto: bool = false) -> String:
 		return why
 	var d = Exploits.get_def(item)
 	Exploits.set_charge(Exploits.charge - Exploits.cost(item))
-	Inventory.remove_resource(item, 1)
+	var kit_saved = Upgrades.has("hacking.exploit_kit") and randf() < EXPLOIT_KIT_CHANCE
+	if !kit_saved:
+		Inventory.remove_resource(item, 1)
 	Signals.update_hacking_header()
 	_exploit_lock = Exploits.LOCKOUT
 	var result = _apply_exploit(item.exploit_id, d)
-	_log("RUN", C_EXP, "%s%s: %s  %s" % ["auto " if auto else "", item.name, result,
-		_c("(-%d charge · %d left)" % [int(Exploits.cost(item)), Inventory.get_amount(item)], C_DIM)])
+	_log("RUN", C_EXP, "%s%s: %s  %s%s" % ["auto " if auto else "", item.name, result,
+		_c("(-%d charge · %d left)" % [int(Exploits.cost(item)), Inventory.get_amount(item)], C_DIM),
+		("  " + _c("(Exploit Kit: not consumed)", C_EXP)) if kit_saved else ""])
 	_banner(item.name.to_upper(), d.effect, C_EXP, 0.8)
 	_flash(exp_row.bar, Color(2, 1.6, 2.2), 0.5)
 	_refresh_panels()

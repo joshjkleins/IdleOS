@@ -168,7 +168,7 @@ func _add_intel(box: VBoxContainer, info) -> void:
 	var stat = Decoding.intel_stat(info)
 	if intel.hacks > 0:
 		box.add_child(_label("-%d %s for %d hack%s" % [intel.amount, stat, intel.hacks, "" if intel.hacks == 1 else "s"], 11, C_INTEL))
-		box.add_child(_label("max -%d %s / %d hacks" % [Decoding.intel_cap(info), stat, Decoding.INTEL_MAX_HACKS], 10, C_DIM))
+		box.add_child(_label("max -%d %s / %d hacks" % [Decoding.intel_cap(info), stat, Decoding.intel_max_hacks()], 10, C_DIM))
 	else:
 		box.add_child(_label("none  ·  gather intel with the Decoding skill (weakens %s)" % stat, 10, C_DIM))
 #endregion

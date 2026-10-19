@@ -81,9 +81,9 @@ func get_fill_rate(mode: Mode) -> float:
 		Mode.OVERHEATED:
 			return _speed_value("overheat speed")
 		Mode.OVERCLOCKED:
-			return _speed_value("overclock speed") * (1.0 + get_speed_upgrade())
+			return _speed_value("overclock speed") * (1.0 + get_speed_upgrade()) * modifier_speed()
 		_:
-			return _speed_value("base speed") * (1.0 + get_speed_upgrade())
+			return _speed_value("base speed") * (1.0 + get_speed_upgrade()) * modifier_speed()
 
 ## Pick one of three process values by mode, for terminals with their own key names
 ## (e.g. Phishing: "cast time" / "overclock cast time" / "overheat cast time").

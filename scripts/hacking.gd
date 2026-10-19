@@ -190,12 +190,7 @@ func handle_hack_command(text):
 	
 	# Check for recursive flag
 	if "-r" in tokens:
-		if !Upgrades.get_package_info("hacking.recursive_hacking").current:
-			player_hacking_box.add_line_error("Recursive functionality not unlocked. Unlock with apt upgrade manager.")
-			return
-		else:
-			recursive = true
-		
+		recursive = true # always available
 		tokens.erase("-r")
 	
 	# Check for overclock flag
@@ -344,7 +339,7 @@ func hacking_help_commands():
 				["cd ..",            "Return to terminal root"]
 			]))
 		HackingContext.PERSONS:
-			var recursive_unlocked = Upgrades.get_package_info("hacking.recursive_hacking").current
+			var recursive_unlocked = true # '-r' is always available
 
 			var commands = [
 				["hack [target]", "Hack target once", "e.g. hack student"],
@@ -358,7 +353,7 @@ func hacking_help_commands():
 
 			player_hacking_box.add_line(format_command_list("COMMANDS", commands))
 		HackingContext.HACKING:
-			if Upgrades.get_package_info("hacking.overclock").current:
+			if true: # hacking overclock is always available
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["run [item]", "Use a one-time item ('run' lists yours)."],

@@ -48,7 +48,7 @@ func _ready():
 ## One line: "DROPS  Logs 5-10 (100%) · ... · RARE Parents credit card x1 (19.8%)" for the current process.
 func _show_drop_rates(cache: CacheData) -> void:
 	var parts = []
-	for r in Decoding.get_drop_table(cache, process_data):
+	for r in Decoding.get_drop_table(cache, process_data, Decoding.FORENSICS_EXPLOIT_MULT if _mod() == "forensics" else 1.0):
 		var qty = str(r.min) if r.min == r.max else "%d-%d" % [r.min, r.max]
 		var pct = "%.1f%%" % (r.chance * 100.0)
 		if r.rare:
@@ -57,11 +57,30 @@ func _show_drop_rates(cache: CacheData) -> void:
 			parts.append("%s %s [color=#888888](%s)[/color]" % [r.name, qty, pct])
 	if process_data == Decoding.SKIM:
 		parts.append("[color=#888888]%.1f%% chance for +50%% basics[/color]" % (Decoding.get_efficiency(Decoding.SKIM) * 100.0))
+	var tb = Decoding.tracker_bonus(cache) if Decoding.get_rare_chance(process_data) > 0.0 else 0.0
+	if tb > 0.0:
+		parts.append("[color=#e0c068]rare tracker +%.2f%% (%d dry)[/color]" % [tb * 100.0, int(Decoding.rare_tracker.get(Decoding.cache_family(cache), 0))])
 	drop_rates.text = "[color=#5c6b7a]DROPS[/color]  " + "  ·  ".join(parts)
 	drop_rates.visible = true
 
 func _kind() -> String:
 	return process_data.get("decode kind", "cache")
+
+## Compression: Package passes run faster on top of Speed
+func get_step_time(mode: Mode) -> float:
+	var t = super.get_step_time(mode)
+	if _kind() == "package":
+		t /= Decoding.compression_multiplier()
+	return t
+
+## Modifiers work on the cache processes and Salvage, not on Package or Intel
+func modifier_block_reason() -> String:
+	if _kind() in ["package", "intel"]:
+		return "Decoding modifiers work on Cache, Skim, Deep Scan and Salvage, not on %s." % process_data.name
+	return ""
+
+func _mod() -> String:
+	return str(modifier.get("command", ""))
 
 func start_decrypting():
 	begin_run()
@@ -80,27 +99,55 @@ func start_decrypting():
 		finish_safely() # out of things to decode
 
 ## Reveals the current dump one byte per speed step. Returns the worst mode seen (decides heat).
+var _cycle_seconds := 0.0 # real seconds this pass took (VM tokens roll on time)
+var _cycle_steps := 0
+
+## Reveals one byte per step time. Time is banked per frame, so steps shorter than a frame (high Speed)
+## reveal several bytes in that frame instead of being capped at one byte per frame.
 func _reveal_dump() -> Mode:
 	var cycle_mode := Mode.NORMAL
 	var times_to_update = cache_decrypt.HEX_CHARACTERS_SIZE * cache_decrypt.row_count()
+	_cycle_seconds = 0.0
+	_cycle_steps = 0
+	var banked := 0.0
 	for i in range(times_to_update):
 		if !running or cache_decrypt.corrupted:
 			break
-		cache_decrypt.update_dump()
-		hex_display.text = cache_decrypt.render_dump()
 		var mode := get_mode()
 		cycle_mode = worst_mode(cycle_mode, mode)
-		await get_tree().create_timer(get_step_time(mode)).timeout
+		var t := get_step_time(mode)
+		while banked < t and running:
+			await get_tree().process_frame
+			banked += get_process_delta_time()
+		if !running:
+			break
+		banked -= t
+		cache_decrypt.update_dump()
+		hex_display.text = cache_decrypt.render_dump()
+		_cycle_seconds += t
+		_cycle_steps += 1
 	return cycle_mode
+
+## VM token chance for the pass just finished, rolled on time spent (speed, Compression and overclock don't
+## change tokens per hour): "vm token chance" is for a base-speed pass, scaled by how long this one took.
+## Token Vault and Forensics double it.
+func _token_chance() -> float:
+	var base = float(process_data["base speed"]) * max(1, _cycle_steps)
+	var chance = float(process_data.get("vm token chance", 0.01)) * (_cycle_seconds / max(0.001, base))
+	if Upgrades.has("decoding.token_vault"):
+		chance *= 2.0
+	if has_modifier("forensics"):
+		chance *= 2.0
+	return chance
 
 ## After every finished cache / salvage / package / intel pass.
 func _cycle_done(cycle_mode: Mode) -> void:
 	apply_heat(cycle_mode)
 	process_data.signal.emit(1)
 	record_cycle(1)
-	Exp.add_xp(Decoding, process_data, process_data["experience per level"])
+	Exp.add_xp(Decoding, process_data, process_data["experience per level"] * (2 if has_modifier("survey") else 1))
 	Signals.update_hud(Decoding)
-	if randf() <= process_data.get("vm token chance", 0.01):
+	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_DECODING_TOKEN, 1)
 
 #region caches (Cache / Skim / Deep Scan)
@@ -124,7 +171,7 @@ func _run_caches() -> void:
 		if token_cost > 0:
 			Inventory.remove_resource(Items.VM_DECODING_TOKEN, token_cost)
 		_show_drop_rates(current_cache)
-		cache_decrypt.build_dump(current_cache, process_data)
+		cache_decrypt.build_dump(current_cache, process_data, _mod())
 		hex_display.text = cache_decrypt.render_dump()
 
 		var cycle_mode := await _reveal_dump()
@@ -139,6 +186,11 @@ func _run_caches() -> void:
 				return
 
 		Tutorial.track_event(Tutorial.TutorialEvent.DECODE_1_STUDENT_CACHE, 1)
+		if has_modifier("index"):
+			var t = Decoding.target_for_cache(current_cache)
+			if !t.is_empty():
+				Decoding.add_intel_point(t)
+				update_items_gained_label("Intel (%s)" % t.name, 1)
 		_cycle_done(cycle_mode)
 
 func _has_requirements() -> bool:
@@ -230,7 +282,7 @@ func _run_salvage() -> void:
 		cache_decrypt.reset()
 		Inventory.remove_resource(target_cache, Decoding.SALVAGE_COST)
 		cache_name.text = "Salvaging %s x%d  (%d left)  ·  %.0f%% per line to find tokens  ·  %.1f%% to double a find" % [target_cache.name, Decoding.SALVAGE_COST, Inventory.get_amount(target_cache), Decoding.get_salvage_line_chance(target_cache) * 100.0, Decoding.get_efficiency(Decoding.SALVAGE) * 100.0]
-		cache_decrypt.build_rows(Decoding.roll_salvage(target_cache))
+		cache_decrypt.build_rows(Decoding.roll_salvage(target_cache, _mod()))
 		hex_display.text = cache_decrypt.render_dump()
 		var cycle_mode := await _reveal_dump()
 		if !running:

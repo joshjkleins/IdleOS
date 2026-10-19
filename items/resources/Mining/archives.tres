@@ -24,4 +24,5 @@ hacking_mod_value = 0.0
 hacking_mod_duration = 0
 hacking_mod_consumed = 0
 hacking_mod_item = false
+exploit_id = ""
 metadata/_custom_type_script = "uid://gsjwknwpr2hc"

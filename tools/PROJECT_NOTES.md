@@ -187,31 +187,76 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - `info <skill>` MODIFIERS box: STATUS column 14 -> 18 (COMMAND 45 -> 41) so "at Matching v1.0" no longer
   runs into the command text (affected every 8+ letter skill).
 
+- **Decoding upgrades** (WIRED, 2026-10-19): rare chance down: CACHE / DEEP "efficiency" 0.1 -> 0.04, rate
+  0.001 -> 0.0004 (Cache 4% at L1 -> 7.9% at L99; Deep x2). Efficiency is RELATIVE like Phishing
+  (`Decoding.get_efficiency` = level eff x (1 + track), +20% at max: Cache rare 7.9% -> 9.5%). Yield multiplies
+  basics in `roll_loot` / `get_drop_table`. Rare Tracker: `Decoding.rare_tracker` (saved), one counter per cache
+  family (`cache_family`: variants share "Student cache"), +cur per dry cache, reset on a rare, only counts
+  while installed; shown in the drop line. Compression = Package passes faster (Josh: keep uploads the slow
+  part, everything uploading at once), `cache_decrypt_terminal.get_step_time` override. Field Notes: max intel
+  hacks 10 + N (`intel_max_hacks()`), first find starts with 1 + N hacks. Capstones: overclock, token_vault
+  (token x2), index / forensics / survey (`Decoding.MODIFIERS`, passed to `roll_loot(cache, process, mod)` /
+  `roll_salvage(item, mod)`), clean_room (COOL_PACKAGE). Modifiers refused on Package / Intel
+  (`modifier_block_reason`). Index credits `target_for_cache` (easy target first, hard once easy is maxed).
+  Forensics: `Exploits.roll_drop(cache, process, mult)`. VM tokens now roll on time (`_token_chance`).
+  - `_reveal_dump` now banks frame time and reveals several bytes per frame when a step is shorter than a
+    frame. Before, each byte waited for its own timer, so high Speed was capped by the frame rate (max Speed
+    is 0.018 s/byte, about one 60 fps frame). Other skills with per-step timers may have the same cap at max Speed.
+  - Measured L99 (Student caches): base 174 caches/h, ~6.8k Logs/h; all tracks max ~2,000 caches/h,
+    ~120k Logs/h, heat/h x11.6 (heat is per cache). Package L99 ~1.2k items/h base, ~21k/h speed + compression.
+    Rare Tracker at max (+1.5% per dry cache) lifts the real rare rate 9.5% -> 15.5% per cache (Josh to decide
+    if that's too strong: +0.25% max per dry would give ~11.3%). Tests: tools/tests/decodeup (PART 1/2/3),
+    decodecap.
+
+- **Compiling upgrades + Mod / Access rework** (WIRED, 2026-10-19):
+  - Burst (efficiency proc) = 100x fill speed for 1 s, no heat (kept from the old code; Josh loves the "goes crazy
+    for a second" feel). Efficiency is RELATIVE (`Compiling.get_efficiency`, +20% at max: 10.8% -> 13% at L99);
+    Optimize doubles it. Bursts happen on payloads, Mod hacks and Access stages. Recovery (20% flat, never the
+    access rares), Linker (double payload), Mod Tuning (mod value x(1 + track) when built), Survey (half output,
+    XP x2), Build Cache + Optimize token x2, Cold Build = COOL_PACKAGE. `BaseTerminal.get_fill_rate` now applies
+    modifier speed. The fill loop keeps progress past 100 in `_fill` (several fills per frame, max 20), so
+    speed and bursts aren't capped by the frame rate. VM tokens roll on real fill time (`_token_chance`).
+  - **Mod** = one fill per hack: `compile -mod=<item>` equips the mod on the first fill (needs a slot or the same
+    type equipped) and adds a hack per fill up to the item's duration (`Compiling.mod_cap`, Debug x1.5), then stops.
+    Cost per fill = item cost / duration (ceil) + SQL Injectors (10 x tier per full mod, split; `mod_fill_cost`).
+    ~10 s per fill at base. `HackingMods.extend_mod` (no SaveManager call in there: it made a cyclic reference
+    through ItemData). At the normal cap with the Debug capstone, the terminal waits for 'debug' instead of
+    spending. Shared validation: `Compiling.check_mod` (main terminal + ssh).
+  - **Access** = stages, progress saved per target (`Compiling.access_progress`, key Stats.target_key):
+    10 stages for a location's 2nd target, +5 per target after (`access_stages`), ~30 s each at base. Payloads are
+    spread over the stages, the 5 rares are taken by the final stage (`access_stage_cost`); without them it stops
+    at the final stage and says what's missing. No modifiers and no overclock on Access (`modifier_block_reason`,
+    `overclock_block_reason`, `get_mode` override). Debug is refused off Mod (`modifier_refuses`, new idle_os_2 hook).
+  - Measured L99 School: base ~850 payloads/h (bursts are ~half of it); all tracks max ~46k/h (input-bound in
+    practice). Tests: tools/tests/compileup (PART 1 payloads, 2 Mod, 3 Access), compilecap (commands).
+
+- **Hacking upgrades** (WIRED, 2026-10-19). LEGACY_DEFAULTS is gone: '-r' and hacking overclock are always on.
+  - Max anonymity (no upgrade): `Stats.set_max_anon()` = 100 + 5 x (Hacking level - 1) + 100 x (locations unlocked
+    - 1); refreshed on Hacking level up, location unlock, Stats load and apply_effects (145 at L10, 590 at L99 with
+    School only, 1,090 with all six). It also sets the auto-spoof threshold (0.3 + spoof_threshold track, 90% max).
+  - hacking_game.setup: Damage / Firewall / Bandwidth tracks as before (`current` = sum of the track); attack heat
+    0.3 + 0.1 per Damage install; Packet Spoof heals DEFEND_PCT = item heal/100 + Healing track of max anonymity
+    (5% -> 11%); RESTORE mods are % points of max anonymity (+5 = +5%, mod text shows "+5%"). Persistent Session
+    multiplies `Exploits.add_charge`. Mod slots were already read by HackingMods.refresh_slots.
+  - Capstones: Clean Exit (lose(): keep floor 50% of banked caches), Evasion (10% dodge in counter()), Recycler (50%
+    SQL kept), Siphon (each SQL attack restores 0.5% of max anonymity, ceil), Dead Man's Switch (once per session,
+    reset in setup(): survive at 1 + 25%), Exploit Kit (50% one-time item kept in use_exploit). All log a tag.
+  - Measured (tools/tests/hackup SCEN=A/B/C, no mods): L10 no upgrades beats the Student 3/3 (~40 s), loses the
+    Superintendent and Student (Hard) (firewall soaks the whole hit at 1 firewall dmg). L45 / 4 locations: Teller 0/2
+    with no upgrades -> 2/2 with tiers 1-4; CFO 0/2 either way. L99 / all max: sustain is fine (Siphon + 11% heals +
+    Evasion) but Government targets stall: their firewall refills 10 s after breaking and 13 firewall dmg can't keep
+    it down, so fights hit the 10-minute test cap. Firewall pressure is the main thing for the balance pass (with mods
+    in the loadout). tools/tests/hackcap checks Clean Exit / Exploit Kit / Persistent Session.
+
 ### Left (designs are in the sheet; wire one per step, add the group to WIRED_GROUPS)
 - ~~Phishing~~ DONE (kept for reference): speed, efficiency (bite chance, 20% max), lines (+1/tier), bait_power (+5%),
   bait_recycling (+5% bait kept), quick_hook (-5% reel). Capstones: overclock, tackle_box, lure (mod:
   -50% speed, heat x1.5, 3% per catch to also hook a hacking mod item), chum (mod: -40% speed, catches
   doubled, token x2, heat x2), survey, deep_water. All done. Re-measure Phishing's rate
   for the sheet afterwards.
-- **Decoding:** speed, efficiency (rare chance, +4% max), yield (+10% basics), rare_tracker (+0.25% rare
-  chance per dry cache per tier level, resets on a rare), compression (+10% packaged), field_notes
-  (+1 intel hack). Capstones: overclock, token_vault, index (mod: -50% speed, heat x1.5, each decoded
-  cache adds 1 intel point on its target), forensics (mod: -40% speed, one-time item chance x2, token x2,
-  heat x2), survey, clean_room. ALSO: rare chance down — CACHE "efficiency" 0.1 -> 0.04,
-  "efficiency rate" 0.001 -> 0.0004 (4% at L1, ~8% at L99).
-- **Compiling:** speed (Compiling uses `get_fill_rate`, which doesn't apply modifier speed yet),
-  efficiency (burst chance, 20%), recovery (20%), linker (+2.5% double payload), mod_tuning (+5% compiled
-  mod strength). Capstones: overclock, build_cache, debug (mod: -50% speed, heat x1.5, compiled mods last
-  +50% hacks), optimize (mod: -40% speed, burst x2, token x2, heat x2), survey, cold_build.
-- **Hacking:** damage (+5, and +0.1 attack heat per level), firewall (+2), bandwidth_recovery
-  (+0.5/s, 2 per tier), max_bandwidth (+5), healing (Packet Spoof restores 5% of max anonymity, +1% per
-  tier — percent-based now), mod_slots (+1/tier; HackingMods.refresh_slots already reads it),
-  spoof_threshold (+10%: 30% -> 90%), persistent_session (+10% EXPLOIT charge gain). Capstones:
-  clean_exit (keep 50% banked caches when traced), evasion (10% dodge), recycler (50% SQL not consumed),
-  siphon (each SQL hit restores 1 anonymity), dead_mans_switch (once per session survive at 1 + restore
-  25%), exploit_kit (50% one-time item not consumed). Max anonymity becomes hybrid:
-  100 + 5 x (Hacking level - 1) + 100 x (tiers unlocked - 1); then remove LEGACY_DEFAULTS. Hacking
-  overclock and `-r` stay always available unless Josh decides otherwise.
+- ~~Decoding~~ DONE 2026-10-19 (see Done).
+- ~~Compiling~~ DONE 2026-10-19 (see Done).
+- ~~Hacking~~ DONE 2026-10-19 (see Done). All nine groups are wired.
 
 ## Other systems built recently (for context)
 - Combat (`scripts/hacking_game.gd`): code-built card UI, tagged combat log, floats/flashes/banners,

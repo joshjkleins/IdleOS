@@ -1228,38 +1228,11 @@ func handle_vm_token_commands(text):
 		new_window = target_process.create_vm_window(target_minor_process, check.target)
 	elif target_process == Compiling:
 		if target_minor_process == Compiling.MOD:
-			if !text.contains("="):
-				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
+			var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "", "ssh compiling mod=logs")
+			if !check.ok:
+				add_line(check.message)
 				return
-			var item_string = text.split("=")
-			if item_string.size() <= 1:
-				add_line("Command not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
-				return
-			var item = Inventory.get_item_by_name(item_string[1])
-			if item == null:
-				add_line("Item not recognized. [color=#666666]ex. ssh compiling mod=logs[/color]")
-				return
-			
-			if item.hacking_mod_item:
-				add_line("ERROR: cannot further Compile hacking mod.")
-				return
-			if !item.is_compilable_mod():
-				add_line("ERROR: " + item.name + " cannot be compiled into a Hacking Mod.")
-				return
-			var amount_needed = item.hacking_mod_consumed
-			if Inventory.get_amount(item) < amount_needed:
-				add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
-				return
-			
-			if HackingMods.at_max_mods():
-				add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
-				return
-			
-			#check if type of mod already exists on player and confirm overwriting
-			if HackingMods.has_mod(item.hacking_mod_type):
-				add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
-				return
-				
+			var item = check.item
 			Inventory.remove_resource(target_process.vm_token, 1)
 			new_window = target_process.create_vm_window(target_minor_process, item)
 		else:
@@ -1820,6 +1793,9 @@ func _handle_modifier_command(text: String) -> bool:
 	if !kill and current_process.has_method("modifier_block_reason") and current_process.modifier_block_reason() != "":
 		add_line(current_process.modifier_block_reason())
 		return true
+	if !kill and current_process.has_method("modifier_refuses") and current_process.modifier_refuses(cmd) != "":
+		add_line(current_process.modifier_refuses(cmd))
+		return true
 	if kill:
 		if current_process.has_modifier(cmd):
 			current_process.modifier = {}
@@ -1841,6 +1817,9 @@ func _handle_modifier_command(text: String) -> bool:
 	return true
 
 func overclock_logic():
+	if current_process and current_process.has_method("overclock_block_reason") and current_process.overclock_block_reason() != "":
+		add_line(current_process.overclock_block_reason())
+		return
 	if !process_running: #no process running
 		add_line("No process running to overclock")
 		return
@@ -1927,37 +1906,11 @@ func compiling_commands(text):
 				start_compiling(ms, check.target)
 				return
 			if ms == Compiling.MOD:
-				if !text.contains("="):
-					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
+				var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "")
+				if !check.ok:
+					add_line(check.message)
 					return
-				var item_string = text.split("=")
-				if item_string.size() <= 1:
-					add_line("Command not recognized. [color=#666666]ex. compile -mod=logs[/color]")
-					return
-				var item = Inventory.get_item_by_name(item_string[1])
-				if item == null:
-					add_line("Item not recognized. [color=#666666]ex. compile -mod=logs[/color]")
-					return
-				
-				if item.hacking_mod_item:
-					add_line("ERROR: cannot further Compile hacking mod.")
-					return
-				if !item.is_compilable_mod():
-					add_line("ERROR: " + item.name + " cannot be compiled into a Hacking Mod.")
-					return
-				var amount_needed = item.hacking_mod_consumed
-				if Inventory.get_amount(item) < amount_needed:
-					add_line("Error: not enough " + item.name + " [color=red]" + str(Inventory.get_amount(item)) + "/" + str(amount_needed) + "[/color]")
-					return
-				
-				if HackingMods.at_max_mods():
-					add_line("Error: maximum active Hacking Mods reached. Use the 'mod' command to manage active Hacking Mods.")
-					return
-				
-				#check if type of mod already exists on player and confirm overwriting
-				if HackingMods.has_mod(item.hacking_mod_type):
-					add_line("Error: Hacking Mod of this type already active. Use the 'mod' command to manage active Hacking Mods.")
-					return
+				var item = check.item
 				start_compiling(ms, item)
 				return
 			else:

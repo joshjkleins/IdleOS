@@ -16,19 +16,86 @@ var terminal_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
 
 var first_cache_decoded: bool = false
 
-## A process's efficiency incl. upgrades + defrag bonus (for Cache / Deep Scan: the rare item chance).
+## Modifier commands unlocked by Decoding capstones (see Mining.MODIFIERS for how they work).
+## They work on the cache processes (Cache, Skim, Deep Scan) and Salvage; Package and Intel refuse them.
+const MODIFIERS = [
+	{"command": "index", "name": "Index", "package": "decoding.index", "speed": 0.5, "heat": 1.5,
+		"effect": "-50% speed, heat x1.5. Each decoded cache adds 1 intel point on the target it came from."},
+	{"command": "forensics", "name": "Forensics", "package": "decoding.forensics", "speed": 0.6, "heat": 2.0,
+		"effect": "-40% speed, heat x2. One-time item chance x2 and VM token chance x2."},
+	{"command": "survey", "name": "Survey", "package": "decoding.survey", "speed": 1.0, "heat": 1.0,
+		"effect": "Half loot, +100% Decoding XP."},
+]
+## Clean Room: overclock and the modifiers add no extra heat
+const COOL_PACKAGE := "decoding.clean_room"
+const FORENSICS_EXPLOIT_MULT := 2.0
+
+## A process's efficiency with the Efficiency track: +X% of the process's own efficiency (x1.20 at max).
+## Cache / Deep Scan: the rare item chance; every other process its own effect.
 func get_efficiency(process: Dictionary = {}) -> float:
 	if process.is_empty():
 		process = CACHE
-	var efficiency_upgrade = Upgrades.get_package_info("decoding.efficiency").current
-	var defrag_bonus = 1.0 # defrag no longer boosts skills
-	return min(1.0, (process["efficiency"] + efficiency_upgrade) * defrag_bonus)
+	return min(1.0, float(process["efficiency"]) * (1.0 + Upgrades.cur("decoding.efficiency")))
 
 ## Chance for a cache's rare item when decoded by <process> (Skim never finds it, Deep Scan doubles it).
-func get_rare_chance(process: Dictionary = {}) -> float:
+## Without <cache> it's the process's own chance (no Rare Tracker bonus).
+func get_rare_chance(process: Dictionary = {}, cache: CacheData = null) -> float:
 	if process.is_empty():
 		process = CACHE
-	return min(1.0, get_efficiency(process) * process.get("rare multiplier", 1.0))
+	if process.get("rare multiplier", 1.0) <= 0.0:
+		return 0.0
+	return min(1.0, get_efficiency(process) * process.get("rare multiplier", 1.0) + tracker_bonus(cache))
+
+#region rare tracker
+## Rare Tracker: every cache of a type that decodes without its rare adds the installed bonus to that type's
+## next one (variants share a counter: "Student cache Extraction" counts as "Student cache"). Saved.
+var rare_tracker := {} # cache family name -> dry caches in a row
+
+func cache_family(cache: CacheData) -> String:
+	var n = cache.name
+	var at = n.to_lower().find("cache")
+	return n.substr(0, at + 5) if at != -1 else n
+
+func tracker_bonus(cache: CacheData) -> float:
+	if cache == null:
+		return 0.0
+	return int(rare_tracker.get(cache_family(cache), 0)) * Upgrades.cur("decoding.rare_tracker")
+
+## After a rare roll on <cache>: reset on a rare, otherwise one more dry cache (only while the track is installed)
+func note_rare_roll(cache: CacheData, got_rare: bool) -> void:
+	var key = cache_family(cache)
+	if got_rare:
+		rare_tracker.erase(key)
+	elif Upgrades.cur("decoding.rare_tracker") > 0.0:
+		rare_tracker[key] = int(rare_tracker.get(key, 0)) + 1
+	SaveManager.mark_dirty()
+#endregion
+
+## Yield: basic resources per decoded cache
+func yield_multiplier() -> float:
+	return 1.0 + Upgrades.cur("decoding.yield")
+
+## Compression: Package passes run this much faster (on top of Speed)
+func compression_multiplier() -> float:
+	return 1.0 + Upgrades.cur("decoding.compression")
+
+## Survey: half an amount (coin flip on odd amounts)
+static func survey_half(amount: int) -> int:
+	return amount / 2 + (1 if amount % 2 == 1 and randf() < 0.5 else 0)
+
+## Index: the target a cache came from (easy mode first; the hard one once the easy one's intel is maxed)
+func target_for_cache(cache: CacheData) -> Dictionary:
+	var family = cache_family(cache)
+	var found: Array = []
+	for loc in Stats.hacking_targets:
+		for list in ["targets", "hard mode targets"]:
+			for t in Stats.hacking_targets[loc].get(list, []):
+				if t.get("loot") is CacheData and t.loot.name == family and t.get("unlocked", false):
+					found.append(t)
+	for t in found:
+		if !is_intel_maxed(t):
+			return t
+	return {}
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -55,8 +122,8 @@ var CACHE = {
 		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
 		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
 	],
-	"efficiency": 0.1,
-	"efficiency rate": 0.001,
+	"efficiency": 0.04, # rare chance: 4% at L1 -> ~8% at L99 (was 10%)
+	"efficiency rate": 0.0004,
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 0.2,
@@ -207,8 +274,8 @@ var DEEP = {
 		{'cmd': 'decode -deep', 'description': 'Deep scans every cache you have (1 VM Decoding token each)'},
 		{'cmd': 'decode -deep=student cache', 'description': 'Deep scans only Student caches'}
 	],
-	"efficiency": 0.1,
-	"efficiency rate": 0.001,
+	"efficiency": 0.04, # x2 below: 8% at L1 -> ~16% at L99
+	"efficiency rate": 0.0004,
 	"rare multiplier": 2.0,
 	"token cost": 1, # VM Decoding tokens per cache
 	"unlocked": false,
@@ -287,6 +354,7 @@ func save_data() -> Dictionary:
 		"cache_efficiency": CACHE["efficiency"],
 		"first_cache_decoded": first_cache_decoded,
 		"intel": intel,
+		"rare_tracker": rare_tracker,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -297,6 +365,10 @@ func load_data(data: Dictionary) -> void:
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
 	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	first_cache_decoded = data.get("first_cache_decoded", false)
+	rare_tracker = {}
+	var saved_tracker: Dictionary = data.get("rare_tracker", {})
+	for k in saved_tracker:
+		rare_tracker[k] = int(saved_tracker[k])
 	intel = {}
 	var saved_intel: Dictionary = data.get("intel", {})
 	for k in saved_intel:
@@ -349,7 +421,7 @@ func is_salvageable(item: ItemData) -> bool:
 
 ## One salvage run's lines for <item>: [{item, amount} or null] (null = nothing on that line).
 ## Line chance comes from the item's tier; efficiency is the chance a find is doubled.
-func roll_salvage(item: ItemData) -> Array:
+func roll_salvage(item: ItemData, mod: String = "") -> Array:
 	var rows = []
 	var chance = get_salvage_line_chance(item)
 	for i in SALVAGE_LINES:
@@ -357,6 +429,8 @@ func roll_salvage(item: ItemData) -> Array:
 			var amount = randi_range(SALVAGE_TOKENS_MIN, SALVAGE_TOKENS_MAX)
 			if randf() < get_efficiency(SALVAGE):
 				amount *= 2
+			if mod == "survey":
+				amount = max(1, survey_half(amount))
 			rows.append({"item": vm_tokens().pick_random(), "amount": amount, "rare": false})
 		else:
 			rows.append(null)
@@ -446,7 +520,7 @@ var next_package_limit := 0
 ## INTEL_CAP_RATIO of the target's intel stat and INTEL_MAX_HACKS. One hack is used per hack attempt.
 const INTEL_LINES = 5
 const INTEL_CAP_RATIO = 0.25
-const INTEL_MAX_HACKS = 10
+const INTEL_MAX_HACKS = 10 # base; Field Notes adds +1 per tier installed (intel_max_hacks())
 const INTEL_STATS = ["firewall", "integrity", "counter", "counter speed"] # "intel stat" a target can name
 var intel := {}
 
@@ -466,17 +540,24 @@ func get_intel(target: Dictionary) -> Dictionary:
 
 func is_intel_maxed(target: Dictionary) -> bool:
 	var i = get_intel(target)
-	return i.amount >= intel_cap(target) and i.hacks >= INTEL_MAX_HACKS
+	return i.amount >= intel_cap(target) and i.hacks >= intel_max_hacks()
+
+## Field Notes: +1 max intel hack per install, and a first find starts with that many extra hacks
+func field_notes() -> int:
+	return int(round(Upgrades.cur("decoding.field_notes")))
+
+func intel_max_hacks() -> int:
+	return INTEL_MAX_HACKS + field_notes()
 
 func add_intel_point(target: Dictionary) -> void:
 	var i = get_intel(target).duplicate()
 	var cap = intel_cap(target)
 	if i.hacks == 0:
 		i.amount = max(i.amount, 1)
-		i.hacks = 1
+		i.hacks = 1 + field_notes()
 	elif i.amount <= i.hacks and i.amount < cap:
 		i.amount += 1
-	elif i.hacks < INTEL_MAX_HACKS:
+	elif i.hacks < intel_max_hacks():
 		i.hacks += 1
 	elif i.amount < cap:
 		i.amount += 1
@@ -500,8 +581,8 @@ func use_intel(target: Dictionary) -> Dictionary:
 func intel_text(target: Dictionary) -> String:
 	var i = get_intel(target)
 	if i.hacks <= 0:
-		return "no intel  (max -%d %s / %d hacks)" % [intel_cap(target), intel_stat(target), INTEL_MAX_HACKS]
-	return "-%d %s for %d hack%s  (max -%d / %d)" % [i.amount, intel_stat(target), i.hacks, "" if i.hacks == 1 else "s", intel_cap(target), INTEL_MAX_HACKS]
+		return "no intel  (max -%d %s / %d hacks)" % [intel_cap(target), intel_stat(target), intel_max_hacks()]
+	return "-%d %s for %d hack%s  (max -%d / %d)" % [i.amount, intel_stat(target), i.hacks, "" if i.hacks == 1 else "s", intel_cap(target), intel_max_hacks()]
 
 ## "student", "student hard", "legal-assistant", "student (hard)" -> the unlocked target, or {}.
 func find_target(text: String) -> Dictionary:
@@ -545,7 +626,7 @@ func intel_detail_text(target: Dictionary) -> String:
 		out += "  current        -%d %s for %d hack%s  ->  next hack: %s %s\n" % [i.amount, stat, i.hacks, "" if i.hacks == 1 else "s", str(max(0, base - i.amount)), stat]
 	else:
 		out += "  current        none\n"
-	out += "  max            -%d %s (25%%) for %d hacks\n" % [intel_cap(target), stat, INTEL_MAX_HACKS]
+	out += "  max            -%d %s (25%%) for %d hacks\n" % [intel_cap(target), stat, intel_max_hacks()]
 	out += "  target stats   integrity %s  ·  firewall %s  ·  counter %s  ·  counter speed %s\n" % [str(target.get("integrity", "-")), str(target.get("firewall", "-")), str(target.get("counter", "-")), str(target.get("counter speed", "-"))]
 	out += "[color=#666666]gather more with: decode -intel=%s%s[/color]" % [target.name.to_lower().replace(" (hard)", "").replace(" ", "-"), " hard" if hard else ""]
 	return out
@@ -598,28 +679,31 @@ func _rare_amount(cache: CacheData) -> int:
 
 ## For `ls` and the decoding terminal: [{name, min, max, chance, rare}]. <process> = Cache (default),
 ## Skim (no rare) or Deep Scan (rare x2).
-func get_drop_table(cache: CacheData, process: Dictionary = {}) -> Array:
+func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: float = 1.0) -> Array:
 	var rows = []
 	for e in cache.entries:
 		var r = _entry_range(cache, e)
-		rows.append({"name": e.item.name, "min": r.x, "max": r.y, "chance": _entry_chance(cache, e), "rare": false})
+		var y = yield_multiplier() if is_basic_item(e.item) else 1.0
+		rows.append({"name": e.item.name, "min": int(ceil(r.x * y)), "max": int(ceil(r.y * y)), "chance": _entry_chance(cache, e), "rare": false})
 	if cache.get_variant() == CacheData.CacheVariant.NETWORK:
 		rows.append({"name": "Random VM token", "min": CacheData.NETWORK_VM_MIN, "max": CacheData.NETWORK_VM_MAX, "chance": CacheData.NETWORK_VM_CHANCE, "rare": false})
-	var rare_chance = get_cache_rare_chance(cache, get_rare_chance(process))
+	var rare_chance = get_cache_rare_chance(cache, get_rare_chance(process, cache))
 	if rare_chance > 0.0:
 		for e in cache.rare_pool:
 			rows.append({"name": e.item.name, "min": _rare_amount(cache), "max": _rare_amount(cache), "chance": rare_chance, "rare": true})
-	var ex = Exploits.drop_row(cache, process)
+	var ex = Exploits.drop_row(cache, process, exploit_mult)
 	if !ex.is_empty():
 		rows.append(ex)
 	return rows
 
 ## Rolls one decode: [{item, amount, rare}] with the rare item (if any) last.
 ## <process> decides the rare chance (Skim: none, Deep Scan: x2); Skim's efficiency can add +50% basics.
-func roll_loot(cache: CacheData, process: Dictionary = {}) -> Array:
+## Yield multiplies basics, the Rare Tracker adds to the rare chance, <mod> is the terminal's modifier
+## command (forensics: one-time item chance x2, survey: half loot).
+func roll_loot(cache: CacheData, process: Dictionary = {}, mod: String = "") -> Array:
 	if process.is_empty():
 		process = CACHE
-	var basic_mult = 1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0
+	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier()
 	var loot = []
 	for e in cache.entries:
 		if randf() <= _entry_chance(cache, e):
@@ -630,10 +714,21 @@ func roll_loot(cache: CacheData, process: Dictionary = {}) -> Array:
 			loot.append({"item": e.item, "amount": amount, "rare": false})
 	if cache.get_variant() == CacheData.CacheVariant.NETWORK and randf() <= CacheData.NETWORK_VM_CHANCE:
 		loot.append({"item": vm_tokens().pick_random(), "amount": randi_range(CacheData.NETWORK_VM_MIN, CacheData.NETWORK_VM_MAX), "rare": false})
-	if !cache.rare_pool.is_empty() and randf() < get_cache_rare_chance(cache, get_rare_chance(process)):
-		loot.append({"item": cache.rare_pool.pick_random().item, "amount": _rare_amount(cache), "rare": true})
-	var ex = Exploits.roll_drop(cache, process)
+	var rare_chance = get_cache_rare_chance(cache, get_rare_chance(process, cache)) if !cache.rare_pool.is_empty() else 0.0
+	if rare_chance > 0.0:
+		var got = randf() < rare_chance
+		note_rare_roll(cache, got)
+		if got:
+			loot.append({"item": cache.rare_pool.pick_random().item, "amount": _rare_amount(cache), "rare": true})
+	var ex = Exploits.roll_drop(cache, process, FORENSICS_EXPLOIT_MULT if mod == "forensics" else 1.0)
 	if ex:
 		loot.append({"item": ex, "amount": 1, "rare": true})
+	if mod == "survey":
+		var kept = []
+		for d in loot:
+			d.amount = survey_half(d.amount)
+			if d.amount > 0:
+				kept.append(d)
+		loot = kept
 	return loot
 #endregion
