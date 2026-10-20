@@ -2,6 +2,21 @@ extends Node
 
 ## Heat plan: heat multiplier by the tier being worked on (see BaseTerminal.heat_tier_mult)
 const HEAT_BY_TIER := [0.667, 1.067, 1.702, 2.55, 6.222, 9.375]
+## Pace plan: higher-tier Mining items are harder data, offsetting the earlier tiers' Parsing upgrades so every tier
+## arrives at the same pace: Footprint / Extraction lines (the payload chain) take longer (incl. the 1.5x-per-tier base
+## slowdown every skill has) and find less often. Corruption / Network and caches aren't affected. (tools/balance/pace_calibrate.py)
+const TIME_BY_TIER := [1.0, 1.4712, 2.1729, 3.4399, 6.2133, 11.3498]
+const FIND_BY_TIER := [1.0, 0.4913, 0.2989, 0.1934, 0.1368, 0.0995]
+
+func item_time_mult(process: Dictionary, item: ItemData) -> float:
+	if item == null or item is CacheData or !(process == FOOTPRINT or process == EXTRACTION):
+		return 1.0
+	return Stats.tier_heat(TIME_BY_TIER, item.tier)
+
+func item_find_mult(process: Dictionary, item: ItemData) -> float:
+	if item == null or item is CacheData or !(process == FOOTPRINT or process == EXTRACTION):
+		return 1.0
+	return Stats.tier_heat(FIND_BY_TIER, item.tier)
 
 signal basic_cycle_completed
 signal cred_cycle_complete

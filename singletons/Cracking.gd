@@ -53,7 +53,7 @@ var PASSWORD = {
 	"efficiency rate": 0.002,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed": 3.0, # seconds per character (4 per crack)
+	"base speed": 3, # seconds per character (4 per crack)
 	"overclock speed": 1.5,
 	"overheat speed": 7.5,
 	"heat": 1.4154,
@@ -74,18 +74,18 @@ var SIGNATURE = {
 	"tier name": "TIER II | SIGNATURE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 110, # xp per item cracked
+	"experience per level": 165, # xp per item cracked
 	"command": "crack -signature",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 15,
-	"base speed": 4.5, # seconds per character (4 per crack)
-	"overclock speed": 2.25,
-	"overheat speed": 11.25,
-	"heat": 2.7344,
-	"overclock heat": 3.2471,
-	"overheat heat": 0.5127,
+	"base speed": 6.7491, # seconds per character (4 per crack)
+	"overclock speed": 3.3746,
+	"overheat speed": 16.8728,
+	"heat": 4.1011,
+	"overclock heat": 4.87,
+	"overheat heat": 0.769,
 	"vm token chance": 0.015, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_SIGNATURE: 1},
 	"resource gained": Items.DIGITAL_SIGNATURE,
@@ -101,18 +101,18 @@ var BADGE = {
 	"tier name": "TIER III | BADGE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 215, # xp per item cracked
+	"experience per level": 472, # xp per item cracked
 	"command": "crack -badge",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 30,
-	"base speed": 6.75, # seconds per character (4 per crack)
-	"overclock speed": 3.375,
-	"overheat speed": 16.875,
-	"heat": 5.5358,
-	"overclock heat": 6.566,
-	"overheat heat": 1.0303,
+	"base speed": 14.8067, # seconds per character (4 per crack)
+	"overclock speed": 7.4034,
+	"overheat speed": 37.0168,
+	"heat": 12.1433,
+	"overclock heat": 14.4031,
+	"overheat heat": 2.2601,
 	"vm token chance": 0.0225, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_BADGE_HASH: 1},
 	"resource gained": Items.BADGE_HASH,
@@ -128,18 +128,18 @@ var PIN = {
 	"tier name": "TIER IV | PIN",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 375, # xp per item cracked
+	"experience per level": 1327, # xp per item cracked
 	"command": "crack -pin",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 45,
-	"base speed": 10.0, # seconds per character (4 per crack)
-	"overclock speed": 5.0,
-	"overheat speed": 25.0,
-	"heat": 9.7689,
-	"overclock heat": 11.6017,
-	"overheat heat": 1.8328,
+	"base speed": 35.3957, # seconds per character (4 per crack)
+	"overclock speed": 17.6978,
+	"overheat speed": 88.4892,
+	"heat": 34.5777,
+	"overclock heat": 41.065,
+	"overheat heat": 6.4873,
 	"vm token chance": 0.0333, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_PINS: 1},
 	"resource gained": Items.PINS,
@@ -155,18 +155,18 @@ var KEYS = {
 	"tier name": "TIER V | KEYS",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 625, # xp per item cracked
+	"experience per level": 3034, # xp per item cracked
 	"command": "crack -keys",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 60,
-	"base speed": 15.0, # seconds per character (4 per crack)
-	"overclock speed": 7.5,
-	"overheat speed": 37.5,
-	"heat": 30.3059,
-	"overclock heat": 35.9882,
-	"overheat heat": 5.6824,
+	"base speed": 72.8274, # seconds per character (4 per crack)
+	"overclock speed": 36.4137,
+	"overheat speed": 182.0686,
+	"heat": 147.14,
+	"overclock heat": 174.7285,
+	"overheat heat": 27.589,
 	"vm token chance": 0.05, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_SSH_KEY: 1},
 	"resource gained": Items.PRIVATE_KEYS,
@@ -182,18 +182,18 @@ var BIOMETRIC = {
 	"tier name": "TIER VI | BIOMETRIC",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 1000, # xp per item cracked
+	"experience per level": 7553, # xp per item cracked
 	"command": "crack -biometric",
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 75,
-	"base speed": 22.5, # seconds per character (4 per crack)
-	"overclock speed": 11.25,
-	"overheat speed": 56.25,
-	"heat": 57.5,
-	"overclock heat": 68.2812,
-	"overheat heat": 10.7812,
+	"base speed": 169.9523, # seconds per character (4 per crack)
+	"overclock speed": 84.9762,
+	"overheat speed": 424.8808,
+	"heat": 434.3226,
+	"overclock heat": 515.7577,
+	"overheat heat": 81.4351,
 	"vm token chance": 0.075, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_BIO_HASH: 1},
 	"resource gained": Items.BIO_TEMPLATE,

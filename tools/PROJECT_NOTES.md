@@ -363,7 +363,41 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   Compiling Mod is hot (4x at T1 arrival) but short (one fill per hack, SQL-limited). Hacking heat (enemy
   COUNTER_HEAT, 0.3 per action) doesn't scale with the new cooling yet: combat pass.
   Later: flat cooling extras (Overheat Fan +0.3 C/s, Defrag cooling +0.5 C/s, hacking/upload heat) don't scale.
-  Step 3: option 1 (speed stays as the 1.5x/tier base slowdown; level the extra-output tracks).
+  Step 3 DONE (pace plan): every tier arrives at the same seconds per payload as Tier 1 (L1, previous tier's
+  upgrades): ~57-61 s; with the tier's own upgrades ~24-27 s; at L99 10 s (T1) -> 15 s (T6).
+  `tools/balance/pace_calibrate.py find|time` (+ `payload_seconds.py`, ARRIVE=1 ratetier -> rates_arrive.tsv):
+  Parsing.FIND_BY_TIER (Footprint/Extraction find chance incl. Pattern Cache, by Mining item tier) and
+  Parsing.TIME_BY_TIER (their line time); Mining/Cracking/Matching/Compiling per-tier processes' speed values
+  scaled, with heat and XP per cycle scaled the same (heat/s, XP/h unchanged). Tier 1 Matching 30% faster
+  (was the slowest step: 17 s -> 12 s per payload on arrival). Corruption/Network/caches unaffected.
+  Higher tiers = longer cycles with bigger hauls (T6 arrival: Mining ~28 s/cycle, Cracking ~37 s, Matching ~32 s).
+  Snapshots: tools/balance/rates_2026-10-20_{arrive,done}.tsv, heat_2026-10-20.tsv.
+  Not done: Decoding / Phishing still speed up 7.6x by T6 (no per-tier base slowdown; caches and SQL aren't in
+  the payload chain) - revisit with the combat/cache pass.
+
+## Combat pass (started 2026-10-20)
+- Tier gating: Mining / Cracking / Matching / Compiling payload processes need their tier (location) unlocked as well
+  as the skill level (Exp.process_tier / tier_block_reason; main terminal + ssh). Hidden while
+  Upgrades.DEV_UNLOCK_ALL_TIERS is on.
+- Compile -mod stats for every tier: `tools/balance/mod_stats.py` (roles from tools/tests/modroles). Same mod type per
+  role at every tier, higher each tier: Mining item SQL dmg 10/20/35/55/80/120; parsed->Matching firewall reduction
+  15/30/53/83/120/180; parsed->Compiling firewall dmg 10..120; encrypted crit 2..12%; cracked crit 3..18%; matched
+  attack speed 15..40%; payload bandwidth +2..+7/s. Rare N of a tier = the next tier's basic of its role
+  (rare1 dmg, rare2 bandwidth, rare3 spoof restore 15..30%, rare4 crit (T6 Deep Cover IDs = best, 20%), rare5
+  counter slow 20..45%). Caches: counter damage reduction 5-9 / 15-19 / 30-34 / 50-54 / 75-79 / 110-114 (placeholder
+  starts). Hacking crit now 5% L1 -> 30% L99 (rate 0.00255, recomputed from level on load):
+  30% + 20% mod = 50%, x2 Vuln Scanner = exactly 100%.
+- Equippable mods (items/hacking_mods, 3 per tier, % based, 20 hacks, Phishing Mod + Corruption pools by tier):
+  T1 SQL Booster (+50% attack speed, now its own SQL_BOOST type so it stacks with Matched mods), Shatter Protocol
+  (firewall break slow -75%), Burst Buffer (+20% max bandwidth/s); T2 Firmware Brick (no reboot), Payload Amplifier
+  (+25% dmg), Vuln Scanner (crit chance x2); T3 Critical Overflow (crit x4), Proxy Chain (spoof heal x2), Ghost Packet
+  (spoofs free); T4 Decoy Traffic (first 3 counters miss), Packet Shredder (+10% max firewall per hit), Latency
+  Injector (counters -20% speed); T5 Silent Entry (no counters first 10 s), IP Rotator (spoofs fill +80%), Zero Hour
+  (EXPLOIT full at hack start); T6 Cascade (break deals 15% max integrity), Mirror (25% counter dmg reflected),
+  Cold Boot (no overclock heat, overheat doesn't speed the enemy). New MOD_TYPEs are appended after NONE
+  (HackingMods.EQUIP_INFO has their names/text). Smoke test: tools/tests/eqtest (TGT=<target index>).
+- Next: Python combat simulator -> tune the 30 easy targets to Josh's ladder; intel stat per target (its specialty),
+  bigger intel for targets 3-5; per-enemy firewall reboot time; hacking heat by tier; mod bandwidth cost per tier.
 
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").

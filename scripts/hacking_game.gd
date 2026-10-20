@@ -150,6 +150,8 @@ var integ_base := 0
 var _fw_tween: Tween
 
 var fight_time := 0.0
+var hack_time := 0.0          # this hack only (Silent Entry)
+var decoys_left := 0          # Decoy Traffic misses left this hack
 var active_intel: Dictionary = {} # this attempt's intel {stat, amount, hacks_left, before, after}
 var _state := ""                  # "", "overclock", "overheat"
 var _panel_tick := 0.0
@@ -187,13 +189,14 @@ func _process(delta):
 	_update_state()
 	# overclock / overheat only touch bandwidth regen (and enemy speed on overheat);
 	# damage and attack speed come from mods and upgrades only
+	var cold_boot = HackingMods.has_mod(HackingMods.MOD_TYPE.COLD_BOOT) # equippable: no overclock heat, overheat doesn't speed the enemy
 	if Stats.overclocked:
 		OVERCLOCK_VALUE = OVERCLOCK_BW_MULT
 		OVERHEAT_VALUE = 1.0
-		NEXT_HEAT_APPLICATION = 2
+		NEXT_HEAT_APPLICATION = 0 if cold_boot else 2
 	elif Stats.overheated:
 		OVERCLOCK_VALUE = OVERHEAT_BW_MULT
-		OVERHEAT_VALUE = 2.0  # 2x speed for enemy
+		OVERHEAT_VALUE = 1.0 if cold_boot else 2.0  # 2x speed for enemy
 	else:
 		OVERCLOCK_VALUE = 1.0
 		OVERHEAT_VALUE = 1.0
@@ -210,12 +213,14 @@ func _process(delta):
 		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + _bw_rate() * delta)
 	band_bar.value = Hacking.current_bandwidth
 
-	var mod_atk_spd = 1.0 + _mod(HackingMods.MOD_TYPE.ATTACK_SPEED)
+	hack_time += delta
+	var mod_atk_spd = 1.0 + _mod(HackingMods.MOD_TYPE.ATTACK_SPEED) + _mod(HackingMods.MOD_TYPE.SQL_BOOST)
 	if attacking:
 		attack_bar.value += ATTACK_SPEED * delta * mod_atk_spd
 	if defending:
-		defense_bar.value += DEFEND_SPEED * delta
-	if Stats.current_anon > 0 and stun_left <= 0.0:
+		defense_bar.value += DEFEND_SPEED * delta * (1.0 + _mod(HackingMods.MOD_TYPE.SPOOF_SPEED))
+	# Silent Entry: the first seconds of each hack go unnoticed
+	if Stats.current_anon > 0 and stun_left <= 0.0 and hack_time >= _mod(HackingMods.MOD_TYPE.STEALTH_START):
 		counter_bar.value += _counter_rate() * delta
 
 	if firewall_down:
@@ -226,11 +231,11 @@ func _process(delta):
 	# a full bar fires as soon as there is bandwidth for it; Packet Spoof gets first claim
 	_def_waiting = false
 	if defense_bar.value >= defense_bar.max_value and defending:
-		if has_bandwidth(DEFEND_BW_COST):
+		if has_bandwidth(_spoof_cost()):
 			defense()
 		else:
 			_def_waiting = true
-			_warn_bandwidth("Packet Spoof", DEFEND_BW_COST)
+			_warn_bandwidth("Packet Spoof", _spoof_cost())
 	_atk_waiting = false
 	if attack_bar.value >= attack_bar.max_value and attacking and !_def_waiting:
 		if has_bandwidth(_sql_cost()):
@@ -255,8 +260,13 @@ func _process(delta):
 
 ## countermeasure bar fill per second (overheat, firewall break, slow mod, intel all apply)
 func _counter_rate() -> float:
-	var fw_slow = FW_BREAK_SLOW if firewall_down else 1.0
-	return COUNTER_SPEED * OVERHEAT_VALUE * fw_slow / (1.0 + _mod(HackingMods.MOD_TYPE.COUNTER_SLOW))
+	# firewall down: -50% (Shatter Protocol: a further -25%); Latency Injector: -20%
+	var fw_slow = max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW)) if firewall_down else 1.0
+	return COUNTER_SPEED * OVERHEAT_VALUE * fw_slow / (1.0 + _mod(HackingMods.MOD_TYPE.COUNTER_SLOW)) * (1.0 - _mod(HackingMods.MOD_TYPE.COUNTER_SLOW_PCT))
+
+## Packet Spoof bandwidth (Ghost Packet: free)
+func _spoof_cost() -> float:
+	return 0.0 if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_FREE) else float(DEFEND_BW_COST)
 
 func has_bandwidth(cost: float) -> bool:
 	return bw_freeze_left > 0.0 or Hacking.current_bandwidth >= cost
@@ -282,7 +292,8 @@ func _spend_bandwidth(cost: float) -> void:
 ## bandwidth regenerated per second: base + upgrade + mod, x2 overclocked, x0.5 overheated
 func _bw_rate() -> float:
 	var per_tick = BANDWIDTH_RECOVERY_RATE + _mod(HackingMods.MOD_TYPE.BAND_RATE)
-	return per_tick / max(0.01, Hacking.bandwidth_recovery_speed) * OVERCLOCK_VALUE
+	var burst = _mod(HackingMods.MOD_TYPE.BW_PCT_REGEN) * MAX_BANDWIDTH # Burst Buffer: % of max bandwidth per second
+	return (per_tick / max(0.01, Hacking.bandwidth_recovery_speed) + burst) * OVERCLOCK_VALUE
 
 ## logged once per action per hack; after that the card's state line shows the wait
 func _warn_bandwidth(action: String, cost: float) -> void:
@@ -405,18 +416,21 @@ func attack():
 		crits_left -= 1
 		crit = 2.0
 		forced_crit = true
-	elif randf() <= _get_total_efficiency():
+	elif randf() <= _get_total_efficiency() * (_mod(M.CRIT_CHANCE_MULT) if HackingMods.has_mod(M.CRIT_CHANCE_MULT) else 1.0):
 		crit = 2.0
+	if crit > 1.0 and HackingMods.has_mod(M.CRIT_DAMAGE_MULT):
+		crit *= _mod(M.CRIT_DAMAGE_MULT) # Critical Overflow: 10 -> 20 -> 40
 	var bw_cost = _sql_cost()
-	var raw_dmg = ATTACK_AMOUNT * crit
+	var raw_dmg = int(round(ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) * crit))
 	var fw_before = firewall_bar.value if !firewall_down else 0.0
 	var blocked = min(fw_before, raw_dmg) # only the part the firewall actually absorbed
 	var actual_dmg = max(raw_dmg - fw_before, 0)
 
 	var fw_hit = 0
 	if fw_before > 0:
-		fw_hit = int(min(fw_before, FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE)))
-		firewall_bar.value -= FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE)
+		var fw_dmg = FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE) + _mod(M.FW_PCT_HIT) * fw_base # Packet Shredder: % of max firewall
+		fw_hit = int(min(fw_before, fw_dmg))
+		firewall_bar.value -= fw_dmg
 
 	_spend_bandwidth(bw_cost)
 	band_bar.value = Hacking.current_bandwidth
@@ -437,7 +451,7 @@ func attack():
 	# log: what hit what, and why it was bigger
 	var line = "SQL Injector -> %s  %s" % [target_name, _c("-%d integrity" % actual_dmg, C_INTEG)]
 	if crit > 1:
-		line = _c("CRIT x2 ", C_CRIT) + line
+		line = _c("CRIT x%d " % int(crit), C_CRIT) + line
 		if forced_crit:
 			line += "  " + _c("(Zero-Day, %d left)" % crits_left, C_EXP)
 	if blocked > 0:
@@ -489,6 +503,8 @@ func defense():
 	# Restore mods add percentage points of max anonymity (+5 = +5%)
 	var mod_restore = int(ceil(Stats.max_anon * _mod(HackingMods.MOD_TYPE.RESTORE) / 100.0))
 	var amount = int(ceil(Stats.max_anon * DEFEND_PCT)) + mod_restore
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT):
+		amount = int(amount * _mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT)) # Proxy Chain
 	var boosted = spoof_boost_left > 0.0
 	if boosted:
 		amount = int(amount * float(Exploits.DEFS.booster_shot.mult))
@@ -496,7 +512,7 @@ func defense():
 	Stats.current_anon = min(Stats.max_anon, Stats.current_anon + amount)
 	var healed = int(Stats.current_anon - before)
 	add_heat(DEFEND_HEAT)
-	_spend_bandwidth(DEFEND_BW_COST)
+	_spend_bandwidth(_spoof_cost())
 	band_bar.value = Hacking.current_bandwidth
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("spoof")
@@ -534,6 +550,11 @@ func counter():
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Ghost Mode, %d left)" % ghost_left, C_EXP)])
 		_float(anon_bar, "MISS", C_EXP, 15)
 		return
+	if decoys_left > 0:
+		decoys_left -= 1
+		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Decoy Traffic, %d left)" % decoys_left, C_MOD)])
+		_float(anon_bar, "DECOY", C_MOD, 15)
+		return
 	if Upgrades.has("hacking.evasion") and randf() < EVASION_CHANCE:
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("EVADED", C_EXP), _c("(Evasion)", C_DIM)])
 		_float(anon_bar, "EVADED", C_EXP, 15)
@@ -549,6 +570,13 @@ func counter():
 	add_heat(COUNTER_HEAT)
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("hit_taken")
+	var reflected = int(round(dmg * _mod(M.COUNTER_REFLECT))) # Mirror
+	if reflected > 0 and Stats.current_anon > 0.0:
+		integ_bar.value -= reflected
+		_log("MOD", C_MOD, "Mirror reflects %d damage to %s" % [reflected, target_name])
+		if integ_bar.value <= 0.0:
+			win()
+			return
 
 	var line = "%s countermeasures -> you  %s  (%d/%d)" % [target_name, _c("-%d anonymity" % dmg, C_INTEG), Stats.current_anon, Stats.max_anon]
 	if reduce > 0:
@@ -595,7 +623,14 @@ func _break_firewall(earned: bool = true) -> void:
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
 	firewall_bar.value = 0
-	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ds" % [target_name, roundi((1.0 - FW_BREAK_SLOW) * 100), int(FW_BREAK_TIME)])
+	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ds" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(FW_BREAK_TIME)])
+	var cascade = int(round(integ_base * _mod(HackingMods.MOD_TYPE.FW_BREAK_INTEGRITY))) # Cascade
+	if cascade > 0:
+		integ_bar.value -= cascade
+		_log("MOD", C_MOD, "Cascade: firewall collapse deals %d integrity" % cascade)
+		if integ_bar.value <= 0.0:
+			win()
+			return
 	_banner("FIREWALL DOWN", "enemy countermeasures -%d%% for %ds" % [roundi((1.0 - FW_BREAK_SLOW) * 100), int(FW_BREAK_TIME)], C_FW, 0.9)
 	_shake(target_card.panel, 7.0, 0.35)
 	_flash(target_card.panel, Color(1.9, 1.5, 1.0), 0.5)
@@ -604,6 +639,11 @@ func _break_firewall(earned: bool = true) -> void:
 
 func _restore_firewall() -> void:
 	firewall_down = false
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT): # Firmware Brick: stays at 0 for the rest of the hack
+		firewall_bar.value = 0
+		_log("FW", C_FW, "firewall bricked - it won't reboot this hack (countermeasures back to full speed)")
+		_refresh_panels()
+		return
 	_log("FW", C_FW, "firewall rebooting to %d - countermeasures back to full speed" % int(fw_start_value))
 	_fw_tween = create_tween()
 	_fw_tween.tween_property(firewall_bar, "value", fw_start_value, FW_REFILL_TIME).set_ease(Tween.EASE_OUT)
@@ -753,6 +793,12 @@ func reset():
 
 func start_hack():
 	is_hacking = true
+	hack_time = 0.0
+	decoys_left = int(_mod(HackingMods.MOD_TYPE.IGNORE_COUNTERS))
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.EXPLOIT_FULL): # Zero Hour
+		Exploits.charge = Exploits.CHARGE_MAX
+	if _mod(HackingMods.MOD_TYPE.STEALTH_START) > 0:
+		_log("MOD", C_MOD, "Silent Entry: unnoticed for %ds" % int(_mod(HackingMods.MOD_TYPE.STEALTH_START)))
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
 	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():

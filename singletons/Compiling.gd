@@ -169,9 +169,9 @@ var SCHOOL = {
 	"efficiency rate": 0.001,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed": 10.0, # bar fill per second (100 = one payload)
-	"overclock speed": 20.0,
-	"overheat speed": 4.0,
+	"base speed": 10, # bar fill per second (100 = one payload)
+	"overclock speed": 20,
+	"overheat speed": 4,
 	"heat": 1.35,
 	"overclock heat": 1.71,
 	"overheat heat": 0.27,
@@ -191,18 +191,18 @@ var LAWFIRM = {
 	"tier name": "TIER II | LAWFIRM",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 93, # xp per payload
+	"experience per level": 96, # xp per payload
 	"command": "compile -lawfirm",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
 	"unlock level": 15,
-	"base speed": 6.667, # bar fill per second (100 = one payload)
-	"overclock speed": 13.333,
-	"overheat speed": 2.667,
-	"heat": 3.0093,
-	"overclock heat": 3.8118,
-	"overheat heat": 0.6019,
+	"base speed": 6.4868, # bar fill per second (100 = one payload)
+	"overclock speed": 12.9726,
+	"overheat speed": 2.5949,
+	"heat": 3.0929,
+	"overclock heat": 3.9177,
+	"overheat heat": 0.6186,
 	"vm token chance": 0.015, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.EMAIL_HEADER: 1,
@@ -219,18 +219,18 @@ var HOSPITAL = {
 	"tier name": "TIER III | HOSPITAL",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 180, # xp per payload
+	"experience per level": 190, # xp per payload
 	"command": "compile -hospital",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
 	"unlock level": 30,
-	"base speed": 4.444, # bar fill per second (100 = one payload)
-	"overclock speed": 8.889,
-	"overheat speed": 1.778,
-	"heat": 6.1014,
-	"overclock heat": 7.708,
-	"overheat heat": 1.2094,
+	"base speed": 4.2101, # bar fill per second (100 = one payload)
+	"overclock speed": 8.4212,
+	"overheat speed": 1.6844,
+	"heat": 6.4404,
+	"overclock heat": 8.1362,
+	"overheat heat": 1.2766,
 	"vm token chance": 0.0225, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.MAC_ADDRESS: 1,
@@ -247,18 +247,18 @@ var BANK = {
 	"tier name": "TIER IV | BANK",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 314, # xp per payload
+	"experience per level": 340, # xp per payload
 	"command": "compile -bank",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
 	"unlock level": 45,
-	"base speed": 2.963, # bar fill per second (100 = one payload)
-	"overclock speed": 5.926,
-	"overheat speed": 1.185,
-	"heat": 13.3993,
-	"overclock heat": 16.9742,
-	"overheat heat": 2.6746,
+	"base speed": 2.7351, # bar fill per second (100 = one payload)
+	"overclock speed": 5.4702,
+	"overheat speed": 1.0938,
+	"heat": 14.5159,
+	"overclock heat": 18.3887,
+	"overheat heat": 2.8975,
 	"vm token chance": 0.0338, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.ROUTING_NUMBER: 1,
@@ -275,18 +275,18 @@ var POLICE = {
 	"tier name": "TIER V | POLICE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 527, # xp per payload
+	"experience per level": 586, # xp per payload
 	"command": "compile -police",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
 	"unlock level": 60,
-	"base speed": 1.975, # bar fill per second (100 = one payload)
-	"overclock speed": 3.951,
-	"overheat speed": 0.79,
-	"heat": 47.817,
-	"overclock heat": 60.606,
-	"overheat heat": 9.576,
+	"base speed": 1.7775, # bar fill per second (100 = one payload)
+	"overclock speed": 3.5559,
+	"overheat speed": 0.711,
+	"heat": 53.13,
+	"overclock heat": 67.34,
+	"overheat heat": 10.64,
 	"vm token chance": 0.0506, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.SUBNET_MAP: 1,
@@ -303,18 +303,18 @@ var GOVERNMENT = {
 	"tier name": "TIER VI | GOVERNMENT",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 840, # xp per payload
+	"experience per level": 959, # xp per payload
 	"command": "compile -government",
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
 	"unlock level": 75,
-	"base speed": 1.317, # bar fill per second (100 = one payload)
-	"overclock speed": 2.634,
-	"overheat speed": 0.527,
-	"heat": 104.8398,
-	"overclock heat": 132.8216,
-	"overheat heat": 20.9864,
+	"base speed": 1.1538, # bar fill per second (100 = one payload)
+	"overclock speed": 2.3077,
+	"overheat speed": 0.4617,
+	"heat": 119.6656,
+	"overclock heat": 151.6045,
+	"overheat heat": 23.9542,
 	"vm token chance": 0.0759, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.GATEWAY_ADDRESS: 1,

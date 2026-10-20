@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://b48k75x6dglqm"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_714gr"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_yx46i"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_48gix"]
+[ext_resource type="Resource" uid="uid://b3vsbekbc3q5k" path="res://items/cache_entry/hospital/reception/reception_appoint_history.tres" id="2_714gr"]
+[ext_resource type="Resource" uid="uid://btn8nfhcjoa4v" path="res://items/cache_entry/hospital/reception/drop_1.tres" id="3_xhdfw"]
+[ext_resource type="Resource" uid="uid://c7ymlcpn1jeif" path="res://items/cache_entry/hospital/reception/drop_2.tres" id="4_r07t1"]
+[ext_resource type="Resource" uid="uid://y3lvy35tq0w6" path="res://items/cache_entry/hospital/reception/drop_3.tres" id="5_645ck"]
+
+[resource]
+script = ExtResource("2_48gix")
+entries = Array[ExtResource("1_yx46i")]([ExtResource("3_xhdfw"), ExtResource("4_r07t1"), ExtResource("5_645ck")])
+rare_pool = Array[ExtResource("1_yx46i")]([ExtResource("2_714gr")])
+rare_drop_chance = 0.05
+id = 52
+name = "Receptionist cache"
+shortened_name = ""
+description = "Received from hacking a Hospital Receptionist. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_714gr")]([])
+tier = 3
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

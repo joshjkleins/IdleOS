@@ -37,7 +37,7 @@ var SKILL = {
 	"level": 1,
 	"experience": 0,
 	"efficiency": 0.05,
-	"efficiency rate": 0.0015,
+	"efficiency rate": 0.00255, # crit 5% at L1 -> 30% at L99: with the best crit mod (+20%) and Double Crit, exactly 100%
 	"efficiency description": "Chance for hacking attack to deal double damage",
 	"color": Color("#22C55E"),
 	"level up signal": hacking_level_up_signal,
@@ -166,5 +166,6 @@ func load_data(data: Dictionary) -> void:
 	bonus_expires_at = int(data.get("bonus_expires_at", bonus_expires_at))
 	SKILL["level"] = int(data.get("skill_level", SKILL["level"]))
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
-	SKILL["efficiency"] = float(data.get("skill_efficiency", SKILL["efficiency"]))
+	# crit always comes from level (retuned rates apply to old saves)
+	SKILL["efficiency"] = 0.05 + float(SKILL["efficiency rate"]) * (int(SKILL["level"]) - 1)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

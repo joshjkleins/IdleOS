@@ -252,7 +252,8 @@ func _parsing(p: Dictionary, snap: Dictionary) -> Dictionary:
 			break
 	if item == null:
 		return {}
-	var step = _step(Parsing, p)
+	var tm = Parsing.item_time_mult(p, item)
+	var step = _step(Parsing, p) * tm
 	var base_eff = (float(p.efficiency) + Upgrades.cur("parsing.efficiency") * float(p.get("efficiency upgrade scale", 1.0)))
 	var fast = Upgrades.cur("parsing.fast_skip")
 	var out := {}
@@ -273,11 +274,12 @@ func _parsing(p: Dictionary, snap: Dictionary) -> Dictionary:
 	else:
 		var lines = PARSE_LINES + int(Upgrades.cur("parsing.rows"))
 		var bonus = Parsing.get_line_chance_bonus(p, item)
+		var fm = Parsing.item_find_mult(p, item)
 		var pc = Upgrades.cur("parsing.pattern_cache")
 		var miss = 0.0
 		for k in SAMPLES:
 			for i in lines:
-				if randf() < base_eff + bonus + miss:
+				if randf() < (base_eff + bonus + miss) * fm:
 					miss = 0.0
 					t += step
 					var f = Parsing.roll_find(p, item, target)
@@ -289,8 +291,8 @@ func _parsing(p: Dictionary, snap: Dictionary) -> Dictionary:
 					t += step * (1.0 - fast)
 		for f in out:
 			out[f] /= float(SAMPLES)
-	return {"seconds": t / SAMPLES, "inp": {item: 1.0}, "out": out, "xp": float(p["experience per level"]),
-		"heat": _hc(Parsing, float(p.heat), Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(item) if item is CacheData else item.tier)), "repeat": true}
+	return {"seconds": t / SAMPLES, "inp": {item: 1.0}, "out": out, "xp": round(float(p["experience per level"]) * tm),
+		"heat": _hc(Parsing, float(p.heat), Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(item) if item is CacheData else item.tier) * tm), "repeat": true}
 
 func _cracking(p: Dictionary) -> Dictionary:
 	var eff = float(p.efficiency) + Upgrades.cur("cracking.efficiency")

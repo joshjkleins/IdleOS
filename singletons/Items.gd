@@ -470,6 +470,23 @@ enum ItemType {
 	GHOST_MODE, #337
 	REDACTION, #338
 	BLACKOUT, #339
+	SHATTER_PROTOCOL, #340
+	BURST_BUFFER, #341
+	FIRMWARE_BRICK, #342
+	PAYLOAD_AMPLIFIER, #343
+	VULN_SCANNER, #344
+	CRITICAL_OVERFLOW, #345
+	PROXY_CHAIN, #346
+	GHOST_PACKET, #347
+	DECOY_TRAFFIC, #348
+	PACKET_SHREDDER, #349
+	LATENCY_INJECTOR, #350
+	SILENT_ENTRY, #351
+	IP_ROTATOR, #352
+	ZERO_HOUR, #353
+	CASCADE, #354
+	MIRROR, #355
+	COLD_BOOT, #356
 }
 
 ### RESOURCES ###
@@ -854,6 +871,23 @@ const ZERO_DAY = preload("res://items/exploits/zero_day.tres") #336
 const GHOST_MODE = preload("res://items/exploits/ghost_mode.tres") #337
 const REDACTION = preload("res://items/exploits/redaction.tres") #338
 const BLACKOUT = preload("res://items/exploits/blackout.tres") #339
+const SHATTER_PROTOCOL = preload("res://items/hacking_mods/shatter_protocol.tres") #340
+const BURST_BUFFER = preload("res://items/hacking_mods/burst_buffer.tres") #341
+const FIRMWARE_BRICK = preload("res://items/hacking_mods/firmware_brick.tres") #342
+const PAYLOAD_AMPLIFIER = preload("res://items/hacking_mods/payload_amplifier.tres") #343
+const VULN_SCANNER = preload("res://items/hacking_mods/vuln_scanner.tres") #344
+const CRITICAL_OVERFLOW = preload("res://items/hacking_mods/critical_overflow.tres") #345
+const PROXY_CHAIN = preload("res://items/hacking_mods/proxy_chain.tres") #346
+const GHOST_PACKET = preload("res://items/hacking_mods/ghost_packet.tres") #347
+const DECOY_TRAFFIC = preload("res://items/hacking_mods/decoy_traffic.tres") #348
+const PACKET_SHREDDER = preload("res://items/hacking_mods/packet_shredder.tres") #349
+const LATENCY_INJECTOR = preload("res://items/hacking_mods/latency_injector.tres") #350
+const SILENT_ENTRY = preload("res://items/hacking_mods/silent_entry.tres") #351
+const IP_ROTATOR = preload("res://items/hacking_mods/ip_rotator.tres") #352
+const ZERO_HOUR = preload("res://items/hacking_mods/zero_hour.tres") #353
+const CASCADE = preload("res://items/hacking_mods/cascade.tres") #354
+const MIRROR = preload("res://items/hacking_mods/mirror.tres") #355
+const COLD_BOOT = preload("res://items/hacking_mods/cold_boot.tres") #356
 
 var ITEM_NAME_MAP = {}
 
@@ -1201,4 +1235,21 @@ const ITEM_MAP = {
 	ItemType.GHOST_MODE: GHOST_MODE, #337
 	ItemType.REDACTION: REDACTION, #338
 	ItemType.BLACKOUT: BLACKOUT, #339
+	ItemType.SHATTER_PROTOCOL: SHATTER_PROTOCOL, #340
+	ItemType.BURST_BUFFER: BURST_BUFFER, #341
+	ItemType.FIRMWARE_BRICK: FIRMWARE_BRICK, #342
+	ItemType.PAYLOAD_AMPLIFIER: PAYLOAD_AMPLIFIER, #343
+	ItemType.VULN_SCANNER: VULN_SCANNER, #344
+	ItemType.CRITICAL_OVERFLOW: CRITICAL_OVERFLOW, #345
+	ItemType.PROXY_CHAIN: PROXY_CHAIN, #346
+	ItemType.GHOST_PACKET: GHOST_PACKET, #347
+	ItemType.DECOY_TRAFFIC: DECOY_TRAFFIC, #348
+	ItemType.PACKET_SHREDDER: PACKET_SHREDDER, #349
+	ItemType.LATENCY_INJECTOR: LATENCY_INJECTOR, #350
+	ItemType.SILENT_ENTRY: SILENT_ENTRY, #351
+	ItemType.IP_ROTATOR: IP_ROTATOR, #352
+	ItemType.ZERO_HOUR: ZERO_HOUR, #353
+	ItemType.CASCADE: CASCADE, #354
+	ItemType.MIRROR: MIRROR, #355
+	ItemType.COLD_BOOT: COLD_BOOT, #356
 }

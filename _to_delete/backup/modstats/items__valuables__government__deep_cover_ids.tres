@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b4uw2pfc7daoe"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_rfid5"]
+
+[resource]
+script = ExtResource("1_rfid5")
+id = 147
+name = "Deep Cover IDs"
+shortened_name = "Cover IDs"
+description = "Rare find from Government Vice President caches. Used to compile access to the next target."
+upgrade_ingredient = true
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_rfid5")]([])
+tier = 6
+color_type = 8
+obtained_from = Array[int]([7])
+obtained_from_additional_hint = "VICE PRESIDENT CACHE"
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

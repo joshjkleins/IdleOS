@@ -2,7 +2,7 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 1	Mining	Logs	0.09/0.10	0.09/0.40
 1	Parsing	Footprint Logs	0.10/0.10	0.09/0.40
 1	Cracking	Password	0.12/0.10	0.12/0.40
-1	Matching	Credential	0.13/0.10	0.14/0.40
+1	Matching	Credential	0.12/0.10	0.14/0.40
 1	Compiling	School payload	0.13/0.10	0.13/0.40
 1	Parsing	Corruption Logs	0.10/0.10	0.09/0.40
 1	Parsing	Network Logs	0.10/0.10	0.09/0.40
@@ -19,8 +19,8 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 1	Decoding	Decode Superintendent cache	0.12/0.10	0.11/0.40
 2	Mining	Archives	0.13/0.40	0.13/0.75
 2	Parsing	Footprint Archives	0.14/0.40	0.12/0.75
-2	Cracking	Signature	0.16/0.40	0.16/0.75
-2	Matching	Certificate	0.17/0.40	0.18/0.75
+2	Cracking	Signature	0.16/0.40	0.17/0.75
+2	Matching	Certificate	0.17/0.40	0.19/0.75
 2	Compiling	Lawfirm payload	0.19/0.40	0.18/0.75
 2	Parsing	Corruption Archives	0.14/0.40	0.12/0.75
 2	Parsing	Network Archives	0.14/0.40	0.13/0.75
@@ -36,13 +36,13 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 2	Decoding	Decode Lawyer cache	0.16/0.40	0.15/0.75
 2	Decoding	Decode Partner cache	0.16/0.40	0.15/0.75
 3	Mining	Metadata	0.17/0.75	0.18/1.30
-3	Parsing	Footprint Metadata	0.19/0.75	0.17/1.30
+3	Parsing	Footprint Metadata	0.20/0.75	0.18/1.30
 3	Cracking	Badge	0.23/0.75	0.24/1.30
-3	Matching	Badge	0.24/0.75	0.26/1.30
+3	Matching	Badge	0.24/0.75	0.27/1.30
 3	Compiling	Hospital payload	0.24/0.75	0.23/1.30
 3	Parsing	Corruption Metadata	0.20/0.75	0.18/1.30
 3	Parsing	Network Metadata	0.20/0.75	0.18/1.30
-3	Parsing	Extraction Metadata	0.19/0.75	0.17/1.30
+3	Parsing	Extraction Metadata	0.20/0.75	0.18/1.30
 3	Phishing	Mod (bait Metadata)	0.18/0.75	0.19/1.30
 3	Phishing	Spear (no bait)	0.19/0.75	0.25/1.30
 3	Compiling	Mod compile	0.67/0.75	0.86/1.30
@@ -54,13 +54,13 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 3	Decoding	Decode Doctor cache	0.22/0.75	0.21/1.30
 3	Decoding	Decode Chief of medicine cache	0.22/0.75	0.21/1.30
 4	Mining	Cookies	0.22/1.30	0.23/2.00
-4	Parsing	Footprint Cookies	0.26/1.30	0.23/2.00
-4	Cracking	PIN	0.29/1.30	0.31/2.00
-4	Matching	Account	0.33/1.30	0.36/2.00
+4	Parsing	Footprint Cookies	0.28/1.30	0.27/2.00
+4	Cracking	PIN	0.28/1.30	0.29/2.00
+4	Matching	Account	0.33/1.30	0.37/2.00
 4	Compiling	Bank payload	0.34/1.30	0.32/2.00
 4	Parsing	Corruption Cookies	0.26/1.30	0.24/2.00
 4	Parsing	Network Cookies	0.27/1.30	0.26/2.00
-4	Parsing	Extraction Cookies	0.26/1.30	0.24/2.00
+4	Parsing	Extraction Cookies	0.28/1.30	0.27/2.00
 4	Phishing	Mod (bait Cookies)	0.24/1.30	0.23/2.00
 4	Phishing	Spear (no bait)	0.25/1.30	0.57/2.00
 4	Compiling	Mod compile	0.86/1.30	1.78/2.00
@@ -72,13 +72,13 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 4	Decoding	Decode Branch Manager Cache	0.28/1.30	0.27/2.00
 4	Decoding	Decode Chief Financial Officer Cache	0.28/1.30	0.27/2.00
 5	Mining	Repositories	0.51/2.00	0.55/3.05
-5	Parsing	Footprint Repositories	0.56/2.00	0.51/3.05
-5	Cracking	Keys	0.63/2.00	0.69/3.05
-5	Matching	Officer	0.70/2.00	0.80/3.05
+5	Parsing	Footprint Repositories	0.65/2.00	0.64/3.05
+5	Cracking	Keys	0.65/2.00	0.67/3.05
+5	Matching	Officer	0.72/2.00	0.84/3.05
 5	Compiling	Police payload	0.75/2.00	0.71/3.05
-5	Parsing	Corruption Repositories	0.58/2.00	0.52/3.05
+5	Parsing	Corruption Repositories	0.58/2.00	0.53/3.05
 5	Parsing	Network Repositories	0.63/2.00	0.60/3.05
-5	Parsing	Extraction Repositories	0.58/2.00	0.53/3.05
+5	Parsing	Extraction Repositories	0.66/2.00	0.64/3.05
 5	Phishing	Mod (bait Repositories)	0.54/2.00	0.50/3.05
 5	Phishing	Spear (no bait)	0.57/2.00	0.77/3.05
 5	Compiling	Mod compile	1.78/2.00	2.23/3.05
@@ -89,14 +89,14 @@ tier	skill	process	level	cycles/h	out/h	in/h	hot
 5	Decoding	Decode Detective cache	0.63/2.00	0.59/3.05
 5	Decoding	Decode Sergeant cache	0.63/2.00	0.59/3.05
 5	Decoding	Decode Captain cache	0.63/2.00	0.59/3.05
-6	Mining	Databases	0.68/3.05	0.75/4.60
-6	Parsing	Footprint Databases	0.76/3.05	0.69/4.60
-6	Cracking	Biometric	0.91/3.05	0.95/4.60
-6	Matching	Clearance	0.92/3.05	1.08/4.60
+6	Mining	Databases	0.67/3.05	0.75/4.60
+6	Parsing	Footprint Databases	0.98/3.05	1.00/4.60
+6	Cracking	Biometric	0.89/3.05	1.01/4.60
+6	Matching	Clearance	0.96/3.05	1.15/4.60
 6	Compiling	Government payload	1.03/3.05	0.96/4.60
 6	Parsing	Corruption Databases	0.79/3.05	0.71/4.60
-6	Parsing	Network Databases	0.89/3.05	0.87/4.60
-6	Parsing	Extraction Databases	0.79/3.05	0.72/4.60
+6	Parsing	Network Databases	0.90/3.05	0.87/4.60
+6	Parsing	Extraction Databases	0.98/3.05	1.00/4.60
 6	Phishing	Mod (bait Databases)	0.73/3.05	0.62/4.60
 6	Phishing	Spear (no bait)	0.77/3.05	0.66/4.60
 6	Compiling	Mod compile	2.23/3.05	2.07/4.60

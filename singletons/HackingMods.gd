@@ -26,6 +26,48 @@ enum MOD_TYPE {
 	DAMAGE_REDUCTION,     #student cache
 	COUNTER_SLOW,         #sql injector
 	NONE,
+	# equippable mods (Phishing Mod / Corruption drops, 3 per tier; values are % so they stay strong all game)
+	SQL_BOOST,
+	FW_BREAK_SLOW,
+	BW_PCT_REGEN,
+	FW_NO_REBOOT,
+	DAMAGE_PCT,
+	CRIT_CHANCE_MULT,
+	CRIT_DAMAGE_MULT,
+	SPOOF_HEAL_MULT,
+	SPOOF_FREE,
+	IGNORE_COUNTERS,
+	FW_PCT_HIT,
+	COUNTER_SLOW_PCT,
+	STEALTH_START,
+	SPOOF_SPEED,
+	EXPLOIT_FULL,
+	FW_BREAK_INTEGRITY,
+	COUNTER_REFLECT,
+	COLD_BOOT,
+}
+
+
+## Equippable mods: name, effect, value format (pct = +X%, x = xN, n = count, s = seconds, on = no value)
+const EQUIP_INFO = {
+	MOD_TYPE.SQL_BOOST: ["SQL Booster", "SQL Injectors attack faster", "pct"],
+	MOD_TYPE.FW_BREAK_SLOW: ["Shatter Protocol", "Breaking the firewall slows enemy countermeasures by an extra 25% (75% total).", "pct"],
+	MOD_TYPE.BW_PCT_REGEN: ["Burst Buffer", "Regenerates an extra 20% of max bandwidth per second.", "pct"],
+	MOD_TYPE.FW_NO_REBOOT: ["Firmware Brick", "Once the firewall is broken it never reboots for the rest of the hack.", "on"],
+	MOD_TYPE.DAMAGE_PCT: ["Payload Amplifier", "SQL Injectors deal 25% more damage.", "pct"],
+	MOD_TYPE.CRIT_CHANCE_MULT: ["Vuln Scanner", "Doubles your crit chance.", "x"],
+	MOD_TYPE.CRIT_DAMAGE_MULT: ["Critical Overflow", "Crits deal double again: x4 instead of x2.", "x"],
+	MOD_TYPE.SPOOF_HEAL_MULT: ["Proxy Chain", "Packet Spoofs heal double.", "x"],
+	MOD_TYPE.SPOOF_FREE: ["Ghost Packet", "Packet Spoofs cost no bandwidth.", "on"],
+	MOD_TYPE.IGNORE_COUNTERS: ["Decoy Traffic", "The first 3 countermeasures of each hack miss.", "n"],
+	MOD_TYPE.FW_PCT_HIT: ["Packet Shredder", "Every hit also deals 10% of the target's max firewall.", "pct"],
+	MOD_TYPE.COUNTER_SLOW_PCT: ["Latency Injector", "Enemy countermeasures are 20% slower.", "pct"],
+	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 10 seconds of each hack go unnoticed: no countermeasures.", "s"],
+	MOD_TYPE.SPOOF_SPEED: ["IP Rotator", "Packet Spoofs fill 80% faster.", "pct"],
+	MOD_TYPE.EXPLOIT_FULL: ["Zero Hour", "The EXPLOIT meter starts full at the start of each hack.", "on"],
+	MOD_TYPE.FW_BREAK_INTEGRITY: ["Cascade", "Breaking the firewall also deals 15% of the target's max integrity.", "pct"],
+	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
+	MOD_TYPE.COLD_BOOT: ["Cold Boot", "Overclock adds no extra heat, and overheating doesn't speed up the enemy.", "on"],
 }
 
 var current_mods = {}
@@ -71,7 +113,7 @@ func get_mod_description(mod: MOD_TYPE) -> String:
 		MOD_TYPE.COUNTER_SLOW:
 			return "Slows counterattack measures"
 		_:
-			return ""
+			return EQUIP_INFO[mod][1] if EQUIP_INFO.has(mod) else ""
 
 func get_mod_name(mod: MOD_TYPE) -> String:
 	match mod:
@@ -94,7 +136,7 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 		MOD_TYPE.COUNTER_SLOW:
 			return "Countermeasures Slow"
 		_:
-			return ""
+			return EQUIP_INFO[mod][0] if EQUIP_INFO.has(mod) else ""
 
 
 func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
@@ -118,6 +160,13 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 		MOD_TYPE.COUNTER_SLOW:
 			return "-" + "%.f%%" % (value * 100.0)
 		_:
+			if EQUIP_INFO.has(mod):
+				match EQUIP_INFO[mod][2]:
+					"pct": return "+%.f%%" % (value * 100.0)
+					"x": return "x%s" % str(value).trim_suffix(".0")
+					"n": return str(int(value))
+					"s": return "%ds" % int(value)
+				return "on"
 			return str(0)
 
 

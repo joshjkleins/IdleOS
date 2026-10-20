@@ -1205,6 +1205,9 @@ func handle_vm_token_commands(text):
 	if !target_minor_process.unlocked:
 		add_line("Process is not unlocked")
 		return
+	if Exp.tier_block_reason(target_process, target_minor_process) != "":
+		add_line(Exp.tier_block_reason(target_process, target_minor_process))
+		return
 	
 	if target_minor_process.get("not built", false):
 		add_line(ContextCommands.not_built_text(target_minor_process))
@@ -1579,6 +1582,9 @@ func start_log_mining(minor_process: Dictionary):
 	if !minor_process.unlocked:
 		add_line("Requires mining level " + str(minor_process["unlock level"]))
 		return
+	if Exp.tier_block_reason(Mining, minor_process) != "":
+		add_line(Exp.tier_block_reason(Mining, minor_process))
+		return
 	var new_data_mining_terminal = mining_scene.instantiate()
 	terminal_body_container.add_child(new_data_mining_terminal)
 	new_data_mining_terminal.set_mine_type(minor_process)
@@ -1704,6 +1710,9 @@ func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
 		return
+	if Exp.tier_block_reason(Cracking, minor_process) != "":
+		add_line(Exp.tier_block_reason(Cracking, minor_process))
+		return
 	#check if requirements are dictionary because if requirements are a String then player is using vm cracking command and initial item check already happened
 	if minor_process.requirements is Dictionary:
 		if !has_requirements(minor_process.requirements):
@@ -1745,6 +1754,9 @@ func cred_matching_commands(text):
 func start_matching(minor_process):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
+		return
+	if Exp.tier_block_reason(Matching, minor_process) != "":
+		add_line(Exp.tier_block_reason(Matching, minor_process))
 		return
 	
 	var new_cred_matching_terminal = cred_matching_scene.instantiate()
@@ -1960,6 +1972,9 @@ func compiling_commands(text):
 func start_compiling(minor_process: Dictionary, item = null):
 	if !minor_process.unlocked:
 		add_line("Process not unlocked")
+		return
+	if Exp.tier_block_reason(Compiling, minor_process) != "":
+		add_line(Exp.tier_block_reason(Compiling, minor_process))
 		return
 	
 	var new_compiling_terminal = compiling_scene.instantiate()

@@ -49,20 +49,20 @@ var CREDENTIAL = {
 	"tier name": "TIER I | CREDENTIAL",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 67, # xp per match
+	"experience per level": 47, # xp per match
 	"command": "match -cred",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
 	"unlock level": 1,
-	"base speed min": 0.2, # seconds per terminal message (24 per match)
-	"base speed max": 1.2,
-	"overclock speed min": 0.1,
-	"overclock speed max": 0.6,
-	"overheat speed": 1.75,
-	"heat": 2.1429,
-	"overclock heat": 2.4107,
-	"overheat heat": 0.2679,
+	"base speed min": 0.1407, # seconds per terminal message (24 per match)
+	"base speed max": 0.844,
+	"overclock speed min": 0.0703,
+	"overclock speed max": 0.422,
+	"overheat speed": 1.2308,
+	"heat": 1.5072,
+	"overclock heat": 1.6955,
+	"overheat heat": 0.1884,
 	"vm token chance": 0.01, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.USERNAMES: 1,
@@ -81,20 +81,20 @@ var CERTIFICATE = {
 	"tier name": "TIER II | CERTIFICATE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 155, # xp per match
+	"experience per level": 163, # xp per match
 	"command": "match -cert",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 15,
-	"base speed min": 0.3, # seconds per terminal message (24 per match)
-	"base speed max": 1.8,
-	"overclock speed min": 0.15,
-	"overclock speed max": 0.9,
-	"overheat speed": 2.625,
-	"heat": 3.9009,
-	"overclock heat": 4.3886,
-	"overheat heat": 0.4876,
+	"base speed min": 0.3158, # seconds per terminal message (24 per match)
+	"base speed max": 1.8951,
+	"overclock speed min": 0.1579,
+	"overclock speed max": 0.9475,
+	"overheat speed": 2.7637,
+	"heat": 4.107,
+	"overclock heat": 4.6204,
+	"overheat heat": 0.5134,
 	"vm token chance": 0.015, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.CASE_NUMBER: 1,
@@ -113,20 +113,20 @@ var BADGE = {
 	"tier name": "TIER III | BADGE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 300, # xp per match
+	"experience per level": 464, # xp per match
 	"command": "match -badge",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 30,
-	"base speed min": 0.45, # seconds per terminal message (24 per match)
-	"base speed max": 2.7,
-	"overclock speed min": 0.225,
-	"overclock speed max": 1.35,
-	"overheat speed": 3.938,
-	"heat": 7.4329,
-	"overclock heat": 8.3689,
-	"overheat heat": 0.9222,
+	"base speed min": 0.6963, # seconds per terminal message (24 per match)
+	"base speed max": 4.1777,
+	"overclock speed min": 0.3481,
+	"overclock speed max": 2.0889,
+	"overheat speed": 6.0933,
+	"heat": 11.501,
+	"overclock heat": 12.9493,
+	"overheat heat": 1.4269,
 	"vm token chance": 0.0225, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.STAFF_IDS: 1,
@@ -145,20 +145,20 @@ var ACCOUNT = {
 	"tier name": "TIER IV | ACCOUNT",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 530, # xp per match
+	"experience per level": 1191, # xp per match
 	"command": "match -account",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 45,
-	"base speed min": 0.675, # seconds per terminal message (24 per match)
-	"base speed max": 4.05,
-	"overclock speed min": 0.338,
-	"overclock speed max": 2.025,
-	"overheat speed": 5.906,
-	"heat": 13.5888,
-	"overclock heat": 15.2832,
-	"overheat heat": 1.6944,
+	"base speed min": 1.5164, # seconds per terminal message (24 per match)
+	"base speed max": 9.0986,
+	"overclock speed min": 0.7593,
+	"overclock speed max": 4.5493,
+	"overheat speed": 13.2683,
+	"heat": 30.5282,
+	"overclock heat": 34.3348,
+	"overheat heat": 3.8066,
 	"vm token chance": 0.0338, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.ACCOUNT_NUMBERS: 1,
@@ -177,20 +177,20 @@ var OFFICER = {
 	"tier name": "TIER V | OFFICER",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 885, # xp per match
+	"experience per level": 2888, # xp per match
 	"command": "match -officer",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 60,
-	"base speed min": 1.012, # seconds per terminal message (24 per match)
-	"base speed max": 6.075,
-	"overclock speed min": 0.506,
-	"overclock speed max": 3.038,
-	"overheat speed": 8.859,
-	"heat": 38.6591,
-	"overclock heat": 43.4955,
-	"overheat heat": 4.8364,
+	"base speed min": 3.3022, # seconds per terminal message (24 per match)
+	"base speed max": 19.8228,
+	"overclock speed min": 1.6511,
+	"overclock speed max": 9.913,
+	"overheat speed": 28.9071,
+	"heat": 126.1453,
+	"overclock heat": 141.9265,
+	"overheat heat": 15.7813,
 	"vm token chance": 0.0506, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.BADGE_NUMBER: 1,
@@ -209,20 +209,20 @@ var CLEARANCE = {
 	"tier name": "TIER VI | CLEARANCE",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 1410, # xp per match
+	"experience per level": 6773, # xp per match
 	"command": "match -clearance",
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
 	"unlock level": 75,
-	"base speed min": 1.519, # seconds per terminal message (24 per match)
-	"base speed max": 9.112,
-	"overclock speed min": 0.759,
-	"overclock speed max": 4.556,
-	"overheat speed": 13.289,
-	"heat": 65.6971,
-	"overclock heat": 73.9183,
-	"overheat heat": 8.2212,
+	"base speed min": 7.2963, # seconds per terminal message (24 per match)
+	"base speed max": 43.7681,
+	"overclock speed min": 3.6457,
+	"overclock speed max": 21.884,
+	"overheat speed": 63.8316,
+	"heat": 315.5657,
+	"overclock heat": 355.055,
+	"overheat heat": 39.4892,
 	"vm token chance": 0.0759, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.CLEARANCE_ID: 1,

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://y7cfa0st0xu8"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_vpm7e"]
+
+[resource]
+script = ExtResource("1_vpm7e")
+id = 6
+name = "IP address"
+shortened_name = ""
+description = "Obtained by Parsing Logs. Used with Credentials to compile School payload."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_vpm7e")]([])
+tier = 1
+color_type = 10
+obtained_from = Array[int]([2])
+obtained_from_additional_hint = ""
+hacking_mod_type = 3
+hacking_mod_value = 10.0
+hacking_mod_duration = 5
+hacking_mod_consumed = 100
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

@@ -1,0 +1,261 @@
+1	resource	Logs	DAMAGE	10.0	5	100	false	
+1	resource	Encrypted passwords	EFFICIENCY	0.02	5	100	false	
+1	resource	Passwords	EFFICIENCY	0.03	5	100	false	
+1	resource	Usernames	FIREWALL_REDUCTION	15.0	5	100	false	
+1	resource	Credentials	ATTACK_SPEED	0.15	5	100	false	
+1	resource	IP address	FIREWALL_DAMAGE	10.0	5	100	false	
+1	rare	Parents credit card	DAMAGE	20.0	5	20	false	
+1	cache	Student cache	DAMAGE_REDUCTION	5.0	10	25	false	
+1	rare	Falsified transcript database	BAND_RATE	3.0	5	20	false	
+1	cache	Admin cache	DAMAGE_REDUCTION	6.0	10	25	false	
+1	rare	Student disciplinary records	RESTORE	15.0	5	20	false	
+1	rare	School budget embezzlement logs	EFFICIENCY	0.06	5	20	false	
+1	rare	District wide master password	COUNTER_SLOW	0.2	5	20	false	
+1	cache	Vice principal cache	DAMAGE_REDUCTION	7.0	10	25	false	
+1	cache	Principal cache	DAMAGE_REDUCTION	8.0	10	25	false	
+1	cache	Superintendent cache	DAMAGE_REDUCTION	9.0	10	25	false	
+3	rare	Patient appointment history	DAMAGE	55.0	5	20	false	
+3	rare	Staff keycard clone data	BAND_RATE	5.0	5	20	false	
+3	rare	Prescription pad credentials	RESTORE	21.0	5	20	false	
+3	rare	Patient insurance data	EFFICIENCY	0.12	5	20	false	
+3	rare	Falsified drug trial results	COUNTER_SLOW	0.3	5	20	false	
+3	cache	Receptionist cache	DAMAGE_REDUCTION	30.0	10	25	false	
+3	cache	Orderly cache	DAMAGE_REDUCTION	31.0	10	25	false	
+3	cache	Nurse cache	DAMAGE_REDUCTION	32.0	10	25	false	
+3	cache	Doctor cache	DAMAGE_REDUCTION	33.0	10	25	false	
+3	cache	Chief of medicine cache	DAMAGE_REDUCTION	34.0	10	25	false	
+5	rare	Internal affairs complaint archive	DAMAGE	120.0	5	20	false	
+5	rare	Body cam footage deletion logs	BAND_RATE	7.0	5	20	false	
+5	rare	Confidential informant registry	RESTORE	27.0	5	20	false	
+5	rare	Evidence locker access codes	EFFICIENCY	0.18	5	20	false	
+5	rare	Corruption payout ledger	COUNTER_SLOW	0.4	5	20	false	
+5	cache	Secretary cache	DAMAGE_REDUCTION	75.0	10	25	false	
+5	cache	Cop cache	DAMAGE_REDUCTION	76.0	10	25	false	
+5	cache	Detective cache	DAMAGE_REDUCTION	77.0	10	25	false	
+5	cache	Sergeant cache	DAMAGE_REDUCTION	78.0	10	25	false	
+5	cache	Captain cache	DAMAGE_REDUCTION	79.0	10	25	false	
+2	rare	Leaked deposition transcripts	DAMAGE	35.0	5	20	false	
+2	rare	Forged court document templates	BAND_RATE	4.0	5	20	false	
+2	rare	Sealed case files	RESTORE	18.0	5	20	false	
+2	rare	Offshore account records	EFFICIENCY	0.09	5	20	false	
+2	rare	Witness protection address	COUNTER_SLOW	0.25	5	20	false	
+2	cache	Legal assistant cache	DAMAGE_REDUCTION	15.0	10	25	false	
+2	cache	Paralegal cache	DAMAGE_REDUCTION	16.0	10	25	false	
+2	cache	Associate attorney cache	DAMAGE_REDUCTION	17.0	10	25	false	
+2	cache	Lawyer cache	DAMAGE_REDUCTION	18.0	10	25	false	
+2	cache	Partner cache	DAMAGE_REDUCTION	19.0	10	25	false	
+0	combat	SQL Injector	COUNTER_SLOW	0.2	5	100	false	
+0	combat	Packet Spoof	RESTORE	5.0	5	25	false	
+4	resource	PINS	EFFICIENCY	0.12	5	100	false	
+4	resource	Encrypted PINS	EFFICIENCY	0.08	5	100	false	
+4	resource	Account Numbers	FIREWALL_REDUCTION	83.0	5	100	false	
+4	resource	Account access tokens	ATTACK_SPEED	0.3	5	100	false	
+0	token	VM mining token	DAMAGE	20.0	10	15	false	
+0	token	VM parsing token	FIREWALL_DAMAGE	25.0	10	15	false	
+0	token	VM cracking token	EFFICIENCY	0.25	10	15	false	
+0	token	VM matching token	ATTACK_SPEED	0.3	10	15	false	
+0	token	VM phishing token	RESTORE	8.0	10	15	false	
+0	token	VM decoding token	DAMAGE_REDUCTION	5.0	10	15	false	
+1	payload	School payload	BAND_RATE	2.0	10	50	false	
+0	token	VM compiling token	BAND_RATE	4.0	10	15	false	
+1	cache	Student cache Footprint	DAMAGE_REDUCTION	5.0	10	25	false	
+1	mod	SQL Booster	SQL_BOOST	0.5	20	1	true	
+2	resource	Archives	DAMAGE	20.0	5	100	false	
+4	resource	Cookies	DAMAGE	55.0	5	100	false	
+6	resource	Databases	DAMAGE	120.0	5	100	false	
+3	resource	Metadata	DAMAGE	35.0	5	100	false	
+5	resource	Repositories	DAMAGE	80.0	5	100	false	
+3	resource	Badge Hash	EFFICIENCY	0.09	5	100	false	
+6	resource	Bio Template	EFFICIENCY	0.18	5	100	false	
+2	resource	Digital Signature	EFFICIENCY	0.06	5	100	false	
+5	resource	Private Keys	EFFICIENCY	0.15	5	100	false	
+3	resource	Access Badge	ATTACK_SPEED	0.25	5	100	false	
+5	resource	Officer Auth Key	ATTACK_SPEED	0.35	5	100	false	
+6	resource	Security Clearance	ATTACK_SPEED	0.4	5	100	false	
+2	resource	Signed Certificate	ATTACK_SPEED	0.2	5	100	false	
+5	resource	Badge Number	FIREWALL_REDUCTION	120.0	5	100	false	
+2	resource	Case Number	FIREWALL_REDUCTION	30.0	5	100	false	
+6	resource	Clearance ID	FIREWALL_REDUCTION	180.0	5	100	false	
+2	resource	Email Header	FIREWALL_DAMAGE	20.0	5	100	false	
+6	resource	Encrypted Bio Hash	EFFICIENCY	0.12	5	100	false	
+2	resource	Encrypted Signature	EFFICIENCY	0.04	5	100	false	
+5	resource	Encrypted SSH Key	EFFICIENCY	0.1	5	100	false	
+6	resource	Gateway Address	FIREWALL_DAMAGE	120.0	5	100	false	
+3	resource	Mac Address	FIREWALL_DAMAGE	35.0	5	100	false	
+4	resource	Routing Number	FIREWALL_DAMAGE	55.0	5	100	false	
+3	resource	Staff IDs	FIREWALL_REDUCTION	53.0	5	100	false	
+5	resource	Subnet Map	FIREWALL_DAMAGE	80.0	5	100	false	
+4	payload	Bank Payload	BAND_RATE	5.0	10	50	false	
+6	payload	Government Payload	BAND_RATE	7.0	10	50	false	
+3	payload	Hospital Payload	BAND_RATE	4.0	10	50	false	
+2	payload	Lawfirm Payload	BAND_RATE	3.0	10	50	false	
+5	payload	Police Payload	BAND_RATE	6.0	10	50	false	
+3	resource	Encrypted Badge Hash	EFFICIENCY	0.06	5	100	false	
+4	rare	Cash Drawer Override Codes	DAMAGE	80.0	5	20	false	
+4	cache	Teller Cache	DAMAGE_REDUCTION	50.0	10	25	false	
+4	cache	Security Cache	DAMAGE_REDUCTION	53.0	10	25	false	
+4	cache	Loan Officer Cache	DAMAGE_REDUCTION	51.0	10	25	false	
+4	cache	Branch Manager Cache	DAMAGE_REDUCTION	52.0	10	25	false	
+4	cache	Chief Financial Officer Cache	DAMAGE_REDUCTION	54.0	10	25	false	
+4	rare	Credit Records	BAND_RATE	6.0	5	20	false	
+4	rare	Safe Deposit Box Registry	RESTORE	24.0	5	20	false	
+4	rare	Swift Master Key	COUNTER_SLOW	0.35	5	20	false	
+4	rare	Vault Override	EFFICIENCY	0.15	5	20	false	
+6	cache	Clerk Cache	DAMAGE_REDUCTION	110.0	10	25	false	
+6	cache	Analyst Cache	DAMAGE_REDUCTION	111.0	10	25	false	
+6	cache	Ambassador Cache	DAMAGE_REDUCTION	112.0	10	25	false	
+6	cache	Vice President Cache	DAMAGE_REDUCTION	113.0	10	25	false	
+6	cache	President Cache	DAMAGE_REDUCTION	114.0	10	25	false	
+6	rare	Registered Voters Database	DAMAGE	170.0	5	20	false	
+6	rare	CIA Brief	BAND_RATE	8.0	5	20	false	
+6	rare	Black Budget Ledger	RESTORE	30.0	5	20	false	
+6	rare	Deep Cover IDs	EFFICIENCY	0.2	5	20	false	
+6	rare	Nuclear Codes	COUNTER_SLOW	0.45	5	20	false	
+1	cache	Student cache Corruption	DAMAGE_REDUCTION	5.0	10	25	false	
+1	cache	Student cache Network	DAMAGE_REDUCTION	5.0	10	25	false	
+1	cache	Student cache Extraction	DAMAGE_REDUCTION	5.0	10	25	false	
+1	cache	Admin cache Footprint	NONE	0.0	0	0	false	
+1	cache	Admin cache Corruption	NONE	0.0	0	0	false	
+1	cache	Admin cache Network	NONE	0.0	0	0	false	
+1	cache	Admin cache Extraction	NONE	0.0	0	0	false	
+1	cache	Vice principal cache Footprint	NONE	0.0	0	0	false	
+1	cache	Vice principal cache Corruption	NONE	0.0	0	0	false	
+1	cache	Vice principal cache Network	NONE	0.0	0	0	false	
+1	cache	Vice principal cache Extraction	NONE	0.0	0	0	false	
+1	cache	Principal cache Footprint	NONE	0.0	0	0	false	
+1	cache	Principal cache Corruption	NONE	0.0	0	0	false	
+1	cache	Principal cache Network	NONE	0.0	0	0	false	
+1	cache	Principal cache Extraction	NONE	0.0	0	0	false	
+1	cache	Superintendent cache Footprint	NONE	0.0	0	0	false	
+1	cache	Superintendent cache Corruption	NONE	0.0	0	0	false	
+1	cache	Superintendent cache Network	NONE	0.0	0	0	false	
+1	cache	Superintendent cache Extraction	NONE	0.0	0	0	false	
+3	cache	Receptionist cache Footprint	NONE	0.0	0	0	false	
+3	cache	Receptionist cache Corruption	NONE	0.0	0	0	false	
+3	cache	Receptionist cache Network	NONE	0.0	0	0	false	
+3	cache	Receptionist cache Extraction	NONE	0.0	0	0	false	
+3	cache	Orderly cache Footprint	NONE	0.0	0	0	false	
+3	cache	Orderly cache Corruption	NONE	0.0	0	0	false	
+3	cache	Orderly cache Network	NONE	0.0	0	0	false	
+3	cache	Orderly cache Extraction	NONE	0.0	0	0	false	
+3	cache	Nurse cache Footprint	NONE	0.0	0	0	false	
+3	cache	Nurse cache Corruption	NONE	0.0	0	0	false	
+3	cache	Nurse cache Network	NONE	0.0	0	0	false	
+3	cache	Nurse cache Extraction	NONE	0.0	0	0	false	
+3	cache	Doctor cache Footprint	NONE	0.0	0	0	false	
+3	cache	Doctor cache Corruption	NONE	0.0	0	0	false	
+3	cache	Doctor cache Network	NONE	0.0	0	0	false	
+3	cache	Doctor cache Extraction	NONE	0.0	0	0	false	
+3	cache	Chief of medicine cache Footprint	NONE	0.0	0	0	false	
+3	cache	Chief of medicine cache Corruption	NONE	0.0	0	0	false	
+3	cache	Chief of medicine cache Network	NONE	0.0	0	0	false	
+3	cache	Chief of medicine cache Extraction	NONE	0.0	0	0	false	
+5	cache	Secretary cache Footprint	NONE	0.0	0	0	false	
+5	cache	Secretary cache Corruption	NONE	0.0	0	0	false	
+5	cache	Secretary cache Network	NONE	0.0	0	0	false	
+5	cache	Secretary cache Extraction	NONE	0.0	0	0	false	
+5	cache	Cop cache Footprint	NONE	0.0	0	0	false	
+5	cache	Cop cache Corruption	NONE	0.0	0	0	false	
+5	cache	Cop cache Network	NONE	0.0	0	0	false	
+5	cache	Cop cache Extraction	NONE	0.0	0	0	false	
+5	cache	Detective cache Footprint	NONE	0.0	0	0	false	
+5	cache	Detective cache Corruption	NONE	0.0	0	0	false	
+5	cache	Detective cache Network	NONE	0.0	0	0	false	
+5	cache	Detective cache Extraction	NONE	0.0	0	0	false	
+5	cache	Sergeant cache Footprint	NONE	0.0	0	0	false	
+5	cache	Sergeant cache Corruption	NONE	0.0	0	0	false	
+5	cache	Sergeant cache Network	NONE	0.0	0	0	false	
+5	cache	Sergeant cache Extraction	NONE	0.0	0	0	false	
+5	cache	Captain cache Footprint	NONE	0.0	0	0	false	
+5	cache	Captain cache Corruption	NONE	0.0	0	0	false	
+5	cache	Captain cache Network	NONE	0.0	0	0	false	
+5	cache	Captain cache Extraction	NONE	0.0	0	0	false	
+2	cache	Legal assistant cache Footprint	NONE	0.0	0	0	false	
+2	cache	Legal assistant cache Corruption	NONE	0.0	0	0	false	
+2	cache	Legal assistant cache Network	NONE	0.0	0	0	false	
+2	cache	Legal assistant cache Extraction	NONE	0.0	0	0	false	
+2	cache	Paralegal cache Footprint	NONE	0.0	0	0	false	
+2	cache	Paralegal cache Corruption	NONE	0.0	0	0	false	
+2	cache	Paralegal cache Network	NONE	0.0	0	0	false	
+2	cache	Paralegal cache Extraction	NONE	0.0	0	0	false	
+2	cache	Associate attorney cache Footprint	NONE	0.0	0	0	false	
+2	cache	Associate attorney cache Corruption	NONE	0.0	0	0	false	
+2	cache	Associate attorney cache Network	NONE	0.0	0	0	false	
+2	cache	Associate attorney cache Extraction	NONE	0.0	0	0	false	
+2	cache	Lawyer cache Footprint	NONE	0.0	0	0	false	
+2	cache	Lawyer cache Corruption	NONE	0.0	0	0	false	
+2	cache	Lawyer cache Network	NONE	0.0	0	0	false	
+2	cache	Lawyer cache Extraction	NONE	0.0	0	0	false	
+2	cache	Partner cache Footprint	NONE	0.0	0	0	false	
+2	cache	Partner cache Corruption	NONE	0.0	0	0	false	
+2	cache	Partner cache Network	NONE	0.0	0	0	false	
+2	cache	Partner cache Extraction	NONE	0.0	0	0	false	
+4	cache	Teller Cache Footprint	NONE	0.0	0	0	false	
+4	cache	Teller Cache Corruption	NONE	0.0	0	0	false	
+4	cache	Teller Cache Network	NONE	0.0	0	0	false	
+4	cache	Teller Cache Extraction	NONE	0.0	0	0	false	
+4	cache	Security Cache Footprint	NONE	0.0	0	0	false	
+4	cache	Security Cache Corruption	NONE	0.0	0	0	false	
+4	cache	Security Cache Network	NONE	0.0	0	0	false	
+4	cache	Security Cache Extraction	NONE	0.0	0	0	false	
+4	cache	Loan Officer Cache Footprint	NONE	0.0	0	0	false	
+4	cache	Loan Officer Cache Corruption	NONE	0.0	0	0	false	
+4	cache	Loan Officer Cache Network	NONE	0.0	0	0	false	
+4	cache	Loan Officer Cache Extraction	NONE	0.0	0	0	false	
+4	cache	Branch Manager Cache Footprint	NONE	0.0	0	0	false	
+4	cache	Branch Manager Cache Corruption	NONE	0.0	0	0	false	
+4	cache	Branch Manager Cache Network	NONE	0.0	0	0	false	
+4	cache	Branch Manager Cache Extraction	NONE	0.0	0	0	false	
+4	cache	Chief Financial Officer Cache Footprint	NONE	0.0	0	0	false	
+4	cache	Chief Financial Officer Cache Corruption	NONE	0.0	0	0	false	
+4	cache	Chief Financial Officer Cache Network	NONE	0.0	0	0	false	
+4	cache	Chief Financial Officer Cache Extraction	NONE	0.0	0	0	false	
+6	cache	Clerk Cache Footprint	NONE	0.0	0	0	false	
+6	cache	Clerk Cache Corruption	NONE	0.0	0	0	false	
+6	cache	Clerk Cache Network	NONE	0.0	0	0	false	
+6	cache	Clerk Cache Extraction	NONE	0.0	0	0	false	
+6	cache	Analyst Cache Footprint	NONE	0.0	0	0	false	
+6	cache	Analyst Cache Corruption	NONE	0.0	0	0	false	
+6	cache	Analyst Cache Network	NONE	0.0	0	0	false	
+6	cache	Analyst Cache Extraction	NONE	0.0	0	0	false	
+6	cache	Ambassador Cache Footprint	NONE	0.0	0	0	false	
+6	cache	Ambassador Cache Corruption	NONE	0.0	0	0	false	
+6	cache	Ambassador Cache Network	NONE	0.0	0	0	false	
+6	cache	Ambassador Cache Extraction	NONE	0.0	0	0	false	
+6	cache	Vice President Cache Footprint	NONE	0.0	0	0	false	
+6	cache	Vice President Cache Corruption	NONE	0.0	0	0	false	
+6	cache	Vice President Cache Network	NONE	0.0	0	0	false	
+6	cache	Vice President Cache Extraction	NONE	0.0	0	0	false	
+6	cache	President Cache Footprint	NONE	0.0	0	0	false	
+6	cache	President Cache Corruption	NONE	0.0	0	0	false	
+6	cache	President Cache Network	NONE	0.0	0	0	false	
+6	cache	President Cache Extraction	NONE	0.0	0	0	false	
+1	exploit	Proxy Hop	NONE	0.0	0	0	false	proxy_hop
+1	exploit	Lag Spike	NONE	0.0	0	0	false	lag_spike
+2	exploit	Cease & Desist	NONE	0.0	0	0	false	cease_desist
+2	exploit	Throttle Patch	NONE	0.0	0	0	false	throttle_patch
+3	exploit	Slow Drip	NONE	0.0	0	0	false	slow_drip
+3	exploit	Booster Shot	NONE	0.0	0	0	false	booster_shot
+4	exploit	Overdraft	NONE	0.0	0	0	false	overdraft
+4	exploit	Margin Call	NONE	0.0	0	0	false	margin_call
+5	exploit	Zero-Day	NONE	0.0	0	0	false	zero_day
+5	exploit	Ghost Mode	NONE	0.0	0	0	false	ghost_mode
+6	exploit	Redaction	NONE	0.0	0	0	false	redaction
+6	exploit	Blackout	NONE	0.0	0	0	false	blackout
+1	mod	Shatter Protocol	FW_BREAK_SLOW	0.25	20	1	true	
+1	mod	Burst Buffer	BW_PCT_REGEN	0.2	20	1	true	
+2	mod	Firmware Brick	FW_NO_REBOOT	1.0	20	1	true	
+2	mod	Payload Amplifier	DAMAGE_PCT	0.25	20	1	true	
+2	mod	Vuln Scanner	CRIT_CHANCE_MULT	2.0	20	1	true	
+3	mod	Critical Overflow	CRIT_DAMAGE_MULT	2.0	20	1	true	
+3	mod	Proxy Chain	SPOOF_HEAL_MULT	2.0	20	1	true	
+3	mod	Ghost Packet	SPOOF_FREE	1.0	20	1	true	
+4	mod	Decoy Traffic	IGNORE_COUNTERS	3.0	20	1	true	
+4	mod	Packet Shredder	FW_PCT_HIT	0.1	20	1	true	
+4	mod	Latency Injector	COUNTER_SLOW_PCT	0.2	20	1	true	
+5	mod	Silent Entry	STEALTH_START	10.0	20	1	true	
+5	mod	IP Rotator	SPOOF_SPEED	0.8	20	1	true	
+5	mod	Zero Hour	EXPLOIT_FULL	1.0	20	1	true	
+6	mod	Cascade	FW_BREAK_INTEGRITY	0.15	20	1	true	
+6	mod	Mirror	COUNTER_REFLECT	0.25	20	1	true	
+6	mod	Cold Boot	COLD_BOOT	1.0	20	1	true	

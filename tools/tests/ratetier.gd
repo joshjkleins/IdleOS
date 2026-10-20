@@ -28,7 +28,7 @@ func _measure(t: int, skill: Node, p: Dictionary, snap: Dictionary, label: Strin
 				cells.append("-"); continue
 			var cool = -Stats.get_cooling_amount() / max(0.01, Stats.cooling_frequency)
 			cells.append("%.2f/%.2f" % [float(job.heat) / float(job.seconds), cool])
-		_set_tier(t)
+		_set_tier(t - 1 if OS.get_environment("ARRIVE") == "1" else t)
 		rows.append(cells)
 		return
 	for lvl in [1, 99]:
@@ -54,8 +54,9 @@ func _run() -> void:
 	for it in Items.ITEM_MAP.values():
 		Inventory.add_resource(it, 1000000)
 	var pays = Compiling.get_payload_processes()
+	var arrive = OS.get_environment("ARRIVE") == "1" # rates with the previous tier's upgrades (arriving at the tier)
 	for t in range(1, 7):
-		_set_tier(t)
+		_set_tier(t - 1 if arrive else t)
 		var mp: Dictionary = Mining.minor_processes[t - 1]
 		var mined: ItemData = mp["resource gained"]
 		_measure(t, Mining, mp, {}, mp.name)
@@ -85,7 +86,7 @@ func _run() -> void:
 				caches.append(it)
 		for c in caches:
 			_measure(t, Decoding, Decoding.CACHE, {"item": c.id, "target": "", "limit": 0}, "Decode " + c.name)
-	var f = FileAccess.open(OS.get_environment("HOME") + "/mnt/idle-os-prototype/_to_delete/%s.tsv" % ("heat" if heat_mode else "rates"), FileAccess.WRITE)
+	var f = FileAccess.open(OS.get_environment("HOME") + "/mnt/idle-os-prototype/_to_delete/%s.tsv" % ("heat" if heat_mode else ("rates_arrive" if OS.get_environment("ARRIVE") == "1" else "rates")), FileAccess.WRITE)
 	f.store_string("tier\tskill\tprocess\tlevel\tcycles/h\tout/h\tin/h\thot\n" + "\n".join(rows.map(func(r): return "\t".join(r.map(func(x): return str(x))))))
 	f.close()
 	print(">>> %d rows" % rows.size())

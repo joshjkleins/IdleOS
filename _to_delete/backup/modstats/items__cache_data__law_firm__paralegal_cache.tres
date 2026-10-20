@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://bpo6b8tuse4q5"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_0gfcb"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_drm0d"]
+[ext_resource type="Resource" uid="uid://bojg1pikdcgga" path="res://items/cache_entry/lawfirm/paralegal/paralegal_court_doc.tres" id="2_0gfcb"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_flffm"]
+[ext_resource type="Resource" uid="uid://bwaayqad6u6yv" path="res://items/cache_entry/lawfirm/paralegal/paralegal_1.tres" id="3_2nkam"]
+[ext_resource type="Resource" uid="uid://br2ehiju8h8ol" path="res://items/cache_entry/lawfirm/paralegal/paralegal_2.tres" id="4_54y46"]
+[ext_resource type="Resource" uid="uid://j5jjw4bgu5en" path="res://items/cache_entry/lawfirm/paralegal/paralegal_3.tres" id="5_fiq46"]
+
+[resource]
+script = ExtResource("2_flffm")
+entries = Array[ExtResource("1_drm0d")]([ExtResource("3_2nkam"), ExtResource("4_54y46"), ExtResource("5_fiq46")])
+rare_pool = Array[ExtResource("1_drm0d")]([ExtResource("2_0gfcb")])
+rare_drop_chance = 0.05
+id = 73
+name = "Paralegal cache"
+shortened_name = "Paralegal C"
+description = "Received from hacking a Lawfirm Paralegal. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_0gfcb")]([])
+tier = 2
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

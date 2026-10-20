@@ -1,145 +1,145 @@
 tier	skill	process	level	cycles/h	out/h	in/h	hot
 1	Mining	Logs	1	750	963 Logs		
 1	Mining	Logs	99	750	3793 Logs		
-1	Parsing	Footprint Logs	1	1222	1120 Usernames · 1030 IP address · 904 Encrypted passwords	1222 Logs	
-1	Parsing	Footprint Logs	99	1208	1558 Usernames · 1514 IP address · 1474 Encrypted passwords	1208 Logs	
-1	Cracking	Password	1	531	531 Passwords	513 Encrypted passwords	HOT
-1	Cracking	Password	99	706	706 Passwords	683 Encrypted passwords	HOT
-1	Matching	Credential	1	364	442 Credentials	352 Usernames · 352 Passwords	HOT
-1	Matching	Credential	99	364	906 Credentials	352 Usernames · 352 Passwords	HOT
-1	Compiling	School payload	1	623	638 School payload	602 IP address · 602 Credentials	HOT
-1	Compiling	School payload	99	1420	1456 School payload	1373 IP address · 1373 Credentials	HOT
+1	Parsing	Footprint Logs	1	1222	1067 Usernames · 982 Encrypted passwords · 978 IP address	1222 Logs	
+1	Parsing	Footprint Logs	99	1206	1648 Encrypted passwords · 1600 Usernames · 1527 IP address	1206 Logs	
+1	Cracking	Password	1	521	521 Passwords	504 Encrypted passwords	
+1	Cracking	Password	99	674	674 Passwords	651 Encrypted passwords	
+1	Matching	Credential	1	511	621 Credentials	493 Usernames · 493 Passwords	
+1	Matching	Credential	99	511	1272 Credentials	493 Usernames · 493 Passwords	
+1	Compiling	School payload	1	623	638 School payload	602 IP address · 602 Credentials	
+1	Compiling	School payload	99	1420	1456 School payload	1373 IP address · 1373 Credentials	
 1	Phishing	Spear (bait Logs)	1	385	989 SQL Injector · 110 Packet Spoof	14634 Logs	
 1	Phishing	Spear (bait Logs)	99	332	1689 SQL Injector · 188 Packet Spoof	12629 Logs	
 1	Phishing	Whale (bait Logs)	1	79.9	1098 SQL Injector · 194 Packet Spoof	760 Logs	
 1	Phishing	Whale (bait Logs)	99	69.7	1661 SQL Injector · 293 Packet Spoof	662 Logs	
-1	Decoding	Decode Student cache	1	270	11170 Logs · 5691 Usernames · 5039 Encrypted passwords · 16.2 Parents credit card · 0.9 Lag Spike	270 Student cache	HOT
-1	Decoding	Decode Student cache	99	270	11129 Logs · 5948 Encrypted passwords · 5781 Usernames · 22.5 Parents credit card · 1.8 Lag Spike	270 Student cache	HOT
-1	Decoding	Decode Admin cache	1	270	11123 Usernames · 5641 Logs · 5610 Passwords · 26.1 Falsified transcript database · 1.8 Lag Spike	270 Admin cache	HOT
-1	Decoding	Decode Admin cache	99	270	11037 Usernames · 5817 Passwords · 5510 Logs · 27.0 Falsified transcript database · 0.9 Proxy Hop	270 Admin cache	HOT
-1	Decoding	Decode Vice principal cache	1	270	11181 Credentials · 5728 IP address · 866 SQL Injector · 19.8 Student disciplinary records · 1.8 Proxy Hop	270 Vice principal cache	HOT
-1	Decoding	Decode Vice principal cache	99	270	11501 Credentials · 5615 IP address · 954 SQL Injector · 29.7 Student disciplinary records · 2.7 Lag Spike	270 Vice principal cache	HOT
-1	Decoding	Decode Principal cache	1	270	11269 IP address · 5156 Credentials · 569 Packet Spoof · 20.7 School budget embezzlement logs · 2.7 Proxy Hop · 1.8 Lag Spike	270 Principal cache	HOT
-1	Decoding	Decode Principal cache	99	270	11399 IP address · 5648 Credentials · 610 Packet Spoof · 26.1 School budget embezzlement logs · 1.8 Lag Spike	270 Principal cache	HOT
-1	Decoding	Decode Superintendent cache	1	270	710 Admin cache · 696 Vice principal cache · 688 Student cache · 652 Principal cache · 22.5 District wide master password · 0.9 Proxy Hop · 0.9 Lag Spike	270 Superintendent cache	HOT
-1	Decoding	Decode Superintendent cache	99	270	688 Principal cache · 669 Student cache · 668 Vice principal cache · 632 Admin cache · 28.8 District wide master password · 1.8 Proxy Hop · 1.8 Lag Spike	270 Superintendent cache	HOT
-2	Mining	Archives	1	844	1250 Archives		
-2	Mining	Archives	99	844	4466 Archives		
-2	Parsing	Footprint Archives	1	1696	2239 Encrypted Signature · 2035 Email Header · 2001 Case Number	1696 Archives	
-2	Parsing	Footprint Archives	99	1656	2915 Email Header · 2870 Encrypted Signature · 2732 Case Number	1656 Archives	
-2	Cracking	Signature	1	642	642 Digital Signature	599 Encrypted Signature	HOT
-2	Cracking	Signature	99	772	772 Digital Signature	721 Encrypted Signature	HOT
-2	Matching	Certificate	1	426	611 Signed Certificate	398 Case Number · 398 Digital Signature	HOT
-2	Matching	Certificate	99	426	1154 Signed Certificate	398 Case Number · 398 Digital Signature	HOT
-2	Compiling	Lawfirm payload	1	625	657 Lawfirm Payload	584 Email Header · 584 Signed Certificate	HOT
-2	Compiling	Lawfirm payload	99	1448	1521 Lawfirm Payload	1352 Email Header · 1352 Signed Certificate	HOT
+1	Decoding	Decode Student cache	1	270	11334 Logs · 5876 Usernames · 5237 Encrypted passwords · 18.9 Parents credit card · 2.7 Proxy Hop · 0.9 Lag Spike	270 Student cache	
+1	Decoding	Decode Student cache	99	270	11246 Logs · 5279 Usernames · 5221 Encrypted passwords · 27.0 Parents credit card · 1.8 Proxy Hop · 0.9 Lag Spike	270 Student cache	
+1	Decoding	Decode Admin cache	1	270	11184 Usernames · 5883 Logs · 5781 Passwords · 17.1 Falsified transcript database · 1.8 Lag Spike · 0.9 Proxy Hop	270 Admin cache	
+1	Decoding	Decode Admin cache	99	270	11449 Usernames · 6286 Passwords · 5701 Logs · 23.4 Falsified transcript database · 3.6 Lag Spike · 0.9 Proxy Hop	270 Admin cache	
+1	Decoding	Decode Vice principal cache	1	270	11280 Credentials · 5742 IP address · 816 SQL Injector · 23.4 Student disciplinary records · 1.8 Proxy Hop · 0.9 Lag Spike	270 Vice principal cache	
+1	Decoding	Decode Vice principal cache	99	270	11206 Credentials · 5414 IP address · 799 SQL Injector · 28.8 Student disciplinary records · 1.8 Proxy Hop · 1.8 Lag Spike	270 Vice principal cache	
+1	Decoding	Decode Principal cache	1	270	11349 IP address · 5363 Credentials · 578 Packet Spoof · 20.7 School budget embezzlement logs · 1.8 Proxy Hop · 0.9 Lag Spike	270 Principal cache	
+1	Decoding	Decode Principal cache	99	270	11244 IP address · 5722 Credentials · 705 Packet Spoof · 25.2 School budget embezzlement logs · 0.9 Proxy Hop · 0.9 Lag Spike	270 Principal cache	
+1	Decoding	Decode Superintendent cache	1	270	667 Admin cache · 645 Vice principal cache · 608 Student cache · 584 Principal cache · 17.1 District wide master password · 2.7 Proxy Hop · 2.7 Lag Spike	270 Superintendent cache	
+1	Decoding	Decode Superintendent cache	99	270	675 Student cache · 671 Principal cache · 652 Admin cache · 611 Vice principal cache · 26.1 District wide master password · 2.7 Proxy Hop · 0.9 Lag Spike	270 Superintendent cache	
+2	Mining	Archives	1	551	816 Archives		
+2	Mining	Archives	99	551	2915 Archives		
+2	Parsing	Footprint Archives	1	1183	899 Case Number · 840 Email Header · 817 Encrypted Signature	1183 Archives	
+2	Parsing	Footprint Archives	99	1171	1207 Email Header · 1050 Case Number · 968 Encrypted Signature	1171 Archives	
+2	Cracking	Signature	1	418	418 Digital Signature	390 Encrypted Signature	
+2	Cracking	Signature	99	501	501 Digital Signature	468 Encrypted Signature	
+2	Matching	Certificate	1	406	581 Signed Certificate	379 Case Number · 379 Digital Signature	
+2	Matching	Certificate	99	406	1098 Signed Certificate	379 Case Number · 379 Digital Signature	
+2	Compiling	Lawfirm payload	1	606	637 Lawfirm Payload	566 Email Header · 566 Signed Certificate	
+2	Compiling	Lawfirm payload	99	1386	1455 Lawfirm Payload	1293 Email Header · 1293 Signed Certificate	
 2	Phishing	Spear (bait Archives)	1	536	1928 SQL Injector · 214 Packet Spoof	24100 Archives	
 2	Phishing	Spear (bait Archives)	99	467	3332 SQL Injector · 370 Packet Spoof	21034 Archives	
 2	Phishing	Whale (bait Archives)	1	121	1863 SQL Injector · 329 Packet Spoof	1088 Archives	
 2	Phishing	Whale (bait Archives)	99	107	2870 SQL Injector · 506 Packet Spoof	966 Archives	
-2	Decoding	Decode Legal assistant cache	1	405	18270 Encrypted Signature · 11299 Archives · 10665 Email Header · 35.1 Leaked deposition transcripts · 2.7 Throttle Patch	405 Legal assistant cache	HOT
-2	Decoding	Decode Legal assistant cache	99	405	18426 Encrypted Signature · 11824 Email Header · 11686 Archives · 45.9 Leaked deposition transcripts · 2.7 Cease & Desist · 1.4 Throttle Patch	405 Legal assistant cache	HOT
-2	Decoding	Decode Paralegal cache	1	405	18385 Digital Signature · 11070 Archives · 10240 Email Header · 33.8 Forged court document templates · 4.1 Throttle Patch · 1.4 Cease & Desist	405 Paralegal cache	HOT
-2	Decoding	Decode Paralegal cache	99	405	18129 Digital Signature · 11269 Archives · 10516 Email Header · 40.5 Forged court document templates · 2.7 Cease & Desist · 2.7 Throttle Patch	405 Paralegal cache	HOT
-2	Decoding	Decode Associate attorney cache	1	405	18520 Case Number · 9811 Signed Certificate · 3672 Packet Spoof · 33.8 Sealed case files · 1.4 Throttle Patch	405 Associate attorney cache	HOT
-2	Decoding	Decode Associate attorney cache	99	405	18400 Case Number · 11698 Signed Certificate · 3726 Packet Spoof · 55.4 Sealed case files · 1.4 Cease & Desist	405 Associate attorney cache	HOT
-2	Decoding	Decode Lawyer cache	1	405	18504 Lawfirm Payload · 11123 Case Number · 8793 SQL Injector · 41.9 Offshore account records · 1.4 Cease & Desist · 1.4 Throttle Patch	405 Lawyer cache	HOT
-2	Decoding	Decode Lawyer cache	99	405	18503 Lawfirm Payload · 11663 Case Number · 9457 SQL Injector · 48.6 Offshore account records · 4.1 Cease & Desist · 1.4 Throttle Patch	405 Lawyer cache	HOT
-2	Decoding	Decode Partner cache	1	405	1157 Lawyer cache · 1096 Paralegal cache · 1034 Associate attorney cache · 882 Legal assistant cache · 32.4 Witness protection address · 2.7 Throttle Patch · 1.4 Cease & Desist	405 Partner cache	HOT
-2	Decoding	Decode Partner cache	99	405	1223 Lawyer cache · 1042 Associate attorney cache · 973 Legal assistant cache · 938 Paralegal cache · 44.6 Witness protection address · 1.4 Throttle Patch · 1.4 Cease & Desist	405 Partner cache	HOT
-3	Mining	Metadata	1	964	1627 Metadata		
-3	Mining	Metadata	99	964	5348 Metadata		
-3	Parsing	Footprint Metadata	1	2401	4081 Staff IDs · 3841 Mac Address · 3697 Encrypted Badge Hash	2401 Metadata	
-3	Parsing	Footprint Metadata	99	2318	5362 Staff IDs · 4860 Encrypted Badge Hash · 4489 Mac Address	2318 Metadata	
-3	Cracking	Badge	1	658	658 Badge Hash	592 Encrypted Badge Hash	HOT
-3	Cracking	Badge	99	1077	1077 Badge Hash	969 Encrypted Badge Hash	HOT
-3	Matching	Badge	1	506	835 Access Badge	455 Staff IDs · 455 Badge Hash	HOT
-3	Matching	Badge	99	506	1479 Access Badge	455 Staff IDs · 455 Badge Hash	HOT
-3	Compiling	Hospital payload	1	628	675 Hospital Payload	565 Mac Address · 565 Access Badge	HOT
-3	Compiling	Hospital payload	99	1476	1586 Hospital Payload	1328 Mac Address · 1328 Access Badge	HOT
+2	Decoding	Decode Legal assistant cache	1	405	18145 Encrypted Signature · 10826 Archives · 10742 Email Header · 28.4 Leaked deposition transcripts	405 Legal assistant cache	
+2	Decoding	Decode Legal assistant cache	99	405	18235 Encrypted Signature · 11166 Archives · 10279 Email Header · 39.2 Leaked deposition transcripts · 2.7 Cease & Desist	405 Legal assistant cache	
+2	Decoding	Decode Paralegal cache	1	405	18366 Digital Signature · 11278 Archives · 10938 Email Header · 35.1 Forged court document templates · 2.7 Cease & Desist · 2.7 Throttle Patch	405 Paralegal cache	
+2	Decoding	Decode Paralegal cache	99	405	18504 Digital Signature · 11147 Email Header · 10871 Archives · 48.6 Forged court document templates	405 Paralegal cache	
+2	Decoding	Decode Associate attorney cache	1	405	18395 Case Number · 11022 Signed Certificate · 3370 Packet Spoof · 28.4 Sealed case files · 6.8 Throttle Patch	405 Associate attorney cache	
+2	Decoding	Decode Associate attorney cache	99	405	18813 Case Number · 10134 Signed Certificate · 3584 Packet Spoof · 39.2 Sealed case files · 4.1 Cease & Desist · 1.4 Throttle Patch	405 Associate attorney cache	
+2	Decoding	Decode Lawyer cache	1	405	18399 Lawfirm Payload · 10711 Case Number · 8484 SQL Injector · 28.4 Offshore account records · 1.4 Throttle Patch	405 Lawyer cache	
+2	Decoding	Decode Lawyer cache	99	405	18273 Lawfirm Payload · 10922 Case Number · 9170 SQL Injector · 48.6 Offshore account records · 2.7 Cease & Desist	405 Lawyer cache	
+2	Decoding	Decode Partner cache	1	405	1089 Lawyer cache · 1065 Associate attorney cache · 1029 Paralegal cache · 1000 Legal assistant cache · 25.7 Witness protection address · 6.8 Throttle Patch · 2.7 Cease & Desist	405 Partner cache	
+2	Decoding	Decode Partner cache	99	405	1125 Associate attorney cache · 1114 Lawyer cache · 1112 Paralegal cache · 1069 Legal assistant cache · 55.4 Witness protection address · 5.4 Cease & Desist · 1.4 Throttle Patch	405 Partner cache	
+3	Mining	Metadata	1	469	792 Metadata		
+3	Mining	Metadata	99	469	2602 Metadata		
+3	Parsing	Footprint Metadata	1	1186	775 Mac Address · 775 Encrypted Badge Hash · 767 Staff IDs	1186 Metadata	
+3	Parsing	Footprint Metadata	99	1172	996 Mac Address · 965 Staff IDs · 891 Encrypted Badge Hash	1172 Metadata	
+3	Cracking	Badge	1	317	317 Badge Hash	285 Encrypted Badge Hash	
+3	Cracking	Badge	99	453	453 Badge Hash	408 Encrypted Badge Hash	
+3	Matching	Badge	1	332	548 Access Badge	299 Staff IDs · 299 Badge Hash	
+3	Matching	Badge	99	332	970 Access Badge	299 Staff IDs · 299 Badge Hash	
+3	Compiling	Hospital payload	1	591	635 Hospital Payload	532 Mac Address · 532 Access Badge	
+3	Compiling	Hospital payload	99	1352	1454 Hospital Payload	1217 Mac Address · 1217 Access Badge	
 3	Phishing	Spear (bait Metadata)	1	730	3511 SQL Injector · 390 Packet Spoof	37215 Metadata	
 3	Phishing	Spear (bait Metadata)	99	650	6191 SQL Injector · 688 Packet Spoof	33142 Metadata	
 3	Phishing	Whale (bait Metadata)	1	179	3074 SQL Injector · 543 Packet Spoof	1522 Metadata	
 3	Phishing	Whale (bait Metadata)	99	163	4698 SQL Injector · 829 Packet Spoof	1382 Metadata	
-3	Decoding	Decode Receptionist cache	1	608	30078 Encrypted Badge Hash · 20382 Mac Address · 17377 Metadata · 66.8 Patient appointment history · 4.1 Booster Shot · 2.0 Slow Drip	608 Receptionist cache	HOT
-3	Decoding	Decode Receptionist cache	99	608	29995 Encrypted Badge Hash · 18552 Metadata · 18138 Mac Address · 97.2 Patient appointment history · 4.1 Slow Drip · 4.1 Booster Shot	608 Receptionist cache	HOT
-3	Decoding	Decode Orderly cache	1	608	29675 Badge Hash · 17604 Metadata · 17430 Mac Address · 58.7 Staff keycard clone data · 4.1 Booster Shot · 4.1 Slow Drip	608 Orderly cache	HOT
-3	Decoding	Decode Orderly cache	99	608	29918 Badge Hash · 18590 Metadata · 17517 Mac Address · 79.0 Staff keycard clone data · 10.1 Booster Shot	608 Orderly cache	HOT
-3	Decoding	Decode Nurse cache	1	608	30133 Staff IDs · 16735 Access Badge · 5632 Packet Spoof · 66.8 Prescription pad credentials · 8.1 Booster Shot	608 Nurse cache	HOT
-3	Decoding	Decode Nurse cache	99	608	29920 Staff IDs · 17185 Access Badge · 5381 Packet Spoof · 77.0 Prescription pad credentials · 2.0 Slow Drip	608 Nurse cache	HOT
-3	Decoding	Decode Doctor cache	1	608	22891 Hospital Payload · 17612 Staff IDs · 14228 SQL Injector · 58.7 Patient insurance data · 6.1 Slow Drip · 2.0 Booster Shot	608 Doctor cache	HOT
-3	Decoding	Decode Doctor cache	99	608	23201 Hospital Payload · 17677 Staff IDs · 13884 SQL Injector · 72.9 Patient insurance data · 2.0 Booster Shot	608 Doctor cache	HOT
-3	Decoding	Decode Chief of medicine cache	1	608	1843 Receptionist cache · 1762 Doctor cache · 1687 Nurse cache · 1675 Orderly cache · 54.7 Falsified drug trial results · 4.1 Booster Shot · 2.0 Slow Drip	608 Chief of medicine cache	HOT
-3	Decoding	Decode Chief of medicine cache	99	608	1849 Doctor cache · 1833 Receptionist cache · 1806 Orderly cache · 1553 Nurse cache · 81.0 Falsified drug trial results · 2.0 Booster Shot · 2.0 Slow Drip	608 Chief of medicine cache	HOT
-4	Mining	Cookies	1	1125	2143 Cookies		HOT
-4	Mining	Cookies	99	1125	6553 Cookies		HOT
-4	Parsing	Footprint Cookies	1	3436	7492 Routing Number · 6965 Account Numbers · 6667 Encrypted PINS	3436 Cookies	
-4	Parsing	Footprint Cookies	99	3255	9048 Routing Number · 8766 Encrypted PINS · 8223 Account Numbers	3255 Cookies	
-4	Cracking	PIN	1	913	913 PINS	791 Encrypted PINS	HOT
-4	Cracking	PIN	99	1115	1115 PINS	966 Encrypted PINS	HOT
-4	Matching	Account	1	610	1139 Account access tokens	529 Account Numbers · 529 PINS	HOT
-4	Matching	Account	99	610	1916 Account access tokens	529 Account Numbers · 529 PINS	HOT
-4	Compiling	Bank payload	1	631	694 Bank Payload	547 Routing Number · 547 Account access tokens	HOT
-4	Compiling	Bank payload	99	1504	1654 Bank Payload	1303 Routing Number · 1303 Account access tokens	HOT
+3	Decoding	Decode Receptionist cache	1	608	29335 Encrypted Badge Hash · 20684 Metadata · 18039 Mac Address · 60.8 Patient appointment history · 12.2 Booster Shot · 6.1 Slow Drip	608 Receptionist cache	
+3	Decoding	Decode Receptionist cache	99	608	30366 Encrypted Badge Hash · 18290 Mac Address · 17426 Metadata · 77.0 Patient appointment history · 2.0 Booster Shot · 2.0 Slow Drip	608 Receptionist cache	
+3	Decoding	Decode Orderly cache	1	608	29641 Badge Hash · 17851 Metadata · 17324 Mac Address · 72.9 Staff keycard clone data · 6.1 Slow Drip	608 Orderly cache	
+3	Decoding	Decode Orderly cache	99	608	29880 Badge Hash · 18286 Metadata · 17397 Mac Address · 81.0 Staff keycard clone data · 8.1 Booster Shot · 2.0 Slow Drip	608 Orderly cache	
+3	Decoding	Decode Nurse cache	1	608	30447 Staff IDs · 18539 Access Badge · 5713 Packet Spoof · 58.7 Prescription pad credentials · 2.0 Booster Shot	608 Nurse cache	
+3	Decoding	Decode Nurse cache	99	608	30384 Staff IDs · 19842 Access Badge · 4947 Packet Spoof · 64.8 Prescription pad credentials · 2.0 Slow Drip	608 Nurse cache	
+3	Decoding	Decode Doctor cache	1	608	23728 Hospital Payload · 19242 Staff IDs · 13013 SQL Injector · 72.9 Patient insurance data · 4.1 Booster Shot	608 Doctor cache	
+3	Decoding	Decode Doctor cache	99	608	23106 Hospital Payload · 17916 Staff IDs · 14742 SQL Injector · 62.8 Patient insurance data	608 Doctor cache	
+3	Decoding	Decode Chief of medicine cache	1	608	1825 Nurse cache · 1727 Receptionist cache · 1596 Doctor cache · 1571 Orderly cache · 54.7 Falsified drug trial results · 2.0 Booster Shot	608 Chief of medicine cache	
+3	Decoding	Decode Chief of medicine cache	99	608	1816 Doctor cache · 1725 Nurse cache · 1717 Receptionist cache · 1513 Orderly cache · 66.8 Falsified drug trial results · 6.1 Slow Drip	608 Chief of medicine cache	
+4	Mining	Cookies	1	393	749 Cookies		
+4	Mining	Cookies	99	393	2291 Cookies		
+4	Parsing	Footprint Cookies	1	1149	716 Encrypted PINS · 693 Routing Number · 674 Account Numbers	1149 Cookies	
+4	Parsing	Footprint Cookies	99	1135	840 Routing Number · 817 Account Numbers · 813 Encrypted PINS	1135 Cookies	
+4	Cracking	PIN	1	260	260 PINS	225 Encrypted PINS	
+4	Cracking	PIN	99	326	326 PINS	282 Encrypted PINS	
+4	Matching	Account	1	279	522 Account access tokens	242 Account Numbers · 242 PINS	
+4	Matching	Account	99	279	878 Account access tokens	242 Account Numbers · 242 PINS	
+4	Compiling	Bank payload	1	576	633 Bank Payload	499 Routing Number · 499 Account access tokens	
+4	Compiling	Bank payload	99	1321	1453 Bank Payload	1145 Routing Number · 1145 Account access tokens	
 4	Phishing	Spear (bait Cookies)	1	969	6021 SQL Injector · 669 Packet Spoof	54277 Cookies	
 4	Phishing	Spear (bait Cookies)	99	890	10945 SQL Injector · 1216 Packet Spoof	49835 Cookies	
 4	Phishing	Whale (bait Cookies)	1	260	4936 SQL Injector · 871 Packet Spoof	2079 Cookies	
 4	Phishing	Whale (bait Cookies)	99	244	7038 SQL Injector · 1242 Packet Spoof	1948 Cookies	
-4	Decoding	Decode Teller Cache	1	911	47978 Encrypted PINS · 28684 Cookies · 27918 Routing Number · 103 Cash Drawer Override Codes · 6.1 Margin Call · 3.0 Overdraft	911 Teller Cache	HOT
-4	Decoding	Decode Teller Cache	99	911	49008 Encrypted PINS · 27335 Routing Number · 27101 Cookies · 122 Cash Drawer Override Codes · 3.0 Margin Call	911 Teller Cache	HOT
-4	Decoding	Decode Security Cache	1	911	48161 Account Numbers · 25683 Bank Payload · 21673 SQL Injector · 97.2 Vault Override · 3.0 Overdraft · 3.0 Margin Call	911 Security Cache	HOT
-4	Decoding	Decode Security Cache	99	911	47772 Account Numbers · 27077 Bank Payload · 18544 SQL Injector · 134 Vault Override · 6.1 Overdraft	911 Security Cache	HOT
-4	Decoding	Decode Loan Officer Cache	1	911	48659 Cookies · 29048 Routing Number · 28787 PINS · 109 Credit Records · 3.0 Overdraft	911 Loan Officer Cache	HOT
-4	Decoding	Decode Loan Officer Cache	99	911	48489 Cookies · 29139 Routing Number · 27535 PINS · 137 Credit Records · 6.1 Overdraft	911 Loan Officer Cache	HOT
-4	Decoding	Decode Branch Manager Cache	1	911	47732 Account access tokens · 29990 Account Numbers · 8490 Packet Spoof · 94.2 Safe Deposit Box Registry · 6.1 Overdraft · 6.1 Margin Call	911 Branch Manager Cache	HOT
-4	Decoding	Decode Branch Manager Cache	99	911	48015 Account access tokens · 27007 Account Numbers · 7062 Packet Spoof · 128 Safe Deposit Box Registry · 3.0 Overdraft · 3.0 Margin Call	911 Branch Manager Cache	HOT
-4	Decoding	Decode Chief Financial Officer Cache	1	911	2886 Branch Manager Cache · 2667 Loan Officer Cache · 2624 Teller Cache · 2624 Security Cache · 109 Swift Master Key	911 Chief Financial Officer Cache	HOT
-4	Decoding	Decode Chief Financial Officer Cache	99	911	2870 Loan Officer Cache · 2700 Branch Manager Cache · 2697 Teller Cache · 2281 Security Cache · 109 Swift Master Key · 9.1 Overdraft · 3.0 Margin Call	911 Chief Financial Officer Cache	HOT
-5	Mining	Repositories	1	1367	2924 Repositories		HOT
-5	Mining	Repositories	99	1367	8394 Repositories		HOT
-5	Parsing	Footprint Repositories	1	4959	12942 Badge Number · 12413 Encrypted SSH Key · 12165 Subnet Map	4959 Repositories	
-5	Parsing	Footprint Repositories	99	4592	15016 Subnet Map · 14986 Badge Number · 14848 Encrypted SSH Key	4592 Repositories	
-5	Cracking	Keys	1	952	952 Private Keys	793 Encrypted SSH Key	HOT
-5	Cracking	Keys	99	1665	1665 Private Keys	1388 Encrypted SSH Key	HOT
-5	Matching	Officer	1	753	1569 Officer Auth Key	628 Badge Number · 628 Private Keys	HOT
-5	Matching	Officer	99	753	2529 Officer Auth Key	628 Badge Number · 628 Private Keys	HOT
-5	Compiling	Police payload	1	633	712 Police Payload	528 Subnet Map · 528 Officer Auth Key	HOT
-5	Compiling	Police payload	99	1531	1723 Police Payload	1276 Subnet Map · 1276 Officer Auth Key	HOT
+4	Decoding	Decode Teller Cache	1	911	47781 Encrypted PINS · 27918 Cookies · 26703 Routing Number · 103 Cash Drawer Override Codes · 6.1 Margin Call	911 Teller Cache	
+4	Decoding	Decode Teller Cache	99	911	48631 Encrypted PINS · 28508 Cookies · 28447 Routing Number · 122 Cash Drawer Override Codes · 6.1 Margin Call	911 Teller Cache	
+4	Decoding	Decode Security Cache	1	911	47905 Account Numbers · 28225 Bank Payload · 20850 SQL Injector · 94.2 Vault Override · 6.1 Overdraft	911 Security Cache	
+4	Decoding	Decode Security Cache	99	911	48091 Account Numbers · 26500 Bank Payload · 20458 SQL Injector · 109 Vault Override · 15.2 Margin Call	911 Security Cache	
+4	Decoding	Decode Loan Officer Cache	1	911	47914 Cookies · 28070 PINS · 26126 Routing Number · 97.2 Credit Records · 9.1 Overdraft	911 Loan Officer Cache	
+4	Decoding	Decode Loan Officer Cache	99	911	48601 Cookies · 29768 Routing Number · 28593 PINS · 137 Credit Records · 9.1 Overdraft · 6.1 Margin Call	911 Loan Officer Cache	
+4	Decoding	Decode Branch Manager Cache	1	911	48364 Account access tokens · 28365 Account Numbers · 8089 Packet Spoof · 94.2 Safe Deposit Box Registry · 9.1 Margin Call	911 Branch Manager Cache	
+4	Decoding	Decode Branch Manager Cache	99	911	48789 Account access tokens · 28990 Account Numbers · 8493 Packet Spoof · 137 Safe Deposit Box Registry · 9.1 Overdraft · 6.1 Margin Call	911 Branch Manager Cache	
+4	Decoding	Decode Chief Financial Officer Cache	1	911	2719 Security Cache · 2710 Teller Cache · 2470 Branch Manager Cache · 2415 Loan Officer Cache · 79.0 Swift Master Key · 6.1 Margin Call · 3.0 Overdraft	911 Chief Financial Officer Cache	
+4	Decoding	Decode Chief Financial Officer Cache	99	911	2722 Security Cache · 2691 Branch Manager Cache · 2691 Teller Cache · 2272 Loan Officer Cache · 134 Swift Master Key · 3.0 Overdraft	911 Chief Financial Officer Cache	
+5	Mining	Repositories	1	305	652 Repositories		
+5	Mining	Repositories	99	305	1873 Repositories		
+5	Parsing	Footprint Repositories	1	1007	658 Encrypted SSH Key · 604 Subnet Map · 604 Badge Number	1007 Repositories	
+5	Parsing	Footprint Repositories	99	993	742 Badge Number · 712 Encrypted SSH Key · 682 Subnet Map	993 Repositories	
+5	Cracking	Keys	1	239	239 Private Keys	200 Encrypted SSH Key	
+5	Cracking	Keys	99	341	341 Private Keys	285 Encrypted SSH Key	
+5	Matching	Officer	1	241	503 Officer Auth Key	201 Badge Number · 201 Private Keys	
+5	Matching	Officer	99	241	810 Officer Auth Key	201 Badge Number · 201 Private Keys	
+5	Compiling	Police payload	1	562	632 Police Payload	468 Subnet Map · 468 Officer Auth Key	
+5	Compiling	Police payload	99	1290	1452 Police Payload	1075 Subnet Map · 1075 Officer Auth Key	
 5	Phishing	Spear (bait Repositories)	1	1249	9760 SQL Injector · 1084 Packet Spoof	74959 Repositories	
 5	Phishing	Spear (bait Repositories)	99	1203	17328 SQL Injector · 1925 Packet Spoof	72200 Repositories	
 5	Phishing	Whale (bait Repositories)	1	368	7689 SQL Injector · 1357 Packet Spoof	2759 Repositories	
 5	Phishing	Whale (bait Repositories)	99	353	10203 SQL Injector · 1800 Packet Spoof	2648 Repositories	
-5	Decoding	Decode Secretary cache	1	1367	75604 Encrypted SSH Key · 47569 Subnet Map · 45049 Repositories · 137 Internal affairs complaint archive · 4.6 Ghost Mode · 4.6 Zero-Day	1367 Secretary cache	HOT
-5	Decoding	Decode Secretary cache	99	1367	77659 Encrypted SSH Key · 45778 Subnet Map · 40525 Repositories · 214 Internal affairs complaint archive · 13.7 Ghost Mode · 4.6 Zero-Day	1367 Secretary cache	HOT
-5	Decoding	Decode Cop cache	1	1367	77905 Repositories · 48157 Subnet Map · 47163 Private Keys · 173 Body cam footage deletion logs · 9.1 Ghost Mode · 4.6 Zero-Day	1367 Cop cache	HOT
-5	Decoding	Decode Cop cache	99	1367	76698 Repositories · 44056 Subnet Map · 42087 Private Keys · 219 Body cam footage deletion logs · 9.1 Zero-Day · 4.6 Ghost Mode	1367 Cop cache	HOT
-5	Decoding	Decode Detective cache	1	1367	77131 Officer Auth Key · 44101 Badge Number · 16376 Packet Spoof · 155 Confidential informant registry · 4.6 Ghost Mode · 4.6 Zero-Day	1367 Detective cache	HOT
-5	Decoding	Decode Detective cache	99	1367	78142 Officer Auth Key · 45915 Badge Number · 16608 Packet Spoof · 200 Confidential informant registry · 13.7 Zero-Day · 4.6 Ghost Mode	1367 Detective cache	HOT
-5	Decoding	Decode Sergeant cache	1	1367	76301 Badge Number · 47418 Police Payload · 20873 SQL Injector · 164 Evidence locker access codes	1367 Sergeant cache	HOT
-5	Decoding	Decode Sergeant cache	99	1367	78192 Badge Number · 45746 Police Payload · 21073 SQL Injector · 182 Evidence locker access codes · 9.1 Zero-Day · 4.6 Ghost Mode	1367 Sergeant cache	HOT
-5	Decoding	Decode Captain cache	1	1367	4483 Sergeant cache · 4383 Secretary cache · 4196 Detective cache · 4169 Cop cache · 155 Corruption payout ledger · 13.7 Zero-Day · 9.1 Ghost Mode	1367 Captain cache	HOT
-5	Decoding	Decode Captain cache	99	1367	4411 Cop cache · 4256 Secretary cache · 4251 Detective cache · 4083 Sergeant cache · 200 Corruption payout ledger · 18.2 Zero-Day · 4.6 Ghost Mode	1367 Captain cache	HOT
-6	Mining	Databases	1	1709	4101 Databases		HOT
-6	Mining	Databases	99	1709	11133 Databases		HOT
-6	Parsing	Footprint Databases	1	7212	22118 Encrypted Bio Hash · 22022 Gateway Address · 20940 Clearance ID	7212 Databases	
-6	Parsing	Footprint Databases	99	6567	25478 Encrypted Bio Hash · 25194 Clearance ID · 23880 Gateway Address	6567 Databases	
-6	Cracking	Biometric	1	1338	1338 Bio Template	1071 Encrypted Bio Hash	HOT
-6	Cracking	Biometric	99	2010	2010 Bio Template	1608 Encrypted Bio Hash	HOT
-6	Matching	Clearance	1	961	2210 Security Clearance	769 Clearance ID · 769 Bio Template	HOT
-6	Matching	Clearance	99	961	3435 Security Clearance	769 Clearance ID · 769 Bio Template	HOT
-6	Compiling	Government payload	1	636	732 Government Payload	509 Gateway Address · 509 Security Clearance	HOT
-6	Compiling	Government payload	99	1560	1794 Government Payload	1248 Gateway Address · 1248 Security Clearance	HOT
+5	Decoding	Decode Secretary cache	1	1367	77568 Encrypted SSH Key · 49350 Repositories · 49223 Subnet Map · 155 Internal affairs complaint archive · 4.6 Zero-Day · 4.6 Ghost Mode	1367 Secretary cache	
+5	Decoding	Decode Secretary cache	99	1367	76985 Encrypted SSH Key · 45915 Repositories · 42283 Subnet Map · 214 Internal affairs complaint archive · 4.6 Ghost Mode	1367 Secretary cache	
+5	Decoding	Decode Cop cache	1	1367	77928 Repositories · 44776 Private Keys · 42151 Subnet Map · 141 Body cam footage deletion logs · 4.6 Ghost Mode	1367 Cop cache	
+5	Decoding	Decode Cop cache	99	1367	77363 Repositories · 45090 Private Keys · 42479 Subnet Map · 214 Body cam footage deletion logs · 4.6 Zero-Day	1367 Cop cache	
+5	Decoding	Decode Detective cache	1	1367	78156 Officer Auth Key · 47086 Badge Number · 15505 Packet Spoof · 169 Confidential informant registry · 4.6 Ghost Mode · 4.6 Zero-Day	1367 Detective cache	
+5	Decoding	Decode Detective cache	99	1367	77892 Officer Auth Key · 47400 Badge Number · 17114 Packet Spoof · 205 Confidential informant registry · 13.7 Ghost Mode	1367 Detective cache	
+5	Decoding	Decode Sergeant cache	1	1367	76835 Badge Number · 47733 Police Payload · 20563 SQL Injector · 155 Evidence locker access codes · 9.1 Ghost Mode · 4.6 Zero-Day	1367 Sergeant cache	
+5	Decoding	Decode Sergeant cache	99	1367	77518 Badge Number · 46083 Police Payload · 21196 SQL Injector · 187 Evidence locker access codes	1367 Sergeant cache	
+5	Decoding	Decode Captain cache	1	1367	4329 Cop cache · 4324 Secretary cache · 4174 Sergeant cache · 4160 Detective cache · 169 Corruption payout ledger · 4.6 Zero-Day	1367 Captain cache	
+5	Decoding	Decode Captain cache	99	1367	4661 Sergeant cache · 4429 Cop cache · 4114 Secretary cache · 3855 Detective cache · 219 Corruption payout ledger · 9.1 Zero-Day · 4.6 Ghost Mode	1367 Captain cache	
+6	Mining	Databases	1	245	588 Databases		
+6	Mining	Databases	99	245	1597 Databases		
+6	Parsing	Footprint Databases	1	910	597 Clearance ID · 579 Gateway Address · 534 Encrypted Bio Hash	910 Databases	
+6	Parsing	Footprint Databases	99	903	686 Encrypted Bio Hash · 581 Clearance ID · 542 Gateway Address	903 Databases	
+6	Cracking	Biometric	1	204	204 Bio Template	163 Encrypted Bio Hash	
+6	Cracking	Biometric	99	301	301 Bio Template	241 Encrypted Bio Hash	
+6	Matching	Clearance	1	214	491 Security Clearance	171 Clearance ID · 171 Bio Template	
+6	Matching	Clearance	99	214	763 Security Clearance	171 Clearance ID · 171 Bio Template	
+6	Compiling	Government payload	1	547	629 Government Payload	438 Gateway Address · 438 Security Clearance	
+6	Compiling	Government payload	99	1258	1446 Government Payload	1006 Gateway Address · 1006 Security Clearance	
 6	Phishing	Spear (bait Databases)	1	1558	14992 SQL Injector · 1666 Packet Spoof	98149 Databases	
 6	Phishing	Spear (bait Databases)	99	1569	25413 SQL Injector · 2824 Packet Spoof	98828 Databases	
 6	Phishing	Whale (bait Databases)	1	505	11563 SQL Injector · 2041 Packet Spoof	3536 Databases	
 6	Phishing	Whale (bait Databases)	99	493	14259 SQL Injector · 2516 Packet Spoof	3454 Databases	
-6	Decoding	Decode Clerk Cache	1	2050	122672 Encrypted Bio Hash · 76430 Gateway Address · 74263 Databases · 273 Registered Voters Database	2050 Clerk Cache	HOT
-6	Decoding	Decode Clerk Cache	99	2050	122768 Encrypted Bio Hash · 78515 Databases · 75077 Gateway Address · 273 Registered Voters Database · 20.5 Redaction	2050 Clerk Cache	HOT
-6	Decoding	Decode Analyst Cache	1	2050	122932 Bio Template · 80408 Gateway Address · 74086 Databases · 273 CIA Brief · 6.8 Redaction · 6.8 Blackout	2050 Analyst Cache	HOT
-6	Decoding	Decode Analyst Cache	99	2050	122768 Bio Template · 78515 Databases · 75630 Gateway Address · 328 CIA Brief	2050 Analyst Cache	HOT
-6	Decoding	Decode Ambassador Cache	1	2050	121004 Clearance ID · 70737 Security Clearance · 43871 Packet Spoof · 253 Black Budget Ledger	2050 Ambassador Cache	HOT
-6	Decoding	Decode Ambassador Cache	99	2050	124367 Clearance ID · 72842 Security Clearance · 42353 Packet Spoof · 328 Black Budget Ledger · 27.3 Redaction · 6.8 Blackout	2050 Ambassador Cache	HOT
-6	Decoding	Decode Vice President Cache	1	2050	125310 Government Payload · 71427 Clearance ID · 45839 SQL Injector · 226 Deep Cover IDs · 20.5 Blackout	2050 Vice President Cache	HOT
-6	Decoding	Decode Vice President Cache	99	2050	126253 Government Payload · 77066 Clearance ID · 45948 SQL Injector · 328 Deep Cover IDs · 20.5 Blackout	2050 Vice President Cache	HOT
-6	Decoding	Decode President Cache	1	2050	7641 Clerk Cache · 7163 Analyst Cache · 6575 Vice President Cache · 6295 Ambassador Cache · 260 Nuclear Codes · 20.5 Redaction · 13.7 Blackout	2050 President Cache	HOT
-6	Decoding	Decode President Cache	99	2050	7190 Clerk Cache · 6452 Analyst Cache · 6356 Vice President Cache · 6165 Ambassador Cache · 355 Nuclear Codes · 13.7 Redaction · 6.8 Blackout	2050 President Cache	HOT
+6	Decoding	Decode Clerk Cache	1	2050	122761 Encrypted Bio Hash · 76601 Databases · 75213 Gateway Address · 239 Registered Voters Database	2050 Clerk Cache	
+6	Decoding	Decode Clerk Cache	99	2050	122043 Encrypted Bio Hash · 80278 Databases · 73929 Gateway Address · 390 Registered Voters Database · 20.5 Blackout · 6.8 Redaction	2050 Clerk Cache	
+6	Decoding	Decode Analyst Cache	1	2050	125447 Bio Template · 70463 Databases · 68222 Gateway Address · 212 CIA Brief · 13.7 Blackout	2050 Analyst Cache	
+6	Decoding	Decode Analyst Cache	99	2050	122494 Bio Template · 74503 Databases · 69254 Gateway Address · 328 CIA Brief · 20.5 Blackout	2050 Analyst Cache	
+6	Decoding	Decode Ambassador Cache	1	2050	125611 Clearance ID · 68796 Security Clearance · 45456 Packet Spoof · 246 Black Budget Ledger · 6.8 Blackout	2050 Ambassador Cache	
+6	Decoding	Decode Ambassador Cache	99	2050	124046 Clearance ID · 74769 Security Clearance · 43925 Packet Spoof · 335 Black Budget Ledger · 6.8 Redaction	2050 Ambassador Cache	
+6	Decoding	Decode Vice President Cache	1	2050	126780 Government Payload · 72726 Clearance ID · 49324 SQL Injector · 239 Deep Cover IDs · 13.7 Blackout · 6.8 Redaction	2050 Vice President Cache	
+6	Decoding	Decode Vice President Cache	99	2050	125713 Government Payload · 75090 Clearance ID · 49304 SQL Injector · 308 Deep Cover IDs · 13.7 Blackout · 6.8 Redaction	2050 Vice President Cache	
+6	Decoding	Decode President Cache	1	2050	7019 Ambassador Cache · 6780 Clerk Cache · 6725 Analyst Cache · 6144 Vice President Cache · 246 Nuclear Codes · 41.0 Blackout · 13.7 Redaction	2050 President Cache	
+6	Decoding	Decode President Cache	99	2050	7593 Ambassador Cache · 7470 Vice President Cache · 6609 Clerk Cache · 6342 Analyst Cache · 287 Nuclear Codes · 13.7 Redaction · 13.7 Blackout	2050 President Cache	

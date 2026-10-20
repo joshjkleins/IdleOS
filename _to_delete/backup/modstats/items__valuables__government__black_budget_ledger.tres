@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dmorqbwv38dnp"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_whx6j"]
+
+[resource]
+script = ExtResource("1_whx6j")
+id = 146
+name = "Black Budget Ledger"
+shortened_name = "BB Ledger"
+description = "Rare find from Government Ambassador caches. Used to compile access to the next target."
+upgrade_ingredient = true
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_whx6j")]([])
+tier = 6
+color_type = 8
+obtained_from = Array[int]([7])
+obtained_from_additional_hint = "AMBASSADOR CACHE"
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

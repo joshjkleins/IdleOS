@@ -86,7 +86,7 @@ func parsing_item_loop(item: ItemData):
 	#LOOP 10 TIMES (+ Rows upgrades) FOR EACH 'PARSE' ITEM
 	for i in range(MAX_LOG_LINES + int(Upgrades.cur("parsing.rows"))):
 		var new_log_line = log_line_scene.instantiate()
-		var eff = _get_line_chance(item) + _miss_bonus
+		var eff = _get_line_chance(item) + _miss_bonus * Parsing.item_find_mult(process_data, item) # harder data slows Pattern Cache too
 		var item_found = null
 		var found_amount = 0
 		
@@ -212,7 +212,7 @@ func is_log_finished() -> bool:
 ## <empty>: a line without a find, which Fast Skip speeds up.
 func _wait_step(empty: bool = false) -> Mode:
 	var mode := get_mode()
-	var t = get_step_time(mode)
+	var t = get_step_time(mode) * Parsing.item_time_mult(process_data, get_current_item_to_parse())
 	if empty:
 		t *= 1.0 - Upgrades.cur("parsing.fast_skip")
 	_item_seconds += t
@@ -222,7 +222,8 @@ func _wait_step(empty: bool = false) -> Mode:
 func _finished_log(heat_mode: Mode):
 	process_data.signal.emit(1)
 	Tutorial.track_event(Tutorial.TutorialEvent.PARSE_20_LOGS, 1)
-	Exp.add_xp(Parsing, process_data, process_data["experience per level"] * (2 if has_modifier("survey") else 1))
+	var xp_mult = Parsing.item_time_mult(process_data, get_current_item_to_parse()) # slower higher-tier lines give more XP each
+	Exp.add_xp(Parsing, process_data, int(round(process_data["experience per level"] * xp_mult)) * (2 if has_modifier("survey") else 1))
 	Signals.update_hud(Parsing)
 
 	_update_chance_label(get_current_item_to_parse())
@@ -236,7 +237,7 @@ func _reset_logs():
 
 ## Chance per line for <item>: process efficiency (+ upgrades, defrag) + the item's tier bonus (Corruption).
 func _get_line_chance(item: ItemData) -> float:
-	return _get_total_effeciency() + (Parsing.get_line_chance_bonus(process_data, item) if item else 0.0)
+	return (_get_total_effeciency() + (Parsing.get_line_chance_bonus(process_data, item) if item else 0.0)) * Parsing.item_find_mult(process_data, item)
 
 func _update_chance_label(item: ItemData) -> void:
 	chance_per_line_label.text = "%.1f%%" % (_get_line_chance(item) * 100.0)
@@ -368,7 +369,7 @@ func heat_tier_mult() -> float:
 	var it = get_current_item_to_parse()
 	if it == null:
 		return 1.0
-	return Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(it) if it is CacheData else it.tier)
+	return Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(it) if it is CacheData else it.tier) * Parsing.item_time_mult(process_data, it)
 
 func get_current_item_to_parse() -> ItemData:
 	if items_to_parse.is_empty():

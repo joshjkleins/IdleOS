@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://be4bgvww8xhjx"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_7su1l"]
+
+[resource]
+script = ExtResource("1_7su1l")
+id = 4
+name = "Usernames"
+shortened_name = ""
+description = "Obtained by Parsing Logs. Match it with Passwords to make Credentials."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_7su1l")]([])
+tier = 1
+color_type = 4
+obtained_from = Array[int]([2])
+obtained_from_additional_hint = ""
+hacking_mod_type = 2
+hacking_mod_value = 15.0
+hacking_mod_duration = 5
+hacking_mod_consumed = 100
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://ok5y7xdlxx8c"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_e66un"]
+
+[resource]
+script = ExtResource("1_e66un")
+id = 48
+name = "Staff keycard clone data"
+shortened_name = "Keycard clone data"
+description = "Rare find from Hospital Orderly caches. Used to compile access to the next target."
+upgrade_ingredient = false
+value = 2300
+parsable = false
+contained_items = Array[ExtResource("1_e66un")]([])
+tier = 3
+color_type = 8
+obtained_from = Array[int]([])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

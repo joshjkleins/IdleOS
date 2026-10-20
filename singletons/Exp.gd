@@ -107,6 +107,26 @@ func refresh_process_unlocks(major) -> void:
 		if major.SKILL.level >= p.get("unlock level", 1):
 			p["unlocked"] = true
 
+## Tier of a tier-specific process (Mining, Cracking, Matching, Compiling payloads), else 0.
+func process_tier(major, p: Dictionary) -> int:
+	match major:
+		Mining:
+			return Mining.minor_processes.find(p) + 1
+		Cracking:
+			return Cracking.minor_processes.filter(func(x): return x != Cracking.VM).find(p) + 1
+		Matching:
+			return Matching.minor_processes.find(p) + 1
+		Compiling:
+			return Compiling.get_payload_processes().find(p) + 1
+	return 0
+
+## Tier-specific processes also need their tier (location) unlocked, not just the skill level. "" = ok.
+func tier_block_reason(major, p: Dictionary) -> String:
+	var t = process_tier(major, p)
+	if t > 1 and !Upgrades.tier_unlocked(t):
+		return "%s requires %s access (Tier %d)." % [p.name, Upgrades.tier_name(t), t]
+	return ""
+
 func refresh_all_process_unlocks() -> void:
 	if DEV_MAX_ALL:
 		_dev_max_all()
