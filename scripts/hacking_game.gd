@@ -614,16 +614,20 @@ func manual_defense():
 #endregion
 
 #region firewall break
+## seconds the target's firewall stays down after a break (per target, "firewall reboot")
+func _fw_down_time() -> float:
+	return float(current_target.get("firewall reboot", FW_BREAK_TIME))
+
 func _break_firewall(earned: bool = true) -> void:
 	if earned:
 		Exploits.add_charge("firewall")
 		_float(exp_row.bar, "+%d charge" % int(Exploits.CHARGE_GAIN.firewall), C_EXP, 12, 18.0)
 	firewall_down = true
-	fw_down_left = FW_BREAK_TIME
+	fw_down_left = _fw_down_time()
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
 	firewall_bar.value = 0
-	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ds" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(FW_BREAK_TIME)])
+	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ds" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(_fw_down_time())])
 	var cascade = int(round(integ_base * _mod(HackingMods.MOD_TYPE.FW_BREAK_INTEGRITY))) # Cascade
 	if cascade > 0:
 		integ_bar.value -= cascade
@@ -631,7 +635,7 @@ func _break_firewall(earned: bool = true) -> void:
 		if integ_bar.value <= 0.0:
 			win()
 			return
-	_banner("FIREWALL DOWN", "enemy countermeasures -%d%% for %ds" % [roundi((1.0 - FW_BREAK_SLOW) * 100), int(FW_BREAK_TIME)], C_FW, 0.9)
+	_banner("FIREWALL DOWN", "enemy countermeasures -%d%% for %ds" % [roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(_fw_down_time())], C_FW, 0.9)
 	_shake(target_card.panel, 7.0, 0.35)
 	_flash(target_card.panel, Color(1.9, 1.5, 1.0), 0.5)
 	_refresh_labels()
@@ -653,14 +657,22 @@ func _restore_firewall() -> void:
 #endregion
 
 #region heat / state
+## Heat plan: hacking heat grows with the location's tier like process heat and cooling do
+const HEAT_BY_TIER := [1.0, 1.46, 2.08, 3.0, 7.0, 10.0]
+func _heat_mult() -> float:
+	var p = Stats.target_place(current_target)
+	var t = Stats.hacking_targets.keys().find(p.location) + 1 if !p.is_empty() else 1
+	return Stats.tier_heat(HEAT_BY_TIER, t)
+
 func add_heat(amount: float):
+	var hm = _heat_mult()
 	if Stats.overheated:
-		Stats.update_tempature(0.3)
+		Stats.update_tempature(0.3 * hm)
 		return
 	if NEXT_HEAT_APPLICATION > 0:
 		amount += NEXT_HEAT_APPLICATION
 		NEXT_HEAT_APPLICATION = 0
-	Stats.update_tempature(amount)
+	Stats.update_tempature(amount * hm)
 	if Stats.overheated:
 		var messages = "[color=#e24b4a]SYSTEM OVERHEATED - BANDWIDTH REGEN SLOWED[/color]\n"
 		messages += "[color=#e24b4a]ENEMY COUNTERMEASURES INCREASED SIGNIFICANTLY[/color]\n"

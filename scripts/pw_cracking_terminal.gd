@@ -259,7 +259,7 @@ func _get_total_efficiency() -> float:
 ## by how long this one took. Keyring and Analyze double it.
 func _token_chance() -> float:
 	var base_crack = float(process_data.get("base speed", 3.0)) * PW_LENGTH
-	var chance = process_data.get("vm token chance", 0.01) * (_crack_seconds / max(0.001, base_crack))
+	var chance = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * (_crack_seconds / max(0.001, base_crack))
 	if Upgrades.has("cracking.keyring"):
 		chance *= 2.0
 	if has_modifier("analyze"):

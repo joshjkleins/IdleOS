@@ -246,7 +246,7 @@ func get_help_text(skill: Node) -> String:
 		text += "\nEFFICIENCY (EFF) BY PROCESS\n"
 		for line in eff_lines:
 			text += "  %-12s %s\n" % line
-	return text + "\n\n" + get_modifier_info_text(skill)
+	return text + Exp.level_bonus_text(skill) + "\n\n" + get_modifier_info_text(skill)
 
 
 
@@ -562,7 +562,7 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 			return_text += "├─ " + text + "\n"
 		
 		var vm = skill.vm_token
-		var vm_name = vm.name + " (%s%s)" % [_pct_text(float(process.get("vm token chance", 0.01))), (" " + process["vm token per"]) if process.has("vm token per") else ""]
+		var vm_name = vm.name + " (%s%s)" % [_pct_text(float(process.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)), (" " + process["vm token per"]) if process.has("vm token per") else ""]
 		var dots_amount = max(2, 35 - vm_name.length())
 		return_text += "└─ " + vm_name + ".".repeat(dots_amount) + vm.description + "\n"
 	
@@ -629,6 +629,9 @@ func get_hack_target_info(location: Dictionary):
 		var pad_text_length = 30
 		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
 		return_text += "\t" + pad_text(counter_atk_text, pad_text_length) + pad_text(counter_spd_text, pad_text_length) + pad_text(exp_text, pad_text_length) + "\n"
+		var reboot_text = "[font_size=12]Firewall reboot: %ds[/font_size]" % int(tar.get("firewall reboot", 10))
+		var intel_text = "[font_size=12]Intel weakens: %s (up to %d%%)[/font_size]" % [Decoding.intel_stat(tar), roundi(float(tar.get("intel cap", Decoding.INTEL_CAP_RATIO)) * 100)]
+		return_text += "\t" + pad_text(reboot_text, pad_text_length) + intel_text + "\n"
 		return_text += "\n"
 		
 	
@@ -1254,5 +1257,5 @@ func upload_goal_text() -> String:
 		rows.append([g.item.name + (" (rare)" if g.rare else ""), "%d/%d" % [up, g.amount], str(Uploads.get_staged(g.item)), str(Inventory.get_amount(g.item)), status])
 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
-	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -a for everything)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS), int(Uploads.RARE_UPLOAD_SECONDS)]
+	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -a for everything)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS_BY_TIER[Uploads.current_tier() - 1]), int(Uploads.RARE_UPLOAD_SECONDS)]
 	return header + build_table(columns, rows, colors) + footer

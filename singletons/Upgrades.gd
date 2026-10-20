@@ -16,7 +16,7 @@ const INSTALLS_PER_TIER := 10
 const VM_TOKEN_COST := "@vm_tokens" # cost paid with any VM tokens
 
 ## TESTING: every tier's installs are open without unlocking locations. Turn off before release.
-const DEV_UNLOCK_ALL_TIERS := true
+const DEV_UNLOCK_ALL_TIERS := false
 
 ## Groups whose effects are wired up in code. The rest are listed in apt but can't be installed yet
 ## (skills are migrated one at a time).

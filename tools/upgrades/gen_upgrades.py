@@ -93,6 +93,14 @@ TRACK="Track"; PTD="Pointed"; CAP="Capstone"
 SPEED_STEP = [round((1.5**t - 1.5**(t-1)) / 3, 4) for t in range(1, 7)]
 # Cooling added by each tier's install: totals 0.4 / 0.75 / 1.3 / 2.0 / 3.05 / 4.6 C/s (base 0.1)
 COOLING_STEP = [0.3, 0.35, 0.55, 0.7, 1.05, 1.55]
+# SQL damage / firewall damage added per tier: totals +5/30/68/118/180/280 and +2/5/10/16/23/35
+DAMAGE_STEP = [5, 25, 38, 50, 62, 100]
+# Economy pass (2026-10-20, tools/balance/econ2.py): cost scale per tier so each tier fits Josh's active-play time
+# (T1 1-2 h ... T6 6-7 h, cache loot counted), and rare items per capstone by tier
+COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
+CAP_RARES = [1, 1, 2, 2, 2, 2]
+HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
+FIREWALL_STEP = [2, 3, 5, 6, 7, 12]
 
 GROUPS = {}
 
@@ -244,8 +252,9 @@ GROUPS["Compiling"] = [
          "Passive: Overclock, Debug Build and Optimize produce no extra heat"],"one-off",None),
 ]
 GROUPS["Hacking"] = [
-    (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)","+5 dmg, +0.1 heat",(20,5,"dmg")),
-    (TRACK,"Firewall Damage","Firewall damage per SQL attack","+2",(1,2,"firewall dmg")),
+    # Combat pass (2026-10-20): grow with the tier like enemies and mods do, so mods stay ~+40% at every tier
+    (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",[f"+{v} dmg, +0.1 heat" for v in DAMAGE_STEP],(20,DAMAGE_STEP,"dmg")),
+    (TRACK,"Firewall Damage","Firewall damage per SQL attack",[f"+{v}" for v in FIREWALL_STEP],(1,FIREWALL_STEP,"firewall dmg")),
     (TRACK,"Bandwidth Recovery","Bandwidth regenerated per second","+0.5/s",(1,0.5,"/s bandwidth regen")),
     (TRACK,"Bandwidth Recovery","Bandwidth regenerated per second","+0.5/s",(1,0.5,"/s bandwidth regen")),
     (TRACK,"Max Bandwidth","Max bandwidth (room for mod bandwidth costs)","+5",(10,5,"max bandwidth")),
@@ -340,14 +349,17 @@ for group, slots in GROUPS.items():
             elif stype==CAP:
                 note = "capstone x.0 release — define the tier's standout effect"
             r_next = ws.max_row + 1
+            cs = COST_SCALE[tier-1]
             if rkey == "tokens":
-                amt = f"=ROUND(Inputs!$B$9*Inputs!$B$10^(B{r_next}-1),0)"
+                amt = f"=MAX(1,ROUND({cs}*Inputs!$B$9*Inputs!$B$10^(B{r_next}-1),0))"
+            elif rkey == "hacking":  # paid in the tier's first-target caches: every one is a hack, so keep it ~20% of the tier's hacks
+                amt = f"=MAX(1,ROUND({HACK_CACHE_TOTAL[tier-1]}*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))"
             else:
                 rate = f"INDEX(Inputs!$C$15:$C$23,MATCH(\"{rkey}\",Inputs!$A$15:$A$23,0))"
                 share = "/3" if rkey == "parsing" else ""
-                amt = (f"=ROUND(Inputs!$B$4*Inputs!$B$5^(B{r_next}-1)*{rate}{share}*Inputs!$B$7"
-                       f"*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0)")
-            rare_amt = "=Inputs!$B$8" if rare else ""
+                amt = (f"=MAX(1,ROUND({cs}*Inputs!$B$4*Inputs!$B$5^(B{r_next}-1)*{rate}{share}*Inputs!$B$7"
+                       f"*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))")
+            rare_amt = CAP_RARES[tier-1] if rare else ""
             base_n = slot[1] if not isinstance(slot[1], list) else slot[1][tier-1]
             pid = package_id(group, base_n)
             gval = game_value(running, tier)

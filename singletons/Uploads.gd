@@ -1,20 +1,23 @@
 extends Node
-## Upload progression. Each tier has an upload goal: 200 of every basic resource in that tier's chain
-## plus 10 of each rare item its targets drop. Items get there in two idle steps:
+## Upload progression. Each tier has an upload goal: BASIC_GOALS[tier] of every basic resource in that tier's chain
+## plus RARE_GOALS[tier] of each rare item its targets drop. Items get there in two idle steps:
 ##   1. decode -package=<item> (Decoding): one item per pass moves from the inventory into the staging area
-##   2. upload -<item>: staged items upload one every UPLOAD_SECONDS, several items in parallel
+##   2. upload -<item>: staged items upload one every get_upload_seconds(), several items in parallel
+## Economy pass (2026-10-20, tools/balance/econ2.py): goals fit each tier's active play time (T1 1-2 h ... T6 6-7 h)
+## with cache loot counted; upload time makes a tier's goal take ~70% of its play time, all items in parallel.
 ## Staged items that aren't needed any more can be returned with unpack -<item>.
 
 signal changed           # staged / uploading / uploaded counts changed
 signal tier_completed(tier: int)
 signal item_uploaded(item: ItemData)
 
-const BASIC_GOAL = 200
-const RARE_GOAL = 10
-const UPLOAD_SECONDS = 15.0       # per basic resource (upgradable later)
+const BASIC_GOALS = [100, 300, 600, 1000, 1600, 2500]
+const RARE_GOALS = [3, 5, 6, 10, 15, 20]
+const UPLOAD_SECONDS_BY_TIER = [38.0, 21.0, 15.0, 11.0, 9.0, 7.0] # per basic resource, by the item's tier
 const RARE_UPLOAD_SECONDS = 60.0  # per rare item
-const UPLOAD_HEAT = 1.0           # system heat per basic resource uploaded
-const RARE_UPLOAD_HEAT = 3.0      # per rare item
+## Upload heat per second of uploading, per item, by tier (~3.5% of that tier's cooling each: all of a tier's
+## items uploading at once is a light, steady load)
+const UPLOAD_HEAT_PER_SECOND = [0.009, 0.02, 0.035, 0.058, 0.088, 0.133]
 const MAX_TIER = 6
 
 var staged := {}    # ItemData -> packaged, waiting to upload
@@ -51,9 +54,9 @@ func get_goals(tier: int = 0) -> Array:
 		tier = current_tier()
 	var goals := []
 	for item in Decoding.get_tier_resources(tier):
-		goals.append({"item": item, "amount": BASIC_GOAL, "rare": false})
+		goals.append({"item": item, "amount": BASIC_GOALS[clamp(tier, 1, MAX_TIER) - 1], "rare": false})
 	for item in get_tier_rares(tier):
-		goals.append({"item": item, "amount": RARE_GOAL, "rare": true})
+		goals.append({"item": item, "amount": RARE_GOALS[clamp(tier, 1, MAX_TIER) - 1], "rare": true})
 	return goals
 
 func get_goal_amount(item: ItemData, tier: int = 0) -> int:
@@ -125,8 +128,17 @@ func is_rare(item: ItemData) -> bool:
 				_rare_cache[r] = true
 	return _rare_cache.has(item)
 
+## Tier an upload item counts for (its location, else the current goal's tier)
+func _item_tier(item: ItemData) -> int:
+	var t = Inventory.item_tier(item) if item else 0
+	return clamp(t if t > 0 else current_tier(), 1, MAX_TIER)
+
 func get_upload_seconds(item: ItemData) -> float:
-	return (RARE_UPLOAD_SECONDS if is_rare(item) else UPLOAD_SECONDS) * Defragging.get_upload_time_multiplier()
+	var base = RARE_UPLOAD_SECONDS if is_rare(item) else UPLOAD_SECONDS_BY_TIER[_item_tier(item) - 1]
+	return base * Defragging.get_upload_time_multiplier()
+
+func get_upload_heat(item: ItemData) -> float:
+	return UPLOAD_HEAT_PER_SECOND[_item_tier(item) - 1] * get_upload_seconds(item)
 
 func is_uploading(item: ItemData) -> bool:
 	return active.has(item)
@@ -146,7 +158,7 @@ func _upload_one(item: ItemData) -> void:
 	if staged[item] <= 0:
 		staged.erase(item)
 	uploaded[item] = get_uploaded(item) + 1
-	Stats.update_tempature(RARE_UPLOAD_HEAT if is_rare(item) else UPLOAD_HEAT)
+	Stats.update_tempature(get_upload_heat(item))
 	SaveManager.mark_dirty()
 	item_uploaded.emit(item)
 	# done with this item: nothing left staged, or its goal is met

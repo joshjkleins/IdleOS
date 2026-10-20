@@ -396,8 +396,59 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   (EXPLOIT full at hack start); T6 Cascade (break deals 15% max integrity), Mirror (25% counter dmg reflected),
   Cold Boot (no overclock heat, overheat doesn't speed the enemy). New MOD_TYPEs are appended after NONE
   (HackingMods.EQUIP_INFO has their names/text). Smoke test: tools/tests/eqtest (TGT=<target index>).
-- Next: Python combat simulator -> tune the 30 easy targets to Josh's ladder; intel stat per target (its specialty),
-  bigger intel for targets 3-5; per-enemy firewall reboot time; hacking heat by tier; mod bandwidth cost per tier.
+- Combat simulator: `tools/balance/combat_sim.py` (Python copy of hacking_game.gd's rules incl. equippables, capstones,
+  Overheat Fan / Liquid Cooling; matches live fights within ~5-10 points of anonymity left). `combat_tune.py <tier>`
+  fits each target (difficulty k, integrity-vs-counter split r) so its gate scenario ends with the target anonymity:
+  T1 arriving no mods ~40% left, T2 +1 mod ~35%, T3 + this tier's Damage/Firewall levels + 2 mods ~30%, T4 mid-tier
+  all slots ~30%, T5 tier done all slots ~25%; fights ~60-90 s. Results -> combat_tune_T<n>.json,
+  `write_targets.py` writes them into stats.gd; ladder table: combat_ladder_2026-10-20.txt.
+  Live check: tools/tests/livecheck (CASES="tier,slot,S1..S5,intel;..."; turns Idle Cooling off - it never runs in a
+  real hack - and drives overclock on <60 C / off >90 C).
+- Target profiles (every tier): 1 balanced (intel firewall, reboot 10 s), 2 tanky (integrity, 8 s), 3 big firewall
+  (firewall, 14 s), 4 fast light counters (counter speed 30, 6 s), 5 heavy hitter (counter, 10 s). New target keys
+  "intel stat", "intel cap" (0.25 / 0.25 / 0.35 / 0.45 / 0.40 of the stat; Decoding.intel_cap), "firewall reboot"
+  (hacking_game._fw_down_time). Shown in 'info hacking <location>'. Heat 0.5..1.7 by slot, x hacking_game
+  HEAT_BY_TIER (1 / 1.46 / 2.08 / 3 / 7 / 10 by location) for every hacking heat tick incl. overclock.
+- Hacking Damage / Firewall Damage tracks now grow with the tier (gen_upgrades DAMAGE_STEP / FIREWALL_STEP):
+  +5/25/38/50/62/100 dmg (25 -> 300 total), +2/3/5/6/7/12 firewall dmg (3 -> 36), so mods stay ~+40% at every tier.
+- Not done: hard-mode targets (old stats); the T1-T2 heavy hitters came out low-counter / high-integrity (r clamp);
+  target exp untouched; mod bandwidth cost still +2 per mod at every tier.
+
+## XP pass (2026-10-20)
+- Tempo: ~250-300 hacks per tier (~4-5 h, easy mode). Rares needed per tier: targets 1-4 = 19 each (upload 10 +
+  next target's access 5 + two capstones x2), target 5 = 12 (+ mods: 20 per full mod, optional).
+  `tools/tests/raredemand` (data) + `tools/balance/xp_plan.py [extra rares for mods]` (hacks + XP per tier).
+- Rare chance (Decoding CACHE and DEEP): 20% at L1 -> ~22% at L99 (was 4% -> 8%); with tracks + Rare Tracker
+  ~20% (T1) .. ~26% (T6) -> ~4.7 .. 3.5 caches per rare.
+- Target 5's cache now holds ~2 of the tier's other caches (4 entries x 1 at 50%; was 3-7 at 40% = ~8), so it's a
+  bonus, not the farm (Josh: pick a target for a reason).
+- Target exp rescaled (today's shape between targets) so a tier's hacks land the combat pass's arrival levels
+  (1 / 15 / 30 / 45 / 60 / 75, 90 after Tier 6): School 7/79/119/159/198 .. Government 233/2793/4190/5586/6983.
+  ~299 hacks (T1) .. ~222 (T6). Hard-mode exp untouched.
+
+## Economy pass (2026-10-20) - Josh to feel it out in a full playthrough
+- Tier length = ACTIVE play: T1 1-2 h, T2 2-3 h ... T6 6-7 h (idle/offline on top). Model `tools/balance/econ2.py`
+  (60% of play in fights at ~70 s, VM windows half the time, one offline session at the tier's cap, cache loot as
+  supply with 25% Extraction / 25% Footprint): hacks ~46 / 77 / 108 / 139 / 170 / 201 per tier.
+- Upgrade costs x COST_SCALE [0.1, 0.7, 0.85, 0.75, 0.75, 1.0] (gen_upgrades.py); Hacking upgrades' cache cost
+  HACK_CACHE_TOTAL [10, 15, 22, 28, 34, 40] per tier; capstone rares CAP_RARES [1, 1, 2, 2, 2, 2]. Only each
+  level's "costs" were merged into data/upgrades.json.
+- Uploads.gd: goals BASIC_GOALS [100, 300, 600, 1000, 1600, 2500], RARE_GOALS [3, 5, 6, 10, 15, 20]; upload time
+  by the item's tier [38, 21, 15, 11, 9, 7] s (rares 60 s) so a goal takes ~70% of the tier's play, all items in
+  parallel; upload heat = UPLOAD_HEAT_PER_SECOND[tier] x upload time (~3.5% of that tier's cooling per item).
+- Target access (stats.gd): rares ACCESS_RARE_BY_TIER [2, 3, 4, 5, 5, 5]; payloads 4/14/24/34 at School, else
+  10/35/60/85.
+- Target exp rescaled again for those hacks (+ the upgrade caches): School 45/500/753/1005/1252 ..
+  Government 252/3013/4521/6027/7534 -> arrival levels 1/15/30/45/60/75.
+- Fit (needed / available production hours): 4.5/4.7, 9.4/11, 15.8/18.5, 23/27, 30/36, 38/47. T1 is the tight one.
+- Ideas parked for after the playthrough: upload-goal item bonuses, small every-5-levels skill bonuses.
+
+## Level bonuses (2026-10-20)
+- Every 5 levels of a skill that makes VM tokens (Mining, Parsing, Cracking, Matching, Phishing, Decoding,
+  Compiling; not Hacking / Defragging): +0.1% VM token chance per cycle, added to each process's base-speed chance
+  (Exp.vm_token_level_bonus; L95 = +1.9%). Announced on level-up; 'info <skill>' shows a LEVEL BONUS block (now +
+  next only, Exp.level_bonus_text); 'info <skill> <process>' shows the chance with the bonus. Test: tools/tests/lvlbonus.
+- Upload-goal item bonuses: idea parked until after the playthrough.
 
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
@@ -412,5 +463,7 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
    RECIPE tree (`Inventory.recipe_text` / `producer`): the full chain down to Mining with each step's command and what
    you have (red below one cycle); parse finds have no amount (chance-based). `ls <item>` shows "Made from" + the info
    command. Test: tools/tests/lstest. Some item descriptions are stale (Parents credit card: "Used as upgrade ingredient").
-- Later: unique combat interactions (maybe a final enemy per location, likely hard mode only),
-  Phishing higher tiers (Whaling/Smish/Trap placeholders).
+- Later: unique combat interactions (maybe a final enemy per location, likely hard mode only).
+- ~~Phishing higher tiers~~ settled 2026-10-20: Spear / Whaling / Smish / Trap / Mod are all built. Phishing stays
+  tier-independent like Parsing and Decoding (processes unlock by Phishing level; its tier-locked upgrades, e.g.
+  +1 line per tier, give the per-tier boost), so no Tier 5-6 processes are needed.

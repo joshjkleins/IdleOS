@@ -338,7 +338,7 @@ func _token_chance() -> float:
 	for msgs in terminal_messages:
 		steps += msgs.size()
 	var base_match = (float(process_data["base speed min"]) + float(process_data["base speed max"])) / 2.0 * steps
-	var chance = process_data.get("vm token chance", 0.01) * (_match_seconds / max(0.001, base_match))
+	var chance = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * (_match_seconds / max(0.001, base_match))
 	if Upgrades.has("matching.rolodex"):
 		chance *= 2.0
 	if has_modifier("correlate"):

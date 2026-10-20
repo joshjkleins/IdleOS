@@ -30,7 +30,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 70
+       "amount": 7
       }
      ]
     },
@@ -45,7 +45,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 77
+       "amount": 54
       }
      ]
     },
@@ -60,7 +60,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 85
+       "amount": 72
       }
      ]
     },
@@ -75,7 +75,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 93
+       "amount": 70
       }
      ]
     },
@@ -90,7 +90,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 103
+       "amount": 77
       }
      ]
     },
@@ -129,7 +129,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 81
+       "amount": 8
       }
      ]
     },
@@ -144,7 +144,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 89
+       "amount": 62
       }
      ]
     },
@@ -159,7 +159,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 98
+       "amount": 83
       }
      ]
     },
@@ -174,7 +174,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 107
+       "amount": 81
       }
      ]
     },
@@ -189,7 +189,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 118
+       "amount": 89
       }
      ]
     },
@@ -228,7 +228,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 10
+       "amount": 1
       }
      ]
     },
@@ -243,7 +243,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 15
+       "amount": 11
       }
      ]
     },
@@ -258,7 +258,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 23
+       "amount": 19
       }
      ]
     },
@@ -273,7 +273,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 34
+       "amount": 25
       }
      ]
     },
@@ -288,7 +288,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 51
+       "amount": 38
       }
      ]
     },
@@ -327,7 +327,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 107
+       "amount": 11
       }
      ]
     },
@@ -342,7 +342,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 123
+       "amount": 12
       }
      ]
     },
@@ -357,7 +357,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 117
+       "amount": 82
       }
      ]
     },
@@ -372,7 +372,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 135
+       "amount": 95
       }
      ]
     },
@@ -387,7 +387,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 129
+       "amount": 110
       }
      ]
     },
@@ -402,7 +402,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 149
+       "amount": 126
       }
      ]
     },
@@ -417,7 +417,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 142
+       "amount": 107
       }
      ]
     },
@@ -432,7 +432,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 163
+       "amount": 123
       }
      ]
     },
@@ -447,7 +447,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 156
+       "amount": 117
       }
      ]
     },
@@ -462,7 +462,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 180
+       "amount": 135
       }
      ]
     },
@@ -516,7 +516,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 141
+       "amount": 14
       }
      ]
     },
@@ -531,7 +531,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 155
+       "amount": 109
       }
      ]
     },
@@ -546,7 +546,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 171
+       "amount": 145
       }
      ]
     },
@@ -561,7 +561,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 188
+       "amount": 141
       }
      ]
     },
@@ -576,7 +576,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 207
+       "amount": 155
       }
      ]
     },
@@ -615,7 +615,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 162
+       "amount": 16
       }
      ]
     },
@@ -630,7 +630,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 179
+       "amount": 125
       }
      ]
     },
@@ -645,7 +645,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 196
+       "amount": 167
       }
      ]
     },
@@ -660,7 +660,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 216
+       "amount": 162
       }
      ]
     },
@@ -675,7 +675,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 238
+       "amount": 178
       }
      ]
     },
@@ -714,7 +714,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 187
+       "amount": 19
       }
      ]
     },
@@ -729,7 +729,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 205
+       "amount": 144
       }
      ]
     },
@@ -744,7 +744,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 226
+       "amount": 192
       }
      ]
     },
@@ -759,7 +759,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 248
+       "amount": 186
       }
      ]
     },
@@ -774,7 +774,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 273
+       "amount": 205
       }
      ]
     },
@@ -813,7 +813,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 10
+       "amount": 1
       }
      ]
     },
@@ -828,7 +828,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 15
+       "amount": 11
       }
      ]
     },
@@ -843,7 +843,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 23
+       "amount": 19
       }
      ]
     },
@@ -858,7 +858,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 34
+       "amount": 25
       }
      ]
     },
@@ -873,7 +873,7 @@
      "costs": [
       {
        "item": "@vm_tokens",
-       "amount": 51
+       "amount": 38
       }
      ]
     },
@@ -912,11 +912,11 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 247
+       "amount": 25
       },
       {
        "item": "Parents credit card",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -940,11 +940,11 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 272
+       "amount": 190
       },
       {
        "item": "Leaked deposition transcripts",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -968,7 +968,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 299
+       "amount": 254
       },
       {
        "item": "Patient appointment history",
@@ -996,7 +996,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 329
+       "amount": 246
       },
       {
        "item": "Cash Drawer Override Codes",
@@ -1024,7 +1024,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 361
+       "amount": 271
       },
       {
        "item": "Internal affairs complaint archive",
@@ -1080,7 +1080,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 70
+       "amount": 7
       }
      ]
     },
@@ -1095,7 +1095,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 81
+       "amount": 8
       }
      ]
     },
@@ -1110,7 +1110,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 93
+       "amount": 9
       }
      ]
     },
@@ -1125,7 +1125,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 77
+       "amount": 54
       }
      ]
     },
@@ -1140,7 +1140,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 89
+       "amount": 62
       }
      ]
     },
@@ -1155,7 +1155,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 102
+       "amount": 71
       }
      ]
     },
@@ -1170,7 +1170,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 85
+       "amount": 72
       }
      ]
     },
@@ -1185,7 +1185,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 98
+       "amount": 83
       }
      ]
     },
@@ -1200,7 +1200,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 112
+       "amount": 95
       }
      ]
     },
@@ -1215,7 +1215,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 93
+       "amount": 70
       }
      ]
     },
@@ -1230,7 +1230,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 107
+       "amount": 81
       }
      ]
     },
@@ -1245,7 +1245,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 124
+       "amount": 93
       }
      ]
     },
@@ -1260,7 +1260,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 103
+       "amount": 77
       }
      ]
     },
@@ -1275,7 +1275,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 118
+       "amount": 89
       }
      ]
     },
@@ -1290,7 +1290,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 136
+       "amount": 102
       }
      ]
     },
@@ -1359,7 +1359,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 107
+       "amount": 11
       }
      ]
     },
@@ -1374,7 +1374,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 123
+       "amount": 12
       }
      ]
     },
@@ -1389,7 +1389,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 117
+       "amount": 82
       }
      ]
     },
@@ -1404,7 +1404,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 135
+       "amount": 95
       }
      ]
     },
@@ -1419,7 +1419,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 129
+       "amount": 110
       }
      ]
     },
@@ -1434,7 +1434,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 149
+       "amount": 126
       }
      ]
     },
@@ -1449,7 +1449,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 142
+       "amount": 107
       }
      ]
     },
@@ -1464,7 +1464,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 163
+       "amount": 123
       }
      ]
     },
@@ -1479,7 +1479,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 156
+       "amount": 117
       }
      ]
     },
@@ -1494,7 +1494,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 180
+       "amount": 135
       }
      ]
     },
@@ -1548,7 +1548,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 141
+       "amount": 14
       }
      ]
     },
@@ -1563,7 +1563,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 162
+       "amount": 16
       }
      ]
     },
@@ -1578,7 +1578,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 155
+       "amount": 109
       }
      ]
     },
@@ -1593,7 +1593,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 179
+       "amount": 125
       }
      ]
     },
@@ -1608,7 +1608,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 171
+       "amount": 145
       }
      ]
     },
@@ -1623,7 +1623,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 196
+       "amount": 167
       }
      ]
     },
@@ -1638,7 +1638,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 188
+       "amount": 141
       }
      ]
     },
@@ -1653,7 +1653,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 216
+       "amount": 162
       }
      ]
     },
@@ -1668,7 +1668,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 207
+       "amount": 155
       }
      ]
     },
@@ -1683,7 +1683,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 238
+       "amount": 178
       }
      ]
     },
@@ -1737,7 +1737,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 187
+       "amount": 19
       }
      ]
     },
@@ -1752,7 +1752,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 205
+       "amount": 144
       }
      ]
     },
@@ -1767,7 +1767,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 226
+       "amount": 192
       }
      ]
     },
@@ -1782,7 +1782,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 248
+       "amount": 186
       }
      ]
     },
@@ -1797,7 +1797,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 273
+       "amount": 205
       }
      ]
     },
@@ -1836,7 +1836,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 215
+       "amount": 21
       }
      ]
     },
@@ -1851,7 +1851,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 236
+       "amount": 165
       }
      ]
     },
@@ -1866,7 +1866,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 260
+       "amount": 221
       }
      ]
     },
@@ -1881,7 +1881,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 286
+       "amount": 214
       }
      ]
     },
@@ -1896,7 +1896,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 314
+       "amount": 236
       }
      ]
     },
@@ -1935,11 +1935,11 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 247
+       "amount": 25
       },
       {
        "item": "Falsified transcript database",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -1963,11 +1963,11 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 272
+       "amount": 190
       },
       {
        "item": "Forged court document templates",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -1991,7 +1991,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 299
+       "amount": 254
       },
       {
        "item": "Staff keycard clone data",
@@ -2019,7 +2019,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 329
+       "amount": 246
       },
       {
        "item": "Credit Records",
@@ -2047,7 +2047,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 361
+       "amount": 271
       },
       {
        "item": "Body cam footage deletion logs",
@@ -2103,15 +2103,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 38
+       "amount": 4
       },
       {
        "item": "Encrypted passwords",
-       "amount": 38
+       "amount": 4
       },
       {
        "item": "Usernames",
-       "amount": 38
+       "amount": 4
       }
      ]
     },
@@ -2126,15 +2126,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 44
+       "amount": 4
       },
       {
        "item": "Encrypted passwords",
-       "amount": 44
+       "amount": 4
       },
       {
        "item": "Usernames",
-       "amount": 44
+       "amount": 4
       }
      ]
     },
@@ -2149,15 +2149,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 50
+       "amount": 5
       },
       {
        "item": "Encrypted passwords",
-       "amount": 50
+       "amount": 5
       },
       {
        "item": "Usernames",
-       "amount": 50
+       "amount": 5
       }
      ]
     },
@@ -2172,15 +2172,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 42
+       "amount": 29
       },
       {
        "item": "Encrypted Signature",
-       "amount": 42
+       "amount": 29
       },
       {
        "item": "Case Number",
-       "amount": 42
+       "amount": 29
       }
      ]
     },
@@ -2195,15 +2195,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 48
+       "amount": 34
       },
       {
        "item": "Encrypted Signature",
-       "amount": 48
+       "amount": 34
       },
       {
        "item": "Case Number",
-       "amount": 48
+       "amount": 34
       }
      ]
     },
@@ -2218,15 +2218,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 56
+       "amount": 39
       },
       {
        "item": "Encrypted Signature",
-       "amount": 56
+       "amount": 39
       },
       {
        "item": "Case Number",
-       "amount": 56
+       "amount": 39
       }
      ]
     },
@@ -2241,15 +2241,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 46
+       "amount": 39
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 46
+       "amount": 39
       },
       {
        "item": "Staff IDs",
-       "amount": 46
+       "amount": 39
       }
      ]
     },
@@ -2264,15 +2264,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 53
+       "amount": 45
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 53
+       "amount": 45
       },
       {
        "item": "Staff IDs",
-       "amount": 53
+       "amount": 45
       }
      ]
     },
@@ -2287,15 +2287,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 61
+       "amount": 52
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 61
+       "amount": 52
       },
       {
        "item": "Staff IDs",
-       "amount": 61
+       "amount": 52
       }
      ]
     },
@@ -2310,15 +2310,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 51
+       "amount": 38
       },
       {
        "item": "Encrypted PINS",
-       "amount": 51
+       "amount": 38
       },
       {
        "item": "Account Numbers",
-       "amount": 51
+       "amount": 38
       }
      ]
     },
@@ -2333,15 +2333,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 58
+       "amount": 44
       },
       {
        "item": "Encrypted PINS",
-       "amount": 58
+       "amount": 44
       },
       {
        "item": "Account Numbers",
-       "amount": 58
+       "amount": 44
       }
      ]
     },
@@ -2356,15 +2356,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 67
+       "amount": 50
       },
       {
        "item": "Encrypted PINS",
-       "amount": 67
+       "amount": 50
       },
       {
        "item": "Account Numbers",
-       "amount": 67
+       "amount": 50
       }
      ]
     },
@@ -2379,15 +2379,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 56
+       "amount": 42
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 56
+       "amount": 42
       },
       {
        "item": "Badge Number",
-       "amount": 56
+       "amount": 42
       }
      ]
     },
@@ -2402,15 +2402,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 64
+       "amount": 48
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 64
+       "amount": 48
       },
       {
        "item": "Badge Number",
-       "amount": 64
+       "amount": 48
       }
      ]
     },
@@ -2425,15 +2425,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 74
+       "amount": 55
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 74
+       "amount": 55
       },
       {
        "item": "Badge Number",
-       "amount": 74
+       "amount": 55
       }
      ]
     },
@@ -2526,15 +2526,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 58
+       "amount": 6
       },
       {
        "item": "Encrypted passwords",
-       "amount": 58
+       "amount": 6
       },
       {
        "item": "Usernames",
-       "amount": 58
+       "amount": 6
       }
      ]
     },
@@ -2549,15 +2549,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 67
+       "amount": 7
       },
       {
        "item": "Encrypted passwords",
-       "amount": 67
+       "amount": 7
       },
       {
        "item": "Usernames",
-       "amount": 67
+       "amount": 7
       }
      ]
     },
@@ -2572,15 +2572,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 64
+       "amount": 45
       },
       {
        "item": "Encrypted Signature",
-       "amount": 64
+       "amount": 45
       },
       {
        "item": "Case Number",
-       "amount": 64
+       "amount": 45
       }
      ]
     },
@@ -2595,15 +2595,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 73
+       "amount": 51
       },
       {
        "item": "Encrypted Signature",
-       "amount": 73
+       "amount": 51
       },
       {
        "item": "Case Number",
-       "amount": 73
+       "amount": 51
       }
      ]
     },
@@ -2618,15 +2618,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 70
+       "amount": 60
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 70
+       "amount": 60
       },
       {
        "item": "Staff IDs",
-       "amount": 70
+       "amount": 60
       }
      ]
     },
@@ -2641,15 +2641,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 81
+       "amount": 69
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 81
+       "amount": 69
       },
       {
        "item": "Staff IDs",
-       "amount": 81
+       "amount": 69
       }
      ]
     },
@@ -2664,15 +2664,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 77
+       "amount": 58
       },
       {
        "item": "Encrypted PINS",
-       "amount": 77
+       "amount": 58
       },
       {
        "item": "Account Numbers",
-       "amount": 77
+       "amount": 58
       }
      ]
     },
@@ -2687,15 +2687,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 89
+       "amount": 67
       },
       {
        "item": "Encrypted PINS",
-       "amount": 89
+       "amount": 67
       },
       {
        "item": "Account Numbers",
-       "amount": 89
+       "amount": 67
       }
      ]
     },
@@ -2710,15 +2710,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 85
+       "amount": 64
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 85
+       "amount": 64
       },
       {
        "item": "Badge Number",
-       "amount": 85
+       "amount": 64
       }
      ]
     },
@@ -2733,15 +2733,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 98
+       "amount": 73
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 98
+       "amount": 73
       },
       {
        "item": "Badge Number",
-       "amount": 98
+       "amount": 73
       }
      ]
     },
@@ -2811,15 +2811,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 77
+       "amount": 8
       },
       {
        "item": "Encrypted passwords",
-       "amount": 77
+       "amount": 8
       },
       {
        "item": "Usernames",
-       "amount": 77
+       "amount": 8
       }
      ]
     },
@@ -2834,15 +2834,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 88
+       "amount": 9
       },
       {
        "item": "Encrypted passwords",
-       "amount": 88
+       "amount": 9
       },
       {
        "item": "Usernames",
-       "amount": 88
+       "amount": 9
       }
      ]
     },
@@ -2857,15 +2857,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 84
+       "amount": 59
       },
       {
        "item": "Encrypted Signature",
-       "amount": 84
+       "amount": 59
       },
       {
        "item": "Case Number",
-       "amount": 84
+       "amount": 59
       }
      ]
     },
@@ -2880,15 +2880,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 97
+       "amount": 68
       },
       {
        "item": "Encrypted Signature",
-       "amount": 97
+       "amount": 68
       },
       {
        "item": "Case Number",
-       "amount": 97
+       "amount": 68
       }
      ]
     },
@@ -2903,15 +2903,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 93
+       "amount": 79
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 93
+       "amount": 79
       },
       {
        "item": "Staff IDs",
-       "amount": 93
+       "amount": 79
       }
      ]
     },
@@ -2926,15 +2926,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 107
+       "amount": 91
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 107
+       "amount": 91
       },
       {
        "item": "Staff IDs",
-       "amount": 107
+       "amount": 91
       }
      ]
     },
@@ -2949,15 +2949,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 102
+       "amount": 77
       },
       {
        "item": "Encrypted PINS",
-       "amount": 102
+       "amount": 77
       },
       {
        "item": "Account Numbers",
-       "amount": 102
+       "amount": 77
       }
      ]
     },
@@ -2972,15 +2972,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 118
+       "amount": 88
       },
       {
        "item": "Encrypted PINS",
-       "amount": 118
+       "amount": 88
       },
       {
        "item": "Account Numbers",
-       "amount": 118
+       "amount": 88
       }
      ]
     },
@@ -2995,15 +2995,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 112
+       "amount": 84
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 112
+       "amount": 84
       },
       {
        "item": "Badge Number",
-       "amount": 112
+       "amount": 84
       }
      ]
     },
@@ -3018,15 +3018,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 129
+       "amount": 97
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 129
+       "amount": 97
       },
       {
        "item": "Badge Number",
-       "amount": 129
+       "amount": 97
       }
      ]
     },
@@ -3096,15 +3096,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 102
+       "amount": 10
       },
       {
        "item": "Encrypted passwords",
-       "amount": 102
+       "amount": 10
       },
       {
        "item": "Usernames",
-       "amount": 102
+       "amount": 10
       }
      ]
     },
@@ -3119,15 +3119,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 112
+       "amount": 78
       },
       {
        "item": "Encrypted Signature",
-       "amount": 112
+       "amount": 78
       },
       {
        "item": "Case Number",
-       "amount": 112
+       "amount": 78
       }
      ]
     },
@@ -3142,15 +3142,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 123
+       "amount": 104
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 123
+       "amount": 104
       },
       {
        "item": "Staff IDs",
-       "amount": 123
+       "amount": 104
       }
      ]
     },
@@ -3165,15 +3165,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 135
+       "amount": 101
       },
       {
        "item": "Encrypted PINS",
-       "amount": 135
+       "amount": 101
       },
       {
        "item": "Account Numbers",
-       "amount": 135
+       "amount": 101
       }
      ]
     },
@@ -3188,15 +3188,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 149
+       "amount": 111
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 149
+       "amount": 111
       },
       {
        "item": "Badge Number",
-       "amount": 149
+       "amount": 111
       }
      ]
     },
@@ -3243,15 +3243,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 117
+       "amount": 12
       },
       {
        "item": "Encrypted passwords",
-       "amount": 117
+       "amount": 12
       },
       {
        "item": "Usernames",
-       "amount": 117
+       "amount": 12
       }
      ]
     },
@@ -3266,15 +3266,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 128
+       "amount": 90
       },
       {
        "item": "Encrypted Signature",
-       "amount": 128
+       "amount": 90
       },
       {
        "item": "Case Number",
-       "amount": 128
+       "amount": 90
       }
      ]
     },
@@ -3289,15 +3289,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 141
+       "amount": 120
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 141
+       "amount": 120
       },
       {
        "item": "Staff IDs",
-       "amount": 141
+       "amount": 120
       }
      ]
     },
@@ -3312,15 +3312,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 155
+       "amount": 117
       },
       {
        "item": "Encrypted PINS",
-       "amount": 155
+       "amount": 117
       },
       {
        "item": "Account Numbers",
-       "amount": 155
+       "amount": 117
       }
      ]
     },
@@ -3335,15 +3335,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 171
+       "amount": 128
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 171
+       "amount": 128
       },
       {
        "item": "Badge Number",
-       "amount": 171
+       "amount": 128
       }
      ]
     },
@@ -3390,19 +3390,19 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 134
+       "amount": 13
       },
       {
        "item": "Encrypted passwords",
-       "amount": 134
+       "amount": 13
       },
       {
        "item": "Usernames",
-       "amount": 134
+       "amount": 13
       },
       {
        "item": "Student disciplinary records",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -3426,19 +3426,19 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 148
+       "amount": 103
       },
       {
        "item": "Encrypted Signature",
-       "amount": 148
+       "amount": 103
       },
       {
        "item": "Case Number",
-       "amount": 148
+       "amount": 103
       },
       {
        "item": "Sealed case files",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -3462,15 +3462,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 162
+       "amount": 138
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 162
+       "amount": 138
       },
       {
        "item": "Staff IDs",
-       "amount": 162
+       "amount": 138
       },
       {
        "item": "Prescription pad credentials",
@@ -3498,15 +3498,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 179
+       "amount": 134
       },
       {
        "item": "Encrypted PINS",
-       "amount": 179
+       "amount": 134
       },
       {
        "item": "Account Numbers",
-       "amount": 179
+       "amount": 134
       },
       {
        "item": "Safe Deposit Box Registry",
@@ -3534,15 +3534,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 197
+       "amount": 147
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 197
+       "amount": 147
       },
       {
        "item": "Badge Number",
-       "amount": 197
+       "amount": 147
       },
       {
        "item": "Confidential informant registry",
@@ -3606,7 +3606,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 46
+       "amount": 5
       }
      ]
     },
@@ -3621,7 +3621,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 53
+       "amount": 5
       }
      ]
     },
@@ -3636,7 +3636,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 61
+       "amount": 6
       }
      ]
     },
@@ -3651,7 +3651,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 51
+       "amount": 36
       }
      ]
     },
@@ -3666,7 +3666,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 58
+       "amount": 41
       }
      ]
     },
@@ -3681,7 +3681,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 67
+       "amount": 47
       }
      ]
     },
@@ -3696,7 +3696,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 56
+       "amount": 47
       }
      ]
     },
@@ -3711,7 +3711,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 64
+       "amount": 55
       }
      ]
     },
@@ -3726,7 +3726,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 74
+       "amount": 63
       }
      ]
     },
@@ -3741,7 +3741,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 61
+       "amount": 46
       }
      ]
     },
@@ -3756,7 +3756,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 71
+       "amount": 53
       }
      ]
     },
@@ -3771,7 +3771,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 81
+       "amount": 61
       }
      ]
     },
@@ -3786,7 +3786,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 68
+       "amount": 51
       }
      ]
     },
@@ -3801,7 +3801,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 78
+       "amount": 58
       }
      ]
     },
@@ -3816,7 +3816,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 89
+       "amount": 67
       }
      ]
     },
@@ -3885,7 +3885,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 70
+       "amount": 7
       }
      ]
     },
@@ -3900,7 +3900,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 81
+       "amount": 8
       }
      ]
     },
@@ -3915,7 +3915,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 77
+       "amount": 54
       }
      ]
     },
@@ -3930,7 +3930,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 89
+       "amount": 62
       }
      ]
     },
@@ -3945,7 +3945,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 85
+       "amount": 72
       }
      ]
     },
@@ -3960,7 +3960,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 98
+       "amount": 83
       }
      ]
     },
@@ -3975,7 +3975,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 93
+       "amount": 70
       }
      ]
     },
@@ -3990,7 +3990,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 107
+       "amount": 81
       }
      ]
     },
@@ -4005,7 +4005,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 103
+       "amount": 77
       }
      ]
     },
@@ -4020,7 +4020,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 118
+       "amount": 89
       }
      ]
     },
@@ -4074,7 +4074,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 93
+       "amount": 9
       }
      ]
     },
@@ -4089,7 +4089,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 107
+       "amount": 11
       }
      ]
     },
@@ -4104,7 +4104,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 102
+       "amount": 72
       }
      ]
     },
@@ -4119,7 +4119,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 117
+       "amount": 82
       }
      ]
     },
@@ -4134,7 +4134,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 112
+       "amount": 96
       }
      ]
     },
@@ -4149,7 +4149,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 129
+       "amount": 110
       }
      ]
     },
@@ -4164,7 +4164,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 124
+       "amount": 93
       }
      ]
     },
@@ -4179,7 +4179,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 142
+       "amount": 107
       }
      ]
     },
@@ -4194,7 +4194,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 136
+       "amount": 102
       }
      ]
     },
@@ -4209,7 +4209,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 156
+       "amount": 117
       }
      ]
     },
@@ -4263,7 +4263,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 123
+       "amount": 12
       }
      ]
     },
@@ -4278,7 +4278,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 135
+       "amount": 95
       }
      ]
     },
@@ -4293,7 +4293,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 149
+       "amount": 126
       }
      ]
     },
@@ -4308,7 +4308,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 163
+       "amount": 123
       }
      ]
     },
@@ -4323,7 +4323,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 180
+       "amount": 135
       }
      ]
     },
@@ -4362,7 +4362,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 141
+       "amount": 14
       }
      ]
     },
@@ -4377,7 +4377,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 155
+       "amount": 109
       }
      ]
     },
@@ -4392,7 +4392,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 171
+       "amount": 145
       }
      ]
     },
@@ -4407,7 +4407,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 188
+       "amount": 141
       }
      ]
     },
@@ -4422,7 +4422,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 207
+       "amount": 155
       }
      ]
     },
@@ -4461,11 +4461,11 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 162
+       "amount": 16
       },
       {
        "item": "School budget embezzlement logs",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -4489,11 +4489,11 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 179
+       "amount": 125
       },
       {
        "item": "Offshore account records",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -4517,7 +4517,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 197
+       "amount": 167
       },
       {
        "item": "Patient insurance data",
@@ -4545,7 +4545,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 216
+       "amount": 162
       },
       {
        "item": "Vault Override",
@@ -4573,7 +4573,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 238
+       "amount": 178
       },
       {
        "item": "Evidence locker access codes",
@@ -4629,7 +4629,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 26
+       "amount": 3
       }
      ]
     },
@@ -4644,7 +4644,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 30
+       "amount": 3
       }
      ]
     },
@@ -4659,7 +4659,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 34
+       "amount": 3
       }
      ]
     },
@@ -4674,7 +4674,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 28
+       "amount": 20
       }
      ]
     },
@@ -4689,7 +4689,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 33
+       "amount": 23
       }
      ]
     },
@@ -4704,7 +4704,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 38
+       "amount": 26
       }
      ]
     },
@@ -4719,7 +4719,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 31
+       "amount": 27
       }
      ]
     },
@@ -4734,7 +4734,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 36
+       "amount": 31
       }
      ]
     },
@@ -4749,7 +4749,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 41
+       "amount": 35
       }
      ]
     },
@@ -4764,7 +4764,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 34
+       "amount": 26
       }
      ]
     },
@@ -4779,7 +4779,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 40
+       "amount": 30
       }
      ]
     },
@@ -4794,7 +4794,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 46
+       "amount": 34
       }
      ]
     },
@@ -4809,7 +4809,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 38
+       "amount": 28
       }
      ]
     },
@@ -4824,7 +4824,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 44
+       "amount": 33
       }
      ]
     },
@@ -4839,7 +4839,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 50
+       "amount": 38
       }
      ]
     },
@@ -4908,7 +4908,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 39
+       "amount": 4
       }
      ]
     },
@@ -4923,7 +4923,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 45
+       "amount": 5
       }
      ]
     },
@@ -4938,7 +4938,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 43
+       "amount": 30
       }
      ]
     },
@@ -4953,7 +4953,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 50
+       "amount": 35
       }
      ]
     },
@@ -4968,7 +4968,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 48
+       "amount": 40
       }
      ]
     },
@@ -4983,7 +4983,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 55
+       "amount": 47
       }
      ]
     },
@@ -4998,7 +4998,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 52
+       "amount": 39
       }
      ]
     },
@@ -5013,7 +5013,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 60
+       "amount": 45
       }
      ]
     },
@@ -5028,7 +5028,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 58
+       "amount": 43
       }
      ]
     },
@@ -5043,7 +5043,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 66
+       "amount": 50
       }
      ]
     },
@@ -5097,7 +5097,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 52
+       "amount": 5
       }
      ]
     },
@@ -5112,7 +5112,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 60
+       "amount": 6
       }
      ]
     },
@@ -5127,7 +5127,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 57
+       "amount": 40
       }
      ]
     },
@@ -5142,7 +5142,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 66
+       "amount": 46
       }
      ]
     },
@@ -5157,7 +5157,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 63
+       "amount": 53
       }
      ]
     },
@@ -5172,7 +5172,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 72
+       "amount": 62
       }
      ]
     },
@@ -5187,7 +5187,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 69
+       "amount": 52
       }
      ]
     },
@@ -5202,7 +5202,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 80
+       "amount": 60
       }
      ]
     },
@@ -5217,7 +5217,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 76
+       "amount": 57
       }
      ]
     },
@@ -5232,7 +5232,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 88
+       "amount": 66
       }
      ]
     },
@@ -5286,7 +5286,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 69
+       "amount": 7
       }
      ]
     },
@@ -5301,7 +5301,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 76
+       "amount": 53
       }
      ]
     },
@@ -5316,7 +5316,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 83
+       "amount": 71
       }
      ]
     },
@@ -5331,7 +5331,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 92
+       "amount": 69
       }
      ]
     },
@@ -5346,7 +5346,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 101
+       "amount": 76
       }
      ]
     },
@@ -5385,7 +5385,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 79
+       "amount": 8
       }
      ]
     },
@@ -5400,7 +5400,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 87
+       "amount": 61
       }
      ]
     },
@@ -5415,7 +5415,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 96
+       "amount": 81
       }
      ]
     },
@@ -5430,7 +5430,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 105
+       "amount": 79
       }
      ]
     },
@@ -5445,7 +5445,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 116
+       "amount": 87
       }
      ]
     },
@@ -5484,11 +5484,11 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 91
+       "amount": 9
       },
       {
        "item": "District wide master password",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -5512,11 +5512,11 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 100
+       "amount": 70
       },
       {
        "item": "Witness protection address",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -5540,7 +5540,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 110
+       "amount": 94
       },
       {
        "item": "Falsified drug trial results",
@@ -5568,7 +5568,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 121
+       "amount": 91
       },
       {
        "item": "Swift Master Key",
@@ -5596,7 +5596,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 133
+       "amount": 100
       },
       {
        "item": "Corruption payout ledger",
@@ -5652,7 +5652,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 41
+       "amount": 4
       }
      ]
     },
@@ -5667,7 +5667,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 47
+       "amount": 5
       }
      ]
     },
@@ -5682,7 +5682,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 54
+       "amount": 5
       }
      ]
     },
@@ -5697,7 +5697,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 45
+       "amount": 31
       }
      ]
     },
@@ -5712,7 +5712,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 51
+       "amount": 36
       }
      ]
     },
@@ -5727,7 +5727,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 59
+       "amount": 41
       }
      ]
     },
@@ -5742,7 +5742,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 49
+       "amount": 42
       }
      ]
     },
@@ -5757,7 +5757,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 57
+       "amount": 48
       }
      ]
     },
@@ -5772,7 +5772,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 65
+       "amount": 55
       }
      ]
     },
@@ -5787,7 +5787,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 54
+       "amount": 41
       }
      ]
     },
@@ -5802,7 +5802,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 62
+       "amount": 47
       }
      ]
     },
@@ -5817,7 +5817,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 72
+       "amount": 54
       }
      ]
     },
@@ -5832,7 +5832,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 59
+       "amount": 45
       }
      ]
     },
@@ -5847,7 +5847,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 68
+       "amount": 51
       }
      ]
     },
@@ -5862,7 +5862,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 79
+       "amount": 59
       }
      ]
     },
@@ -5931,7 +5931,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 62
+       "amount": 6
       }
      ]
     },
@@ -5946,7 +5946,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 71
+       "amount": 7
       }
      ]
     },
@@ -5961,7 +5961,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 68
+       "amount": 48
       }
      ]
     },
@@ -5976,7 +5976,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 78
+       "amount": 55
       }
      ]
     },
@@ -5991,7 +5991,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 75
+       "amount": 64
       }
      ]
     },
@@ -6006,7 +6006,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 86
+       "amount": 73
       }
      ]
     },
@@ -6021,7 +6021,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 82
+       "amount": 62
       }
      ]
     },
@@ -6036,7 +6036,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 95
+       "amount": 71
       }
      ]
     },
@@ -6051,7 +6051,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 90
+       "amount": 68
       }
      ]
     },
@@ -6066,7 +6066,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 104
+       "amount": 78
       }
      ]
     },
@@ -6120,7 +6120,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 82
+       "amount": 8
       }
      ]
     },
@@ -6135,7 +6135,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 90
+       "amount": 63
       }
      ]
     },
@@ -6150,7 +6150,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 99
+       "amount": 84
       }
      ]
     },
@@ -6165,7 +6165,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 109
+       "amount": 82
       }
      ]
     },
@@ -6180,7 +6180,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 120
+       "amount": 90
       }
      ]
     },
@@ -6219,7 +6219,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 94
+       "amount": 9
       }
      ]
     },
@@ -6234,7 +6234,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 103
+       "amount": 72
       }
      ]
     },
@@ -6249,7 +6249,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 114
+       "amount": 97
       }
      ]
     },
@@ -6264,7 +6264,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 125
+       "amount": 94
       }
      ]
     },
@@ -6279,7 +6279,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 138
+       "amount": 103
       }
      ]
     },
@@ -6318,7 +6318,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 108
+       "amount": 11
       }
      ]
     },
@@ -6333,7 +6333,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 119
+       "amount": 83
       }
      ]
     },
@@ -6348,7 +6348,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 131
+       "amount": 111
       }
      ]
     },
@@ -6363,7 +6363,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 144
+       "amount": 108
       }
      ]
     },
@@ -6378,7 +6378,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 158
+       "amount": 119
       }
      ]
     },
@@ -6417,7 +6417,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 124
+       "amount": 12
       }
      ]
     },
@@ -6432,7 +6432,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 137
+       "amount": 96
       }
      ]
     },
@@ -6447,7 +6447,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 150
+       "amount": 128
       }
      ]
     },
@@ -6462,7 +6462,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 165
+       "amount": 124
       }
      ]
     },
@@ -6477,7 +6477,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 182
+       "amount": 136
       }
      ]
     },
@@ -6516,11 +6516,11 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 143
+       "amount": 14
       },
       {
        "item": "Parents credit card",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -6544,11 +6544,11 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 157
+       "amount": 110
       },
       {
        "item": "Leaked deposition transcripts",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -6572,7 +6572,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 173
+       "amount": 147
       },
       {
        "item": "Patient appointment history",
@@ -6600,7 +6600,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 190
+       "amount": 143
       },
       {
        "item": "Cash Drawer Override Codes",
@@ -6628,7 +6628,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 209
+       "amount": 157
       },
       {
        "item": "Internal affairs complaint archive",
@@ -6684,7 +6684,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 554
+       "amount": 55
       }
      ]
     },
@@ -6699,7 +6699,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 637
+       "amount": 64
       }
      ]
     },
@@ -6714,7 +6714,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 733
+       "amount": 73
       }
      ]
     },
@@ -6729,7 +6729,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 609
+       "amount": 427
       }
      ]
     },
@@ -6744,7 +6744,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 701
+       "amount": 491
       }
      ]
     },
@@ -6759,7 +6759,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 806
+       "amount": 564
       }
      ]
     },
@@ -6774,7 +6774,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 670
+       "amount": 570
       }
      ]
     },
@@ -6789,7 +6789,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 771
+       "amount": 655
       }
      ]
     },
@@ -6804,7 +6804,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 887
+       "amount": 754
       }
      ]
     },
@@ -6819,7 +6819,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 737
+       "amount": 553
       }
      ]
     },
@@ -6834,7 +6834,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 848
+       "amount": 636
       }
      ]
     },
@@ -6849,7 +6849,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 975
+       "amount": 731
       }
      ]
     },
@@ -6864,7 +6864,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 811
+       "amount": 608
       }
      ]
     },
@@ -6879,7 +6879,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 933
+       "amount": 700
       }
      ]
     },
@@ -6894,7 +6894,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1073
+       "amount": 805
       }
      ]
     },
@@ -6963,7 +6963,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 843
+       "amount": 84
       }
      ]
     },
@@ -6978,7 +6978,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 969
+       "amount": 97
       }
      ]
     },
@@ -6993,7 +6993,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 927
+       "amount": 649
       }
      ]
     },
@@ -7008,7 +7008,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1066
+       "amount": 746
       }
      ]
     },
@@ -7023,7 +7023,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1020
+       "amount": 867
       }
      ]
     },
@@ -7038,7 +7038,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1173
+       "amount": 997
       }
      ]
     },
@@ -7053,7 +7053,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1122
+       "amount": 841
       }
      ]
     },
@@ -7068,7 +7068,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1290
+       "amount": 967
       }
      ]
     },
@@ -7083,7 +7083,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1234
+       "amount": 925
       }
      ]
     },
@@ -7098,7 +7098,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1419
+       "amount": 1064
       }
      ]
     },
@@ -7152,7 +7152,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 1114
+       "amount": 111
       }
      ]
     },
@@ -7167,7 +7167,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1226
+       "amount": 858
       }
      ]
     },
@@ -7182,7 +7182,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1349
+       "amount": 1146
       }
      ]
     },
@@ -7197,7 +7197,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1483
+       "amount": 1113
       }
      ]
     },
@@ -7212,7 +7212,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1632
+       "amount": 1224
       }
      ]
     },
@@ -7251,7 +7251,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 1282
+       "amount": 128
       }
      ]
     },
@@ -7266,7 +7266,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1410
+       "amount": 987
       }
      ]
     },
@@ -7281,7 +7281,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1551
+       "amount": 1318
       }
      ]
     },
@@ -7296,7 +7296,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1706
+       "amount": 1279
       }
      ]
     },
@@ -7311,7 +7311,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1876
+       "amount": 1407
       }
      ]
     },
@@ -7350,7 +7350,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 1474
+       "amount": 147
       }
      ]
     },
@@ -7365,7 +7365,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1621
+       "amount": 1135
       }
      ]
     },
@@ -7380,7 +7380,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1783
+       "amount": 1516
       }
      ]
     },
@@ -7395,7 +7395,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1962
+       "amount": 1471
       }
      ]
     },
@@ -7410,7 +7410,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 2158
+       "amount": 1618
       }
      ]
     },
@@ -7449,7 +7449,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 1695
+       "amount": 169
       }
      ]
     },
@@ -7464,7 +7464,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1864
+       "amount": 1305
       }
      ]
     },
@@ -7479,7 +7479,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 2051
+       "amount": 1743
       }
      ]
     },
@@ -7494,7 +7494,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 2256
+       "amount": 1692
       }
      ]
     },
@@ -7509,7 +7509,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 2482
+       "amount": 1861
       }
      ]
     },
@@ -7548,11 +7548,11 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 1949
+       "amount": 195
       },
       {
        "item": "Falsified transcript database",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -7576,11 +7576,11 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 2144
+       "amount": 1501
       },
       {
        "item": "Forged court document templates",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -7604,7 +7604,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 2359
+       "amount": 2005
       },
       {
        "item": "Staff keycard clone data",
@@ -7632,7 +7632,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 2594
+       "amount": 1946
       },
       {
        "item": "Credit Records",
@@ -7660,7 +7660,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 2854
+       "amount": 2140
       },
       {
        "item": "Body cam footage deletion logs",
@@ -7716,7 +7716,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 52
+       "amount": 5
       }
      ]
     },
@@ -7731,7 +7731,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 59
+       "amount": 6
       }
      ]
     },
@@ -7746,7 +7746,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 68
+       "amount": 7
       }
      ]
     },
@@ -7761,7 +7761,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 57
+       "amount": 40
       }
      ]
     },
@@ -7776,7 +7776,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 65
+       "amount": 46
       }
      ]
     },
@@ -7791,7 +7791,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 75
+       "amount": 53
       }
      ]
     },
@@ -7806,7 +7806,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 63
+       "amount": 53
       }
      ]
     },
@@ -7821,7 +7821,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 72
+       "amount": 61
       }
      ]
     },
@@ -7836,7 +7836,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 83
+       "amount": 70
       }
      ]
     },
@@ -7851,7 +7851,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 69
+       "amount": 52
       }
      ]
     },
@@ -7866,7 +7866,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 79
+       "amount": 59
       }
      ]
     },
@@ -7881,7 +7881,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 91
+       "amount": 68
       }
      ]
     },
@@ -7896,7 +7896,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 76
+       "amount": 57
       }
      ]
     },
@@ -7911,7 +7911,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 87
+       "amount": 65
       }
      ]
     },
@@ -7926,7 +7926,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 100
+       "amount": 75
       }
      ]
     },
@@ -7995,7 +7995,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 79
+       "amount": 8
       }
      ]
     },
@@ -8010,7 +8010,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 90
+       "amount": 9
       }
      ]
     },
@@ -8025,7 +8025,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 87
+       "amount": 61
       }
      ]
     },
@@ -8040,7 +8040,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 99
+       "amount": 70
       }
      ]
     },
@@ -8055,7 +8055,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 95
+       "amount": 81
       }
      ]
     },
@@ -8070,7 +8070,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 109
+       "amount": 93
       }
      ]
     },
@@ -8085,7 +8085,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 105
+       "amount": 79
       }
      ]
     },
@@ -8100,7 +8100,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 120
+       "amount": 90
       }
      ]
     },
@@ -8115,7 +8115,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 115
+       "amount": 86
       }
      ]
     },
@@ -8130,7 +8130,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 132
+       "amount": 99
       }
      ]
     },
@@ -8184,7 +8184,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 104
+       "amount": 10
       }
      ]
     },
@@ -8199,7 +8199,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 120
+       "amount": 12
       }
      ]
     },
@@ -8214,7 +8214,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 114
+       "amount": 80
       }
      ]
     },
@@ -8229,7 +8229,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 132
+       "amount": 92
       }
      ]
     },
@@ -8244,7 +8244,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 126
+       "amount": 107
       }
      ]
     },
@@ -8259,7 +8259,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 145
+       "amount": 123
       }
      ]
     },
@@ -8274,7 +8274,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 138
+       "amount": 104
       }
      ]
     },
@@ -8289,7 +8289,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 159
+       "amount": 119
       }
      ]
     },
@@ -8304,7 +8304,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 152
+       "amount": 114
       }
      ]
     },
@@ -8319,7 +8319,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 175
+       "amount": 131
       }
      ]
     },
@@ -8373,7 +8373,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 138
+       "amount": 14
       }
      ]
     },
@@ -8388,7 +8388,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 151
+       "amount": 106
       }
      ]
     },
@@ -8403,7 +8403,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 166
+       "amount": 141
       }
      ]
     },
@@ -8418,7 +8418,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 183
+       "amount": 137
       }
      ]
     },
@@ -8433,7 +8433,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 201
+       "amount": 151
       }
      ]
     },
@@ -8472,7 +8472,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 158
+       "amount": 16
       }
      ]
     },
@@ -8487,7 +8487,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 174
+       "amount": 122
       }
      ]
     },
@@ -8502,7 +8502,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 191
+       "amount": 163
       }
      ]
     },
@@ -8517,7 +8517,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 211
+       "amount": 158
       }
      ]
     },
@@ -8532,7 +8532,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 232
+       "amount": 174
       }
      ]
     },
@@ -8571,11 +8571,11 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 182
+       "amount": 18
       },
       {
        "item": "Student disciplinary records",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -8599,11 +8599,11 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 200
+       "amount": 140
       },
       {
        "item": "Sealed case files",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -8627,7 +8627,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 220
+       "amount": 187
       },
       {
        "item": "Prescription pad credentials",
@@ -8655,7 +8655,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 242
+       "amount": 182
       },
       {
        "item": "Safe Deposit Box Registry",
@@ -8683,7 +8683,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 266
+       "amount": 200
       },
       {
        "item": "Confidential informant registry",
@@ -8739,82 +8739,82 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 10
+       "amount": 1
       }
      ]
     },
     {
      "tier": 2,
      "slot": 1,
-     "value": 5.0,
-     "label": "+5 dmg, +0.1 heat",
+     "value": 25.0,
+     "label": "+25 dmg, +0.1 heat",
      "before": "25 dmg",
-     "after": "30 dmg",
+     "after": "50 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 11
+       "amount": 1
       }
      ]
     },
     {
      "tier": 3,
      "slot": 1,
-     "value": 5.0,
-     "label": "+5 dmg, +0.1 heat",
-     "before": "30 dmg",
-     "after": "35 dmg",
+     "value": 38.0,
+     "label": "+38 dmg, +0.1 heat",
+     "before": "50 dmg",
+     "after": "88 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 12
+       "amount": 1
       }
      ]
     },
     {
      "tier": 4,
      "slot": 1,
-     "value": 5.0,
-     "label": "+5 dmg, +0.1 heat",
-     "before": "35 dmg",
-     "after": "40 dmg",
+     "value": 50.0,
+     "label": "+50 dmg, +0.1 heat",
+     "before": "88 dmg",
+     "after": "138 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 13
+       "amount": 1
       }
      ]
     },
     {
      "tier": 5,
      "slot": 1,
-     "value": 5.0,
-     "label": "+5 dmg, +0.1 heat",
-     "before": "40 dmg",
-     "after": "45 dmg",
+     "value": 62.0,
+     "label": "+62 dmg, +0.1 heat",
+     "before": "138 dmg",
+     "after": "200 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 15
+       "amount": 2
       }
      ]
     },
     {
      "tier": 6,
      "slot": 1,
-     "value": 5.0,
-     "label": "+5 dmg, +0.1 heat",
-     "before": "45 dmg",
-     "after": "50 dmg",
+     "value": 100.0,
+     "label": "+100 dmg, +0.1 heat",
+     "before": "200 dmg",
+     "after": "300 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 16
+       "amount": 2
       }
      ]
     }
@@ -8838,82 +8838,82 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 12
+       "amount": 1
       }
      ]
     },
     {
      "tier": 2,
      "slot": 2,
-     "value": 2.0,
-     "label": "+2",
+     "value": 3.0,
+     "label": "+3",
      "before": "3 firewall dmg",
-     "after": "5 firewall dmg",
+     "after": "6 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 13
+       "amount": 1
       }
      ]
     },
     {
      "tier": 3,
      "slot": 2,
-     "value": 2.0,
-     "label": "+2",
-     "before": "5 firewall dmg",
-     "after": "7 firewall dmg",
+     "value": 5.0,
+     "label": "+5",
+     "before": "6 firewall dmg",
+     "after": "11 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 14
+       "amount": 1
       }
      ]
     },
     {
      "tier": 4,
      "slot": 2,
-     "value": 2.0,
-     "label": "+2",
-     "before": "7 firewall dmg",
-     "after": "9 firewall dmg",
+     "value": 6.0,
+     "label": "+6",
+     "before": "11 firewall dmg",
+     "after": "17 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 15
+       "amount": 2
       }
      ]
     },
     {
      "tier": 5,
      "slot": 2,
-     "value": 2.0,
-     "label": "+2",
-     "before": "9 firewall dmg",
-     "after": "11 firewall dmg",
+     "value": 7.0,
+     "label": "+7",
+     "before": "17 firewall dmg",
+     "after": "24 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 17
+       "amount": 2
       }
      ]
     },
     {
      "tier": 6,
      "slot": 2,
-     "value": 2.0,
-     "label": "+2",
-     "before": "11 firewall dmg",
-     "after": "13 firewall dmg",
+     "value": 12.0,
+     "label": "+12",
+     "before": "24 firewall dmg",
+     "after": "36 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 19
+       "amount": 2
       }
      ]
     }
@@ -8937,7 +8937,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 13
+       "amount": 1
       }
      ]
     },
@@ -8952,7 +8952,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 15
+       "amount": 1
       }
      ]
     },
@@ -8967,7 +8967,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 15
+       "amount": 1
       }
      ]
     },
@@ -8982,7 +8982,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 17
+       "amount": 1
       }
      ]
     },
@@ -8997,7 +8997,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 16
+       "amount": 1
       }
      ]
     },
@@ -9012,7 +9012,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 19
+       "amount": 2
       }
      ]
     },
@@ -9027,7 +9027,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 18
+       "amount": 2
       }
      ]
     },
@@ -9042,7 +9042,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 20
+       "amount": 2
       }
      ]
     },
@@ -9057,7 +9057,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 20
+       "amount": 2
       }
      ]
     },
@@ -9072,7 +9072,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 22
+       "amount": 3
       }
      ]
     },
@@ -9087,7 +9087,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 22
+       "amount": 3
       }
      ]
     },
@@ -9102,7 +9102,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 25
+       "amount": 3
       }
      ]
     }
@@ -9126,7 +9126,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 18
+       "amount": 1
       }
      ]
     },
@@ -9141,7 +9141,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 19
+       "amount": 1
       }
      ]
     },
@@ -9156,7 +9156,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 21
+       "amount": 2
       }
      ]
     },
@@ -9171,7 +9171,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 24
+       "amount": 2
       }
      ]
     },
@@ -9186,7 +9186,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 26
+       "amount": 3
       }
      ]
     },
@@ -9201,7 +9201,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 28
+       "amount": 3
       }
      ]
     }
@@ -9225,7 +9225,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 20
+       "amount": 1
       }
      ]
     },
@@ -9240,7 +9240,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 22
+       "amount": 1
       }
      ]
     },
@@ -9255,7 +9255,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 25
+       "amount": 2
       }
      ]
     },
@@ -9270,7 +9270,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 27
+       "amount": 3
       }
      ]
     },
@@ -9285,7 +9285,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 30
+       "amount": 3
       }
      ]
     },
@@ -9300,7 +9300,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 33
+       "amount": 4
       }
      ]
     }
@@ -9324,7 +9324,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 23
+       "amount": 1
       }
      ]
     },
@@ -9339,7 +9339,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 26
+       "amount": 2
       }
      ]
     },
@@ -9354,7 +9354,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 28
+       "amount": 3
       }
      ]
     },
@@ -9369,7 +9369,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 31
+       "amount": 3
       }
      ]
     },
@@ -9384,7 +9384,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 34
+       "amount": 4
       }
      ]
     },
@@ -9399,7 +9399,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 38
+       "amount": 5
       }
      ]
     }
@@ -9423,7 +9423,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 27
+       "amount": 1
       }
      ]
     },
@@ -9438,7 +9438,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 30
+       "amount": 2
       }
      ]
     },
@@ -9453,7 +9453,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 32
+       "amount": 3
       }
      ]
     },
@@ -9468,7 +9468,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 36
+       "amount": 4
       }
      ]
     },
@@ -9483,7 +9483,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 39
+       "amount": 4
       }
      ]
     },
@@ -9498,7 +9498,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 43
+       "amount": 5
       }
      ]
     }
@@ -9522,7 +9522,7 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 31
+       "amount": 2
       }
      ]
     },
@@ -9537,7 +9537,7 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 34
+       "amount": 2
       }
      ]
     },
@@ -9552,7 +9552,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 37
+       "amount": 3
       }
      ]
     },
@@ -9567,7 +9567,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 41
+       "amount": 4
       }
      ]
     },
@@ -9582,7 +9582,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 45
+       "amount": 5
       }
      ]
     },
@@ -9597,7 +9597,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 50
+       "amount": 6
       }
      ]
     }
@@ -9621,11 +9621,11 @@
      "costs": [
       {
        "item": "Student cache",
-       "amount": 36
+       "amount": 2
       },
       {
        "item": "School budget embezzlement logs",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -9649,11 +9649,11 @@
      "costs": [
       {
        "item": "Legal assistant cache",
-       "amount": 39
+       "amount": 3
       },
       {
        "item": "Offshore account records",
-       "amount": 2
+       "amount": 1
       }
      ]
     }
@@ -9677,7 +9677,7 @@
      "costs": [
       {
        "item": "Receptionist cache",
-       "amount": 43
+       "amount": 4
       },
       {
        "item": "Patient insurance data",
@@ -9705,7 +9705,7 @@
      "costs": [
       {
        "item": "Teller Cache",
-       "amount": 47
+       "amount": 5
       },
       {
        "item": "Vault Override",
@@ -9733,7 +9733,7 @@
      "costs": [
       {
        "item": "Secretary cache",
-       "amount": 52
+       "amount": 6
       },
       {
        "item": "Evidence locker access codes",
@@ -9761,7 +9761,7 @@
      "costs": [
       {
        "item": "Clerk Cache",
-       "amount": 57
+       "amount": 7
       },
       {
        "item": "Deep Cover IDs",

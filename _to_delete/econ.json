@@ -1,0 +1,722 @@
+[
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Student",
+    "payload": "School payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 4,
+    "access_rare": 2,
+    "name": "Administrator",
+    "payload": "School payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 14,
+    "access_rare": 2,
+    "name": "Vice Principal",
+    "payload": "School payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 24,
+    "access_rare": 2,
+    "name": "Principal",
+    "payload": "School payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 34,
+    "access_rare": 2,
+    "name": "Superintendent",
+    "payload": "School payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Logs",
+   "IP address",
+   "Encrypted passwords",
+   "Usernames",
+   "Passwords",
+   "Credentials",
+   "School payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 2,
+   "Credentials": 53,
+   "District wide master password": 1,
+   "Encrypted passwords": 78,
+   "Falsified transcript database": 2,
+   "IP address": 78,
+   "Logs": 1377,
+   "Parents credit card": 2,
+   "Passwords": 93,
+   "SQL Injector": 81,
+   "School budget embezzlement logs": 2,
+   "School payload": 105,
+   "Student cache": 12,
+   "Student disciplinary records": 2,
+   "Usernames": 78
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "School payload": 105,
+    "Student disciplinary records": 1
+   },
+   "Cracking": {
+    "Passwords": 93,
+    "School budget embezzlement logs": 1
+   },
+   "Decoding": {
+    "Falsified transcript database": 1,
+    "Logs": 1123
+   },
+   "Hacking": {
+    "School budget embezzlement logs": 1,
+    "Student cache": 12
+   },
+   "Matching": {
+    "Credentials": 53,
+    "District wide master password": 1
+   },
+   "Mining": {
+    "Falsified transcript database": 1,
+    "Logs": 142
+   },
+   "Parsing": {
+    "Encrypted passwords": 78,
+    "IP address": 78,
+    "Student disciplinary records": 1,
+    "Usernames": 78
+   },
+   "Phishing": {
+    "Parents credit card": 1,
+    "SQL Injector": 81
+   },
+   "System": {
+    "@vm_tokens": 2,
+    "Logs": 112,
+    "Parents credit card": 1
+   }
+  },
+  "upload": {
+   "Credentials": 100,
+   "District wide master password": 3,
+   "Encrypted passwords": 100,
+   "Falsified transcript database": 3,
+   "IP address": 100,
+   "Logs": 100,
+   "Parents credit card": 3,
+   "Passwords": 100,
+   "School budget embezzlement logs": 3,
+   "School payload": 100,
+   "Student disciplinary records": 3,
+   "Usernames": 100
+  }
+ },
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Legal Assistant",
+    "payload": "Lawfirm Payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 10,
+    "access_rare": 3,
+    "name": "Paralegal",
+    "payload": "Lawfirm Payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 35,
+    "access_rare": 3,
+    "name": "Associate Attorney",
+    "payload": "Lawfirm Payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 60,
+    "access_rare": 3,
+    "name": "Lawyer",
+    "payload": "Lawfirm Payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 85,
+    "access_rare": 3,
+    "name": "Partner",
+    "payload": "Lawfirm Payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Archives",
+   "Email Header",
+   "Encrypted Signature",
+   "Case Number",
+   "Digital Signature",
+   "Signed Certificate",
+   "Lawfirm Payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 22,
+   "Archives": 10621,
+   "Case Number": 596,
+   "Digital Signature": 723,
+   "Email Header": 596,
+   "Encrypted Signature": 596,
+   "Forged court document templates": 2,
+   "Lawfirm Payload": 810,
+   "Leaked deposition transcripts": 2,
+   "Legal assistant cache": 15,
+   "Offshore account records": 2,
+   "SQL Injector": 635,
+   "Sealed case files": 2,
+   "Signed Certificate": 404,
+   "Witness protection address": 1
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "Lawfirm Payload": 810,
+    "Sealed case files": 1
+   },
+   "Cracking": {
+    "Digital Signature": 723,
+    "Offshore account records": 1
+   },
+   "Decoding": {
+    "Archives": 8663,
+    "Forged court document templates": 1
+   },
+   "Hacking": {
+    "Legal assistant cache": 15,
+    "Offshore account records": 1
+   },
+   "Matching": {
+    "Signed Certificate": 404,
+    "Witness protection address": 1
+   },
+   "Mining": {
+    "Archives": 1097,
+    "Forged court document templates": 1
+   },
+   "Parsing": {
+    "Case Number": 596,
+    "Email Header": 596,
+    "Encrypted Signature": 596,
+    "Sealed case files": 1
+   },
+   "Phishing": {
+    "Leaked deposition transcripts": 1,
+    "SQL Injector": 635
+   },
+   "System": {
+    "@vm_tokens": 22,
+    "Archives": 861,
+    "Leaked deposition transcripts": 1
+   }
+  },
+  "upload": {
+   "Archives": 300,
+   "Case Number": 300,
+   "Digital Signature": 300,
+   "Email Header": 300,
+   "Encrypted Signature": 300,
+   "Forged court document templates": 5,
+   "Lawfirm Payload": 300,
+   "Leaked deposition transcripts": 5,
+   "Offshore account records": 5,
+   "Sealed case files": 5,
+   "Signed Certificate": 300,
+   "Witness protection address": 5
+  }
+ },
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Receptionist",
+    "payload": "Hospital Payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 10,
+    "access_rare": 4,
+    "name": "Orderly",
+    "payload": "Hospital Payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 35,
+    "access_rare": 4,
+    "name": "Nurse",
+    "payload": "Hospital Payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 60,
+    "access_rare": 4,
+    "name": "Doctor",
+    "payload": "Hospital Payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 85,
+    "access_rare": 4,
+    "name": "Chief of Medicine",
+    "payload": "Hospital Payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Metadata",
+   "Mac Address",
+   "Encrypted Badge Hash",
+   "Staff IDs",
+   "Badge Hash",
+   "Access Badge",
+   "Hospital Payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 38,
+   "Access Badge": 541,
+   "Badge Hash": 964,
+   "Encrypted Badge Hash": 797,
+   "Falsified drug trial results": 2,
+   "Hospital Payload": 1079,
+   "Mac Address": 797,
+   "Metadata": 14185,
+   "Patient appointment history": 4,
+   "Patient insurance data": 4,
+   "Prescription pad credentials": 4,
+   "Receptionist cache": 22,
+   "SQL Injector": 849,
+   "Staff IDs": 797,
+   "Staff keycard clone data": 4
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "Hospital Payload": 1079,
+    "Prescription pad credentials": 2
+   },
+   "Cracking": {
+    "Badge Hash": 964,
+    "Patient insurance data": 2
+   },
+   "Decoding": {
+    "Metadata": 11571,
+    "Staff keycard clone data": 2
+   },
+   "Hacking": {
+    "Patient insurance data": 2,
+    "Receptionist cache": 22
+   },
+   "Matching": {
+    "Access Badge": 541,
+    "Falsified drug trial results": 2
+   },
+   "Mining": {
+    "Metadata": 1465,
+    "Staff keycard clone data": 2
+   },
+   "Parsing": {
+    "Encrypted Badge Hash": 797,
+    "Mac Address": 797,
+    "Prescription pad credentials": 2,
+    "Staff IDs": 797
+   },
+   "Phishing": {
+    "Patient appointment history": 2,
+    "SQL Injector": 849
+   },
+   "System": {
+    "@vm_tokens": 38,
+    "Metadata": 1149,
+    "Patient appointment history": 2
+   }
+  },
+  "upload": {
+   "Access Badge": 600,
+   "Badge Hash": 600,
+   "Encrypted Badge Hash": 600,
+   "Falsified drug trial results": 6,
+   "Hospital Payload": 600,
+   "Mac Address": 600,
+   "Metadata": 600,
+   "Patient appointment history": 6,
+   "Patient insurance data": 6,
+   "Prescription pad credentials": 6,
+   "Staff IDs": 600,
+   "Staff keycard clone data": 6
+  }
+ },
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Teller",
+    "payload": "Bank Payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 10,
+    "access_rare": 5,
+    "name": "Loan Officer",
+    "payload": "Bank Payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 35,
+    "access_rare": 5,
+    "name": "Branch Manager",
+    "payload": "Bank Payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 60,
+    "access_rare": 5,
+    "name": "Security",
+    "payload": "Bank Payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 85,
+    "access_rare": 5,
+    "name": "Chief Financial Officer",
+    "payload": "Bank Payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Cookies",
+   "Routing Number",
+   "Encrypted PINS",
+   "Account Numbers",
+   "PINS",
+   "Account access tokens",
+   "Bank Payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 50,
+   "Account Numbers": 774,
+   "Account access tokens": 525,
+   "Bank Payload": 1048,
+   "Cash Drawer Override Codes": 4,
+   "Cookies": 13768,
+   "Credit Records": 4,
+   "Encrypted PINS": 774,
+   "PINS": 937,
+   "Routing Number": 774,
+   "SQL Injector": 826,
+   "Safe Deposit Box Registry": 4,
+   "Swift Master Key": 2,
+   "Teller Cache": 28,
+   "Vault Override": 4
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "Bank Payload": 1048,
+    "Safe Deposit Box Registry": 2
+   },
+   "Cracking": {
+    "PINS": 937,
+    "Vault Override": 2
+   },
+   "Decoding": {
+    "Cookies": 11229,
+    "Credit Records": 2
+   },
+   "Hacking": {
+    "Teller Cache": 28,
+    "Vault Override": 2
+   },
+   "Matching": {
+    "Account access tokens": 525,
+    "Swift Master Key": 2
+   },
+   "Mining": {
+    "Cookies": 1423,
+    "Credit Records": 2
+   },
+   "Parsing": {
+    "Account Numbers": 774,
+    "Encrypted PINS": 774,
+    "Routing Number": 774,
+    "Safe Deposit Box Registry": 2
+   },
+   "Phishing": {
+    "Cash Drawer Override Codes": 2,
+    "SQL Injector": 826
+   },
+   "System": {
+    "@vm_tokens": 50,
+    "Cash Drawer Override Codes": 2,
+    "Cookies": 1116
+   }
+  },
+  "upload": {
+   "Account Numbers": 1000,
+   "Account access tokens": 1000,
+   "Bank Payload": 1000,
+   "Cash Drawer Override Codes": 10,
+   "Cookies": 1000,
+   "Credit Records": 10,
+   "Encrypted PINS": 1000,
+   "PINS": 1000,
+   "Routing Number": 1000,
+   "Safe Deposit Box Registry": 10,
+   "Swift Master Key": 10,
+   "Vault Override": 10
+  }
+ },
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Secretary",
+    "payload": "Police Payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 10,
+    "access_rare": 5,
+    "name": "Cop",
+    "payload": "Police Payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 35,
+    "access_rare": 5,
+    "name": "Detective",
+    "payload": "Police Payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 60,
+    "access_rare": 5,
+    "name": "Sergeant",
+    "payload": "Police Payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 85,
+    "access_rare": 5,
+    "name": "Captain",
+    "payload": "Police Payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Repositories",
+   "Subnet Map",
+   "Encrypted SSH Key",
+   "Badge Number",
+   "Private Keys",
+   "Officer Auth Key",
+   "Police Payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 76,
+   "Badge Number": 849,
+   "Body cam footage deletion logs": 4,
+   "Confidential informant registry": 4,
+   "Corruption payout ledger": 2,
+   "Encrypted SSH Key": 849,
+   "Evidence locker access codes": 4,
+   "Internal affairs complaint archive": 4,
+   "Officer Auth Key": 578,
+   "Police Payload": 1152,
+   "Private Keys": 1029,
+   "Repositories": 15144,
+   "SQL Injector": 906,
+   "Secretary cache": 34,
+   "Subnet Map": 849
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "Confidential informant registry": 2,
+    "Police Payload": 1152
+   },
+   "Cracking": {
+    "Evidence locker access codes": 2,
+    "Private Keys": 1029
+   },
+   "Decoding": {
+    "Body cam footage deletion logs": 2,
+    "Repositories": 12352
+   },
+   "Hacking": {
+    "Evidence locker access codes": 2,
+    "Secretary cache": 34
+   },
+   "Matching": {
+    "Corruption payout ledger": 2,
+    "Officer Auth Key": 578
+   },
+   "Mining": {
+    "Body cam footage deletion logs": 2,
+    "Repositories": 1565
+   },
+   "Parsing": {
+    "Badge Number": 849,
+    "Confidential informant registry": 2,
+    "Encrypted SSH Key": 849,
+    "Subnet Map": 849
+   },
+   "Phishing": {
+    "Internal affairs complaint archive": 2,
+    "SQL Injector": 906
+   },
+   "System": {
+    "@vm_tokens": 76,
+    "Internal affairs complaint archive": 2,
+    "Repositories": 1227
+   }
+  },
+  "upload": {
+   "Badge Number": 1600,
+   "Body cam footage deletion logs": 15,
+   "Confidential informant registry": 15,
+   "Corruption payout ledger": 15,
+   "Encrypted SSH Key": 1600,
+   "Evidence locker access codes": 15,
+   "Internal affairs complaint archive": 15,
+   "Officer Auth Key": 1600,
+   "Police Payload": 1600,
+   "Private Keys": 1600,
+   "Repositories": 1600,
+   "Subnet Map": 1600
+  }
+ },
+ {
+  "targets": [
+   {
+    "access_payloads": 0,
+    "access_rare": 0,
+    "name": "Clerk",
+    "payload": "Government Payload",
+    "per_hack": 1
+   },
+   {
+    "access_payloads": 10,
+    "access_rare": 5,
+    "name": "Analyst",
+    "payload": "Government Payload",
+    "per_hack": 2
+   },
+   {
+    "access_payloads": 35,
+    "access_rare": 5,
+    "name": "Ambassador",
+    "payload": "Government Payload",
+    "per_hack": 3
+   },
+   {
+    "access_payloads": 60,
+    "access_rare": 5,
+    "name": "Vice President",
+    "payload": "Government Payload",
+    "per_hack": 4
+   },
+   {
+    "access_payloads": 85,
+    "access_rare": 5,
+    "name": "President",
+    "payload": "Government Payload",
+    "per_hack": 5
+   }
+  ],
+  "tier_resources": [
+   "Databases",
+   "Gateway Address",
+   "Encrypted Bio Hash",
+   "Clearance ID",
+   "Bio Template",
+   "Security Clearance",
+   "Government Payload"
+  ],
+  "upgrades": {
+   "@vm_tokens": 152,
+   "Bio Template": 1510,
+   "Black Budget Ledger": 4,
+   "CIA Brief": 4,
+   "Clearance ID": 1248,
+   "Clerk Cache": 40,
+   "Databases": 22213,
+   "Deep Cover IDs": 4,
+   "Encrypted Bio Hash": 1248,
+   "Gateway Address": 1248,
+   "Government Payload": 1693,
+   "Nuclear Codes": 2,
+   "Registered Voters Database": 4,
+   "SQL Injector": 1328,
+   "Security Clearance": 845
+  },
+  "upgrades_by_group": {
+   "Compiling": {
+    "Black Budget Ledger": 2,
+    "Government Payload": 1693
+   },
+   "Cracking": {
+    "Bio Template": 1510,
+    "Deep Cover IDs": 2
+   },
+   "Decoding": {
+    "CIA Brief": 2,
+    "Databases": 18118
+   },
+   "Hacking": {
+    "Clerk Cache": 40,
+    "Deep Cover IDs": 2
+   },
+   "Matching": {
+    "Nuclear Codes": 2,
+    "Security Clearance": 845
+   },
+   "Mining": {
+    "CIA Brief": 2,
+    "Databases": 2295
+   },
+   "Parsing": {
+    "Black Budget Ledger": 2,
+    "Clearance ID": 1248,
+    "Encrypted Bio Hash": 1248,
+    "Gateway Address": 1248
+   },
+   "Phishing": {
+    "Registered Voters Database": 2,
+    "SQL Injector": 1328
+   },
+   "System": {
+    "@vm_tokens": 152,
+    "Databases": 1800,
+    "Registered Voters Database": 2
+   }
+  },
+  "upload": {
+   "Bio Template": 2500,
+   "Black Budget Ledger": 20,
+   "CIA Brief": 20,
+   "Clearance ID": 2500,
+   "Databases": 2500,
+   "Deep Cover IDs": 20,
+   "Encrypted Bio Hash": 2500,
+   "Gateway Address": 2500,
+   "Government Payload": 2500,
+   "Nuclear Codes": 20,
+   "Registered Voters Database": 20,
+   "Security Clearance": 2500
+  }
+ }
+]

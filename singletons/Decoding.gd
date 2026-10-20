@@ -125,8 +125,8 @@ var CACHE = {
 		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
 		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
 	],
-	"efficiency": 0.04, # rare chance: 4% at L1 -> ~8% at L99 (was 10%)
-	"efficiency rate": 0.0004,
+	"efficiency": 0.20, # rare chance: 20% at L1 -> ~22% at L99 (XP pass 2026-10-20: ~250-300 hacks per tier; was 4%)
+	"efficiency rate": 0.0002,
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 0.2,
@@ -277,8 +277,8 @@ var DEEP = {
 		{'cmd': 'decode -deep', 'description': 'Deep scans every cache you have (1 VM Decoding token each)'},
 		{'cmd': 'decode -deep=student cache', 'description': 'Deep scans only Student caches'}
 	],
-	"efficiency": 0.04, # x2 below: 8% at L1 -> ~16% at L99
-	"efficiency rate": 0.0004,
+	"efficiency": 0.20, # x2 below: 40% at L1 -> ~44% at L99
+	"efficiency rate": 0.0002,
 	"rare multiplier": 2.0,
 	"token cost": 1, # VM Decoding tokens per cache
 	"unlocked": false,
@@ -536,7 +536,8 @@ func intel_stat(target: Dictionary) -> String:
 	return s if s in INTEL_STATS else "firewall"
 
 func intel_cap(target: Dictionary) -> int:
-	return max(1, int(float(target.get(intel_stat(target), 0)) * INTEL_CAP_RATIO))
+	# targets 3-5 of a tier carry a bigger "intel cap" (share of their intel stat); default INTEL_CAP_RATIO
+	return max(1, int(float(target.get(intel_stat(target), 0)) * float(target.get("intel cap", INTEL_CAP_RATIO))))
 
 func get_intel(target: Dictionary) -> Dictionary:
 	return intel.get(intel_key(target), {"amount": 0, "hacks": 0})

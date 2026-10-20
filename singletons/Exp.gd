@@ -70,6 +70,9 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 		Audiomanager.play_sfx("level_up")
 		if major != Hacking:
 			Inventory.add_resource(major.vm_token, 1)
+		if level_bonus_applies(major) and int(major.SKILL["level"]) % LEVEL_BONUS_STEP == 0:
+			Signals.system_message_signal.emit("[color=#4ec9b0]%s level %d bonus: +%s VM token chance per cycle (total +%s)[/color]" % [
+				major.SKILL.name, int(major.SKILL["level"]), _pct(LEVEL_TOKEN_BONUS), _pct(vm_token_level_bonus(major))])
 		if major.SKILL.has("efficiency"):
 			major.SKILL["efficiency"] += major.SKILL["efficiency rate"]
 
@@ -100,6 +103,40 @@ func on_level_up(skill_data: Dictionary):
 
 
 #region process unlocks + saving
+## Level bonus: every LEVEL_BONUS_STEP levels of a skill that makes VM tokens, +LEVEL_TOKEN_BONUS VM token chance
+## per cycle (added to each process's base-speed chance, so tokens per hour still don't depend on speed).
+## Hacking and Defragging don't make VM tokens and get none.
+const LEVEL_BONUS_STEP := 5
+const LEVEL_TOKEN_BONUS := 0.001
+
+func level_bonus_applies(major) -> bool:
+	return major in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
+
+func vm_token_level_bonus(major) -> float:
+	if !level_bonus_applies(major):
+		return 0.0
+	return LEVEL_TOKEN_BONUS * int(int(major.SKILL["level"]) / LEVEL_BONUS_STEP)
+
+func _pct(v: float) -> String:
+	return ("%.1f%%" % (v * 100.0))
+
+## 'info <skill>': the bonus so far and the next one only
+func level_bonus_text(major) -> String:
+	if !level_bonus_applies(major):
+		return ""
+	var lvl = int(major.SKILL["level"])
+	var t = "\n[color=#4ec9b0]LEVEL BONUS[/color] [color=#666666]· every %d levels: +%s VM token chance per cycle[/color]\n" % [LEVEL_BONUS_STEP, _pct(LEVEL_TOKEN_BONUS)]
+	t += "├─ Now      +%s  (level %d)\n" % [_pct(vm_token_level_bonus(major)), lvl]
+	if lvl >= MAX_LEVEL:
+		t += "└─ Next     maxed\n"
+	else:
+		var nxt = (int(lvl / LEVEL_BONUS_STEP) + 1) * LEVEL_BONUS_STEP
+		if nxt > MAX_LEVEL:
+			t += "└─ Next     none (last bonus at level %d)\n" % (int(MAX_LEVEL / LEVEL_BONUS_STEP) * LEVEL_BONUS_STEP)
+		else:
+			t += "└─ Next     level %d: +%s total\n" % [nxt, _pct(LEVEL_TOKEN_BONUS * int(nxt / LEVEL_BONUS_STEP))]
+	return t
+
 ## Processes unlock once their skill reaches "unlock level" (and never re-lock).
 ## (The old header did this as a side effect of displaying a skill; now it happens on level up + load.)
 func refresh_process_unlocks(major) -> void:
@@ -136,7 +173,7 @@ func refresh_all_process_unlocks() -> void:
 ## TESTING: every skill and process at max level and unlocked (applied at startup and after every
 ## load, so new processes are covered automatically). Turn off before release; saves made with it on
 ## keep the levels.
-const DEV_MAX_ALL := true
+const DEV_MAX_ALL := false
 
 func _dev_max_all() -> void:
 	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:

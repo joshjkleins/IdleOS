@@ -41,11 +41,14 @@ var hacking_targets = {
 				"command": "hack student",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 1 },
 				"heat": 0.5,
-				"exp": 100,
-				"integrity": 100,
-				"firewall": 10,
-				"counter": 5,
+				"exp": 45,
+				"integrity": 148,
+				"firewall": 13,
+				"counter": 7,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.STUDENT_CACHE
 			},
 			{
@@ -54,12 +57,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack administrator",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
-				"heat": 0.9,
-				"exp": 1200,
-				"integrity": 120,
-				"firewall": 13,
-				"counter": 7,
+				"heat": 0.8,
+				"exp": 500,
+				"integrity": 306,
+				"firewall": 15,
+				"counter": 5,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ADMIN_CACHE
 			},
 			{
@@ -68,12 +74,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack vice-principal",
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
-				"heat": 1.0,
-				"exp": 1800,
-				"integrity": 140,
-				"firewall": 15,
-				"counter": 9,
+				"heat": 1.1,
+				"exp": 753,
+				"integrity": 354,
+				"firewall": 26,
+				"counter": 6,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
 			{
@@ -82,12 +91,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack principal",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
-				"heat": 1.3,
-				"exp": 2400,
-				"integrity": 160,
-				"firewall": 20,
-				"counter": 6,
+				"heat": 1.4,
+				"exp": 1005,
+				"integrity": 409,
+				"firewall": 19,
+				"counter": 3,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.PRINCIPAL_CACHE
 			},
 			{
@@ -96,12 +108,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
-				"heat": 2.0,
-				"exp": 3000,
-				"integrity": 200,
-				"firewall": 30,
-				"counter": 12,
+				"heat": 1.7,
+				"exp": 1252,
+				"integrity": 523,
+				"firewall": 21,
+				"counter": 6,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],
@@ -204,12 +219,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack legal-assistant",
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 1},
-				"heat": 0.7,
-				"exp": 200,
-				"integrity": 200,
-				"firewall": 20,
-				"counter": 10,
+				"heat": 0.5,
+				"exp": 109,
+				"integrity": 164,
+				"firewall": 25,
+				"counter": 20,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -218,12 +236,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack paralegal",
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 2},
-				"heat": 1.1,
-				"exp": 2400,
-				"integrity": 240,
-				"firewall": 26,
-				"counter": 14,
+				"heat": 0.8,
+				"exp": 1287,
+				"integrity": 419,
+				"firewall": 31,
+				"counter": 18,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.PARALEGAL_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -232,12 +253,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack associate-attorney",
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 3},
-				"heat": 1.2,
-				"exp": 3600,
-				"integrity": 280,
-				"firewall": 30,
-				"counter": 18,
+				"heat": 1.1,
+				"exp": 1931,
+				"integrity": 691,
+				"firewall": 74,
+				"counter": 22,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -246,12 +270,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack lawyer",
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 4},
-				"heat": 1.5,
-				"exp": 4800,
-				"integrity": 320,
-				"firewall": 40,
-				"counter": 12,
+				"heat": 1.4,
+				"exp": 2578,
+				"integrity": 826,
+				"firewall": 41,
+				"counter": 8,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.LAWYER_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -260,12 +287,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack partner",
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 5},
-				"heat": 2.2,
-				"exp": 6000,
-				"integrity": 400,
-				"firewall": 60,
-				"counter": 24,
+				"heat": 1.7,
+				"exp": 3222,
+				"integrity": 1113,
+				"firewall": 56,
+				"counter": 21,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.PARTNER_CACHE
 			}
 		],
@@ -286,12 +316,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack receptionist",
 				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 1},
-				"heat": 0.9,
-				"exp": 350,
-				"integrity": 350,
-				"firewall": 35,
-				"counter": 18,
+				"heat": 0.5,
+				"exp": 155,
+				"integrity": 348,
+				"firewall": 52,
+				"counter": 40,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.RECEPTIONIST_CACHE
 			},
 			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
@@ -300,12 +333,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack orderly",
 				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 2},
-				"heat": 1.3,
-				"exp": 4200,
-				"integrity": 420,
-				"firewall": 45,
-				"counter": 24,
+				"heat": 0.8,
+				"exp": 1865,
+				"integrity": 834,
+				"firewall": 63,
+				"counter": 35,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ORDERLY_CACHE
 			},
 			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
@@ -314,12 +350,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack nurse",
 				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 3},
-				"heat": 1.4,
-				"exp": 6300,
-				"integrity": 490,
-				"firewall": 52,
-				"counter": 32,
+				"heat": 1.1,
+				"exp": 2798,
+				"integrity": 1275,
+				"firewall": 143,
+				"counter": 43,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.NURSE_CACHE
 			},
 			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
@@ -328,12 +367,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack doctor",
 				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 4},
-				"heat": 1.7,
-				"exp": 8400,
-				"integrity": 560,
-				"firewall": 70,
-				"counter": 21,
+				"heat": 1.4,
+				"exp": 3731,
+				"integrity": 1890,
+				"firewall": 91,
+				"counter": 17,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.DOCTOR_CACHE
 			},
 			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
@@ -342,12 +384,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack chief-medicine",
 				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 5},
-				"heat": 2.4,
-				"exp": 10500,
-				"integrity": 700,
-				"firewall": 105,
-				"counter": 42,
+				"heat": 1.7,
+				"exp": 4661,
+				"integrity": 2193,
+				"firewall": 106,
+				"counter": 38,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CHIEF_OF_MEDICINE_CACHE
 			}
 		],
@@ -368,12 +413,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack teller",
 				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 1},
-				"heat": 1.1,
-				"exp": 550,
-				"integrity": 550,
-				"firewall": 55,
-				"counter": 28,
+				"heat": 0.5,
+				"exp": 193,
+				"integrity": 672,
+				"firewall": 93,
+				"counter": 64,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.TELLER_CACHE
 			},
 			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
@@ -382,12 +430,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack loan-officer",
 				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 2},
-				"heat": 1.5,
-				"exp": 6600,
-				"integrity": 660,
-				"firewall": 71,
-				"counter": 38,
+				"heat": 0.8,
+				"exp": 2317,
+				"integrity": 1475,
+				"firewall": 106,
+				"counter": 58,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.LOAN_OFFICER_CACHE
 			},
 			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
@@ -396,12 +447,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack branch-manager",
 				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 3},
-				"heat": 1.6,
-				"exp": 9900,
-				"integrity": 770,
-				"firewall": 82,
-				"counter": 50,
+				"heat": 1.1,
+				"exp": 3475,
+				"integrity": 2138,
+				"firewall": 230,
+				"counter": 67,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.BRANCH_MANAGER_CACHE
 			},
 			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
@@ -410,12 +464,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack security",
 				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 4},
-				"heat": 1.9,
-				"exp": 13200,
-				"integrity": 880,
-				"firewall": 110,
-				"counter": 33,
+				"heat": 1.4,
+				"exp": 4634,
+				"integrity": 3340,
+				"firewall": 169,
+				"counter": 34,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SECURITY_CACHE
 			},
 			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
@@ -424,12 +481,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack cfo",
 				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 5},
-				"heat": 2.6,
-				"exp": 16500,
-				"integrity": 1100,
-				"firewall": 165,
-				"counter": 66,
+				"heat": 1.7,
+				"exp": 5792,
+				"integrity": 3876,
+				"firewall": 188,
+				"counter": 68,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CFO_CACHE
 			}
 		],
@@ -450,12 +510,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack secretary",
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 1},
-				"heat": 1.3,
-				"exp": 800,
-				"integrity": 800,
-				"firewall": 80,
-				"counter": 40,
+				"heat": 0.5,
+				"exp": 225,
+				"integrity": 1163,
+				"firewall": 135,
+				"counter": 79,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SECRETARY_CACHE
 			},
 			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
@@ -464,12 +527,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack cop",
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 2},
-				"heat": 1.7,
-				"exp": 9600,
-				"integrity": 960,
-				"firewall": 104,
-				"counter": 56,
+				"heat": 0.8,
+				"exp": 2692,
+				"integrity": 2340,
+				"firewall": 155,
+				"counter": 77,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.COP_CACHE
 			},
 			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
@@ -478,12 +544,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack detective",
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 3},
-				"heat": 1.8,
-				"exp": 14400,
-				"integrity": 1120,
-				"firewall": 120,
-				"counter": 72,
+				"heat": 1.1,
+				"exp": 4036,
+				"integrity": 3246,
+				"firewall": 349,
+				"counter": 101,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.DETECTIVE_CACHE
 			},
 			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
@@ -492,12 +561,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack sergeant",
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 4},
-				"heat": 2.1,
-				"exp": 19200,
-				"integrity": 1280,
-				"firewall": 160,
-				"counter": 48,
+				"heat": 1.4,
+				"exp": 5383,
+				"integrity": 4156,
+				"firewall": 354,
+				"counter": 118,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SERGEANT_CACHE
 			},
 			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
@@ -506,12 +578,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack captain",
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 5},
-				"heat": 2.8,
-				"exp": 24000,
-				"integrity": 1600,
-				"firewall": 240,
-				"counter": 96,
+				"heat": 1.7,
+				"exp": 6728,
+				"integrity": 5502,
+				"firewall": 346,
+				"counter": 162,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CAPTAIN_CACHE
 			}
 		],
@@ -532,12 +607,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack clerk",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 1},
-				"heat": 1.5,
-				"exp": 1200,
-				"integrity": 1200,
-				"firewall": 120,
-				"counter": 60,
+				"heat": 0.5,
+				"exp": 252,
+				"integrity": 1862,
+				"firewall": 198,
+				"counter": 106,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CLERK_CACHE
 			},
 			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
@@ -546,12 +624,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack analyst",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 2},
-				"heat": 1.9,
-				"exp": 14400,
-				"integrity": 1440,
-				"firewall": 156,
-				"counter": 84,
+				"heat": 0.8,
+				"exp": 3013,
+				"integrity": 3510,
+				"firewall": 233,
+				"counter": 115,
 				"counter speed": 16.0,
+				"intel stat": "integrity",
+				"intel cap": 0.25, # share of the intel stat full intel removes
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ANALYST_CACHE
 			},
 			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
@@ -560,12 +641,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack ambassador",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 3},
-				"heat": 2.0,
-				"exp": 21600,
-				"integrity": 1680,
-				"firewall": 180,
-				"counter": 108,
+				"heat": 1.1,
+				"exp": 4521,
+				"integrity": 5200,
+				"firewall": 491,
+				"counter": 125,
 				"counter speed": 16.0,
+				"intel stat": "firewall",
+				"intel cap": 0.35, # share of the intel stat full intel removes
+				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.AMBASSADOR_CACHE
 			},
 			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
@@ -574,12 +658,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack vice-president",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 4},
-				"heat": 2.3,
-				"exp": 28800,
-				"integrity": 1920,
-				"firewall": 240,
-				"counter": 72,
+				"heat": 1.4,
+				"exp": 6027,
+				"integrity": 8341,
+				"firewall": 598,
+				"counter": 168,
 				"counter speed": 30.0,
+				"intel stat": "counter speed",
+				"intel cap": 0.45, # share of the intel stat full intel removes
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRESIDENT_CACHE
 			},
 			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
@@ -588,12 +675,15 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack president",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 5},
-				"heat": 3.0,
-				"exp": 36000,
-				"integrity": 2400,
-				"firewall": 360,
-				"counter": 144,
+				"heat": 1.7,
+				"exp": 7534,
+				"integrity": 10693,
+				"firewall": 566,
+				"counter": 223,
 				"counter speed": 20.0,
+				"intel stat": "counter",
+				"intel cap": 0.4, # share of the intel stat full intel removes
+				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.PRESIDENT_CACHE
 			}
 		],
@@ -830,14 +920,17 @@ func remove_vm_count(amount: int = 1):
 ## Who can be hacked (saved as "unlocks"; the "unlocked" flags written in hacking_targets above are
 ## overwritten by apply_default_unlocks() at startup):
 ##  - each location + its FIRST target unlock when the previous tier's upload goal completes (School: from the start)
-##  - every other target: compile -access=<target> (Compiling: 5 of the previous target's rare item +
+##  - every other target: compile -access=<target> (Compiling: a few of the previous target's rare item +
 ##    payloads, 10 for the 2nd target and +5 per target after)
 ##  - hard mode is always open, but each hard target unlocks after beating its normal version HARD_UNLOCK_WINS times
 const DEV_UNLOCK_ALL_TARGETS := false # TESTING: open every location and target
 const HARD_UNLOCK_WINS = 5
-const ACCESS_RARE_AMOUNT = 5
-const ACCESS_PAYLOAD_BASE = 10
-const ACCESS_PAYLOAD_STEP = 25
+## Target access by tier (economy pass 2026-10-20): rares of the previous target, and payloads for target 2 (+ step
+## per target after it). Tier 1 is short (~46 hacks), so its access is cheaper.
+const ACCESS_RARE_BY_TIER = [2, 3, 4, 5, 5, 5]
+const ACCESS_PAYLOAD_BASE_BY_TIER = [4, 10, 10, 10, 10, 10]
+const ACCESS_PAYLOAD_STEP_BY_TIER = [10, 25, 25, 25, 25, 25]
+const ACCESS_RARE_AMOUNT = 5 # (kept for old references; get_access_recipe uses the per-tier tables)
 
 var wins := {} # target_key -> times beaten
 
@@ -930,15 +1023,16 @@ func get_access_recipe(target: Dictionary) -> Dictionary:
 	if p.is_empty() or p.hard or p.index == 0:
 		return {}
 	var l = hacking_targets[p.location]
+	var ti = clamp(hacking_targets.keys().find(p.location), 0, 5)
 	var prev = l.targets[p.index - 1]
 	var rare = null
 	if prev.get("loot") is CacheData and !prev.loot.rare_pool.is_empty():
 		rare = prev.loot.rare_pool[0].item
 	return {
 		"rare": rare,
-		"rare_amount": ACCESS_RARE_AMOUNT,
+		"rare_amount": ACCESS_RARE_BY_TIER[ti],
 		"payload": l.get("required payload"),
-		"payload_amount": ACCESS_PAYLOAD_BASE + ACCESS_PAYLOAD_STEP * (p.index - 1),
+		"payload_amount": ACCESS_PAYLOAD_BASE_BY_TIER[ti] + ACCESS_PAYLOAD_STEP_BY_TIER[ti] * (p.index - 1),
 	}
 
 ## Short "how do I unlock this" text for locked targets / locations.

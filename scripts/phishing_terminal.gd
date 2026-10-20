@@ -202,7 +202,7 @@ func modifier_block_reason() -> String:
 ## "lines" processes scale by 3 / lines so extra lines don't either.
 func roll_tokens(seconds: float) -> void:
 	var share = float(Phishing.BASE_LINES) / max(1.0, float(_my_lines().size())) if style() == "lines" else 1.0
-	var expected = float(process_data.get("vm token chance", 0.01)) * seconds / Phishing.base_attempt_seconds(process_data) * share
+	var expected = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * seconds / Phishing.base_attempt_seconds(process_data) * share
 	if Upgrades.has("phishing.tackle_box"):
 		expected *= 2.0
 	if has_modifier("chum"):

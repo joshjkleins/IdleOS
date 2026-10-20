@@ -327,7 +327,7 @@ var GOVERNMENT = {
 }
 
 ## ACCESS: unlocks the next hacking target of a location (one-time per target). The cost comes from
-## Stats.get_access_recipe(): 5 of the previous target's rare item + that location's payloads.
+## Stats.get_access_recipe(): a few of the previous target's rare item (by tier) + that location's payloads.
 var ACCESS = {
 	"name": "Access",
 	"tier name": "UTILITY | ACCESS",
@@ -353,7 +353,7 @@ var ACCESS = {
 	"vm token chance": 0.0,
 	"requirements": "Payloads per stage + the previous target's rare item x5 at the final stage",
 	"resource gained": "Access to the next target",
-	"description": "Compiles access to the next hacking target at a location in stages (10 for the second target, +5 per target after; progress is saved). Each stage uses some of the location's payloads; the final stage also takes 5 of the previous target's rare item.",
+	"description": "Compiles access to the next hacking target at a location in stages (10 for the second target, +5 per target after; progress is saved). Each stage uses some of the location's payloads; the final stage also takes a few of the previous target's rare item (2 at School up to 5 from the Bank on).",
 	"efficiency description": "Chance for a burst: 100x speed for 1 second, no heat.",
 	"signal": compile_cycle_complete
 }

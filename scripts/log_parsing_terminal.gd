@@ -188,7 +188,7 @@ func parsing_cache_loop(item: ItemData):
 ## item actually took. Token Sniffer and Deep Read double it.
 func _token_chance() -> float:
 	var base_item = float(process_data.get("base speed", 0.4)) * MAX_LOG_LINES
-	var chance = process_data.get("vm token chance", 0.01) * (_item_seconds / max(0.001, base_item))
+	var chance = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * (_item_seconds / max(0.001, base_item))
 	if Upgrades.has("parsing.token_sniffer"):
 		chance *= 2.0
 	if has_modifier("deep-read"):

@@ -138,7 +138,7 @@ func _reveal_dump() -> Mode:
 ## Token Vault and Forensics double it.
 func _token_chance() -> float:
 	var base = float(process_data["base speed"]) * max(1, _cycle_steps)
-	var chance = float(process_data.get("vm token chance", 0.01)) * (_cycle_seconds / max(0.001, base))
+	var chance = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * (_cycle_seconds / max(0.001, base))
 	if Upgrades.has("decoding.token_vault"):
 		chance *= 2.0
 	if has_modifier("forensics"):

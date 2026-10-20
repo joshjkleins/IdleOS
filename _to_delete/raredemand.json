@@ -1,0 +1,631 @@
+{
+ "decoding": {
+  "efficiency": 0.2,
+  "rate": 0.0002
+ },
+ "tiers": [
+  {
+   "location": "School",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 100,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Student",
+     "rare": "Parents credit card",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 1200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Administrator",
+     "rare": "Falsified transcript database",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 1800,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Vice Principal",
+     "rare": "Student disciplinary records",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 2400,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Principal",
+     "rare": "School budget embezzlement logs",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 3000,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "Superintendent",
+     "rare": "District wide master password",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  },
+  {
+   "location": "Lawfirm",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Legal Assistant",
+     "rare": "Leaked deposition transcripts",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 2400,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Paralegal",
+     "rare": "Forged court document templates",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 3600,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Associate Attorney",
+     "rare": "Sealed case files",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 4800,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Lawyer",
+     "rare": "Offshore account records",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 6000,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "Partner",
+     "rare": "Witness protection address",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  },
+  {
+   "location": "Hospital",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 350,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Receptionist",
+     "rare": "Patient appointment history",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 4200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Orderly",
+     "rare": "Staff keycard clone data",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 6300,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Nurse",
+     "rare": "Prescription pad credentials",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 8400,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Doctor",
+     "rare": "Patient insurance data",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 10500,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "Chief of Medicine",
+     "rare": "Falsified drug trial results",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  },
+  {
+   "location": "Bank",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 550,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Teller",
+     "rare": "Cash Drawer Override Codes",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 6600,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Loan Officer",
+     "rare": "Credit Records",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 9900,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Branch Manager",
+     "rare": "Safe Deposit Box Registry",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 13200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Security",
+     "rare": "Vault Override",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 16500,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "Chief Financial Officer",
+     "rare": "Swift Master Key",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  },
+  {
+   "location": "Police Station",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 800,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Secretary",
+     "rare": "Internal affairs complaint archive",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 9600,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Cop",
+     "rare": "Body cam footage deletion logs",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 14400,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Detective",
+     "rare": "Confidential informant registry",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 19200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Sergeant",
+     "rare": "Evidence locker access codes",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 24000,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "Captain",
+     "rare": "Corruption payout ledger",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  },
+  {
+   "location": "Government",
+   "targets": [
+    {
+     "access": 5,
+     "by_group": {
+      "Phishing": 2,
+      "System": 2
+     },
+     "exp": 1200,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Clerk",
+     "rare": "Registered Voters Database",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Decoding": 2,
+      "Mining": 2
+     },
+     "exp": 14400,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Analyst",
+     "rare": "CIA Brief",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Compiling": 2,
+      "Parsing": 2
+     },
+     "exp": 21600,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Ambassador",
+     "rare": "Black Budget Ledger",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 5,
+     "by_group": {
+      "Cracking": 2,
+      "Hacking": 2
+     },
+     "exp": 28800,
+     "lower_caches": 0.0,
+     "mod_full": 20,
+     "name": "Vice President",
+     "rare": "Deep Cover IDs",
+     "upgrades": 4,
+     "upload": 10
+    },
+    {
+     "access": 0,
+     "by_group": {
+      "Matching": 2
+     },
+     "exp": 36000,
+     "lower_caches": 2.0,
+     "mod_full": 20,
+     "name": "President",
+     "rare": "Nuclear Codes",
+     "upgrades": 2,
+     "upload": 10
+    }
+   ]
+  }
+ ],
+ "tracks": {
+  "decoding.efficiency": [
+   [
+    1,
+    0.016667
+   ],
+   [
+    1,
+    0.016667
+   ],
+   [
+    2,
+    0.016667
+   ],
+   [
+    2,
+    0.016667
+   ],
+   [
+    3,
+    0.016667
+   ],
+   [
+    3,
+    0.016667
+   ],
+   [
+    4,
+    0.016667
+   ],
+   [
+    4,
+    0.016667
+   ],
+   [
+    5,
+    0.016667
+   ],
+   [
+    5,
+    0.016667
+   ],
+   [
+    6,
+    0.016667
+   ],
+   [
+    6,
+    0.016667
+   ]
+  ],
+  "decoding.rare_tracker": [
+   [
+    1,
+    0.0025
+   ],
+   [
+    2,
+    0.0025
+   ],
+   [
+    3,
+    0.0025
+   ],
+   [
+    4,
+    0.0025
+   ],
+   [
+    5,
+    0.0025
+   ],
+   [
+    6,
+    0.0025
+   ]
+  ]
+ },
+ "xp_for_level": [
+  0,
+  263,
+  698,
+  1392,
+  2379,
+  3685,
+  5335,
+  7351,
+  9753,
+  12559,
+  15787,
+  19453,
+  23574,
+  28162,
+  33234,
+  38802,
+  44879,
+  51478,
+  58610,
+  66289,
+  74524,
+  83326,
+  92707,
+  102677,
+  113246,
+  124424,
+  136220,
+  148644,
+  161705,
+  175412,
+  189774,
+  204799,
+  220497,
+  236875,
+  253941,
+  271703,
+  290171,
+  309350,
+  329249,
+  349875,
+  371237,
+  393340,
+  416192,
+  439801,
+  464173,
+  489315,
+  515234,
+  541937,
+  569430,
+  597720,
+  626813,
+  656716,
+  687435,
+  718977,
+  751346,
+  784551,
+  818596,
+  853487,
+  889231,
+  925833,
+  963300,
+  1001636,
+  1040848,
+  1080940,
+  1121920,
+  1163792,
+  1206561,
+  1250234,
+  1294815,
+  1340310,
+  1386724,
+  1434062,
+  1482329,
+  1531532,
+  1581674,
+  1632761,
+  1684797,
+  1737789,
+  1791740,
+  1846655,
+  1902541,
+  1959400,
+  2017239,
+  2076061,
+  2135873,
+  2196677,
+  2258479,
+  2321284,
+  2385096,
+  2449920,
+  2515760,
+  2582621,
+  2650507,
+  2719423,
+  2789373,
+  2860361,
+  2932392,
+  3005471,
+  3079601
+ ]
+}

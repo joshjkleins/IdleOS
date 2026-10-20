@@ -316,7 +316,7 @@ func _compile_payload():
 ## tokens per hour): "vm token chance" is for a base-speed fill. Build Cache and Optimize double it.
 func _token_chance() -> float:
 	var base = 100.0 / max(0.001, float(process_data["base speed"]))
-	var chance = float(process_data.get("vm token chance", 0.01)) * (_fill_seconds / base)
+	var chance = (float(process_data.get("vm token chance", 0.01)) + Exp.vm_token_level_bonus(skill)) * (_fill_seconds / base)
 	if Upgrades.has("compiling.build_cache"):
 		chance *= 2.0
 	if has_modifier("optimize"):
