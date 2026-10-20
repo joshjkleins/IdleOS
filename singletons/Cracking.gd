@@ -56,9 +56,9 @@ var PASSWORD = {
 	"base speed": 3.0, # seconds per character (4 per crack)
 	"overclock speed": 1.5,
 	"overheat speed": 7.5,
-	"heat": 1.6,
-	"overclock heat": 1.9,
-	"overheat heat": 0.3,
+	"heat": 1.4154,
+	"overclock heat": 1.6808,
+	"overheat heat": 0.2654,
 	"vm token chance": 0.01, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_PASSWORDS: 1},
 	"resource gained": Items.PASSWORDS,
@@ -83,9 +83,9 @@ var SIGNATURE = {
 	"base speed": 4.5, # seconds per character (4 per crack)
 	"overclock speed": 2.25,
 	"overheat speed": 11.25,
-	"heat": 2.4,
-	"overclock heat": 2.85,
-	"overheat heat": 0.45,
+	"heat": 2.7344,
+	"overclock heat": 3.2471,
+	"overheat heat": 0.5127,
 	"vm token chance": 0.015, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_SIGNATURE: 1},
 	"resource gained": Items.DIGITAL_SIGNATURE,
@@ -110,9 +110,9 @@ var BADGE = {
 	"base speed": 6.75, # seconds per character (4 per crack)
 	"overclock speed": 3.375,
 	"overheat speed": 16.875,
-	"heat": 3.6,
-	"overclock heat": 4.27,
-	"overheat heat": 0.67,
+	"heat": 5.5358,
+	"overclock heat": 6.566,
+	"overheat heat": 1.0303,
 	"vm token chance": 0.0225, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_BADGE_HASH: 1},
 	"resource gained": Items.BADGE_HASH,
@@ -137,9 +137,9 @@ var PIN = {
 	"base speed": 10.0, # seconds per character (4 per crack)
 	"overclock speed": 5.0,
 	"overheat speed": 25.0,
-	"heat": 5.33,
-	"overclock heat": 6.33,
-	"overheat heat": 1.0,
+	"heat": 9.7689,
+	"overclock heat": 11.6017,
+	"overheat heat": 1.8328,
 	"vm token chance": 0.0333, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_PINS: 1},
 	"resource gained": Items.PINS,
@@ -164,9 +164,9 @@ var KEYS = {
 	"base speed": 15.0, # seconds per character (4 per crack)
 	"overclock speed": 7.5,
 	"overheat speed": 37.5,
-	"heat": 8.0,
-	"overclock heat": 9.5,
-	"overheat heat": 1.5,
+	"heat": 30.3059,
+	"overclock heat": 35.9882,
+	"overheat heat": 5.6824,
 	"vm token chance": 0.05, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_SSH_KEY: 1},
 	"resource gained": Items.PRIVATE_KEYS,
@@ -191,9 +191,9 @@ var BIOMETRIC = {
 	"base speed": 22.5, # seconds per character (4 per crack)
 	"overclock speed": 11.25,
 	"overheat speed": 56.25,
-	"heat": 12.0,
-	"overclock heat": 14.25,
-	"overheat heat": 2.25,
+	"heat": 57.5,
+	"overclock heat": 68.2812,
+	"overheat heat": 10.7812,
 	"vm token chance": 0.075, # per crack; scales with crack length so tokens/hour stay level
 	"requirements": {Items.ENCRYPTED_BIO_HASH: 1},
 	"resource gained": Items.BIO_TEMPLATE,

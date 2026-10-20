@@ -630,11 +630,14 @@ func get_bonus_time_text(what) -> String:
 	var remaining = int(get_bonus_time_remaining(expires))
 	return "%02d:%02d" % [remaining / 60, remaining % 60]
 
+## Heat plan: multiplier from a skill's HEAT_BY_TIER table for tier <t> (1..6; out of range clamps)
+static func tier_heat(table: Array, t: int) -> float:
+	return float(table[clamp(t, 1, table.size()) - 1]) if !table.is_empty() else 1.0
+
 func update_tempature(amount: float):
 	if amount >= 0.0:
-		amount -= HEAT_REDUCTION + Defragging.get_heat_reduction()
-		if amount <= 0.0:
-			amount = 0.0
+		# System Heat Reduction and the defrag heat boost are both a percent of every heat tick
+		amount = max(0.0, amount * (1.0 - HEAT_REDUCTION) * (1.0 - Defragging.get_heat_reduction()))
 	system_tempature += amount
 	if system_tempature >= MAX_TEMP:
 		system_tempature = MAX_TEMP

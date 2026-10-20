@@ -61,10 +61,10 @@ var HEAT = {
 	"requirements": { "item": Items.PASSWORDS, "amount": 15 },
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
-	"bonus heat reduction": 0.2, # removed from every heat gain
-	"bonus label": "-0.2 heat",
-	"bonus text": "All heat applications reduced by a flat 0.2°C",
-	"description": "Every time heat is added to the system, it's reduced by 0.2.",
+	"bonus heat reduction": 0.2, # percent removed from every heat gain (20%)
+	"bonus label": "-20% heat",
+	"bonus text": "All heat applications reduced by 20%",
+	"description": "Every time heat is added to the system, it's reduced by 20%.",
 	"command": "defrag -heat",
 	"expires_at": 0,
 }

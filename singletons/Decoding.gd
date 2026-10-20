@@ -1,5 +1,8 @@
 extends Node
 
+## Heat plan: heat multiplier by the tier being worked on (see BaseTerminal.heat_tier_mult)
+const HEAT_BY_TIER := [0.719, 1.063, 1.538, 2.095, 4.954, 7.188]
+
 signal cache_decode_cycle_completed
 signal intel_decode_cycle_completed
 signal xp_gained

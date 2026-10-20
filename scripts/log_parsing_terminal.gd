@@ -247,7 +247,9 @@ func _get_total_effeciency() -> float:
 	var defragging_bonus = 1.0 # defrag no longer boosts skills
 	
 	var upgrade_scale = process_data.get("efficiency upgrade scale", 1.0)
-	return (base + upgrades.current * upgrade_scale) * defragging_bonus * (2.0 if has_modifier("deep-read") else 1.0)
+	# Deep Read doubles line finds, except Network's (VM tokens stay a slow sink; its token chance still doubles)
+	var deep = 2.0 if has_modifier("deep-read") and process_data.get("command") != Parsing.NETWORK.command else 1.0
+	return (base + upgrades.current * upgrade_scale) * defragging_bonus * deep
 
 ## "PARSING · DEEP READ" on the status line while a modifier runs
 func _update_title() -> void:
@@ -361,6 +363,12 @@ func remove_requirements() -> void:
 	for item in requirements:
 		if Inventory.get_amount(item) >= requirements[item]:
 			Inventory.remove_resource(item, requirements[item])
+
+func heat_tier_mult() -> float:
+	var it = get_current_item_to_parse()
+	if it == null:
+		return 1.0
+	return Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(it) if it is CacheData else it.tier)
 
 func get_current_item_to_parse() -> ItemData:
 	if items_to_parse.is_empty():

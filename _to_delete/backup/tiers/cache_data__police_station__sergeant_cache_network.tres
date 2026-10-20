@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://dgsgihpbovuca"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_f14qd"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_tm3vm"]
+[ext_resource type="Resource" uid="uid://dj41vkg2d3m50" path="res://items/cache_entry/police_station/sergeant/drop_1.tres" id="3_75i45"]
+[ext_resource type="Resource" uid="uid://dblacank4afv8" path="res://items/cache_entry/police_station/sergeant/drop_2.tres" id="4_r5d56"]
+[ext_resource type="Resource" uid="uid://0nqa6h7dkqmy" path="res://items/cache_entry/police_station/sergeant/drop_3.tres" id="5_kvx46"]
+[ext_resource type="Resource" uid="uid://dxvuq51w0tsy3" path="res://items/cache_entry/police_station/sergeant/sergeant_evidence.tres" id="6_5hwgp"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_5qq0f"]
+
+[resource]
+script = ExtResource("7_5qq0f")
+entries = Array[ExtResource("2_tm3vm")]([ExtResource("3_75i45"), ExtResource("4_r5d56"), ExtResource("5_kvx46")])
+rare_pool = Array[ExtResource("2_tm3vm")]([ExtResource("6_5hwgp")])
+rare_drop_chance = 0.05
+id = 262
+name = "Sergeant cache Network"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_f14qd")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -34,6 +34,11 @@ func set_cache_type(p_type: Dictionary, window: bool = false, arg = null):
 
 var drop_rates: RichTextLabel # current cache's drop table (Cache / Skim / Deep)
 
+func heat_tier_mult() -> float:
+	var it = current_cache if current_cache else target_cache
+	var t = Inventory.item_tier(it) if it else Upgrades.working_tier("Decoding")
+	return Stats.tier_heat(Decoding.HEAT_BY_TIER, t if t > 0 else Upgrades.working_tier("Decoding"))
+
 func _ready():
 	cache_decrypt.item_found.connect(update_items_gained)
 	drop_rates = RichTextLabel.new()

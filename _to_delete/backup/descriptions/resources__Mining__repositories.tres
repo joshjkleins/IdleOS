@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://bl1tdo2gpt4ca"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_0lwiv"]
+[ext_resource type="Resource" uid="uid://3pp206mdrqum" path="res://items/resources/Parsing/badge_number.tres" id="2_argl3"]
+[ext_resource type="Resource" uid="uid://b556tbmmdwomk" path="res://items/resources/Parsing/encrypted_ssh_key.tres" id="3_vkiun"]
+[ext_resource type="Resource" uid="uid://oj1s44vus3up" path="res://items/resources/Parsing/subnet_map.tres" id="4_m5qde"]
+
+[resource]
+script = ExtResource("1_0lwiv")
+id = 102
+name = "Repositories"
+shortened_name = "Repos"
+description = "Obtained from Mining. Can be Parsed for resources."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_0lwiv")]([ExtResource("2_argl3"), ExtResource("3_vkiun"), ExtResource("4_m5qde")])
+tier = 5
+color_type = 2
+obtained_from = Array[int]([1])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

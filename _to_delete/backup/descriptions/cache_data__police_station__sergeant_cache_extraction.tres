@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://cv3t1vis6a8p2"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_5tkxl"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_eaped"]
+[ext_resource type="Resource" uid="uid://dj41vkg2d3m50" path="res://items/cache_entry/police_station/sergeant/drop_1.tres" id="3_am1ya"]
+[ext_resource type="Resource" uid="uid://dblacank4afv8" path="res://items/cache_entry/police_station/sergeant/drop_2.tres" id="4_tupta"]
+[ext_resource type="Resource" uid="uid://0nqa6h7dkqmy" path="res://items/cache_entry/police_station/sergeant/drop_3.tres" id="5_lq3gv"]
+[ext_resource type="Resource" uid="uid://dxvuq51w0tsy3" path="res://items/cache_entry/police_station/sergeant/sergeant_evidence.tres" id="6_gr8mr"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_elv38"]
+
+[resource]
+script = ExtResource("7_elv38")
+entries = Array[ExtResource("2_eaped")]([ExtResource("3_am1ya"), ExtResource("4_tupta"), ExtResource("5_lq3gv")])
+rare_pool = Array[ExtResource("2_eaped")]([ExtResource("6_gr8mr")])
+rare_drop_chance = 0.05
+id = 263
+name = "Sergeant cache Extraction"
+shortened_name = ""
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_5tkxl")]([])
+tier = 5
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -325,13 +325,49 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - Packet Spoof (5 heal per 12.5 s, 2 bw, first claim on bandwidth) is too weak for "spoof early" to matter: early
   spoofing delays attacks more than it heals. Needs a spoof change (bandwidth priority / cost / heal) if early spoof
   should be a skill. Firewall reboot (10 s after a break) is what stalls late fights.
-- Item tiers: item_resource.gd defaults `tier` to 1, so items without a set tier (incl. later-location caches) are
-  tier 1. Anything reading item.tier (Compiling mod SQL cost, MOD_BW_COST_BY_TIER, Phishing mod pool) needs the
-  right tiers set first. (The editor re-saving ~129 .tres with "tier = 1" is just the default written out.)
+- ~~Item tiers~~ DONE 2026-10-19: all 185 in-game items whose `tier` field disagreed with their location now carry it
+  (`tools/tests/itemdump` checks: 0 mismatches). This switched on tier effects that were silently stuck at tier 1:
+  Corruption +1%/Mining tier, bait x1.10 (Logs) .. x1.35 (Databases),
+  Compiling mod SQL cost 10 x tier, Phishing mod pool gated by tier unlock. Library / Small business / University
+  items (not in the 6 locations) left at tier 1. Backups: `_to_delete/backup/tiers/`.
+- Network parsing retuned 2026-10-19 (Josh: VM tokens are a resource sink, ~5% max): one token per find (was
+  Mining-tier tokens per find), 0.5% per line at L1 -> 2.46% at L99, efficiency upgrades count 5% (+1% at max),
+  +0.3%/Mining tier above Logs (NETWORK_TIER_BONUS) -> Databases at L99 + max upgrades = 4.96%.
+  Deep Read no longer doubles Network line finds (still doubles the per-cycle VM token chance).
+- ~~Stale item descriptions~~ DONE 2026-10-19: 231 descriptions regenerated from live data by `tools/tests/descgen`
+  (recipes, cache rare pools, variant constants): fixes e.g. "Used as upgrade ingredient" / "Sell on the marketplace" /
+  blank rares, Bio Template "forms a Gateway Address". Re-run descgen after changing recipes or variant numbers
+  (it writes `_to_delete/descgen.tsv`; empty = all descriptions current). Backups: `_to_delete/backup/descriptions/`.
+
+- Rates per tier measured 2026-10-19: `tools/tests/ratetier` (Offline cycle models; every upgrade up to that tier,
+  process level 1 and 99, no modifiers/overclock, before the overheat penalty) -> `tools/balance/rates_2026-10-19.tsv`.
+
+- **Heat plan (Josh, 2026-10-20).** Targets per tier: main + your VMs on the new tier's work run ~1.3x hot on
+  arrival; cool after the tier's Cooling + Heat Reduction installs; main + all VM windows cool at the tier's end
+  (Load Balancer T4 halves VM heat, Server Rack T6 removes it).
+  Step 1 DONE: speed upgrades no longer add heat (BaseTerminal.get_heat and Offline._hc divide by 1 + speed track;
+  overclock/modifiers still add theirs, overheated mode unchanged); System Heat Reduction is now 5% per tier
+  (percent of every heat tick, was flat 0.1/tier) and the Defrag heat boost is 20% (was flat 0.2); Cooling per
+  tier install 0.3/0.35/0.55/0.7/1.05/1.55 -> totals 0.4/0.75/1.3/2.0/3.05/4.6 C/s (COOLING_STEP in gen_upgrades.py).
+  Measure: `HEAT=1 res://ratetier.tscn` -> `_to_delete/heat.tsv` (heat/s vs cooling, arriving vs tier done).
+  Step 2 DONE: Josh's skill ladder kept at every tier (all your windows on one skill's new-tier work, on arrival):
+  Mining 0.9x cooling (never compounds), Parsing/Phishing 1.0x, Cracking/Decoding 1.15x, Matching 1.25x,
+  Compiling 1.35x; tier base 0.1/0.146/0.208/0.3/0.7/1.0 heat/s (x skill mult x previous tier's reduction).
+  `tools/balance/heat_calibrate.py` scaled the per-tier processes' heat / overclock heat / overheat heat
+  (Mining, Cracking, Matching, Compiling payloads) and wrote HEAT_BY_TIER tables for shared processes:
+  Parsing (item tier), Decoding (cache / item tier), Phishing (bait tier, else Upgrades.working_tier),
+  Compiling Mod/Access (working tier) via BaseTerminal.heat_tier_mult() (+ Offline). Whaling heat x4.5 and
+  Phishing Mod x1.5 first (they were 0.02 / 0.06 heat/s vs Spear 0.09). It multiplies what's there: re-run only
+  after resetting HEAT_BY_TIER to 1.0 and re-measuring. Result (main alone, arrival -> tier done): T1 0.9-1.3x -> 0.2-0.35x;
+  T2+ main alone ~0.2-0.47x on arrival (the 1.3x is with main + your VM windows), main + all VMs ~0.9x at tier end.
+  Compiling Mod is hot (4x at T1 arrival) but short (one fill per hack, SQL-limited). Hacking heat (enemy
+  COUNTER_HEAT, 0.3 per action) doesn't scale with the new cooling yet: combat pass.
+  Later: flat cooling extras (Overheat Fan +0.3 C/s, Defrag cooling +0.5 C/s, hacking/upload heat) don't scale.
+  Step 3: option 1 (speed stays as the 1.5x/tier base slowdown; level the extra-output tracks).
 
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
-2. Game-loop chart.
+2. ~~Game-loop chart~~ DONE 2026-10-19 (see "Flow chart node"; `flow` + recipe chart in `info <skill> <process>`).
 3. ~~`ls` filters~~ DONE 2026-10-19: Inventory.gd `item_type()` (cache / exploit / mod / token / combat / payload / rare /
    resource, worked out from existing data, matches 'ls -h') and `item_tier()` (from the location the item comes from,
    not the item's tier field). `ls` is grouped by type (`list_inventory_grouped`), filters combine (`list_filtered`):

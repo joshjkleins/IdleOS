@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://d27dylcoxjtkj"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_ytnmx"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_coalc"]
+[ext_resource type="Resource" uid="uid://bpmpt23pha6yl" path="res://items/cache_entry/school/student/student_encrypted_pw.tres" id="3_3po7n"]
+[ext_resource type="Resource" uid="uid://c1fdvurvkmgnj" path="res://items/cache_entry/school/student/student_logs.tres" id="4_meboi"]
+[ext_resource type="Resource" uid="uid://du5w0msm1yehr" path="res://items/cache_entry/school/student/student_usernames.tres" id="5_jk4my"]
+[ext_resource type="Resource" uid="uid://cnv1kmbjwjhej" path="res://items/cache_entry/school/student/student_parent_cc.tres" id="7_dcwpo"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_bbtrd"]
+
+[resource]
+script = ExtResource("8_bbtrd")
+entries = Array[ExtResource("2_coalc")]([ExtResource("3_3po7n"), ExtResource("4_meboi"), ExtResource("5_jk4my")])
+rare_pool = Array[ExtResource("2_coalc")]([ExtResource("7_dcwpo")])
+rare_drop_chance = 0.05
+id = 151
+name = "Student cache Extraction"
+shortened_name = ""
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_ytnmx")]([])
+tier = 1
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 5.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

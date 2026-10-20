@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://b68ni31n2johk"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_byi4v"]
+[ext_resource type="Resource" uid="uid://b6xgahokrr6kl" path="res://items/resources/Parsing/case_number.tres" id="2_h10mk"]
+[ext_resource type="Resource" uid="uid://gbj2qc7hao5g" path="res://items/resources/Parsing/encrypted_signature.tres" id="3_gxqlf"]
+[ext_resource type="Resource" uid="uid://b71xw504yucne" path="res://items/resources/Parsing/email_header.tres" id="4_wxntj"]
+
+[resource]
+script = ExtResource("1_byi4v")
+id = 98
+name = "Archives"
+shortened_name = ""
+description = "Obtained from Mining. Can be Parsed for resources."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_byi4v")]([ExtResource("2_h10mk"), ExtResource("3_gxqlf"), ExtResource("4_wxntj")])
+tier = 1
+color_type = 2
+obtained_from = Array[int]([1])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

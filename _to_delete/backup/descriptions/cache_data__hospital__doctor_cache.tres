@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://wv05tmcpbuy"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_0uo6k"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_g4tje"]
+[ext_resource type="Resource" uid="uid://dx6wqtstv1pwd" path="res://items/cache_entry/hospital/doctor/doctor_insurance_data.tres" id="2_0uo6k"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_a1301"]
+[ext_resource type="Resource" uid="uid://djjo3wukjel4u" path="res://items/cache_entry/hospital/doctor/drop_1.tres" id="3_0f7k4"]
+[ext_resource type="Resource" uid="uid://diwrkx8304pxl" path="res://items/cache_entry/hospital/doctor/drop_2.tres" id="4_ywtrf"]
+[ext_resource type="Resource" uid="uid://r06kv576f7ui" path="res://items/cache_entry/hospital/doctor/drop_3.tres" id="5_nm07e"]
+
+[resource]
+script = ExtResource("2_a1301")
+entries = Array[ExtResource("1_g4tje")]([ExtResource("3_0f7k4"), ExtResource("4_ywtrf"), ExtResource("5_nm07e")])
+rare_pool = Array[ExtResource("1_g4tje")]([ExtResource("2_0uo6k")])
+rare_drop_chance = 0.05
+id = 55
+name = "Doctor cache"
+shortened_name = "Dr cache"
+description = "Received from hacking a Hospital Doctor. Can be Decoded for a variety of resources or Parsed to transform into a different variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_0uo6k")]([])
+tier = 3
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

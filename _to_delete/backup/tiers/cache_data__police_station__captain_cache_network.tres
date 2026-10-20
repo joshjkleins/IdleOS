@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://cwmdrob8xpcep"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_05vfa"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_r1cbe"]
+[ext_resource type="Resource" uid="uid://0v21uw4f53yc" path="res://items/cache_entry/police_station/captain/drop_1.tres" id="3_72tg4"]
+[ext_resource type="Resource" uid="uid://usg8vsmeg7wn" path="res://items/cache_entry/police_station/captain/drop_2.tres" id="4_26h77"]
+[ext_resource type="Resource" uid="uid://cfvyo1ovkdo1d" path="res://items/cache_entry/police_station/captain/drop_3.tres" id="5_x5nov"]
+[ext_resource type="Resource" uid="uid://dsl12bhgfxbvr" path="res://items/cache_entry/police_station/captain/drop_4.tres" id="6_gsc6m"]
+[ext_resource type="Resource" uid="uid://86fhv81x2tcs" path="res://items/cache_entry/police_station/captain/captain_corruption.tres" id="7_sclqm"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_kjlvv"]
+
+[resource]
+script = ExtResource("8_kjlvv")
+entries = Array[ExtResource("2_r1cbe")]([ExtResource("3_72tg4"), ExtResource("4_26h77"), ExtResource("5_x5nov"), ExtResource("6_gsc6m")])
+rare_pool = Array[ExtResource("2_r1cbe")]([ExtResource("7_sclqm")])
+rare_drop_chance = 0.05
+id = 266
+name = "Captain cache Network"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_05vfa")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

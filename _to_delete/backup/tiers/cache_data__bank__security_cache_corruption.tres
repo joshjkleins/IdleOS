@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://qeenhitctr5w"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_gkicw"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_rm757"]
+[ext_resource type="Resource" uid="uid://dsopa6lsg3nnj" path="res://items/cache_entry/bank/security/drop_1.tres" id="3_1te78"]
+[ext_resource type="Resource" uid="uid://bjg44l7bmh5wy" path="res://items/cache_entry/bank/security/drop_2.tres" id="4_e2hrg"]
+[ext_resource type="Resource" uid="uid://b2e17nnxmjp7o" path="res://items/cache_entry/bank/security/drop_3.tres" id="5_0li7w"]
+[ext_resource type="Resource" uid="uid://ca8hwh5o8idyc" path="res://items/cache_entry/bank/security/rare_item.tres" id="6_tjdak"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_c6ikb"]
+
+[resource]
+script = ExtResource("7_c6ikb")
+entries = Array[ExtResource("2_rm757")]([ExtResource("3_1te78"), ExtResource("4_e2hrg"), ExtResource("5_0li7w")])
+rare_pool = Array[ExtResource("2_rm757")]([ExtResource("6_tjdak")])
+rare_drop_chance = 0.05
+id = 293
+name = "Security Cache Corruption"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_gkicw")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

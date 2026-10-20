@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://cg30q4upeorvr"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_2fe8p"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_eqv81"]
+[ext_resource type="Resource" uid="uid://d2d3ja633vehf" path="res://items/cache_entry/hospital/chief/drop_1.tres" id="3_nim4y"]
+[ext_resource type="Resource" uid="uid://bom7w5lkqv0a6" path="res://items/cache_entry/hospital/chief/drop_2.tres" id="4_lq0cw"]
+[ext_resource type="Resource" uid="uid://wvfe2irf530w" path="res://items/cache_entry/hospital/chief/drop_3.tres" id="5_8j5c1"]
+[ext_resource type="Resource" uid="uid://dpuppjltg2nfm" path="res://items/cache_entry/hospital/chief/drop_4.tres" id="6_yqlbm"]
+[ext_resource type="Resource" uid="uid://d4h14xvvcapq" path="res://items/cache_entry/hospital/chief/chief_trial_results.tres" id="7_6thg4"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_7q46y"]
+
+[resource]
+script = ExtResource("8_7q46y")
+entries = Array[ExtResource("2_eqv81")]([ExtResource("3_nim4y"), ExtResource("4_lq0cw"), ExtResource("5_8j5c1"), ExtResource("6_yqlbm")])
+rare_pool = Array[ExtResource("2_eqv81")]([ExtResource("7_6thg4")])
+rare_drop_chance = 0.05
+id = 246
+name = "Chief of medicine cache Network"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_2fe8p")]([])
+tier = 3
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

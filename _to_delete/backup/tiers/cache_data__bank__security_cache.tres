@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://b8kernma2nrhj"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_krsgw"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_k4jie"]
+[ext_resource type="Resource" uid="uid://dsopa6lsg3nnj" path="res://items/cache_entry/bank/security/drop_1.tres" id="3_k3txi"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_xc5ks"]
+[ext_resource type="Resource" uid="uid://bjg44l7bmh5wy" path="res://items/cache_entry/bank/security/drop_2.tres" id="4_kfe0i"]
+[ext_resource type="Resource" uid="uid://b2e17nnxmjp7o" path="res://items/cache_entry/bank/security/drop_3.tres" id="5_0fcly"]
+[ext_resource type="Resource" uid="uid://ca8hwh5o8idyc" path="res://items/cache_entry/bank/security/rare_item.tres" id="6_86cdg"]
+
+[resource]
+script = ExtResource("3_xc5ks")
+entries = Array[ExtResource("2_k4jie")]([ExtResource("3_k3txi"), ExtResource("4_kfe0i"), ExtResource("5_0fcly")])
+rare_pool = Array[ExtResource("2_k4jie")]([ExtResource("6_86cdg")])
+rare_drop_chance = 0.05
+id = 131
+name = "Security Cache"
+shortened_name = ""
+description = "Obtained from Bank Security. Can be Decoded for a variety of resources or Parsed to transform into a different variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_krsgw")]([])
+tier = 1
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

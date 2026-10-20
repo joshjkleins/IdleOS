@@ -14,6 +14,9 @@ extends BaseTerminal
 
 var vm_lines = []
 var bait: ItemData = null       # Mining item, Phishing.BAIT_PER_CAST used per cast: bite chance up, catch doubled
+func heat_tier_mult() -> float:
+	return Stats.tier_heat(Phishing.HEAT_BY_TIER, bait.tier if bait else Upgrades.working_tier("Phishing"))
+
 var smish_target: Dictionary = {} # Smish: chosen target ({} = random unlocked target that isn't maxed)
 
 ## Main terminal lines live in Phishing.current_lines; a VM keeps its own.

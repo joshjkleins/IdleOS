@@ -86,7 +86,7 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 		MOD_TYPE.RESTORE:
 			return "Packet Spoof Amount"
 		MOD_TYPE.BAND_RATE:
-			return "Bandwith Restore Amount"
+			return "Bandwidth Restore Amount"
 		MOD_TYPE.ATTACK_SPEED:
 			return "SQL Attack Speed"
 		MOD_TYPE.DAMAGE_REDUCTION:

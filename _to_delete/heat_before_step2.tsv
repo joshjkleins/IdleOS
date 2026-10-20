@@ -1,0 +1,109 @@
+tier	skill	process	level	cycles/h	out/h	in/h	hot
+1	Mining	Logs	0.10/0.10	0.10/0.40
+1	Parsing	Footprint Logs	0.15/0.10	0.13/0.40
+1	Cracking	Password	0.13/0.10	0.14/0.40
+1	Matching	Credential	0.14/0.10	0.15/0.40
+1	Compiling	School payload	0.15/0.10	0.14/0.40
+1	Parsing	Corruption Logs	0.15/0.10	0.13/0.40
+1	Parsing	Network Logs	0.15/0.10	0.13/0.40
+1	Parsing	Extraction Logs	0.15/0.10	0.13/0.40
+1	Phishing	Mod (bait Logs)	0.06/0.10	0.07/0.40
+1	Phishing	Spear (no bait)	0.09/0.10	0.11/0.40
+1	Compiling	Mod compile	0.40/0.10	0.38/0.40
+1	Phishing	Spear (bait Logs)	0.09/0.10	0.11/0.40
+1	Phishing	Whale (bait Logs)	0.02/0.10	0.02/0.40
+1	Decoding	Decode Student cache	0.16/0.10	0.15/0.40
+1	Decoding	Decode Admin cache	0.16/0.10	0.15/0.40
+1	Decoding	Decode Vice principal cache	0.16/0.10	0.15/0.40
+1	Decoding	Decode Principal cache	0.16/0.10	0.15/0.40
+1	Decoding	Decode Superintendent cache	0.16/0.10	0.15/0.40
+2	Mining	Archives	0.10/0.40	0.10/0.75
+2	Parsing	Footprint Archives	0.13/0.40	0.11/0.75
+2	Cracking	Signature	0.14/0.40	0.14/0.75
+2	Matching	Certificate	0.16/0.40	0.17/0.75
+2	Compiling	Lawfirm payload	0.14/0.40	0.13/0.75
+2	Parsing	Corruption Archives	0.13/0.40	0.12/0.75
+2	Parsing	Network Archives	0.13/0.40	0.12/0.75
+2	Parsing	Extraction Archives	0.13/0.40	0.11/0.75
+2	Phishing	Mod (bait Archives)	0.07/0.40	0.08/0.75
+2	Phishing	Spear (no bait)	0.11/0.40	0.12/0.75
+2	Compiling	Mod compile	0.38/0.40	0.36/0.75
+2	Phishing	Spear (bait Archives)	0.11/0.40	0.12/0.75
+2	Phishing	Whale (bait Archives)	0.02/0.40	0.02/0.75
+2	Decoding	Decode Legal assistant cache	0.15/0.40	0.14/0.75
+2	Decoding	Decode Paralegal cache	0.15/0.40	0.14/0.75
+2	Decoding	Decode Associate attorney cache	0.15/0.40	0.14/0.75
+2	Decoding	Decode Lawyer cache	0.15/0.40	0.14/0.75
+2	Decoding	Decode Partner cache	0.15/0.40	0.14/0.75
+3	Mining	Metadata	0.10/0.75	0.11/1.30
+3	Parsing	Footprint Metadata	0.11/0.75	0.10/1.30
+3	Cracking	Badge	0.14/0.75	0.15/1.30
+3	Matching	Badge	0.17/0.75	0.19/1.30
+3	Compiling	Hospital payload	0.14/0.75	0.13/1.30
+3	Parsing	Corruption Metadata	0.12/0.75	0.10/1.30
+3	Parsing	Network Metadata	0.12/0.75	0.11/1.30
+3	Parsing	Extraction Metadata	0.11/0.75	0.10/1.30
+3	Phishing	Mod (bait Metadata)	0.08/0.75	0.08/1.30
+3	Phishing	Spear (no bait)	0.12/0.75	0.13/1.30
+3	Compiling	Mod compile	0.36/0.75	0.34/1.30
+3	Phishing	Spear (bait Metadata)	0.13/0.75	0.13/1.30
+3	Phishing	Whale (bait Metadata)	0.02/0.75	0.02/1.30
+3	Decoding	Decode Receptionist cache	0.14/0.75	0.14/1.30
+3	Decoding	Decode Orderly cache	0.14/0.75	0.14/1.30
+3	Decoding	Decode Nurse cache	0.14/0.75	0.14/1.30
+3	Decoding	Decode Doctor cache	0.14/0.75	0.14/1.30
+3	Decoding	Decode Chief of medicine cache	0.14/0.75	0.14/1.30
+4	Mining	Cookies	0.11/1.30	0.11/2.00
+4	Parsing	Footprint Cookies	0.10/1.30	0.09/2.00
+4	Cracking	PIN	0.16/1.30	0.17/2.00
+4	Matching	Account	0.19/1.30	0.22/2.00
+4	Compiling	Bank payload	0.13/1.30	0.12/2.00
+4	Parsing	Corruption Cookies	0.10/1.30	0.09/2.00
+4	Parsing	Network Cookies	0.11/1.30	0.10/2.00
+4	Parsing	Extraction Cookies	0.10/1.30	0.09/2.00
+4	Phishing	Mod (bait Cookies)	0.08/1.30	0.08/2.00
+4	Phishing	Spear (no bait)	0.13/1.30	0.12/2.00
+4	Compiling	Mod compile	0.34/1.30	0.32/2.00
+4	Phishing	Spear (bait Cookies)	0.13/1.30	0.13/2.00
+4	Phishing	Whale (bait Cookies)	0.02/1.30	0.02/2.00
+4	Decoding	Decode Teller Cache	0.14/1.30	0.13/2.00
+4	Decoding	Decode Security Cache	0.14/1.30	0.13/2.00
+4	Decoding	Decode Loan Officer Cache	0.14/1.30	0.13/2.00
+4	Decoding	Decode Branch Manager Cache	0.14/1.30	0.13/2.00
+4	Decoding	Decode Chief Financial Officer Cache	0.14/1.30	0.13/2.00
+5	Mining	Repositories	0.11/2.00	0.12/3.05
+5	Parsing	Footprint Repositories	0.09/2.00	0.08/3.05
+5	Cracking	Keys	0.17/2.00	0.18/3.05
+5	Matching	Officer	0.22/2.00	0.25/3.05
+5	Compiling	Police payload	0.12/2.00	0.11/3.05
+5	Parsing	Corruption Repositories	0.09/2.00	0.08/3.05
+5	Parsing	Network Repositories	0.10/2.00	0.10/3.05
+5	Parsing	Extraction Repositories	0.09/2.00	0.08/3.05
+5	Phishing	Mod (bait Repositories)	0.08/2.00	0.07/3.05
+5	Phishing	Spear (no bait)	0.12/2.00	0.11/3.05
+5	Compiling	Mod compile	0.32/2.00	0.30/3.05
+5	Phishing	Spear (bait Repositories)	0.13/2.00	0.13/3.05
+5	Phishing	Whale (bait Repositories)	0.02/2.00	0.02/3.05
+5	Decoding	Decode Secretary cache	0.13/2.00	0.12/3.05
+5	Decoding	Decode Cop cache	0.13/2.00	0.12/3.05
+5	Decoding	Decode Detective cache	0.13/2.00	0.12/3.05
+5	Decoding	Decode Sergeant cache	0.13/2.00	0.12/3.05
+5	Decoding	Decode Captain cache	0.13/2.00	0.12/3.05
+6	Mining	Databases	0.12/3.05	0.13/4.60
+6	Parsing	Footprint Databases	0.08/3.05	0.07/4.60
+6	Cracking	Biometric	0.18/3.05	0.19/4.60
+6	Matching	Clearance	0.26/3.05	0.30/4.60
+6	Compiling	Government payload	0.11/3.05	0.10/4.60
+6	Parsing	Corruption Databases	0.08/3.05	0.08/4.60
+6	Parsing	Network Databases	0.10/3.05	0.09/4.60
+6	Parsing	Extraction Databases	0.08/3.05	0.08/4.60
+6	Phishing	Mod (bait Databases)	0.07/3.05	0.06/4.60
+6	Phishing	Spear (no bait)	0.11/3.05	0.10/4.60
+6	Compiling	Mod compile	0.30/3.05	0.28/4.60
+6	Phishing	Spear (bait Databases)	0.13/3.05	0.11/4.60
+6	Phishing	Whale (bait Databases)	0.02/3.05	0.01/4.60
+6	Decoding	Decode Clerk Cache	0.12/3.05	0.11/4.60
+6	Decoding	Decode Analyst Cache	0.12/3.05	0.11/4.60
+6	Decoding	Decode Ambassador Cache	0.12/3.05	0.11/4.60
+6	Decoding	Decode Vice President Cache	0.12/3.05	0.11/4.60
+6	Decoding	Decode President Cache	0.12/3.05	0.11/4.60

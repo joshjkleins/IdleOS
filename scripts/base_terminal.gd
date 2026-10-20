@@ -111,9 +111,17 @@ func get_heat(mode: Mode) -> float:
 			h = process_data["heat"]
 	if mode != Mode.OVERHEATED:
 		h *= modifier_heat()
+		# speed upgrades don't add heat: cycles run faster, so each one makes proportionally less
+		# (heat per second stays the same; overclock and modifiers still add theirs)
+		h /= 1.0 + get_speed_upgrade()
 	# Heat Sink track (Mining): less heat from this skill
 	h *= 1.0 - Upgrades.cur(skill.SKILL.name.to_lower() + ".heat_sink")
-	return h
+	return h * heat_tier_mult()
+
+## Heat plan: processes shared by every tier (Parsing, Decoding, Phishing, Compiling Mod/Access) scale their heat
+## with the tier of what they work on (skill.HEAT_BY_TIER). Per-tier processes carry their own heat: 1.0.
+func heat_tier_mult() -> float:
+	return 1.0
 
 ## modifier speed multiplier (1.0 = none)
 func modifier_speed() -> float:

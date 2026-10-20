@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://cvavs60c1jgvt"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_dvp7t"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_cx1gi"]
+[ext_resource type="Resource" uid="uid://rs4v2hjtr3gd" path="res://items/cache_entry/government/president/drop_1.tres" id="3_0j65t"]
+[ext_resource type="Resource" uid="uid://bfmi8ilsghw3c" path="res://items/cache_entry/government/president/drop_2.tres" id="4_f6yhb"]
+[ext_resource type="Resource" uid="uid://dukvvnjohdue6" path="res://items/cache_entry/government/president/drop_3.tres" id="5_3v50v"]
+[ext_resource type="Resource" uid="uid://dwmql3gjklb3y" path="res://items/cache_entry/government/president/drop_4.tres" id="6_s2him"]
+[ext_resource type="Resource" uid="uid://flwrvdlddfbn" path="res://items/cache_entry/government/president/rare_drop.tres" id="7_spy6h"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_6aohr"]
+
+[resource]
+script = ExtResource("8_6aohr")
+entries = Array[ExtResource("2_cx1gi")]([ExtResource("3_0j65t"), ExtResource("4_f6yhb"), ExtResource("5_3v50v"), ExtResource("6_s2him")])
+rare_pool = Array[ExtResource("2_cx1gi")]([ExtResource("7_spy6h")])
+rare_drop_chance = 0.05
+id = 326
+name = "President Cache Network"
+shortened_name = "Pres Cache"
+description = "Cache variant. Can be Decoded with an added chance of finding random VM Tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_dvp7t")]([])
+tier = 6
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

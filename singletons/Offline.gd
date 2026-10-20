@@ -193,10 +193,11 @@ func _runs_hot(job: Dictionary) -> bool:
 	var cool_per_s = -Stats.get_cooling_amount() / max(0.01, Stats.cooling_frequency)
 	return float(job.get("heat", 0.0)) > cool_per_s * float(job.seconds)
 
-## Heat one apply_heat(<h>) call adds (heat sink track, flat heat reduction)
-func _hc(skill: Node, h: float) -> float:
+## Heat one apply_heat(<h>) call adds (heat sink track, speed-neutral, % heat reduction, % defrag boost)
+func _hc(skill: Node, h: float, tier_mult: float = 1.0) -> float:
 	h *= 1.0 - Upgrades.cur(skill.SKILL.name.to_lower() + ".heat_sink")
-	return max(0.0, h - Stats.HEAT_REDUCTION - Defragging.get_heat_reduction())
+	h /= _speed(skill)
+	return max(0.0, h * tier_mult * (1.0 - Stats.HEAT_REDUCTION) * (1.0 - Defragging.get_heat_reduction()))
 
 func _speed(skill: Node) -> float:
 	return 1.0 + Upgrades.cur(skill.SKILL.name.to_lower() + ".speed")
@@ -289,7 +290,7 @@ func _parsing(p: Dictionary, snap: Dictionary) -> Dictionary:
 		for f in out:
 			out[f] /= float(SAMPLES)
 	return {"seconds": t / SAMPLES, "inp": {item: 1.0}, "out": out, "xp": float(p["experience per level"]),
-		"heat": _hc(Parsing, float(p.heat)), "repeat": true}
+		"heat": _hc(Parsing, float(p.heat), Stats.tier_heat(Parsing.HEAT_BY_TIER, Exploits.cache_tier(item) if item is CacheData else item.tier)), "repeat": true}
 
 func _cracking(p: Dictionary) -> Dictionary:
 	var eff = float(p.efficiency) + Upgrades.cur("cracking.efficiency")
@@ -358,7 +359,7 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var cast = float(p["cast time"]) / s
 	var wait = (float(p["wait time min"]) + float(p["wait time max"])) / 2.0 / s
 	var mult = 2.0 if baited else 1.0
-	var h = _hc(Phishing, float(p.heat))
+	var h = _hc(Phishing, float(p.heat), Stats.tier_heat(Phishing.HEAT_BY_TIER, bait.tier if bait else Upgrades.working_tier("Phishing")))
 	var inp := {}
 	var style = p.get("style", "lines")
 	var casts = lines if style == "lines" else 1
@@ -415,7 +416,7 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var step = _step(Decoding, p)
 	var kind = p.get("decode kind", "cache")
 	var bytes_row = CacheDecrypting.HEX_CHARACTERS_SIZE
-	var h = _hc(Decoding, float(p.heat))
+	var h = _hc(Decoding, float(p.heat)) # x the tier of what's decoded (_dec_heat)
 	match kind:
 		"package":
 			var item = Items.ITEM_MAP.get(int(snap.get("item", -1)))
@@ -424,7 +425,7 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 			var eff = Decoding.get_efficiency(p)
 			var per = 1.0 + eff
 			var limit = int(snap.get("limit", 0))
-			var job = {"seconds": bytes_row * step / Decoding.compression_multiplier(), "xp": float(p["experience per level"]), "heat": h}
+			var job = {"seconds": bytes_row * step / Decoding.compression_multiplier(), "xp": float(p["experience per level"]), "heat": h * _dec_heat(item)}
 			job.apply = func(cycles: int, _m: float) -> int:
 				var room = Uploads.get_still_needed(item)
 				if limit > 0:
@@ -441,7 +442,7 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 			if tg.is_empty() or Decoding.is_intel_maxed(tg):
 				return {}
 			var finds = Decoding.INTEL_LINES * Decoding.get_efficiency(p)
-			var job = {"seconds": Decoding.INTEL_LINES * bytes_row * step, "xp": float(p["experience per level"]), "heat": h}
+			var job = {"seconds": Decoding.INTEL_LINES * bytes_row * step, "xp": float(p["experience per level"]), "heat": h * _dec_heat(null)}
 			job.apply = func(cycles: int, m: float) -> int:
 				var n = int(round(cycles * finds * m))
 				var done = 0
@@ -475,8 +476,13 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 					out[d.item] = out.get(d.item, 0.0) + float(d.amount) / SAMPLES
 			Decoding.rare_tracker = keep_tracker
 			Decoding.first_cache_decoded = keep_first
-			return {"seconds": bytes / SAMPLES * step, "inp": {cache: 1.0}, "out": out, "xp": float(p["experience per level"]), "heat": h, "repeat": true}
+			return {"seconds": bytes / SAMPLES * step, "inp": {cache: 1.0}, "out": out, "xp": float(p["experience per level"]), "heat": h * _dec_heat(cache), "repeat": true}
 	return {}
+
+## Decoding heat x the tier of <item> (as cache_decrypt_terminal.heat_tier_mult)
+func _dec_heat(item) -> float:
+	var t = Inventory.item_tier(item) if item else 0
+	return Stats.tier_heat(Decoding.HEAT_BY_TIER, t if t > 0 else Upgrades.working_tier("Decoding"))
 
 ## Fills per second with bursts: a normal fill takes 100 / rate s; a burst (chance per fill) fills at 100x for 1 s
 func _compile_seconds(p: Dictionary) -> Dictionary:
@@ -489,6 +495,8 @@ func _compile_seconds(p: Dictionary) -> Dictionary:
 func _compiling(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var c = _compile_seconds(p)
 	var h = _hc(Compiling, float(p.heat)) * c.heat_share
+	if p == Compiling.MOD or p == Compiling.ACCESS:
+		h *= Stats.tier_heat(Compiling.HEAT_BY_TIER, Upgrades.working_tier("Compiling"))
 	var keep = 1.0 - Upgrades.cur("compiling.recovery")
 	if p == Compiling.MOD:
 		var item = Items.ITEM_MAP.get(int(snap.get("item", -1)))

@@ -60,9 +60,9 @@ var CREDENTIAL = {
 	"overclock speed min": 0.1,
 	"overclock speed max": 0.6,
 	"overheat speed": 1.75,
-	"heat": 2.4,
-	"overclock heat": 2.7,
-	"overheat heat": 0.3,
+	"heat": 2.1429,
+	"overclock heat": 2.4107,
+	"overheat heat": 0.2679,
 	"vm token chance": 0.01, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.USERNAMES: 1,
@@ -92,9 +92,9 @@ var CERTIFICATE = {
 	"overclock speed min": 0.15,
 	"overclock speed max": 0.9,
 	"overheat speed": 2.625,
-	"heat": 3.6,
-	"overclock heat": 4.05,
-	"overheat heat": 0.45,
+	"heat": 3.9009,
+	"overclock heat": 4.3886,
+	"overheat heat": 0.4876,
 	"vm token chance": 0.015, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.CASE_NUMBER: 1,
@@ -124,9 +124,9 @@ var BADGE = {
 	"overclock speed min": 0.225,
 	"overclock speed max": 1.35,
 	"overheat speed": 3.938,
-	"heat": 5.4,
-	"overclock heat": 6.08,
-	"overheat heat": 0.67,
+	"heat": 7.4329,
+	"overclock heat": 8.3689,
+	"overheat heat": 0.9222,
 	"vm token chance": 0.0225, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.STAFF_IDS: 1,
@@ -156,9 +156,9 @@ var ACCOUNT = {
 	"overclock speed min": 0.338,
 	"overclock speed max": 2.025,
 	"overheat speed": 5.906,
-	"heat": 8.1,
-	"overclock heat": 9.11,
-	"overheat heat": 1.01,
+	"heat": 13.5888,
+	"overclock heat": 15.2832,
+	"overheat heat": 1.6944,
 	"vm token chance": 0.0338, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.ACCOUNT_NUMBERS: 1,
@@ -188,9 +188,9 @@ var OFFICER = {
 	"overclock speed min": 0.506,
 	"overclock speed max": 3.038,
 	"overheat speed": 8.859,
-	"heat": 12.15,
-	"overclock heat": 13.67,
-	"overheat heat": 1.52,
+	"heat": 38.6591,
+	"overclock heat": 43.4955,
+	"overheat heat": 4.8364,
 	"vm token chance": 0.0506, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.BADGE_NUMBER: 1,
@@ -220,9 +220,9 @@ var CLEARANCE = {
 	"overclock speed min": 0.759,
 	"overclock speed max": 4.556,
 	"overheat speed": 13.289,
-	"heat": 18.22,
-	"overclock heat": 20.5,
-	"overheat heat": 2.28,
+	"heat": 65.6971,
+	"overclock heat": 73.9183,
+	"overheat heat": 8.2212,
 	"vm token chance": 0.0759, # per match; scales with match length so tokens/hour stay level
 	"requirements": {
 		Items.CLEARANCE_ID: 1,

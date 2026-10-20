@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://j86mkhrvw2hy"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_3ur3a"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_5uesc"]
+[ext_resource type="Resource" uid="uid://c18uv8iamgsu1" path="res://items/cache_entry/lawfirm/partner/drop_1.tres" id="3_btt06"]
+[ext_resource type="Resource" uid="uid://bg3qor4ak84b0" path="res://items/cache_entry/lawfirm/partner/drop_2.tres" id="4_4h8xq"]
+[ext_resource type="Resource" uid="uid://ctyu6hr6eex05" path="res://items/cache_entry/lawfirm/partner/drop_3.tres" id="5_6c5pl"]
+[ext_resource type="Resource" uid="uid://rhptyjbxhg5p" path="res://items/cache_entry/lawfirm/partner/drop_4.tres" id="6_01207"]
+[ext_resource type="Resource" uid="uid://br3ixun7a006p" path="res://items/cache_entry/lawfirm/partner/partner_wittness_protec.tres" id="7_qt8as"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_4dsvo"]
+
+[resource]
+script = ExtResource("8_4dsvo")
+entries = Array[ExtResource("2_5uesc")]([ExtResource("3_btt06"), ExtResource("4_4h8xq"), ExtResource("5_6c5pl"), ExtResource("6_01207")])
+rare_pool = Array[ExtResource("2_5uesc")]([ExtResource("7_qt8as")])
+rare_drop_chance = 0.05
+id = 284
+name = "Partner cache Footprint"
+shortened_name = ""
+description = "Cache variant. Can be Decoded for double basic resources."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_3ur3a")]([])
+tier = 2
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

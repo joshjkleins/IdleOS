@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://32wl5lbs8y8h"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_xx4d6"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_fbbcv"]
+[ext_resource type="Resource" uid="uid://c06pel3uuvcvi" path="res://items/cache_entry/bank/cfo/drop_1.tres" id="3_b53r3"]
+[ext_resource type="Resource" uid="uid://e66u57bwteo6" path="res://items/cache_entry/bank/cfo/drop_2.tres" id="4_0xwb0"]
+[ext_resource type="Resource" uid="uid://blalbom1yfpm7" path="res://items/cache_entry/bank/cfo/drop_3.tres" id="5_mmowf"]
+[ext_resource type="Resource" uid="uid://bw2rs17bncxgg" path="res://items/cache_entry/bank/cfo/drop_4.tres" id="6_jfvf8"]
+[ext_resource type="Resource" uid="uid://ddevps3l2enu8" path="res://items/cache_entry/bank/cfo/rare_item.tres" id="7_gujrb"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_k2x3a"]
+
+[resource]
+script = ExtResource("8_k2x3a")
+entries = Array[ExtResource("2_fbbcv")]([ExtResource("3_b53r3"), ExtResource("4_0xwb0"), ExtResource("5_mmowf"), ExtResource("6_jfvf8")])
+rare_pool = Array[ExtResource("2_fbbcv")]([ExtResource("7_gujrb")])
+rare_drop_chance = 0.05
+id = 304
+name = "Chief Financial Officer Cache Footprint"
+shortened_name = "CFO Cache"
+description = "Cache variant. Can be Decoded for double basic resources."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_xx4d6")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

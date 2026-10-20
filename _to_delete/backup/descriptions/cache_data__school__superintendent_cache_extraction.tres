@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=9 format=3 uid="uid://iu46xov3sd83"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_1k03u"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_o83t4"]
+[ext_resource type="Resource" uid="uid://8smq7rwhalfj" path="res://items/cache_entry/school/superintendent/superintendent_admin_cache.tres" id="3_cxyn5"]
+[ext_resource type="Resource" uid="uid://fn2225vnxin1" path="res://items/cache_entry/school/superintendent/superintendent_principal_cache.tres" id="4_wrpki"]
+[ext_resource type="Resource" uid="uid://bulkd6j1rocuw" path="res://items/cache_entry/school/superintendent/superintendent_student_cache.tres" id="5_dft5u"]
+[ext_resource type="Resource" uid="uid://na3y8mosn3rl" path="res://items/cache_entry/school/superintendent/superintendent_vice_principal_cache.tres" id="6_okdiy"]
+[ext_resource type="Resource" uid="uid://cfllrje0q12yh" path="res://items/cache_entry/school/superintendent/superintendent_master_pw.tres" id="7_sk4es"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_ol8cu"]
+
+[resource]
+script = ExtResource("8_ol8cu")
+entries = Array[ExtResource("2_o83t4")]([ExtResource("3_cxyn5"), ExtResource("4_wrpki"), ExtResource("5_dft5u"), ExtResource("6_okdiy")])
+rare_pool = Array[ExtResource("2_o83t4")]([ExtResource("7_sk4es")])
+rare_drop_chance = 0.05
+id = 167
+name = "Superintendent cache Extraction"
+shortened_name = ""
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_1k03u")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

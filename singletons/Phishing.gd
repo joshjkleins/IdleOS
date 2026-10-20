@@ -1,5 +1,8 @@
 extends Node
 
+## Heat plan: heat multiplier by the tier being worked on (see BaseTerminal.heat_tier_mult)
+const HEAT_BY_TIER := [1.111, 1.261, 1.56, 1.962, 4.667, 6.818]
+
 signal spear_cycle_completed
 signal whale_cycle_completed
 signal xp_gained
@@ -118,9 +121,9 @@ var WHALING = {
 	"download time": 120.0, # total reel time, divided by the lines on the whale
 	"overclocked download time": 60.0,
 	"overheated download time": 300.0,
-	"heat": 0.9,
-	"overclock heat": 1.8,
-	"overheat heat": 0.3,
+	"heat": 4.05,
+	"overclock heat": 8.1,
+	"overheat heat": 1.35,
 	"vm token chance": 0.05, # per attempt at base speed (rolled on time spent, like every skill)
 	"vm token per": "per whale",
 	"bundle min": 10,
@@ -242,9 +245,9 @@ var MOD = {
 	"download time": 35.0,
 	"overclocked download time": 27.5,
 	"overheated download time": 75.5,
-	"heat": 0.3,
-	"overclock heat": 0.6,
-	"overheat heat": 0.1,
+	"heat": 0.45,
+	"overclock heat": 0.9,
+	"overheat heat": 0.15,
 	"vm token chance": 0.009, # per attempt at base speed (rolled on time spent, like every skill)
 	"vm token per": "per cast",
 	"requirements": {},

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://byaewcpeuv4ri"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_cinws"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_fvovo"]
+[ext_resource type="Resource" uid="uid://dn7jx714cfn85" path="res://items/cache_entry/lawfirm/lawyer/drop_1.tres" id="3_h4t6s"]
+[ext_resource type="Resource" uid="uid://dej7g51nj663g" path="res://items/cache_entry/lawfirm/lawyer/drop_2.tres" id="4_u2jft"]
+[ext_resource type="Resource" uid="uid://du5ju72o7antm" path="res://items/cache_entry/lawfirm/lawyer/drop_3.tres" id="5_fhyjq"]
+[ext_resource type="Resource" uid="uid://namxmpnl1kda" path="res://items/cache_entry/lawfirm/lawyer/lawyer_offshore.tres" id="6_ejqme"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_r65jn"]
+
+[resource]
+script = ExtResource("7_r65jn")
+entries = Array[ExtResource("2_fvovo")]([ExtResource("3_h4t6s"), ExtResource("4_u2jft"), ExtResource("5_fhyjq")])
+rare_pool = Array[ExtResource("2_fvovo")]([ExtResource("6_ejqme")])
+rare_drop_chance = 0.05
+id = 281
+name = "Lawyer cache Corruption"
+shortened_name = ""
+description = "Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_cinws")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

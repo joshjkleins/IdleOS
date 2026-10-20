@@ -91,13 +91,17 @@ def flat_track(vals): # explicit per-tier flat amount
 TRACK="Track"; PTD="Pointed"; CAP="Capstone"
 # additive speed bonus per install, by tier: 3 installs per tier bring the total to 1.5^tier - 1
 SPEED_STEP = [round((1.5**t - 1.5**(t-1)) / 3, 4) for t in range(1, 7)]
+# Cooling added by each tier's install: totals 0.4 / 0.75 / 1.3 / 2.0 / 3.05 / 4.6 C/s (base 0.1)
+COOLING_STEP = [0.3, 0.35, 0.55, 0.7, 1.05, 1.55]
 
 GROUPS = {}
 
 GROUPS["System"] = [
     # (type, name, effect, per-install value, running: (start, step, unit) or None)
-    (TRACK,"Cooling","Passive cooling per second","+0.1 C/s",(0.1,0.1,"C/s cooling")),
-    (TRACK,"Heat Reduction","Flat heat removed from every heat application","+0.1",(0.0,0.1,"heat off each application")),
+    # Heat plan (2026-10-20): cooling grows with each tier's process heat, so a new tier runs ~1.3x hot on arrival,
+    # cool after this tier's Cooling + Heat Reduction installs, and main + all VM windows run cool at the tier's end.
+    (TRACK,"Cooling","Passive cooling per second",[f"+{v} C/s" for v in COOLING_STEP],(0.1,COOLING_STEP,"C/s cooling")),
+    (TRACK,"Heat Reduction","Less heat from every process (percent of each heat tick)","-5%",(0.0,5,"% less heat")),
     (TRACK,"VM Windows","Max simultaneous VM windows","+1",(1,1,"VM windows")),
     (TRACK,"Background Services","Offline progression cap: +2 h per install on top of the 1 h base (24 h max)","+2 h",(0,2,"h added to the 1 h offline cap")),
     (TRACK,"Background Services","Offline progression cap","+2 h",(0,2,"h added to the 1 h offline cap")),
@@ -145,7 +149,7 @@ GROUPS["Parsing"] = [
         ["MODIFIER 'overclock': faster, more heat (existing)",
          "Passive: VM Parsing token chance x2",
          "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 10% chance to come out already cracked (skips Cracking)",
-         "MODIFIER 'deep-read': -40% speed; row find chance x2, VM token chance x2, heat x2",
+         "MODIFIER 'deep-read': -40% speed; row find chance x2 (not Network finds), VM token chance x2, heat x2",
          "MODIFIER 'survey': half resources, +100% Parsing XP (same command name in every skill)",
          "Passive: Overclock, Plaintext and Deep Read produce no extra heat"],"one-off",None),
 ]

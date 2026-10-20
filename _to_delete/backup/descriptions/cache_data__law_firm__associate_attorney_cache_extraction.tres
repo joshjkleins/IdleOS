@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://c3k6ewrwr21je"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_cxydj"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_2pt4h"]
+[ext_resource type="Resource" uid="uid://dsvu44d7ye40q" path="res://items/cache_entry/lawfirm/assoc_attorney/drop_1.tres" id="3_nxvgi"]
+[ext_resource type="Resource" uid="uid://qf3oj6o565ac" path="res://items/cache_entry/lawfirm/assoc_attorney/drop_2.tres" id="4_rdvtj"]
+[ext_resource type="Resource" uid="uid://be1kfwbb7nfvj" path="res://items/cache_entry/lawfirm/assoc_attorney/drop_3.tres" id="5_fohoh"]
+[ext_resource type="Resource" uid="uid://ye81u0wk7eoa" path="res://items/cache_entry/lawfirm/assoc_attorney/associate_attorney_sealed_case.tres" id="6_6cm8g"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_wg83x"]
+
+[resource]
+script = ExtResource("7_wg83x")
+entries = Array[ExtResource("2_2pt4h")]([ExtResource("3_nxvgi"), ExtResource("4_rdvtj"), ExtResource("5_fohoh")])
+rare_pool = Array[ExtResource("2_2pt4h")]([ExtResource("6_6cm8g")])
+rare_drop_chance = 0.05
+id = 279
+name = "Associate attorney cache Extraction"
+shortened_name = "Asc. Attorney C"
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_cxydj")]([])
+tier = 2
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

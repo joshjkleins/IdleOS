@@ -1,5 +1,8 @@
 extends Node
 
+## Heat plan: heat multiplier by the tier being worked on (see BaseTerminal.heat_tier_mult)
+const HEAT_BY_TIER := [1.0, 1.387, 1.872, 2.55, 5.6, 7.5]
+
 signal compile_cycle_complete
 signal xp_gained
 signal compile_level_up_signal
@@ -169,9 +172,9 @@ var SCHOOL = {
 	"base speed": 10.0, # bar fill per second (100 = one payload)
 	"overclock speed": 20.0,
 	"overheat speed": 4.0,
-	"heat": 1.5,
-	"overclock heat": 1.9,
-	"overheat heat": 0.3,
+	"heat": 1.35,
+	"overclock heat": 1.71,
+	"overheat heat": 0.27,
 	"vm token chance": 0.01, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.IP_ADDRESS: 1,
@@ -197,9 +200,9 @@ var LAWFIRM = {
 	"base speed": 6.667, # bar fill per second (100 = one payload)
 	"overclock speed": 13.333,
 	"overheat speed": 2.667,
-	"heat": 2.25,
-	"overclock heat": 2.85,
-	"overheat heat": 0.45,
+	"heat": 3.0093,
+	"overclock heat": 3.8118,
+	"overheat heat": 0.6019,
 	"vm token chance": 0.015, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.EMAIL_HEADER: 1,
@@ -225,9 +228,9 @@ var HOSPITAL = {
 	"base speed": 4.444, # bar fill per second (100 = one payload)
 	"overclock speed": 8.889,
 	"overheat speed": 1.778,
-	"heat": 3.38,
-	"overclock heat": 4.27,
-	"overheat heat": 0.67,
+	"heat": 6.1014,
+	"overclock heat": 7.708,
+	"overheat heat": 1.2094,
 	"vm token chance": 0.0225, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.MAC_ADDRESS: 1,
@@ -253,9 +256,9 @@ var BANK = {
 	"base speed": 2.963, # bar fill per second (100 = one payload)
 	"overclock speed": 5.926,
 	"overheat speed": 1.185,
-	"heat": 5.06,
-	"overclock heat": 6.41,
-	"overheat heat": 1.01,
+	"heat": 13.3993,
+	"overclock heat": 16.9742,
+	"overheat heat": 2.6746,
 	"vm token chance": 0.0338, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.ROUTING_NUMBER: 1,
@@ -281,9 +284,9 @@ var POLICE = {
 	"base speed": 1.975, # bar fill per second (100 = one payload)
 	"overclock speed": 3.951,
 	"overheat speed": 0.79,
-	"heat": 7.59,
-	"overclock heat": 9.62,
-	"overheat heat": 1.52,
+	"heat": 47.817,
+	"overclock heat": 60.606,
+	"overheat heat": 9.576,
 	"vm token chance": 0.0506, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.SUBNET_MAP: 1,
@@ -309,9 +312,9 @@ var GOVERNMENT = {
 	"base speed": 1.317, # bar fill per second (100 = one payload)
 	"overclock speed": 2.634,
 	"overheat speed": 0.527,
-	"heat": 11.39,
-	"overclock heat": 14.43,
-	"overheat heat": 2.28,
+	"heat": 104.8398,
+	"overclock heat": 132.8216,
+	"overheat heat": 20.9864,
 	"vm token chance": 0.0759, # per payload; scales with compile length so tokens/hour stay level
 	"requirements": {
 		Items.GATEWAY_ADDRESS: 1,

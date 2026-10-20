@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b4nddpnk5mprv"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_2gcbi"]
+
+[resource]
+script = ExtResource("1_2gcbi")
+id = 12
+name = "School budget embezzlement logs"
+shortened_name = "Budget embezzle logs"
+description = "Used as upgrade ingredient"
+upgrade_ingredient = true
+value = 2000
+parsable = false
+contained_items = Array[ExtResource("1_2gcbi")]([])
+tier = 1
+color_type = 8
+obtained_from = Array[int]([7])
+obtained_from_additional_hint = "PRINCIPAL CACHE"
+hacking_mod_type = 1
+hacking_mod_value = 0.3
+hacking_mod_duration = 5
+hacking_mod_consumed = 20
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

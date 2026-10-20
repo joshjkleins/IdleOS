@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://dikfki533eey1"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_gg0ky"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_siotj"]
+[ext_resource type="Resource" uid="uid://crgs3y6wjv27r" path="res://items/cache_entry/lawfirm/legal_assist/legal_assist_1.tres" id="3_g4unn"]
+[ext_resource type="Resource" uid="uid://3m2mt25i7d1" path="res://items/cache_entry/lawfirm/legal_assist/legal_assist_2.tres" id="4_1pfar"]
+[ext_resource type="Resource" uid="uid://ca3jenv8t3ced" path="res://items/cache_entry/lawfirm/legal_assist/legal_assist_3.tres" id="5_dlgvy"]
+[ext_resource type="Resource" uid="uid://28xf8k18sale" path="res://items/cache_entry/lawfirm/legal_assist/legal_assist_deposition.tres" id="6_jkt4a"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_72pgn"]
+
+[resource]
+script = ExtResource("7_72pgn")
+entries = Array[ExtResource("2_siotj")]([ExtResource("3_g4unn"), ExtResource("4_1pfar"), ExtResource("5_dlgvy")])
+rare_pool = Array[ExtResource("2_siotj")]([ExtResource("6_jkt4a")])
+rare_drop_chance = 0.05
+id = 269
+name = "Legal assistant cache Corruption"
+shortened_name = "L Assist cache"
+description = "Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_gg0ky")]([])
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

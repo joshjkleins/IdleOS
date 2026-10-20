@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://bgquj4ry6vkcj"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_f1l8r"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_wttw5"]
+[ext_resource type="Resource" uid="uid://chmsajttdy8xd" path="res://items/cache_entry/bank/branch_manager/drop_1.tres" id="3_xa32l"]
+[ext_resource type="Resource" uid="uid://1rgby2lomjcm" path="res://items/cache_entry/bank/branch_manager/drop_2.tres" id="4_1iktc"]
+[ext_resource type="Resource" uid="uid://ddfv6dn2e2mcq" path="res://items/cache_entry/bank/branch_manager/drop_3.tres" id="5_l8q7b"]
+[ext_resource type="Resource" uid="uid://c10hex7wl3jju" path="res://items/cache_entry/bank/branch_manager/rare_item.tres" id="6_tiris"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_v3p5n"]
+
+[resource]
+script = ExtResource("7_v3p5n")
+entries = Array[ExtResource("2_wttw5")]([ExtResource("3_xa32l"), ExtResource("4_1iktc"), ExtResource("5_l8q7b")])
+rare_pool = Array[ExtResource("2_wttw5")]([ExtResource("6_tiris")])
+rare_drop_chance = 0.05
+id = 303
+name = "Branch Manager Cache Extraction"
+shortened_name = "Manager Ca."
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_f1l8r")]([])
+tier = 4
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

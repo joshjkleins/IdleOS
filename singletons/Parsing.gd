@@ -1,5 +1,8 @@
 extends Node
 
+## Heat plan: heat multiplier by the tier being worked on (see BaseTerminal.heat_tier_mult)
+const HEAT_BY_TIER := [0.667, 1.067, 1.702, 2.55, 6.222, 9.375]
+
 signal basic_cycle_completed
 signal cred_cycle_complete
 signal quality_cycle_completed
@@ -17,7 +20,7 @@ const MODIFIERS = [
 	{"command": "plaintext", "name": "Plaintext", "package": "parsing.plaintext", "speed": 0.5, "heat": 1.5,
 		"effect": "-50% speed, heat x1.5. Each encrypted find has a 10% chance to come out already cracked."},
 	{"command": "deep-read", "name": "Deep Read", "package": "parsing.deep_read", "speed": 0.6, "heat": 2.0,
-		"effect": "-40% speed, heat x2. Line find chance x2 and VM token chance x2."},
+		"effect": "-40% speed, heat x2. Line find chance x2 (not Network finds) and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "parsing.survey", "speed": 1.0, "heat": 1.0,
 		"effect": "Half finds, +100% Parsing XP."},
 ]
@@ -151,9 +154,11 @@ var NETWORK = {
 		{ 'cmd': 'parse -network=student cache', 'description': 'Cache item' },
 	],
 	"ssh command": "ssh parsing network",
-	"efficiency": 0.01,
-	"efficiency rate": 0.0003,
-	"efficiency upgrade scale": 0.2, # VM tokens are strong: parsing efficiency upgrades count at 20% here
+	# Network is a resource sink: ~0.5% per line at level 1, ~2.5% at 99, +1% from max upgrades, +0.3% per Mining tier
+	# (Databases +1.5%) -> about 5% at the very top. Deep Read doesn't double these finds.
+	"efficiency": 0.005,
+	"efficiency rate": 0.0002,
+	"efficiency upgrade scale": 0.05, # parsing efficiency upgrades count at 5% here (+1% at max)
 	"unlocked": true,
 	"unlock level": 35,
 	"base speed": 0.9,
@@ -165,7 +170,7 @@ var NETWORK = {
 	"vm token chance": 0.0225, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Random VM token (any skill), x Mining tier per find",
-	"description": "Sniffs any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at random VM tokens: one token per find from Logs, two from Archives, and so on up the Mining tiers. If used on a Cache it will transform it to a Network variant, giving it a chance to hold a stack of VM tokens.",
+	"description": "Sniffs any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at a random VM token. Higher tier Mining items give +0.3% chance per line per tier. If used on a Cache it will transform it to a Network variant, giving it a chance to hold a stack of VM tokens.",
 	"efficiency description": "Chance to find a VM token per line.",
 	"signal": basic_cycle_completed
 }
@@ -356,6 +361,7 @@ func get_corruption_pool() -> Array:
 	]
 
 const CORRUPTION_TIER_BONUS = 0.01 # +1% chance per line for each Mining tier above Logs
+const NETWORK_TIER_BONUS = 0.003 # +0.3% chance per line for each Mining tier above Logs
 
 ## Hacking mods Corruption can find in a Mining item of <tier>: that tier's mods. Until a tier has its
 ## own mods it falls back to the highest tier below it that has some (today only tier 1: SQL Booster).
@@ -376,16 +382,18 @@ func get_hacking_mod_items(tier: int = 0) -> Array:
 func _pool_tier(pool: Array, fallback: int) -> int:
 	return pool[0].tier if !pool.is_empty() else fallback
 
-## Extra chance per line from the Mining item's tier (Corruption only).
+## Extra chance per line from the Mining item's tier (Corruption and Network).
 func get_line_chance_bonus(process: Dictionary, item: ItemData) -> float:
-	if process == CORRUPTION and item is not CacheData:
+	if item is CacheData:
+		return 0.0
+	if process == CORRUPTION:
 		return CORRUPTION_TIER_BONUS * (item.tier - 1)
+	if process == NETWORK:
+		return NETWORK_TIER_BONUS * (item.tier - 1)
 	return 0.0
 
-## How many of the found item one successful line gives (Network: one VM token per Mining tier).
-func get_find_amount(process: Dictionary, item: ItemData) -> int:
-	if process == NETWORK and item is not CacheData:
-		return item.tier
+## How many of the found item one successful line gives (always 1; tiers raise the chance instead).
+func get_find_amount(_process: Dictionary, _item: ItemData) -> int:
 	return 1
 
 func get_vm_tokens() -> Array:

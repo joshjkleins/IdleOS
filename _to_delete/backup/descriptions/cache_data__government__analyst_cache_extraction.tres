@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://ne3q5rx0cpux"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_cvv1g"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_x1sus"]
+[ext_resource type="Resource" uid="uid://bnkd64ranmkn0" path="res://items/cache_entry/government/analyst/drop_1.tres" id="3_nx32y"]
+[ext_resource type="Resource" uid="uid://deaqg4e64qqno" path="res://items/cache_entry/government/analyst/drop_2.tres" id="4_24jt1"]
+[ext_resource type="Resource" uid="uid://btm26vegdespx" path="res://items/cache_entry/government/analyst/drop_3.tres" id="5_ntahl"]
+[ext_resource type="Resource" uid="uid://bwp1f4n82v3rq" path="res://items/cache_entry/government/analyst/rare_drop.tres" id="6_q2qt3"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_1alps"]
+
+[resource]
+script = ExtResource("7_1alps")
+entries = Array[ExtResource("2_x1sus")]([ExtResource("3_nx32y"), ExtResource("4_24jt1"), ExtResource("5_ntahl")])
+rare_pool = Array[ExtResource("2_x1sus")]([ExtResource("6_q2qt3")])
+rare_drop_chance = 0.05
+id = 315
+name = "Analyst Cache Extraction"
+shortened_name = ""
+description = "Cache variant. Can be Decoded. Will Decode additional copies of rare items."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_cvv1g")]([])
+tier = 6
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

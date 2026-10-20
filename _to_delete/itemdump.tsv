@@ -1,0 +1,339 @@
+0	resources/data.tres	Data	1	0	resource		[]		Raw encrypted data
+1	resources/Mining/logs.tres	Logs	1	1	resource	mod	["Mining"]		Obtained from Mining. Can be Parsed for resources.
+2	resources/Parsing/encrypted_passwords.tres	Encrypted passwords	1	1	resource	mod	["Parsing"]		Obtained from Parsing. Can be Cracked for a Password.
+3	resources/Cracking/passwords.tres	Passwords	1	1	resource	mod	["Cracking"]		Obtained from Cracking. Can be used in Matching to form a Credential.
+4	resources/Parsing/usernames.tres	Usernames	1	1	resource	mod	["Parsing"]		Obtained from Parsing. Can be used in Matching to make a credential.
+5	resources/Matching/credentials.tres	Credentials	1	1	resource	mod	["Matching"]		A Matched Username and Password. Used to Compile School payloads.
+6	resources/Parsing/ip_address.tres	IP address	1	1	resource	mod	["Parsing"]		Obtained from Parsing. Used to Compile School payloads.
+7	valuables/school/parents_credit_card.tres	Parents credit card	1	1	rare	mod	["Decoding"]	STUDENT CACHE	Used as upgrade ingredient
+8	cache_data/school/student_cache.tres	Student cache	1	1	cache	mod	["Hacking"]		Obtained from School Student. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+9	valuables/school/falsified_transcript_database.tres	Falsified transcript database	1	1	rare	mod	["Decoding"]	ADMIN CACHE	Used as upgrade ingredient
+10	cache_data/school/admin_cache.tres	Admin cache	1	1	cache		["Hacking"]		Obtained from School Admin. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+11	valuables/school/student_disciplinary_records.tres	Student disciplinary records	1	1	rare	mod	["Decoding"]	VICE PRINCIPAL CACHE	Used as upgrade ingredient
+12	valuables/school/school_budget_embezzlement_logs.tres	School budget embezzlement logs	1	1	rare	mod	["Decoding"]	PRINCIPAL CACHE	Used as upgrade ingredient
+13	valuables/school/district_wide_master_password.tres	District wide master password	1	1	rare	mod	["Decoding"]	SUPERINTENDENT CACHE	Used as upgrade ingredient
+14	cache_data/school/vice_principal_cache.tres	Vice principal cache	1	1	cache		["Hacking"]		Obtained from School Vice Principal. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+15	cache_data/school/principal_cache.tres	Principal cache	1	1	cache		["Hacking"]		Obtained from School Principal. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+16	cache_data/school/superintendent_cache.tres	Superintendent cache	1	1	cache		["Hacking"]		Obtained from School Superintendent. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+17	valuables/library/borrowed_book_history.tres	Borrowed book history	1	0	rare		[]		Sell on the marketplace
+18	valuables/library/internal_staff_login_credentials.tres	Internal staff login credentials	1	0	rare		[]		Sell on the marketplace
+19	valuables/library/digitized_rare_book_scan.tres	Digitized rare book scan	1	0	rare		[]		Sell on the marketplace
+20	valuables/library/overdue_fine_waiver_database.tres	Overdue fine waiver database	1	0	rare		[]		Sell on the marketplace
+21	valuables/library/censored_books_archive.tres	Censored books archive	1	0	rare		[]		Sell on the marketplace
+22	cache_data/library/patron_cache.tres	Patron cache	1	0	cache		[]		Received from hacking a patron. Decrypt for resources.
+23	cache_data/library/volunteer_cache.tres	Volunteer cache	1	0	cache		[]		Received from hacking a volunteer. Decrypt for resources.
+24	cache_data/library/assistant_librarian_cache.tres	Assist. librarian cache	1	0	cache		[]		Received from hacking a assistant libarian. Decrypt for resources.
+25	cache_data/library/head_librarian_cache.tres	Head librarian cache	1	0	cache		[]		Received from hacking a head librarian. Decrypt for resources.
+26	cache_data/library/director_cache.tres	Director cache	1	0	cache		[]		Received from hacking a director. Decrypt for resources.
+27	valuables/small_business/employee_payroll_data.tres	Employee payroll data	1	0	rare		[]		Sell on the marketplace
+28	valuables/small_business/shift_schedule_and_security_rotation.tres	Shift schedule and security rotation	1	0	rare		[]		Sell on the marketplace
+29	valuables/small_business/supplier_contact_list.tres	Supplier contact list	1	0	rare		[]		Sell on the marketplace
+30	valuables/small_business/confidential_hr_complaint_files.tres	Confidential HR complaint files	1	0	rare		[]		Sell on the marketplace
+31	valuables/small_business/unreleased_product_prototype.tres	Unreleased product prototype	1	0	rare		[]		Sell on the marketplace
+32	cache_data/small_business/worker_cache.tres	Worker cache	1	0	cache		[]		Received from hacking a worker. Decrypt for resources.
+33	cache_data/small_business/supervisor_cache.tres	Supervisor cache	1	0	cache		[]		Received from hacking a supervisor. Decrypt for resources.
+34	cache_data/small_business/manager_cache.tres	Manager cache	1	0	cache		[]		Received from hacking a manager. Decrypt for resources.
+35	cache_data/small_business/human_resources_cache.tres	Human resources cache	1	0	cache		[]		Received from hacking human resources. Decrypt for resources.
+36	cache_data/small_business/owner_cache.tres	Owner cache	1	0	cache		[]		Received from hacking a business owner. Decrypt for resources.
+37	valuables/university/stolen_exam_answer_key.tres	Stolen exam answer key	1	0	rare		[]		Sell on the marketplace
+38	valuables/university/unpublished_research_paper.tres	Unpublished research paper	1	0	rare		[]		Sell on the marketplace
+39	valuables/university/grant_fraud_documentation.tres	Grant fraud documentation	1	0	rare		[]		Sell on the marketplace
+40	valuables/university/admissions_bribery_records.tres	Admissions bribery records	1	0	rare		[]		Sell on the marketplace
+41	valuables/university/endowment_fund_access_codes.tres	Endowment fund access codes	1	0	rare		[]		Sell on the marketplace
+42	cache_data/university/teachers_assistant_cache.tres	Teachers assist. cache	1	0	cache		[]		Received from hacking a teachers assistant. Decrypt for resources.
+43	cache_data/university/professor_cache.tres	Professor cache	1	0	cache		[]		Received from hacking a professor. Decrypt for resources.
+44	cache_data/university/department_chair_cache.tres	Department chair cache	1	0	cache		[]		Received from hacking a department chair. Decrypt for resources.
+45	cache_data/university/dean_cache.tres	Dean cache	1	0	cache		[]		Received from hacking a dean. Decrypt for resources.
+46	cache_data/university/university_president_cache.tres	University president cache	1	0	cache		[]		Received from hacking a university president. Decrypt for resources.
+47	valuables/hospital/patient_appointment_history.tres	Patient appointment history	3	3	rare		[]		Sell on the marketplace
+48	valuables/hospital/staff_keycard_clone_data.tres	Staff keycard clone data	3	3	rare		[]		Sell on the marketplace
+49	valuables/hospital/prescription_pad_credentials.tres	Prescription pad credentials	3	3	rare		[]		Sell on the marketplace
+50	valuables/hospital/patient_insurance_data.tres	Patient insurance data	3	3	rare		[]		Sell on the marketplace
+51	valuables/hospital/falsified_drug_trial_results.tres	Falsified drug trial results	3	3	rare		[]		Sell on the marketplace
+52	cache_data/hospital/receptionist_cache.tres	Receptionist cache	3	3	cache		["Hacking"]		Received from hacking a Hospital Receptionist. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+53	cache_data/hospital/orderly_cache.tres	Orderly cache	3	3	cache		["Hacking"]		Received from hacking a Hospital Orderly. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+54	cache_data/hospital/nurse_cache.tres	Nurse cache	3	3	cache		["Hacking"]		Received from hacking a Hospital Nurse. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+55	cache_data/hospital/doctor_cache.tres	Doctor cache	3	3	cache		["Hacking"]		Received from hacking a Hospital Doctor. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+56	cache_data/hospital/chief_of_medicine_cache.tres	Chief of medicine cache	3	3	cache		["Hacking"]		Received from hacking Hospital Chief of Medicine. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+57	valuables/police_station/internal_affairs_complaint_archive.tres	Internal affairs complaint archive	5	5	rare		[]		Sell on the marketplace
+58	valuables/police_station/body_cam_footage_deletion_logs.tres	Body cam footage deletion logs	5	5	rare		[]		Sell on the marketplace
+59	valuables/police_station/confidential_informant_registry.tres	Confidential informant registry	5	5	rare		[]		Sell on the marketplace
+60	valuables/police_station/evidence_locker_access_codes.tres	Evidence locker access codes	5	5	rare		[]		Sell on the marketplace
+61	valuables/police_station/corruption_payout_ledger.tres	Corruption payout ledger	5	5	rare		[]		Sell on the marketplace
+62	cache_data/police_station/secretary_cache.tres	Secretary cache	5	5	cache		["Hacking"]		Received from hacking a Police Secretary. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+63	cache_data/police_station/cop_cache.tres	Cop cache	5	5	cache		["Hacking"]		Received from hacking a Police Cop. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+64	cache_data/police_station/detective_cache.tres	Detective cache	5	5	cache		["Hacking"]		Received from hacking a Police Detective. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+65	cache_data/police_station/sergeant_cache.tres	Sergeant cache	5	5	cache		["Hacking"]		Received from hacking a Police Sergeant. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+66	cache_data/police_station/captain_cache.tres	Captain cache	5	5	cache		["Hacking"]		Received from hacking a Police Captain. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+67	valuables/lawfirm/leaked_deposition_transcripts.tres	Leaked deposition transcripts	2	2	rare		["Decoding"]	LEGAL ASSISTANT CACHE	Sell on the marketplace
+68	valuables/lawfirm/forged_court_document_templates.tres	Forged court document templates	2	2	rare		["Decoding"]	PARALEGAL CACHE	Sell on the marketplace
+69	valuables/lawfirm/sealed_case_files.tres	Sealed case files	2	2	rare		["Decoding"]	ASSOCIATE ATTORNEY CACHE	Sell on the marketplace
+70	valuables/lawfirm/offshore_account_records.tres	Offshore account records	2	2	rare		["Decoding"]	LAWYER CACHE	Sell on the marketplace
+71	valuables/lawfirm/witness_protection_address.tres	Witness protection address	2	2	rare		["Decoding"]	PARTNER CACHE	Sell on the marketplace
+72	cache_data/law_firm/legal_assistant_cache.tres	Legal assistant cache	2	2	cache		["Hacking"]		Received from hacking a Lawfirm Legal Assistant. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+73	cache_data/law_firm/paralegal_cache.tres	Paralegal cache	2	2	cache		["Hacking"]		Received from hacking a Lawfirm Paralegal. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+74	cache_data/law_firm/associate_attorney_cache.tres	Associate attorney cache	2	2	cache		["Hacking"]		Received from hacking Lawfirm Associate Attorney. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+75	cache_data/law_firm/lawyer_cache.tres	Lawyer cache	2	2	cache		["Hacking"]		Received from hacking a Lawfirm Lawyer. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+76	cache_data/law_firm/partner_cache.tres	Partner cache	2	2	cache		["Hacking"]		Received from hacking a Lawfirm Partner. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+77	combat/sql_injector.tres	SQL Injector	1	0	combat	mod	["Phishing"]		Basic attacking hack. Can be upgraded with 'apt'.
+78	combat/packet_spoof.tres	Packet Spoof	1	0	combat	mod	["Phishing"]		Restores anonymity during hack. Can be upgraded with 'apt'.
+79	resources/Cracking/pins.tres	PINS	4	4	resource		["Cracking"]		Four digit codes used for account access
+80	resources/Parsing/encrypted_pins.tres	Encrypted PINS	4	4	resource		["Parsing"]		Obtained from Parsing. Can be Cracked for a PIN.
+81	resources/Parsing/account_numbers.tres	Account Numbers	4	4	resource		["Parsing"]		Obtained from Parsing. Can be used in Matching to form a Account Access Token.
+82	resources/Matching/account_access_tokens.tres	Account access tokens	4	4	resource		["Matching"]		A Matched Account Access Token and Routing Number. Used to Compile Bank payloads.
+84	tokens/refresh/refresh_token.tres	Refresh token	1	0	resource		[]		Refreshes contracts in marketplace
+85	resources/quality_logs.tres	Quality logs	1	0	resource		["Mining"]		Logs that can be parsed for rare resources
+86	tokens/mining/vm_mining_token.tres	VM mining token	1	0	token	mod	["Mining"]	1% chance every time a Mining cycle is completed and +1 every time Mining is leveled up.	Runs a mining process in a separate window
+87	tokens/parsing/vm_parsing_token.tres	VM parsing token	1	0	token	mod	["Parsing"]	1% chance every time a Parsing cycle is completed and +1 every time Parsing is leveled up.	Runs a parsing process in a separate window
+88	tokens/cracking/vm_cracking_token.tres	VM cracking token	1	0	token	mod	["Cracking"]	1% chance every time a Cracking cycle is completed and +1 every time Cracking is leveled up.	Runs a cracking process in a separate window
+89	tokens/matching/vm_matching_token.tres	VM matching token	1	0	token	mod	["Matching"]	1% chance every time a Matching cycle is completed and +1 every time Matching is leveled up.	Runs a matching process in a separate window
+90	tokens/phishing/vm_phishing_token.tres	VM phishing token	1	0	token	mod	["Phishing"]	1% chance every time a Phishing cycle is completed and +1 every time Phishing is leveled up.	Runs a phishing process in a separate window
+91	tokens/decoding/vm_decoding_token.tres	VM decoding token	1	0	token	mod	["Decoding"]	1% chance every time a Decoding cycle is completed and +1 every time Decoding is leveled up.	Runs a decoding process in a separate window
+92	resources/Payloads/school_payload.tres	School payload	1	1	payload	mod	["Compiling"]		A Compiled payload used to hack a target at the School.
+93	resources/Payloads/small_business_payload.tres	Small business payload	1	0	resource		["Compiling"]		Use to hack small business targets
+94	resources/Payloads/library_payload.tres	Library payload	1	0	resource		["Compiling"]		A Compiled payload used to hack a target at the Library.
+95	tokens/compiling/vm_compiling_token.tres	VM compiling token	1	0	token	mod	["Compiling"]	1% chance every time a Compiling cycle is completed and +1 every time Compiling is leveled up.	Runs a compiling process in a separate window
+96	cache_data/school/student_cache_footprint.tres	Student cache Footprint	1	1	cache	mod	["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+97	hacking_mods/sql_booster.tres	SQL Booster	1	1	mod		["Phishing"]	1% chance to find in Phishing for mods.	Hacking mod that increases SQL attack speed by 50%. Can be directly equipped with 'mod' commands.
+98	resources/Mining/archives.tres	Archives	2	2	resource		["Mining"]		Obtained from Mining. Can be Parsed for resources.
+99	resources/Mining/cookies.tres	Cookies	4	4	resource		["Mining"]		Obtained from Mining. Can be Parsed for resources.
+100	resources/Mining/databases.tres	Databases	6	6	resource		["Mining"]		Obtained from Mining. Can be Parsed for resources.
+101	resources/Mining/metadata.tres	Metadata	3	3	resource		["Mining"]		Obtained from Mining. Can be Parsed for resources.
+102	resources/Mining/repositories.tres	Repositories	5	5	resource		["Mining"]		Obtained from Mining. Can be Parsed for resources.
+103	resources/Cracking/badge_hash.tres	Badge Hash	3	3	resource		["Cracking"]		Obtained from Cracking. Can be used in Matching to form a Access Badge.
+104	resources/Cracking/bio_template.tres	Bio Template	6	6	resource		["Cracking"]		Obtained from Cracking. Can be used in Matching to form a Gateway Address.
+105	resources/Cracking/digital_signature.tres	Digital Signature	2	2	resource		["Cracking"]		Obtained from Cracking. Can be used in Matching to form a Signed Certificate.
+106	resources/Cracking/private_keys.tres	Private Keys	5	5	resource		["Cracking"]		Obtained from Cracking. Can be used in Matching to form a Officer Auth Key.
+107	resources/Matching/access_badge.tres	Access Badge	3	3	resource		["Matching"]		A Matched Staff ID and Badge Hash. Used to Compile Hospital payloads.
+108	resources/Matching/officer_auth_keys.tres	Officer Auth Key	5	5	resource		["Matching"]		A Matched Badge Number and Private Key. Used to Compile Police payloads.
+109	resources/Matching/security_clearance.tres	Security Clearance	6	6	resource		["Matching"]		A Matched Clearance ID and Biometric Template. Used to Compile Government payloads.
+110	resources/Matching/signed_certificate.tres	Signed Certificate	2	2	resource		["Matching"]		A Matched Case Number and Digital Signature. Used to Compile Lawfirm payloads.
+111	resources/Parsing/badge_number.tres	Badge Number	5	5	resource		["Parsing"]		Obtained from Parsing. Can be used in Matching to form an Officer Auth Key.
+112	resources/Parsing/case_number.tres	Case Number	2	2	resource		["Parsing"]		Obtained from Parsing. Can be used in Matching to form a Signed Certificate.
+113	resources/Parsing/clearance_id.tres	Clearance ID	6	6	resource		["Parsing"]		Obtained from Parsing. Can be used in Matching to form a Security Clearance.
+114	resources/Parsing/email_header.tres	Email Header	2	2	resource		["Parsing"]		Obtained from Parsing. Can be used in Compiling to make a Lawfirm Payload.
+115	resources/Parsing/encrypted_bio_hash.tres	Encrypted Bio Hash	6	6	resource		["Parsing"]		Obtained from Parsing. Can be Cracked for a Bio Hash.
+116	resources/Parsing/encrypted_signature.tres	Encrypted Signature	2	2	resource		["Parsing"]		Obtained from Parsing. Can be Cracked for a Digital Signature.
+117	resources/Parsing/encrypted_ssh_key.tres	Encrypted SSH Key	5	5	resource		["Parsing"]		Obtained from Parsing. Can be Cracked for a Private Key.
+118	resources/Parsing/gateway_address.tres	Gateway Address	6	6	resource		["Parsing"]		Obtained from Parsing. Used to Compile Government payloads.
+119	resources/Parsing/mac_address.tres	Mac Address	3	3	resource		["Parsing"]		Obtained from Parsing. Used to Compile Hospital payloads.
+120	resources/Parsing/routing_number.tres	Routing Number	4	4	resource		["Parsing"]		Obtained from Parsing. Used to Compile Bank payloads.
+121	resources/Parsing/staff_ids.tres	Staff IDs	3	3	resource		["Parsing"]		Obtained from Parsing. Can be used in Matching to make a Access Badge.
+122	resources/Parsing/subnet_map.tres	Subnet Map	5	5	resource		["Parsing"]		Obtained from Parsing. Used to Compile Police payloads.
+123	resources/Payloads/bank_payload.tres	Bank Payload	4	4	payload		["Compiling"]		A Compiled payload used to hack a target at the Bank.
+124	resources/Payloads/government_payload.tres	Government Payload	6	6	payload		["Compiling"]		A Compiled payload used to hack a target in the Government.
+125	resources/Payloads/hospital_payload.tres	Hospital Payload	3	3	payload		["Compiling"]		A Compiled payload used to hack a target at the Hospital.
+126	resources/Payloads/lawfirm_payload.tres	Lawfirm Payload	2	2	payload		["Compiling"]		A Compiled payload used to hack a target at the Lawfirm.
+127	resources/Payloads/police_station_payload.tres	Police Payload	5	5	payload		["Compiling"]		A Compiled payload used to hack a target at the Police Station.
+128	resources/Parsing/encrypted_badge_hash.tres	Encrypted Badge Hash	3	3	resource		["Parsing"]		Obtained from Parsing. Can be Cracked for a Badge Hash.
+129	valuables/bank/cash_drawer_override_code.tres	Cash Drawer Override Codes	4	4	rare		["Decoding"]	TELLER CACHE	
+130	cache_data/bank/teller_cache.tres	Teller Cache	4	4	cache		["Hacking"]		Obtained from Bank Teller. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+131	cache_data/bank/security_cache.tres	Security Cache	4	4	cache		["Hacking"]		Obtained from Bank Security. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+132	cache_data/bank/officer_cache.tres	Loan Officer Cache	4	4	cache		["Hacking"]		Obtained from Bank Loan Officer. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+133	cache_data/bank/manager_cache.tres	Branch Manager Cache	4	4	cache		["Hacking"]		Obtained from Bank Manager. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+134	cache_data/bank/cfo_cache.tres	Chief Financial Officer Cache	4	4	cache		["Hacking"]		Obtained from Bank CFO. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+135	valuables/bank/credit_records.tres	Credit Records	4	4	rare		["Decoding"]	LOAN OFFICER CACHE	
+136	valuables/bank/safe_deposit_box_registry.tres	Safe Deposit Box Registry	4	4	rare		["Decoding"]		
+137	valuables/bank/swift_master_key.tres	Swift Master Key	4	4	rare		["Decoding"]		
+138	valuables/bank/vault_override.tres	Vault Override	4	4	rare		["Decoding"]		
+139	cache_data/government/clerk_cache.tres	Clerk Cache	6	6	cache		["Hacking"]		Obtained from Government Clerk. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+140	cache_data/government/analyst_cache.tres	Analyst Cache	6	6	cache		["Hacking"]		Obtained from Government Analyst. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+141	cache_data/government/ambassador_cache.tres	Ambassador Cache	6	6	cache		["Hacking"]		Obtained from Government Ambassador. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+142	cache_data/government/vice_president_cache.tres	Vice President Cache	6	6	cache		["Hacking"]		Obtained from Government Vice President. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+143	cache_data/government/president_cache.tres	President Cache	6	6	cache		["Hacking"]		Obtained from Government President. Can be Decoded for a variety of resources or Parsed to transform into a different variant.
+144	valuables/government/register_voter_db.tres	Registered Voters Database	6	6	rare		["Decoding"]	CLERK CACHE	
+145	valuables/government/cia_brief.tres	CIA Brief	6	6	rare		["Decoding"]	ANALYST CACHE	
+146	valuables/government/black_budget_ledger.tres	Black Budget Ledger	6	6	rare		["Decoding"]	AMBASSADOR CACHE	
+147	valuables/government/deep_cover_ids.tres	Deep Cover IDs	6	6	rare		["Decoding"]	VICE PRESIDENT CACHE	
+148	valuables/government/nuke_codes.tres	Nuclear Codes	6	6	rare		["Decoding"]	PRESIDENT CACHE	
+149	cache_data/school/student_cache_corruption.tres	Student cache Corruption	1	1	cache	mod	["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+150	cache_data/school/student_cache_network.tres	Student cache Network	1	1	cache	mod	["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+151	cache_data/school/student_cache_extraction.tres	Student cache Extraction	1	1	cache	mod	["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+152	cache_data/school/admin_cache_footprint.tres	Admin cache Footprint	1	1	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+153	cache_data/school/admin_cache_corruption.tres	Admin cache Corruption	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+154	cache_data/school/admin_cache_network.tres	Admin cache Network	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+155	cache_data/school/admin_cache_extraction.tres	Admin cache Extraction	1	1	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+156	cache_data/school/vice_principal_cache_footprint.tres	Vice principal cache Footprint	1	1	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+157	cache_data/school/vice_principal_cache_corruption.tres	Vice principal cache Corruption	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+158	cache_data/school/vice_principal_cache_network.tres	Vice principal cache Network	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+159	cache_data/school/vice_principal_cache_extraction.tres	Vice principal cache Extraction	1	1	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+160	cache_data/school/principal_cache_footprint.tres	Principal cache Footprint	1	1	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+161	cache_data/school/principal_cache_corruption.tres	Principal cache Corruption	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+162	cache_data/school/principal_cache_network.tres	Principal cache Network	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+163	cache_data/school/principal_cache_extraction.tres	Principal cache Extraction	1	1	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+164	cache_data/school/superintendent_cache_footprint.tres	Superintendent cache Footprint	1	1	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+165	cache_data/school/superintendent_cache_corruption.tres	Superintendent cache Corruption	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+166	cache_data/school/superintendent_cache_network.tres	Superintendent cache Network	1	1	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+167	cache_data/school/superintendent_cache_extraction.tres	Superintendent cache Extraction	1	1	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+168	cache_data/library/patron_cache_footprint.tres	Patron cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+169	cache_data/library/patron_cache_corruption.tres	Patron cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+170	cache_data/library/patron_cache_network.tres	Patron cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+171	cache_data/library/patron_cache_extraction.tres	Patron cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+172	cache_data/library/volunteer_cache_footprint.tres	Volunteer cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+173	cache_data/library/volunteer_cache_corruption.tres	Volunteer cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+174	cache_data/library/volunteer_cache_network.tres	Volunteer cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+175	cache_data/library/volunteer_cache_extraction.tres	Volunteer cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+176	cache_data/library/assistant_librarian_cache_footprint.tres	Assist. librarian cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+177	cache_data/library/assistant_librarian_cache_corruption.tres	Assist. librarian cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+178	cache_data/library/assistant_librarian_cache_network.tres	Assist. librarian cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+179	cache_data/library/assistant_librarian_cache_extraction.tres	Assist. librarian cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+180	cache_data/library/head_librarian_cache_footprint.tres	Head librarian cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+181	cache_data/library/head_librarian_cache_corruption.tres	Head librarian cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+182	cache_data/library/head_librarian_cache_network.tres	Head librarian cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+183	cache_data/library/head_librarian_cache_extraction.tres	Head librarian cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+184	cache_data/library/director_cache_footprint.tres	Director cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+185	cache_data/library/director_cache_corruption.tres	Director cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+186	cache_data/library/director_cache_network.tres	Director cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+187	cache_data/library/director_cache_extraction.tres	Director cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+188	cache_data/small_business/worker_cache_footprint.tres	Worker cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+189	cache_data/small_business/worker_cache_corruption.tres	Worker cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+190	cache_data/small_business/worker_cache_network.tres	Worker cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+191	cache_data/small_business/worker_cache_extraction.tres	Worker cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+192	cache_data/small_business/supervisor_cache_footprint.tres	Supervisor cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+193	cache_data/small_business/supervisor_cache_corruption.tres	Supervisor cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+194	cache_data/small_business/supervisor_cache_network.tres	Supervisor cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+195	cache_data/small_business/supervisor_cache_extraction.tres	Supervisor cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+196	cache_data/small_business/manager_cache_footprint.tres	Manager cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+197	cache_data/small_business/manager_cache_corruption.tres	Manager cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+198	cache_data/small_business/manager_cache_network.tres	Manager cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+199	cache_data/small_business/manager_cache_extraction.tres	Manager cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+200	cache_data/small_business/human_resources_cache_footprint.tres	Human resources cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+201	cache_data/small_business/human_resources_cache_corruption.tres	Human resources cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+202	cache_data/small_business/human_resources_cache_network.tres	Human resources cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+203	cache_data/small_business/human_resources_cache_extraction.tres	Human resources cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+204	cache_data/small_business/owner_cache_footprint.tres	Owner cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+205	cache_data/small_business/owner_cache_corruption.tres	Owner cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+206	cache_data/small_business/owner_cache_network.tres	Owner cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+207	cache_data/small_business/owner_cache_extraction.tres	Owner cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+208	cache_data/university/teachers_assistant_cache_footprint.tres	Teachers assist. cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+209	cache_data/university/teachers_assistant_cache_corruption.tres	Teachers assist. cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+210	cache_data/university/teachers_assistant_cache_network.tres	Teachers assist. cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+211	cache_data/university/teachers_assistant_cache_extraction.tres	Teachers assist. cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+212	cache_data/university/professor_cache_footprint.tres	Professor cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+213	cache_data/university/professor_cache_corruption.tres	Professor cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+214	cache_data/university/professor_cache_network.tres	Professor cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+215	cache_data/university/professor_cache_extraction.tres	Professor cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+216	cache_data/university/department_chair_cache_footprint.tres	Department chair cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+217	cache_data/university/department_chair_cache_corruption.tres	Department chair cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+218	cache_data/university/department_chair_cache_network.tres	Department chair cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+219	cache_data/university/department_chair_cache_extraction.tres	Department chair cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+220	cache_data/university/dean_cache_footprint.tres	Dean cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+221	cache_data/university/dean_cache_corruption.tres	Dean cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+222	cache_data/university/dean_cache_network.tres	Dean cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+223	cache_data/university/dean_cache_extraction.tres	Dean cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+224	cache_data/university/university_president_cache_footprint.tres	University president cache Footprint	1	0	cache		[]		Cache variant. Can be Decoded for double basic resources.
+225	cache_data/university/university_president_cache_corruption.tres	University president cache Corruption	1	0	cache		[]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+226	cache_data/university/university_president_cache_network.tres	University president cache Network	1	0	cache		[]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+227	cache_data/university/university_president_cache_extraction.tres	University president cache Extraction	1	0	cache		[]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+228	cache_data/hospital/receptionist_cache_footprint.tres	Receptionist cache Footprint	3	3	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+229	cache_data/hospital/receptionist_cache_corruption.tres	Receptionist cache Corruption	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+230	cache_data/hospital/receptionist_cache_network.tres	Receptionist cache Network	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+231	cache_data/hospital/receptionist_cache_extraction.tres	Receptionist cache Extraction	3	3	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+232	cache_data/hospital/orderly_cache_footprint.tres	Orderly cache Footprint	3	3	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+233	cache_data/hospital/orderly_cache_corruption.tres	Orderly cache Corruption	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+234	cache_data/hospital/orderly_cache_network.tres	Orderly cache Network	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+235	cache_data/hospital/orderly_cache_extraction.tres	Orderly cache Extraction	3	3	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+236	cache_data/hospital/nurse_cache_footprint.tres	Nurse cache Footprint	3	3	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+237	cache_data/hospital/nurse_cache_corruption.tres	Nurse cache Corruption	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+238	cache_data/hospital/nurse_cache_network.tres	Nurse cache Network	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+239	cache_data/hospital/nurse_cache_extraction.tres	Nurse cache Extraction	3	3	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+240	cache_data/hospital/doctor_cache_footprint.tres	Doctor cache Footprint	3	3	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+241	cache_data/hospital/doctor_cache_corruption.tres	Doctor cache Corruption	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+242	cache_data/hospital/doctor_cache_network.tres	Doctor cache Network	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+243	cache_data/hospital/doctor_cache_extraction.tres	Doctor cache Extraction	3	3	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+244	cache_data/hospital/chief_of_medicine_cache_footprint.tres	Chief of medicine cache Footprint	3	3	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+245	cache_data/hospital/chief_of_medicine_cache_corruption.tres	Chief of medicine cache Corruption	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+246	cache_data/hospital/chief_of_medicine_cache_network.tres	Chief of medicine cache Network	3	3	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+247	cache_data/hospital/chief_of_medicine_cache_extraction.tres	Chief of medicine cache Extraction	3	3	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+248	cache_data/police_station/secretary_cache_footprint.tres	Secretary cache Footprint	5	5	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+249	cache_data/police_station/secretary_cache_corruption.tres	Secretary cache Corruption	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+250	cache_data/police_station/secretary_cache_network.tres	Secretary cache Network	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+251	cache_data/police_station/secretary_cache_extraction.tres	Secretary cache Extraction	5	5	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+252	cache_data/police_station/cop_cache_footprint.tres	Cop cache Footprint	5	5	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+253	cache_data/police_station/cop_cache_corruption.tres	Cop cache Corruption	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+254	cache_data/police_station/cop_cache_network.tres	Cop cache Network	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+255	cache_data/police_station/cop_cache_extraction.tres	Cop cache Extraction	5	5	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+256	cache_data/police_station/detective_cache_footprint.tres	Detective cache Footprint	5	5	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+257	cache_data/police_station/detective_cache_corruption.tres	Detective cache Corruption	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+258	cache_data/police_station/detective_cache_network.tres	Detective cache Network	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+259	cache_data/police_station/detective_cache_extraction.tres	Detective cache Extraction	5	5	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+260	cache_data/police_station/sergeant_cache_footprint.tres	Sergeant cache Footprint	5	5	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+261	cache_data/police_station/sergeant_cache_corruption.tres	Sergeant cache Corruption	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+262	cache_data/police_station/sergeant_cache_network.tres	Sergeant cache Network	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+263	cache_data/police_station/sergeant_cache_extraction.tres	Sergeant cache Extraction	5	5	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+264	cache_data/police_station/captain_cache_footprint.tres	Captain cache Footprint	5	5	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+265	cache_data/police_station/captain_cache_corruption.tres	Captain cache Corruption	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+266	cache_data/police_station/captain_cache_network.tres	Captain cache Network	5	5	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+267	cache_data/police_station/captain_cache_extraction.tres	Captain cache Extraction	5	5	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+268	cache_data/law_firm/legal_assistant_cache_footprint.tres	Legal assistant cache Footprint	2	2	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+269	cache_data/law_firm/legal_assistant_cache_corruption.tres	Legal assistant cache Corruption	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+270	cache_data/law_firm/legal_assistant_cache_network.tres	Legal assistant cache Network	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+271	cache_data/law_firm/legal_assistant_cache_extraction.tres	Legal assistant cache Extraction	2	2	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+272	cache_data/law_firm/paralegal_cache_footprint.tres	Paralegal cache Footprint	2	2	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+273	cache_data/law_firm/paralegal_cache_corruption.tres	Paralegal cache Corruption	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+274	cache_data/law_firm/paralegal_cache_network.tres	Paralegal cache Network	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+275	cache_data/law_firm/paralegal_cache_extraction.tres	Paralegal cache Extraction	2	2	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+276	cache_data/law_firm/associate_attorney_cache_footprint.tres	Associate attorney cache Footprint	2	2	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+277	cache_data/law_firm/associate_attorney_cache_corruption.tres	Associate attorney cache Corruption	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+278	cache_data/law_firm/associate_attorney_cache_network.tres	Associate attorney cache Network	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+279	cache_data/law_firm/associate_attorney_cache_extraction.tres	Associate attorney cache Extraction	2	2	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+280	cache_data/law_firm/lawyer_cache_footprint.tres	Lawyer cache Footprint	2	2	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+281	cache_data/law_firm/lawyer_cache_corruption.tres	Lawyer cache Corruption	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+282	cache_data/law_firm/lawyer_cache_network.tres	Lawyer cache Network	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+283	cache_data/law_firm/lawyer_cache_extraction.tres	Lawyer cache Extraction	2	2	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+284	cache_data/law_firm/partner_cache_footprint.tres	Partner cache Footprint	2	2	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+285	cache_data/law_firm/partner_cache_corruption.tres	Partner cache Corruption	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+286	cache_data/law_firm/partner_cache_network.tres	Partner cache Network	2	2	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+287	cache_data/law_firm/partner_cache_extraction.tres	Partner cache Extraction	2	2	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+288	cache_data/bank/teller_cache_footprint.tres	Teller Cache Footprint	4	4	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+289	cache_data/bank/teller_cache_corruption.tres	Teller Cache Corruption	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+290	cache_data/bank/teller_cache_network.tres	Teller Cache Network	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+291	cache_data/bank/teller_cache_extraction.tres	Teller Cache Extraction	4	4	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+292	cache_data/bank/security_cache_footprint.tres	Security Cache Footprint	4	4	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+293	cache_data/bank/security_cache_corruption.tres	Security Cache Corruption	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+294	cache_data/bank/security_cache_network.tres	Security Cache Network	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+295	cache_data/bank/security_cache_extraction.tres	Security Cache Extraction	4	4	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+296	cache_data/bank/officer_cache_footprint.tres	Loan Officer Cache Footprint	4	4	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+297	cache_data/bank/officer_cache_corruption.tres	Loan Officer Cache Corruption	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+298	cache_data/bank/officer_cache_network.tres	Loan Officer Cache Network	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+299	cache_data/bank/officer_cache_extraction.tres	Loan Officer Cache Extraction	4	4	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+300	cache_data/bank/manager_cache_footprint.tres	Branch Manager Cache Footprint	4	4	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+301	cache_data/bank/manager_cache_corruption.tres	Branch Manager Cache Corruption	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+302	cache_data/bank/manager_cache_network.tres	Branch Manager Cache Network	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+303	cache_data/bank/manager_cache_extraction.tres	Branch Manager Cache Extraction	4	4	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+304	cache_data/bank/cfo_cache_footprint.tres	Chief Financial Officer Cache Footprint	4	4	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+305	cache_data/bank/cfo_cache_corruption.tres	Chief Financial Officer Cache Corruption	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+306	cache_data/bank/cfo_cache_network.tres	Chief Financial Officer Cache Network	4	4	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+307	cache_data/bank/cfo_cache_extraction.tres	Chief Financial Officer Cache Extraction	4	4	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+308	cache_data/government/clerk_cache_footprint.tres	Clerk Cache Footprint	6	6	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+309	cache_data/government/clerk_cache_corruption.tres	Clerk Cache Corruption	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+310	cache_data/government/clerk_cache_network.tres	Clerk Cache Network	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+311	cache_data/government/clerk_cache_extraction.tres	Clerk Cache Extraction	6	6	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+312	cache_data/government/analyst_cache_footprint.tres	Analyst Cache Footprint	6	6	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+313	cache_data/government/analyst_cache_corruption.tres	Analyst Cache Corruption	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+314	cache_data/government/analyst_cache_network.tres	Analyst Cache Network	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+315	cache_data/government/analyst_cache_extraction.tres	Analyst Cache Extraction	6	6	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+316	cache_data/government/ambassador_cache_footprint.tres	Ambassador Cache Footprint	6	6	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+317	cache_data/government/ambassador_cache_corruption.tres	Ambassador Cache Corruption	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+318	cache_data/government/ambassador_cache_network.tres	Ambassador Cache Network	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+319	cache_data/government/ambassador_cache_extraction.tres	Ambassador Cache Extraction	6	6	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+320	cache_data/government/vice_president_cache_footprint.tres	Vice President Cache Footprint	6	6	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+321	cache_data/government/vice_president_cache_corruption.tres	Vice President Cache Corruption	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+322	cache_data/government/vice_president_cache_network.tres	Vice President Cache Network	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+323	cache_data/government/vice_president_cache_extraction.tres	Vice President Cache Extraction	6	6	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+324	cache_data/government/president_cache_footprint.tres	President Cache Footprint	6	6	cache		["Hacking"]		Cache variant. Can be Decoded for double basic resources.
+325	cache_data/government/president_cache_corruption.tres	President Cache Corruption	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with a much higher chance to find items in cache, but 20% chance to destroy cache after each item found.
+326	cache_data/government/president_cache_network.tres	President Cache Network	6	6	cache		["Hacking"]		Cache variant. Can be Decoded with an added chance of finding random VM Tokens.
+327	cache_data/government/president_cache_extraction.tres	President Cache Extraction	6	6	cache		["Hacking"]		Cache variant. Can be Decoded. Will Decode additional copies of rare items.
+328	exploits/proxy_hop.tres	Proxy Hop	1	1	exploit		["Decoding"]	Rare find in School caches.	Reroutes your connection through a fresh proxy, shaking off part of the trace.
+329	exploits/lag_spike.tres	Lag Spike	1	1	exploit		["Decoding"]	Rare find in School caches.	Floods the target with junk traffic so its countermeasures have to start over.
+330	exploits/cease_desist.tres	Cease & Desist	2	2	exploit		["Decoding"]	Rare find in Lawfirm caches.	A legal-looking notice that freezes the target's response team for a moment.
+331	exploits/throttle_patch.tres	Throttle Patch	2	2	exploit		["Decoding"]	Rare find in Lawfirm caches.	A patched network driver that halves what SQL Injectors cost in bandwidth.
+332	exploits/slow_drip.tres	Slow Drip	3	3	exploit		["Decoding"]	Rare find in Hospital caches.	Leaves a process running inside the target that slowly eats integrity and firewall.
+333	exploits/booster_shot.tres	Booster Shot	3	3	exploit		["Decoding"]	Rare find in Hospital caches.	Supercharges Packet Spoof for a short time.
+334	exploits/overdraft.tres	Overdraft	4	4	exploit		["Decoding"]	Rare find in Bank caches.	Borrows bandwidth you don't have: fills it and freezes it for a short time.
+335	exploits/margin_call.tres	Margin Call	4	4	exploit		["Decoding"]	Rare find in Bank caches.	One heavy hit straight to the target's integrity, past the firewall.
+336	exploits/zero_day.tres	Zero-Day	5	5	exploit		["Decoding"]	Rare find in Police caches.	An unpatched hole: your next SQL Injectors land as critical hits.
+337	exploits/ghost_mode.tres	Ghost Mode	5	5	exploit		["Decoding"]	Rare find in Police caches.	Drops your trace entirely so the next countermeasures miss.
+338	exploits/redaction.tres	Redaction	6	6	exploit		["Decoding"]	Rare find in Government caches.	Wipes the target's firewall rules in one go.
+339	exploits/blackout.tres	Blackout	6	6	exploit		["Decoding"]	Rare find in Government caches.	Cuts the target's monitoring: a short stun, then its countermeasures restart.

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://coxoqs7s8e86v"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_ccvtd"]
+[ext_resource type="Resource" uid="uid://bokiyw84pwudb" path="res://items/resources/Parsing/account_numbers.tres" id="2_xkhsa"]
+[ext_resource type="Resource" uid="uid://dkb06jp8du6p8" path="res://items/resources/Parsing/encrypted_pins.tres" id="3_uhstg"]
+[ext_resource type="Resource" uid="uid://q0j3rb8tk48j" path="res://items/resources/Parsing/routing_number.tres" id="4_5f3mh"]
+
+[resource]
+script = ExtResource("1_ccvtd")
+id = 99
+name = "Cookies"
+shortened_name = ""
+description = "Obtained from Mining. Can be Parsed for resources."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_ccvtd")]([ExtResource("2_xkhsa"), ExtResource("3_uhstg"), ExtResource("4_5f3mh")])
+tier = 4
+color_type = 2
+obtained_from = Array[int]([1])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

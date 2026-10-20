@@ -103,6 +103,11 @@ func overclock_block_reason() -> String:
 	return modifier_block_reason()
 
 ## Access never runs overclocked (overclock is system-wide, so a running overclock just doesn't speed it up)
+func heat_tier_mult() -> float:
+	if process_data == Compiling.MOD or process_data == Compiling.ACCESS:
+		return Stats.tier_heat(Compiling.HEAT_BY_TIER, Upgrades.working_tier("Compiling"))
+	return 1.0
+
 func get_mode() -> Mode:
 	var m := super.get_mode()
 	if process_data == Compiling.ACCESS and m == Mode.OVERCLOCKED:
