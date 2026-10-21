@@ -63,7 +63,7 @@ var SPEAR = {
 	"experience": 0,
 	"experience per level": 60,
 	"command": "phish -spear",
-	"display command": "phish -spear (bait=<item>)",
+	"display command": "phish -spear [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -spear', 'description': 'Cast every line' },
 		{ 'cmd': 'phish -spear bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
@@ -104,9 +104,9 @@ var WHALING = {
 	"experience": 0,
 	"experience per level": 900, # per whale landed (a bundle of ~14 items)
 	"command": "phish -whale",
-	"display command": "phish -whale (bait=<item>)",
+	"display command": "phish -whale [bait=<item>]",
 	"example commands": [
-		{ 'cmd': 'phish -whale', 'description': 'Every line goes onto one whale (more lines = faster reel)' },
+		{ 'cmd': 'phish -whale', 'description': 'All lines on one whale: wait, bite roll, then a reel split across your lines for a bundle of 10-24 SQL / Spoofs' },
 		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a Mining item: bite chance up, bundle doubled' },
 	],
 	"efficiency": 0.4,
@@ -135,7 +135,7 @@ var WHALING = {
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 15 },
 	],
 	"resource amount gained": 1,
-	"description": "Hooks one big target with every line: slow, but each whale lands a bundle of 10-24 SQL Injectors and Packet Spoofs, and sometimes a one-time exploit item.",
+	"description": "One big catch at a time. All your lines go on a single whale: cast, wait while it circles (30-60s), then it bites or slips away (bite chance = efficiency). A bite starts the reel: 2 minutes split across your lines, so more lines reel faster. A landed whale is a bundle of 10-24 items, mostly SQL Injectors (85%) with some Packet Spoofs (15%), plus a 5% chance of a one-time item. Bait (10 of a Mining item per whale) raises the bite chance and doubles the bundle.",
 	"efficiency description": "Chance the whale bites",
 	"signal": whale_cycle_completed
 }
@@ -148,7 +148,7 @@ var SMISH = {
 	"experience": 0,
 	"experience per level": 350, # per reply
 	"command": "phish -smish",
-	"display command": "phish -smish (target=<target>) (bait=<item>)",
+	"display command": "phish -smish [target=<target>] [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -smish', 'description': 'Replies become intel on a random unlocked target that is not maxed' },
 		{ 'cmd': 'phish -smish target=student', 'description': 'Replies become intel on the Student (add "hard" for hard mode)' },
@@ -187,7 +187,7 @@ var TRAP = {
 	"experience": 0,
 	"experience per level": 24000, # for a full trap (scales with how full it was)
 	"command": "phish -trap",
-	"display command": "phish -trap (bait=<item>)",
+	"display command": "phish -trap [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -trap', 'description': 'Sets a watering-hole trap (1 min). Shows its status once set' },
 		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a Mining item: haul doubled, rare chance up' },
@@ -228,12 +228,12 @@ var MOD = {
 	"experience": 0,
 	"experience per level": 1000,
 	"command": "phish -mod",
-	"display command": "phish -mod (bait=<item>)",
+	"display command": "phish -mod [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -mod', 'description': 'Cast every line' },
 		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
 	],
-	"efficiency": 0.001,
+	"efficiency": 0.01, # 1% bite chance at L1 (2026-10-21; was 0.1%)
 	"efficiency rate": 0.0001,
 	"unlocked": false,
 	"unlock level": 5,

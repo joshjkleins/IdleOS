@@ -47,12 +47,16 @@ func get_rare_chance(process: Dictionary = {}, cache: CacheData = null) -> float
 		process = CACHE
 	if process.get("rare multiplier", 1.0) <= 0.0:
 		return 0.0
-	return min(1.0, get_efficiency(process) * process.get("rare multiplier", 1.0) + tracker_bonus(cache))
+	return min(1.0, get_efficiency(process) * process.get("rare multiplier", 1.0) + process.get("rare bonus", 0.0) + tracker_bonus(cache))
 
 #region rare tracker
 ## Rare Tracker: every cache of a type that decodes without its rare adds the installed bonus to that type's
 ## next one (variants share a counter: "Student cache Extraction" counts as "Student cache"). Saved.
 var rare_tracker := {} # cache family name -> dry caches in a row
+## Cache families that already gave their first-time rare: the first decode of every cache family that can
+## drop a rare always does (CacheDecrypting.get_potential_items; live decoding only). Hidden on purpose: drop
+## tables keep showing the normal chance, so the first one just feels lucky.
+var first_rare_given := {}
 
 func cache_family(cache: CacheData) -> String:
 	var n = cache.name
@@ -125,7 +129,7 @@ var CACHE = {
 		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
 		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
 	],
-	"efficiency": 0.20, # rare chance: 20% at L1 -> ~22% at L99 (XP pass 2026-10-20: ~250-300 hacks per tier; was 4%)
+	"efficiency": 0.35, # rare chance: 35% at L1 (2026-10-21 playthrough; was 20%, 4% before the XP pass)
 	"efficiency rate": 0.0002,
 	"unlocked": true,
 	"unlock level": 1,
@@ -169,7 +173,7 @@ var INTEL = {
 	"overheat heat": 0.3,
 	"vm token chance": 0.01,
 	"requirements": "Nothing (an unlocked hacking target)",
-	"description": "Gathers intel on a hacking target, free to run. Each successful line weakens the target's intel stat by 1 more or lasts 1 more hack (alternating), up to 25% of that stat and 10 hacks. Used up one hack at a time.",
+	"description": "Gathers intel on a hacking target, free to run. Each successful line weakens one of its stats (integrity, firewall, counter damage, counter speed) by 2% more, one at a time; every time all four match, the intel lasts 1 more hack. Up to -10% on everything, then more hacks, up to 15. Used up one hack at a time.",
 	"efficiency description": "Chance per line to gather intel.",
 	"signal": intel_decode_cycle_completed
 }
@@ -247,9 +251,9 @@ var DEEP = {
 		{'cmd': 'decode -deep', 'description': 'Deep scans every cache you have (1 VM Decoding token each)'},
 		{'cmd': 'decode -deep=student cache', 'description': 'Deep scans only Student caches'}
 	],
-	"efficiency": 0.20, # x2 below: 40% at L1 -> ~44% at L99
+	"efficiency": 0.35, # + rare bonus below: 50% at L1 (2026-10-21)
 	"efficiency rate": 0.0002,
-	"rare multiplier": 2.0,
+	"rare bonus": 0.15, # Deep Scan: +15% rare chance on top of Cache's (2026-10-21; was x2)
 	"token cost": 1, # VM Decoding tokens per cache
 	"unlocked": false,
 	"unlock level": 40,
@@ -327,6 +331,7 @@ func save_data() -> Dictionary:
 		"first_cache_decoded": first_cache_decoded,
 		"intel": intel,
 		"rare_tracker": rare_tracker,
+		"first_rare_given": first_rare_given,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -337,6 +342,7 @@ func load_data(data: Dictionary) -> void:
 	CACHE["experience"] = int(data.get("cache_experience", CACHE["experience"]))
 	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	first_cache_decoded = data.get("first_cache_decoded", false)
+	first_rare_given = data.get("first_rare_given", {}).duplicate()
 	rare_tracker = {}
 	var saved_tracker: Dictionary = data.get("rare_tracker", {})
 	for k in saved_tracker:
@@ -461,33 +467,40 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 
 
 #region intel
-## Intel per target, saved: key -> {"amount": stat reduction, "hacks": hacks left}.
-## Each successful line alternates +1 amount / +1 hack (first find = -1 for 1 hack), capped at
-## INTEL_CAP_RATIO of the target's intel stat and INTEL_MAX_HACKS. One hack is used per hack attempt.
+## Intel per target, saved: key -> {"lv": [integrity, firewall, counter, counter speed] in steps, "dur": hacks earned,
+## "hacks": hacks left}. Each step is INTEL_STEP (2%) off that stat for a hack that uses the intel. Gathering builds
+## it up one point per successful line, in this order (2026-10-21):
+##   one stat +2% at a time until all four are at 2%, then +1 hack; all four to 4%, +1 hack; ... all at 10%,
+##   then +1 hack per point up to INTEL_MAX_HACKS (15, + Field Notes).
+## Each hack attempt uses 1 hack of intel; when the last one is used the intel is spent (back to nothing).
 const INTEL_LINES = 5
-const INTEL_CAP_RATIO = 0.25
-const INTEL_MAX_HACKS = 10 # base; Field Notes adds +1 per tier installed (intel_max_hacks())
-const INTEL_STATS = ["firewall", "integrity", "counter", "counter speed"] # "intel stat" a target can name
+const INTEL_STATS = ["integrity", "firewall", "counter", "counter speed"]
+const INTEL_STEP = 0.02
+const INTEL_MAX_STEPS = 5 # 10%
+const INTEL_MAX_HACKS = 15 # base; Field Notes adds +1 per tier installed (intel_max_hacks())
 var intel := {}
 
 ## "School/Student" or "School/Student (Hard)/hard" style key (easy and hard mode are separate).
 func intel_key(target: Dictionary) -> String:
 	return Stats.target_key(target)
 
-func intel_stat(target: Dictionary) -> String:
-	var s = target.get("intel stat", "firewall")
-	return s if s in INTEL_STATS else "firewall"
-
-func intel_cap(target: Dictionary) -> int:
-	# targets 3-5 of a tier carry a bigger "intel cap" (share of their intel stat); default INTEL_CAP_RATIO
-	return max(1, int(float(target.get(intel_stat(target), 0)) * float(target.get("intel cap", INTEL_CAP_RATIO))))
-
 func get_intel(target: Dictionary) -> Dictionary:
-	return intel.get(intel_key(target), {"amount": 0, "hacks": 0})
+	var i: Dictionary = intel.get(intel_key(target), {})
+	var lv = i.get("lv", [0, 0, 0, 0])
+	var hacks = int(i.get("hacks", 0))
+	return {"lv": [int(lv[0]), int(lv[1]), int(lv[2]), int(lv[3])], "dur": int(i.get("dur", hacks)), "hacks": hacks}
+
+## stat -> share removed (0.0 .. 0.10)
+func intel_pcts(target: Dictionary) -> Dictionary:
+	var i = get_intel(target)
+	var out = {}
+	for k in INTEL_STATS.size():
+		out[INTEL_STATS[k]] = i.lv[k] * INTEL_STEP
+	return out
 
 func is_intel_maxed(target: Dictionary) -> bool:
 	var i = get_intel(target)
-	return i.amount >= intel_cap(target) and i.hacks >= intel_max_hacks()
+	return i.lv.min() >= INTEL_MAX_STEPS and i.hacks >= intel_max_hacks()
 
 ## Field Notes: +1 max intel hack per install, and a first find starts with that many extra hacks
 func field_notes() -> int:
@@ -497,39 +510,49 @@ func intel_max_hacks() -> int:
 	return INTEL_MAX_HACKS + field_notes()
 
 func add_intel_point(target: Dictionary) -> void:
-	var i = get_intel(target).duplicate()
-	var cap = intel_cap(target)
-	if i.hacks == 0:
-		i.amount = max(i.amount, 1)
-		i.hacks = 1 + field_notes()
-	elif i.amount <= i.hacks and i.amount < cap:
-		i.amount += 1
-	elif i.hacks < intel_max_hacks():
+	var i = get_intel(target)
+	var lo = i.lv.min()
+	if i.hacks <= 0:
+		i = {"lv": [1, 0, 0, 0], "dur": 1 + field_notes(), "hacks": 1 + field_notes()}
+	elif lo < i.lv.max():
+		i.lv[i.lv.find(lo)] += 1 # finish the round: next stat up to the same %
+	elif lo >= INTEL_MAX_STEPS:
+		if i.dur < intel_max_hacks():
+			i.dur += 1
+		i.hacks = min(i.hacks + 1, i.dur) # all at 10%: more hacks (or a refill of used ones)
+	elif i.dur < lo + 1 + field_notes():
+		i.dur += 1 # round done: +1 hack
 		i.hacks += 1
-	elif i.amount < cap:
-		i.amount += 1
+	else:
+		i.lv[0] += 1 # next round
 	intel[intel_key(target)] = i
 	SaveManager.mark_dirty()
 
-## Called once per hack attempt: returns {"stat", "amount", "hacks_left"} (empty if no intel) and uses a hack.
+## Called once per hack attempt: returns {"pcts": stat -> share, "hacks_left"} (empty if no intel) and uses a hack.
 func use_intel(target: Dictionary) -> Dictionary:
 	var key = intel_key(target)
-	var i = intel.get(key, {})
-	if i.is_empty() or i.hacks <= 0:
+	var i = get_intel(target)
+	if i.hacks <= 0:
 		return {}
-	var out = {"stat": intel_stat(target), "amount": min(i.amount, intel_cap(target)), "hacks_left": i.hacks - 1}
+	var out = {"pcts": intel_pcts(target), "hacks_left": i.hacks - 1}
 	if i.hacks <= 1:
-		intel.erase(key)
+		intel.erase(key) # spent
 	else:
-		intel[key] = {"amount": i.amount, "hacks": i.hacks - 1}
+		i.hacks -= 1
+		intel[key] = i
 	SaveManager.mark_dirty()
 	return out
+
+## "-4% integrity · -4% firewall · -2% counter · -2% counter speed"
+func intel_effect_text(target: Dictionary) -> String:
+	var p = intel_pcts(target)
+	return " · ".join(INTEL_STATS.map(func(s): return "-%d%% %s" % [roundi(p[s] * 100), s]))
 
 func intel_text(target: Dictionary) -> String:
 	var i = get_intel(target)
 	if i.hacks <= 0:
-		return "no intel  (max -%d %s / %d hacks)" % [intel_cap(target), intel_stat(target), intel_max_hacks()]
-	return "-%d %s for %d hack%s  (max -%d / %d)" % [i.amount, intel_stat(target), i.hacks, "" if i.hacks == 1 else "s", intel_cap(target), intel_max_hacks()]
+		return "no intel  (builds up to -%d%% on every stat for %d hacks)" % [roundi(INTEL_STEP * INTEL_MAX_STEPS * 100), intel_max_hacks()]
+	return "%s  for %d hack%s" % [intel_effect_text(target), i.hacks, "" if i.hacks == 1 else "s"]
 
 ## "student", "student hard", "legal-assistant", "student (hard)" -> the unlocked target, or {}.
 func find_target(text: String) -> Dictionary:
@@ -562,19 +585,20 @@ func intel_command_text(arg: String) -> String:
 	return intel_detail_text(target)
 
 func intel_detail_text(target: Dictionary) -> String:
-	var stat = intel_stat(target)
-	var base = target.get(stat, 0)
 	var i = get_intel(target)
 	var key = intel_key(target)
 	var hard = key.ends_with("/hard")
+	var p = intel_pcts(target)
 	var out = "INTEL  ·  %s%s  [color=#666666](%s)[/color]\n" % [target.name, " (hard)" if hard and !target.name.to_lower().contains("hard") else "", key.get_slice("/", 0)]
-	out += "  intel stat     %s (base %s)\n" % [stat, str(base)]
-	if i.hacks > 0:
-		out += "  current        -%d %s for %d hack%s  ->  next hack: %s %s\n" % [i.amount, stat, i.hacks, "" if i.hacks == 1 else "s", str(max(0, base - i.amount)), stat]
-	else:
+	if i.hacks <= 0:
 		out += "  current        none\n"
-	out += "  max            -%d %s (25%%) for %d hacks\n" % [intel_cap(target), stat, intel_max_hacks()]
+	else:
+		out += "  current        %s\n" % intel_effect_text(target)
+		out += "  hacks left     %d  [color=#666666](max %d)[/color]\n" % [i.hacks, intel_max_hacks()]
 	out += "  target stats   integrity %s  ·  firewall %s  ·  counter %s  ·  counter speed %s\n" % [str(target.get("integrity", "-")), str(target.get("firewall", "-")), str(target.get("counter", "-")), str(target.get("counter speed", "-"))]
+	if i.hacks > 0:
+		out += "  next hack      integrity %d  ·  firewall %d  ·  counter %d  ·  counter speed %s\n" % [int(round(float(target.get("integrity", 0)) * (1.0 - p.integrity))), int(round(float(target.get("firewall", 0)) * (1.0 - p.firewall))), int(round(float(target.get("counter", 0)) * (1.0 - p.counter))), str(snappedf(float(target.get("counter speed", 0)) * (1.0 - p["counter speed"]), 0.1))]
+	out += "  [color=#666666]builds 2%% at a time, one stat per find, +1 hack each time all four match; at 10%% every find adds a hack (max %d)[/color]\n" % intel_max_hacks()
 	out += "[color=#666666]gather more with: decode -intel=%s%s[/color]" % [target.name.to_lower().replace(" (hard)", "").replace(" ", "-"), " hard" if hard else ""]
 	return out
 
@@ -641,9 +665,7 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 	if rare_chance > 0.0:
 		for e in cache.rare_pool:
 			rows.append({"name": e.item.name, "min": _rare_amount(cache), "max": _rare_amount(cache), "chance": rare_chance, "rare": true})
-	var ex = Exploits.drop_row(cache, process, exploit_mult)
-	if !ex.is_empty():
-		rows.append(ex)
+	rows.append_array(Exploits.drop_rows(cache, process, exploit_mult))
 	return rows
 
 ## Rolls one decode: [{item, amount, rare}] with the rare item (if any) last.
@@ -689,8 +711,7 @@ func roll_loot(cache: CacheData, process: Dictionary = {}, mod: String = "") -> 
 		note_rare_roll(cache, got)
 		if got:
 			loot.append({"item": cache.rare_pool.pick_random().item, "amount": _rare_amount(cache), "rare": true})
-	var ex = Exploits.roll_drop(cache, process, FORENSICS_EXPLOIT_MULT if mod == "forensics" else 1.0)
-	if ex:
+	for ex in Exploits.roll_drops(cache, process, FORENSICS_EXPLOIT_MULT if mod == "forensics" else 1.0):
 		loot.append({"item": ex, "amount": 1, "rare": true})
 	if mod == "survey":
 		var kept = []

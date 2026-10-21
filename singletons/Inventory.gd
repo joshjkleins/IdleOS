@@ -483,8 +483,8 @@ func list_filtered(args: String) -> Dictionary:
 		if search != "" and !item.name.to_lower().contains(search):
 			continue
 		picked.append(item)
-	if search != "" and picked.size() == 1 and types.is_empty() and tiers.is_empty() and skills.is_empty():
-		return {"text": "", "single": picked[0]}
+	# (a name search always lists, even with one hit, so 'ls vm' looks the same whatever you own; exact
+	# names like 'ls vm cache' are handled before this by get_item_by_name)
 	if picked.is_empty():
 		return {"text": "No items match '%s'. [color=#666666]('ls' lists everything · 'ls -h' explains item types)[/color]" % args.strip_edges(), "single": null}
 	if skills.size() == 1:

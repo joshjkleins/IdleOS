@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://c8tks2ca1j3wm"]
 
-[ext_resource type="Resource" uid="uid://btjjhl0l0geno" path="res://items/combat/sql_injector.tres" id="1_2os4i"]
+[ext_resource type="Resource" uid="uid://cyca63jurp3gh" path="res://items/resources/Matching/security_clearance.tres" id="1_2os4i"]
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_a5qjv"]
 
 [resource]

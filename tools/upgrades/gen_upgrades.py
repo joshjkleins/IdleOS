@@ -118,14 +118,14 @@ GROUPS["System"] = [
     # (type, name, effect, per-install value, running: (start, step, unit) or None)
     # Heat plan (2026-10-20): cooling grows with each tier's process heat, so a new tier runs ~1.3x hot on arrival,
     # cool after this tier's Cooling + Heat Reduction installs, and main + all VM windows run cool at the tier's end.
-    (TRACK,"Cooling","Passive cooling per second",[f"+{v} C/s" for v in COOLING_STEP],(0.1,COOLING_STEP,"C/s cooling")),
+    (TRACK,"Cooling","Passive cooling per second",[f"+{v} C/s" for v in COOLING_STEP],(0.2,COOLING_STEP,"C/s cooling")),
     (TRACK,"Heat Reduction","Less heat from every process (percent of each heat tick)","-5%",(0.0,5,"% less heat")),
     (TRACK,"VM Windows","Max simultaneous VM windows","+1",(1,1,"VM windows")),
     (TRACK,"Background Services","Offline progression cap: +2 h per install on top of the 1 h base (24 h max)","+2 h",(0,2,"h added to the 1 h offline cap")),
     (TRACK,"Background Services","Offline progression cap","+2 h",(0,2,"h added to the 1 h offline cap")),
     (TRACK,"Defrag Duration","Defrag boosts last longer","+2.5 min",(10,2.5,"min boost")),
     (TRACK,"Defrag Cooldown","Shared defrag cooldown shorter (meets duration at max)","-2.5 min",(40,-2.5,"min cooldown")),
-    (PTD,"Thermal Paste","Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)","+2 C clear temp",(80,2,"C overheat clears")),
+    (PTD,"VM Snapshot","Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)","+5% / +3%",(0,[5,3,3,3,3,3],"% chance to keep the VM token")),
     (PTD,"Scheduler","VM tokens last longer per use","+10% VM uptime",(0,10,"% VM uptime")),
     (CAP,["Overheat Fan","Idle Cooling","Liquid Cooling","Load Balancer","Watchdog","Server Rack"],
         ["+0.3 C/s cooling while overheated (existing upgrade, kept)",

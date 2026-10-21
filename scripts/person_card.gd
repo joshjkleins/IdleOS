@@ -115,7 +115,7 @@ func _add_hack_section(box: VBoxContainer, info) -> void:
 
 func _add_stats(box: VBoxContainer, info) -> void:
 	var intel = Decoding.get_intel(info)
-	var intel_stat = Decoding.intel_stat(info) if intel.hacks > 0 else ""
+	var with_intel = int(intel.hacks) > 0 # next hack uses intel: every stat shows its weakened value
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 6)
@@ -130,8 +130,9 @@ func _add_stats(box: VBoxContainer, info) -> void:
 	for s in stats:
 		var value = s[2]
 		var color = C_TEXT
-		if s[0] == intel_stat: # show what intel brings it down to for the next hack
-			value = _intel_value(s[0], info, intel.amount)
+		var ip = Decoding.intel_pcts(info)
+		if with_intel and ip[s[0]] > 0.0: # show what intel brings it down to for the next hack
+			value = _intel_value(s[0], info, ip[s[0]])
 			color = C_INTEL
 		grid.add_child(_stat_box(s[0], s[1], value, color, s[3]))
 
@@ -178,26 +179,31 @@ func _add_special(box: VBoxContainer, info) -> void:
 func _add_intel(box: VBoxContainer, info) -> void:
 	box.add_child(_section("INTEL", C_INTEL))
 	var intel = Decoding.get_intel(info)
-	var stat = Decoding.intel_stat(info)
-	if intel.hacks > 0:
-		box.add_child(_label("-%d %s for %d hack%s" % [intel.amount, stat, intel.hacks, "" if intel.hacks == 1 else "s"], 11, C_INTEL))
-		box.add_child(_label("max -%d %s / %d hacks" % [Decoding.intel_cap(info), stat, Decoding.intel_max_hacks()], 10, C_DIM))
+	if int(intel.hacks) > 0:
+		var p = Decoding.intel_pcts(info)
+		var l1 = _label("-%d%% integrity · -%d%% firewall · -%d%% counter · -%d%% speed" % [roundi(p.integrity * 100), roundi(p.firewall * 100), roundi(p.counter * 100), roundi(p["counter speed"] * 100)], 10, C_INTEL)
+		l1.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(l1)
+		box.add_child(_label("for %d hack%s  ·  up to -10%% / %d hacks" % [intel.hacks, "" if int(intel.hacks) == 1 else "s", Decoding.intel_max_hacks()], 10, C_DIM))
 	else:
-		box.add_child(_label("none  ·  gather intel with the Decoding skill (weakens %s)" % stat, 10, C_DIM))
+		var l = _label("none  ·  gather intel with Decoding to weaken this target (up to -10% on every stat)", 10, C_DIM)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(l)
 #endregion
 
 #region helpers
-func _intel_value(stat: String, info, amount: int) -> String:
+func _intel_value(stat: String, info, pct: float) -> String:
 	var base = float(info[stat])
+	var k = 1.0 - pct
 	match stat:
 		"counter":
-			return "%d → %d dmg" % [int(base), int(max(0, base - amount))]
+			return "%d → %d dmg" % [int(base), int(max(0, round(base * k)))]
 		"counter speed":
-			var after = max(0.1, base - amount)
+			var after = max(0.1, base * k)
 			return "%ss → %ss" % [_fmt(COUNTER_BAR_MAX / base), _fmt(COUNTER_BAR_MAX / after)]
 		"integrity":
-			return "%d → %d" % [int(base), int(max(1, base - amount))]
-	return "%d → %d" % [int(base), int(max(0, base - amount))]
+			return "%d → %d" % [int(base), int(max(1, round(base * k)))]
+	return "%d → %d" % [int(base), int(max(0, round(base * k)))]
 
 func _style() -> void:
 	var sb := StyleBoxFlat.new()

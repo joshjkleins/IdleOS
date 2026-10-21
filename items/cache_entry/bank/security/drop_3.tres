@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://b2e17nnxmjp7o"]
 
 [ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_uy68m"]
-[ext_resource type="Resource" uid="uid://btjjhl0l0geno" path="res://items/combat/sql_injector.tres" id="1_w1wrc"]
+[ext_resource type="Resource" uid="uid://mecdw40qxrx1" path="res://items/resources/Matching/account_access_tokens.tres" id="1_w1wrc"]
 
 [resource]
 script = ExtResource("1_uy68m")

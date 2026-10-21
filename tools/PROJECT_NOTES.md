@@ -501,6 +501,44 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   max anonymity (anonymity already carries over between fights; reset only in setup()). Old saves: Upgrades.RENAMED
   maps clean_exit installs to second_wind. Test: tools/tests/hackcap.
 
+## From the demo-nextfest-2 playtest (2026-10-20)
+- Base cooling 0.1 -> 0.2 C/s (Upgrades.BASE_COOLING, Stats.cooling_amount, cooling labels, gen_upgrades start, combat_sim COOLING).
+- Optional flags in [brackets] like real terminals: phishing display commands, 'upload <item> [amount]' (hints merged into one line).
+- **Tab auto-complete** (singletons/CommandRegistry.gd, rewritten; idle_os_2 `_tab_complete`): prefix-then-list like bash,
+  start-of-string, case-insensitive. Candidates are whole commands: static list + skill processes (parse always gets
+  '='), cd / info / ssh / apt per skill, owned items for ls / track / parse / decode / compile -mod / bait, upload goal
+  and queued items, unlocked targets (intel, smish), VMs, unlocked modifiers. Hacking console: view / hack / unlock /
+  run. Options list one word at a time (cut at '=' / ' -', and at spaces after cd / info / ssh / apt ...). '-h' line +
+  tutorial tip on the Navigate Mining step. Tests: tools/tests/tabtest, tabkey.
+- Skills run from any directory (demo player feedback: binaries belong on $PATH): idle_os_2 `_run_skill_from_anywhere`
+  routes mine / parse / crack / match / phish / decode / compile commands to their skill's handler without changing
+  directory; root also takes overclock / modifiers / kill -s for the running process; 'which <cmd>' and
+  'ls /usr/local/bin' are unadvertised easter eggs for programmers (not in -h or the tutorial); 'hack' at root points to 'cd hacking'. Tutorial Crack / Match / Phish / Compile / Decode steps
+  give the command and say it runs from anywhere; '-h' has a line for it. Test: tools/tests/pathtest.
+
+## Playthrough notes pass 3 (2026-10-21, cdd)
+- Drops: Phishing Mod bite 1% at L1 (was 0.1%); one-time items 5% EACH per cache (Exploits.roll_drops / drop_rows, each on
+  its own line, no "(one-time item)" tag); cache rare chance 35% (Cache + Deep Scan efficiency; Deep x2 = 70%).
+  First decode of every cache family with a rare chance always has its rare (Decoding.first_rare_given, saved;
+  CacheDecrypting.get_potential_items), hidden on purpose: drop tables show the normal chance. Deep Scan = Cache's
+  rare chance + 15% ("rare bonus"; was x2). VM cache hint no longer mentions the tutorial cache.
+- Caches no longer drop SQL Injectors / Packet Spoofs (Phishing and Corruption parsing still do). Gap fill: each tier's
+  3rd target cache now drops that tier's cracked item, the 4th its matched item (School: Vice principal -> Passwords,
+  Principal -> School payload, since School caches had no payload). Old entries in _to_delete/backup/cache_entries.
+- Mods: Encrypted passwords crit 5%, Passwords 7.5% (note: School budget embezzlement logs rare is 6%). New compile mod
+  COUNTER_RESET (MOD_TYPE 28) on payloads: 5/7/9/11/13/15% per SQL attack to reset the counter bar; payloads gave
+  bandwidth regen before (the rares still do).
+- Intel rework: per target {lv[integrity, firewall, counter, counter speed], dur, hacks}. Each successful line: one stat
+  +2% (in that order) until all four match, then +1 hack; repeat to 10% on everything (5 steps), then +1 hack per point
+  up to 15 (+ Field Notes). A hack uses 1; the last one spends the intel. 34 points from nothing to maxed.
+  "intel stat" / "intel cap" target keys are unused (tools/balance combat_sim / livecheck still model the old intel).
+- System Thermal Paste -> VM Snapshot (system.vm_snapshot): chance a VM token isn't used when a VM starts or renews,
+  5% at T1 then +3% per tier (Upgrades.spend_vm_token; silent on renewals). Overheat always clears at 80 C.
+  Upgrades.RENAMED maps old thermal_paste installs.
+- Fixes: 'ls <partial name>' always lists (no auto-details on a single hit), hacking console up/down history resets
+  after a new command, 'defrag -<process>' runs from any directory, Whaling description + terminal header explain the
+  bite / reel / bundle. Tab: bait completes Mining items only (Phishing.is_bait), 'ls' completes every item name.
+
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
 2. ~~Game-loop chart~~ DONE 2026-10-19 (see "Flow chart node"; `flow` + recipe chart in `info <skill> <process>`).

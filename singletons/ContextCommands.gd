@@ -634,7 +634,7 @@ func get_hack_target_info(location: Dictionary):
 		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
 		return_text += "\t" + pad_text(counter_atk_text, pad_text_length) + pad_text(counter_spd_text, pad_text_length) + pad_text(exp_text, pad_text_length) + "\n"
 		var reboot_text = "[font_size=12]Firewall reboot: %ds[/font_size]" % int(tar.get("firewall reboot", 10))
-		var intel_text = "[font_size=12]Intel weakens: %s (up to %d%%)[/font_size]" % [Decoding.intel_stat(tar), roundi(float(tar.get("intel cap", Decoding.INTEL_CAP_RATIO)) * 100)]
+		var intel_text = "[font_size=12]Intel: up to -10% on every stat[/font_size]"
 		return_text += "\t" + pad_text(reboot_text, pad_text_length) + intel_text + "\n"
 		return_text += "\n"
 		
@@ -735,6 +735,8 @@ func get_help() -> String:
 |                                                                     |
 | SKILLS / TRAVERSAL                                                  |
 |   cd <skill>                   Navigate to a skill                  |
+|   mine -logs, crack ...        Skills run from any directory        |
+|   Tab                          Auto-complete a command              |
 |   cd ..                        Return to root                       |
 |   tree                         Display skill hierarchy              |
 |   flow                         Chart of the game loop               |
@@ -753,7 +755,7 @@ func get_help() -> String:
 |                                                                     |
 | PROGRESS                                                            |
 |   upload                       Upload goal + what's uploading       |
-|   upload <item> <amount>       Upload items from your inventory     |
+|   upload <item> [amount]       Upload items from your inventory     |
 |   upload -a                    Upload everything the goal needs     |
 |   upload cancel <item>         Return queued items to inventory     |
 |   intel                        Intel on every hacking target        |
@@ -1032,6 +1034,8 @@ func returned_to_root() -> String:
 |                                                                    |
 | SKILLS / TRAVERSAL                                                 |
 |   cd <skill>                   Navigate to a skill                 |
+|   mine -logs, crack ...        Skills run from any directory       |
+|   Tab                          Auto-complete a command             |
 |   info                         Display additional skill info       |
 |                                                                    |
 | SYSTEM                                                             |
@@ -1262,8 +1266,7 @@ func upload_goal_text() -> String:
 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
 	var hints = [
-		["upload <item> <amount>", "upload from your inventory  (ex. upload logs 5)"],
-		["upload <item>", "upload all the goal still needs"],
+		["upload <item> [amount]", "upload from your inventory; no amount = all the goal still needs  (ex. upload logs 5)"],
 		["upload -a", "upload every goal item you have"],
 		["upload cancel <item>", "return queued items to your inventory"],
 	]

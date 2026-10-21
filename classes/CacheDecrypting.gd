@@ -135,9 +135,18 @@ func get_potential_items(cache: CacheData, process: Dictionary = {}, mod: String
 		loot.append({"item": Items.VM_CACHE, "amount": 1, "rare": false})
 		loot.append({"item": cache.rare_pool.pick_random().item, "amount": 1, "rare": true})
 		Decoding.first_cache_decoded = true
+		Decoding.first_rare_given[Decoding.cache_family(cache)] = true
 		SaveManager.mark_dirty()
 		return loot
-	return Decoding.roll_loot(cache, process, mod)
+	var rolled = Decoding.roll_loot(cache, process, mod)
+	# first time a cache family is decoded with a rare chance, the rare item is guaranteed
+	var fam = Decoding.cache_family(cache)
+	if !Decoding.first_rare_given.has(fam) and !cache.rare_pool.is_empty() and Decoding.get_cache_rare_chance(cache, Decoding.get_rare_chance(process, cache)) > 0.0:
+		Decoding.first_rare_given[fam] = true
+		SaveManager.mark_dirty()
+		if !rolled.any(func(d): return d.rare and cache.rare_pool.any(func(e): return e.item == d.item)):
+			rolled.append({"item": cache.rare_pool.pick_random().item, "amount": 1, "rare": true})
+	return rolled
 
 func get_item_hexes(item, amount) -> Array:
 	var result: Array = []

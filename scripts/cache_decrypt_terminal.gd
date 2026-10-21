@@ -216,7 +216,7 @@ func _run_intel() -> void:
 		var finds = 0
 		for i in Decoding.INTEL_LINES:
 			if randf() < Decoding.get_efficiency(process_data):
-				rows.append({"text": "INTEL+" + Decoding.intel_stat(target).to_upper()})
+				rows.append({"text": "INTEL FOUND"})
 				finds += 1
 			else:
 				rows.append(null)

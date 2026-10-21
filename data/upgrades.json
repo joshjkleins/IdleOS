@@ -24,8 +24,8 @@
      "slot": 1,
      "value": 0.3,
      "label": "+0.3 C/s",
-     "before": "0.1 C/s cooling",
-     "after": "0.4 C/s cooling",
+     "before": "0.2 C/s cooling",
+     "after": "0.5 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -39,8 +39,8 @@
      "slot": 1,
      "value": 0.35,
      "label": "+0.35 C/s",
-     "before": "0.4 C/s cooling",
-     "after": "0.75 C/s cooling",
+     "before": "0.5 C/s cooling",
+     "after": "0.85 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -54,8 +54,8 @@
      "slot": 1,
      "value": 0.55,
      "label": "+0.55 C/s",
-     "before": "0.75 C/s cooling",
-     "after": "1.3 C/s cooling",
+     "before": "0.85 C/s cooling",
+     "after": "1.4 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -69,8 +69,8 @@
      "slot": 1,
      "value": 0.7,
      "label": "+0.7 C/s",
-     "before": "1.3 C/s cooling",
-     "after": "2 C/s cooling",
+     "before": "1.4 C/s cooling",
+     "after": "2.1 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -84,8 +84,8 @@
      "slot": 1,
      "value": 1.05,
      "label": "+1.05 C/s",
-     "before": "2 C/s cooling",
-     "after": "3.05 C/s cooling",
+     "before": "2.1 C/s cooling",
+     "after": "3.15 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -99,8 +99,8 @@
      "slot": 1,
      "value": 1.55,
      "label": "+1.55 C/s",
-     "before": "3.05 C/s cooling",
-     "after": "4.6 C/s cooling",
+     "before": "3.15 C/s cooling",
+     "after": "4.7 C/s cooling",
      "effect": "Passive cooling per second",
      "costs": [
       {
@@ -697,20 +697,20 @@
    ]
   },
   {
-   "id": "system.thermal_paste",
+   "id": "system.vm_snapshot",
    "group": "System",
-   "name": "Thermal Paste",
+   "name": "VM Snapshot",
    "type": "pointed",
-   "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+   "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
    "levels": [
     {
      "tier": 1,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "80 C overheat clears",
-     "after": "82 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.05,
+     "label": "+5%",
+     "before": "0 % chance to keep the VM token",
+     "after": "5 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Logs",
@@ -721,11 +721,11 @@
     {
      "tier": 2,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "82 C overheat clears",
-     "after": "84 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.03,
+     "label": "+3%",
+     "before": "5 % chance to keep the VM token",
+     "after": "8 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Archives",
@@ -736,11 +736,11 @@
     {
      "tier": 3,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "84 C overheat clears",
-     "after": "86 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.03,
+     "label": "+3%",
+     "before": "8 % chance to keep the VM token",
+     "after": "11 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Metadata",
@@ -751,11 +751,11 @@
     {
      "tier": 4,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "86 C overheat clears",
-     "after": "88 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.03,
+     "label": "+3%",
+     "before": "11 % chance to keep the VM token",
+     "after": "14 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Cookies",
@@ -766,11 +766,11 @@
     {
      "tier": 5,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "88 C overheat clears",
-     "after": "90 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.03,
+     "label": "+3%",
+     "before": "14 % chance to keep the VM token",
+     "after": "17 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Repositories",
@@ -781,11 +781,11 @@
     {
      "tier": 6,
      "slot": 8,
-     "value": 2.0,
-     "label": "+2 C clear temp",
-     "before": "90 C overheat clears",
-     "after": "92 C overheat clears",
-     "effect": "Overheat clears sooner: the clear temp rises toward the 95 C trigger (today: clears at 80 C)",
+     "value": 0.03,
+     "label": "+3%",
+     "before": "17 % chance to keep the VM token",
+     "after": "20 % chance to keep the VM token",
+     "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
        "item": "Databases",

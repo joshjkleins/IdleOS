@@ -21,7 +21,7 @@ enum MOD_TYPE {
 	FIREWALL_REDUCTION,   #usernames
 	FIREWALL_DAMAGE,      #IP address
 	RESTORE,              #packet spoof
-	BAND_RATE,            #school payload
+	BAND_RATE,            #Falsified transcript-style rares (payloads moved to COUNTER_RESET)
 	ATTACK_SPEED,         #credentials
 	DAMAGE_REDUCTION,     #student cache
 	COUNTER_SLOW,         #sql injector
@@ -45,6 +45,7 @@ enum MOD_TYPE {
 	FW_BREAK_INTEGRITY,
 	COUNTER_REFLECT,
 	COLD_BOOT,
+	COUNTER_RESET,        #payloads (2026-10-21): chance per SQL attack to reset the enemy's countermeasure bar
 }
 
 
@@ -115,6 +116,8 @@ func get_mod_description(mod: MOD_TYPE) -> String:
 			return "Gives flat countermeasures reduction"
 		MOD_TYPE.COUNTER_SLOW:
 			return "Slows counterattack measures"
+		MOD_TYPE.COUNTER_RESET:
+			return "Each SQL Injector attack has a chance to reset the target's countermeasure bar"
 		_:
 			return EQUIP_INFO[mod][1] if EQUIP_INFO.has(mod) else ""
 
@@ -138,6 +141,8 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 			return "Countermeasures Flat Reduction"
 		MOD_TYPE.COUNTER_SLOW:
 			return "Countermeasures Slow"
+		MOD_TYPE.COUNTER_RESET:
+			return "Countermeasure Reset"
 		_:
 			return EQUIP_INFO[mod][0] if EQUIP_INFO.has(mod) else ""
 
@@ -147,7 +152,7 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 		MOD_TYPE.DAMAGE:
 			return "+" + str(int(value))
 		MOD_TYPE.EFFICIENCY:
-			return "+%.f%%" % (value * 100.0)
+			return "+%s%%" % str(snappedf(value * 100.0, 0.1)).trim_suffix(".0")
 		MOD_TYPE.FIREWALL_REDUCTION:
 			return "-" + str(int(value))
 		MOD_TYPE.FIREWALL_DAMAGE:
@@ -162,6 +167,8 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 			return "-" + str(int(value))
 		MOD_TYPE.COUNTER_SLOW:
 			return "-" + "%.f%%" % (value * 100.0)
+		MOD_TYPE.COUNTER_RESET:
+			return "%.f%%" % (value * 100.0)
 		_:
 			if EQUIP_INFO.has(mod):
 				match EQUIP_INFO[mod][2]:

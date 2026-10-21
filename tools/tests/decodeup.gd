@@ -76,8 +76,8 @@ func _run() -> void:
 		print("20k caches all max: rare/cache %.4f (no tracker would be %.4f), longest dry streak %d | logs/cache max %.1f survey %.1f base %.1f" % [rares / 20000.0, 0.095, streak_max, logs[0] / 20000.0, logs[1] / 20000.0, logs[2] / 20000.0])
 		var ex = [0, 0]
 		for i in 50000:
-			if Exploits.roll_drop(Items.STUDENT_CACHE, Decoding.CACHE): ex[0] += 1
-			if Exploits.roll_drop(Items.STUDENT_CACHE, Decoding.CACHE, Decoding.FORENSICS_EXPLOIT_MULT): ex[1] += 1
+			if Exploits.roll_drops(Items.STUDENT_CACHE, Decoding.CACHE).size() > 0: ex[0] += 1
+			if Exploits.roll_drops(Items.STUDENT_CACHE, Decoding.CACHE, Decoding.FORENSICS_EXPLOIT_MULT).size() > 0: ex[1] += 1
 		print("one-time item per cache: normal %.4f forensics %.4f" % [ex[0] / 50000.0, ex[1] / 50000.0])
 		# field notes
 		_setpkg("decoding.field_notes", 99)

@@ -152,7 +152,7 @@ var _fw_tween: Tween
 var fight_time := 0.0
 var hack_time := 0.0          # this hack only (Silent Entry)
 var decoys_left := 0          # Decoy Traffic misses left this hack
-var active_intel: Dictionary = {} # this attempt's intel {stat, amount, hacks_left, before, after}
+var active_intel: Dictionary = {} # this attempt's intel {pct, hacks_left, integrity/firewall/counter/counter speed: [before, after]}
 var _state := ""                  # "", "overclock", "overheat"
 var _panel_tick := 0.0
 var _revealed := false            # target stats are shown once access is granted
@@ -469,6 +469,10 @@ func attack():
 		line += "  " + _c("(MOD " + ", ".join(tags) + ")", C_MOD)
 	if recycled:
 		line += "  " + _c("(recycled)", C_EXP)
+	if _mod(M.COUNTER_RESET) > 0 and counter_bar.value > 0.0 and randf() < _mod(M.COUNTER_RESET):
+		counter_bar.value = 0.0 # Countermeasure Reset mod (payloads)
+		line += "  " + _c("(MOD countermeasures reset)", C_MOD)
+		_float(ctr_card.panel, "RESET", C_MOD, 14)
 	if siphoned > 0:
 		line += "  " + _c("+%d anonymity (siphon)" % siphoned, C_YOU)
 	line += "  " + _c("bw -%s" % _fmt(bw_cost) if bw_freeze_left <= 0.0 else "bw frozen", C_DIM)
@@ -581,8 +585,8 @@ func counter():
 	var line = "%s countermeasures -> you  %s  (%d/%d)" % [target_name, _c("-%d anonymity" % dmg, C_INTEG), Stats.current_anon, Stats.max_anon]
 	if reduce > 0:
 		line += "  " + _c("(MOD -%d dmg)" % reduce, C_MOD)
-	if active_intel.get("stat", "") == "counter":
-		line += "  " + _c("(INTEL -%d dmg)" % active_intel.amount, C_INTEL)
+	if !active_intel.is_empty():
+		line += "  " + _c("(INTEL -%d%% dmg)" % _ipct("counter"), C_INTEL)
 	if firewall_down:
 		line += "  " + _c("(slowed: firewall down)", C_FW)
 	_log("CTR", C_CTR, line)
@@ -946,45 +950,36 @@ func _apply_intel() -> Dictionary:
 	active_intel = i
 	if i.is_empty():
 		return {}
-	match i.stat:
-		"firewall":
-			i["before"] = FIREWALL_AMOUNT
-			FIREWALL_AMOUNT = max(0, FIREWALL_AMOUNT - i.amount)
-			i["after"] = FIREWALL_AMOUNT
-		"integrity":
-			i["before"] = INTEGRITY_AMOUNT
-			INTEGRITY_AMOUNT = max(1, INTEGRITY_AMOUNT - i.amount)
-			i["after"] = INTEGRITY_AMOUNT
-		"counter":
-			i["before"] = COUNTER_AMOUNT
-			COUNTER_AMOUNT = max(0, COUNTER_AMOUNT - i.amount)
-			i["after"] = COUNTER_AMOUNT
-		"counter speed":
-			i["before"] = COUNTER_SPEED
-			COUNTER_SPEED = max(0.1, COUNTER_SPEED - i.amount)
-			i["after"] = COUNTER_SPEED
+	# each stat has its own intel share (Decoding.intel_pcts: 2% steps up to 10%)
+	var p: Dictionary = i.pcts
+	i["integrity"] = [INTEGRITY_AMOUNT, max(1, int(round(INTEGRITY_AMOUNT * (1.0 - p.integrity))))]
+	i["firewall"] = [FIREWALL_AMOUNT, max(0, int(round(FIREWALL_AMOUNT * (1.0 - p.firewall))))]
+	i["counter"] = [COUNTER_AMOUNT, max(0, int(round(COUNTER_AMOUNT * (1.0 - p.counter))))]
+	i["counter speed"] = [COUNTER_SPEED, max(0.1, COUNTER_SPEED * (1.0 - p["counter speed"]))]
+	INTEGRITY_AMOUNT = i.integrity[1]
+	FIREWALL_AMOUNT = i.firewall[1]
+	COUNTER_AMOUNT = i.counter[1]
+	COUNTER_SPEED = i["counter speed"][1]
 	return i
+
+## this attempt's intel on <stat>, in whole percent (0 without intel)
+func _ipct(stat: String) -> int:
+	return roundi(float(active_intel.get("pcts", {}).get(stat, 0.0)) * 100)
 
 func _show_intel(i: Dictionary) -> void:
 	var left = int(i.hacks_left)
 	var label = chip_intel.get_meta("label")
-	label.text = "INTEL -%s %s" % [_fmt(i.amount), i.stat]
+	var pct = _ipct("integrity")
+	label.text = "INTEL"
 	chip_intel.visible = true
 	_flash(chip_intel, Color(2, 2, 2), 0.6)
-	_log("INTEL", C_INTEL, "Decoding intel weakens %s: %s %s -> %s  %s" % [target_name, i.stat, _fmt(i.get("before", 0)), _fmt(i.get("after", 0)),
+	_log("INTEL", C_INTEL, "Decoding intel weakens %s: integrity %s -> %s, firewall %s -> %s, counter %s -> %s dmg, counters %d%% slower  %s" % [target_name,
+		_fmt(i.integrity[0]), _fmt(i.integrity[1]), _fmt(i.firewall[0]), _fmt(i.firewall[1]), _fmt(i.counter[0]), _fmt(i.counter[1]), _ipct("counter speed"),
 		_c("(%d hack%s of intel left)" % [left, "" if left == 1 else "s"], C_DIM)])
-	var anchor: Control = ctr_card.panel
+	var anchor: Control = firewall_bar
 	var tw = create_tween()
-	match i.stat:
-		"firewall":
-			anchor = firewall_bar
-			tw.tween_property(firewall_bar, "value", float(i.after), 0.6)
-		"integrity":
-			anchor = integ_bar
-			tw.tween_property(integ_bar, "value", float(i.after), 0.6)
-		_:
-			tw.tween_interval(0.6)
-	_float(anchor, "-%s INTEL" % _fmt(i.amount), C_INTEL, 16)
+	tw.tween_property(firewall_bar, "value", float(i.firewall[1]), 0.6)
+	_float(anchor, "INTEL", C_INTEL, 16)
 	_flash(anchor, Color(1.2, 2.0, 1.9), 0.7)
 	_refresh_panels()
 	await tw.finished
@@ -1011,7 +1006,7 @@ func _mod_card(t) -> Control:
 			return spoof_card.panel
 		M.BAND_RATE:
 			return you_card.panel
-		M.DAMAGE_REDUCTION, M.COUNTER_SLOW:
+		M.DAMAGE_REDUCTION, M.COUNTER_SLOW, M.COUNTER_RESET:
 			return ctr_card.panel
 		M.FIREWALL_REDUCTION:
 			return target_card.panel
@@ -1046,7 +1041,6 @@ func _refresh_panels() -> void:
 	if offensive_item == null or sql_card.is_empty():
 		return
 	var M = HackingMods.MOD_TYPE
-	var istat = active_intel.get("stat", "")
 
 	# SQL Injector
 	sql_card.count.text = "x" + _short(Inventory.get_amount(offensive_item))
@@ -1088,7 +1082,7 @@ func _refresh_panels() -> void:
 
 	# Countermeasures
 	var reduce = int(_mod(M.DAMAGE_REDUCTION))
-	var dmg_col = C_MOD if reduce > 0 else (C_INTEL if istat == "counter" else C_TEXT)
+	var dmg_col = C_MOD if reduce > 0 else (C_INTEL if !active_intel.is_empty() else C_TEXT)
 	var spd_col = C_TEXT
 	if firewall_down:
 		spd_col = C_FW
@@ -1096,15 +1090,15 @@ func _refresh_panels() -> void:
 		spd_col = C_HEAT
 	elif _mod(M.COUNTER_SLOW) > 0:
 		spd_col = C_MOD
-	elif istat == "counter speed":
+	elif !active_intel.is_empty():
 		spd_col = C_INTEL
 	var rate = _counter_rate() if is_hacking else COUNTER_SPEED / (1.0 + _mod(M.COUNTER_SLOW))
 	ctr_card.stats.text = "   ".join([
 		_stat("DMG", str(max(1, COUNTER_AMOUNT - reduce)) if _revealed else "--", dmg_col),
 		_stat("EVERY", _secs(100.0 / max(0.001, rate)) if _revealed else "--", spd_col)])
-	var ctr_mods = _mods_text([M.DAMAGE_REDUCTION, M.COUNTER_SLOW])
-	if istat == "counter" or istat == "counter speed":
-		ctr_mods += ("\n" if ctr_mods != "" else "") + _c("INTEL -%s %s" % [_fmt(active_intel.amount), istat], C_INTEL) + _c("  · this hack", C_DIM)
+	var ctr_mods = _mods_text([M.DAMAGE_REDUCTION, M.COUNTER_SLOW, M.COUNTER_RESET])
+	if !active_intel.is_empty():
+		ctr_mods += ("\n" if ctr_mods != "" else "") + _c("INTEL -%d%% dmg, -%d%% speed" % [_ipct("counter"), _ipct("counter speed")], C_INTEL) + _c("  · this hack", C_DIM)
 	_set_rtl(ctr_card.mods, ctr_mods)
 	if stun_left > 0.0:
 		_set_state(ctr_card, "STUNNED %.1fs" % stun_left, C_EXP)
@@ -1137,13 +1131,13 @@ func _refresh_panels() -> void:
 	band_tags.append(_c("regen " + regen, regen_col))
 	_set_tag(band_row, "  ".join(band_tags))
 	_set_tag(anon_row, _c("spoofing", C_SPOOF) if defending else _c("auto-spoof below %d%%" % th, C_DIM))
-	_set_tag(integ_row, _c("INTEL -%s" % _fmt(active_intel.amount), C_INTEL) if istat == "integrity" else "")
+	_set_tag(integ_row, _c("INTEL -%d%%" % _ipct("integrity"), C_INTEL) if _ipct("integrity") > 0 else "")
 	var fw_tags = []
 	if firewall_down:
 		fw_tags.append(_c("DOWN - reboot in %.1fs" % fw_down_left, C_FW))
 	else:
-		if istat == "firewall":
-			fw_tags.append(_c("INTEL -%s" % _fmt(active_intel.amount), C_INTEL))
+		if _ipct("firewall") > 0:
+			fw_tags.append(_c("INTEL -%d%%" % _ipct("firewall"), C_INTEL))
 		if _mod(M.FIREWALL_REDUCTION) > 0:
 			fw_tags.append(_c("MOD -%d" % int(_mod(M.FIREWALL_REDUCTION)), C_MOD))
 	_set_tag(fw_row, "  ".join(fw_tags))

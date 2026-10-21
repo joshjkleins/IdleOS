@@ -96,7 +96,7 @@ func update_eff_label(_p_type = null):
 		"whale":
 			var reel: float = step_seconds(get_mode(), "download time", "overclocked download time", "overheated download time", true)
 			slots_label.text = "%d lines on one whale: reeling takes %ds (%ds split across %d lines)\n" % [lines, roundi(reel / lines), roundi(reel), lines]
-			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance the whale bites."
+			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "%% chance the whale bites  ·  a landed whale: %d-%d SQL Injectors / Packet Spoofs (bait doubles it)" % [int(Phishing.WHALING["bundle min"]), int(Phishing.WHALING["bundle max"])]
 		"smish":
 			slots_label.text = "%d texts per blast (%d per line)  ·  intel on %s\n" % [Phishing.SMISH["texts per line"] * lines, Phishing.SMISH["texts per line"], smish_target.name if !smish_target.is_empty() else "random targets"]
 			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% reply chance per text."

@@ -101,7 +101,7 @@ var UPLOAD_STEPS := {} # TutorialEvent -> ItemData, filled in _ready (Items is a
 
 var tutorial_tasks := {
 	TutorialEvent.RUN_HELP_COMMAND: "This tutorial walks you through preparing and hacking your first target while you learn the terminal. Start by typing '-h' to see the available commands. If you're ever stuck, it's the quickest way to see your options.",
-	TutorialEvent.NAVIGATE_MINING: "Navigate to the Mining skill with 'cd mining'. Navigating in the terminal always uses the command 'cd', which stands for Change Directory, followed by where you'd like to go.",
+	TutorialEvent.NAVIGATE_MINING: "Navigate to the Mining skill with 'cd mining'. Navigating in the terminal always uses the command 'cd', which stands for Change Directory, followed by where you'd like to go. Tip: press Tab to auto-complete any command (type 'cd mi' and press Tab). Press it again to list the options.",
 	TutorialEvent.RUN_MINING_LOG: "Each skill has processes you can run. The pattern to run a process is <singular skill name> -<process name>. Use the run command for the Logs process in Mining. 'mine -logs'",
 	
 	TutorialEvent.INFO_COMMAND: "Use 'info' to view the list of skills. These are all the places you can navigate to and run processes, as well as their current version and level.",
@@ -121,21 +121,21 @@ var tutorial_tasks := {
 	TutorialEvent.OBTAIN_3_USERNAMES: "Use the Footprint process to parse through logs and obtain 5 usernames.",
 	TutorialEvent.OBTAIN_3_IP_ADDRESSES: "Use the Footprint process to parse through logs and obtain 5 IP addresses.",
 	
-	TutorialEvent.CRACK_3_PASSWORDS: "Navigate to and use the Cracking skill to crack 6 encrypted passwords into usable passwords. This time do it in one command: 'cd ../cracking' ('..' steps back up to the root, then into cracking). Here's a Cracking VM token as well: 'ssh cracking password'.",
+	TutorialEvent.CRACK_3_PASSWORDS: "[color=#33ff33]export PATH=/usr/local/bin:$PATH[/color]  IdleOS has added its skills to your $PATH, so they now run from any directory. Crack 6 encrypted passwords into usable passwords with 'crack -password', right here, no 'cd' needed. ('cd ../cracking' still takes you to Cracking's processes and info.) Here's a Cracking VM token as well: 'ssh cracking password'.",
 	
-	TutorialEvent.MATCH_3_CREDENTIALS: "Navigate to and use the Matching skill to match 5 credentials. Matching takes 2 items and combines them. Matching a Username and Password gives you a credential used to build a payload for hacking. Here's a Matching VM token: 'ssh matching credential'.",
+	TutorialEvent.MATCH_3_CREDENTIALS: "Use the Matching skill to match 5 credentials: 'match -cred', from any directory. Matching takes 2 items and combines them. Matching a Username and Password gives you a credential used to build a payload for hacking. Here's a Matching VM token: 'ssh matching credential'.",
 	
 	TutorialEvent.PHISH_SPEAR_INFO: "Phishing can be used to obtain powerful Hacking items. Use 'info phishing spear' to view what can be obtained from spear phishing.",
 	TutorialEvent.TRACK_SQL: "Next up is Phishing, which catches Hacking items like SQL Injectors. Track how many 'SQL Injectors' you have with the 'track' command. Hint: 'track <item name>'. This keeps a live count in the side panel, under the system temperature.",
-	TutorialEvent.PHISH_15_SQL_INJECTORS: "Navigate to Phishing and use the Spear skill to phish for 10 SQL Injectors. Learn more about SQL Injectors with 'ls sql injectors'. Here's a Phishing VM token: 'ssh phishing spear'.",
+	TutorialEvent.PHISH_15_SQL_INJECTORS: "Use Phishing's Spear process to phish for 10 SQL Injectors: 'phish -spear'. Learn more about SQL Injectors with 'ls sql injectors'. Here's a Phishing VM token: 'ssh phishing spear'.",
 	TutorialEvent.PHISH_1_PACKET_SPOOFS: "In Phishing, use the Spear skill to phish for 1 Packet Spoof. Learn more about Packet Spoofs with 'ls packet spoof'.",
 	TutorialEvent.UNTRACK_ITEMS: "Remove the tracking for your SQL Injectors using 'untrack sql injectors'. If you're tracking multiple items you want removed, you can remove them all with the '-a' flag. Ex. untrack -a",
-	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Navigate to and use the Compiling skill to compile 4 school payloads. Payloads require a Credential and IP Address and are required to attempt hacking. Here's a Compiling VM token: 'ssh compiling school'.",
+	TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS: "Use the Compiling skill to compile 4 school payloads: 'compile -school'. Payloads require a Credential and IP Address and are required to attempt hacking. Here's a Compiling VM token: 'ssh compiling school'.",
 	
 	TutorialEvent.NAVIGATE_HACKING: "Navigate to the Hacking skill.",
 	TutorialEvent.HACK_STUDENT: "Successfully hack a student and obtain a Student Cache.",
 	
-	TutorialEvent.DECODE_1_STUDENT_CACHE: "Return to the main terminal and use the Decoding skill to decode 1 Student Cache. To exit the Hacking skill use 'cd ..' until back to root. Here's a Decoding VM token for later caches: 'ssh decoding cache'.",
+	TutorialEvent.DECODE_1_STUDENT_CACHE: "Return to the main terminal ('cd ..' until you're back at the root) and decode 1 Student Cache: 'decode -cache'. Here's a Decoding VM token for later caches: 'ssh decoding cache'.",
 	
 	TutorialEvent.UNLOCK_MINING_OVERCLOCK_WITH_APT: "Install your first Mining upgrade. 'apt mining' lists the upgrades you can install right now, then 'apt install <package>' installs one (ex. 'apt install mining.speed'). Upgrades are paid in the skill's own resources: Mining's in Logs, so mine a few more if you're short.",
 	
