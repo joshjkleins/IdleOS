@@ -32,6 +32,7 @@ const TEXT = Color(0.8, 0.84, 0.88, 1)
 var _rows := {} # VMWindow -> {button, name, status, bar}
 var _refresh_accum := 0.0
 var access_section: AccessSection
+var available_section: AvailableSection
 var upload_section: UploadSection
 var vm_toggle: SectionToggle
 var vm_summary: HBoxContainer # collapsed VM view: one light per running VM
@@ -58,10 +59,18 @@ func _add_upload_section() -> void:
 	sep.modulate = Color(1, 1, 1, 0.35)
 	full_view.add_child(sep)
 	full_view.move_child(sep, vm_section.get_index() + 1)
+	var avail := AvailableSection.new()
+	available_section = avail
+	full_view.add_child(avail)
+	full_view.move_child(avail, sep.get_index() + 1)
+	var sep_a := HSeparator.new()
+	sep_a.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep_a)
+	full_view.move_child(sep_a, avail.get_index() + 1)
 	var access := AccessSection.new()
 	access_section = access
 	full_view.add_child(access)
-	full_view.move_child(access, sep.get_index() + 1)
+	full_view.move_child(access, sep_a.get_index() + 1)
 	var sep2 := HSeparator.new()
 	sep2.modulate = Color(1, 1, 1, 0.35)
 	full_view.add_child(sep2)
@@ -141,7 +150,7 @@ func _apply_collapsed() -> void:
 func save_data() -> Dictionary:
 	return {
 		"collapsed": collapsed,
-		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "uploads": upload_section.collapsed},
+		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "available": available_section.collapsed, "uploads": upload_section.collapsed},
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -149,6 +158,7 @@ func load_data(data: Dictionary) -> void:
 	var sections: Dictionary = data.get("sections", {})
 	set_vm_collapsed(bool(sections.get("vm", false)))
 	access_section.set_collapsed(bool(sections.get("access", false)))
+	available_section.set_collapsed(bool(sections.get("available", false)))
 	upload_section.set_collapsed(bool(sections.get("uploads", false)))
 
 func _process(delta: float) -> void:

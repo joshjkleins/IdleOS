@@ -80,7 +80,6 @@ func _run() -> void:
 		["phishing spear bait", "phishing", "phish -spear bait=logs"],
 		["phishing whaling", "phishing", Phishing.WHALING.command],
 		["decoding cache", "decoding", "decode -cache=student cache"],
-		["decoding package", "decoding", "decode -package=logs 1000"],
 		["compiling school", "compiling", "compile -school"],
 	]
 	for s in sc:

@@ -132,6 +132,7 @@ func get_potential_items(cache: CacheData, process: Dictionary = {}, mod: String
 		var loot = []
 		for entry in cache.entries:
 			loot.append({"item": entry.item, "amount": randi_range(entry.min_quantity, entry.max_quantity), "rare": false})
+		loot.append({"item": Items.VM_CACHE, "amount": 1, "rare": false})
 		loot.append({"item": cache.rare_pool.pick_random().item, "amount": 1, "rare": true})
 		Decoding.first_cache_decoded = true
 		SaveManager.mark_dirty()

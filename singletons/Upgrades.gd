@@ -361,6 +361,9 @@ func save_data() -> Dictionary:
 			installed_counts[id] = packages[id].installed
 	return {"format": 2, "installed": installed_counts}
 
+## Packages that were replaced: an old save's install carries over to the new one
+const RENAMED = {"hacking.clean_exit": "hacking.second_wind"}
+
 ## Saves from the old upgrade system (no "format": 2) start fresh at v0.0.
 func load_data(data: Dictionary) -> void:
 	for id in packages:
@@ -368,10 +371,11 @@ func load_data(data: Dictionary) -> void:
 		_recompute(packages[id])
 	if int(data.get("format", 0)) == 2:
 		var saved: Dictionary = data.get("installed", {})
-		for id in saved:
+		for saved_id in saved:
+			var id = RENAMED.get(saved_id, saved_id)
 			if packages.has(id):
 				var p = packages[id]
-				p.installed = clamp(int(saved[id]), 0, p.levels.size())
+				p.installed = clamp(int(saved[saved_id]), 0, p.levels.size())
 				_recompute(p)
 	apply_effects()
 

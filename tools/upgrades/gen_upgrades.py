@@ -7,6 +7,15 @@ TIER_NAMES = ["School","Lawfirm","Hospital","Bank","Police","Government"]
 # primary basic cost item per tier (mined resource) and a secondary (cache)
 TIER_BASIC = ["Logs","Archives","Metadata","Cookies","Repositories","Databases"]
 TIER_CACHE = ["Student cache","Legal assistant cache","Receptionist cache","Teller Cache","Secretary cache","Clerk Cache"]
+# every target's cache per tier (targets 1..5): Hacking upgrades rotate through them, 2 installs per target
+TARGET_CACHES = [
+    ["Student cache","Admin cache","Vice principal cache","Principal cache","Superintendent cache"],
+    ["Legal assistant cache","Paralegal cache","Associate attorney cache","Lawyer cache","Partner cache"],
+    ["Receptionist cache","Orderly cache","Nurse cache","Doctor cache","Chief of medicine cache"],
+    ["Teller Cache","Loan Officer Cache","Branch Manager Cache","Security Cache","Chief Financial Officer Cache"],
+    ["Secretary cache","Cop cache","Detective cache","Sergeant cache","Captain cache"],
+    ["Clerk Cache","Analyst Cache","Ambassador Cache","Vice President Cache","President Cache"],
+]
 # rare item per tier (capstone cost)
 TIER_RARE  = ["Falsified transcript database","Sealed case files","Prescription pad credentials","Vault Override","Corruption payout ledger","Black Budget Ledger"]
 
@@ -98,6 +107,7 @@ DAMAGE_STEP = [5, 25, 38, 50, 62, 100]
 # Economy pass (2026-10-20, tools/balance/econ2.py): cost scale per tier so each tier fits Josh's active-play time
 # (T1 1-2 h ... T6 6-7 h, cache loot counted), and rare items per capstone by tier
 COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
+BASIC_TIER_MULT = [3, 1, 1, 1, 1, 1]  # basic-resource costs only (2026-10-20 playthrough: T1 x3)
 CAP_RARES = [1, 1, 2, 2, 2, 2]
 HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
 FIREWALL_STEP = [2, 3, 5, 6, 7, 12]
@@ -223,7 +233,7 @@ GROUPS["Decoding"] = [
     (TRACK,"Efficiency","Process efficiency, relative (+20% of its own at max)","+1.67% of eff",(0,20/12,"% of own efficiency")),
     (TRACK,"Yield","Basic resources per decoded cache","+10%",(0,10,"% more basics")),
     (PTD,"Rare Tracker","Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection","+0.25% per miss",(0,0.25,"% added per dry cache")),
-    (PTD,"Compression","Package passes run faster (on top of Speed), so uploads get fed sooner","+10%",(0,10,"% faster packaging")),
+    (PTD,"Compression","More basic resources per decoded cache (stacks with Yield)","+10%",(0,10,"% more basics")),
     (PTD,"Field Notes","Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack","+1 hack",(0,1,"extra intel hacks")),
     (CAP,["Overclock","Token Vault","Index","Forensics","Survey","Clean Room"],
         ["MODIFIER 'overclock': faster, more heat (existing)",
@@ -239,7 +249,7 @@ GROUPS["Compiling"] = [
     (TRACK,"Speed","Compile cycle speed",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
     (TRACK,"Efficiency","Burst chance x(1 + bonus) (burst: 100x speed for 1 second, no heat); +20% of its own at max (10.8% -> 13% at L99)","+1.67% of eff",(0,20/12,"% of own efficiency")),
     (TRACK,"Efficiency","Burst chance, relative (+20% of its own at max)","+1.67% of eff",(0,20/12,"% of own efficiency")),
-    (TRACK,"Recovery","Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max","+1.67%",(0,20/12,"% inputs kept")),
+    (TRACK,"Recovery","Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max","+1.67%",(0,20/12,"% inputs kept")),
     (TRACK,"Recovery","Chance the inputs are not consumed","+1.67%",(0,20/12,"% inputs kept")),
     (PTD,"Linker","Chance to build two payloads at once","+2.5%",(0,2.5,"% double payload")),
     (PTD,"Mod Tuning","Hacking mods built with Mod are stronger","+5%",(0,5,"% stronger compiled mods")),
@@ -262,8 +272,8 @@ GROUPS["Hacking"] = [
     (PTD,"Mod Slot","+1 hacking mod slot","+1 slot",(1,1,"mod slots")),
     (PTD,"Spoof Threshold","Packet Spoof starts auto-healing at a higher anonymity %","+10%",(30,10,"% auto-spoof threshold")),
     (PTD,"Persistent Session","More EXPLOIT charge from every combat event","+10% charge gain",(0,10,"% charge gain")),
-    (CAP,["Clean Exit","Evasion","Recycler","Siphon","Dead Man's Switch","Exploit Kit"],
-        ["Keep 50% of banked caches when traced",
+    (CAP,["Second Wind","Evasion","Recycler","Siphon","Dead Man's Switch","Exploit Kit"],
+        ["Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
          "10% chance to dodge a countermeasure completely",
          "50% chance an SQL Injector is not consumed",
          "Each SQL hit restores 0.5% of max anonymity",
@@ -273,7 +283,7 @@ GROUPS["Hacking"] = [
 
 # capstone flavor per tier (used in notes), can be renamed freely
 CAPSTONE_NOTES = {
- "Hacking": ["Clean Exit: keep 50% of banked caches when traced",
+ "Hacking": ["Second Wind: each win in a multi-hack run restores 25% of max anonymity",
              "Spoof Threshold: auto-spoof triggers at 40% then higher",
              "Overkill Carry: damage past 0 carries to the next target's firewall",
              "Multi-Thread: a 2nd SQL Injector fires at reduced rate",
@@ -352,12 +362,13 @@ for group, slots in GROUPS.items():
             cs = COST_SCALE[tier-1]
             if rkey == "tokens":
                 amt = f"=MAX(1,ROUND({cs}*Inputs!$B$9*Inputs!$B$10^(B{r_next}-1),0))"
-            elif rkey == "hacking":  # paid in the tier's first-target caches: every one is a hack, so keep it ~20% of the tier's hacks
+            elif rkey == "hacking":  # paid in the tier's target caches (slots 1-2 target 1 ... 9-10 target 5); ~20% of the tier's hacks
+                cost_item = TARGET_CACHES[tier-1][min(4, (i-1)//2)]
                 amt = f"=MAX(1,ROUND({HACK_CACHE_TOTAL[tier-1]}*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))"
             else:
                 rate = f"INDEX(Inputs!$C$15:$C$23,MATCH(\"{rkey}\",Inputs!$A$15:$A$23,0))"
                 share = "/3" if rkey == "parsing" else ""
-                amt = (f"=MAX(1,ROUND({cs}*Inputs!$B$4*Inputs!$B$5^(B{r_next}-1)*{rate}{share}*Inputs!$B$7"
+                amt = (f"=MAX(1,ROUND({cs*BASIC_TIER_MULT[tier-1]}*Inputs!$B$4*Inputs!$B$5^(B{r_next}-1)*{rate}{share}*Inputs!$B$7"
                        f"*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))")
             rare_amt = CAP_RARES[tier-1] if rare else ""
             base_n = slot[1] if not isinstance(slot[1], list) else slot[1][tier-1]
@@ -471,7 +482,7 @@ notes = [
  "  • Per tier: SQL Damage (+5 dmg, +0.1 heat), Firewall Dmg +2, BW Recovery x2 (+0.5/s), Max BW +5, Spoof Healing +1% of max anon (5% -> 11%),",
  "    Mod Slot +1 (1 -> 7), Spoof Threshold +10% (30% -> 90%), Persistent Session +10% charge gain, Capstone.",
  "  • At max: SQL attack heat 0.9 - 0.6 System heat reduction = 0.3 net, the same as an attack makes today.",
- "  • Capstones: Clean Exit, Evasion, Recycler, Siphon, Dead Man's Switch, Exploit Kit (decided).",
+ "  • Capstones: Second Wind, Evasion, Recycler, Siphon, Dead Man's Switch, Exploit Kit (decided).",
  "  • Unused alternates: Multi-Thread, Chain Breach, Overkill Carry.",
  "  • Max anonymity is NOT an apt upgrade: hybrid (wired): 100 + 5 x (Hacking level - 1) + 100 x (locations unlocked - 1) — see 'Max Anonymity' tab.",
  "",
@@ -528,7 +539,7 @@ notes = [
  "",
  "DECODING (decided)",
  "  • Per tier: Speed x3, Efficiency x2 (rare chance, +4% max), Yield (+10% basics), Rare Tracker (+0.25% per dry cache),",
- "    Compression (+10% packaged), Field Notes (+1 intel hack), Capstone.",
+ "    Compression (+10% basics per cache), Field Notes (+1 intel hack), Capstone.",
  "  • Capstones: Overclock, Token Vault (token x2), Index (mod), Forensics (mod), Survey (mod), Clean Room.",
  "",
  "COMPILING (decided)",

@@ -64,10 +64,8 @@ func snapshot() -> Dictionary:
 				return {} # VM token processes are online only
 			snap.item = t.target_cache.id if t.target_cache else -1
 			snap.target = Stats.target_key(t.target_arg) if t.target_arg is Dictionary else ""
-			snap.limit = t.package_limit
 		Compiling:
 			snap.item = t.hacking_mod_item.id if t.hacking_mod_item else -1
-			snap.target = Stats.target_key(t.access_target) if !t.access_target.is_empty() else ""
 	return snap
 #endregion
 
@@ -420,25 +418,6 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var bytes_row = CacheDecrypting.HEX_CHARACTERS_SIZE
 	var h = _hc(Decoding, float(p.heat)) # x the tier of what's decoded (_dec_heat)
 	match kind:
-		"package":
-			var item = Items.ITEM_MAP.get(int(snap.get("item", -1)))
-			if item == null:
-				return {}
-			var eff = Decoding.get_efficiency(p)
-			var per = 1.0 + eff
-			var limit = int(snap.get("limit", 0))
-			var job = {"seconds": bytes_row * step / Decoding.compression_multiplier(), "xp": float(p["experience per level"]), "heat": h * _dec_heat(item)}
-			job.apply = func(cycles: int, _m: float) -> int:
-				var room = Uploads.get_still_needed(item)
-				if limit > 0:
-					room = min(room, limit)
-				var n = min(int(round(cycles * per)), Inventory.get_amount(item), room)
-				if n <= 0:
-					return 0
-				Inventory.remove_resource(item, n)
-				Uploads.stage(item, n)
-				return int(ceil(n / per))
-			return job
 		"intel":
 			var tg = _target(str(snap.get("target", "")))
 			if tg.is_empty() or Decoding.is_intel_maxed(tg):
@@ -497,7 +476,7 @@ func _compile_seconds(p: Dictionary) -> Dictionary:
 func _compiling(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var c = _compile_seconds(p)
 	var h = _hc(Compiling, float(p.heat)) * c.heat_share
-	if p == Compiling.MOD or p == Compiling.ACCESS:
+	if p == Compiling.MOD:
 		h *= Stats.tier_heat(Compiling.HEAT_BY_TIER, Upgrades.working_tier("Compiling"))
 	var keep = 1.0 - Upgrades.cur("compiling.recovery")
 	if p == Compiling.MOD:
@@ -519,28 +498,6 @@ func _compiling(p: Dictionary, snap: Dictionary) -> Dictionary:
 						Inventory.remove_resource(it, cost[it])
 				HackingMods.extend_mod(item, 1.0 + Upgrades.cur("compiling.mod_tuning"), Compiling.mod_cap(item))
 				done += 1
-			return done
-		return job
-	if p == Compiling.ACCESS:
-		var tg = _target(str(snap.get("target", "")))
-		if tg.is_empty() or tg.get("unlocked", false):
-			return {}
-		var job = {"seconds": c.seconds, "xp": float(p["experience per level"]), "heat": h}
-		job.apply = func(cycles: int, _m: float) -> int:
-			var done = 0
-			for i in cycles:
-				var cost = Compiling.access_stage_cost(tg, Compiling.access_done(tg))
-				if cost.is_empty() or !Compiling.can_afford(cost):
-					break
-				var r = Stats.get_access_recipe(tg)
-				var recovered = randf() < Upgrades.cur("compiling.recovery")
-				for it in cost:
-					if !recovered or it == r.get("rare"):
-						Inventory.remove_resource(it, cost[it])
-				done += 1
-				if Compiling.complete_access_stage(tg):
-					report.notes.append("compiled access to %s" % tg.name)
-					break
 			return done
 		return job
 	var inp := {}

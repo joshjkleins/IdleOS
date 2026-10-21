@@ -62,6 +62,10 @@ func get_modifier_info_text(skill: Node) -> String:
 		"command": "overclock", "effect": "Increase speed & heat output."}]
 	for m in skill.get("MODIFIERS") if skill.get("MODIFIERS") else []:
 		entries.append({"name": m.name, "unlocked": Upgrades.has(m.package), "package": m.package, "command": m.command, "effect": m.effect})
+	# only modifiers you've unlocked; nothing at all until the first one
+	entries = entries.filter(func(e): return e.unlocked)
+	if entries.is_empty():
+		return ""
 	for e in entries:
 		var p = Upgrades.get_package_info(e.package)
 		var unlock_at = ("at %s v%d.0" % [group, int(p.levels[0].tier)]) if p.has("levels") else ""
@@ -748,10 +752,10 @@ func get_help() -> String:
 |   mod                          Hacking mod manager                  |
 |                                                                     |
 | PROGRESS                                                            |
-|   upload                       Upload goal + what's packaged        |
-|   upload -<item>               Upload packaged items                |
-|   upload -a                    Upload everything packaged           |
-|   unpack -<item>               Return packaged items                |
+|   upload                       Upload goal + what's uploading       |
+|   upload <item> <amount>       Upload items from your inventory     |
+|   upload -a                    Upload everything the goal needs     |
+|   upload cancel <item>         Return queued items to inventory     |
 |   intel                        Intel on every hacking target        |
 |   intel <target>               Intel on one target                  |
 |                                                                     |
@@ -1128,7 +1132,7 @@ far more than your processes make on their own. Your processes keep the hacks su
 
 Thoughts or suggestions? Join the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)
 
-To view this message again, use the 'demo' command.
+To view this message again, use the 'welcome' command.
 """
 
 func discord_message():
@@ -1230,7 +1234,7 @@ func not_built_text(minor_process: Dictionary) -> String:
 	return "[color=#888888]" + str(minor_process.name) + " isn't built yet — it arrives with a later tier.[/color]"
 
 
-## 'upload': the current tier's goal, what's uploaded, packaged and uploading.
+## 'upload': the current tier's goal, what's uploaded, queued and uploading.
 ## Banner when a location's upload goal completes: what the next location opens up (online and in the offline download)
 func tier_complete_text(tier: int) -> String:
 	var done = Uploads.get_location_name(tier)
@@ -1248,14 +1252,23 @@ func tier_complete_text(tier: int) -> String:
 
 func upload_goal_text() -> String:
 	var tier = Uploads.current_tier()
-	var columns = [{"title": "ITEM"}, {"title": "UPLOADED"}, {"title": "PACKAGED"}, {"title": "IN INVENTORY", "drop": 1}, {"title": "STATUS"}]
+	var columns = [{"title": "ITEM"}, {"title": "UPLOADED"}, {"title": "QUEUED"}, {"title": "IN INVENTORY", "drop": 1}, {"title": "STATUS"}]
 	var rows = []
 	var colors = []
 	for g in Uploads.get_goals(tier):
 		var up = Uploads.get_uploaded(g.item)
-		var status = "done" if up >= g.amount else ("uploading" if Uploads.is_uploading(g.item) else ("ready" if Uploads.get_staged(g.item) > 0 else "-"))
+		var status = "done" if up >= g.amount else ("uploading" if Uploads.is_uploading(g.item) else ("queued" if Uploads.get_staged(g.item) > 0 else ("ready" if Inventory.get_amount(g.item) > 0 else "-")))
 		rows.append([g.item.name + (" (rare)" if g.rare else ""), "%d/%d" % [up, g.amount], str(Uploads.get_staged(g.item)), str(Inventory.get_amount(g.item)), status])
 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
-	var footer = "\n[color=#666666]decode -package=<item>  ->  upload -<item>  (or upload -a for everything)  |  unpack -<item> returns packaged items  |  %ds per resource, %ds per rare, adds heat[/color]" % [int(Uploads.UPLOAD_SECONDS_BY_TIER[Uploads.current_tier() - 1]), int(Uploads.RARE_UPLOAD_SECONDS)]
+	var hints = [
+		["upload <item> <amount>", "upload from your inventory  (ex. upload logs 5)"],
+		["upload <item>", "upload all the goal still needs"],
+		["upload -a", "upload every goal item you have"],
+		["upload cancel <item>", "return queued items to your inventory"],
+	]
+	var footer = "\n"
+	for h in hints:
+		footer += "  [color=#33ff33]%s[/color] [color=#666666]%s[/color]\n" % [h[0].rpad(24), h[1]]
+	footer += "  [color=#666666]%ds per resource, %ds per rare. Uploads run in the background and add heat.[/color]" % [int(Uploads.UPLOAD_SECONDS_BY_TIER[Uploads.current_tier() - 1]), int(Uploads.RARE_UPLOAD_SECONDS)]
 	return header + build_table(columns, rows, colors) + footer

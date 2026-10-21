@@ -176,6 +176,9 @@ func _ready():
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
 	VMManager.set_host(vm_layer)
+	tutorial_window = TutorialWindow.new()
+	tutorial_window.top_anchor = header
+	vm_layer.add_child(tutorial_window)
 	Signals.tutorial_event_completed_signal.connect(tutorial_event_completed)
 	Signals.system_overheated_signal.connect(overheat_terminal_notice)
 	Signals.system_cooled_below_overheat_signal.connect(system_cooled_out_of_overheat_range)
@@ -189,6 +192,7 @@ func _ready():
 		header.visible = false
 		input_line_container.visible = false
 		system_dock.modulate.a = 0.0 # the boot sequence brings the panel in section by section
+		tutorial_window.set_context_hidden(true) # shown with the welcome message (_finish_boot)
 		header.prepare_intro()
 		intro_to_game()
 
@@ -400,8 +404,11 @@ func get_context_lead():
 
 
 #Changes context and updates leading text
+var tutorial_window: TutorialWindow
 func update_context(new_context: Context):
 	current_context = new_context
+	if tutorial_window and new_context == Context.HACKING:
+		tutorial_window.set_context_hidden(true) # shown again in _on_hacking_start_loading
 	lead_text.text = get_context_lead()
 
 func update_market_context(new_context: MarketContext):
@@ -429,8 +436,13 @@ func list_help():
 
 	add_line("[color=gray]Tip: Use ↑ and ↓ to scroll through previous commands[/color]\n")
 
+## With the tutorial window up the terminal only gets a one-line notice (the window has the step);
+## the tutorial-complete message and a closed window still print in full.
 func tutorial_event_completed(message: String):
 	if current_context == Context.HACKING:
+		return
+	if tutorial_window and tutorial_window.is_showing() and !Tutorial.is_tutorial_complete():
+		add_line("[color=green]✓ OBJECTIVE COMPLETE[/color]  [color=#888888]%s  ·  next step in the tutorial window[/color]" % Tutorial.get_tutorial_progress_string())
 		return
 	add_line(message)
 
@@ -618,6 +630,13 @@ func universal_commands(text):
 			Tutorial.complete_event(Tutorial.TutorialEvent.RUN_HELP_COMMAND)
 			return true
 		"tutorial":
+			if Tutorial.is_tutorial_complete() or tutorial_window == null:
+				add_line(ContextCommands.get_tutorial())
+			else:
+				tutorial_window.open()
+				add_line("[color=#888888]Tutorial window open. 'tutorial -l' prints the checklist here.[/color]")
+			return true
+		"tutorial -l", "tutorial list":
 			add_line(ContextCommands.get_tutorial())
 			return true
 		"tutorial reset", "tutorial -r":
@@ -647,7 +666,7 @@ func universal_commands(text):
 		"date":
 			add_line(ContextCommands.get_date_command())
 			return true
-		"demo":
+		"welcome", "demo":
 			add_line(ContextCommands.demo_welcome_message())
 			return true
 		"discord -c":
@@ -772,6 +791,8 @@ func handle_cd_commands(text):
 			if process_running:
 				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.[/color]")
 				return
+			if tutorial_window:
+				tutorial_window.set_context_hidden(true)
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
 			tween.parallel().tween_property(system_dock, "modulate:a", 0.0, 0.5)
@@ -1007,21 +1028,46 @@ func apply_apt_bulk_upgrade():
 		v_before[e.package.group] = Upgrades.version(e.package.group)
 	add_line("Reading package lists... Done")
 	await bro_wait(0.2)
-	var bar_index = await _add_live_line(_apt_progress_text(0))
+	# one download bar per package, each starting a beat after the one above (a cascade); a package
+	# installs when its bar fills. All rows live in one terminal line so the block can't be split.
+	var names = []
+	var w = 8
+	for e in plan:
+		var n = e.package.id.replace(".", "-").replace("_", "-")
+		names.append(n)
+		w = max(w, n.length())
+	var bar_index = await _add_live_line("")
 	var done = []
 	var majors = []
-	for i in plan.size():
-		var e = plan[i]
-		var p = e.package
-		if Upgrades.install_block_reason(p) != "" or Upgrades.next_level(p) != e.level:
-			continue # something changed since the plan was made
-		var r = Upgrades.install(p)
-		done.append(e)
-		if r.major:
-			majors.append([p.group, r.tier])
-		set_line(bar_index, _apt_progress_text(int(100.0 * (i + 1) / plan.size())))
-		await bro_wait(0.06)
-	set_line(bar_index, _apt_progress_text(100))
+	var installed = []
+	installed.resize(plan.size())
+	installed.fill(false)
+	var stagger = min(0.12, 3.0 / max(1, plan.size()))
+	var fill_time = 0.45
+	var t = 0.0
+	var total = fill_time + stagger * (plan.size() - 1)
+	while true:
+		var rows = []
+		for i in plan.size():
+			var f = clamp((t - stagger * i) / fill_time, 0.0, 1.0)
+			if t < stagger * i:
+				break
+			if f >= 1.0 and !installed[i]:
+				installed[i] = true
+				var e = plan[i]
+				var p = e.package
+				if Upgrades.install_block_reason(p) == "" and Upgrades.next_level(p) == e.level:
+					var r = Upgrades.install(p)
+					done.append(e)
+					if r.major:
+						majors.append([p.group, r.tier])
+			var c = Upgrades.group_color(plan[i].package.group).to_html(false)
+			rows.append("[color=#%s]%s[/color] %s" % [c, names[i].rpad(w), _apt_progress_text(int(f * 100))])
+		set_line(bar_index, "\n".join(rows))
+		if t >= total:
+			break
+		await bro_wait(0.03)
+		t += 0.03
 	add_line("Setting up %d package%s ..." % [done.size(), "" if done.size() == 1 else "s"])
 	await bro_wait(0.3)
 	var box = "\n[color=#4ec994]────────────────────────────────────────[/color]\n"
@@ -1127,8 +1173,6 @@ func handle_info_commands(text):
 						if command[2] == mp.name.to_lower().replace(" ", "-"):
 							add_line(ContextCommands.get_mp_info(p, mp))
 							post_flow_chart(func(c): return c.show_recipe(p, mp))
-							if p == Phishing and mp == Phishing.SPEAR:
-								Tutorial.complete_event(Tutorial.TutorialEvent.PHISH_SPEAR_INFO)
 							return
 	add_line("info command not recognized")
 	add_line("info commands")
@@ -1151,7 +1195,11 @@ func handle_vm_token_commands(text):
 	if text == "ssh":
 		add_line(ContextCommands.ssh_commands(processes))
 		return
-	var commands = text.split(" ")
+	var commands = text.split(" ", false)
+	# 'ssh cracking -password' works like 'ssh cracking password'
+	if commands.size() >= 3 and commands[2].begins_with("-"):
+		commands[2] = commands[2].trim_prefix("-")
+		text = " ".join(commands)
 	
 	#LIST MINOR PROCESSES AVAILABLE FOR SSH/VM example: ssh mining -> list logs, quality logs, etc
 	if text == "ssh hacking":
@@ -1189,9 +1237,18 @@ func handle_vm_token_commands(text):
 	#find minor process
 	var target_minor_process = null
 
+	if commands.size() < 3:
+		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
+		return
+	var typed = commands[2].split("=")[0]
 	for mp in target_process.minor_processes:
-		if commands[2].split("=")[0] == mp.name.to_lower():
+		var n = str(mp.name).to_lower()
+		# singular / plural both work: 'ssh matching credentials' = 'ssh matching credential'
+		if typed == n or typed == n + "s" or typed + "s" == n or typed == n.trim_suffix("s"):
 			target_minor_process = mp
+			if typed != n:
+				commands[2] = n + commands[2].substr(typed.length())
+				text = " ".join(commands)
 			break
 		
 	if target_minor_process == null:
@@ -1252,13 +1309,6 @@ func handle_vm_token_commands(text):
 		Inventory.remove_resource(target_process.vm_token, 1)
 		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse, parsed_cmd.target)
 	
-	elif target_process == Compiling and target_minor_process == Compiling.ACCESS:
-		var check = Compiling.check_access(text.substr(text.find("=") + 1) if text.contains("=") else "")
-		if !check.ok:
-			add_line(check.message)
-			return
-		Inventory.remove_resource(target_process.vm_token, 1)
-		new_window = target_process.create_vm_window(target_minor_process, check.target)
 	elif target_process == Compiling:
 		if target_minor_process == Compiling.MOD:
 			var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "", "ssh compiling mod=logs")
@@ -1339,34 +1389,55 @@ func handle_vm_token_commands(text):
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
 
-## upload | upload -<item> | upload -all | unpack -<item>
+## upload | upload <item> [amount] | upload -a | upload cancel <item> (unpack <item>)
 func handle_upload_commands(text: String) -> void:
 	if text == "upload" or text == "upload -h":
 		add_line(ContextCommands.upload_goal_text())
 		Tutorial.complete_event(Tutorial.TutorialEvent.UPLOAD_INFO)
 		return
-	var is_unpack = text.begins_with("unpack")
-	var arg = text.trim_prefix("unpack" if is_unpack else "upload").strip_edges().trim_prefix("-").strip_edges()
+	var is_cancel = text.begins_with("unpack") or text.begins_with("upload cancel") or text.begins_with("upload -cancel")
+	var arg = text
+	for pre in ["upload -cancel", "upload cancel", "unpack", "upload"]:
+		if arg.begins_with(pre):
+			arg = arg.trim_prefix(pre)
+			break
+	arg = arg.strip_edges().trim_prefix("-").strip_edges()
 	if arg == "":
-		add_line("Name an item. [color=#666666]ex. upload -logs  |  upload -a  |  unpack -logs[/color]")
+		add_line("Name an item. [color=#666666]ex. upload logs 5  |  upload -a  |  upload cancel logs[/color]")
 		return
-	if !is_unpack and (arg == "all" or arg == "a"):
+	if !is_cancel and (arg == "all" or arg == "a"):
+		if !Tutorial.is_tutorial_complete():
+			add_line("'upload -a' opens after the tutorial. For now, upload exact amounts, e.g. 'upload logs 5'.")
+			return
 		var started = []
-		for item in Uploads.staged.keys():
-			if Uploads.start_upload(item) == "":
-				started.append(item.name)
-		add_line("Uploading: " + ", ".join(started) if !started.is_empty() else "Nothing packaged that the current goal still needs.")
+		for g in Uploads.get_goals():
+			var q = Uploads.queue(g.item)
+			if q.ok:
+				started.append("%d %s" % [q.amount, g.item.name])
+		add_line("Queued for upload: " + ", ".join(started) if !started.is_empty() else "Nothing in your inventory that the current goal still needs.")
 		return
+	# optional trailing amount: 'upload logs 5'
+	var amount = 0
+	var words = arg.split(" ", false)
+	if words.size() > 1 and words[-1].is_valid_int():
+		amount = max(1, int(words[-1]))
+		arg = " ".join(words.slice(0, words.size() - 1))
 	var item = Inventory.get_item_by_name(arg)
 	if item == null:
 		add_line("Item not recognized: " + arg)
 		return
-	if is_unpack:
-		var n = Uploads.unpack(item)
-		add_line("Unpacked %d %s back to your inventory." % [n, item.name] if n > 0 else "No packaged " + item.name + ".")
+	if !is_cancel and amount == 0 and !Tutorial.is_tutorial_complete():
+		add_line("Add how many to upload, e.g. 'upload %s 5'. During the tutorial, always upload an exact amount so you keep enough for the next steps." % item.name.to_lower())
 		return
-	var err = Uploads.start_upload(item)
-	add_line(err if err != "" else "Uploading %s: %d packaged, %ds each. Progress is in the side panel." % [item.name, Uploads.get_staged(item), int(Uploads.get_upload_seconds(item))])
+	if is_cancel:
+		var n = Uploads.unpack(item)
+		add_line("Returned %d queued %s to your inventory." % [n, item.name] if n > 0 else "Nothing queued for " + item.name + ".")
+		return
+	var res = Uploads.queue(item, amount)
+	if !res.ok:
+		add_line(res.message)
+		return
+	add_line("Uploading %d %s, %ds each. Progress is in the side panel. [color=#666666](%d queued, goal %d/%d)[/color]" % [res.amount, item.name, int(Uploads.get_upload_seconds(item)), Uploads.get_staged(item), Uploads.get_uploaded(item), Uploads.get_goal_amount(item)])
 
 ## vm ls | vm show <id|all> | vm hide <id|all> | vm kill <id|all> | vm -h
 func handle_vm_commands(text: String) -> void:
@@ -1382,10 +1453,10 @@ func handle_vm_commands(text: String) -> void:
 		add_line("Unknown vm command. Use 'vm -h'.")
 		return
 	if parts.size() < 3:
-		add_line("Missing VM id. [color=#666666]example: vm %s 1  |  vm %s all[/color]" % [action, action])
+		add_line("Missing VM id. [color=#666666]example: vm %s 1  |  vm %s -a[/color]" % [action, action])
 		return
 	var targets: Array[VMWindow] = []
-	if parts[2] == "all":
+	if parts[2] in ["all", "-a", "a", "-all"]:
 		targets.assign(VMManager.vms)
 	elif parts[2].trim_prefix("vm-").is_valid_int():
 		var vm = VMManager.get_vm(int(parts[2].trim_prefix("vm-")))
@@ -1419,9 +1490,9 @@ func vm_help_text() -> String:
 	return """
  VM WINDOW COMMANDS
    vm ls                    List running VMs
-   vm hide <id|all>         Minimize VM window(s) to the dock
-   vm show <id|all>         Restore VM window(s)
-   vm kill <id|all>         Stop VM(s) immediately (no token refund)
+   vm hide <id|all|-a>      Minimize VM window(s) to the dock
+   vm show <id|all|-a>      Restore VM window(s)
+   vm kill <id|all|-a>      Stop VM(s) immediately (no token refund)
    Tip: click a VM in the dock to minimize/restore it.
 """
 
@@ -1774,6 +1845,9 @@ func start_matching(minor_process):
 ###################################################
 func cache_decrypting_commands(text):
 	text = text.to_lower().strip_edges()
+	if text.begins_with("decode -package"):
+		add_line("Packaging is gone: upload straight from your inventory with 'upload <item> <amount>'. Type 'upload' for the goal.")
+		return
 
 	for ms in Decoding.minor_processes:
 		if text == ms["command"] or text.begins_with(ms["command"] + "="):
@@ -1940,13 +2014,6 @@ func compiling_commands(text):
 				add_line(ContextCommands.process_already_running_text())
 				return
 			
-			if ms == Compiling.ACCESS:
-				var check = Compiling.check_access(text.trim_prefix(ms["command"]).trim_prefix("="))
-				if !check.ok:
-					add_line(check.message)
-					return
-				start_compiling(ms, check.target)
-				return
 			if ms == Compiling.MOD:
 				var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "")
 				if !check.ok:
@@ -2352,6 +2419,8 @@ func _on_hacking_start_loading() -> void:
 	await loading.show_loading()
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true
+	if tutorial_window:
+		tutorial_window.set_context_hidden(false)
 	input_line.grab_focus()
 	var tween = create_tween()
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
@@ -2637,6 +2706,7 @@ func _finish_boot() -> void:
 	add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 	add_line(ContextCommands.demo_welcome_message())
 	add_line("To get started, type `-h` in the terminal.")
+	tutorial_window.set_context_hidden(false)
 	_offline_welcome.call_deferred()
 #endregion
 
@@ -2698,7 +2768,7 @@ func _offline_welcome() -> void:
 	if !r.spent.is_empty():
 		tail += "[color=%s]used: %s[/color]\n" % [OFFLINE_DIM, ", ".join(r.spent.slice(0, 4).map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))]
 	if !r.staged.is_empty():
-		tail += "packaged: %s\n" % ", ".join(r.staged.map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))
+		tail += "queued: %s\n" % ", ".join(r.staged.map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))
 	for u in r.uploaded:
 		tail += "uploaded: %s %s%s\n" % [_commas(u.amount), u.item.name, ("  [color=%s]· goal complete[/color]" % OFFLINE_C) if u.done else ""]
 	for l in r.levels:

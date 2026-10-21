@@ -8,7 +8,7 @@ func _run() -> void:
 		if id.begins_with("hacking."):
 			var p = Upgrades.packages[id]; p.installed = p.levels.size(); Upgrades._recompute(p)
 	Upgrades.apply_effects()
-	print("caps: ", ["clean_exit","evasion","recycler","siphon","dead_mans_switch","exploit_kit"].map(func(c): return Upgrades.has("hacking." + c)), " | spoof threshold %.2f | charge x%.2f | slots %d" % [Stats.healing_threshold_auto_start, 1.0 + Upgrades.cur("hacking.persistent_session"), HackingMods.max_mods])
+	print("caps: ", ["second_wind","evasion","recycler","siphon","dead_mans_switch","exploit_kit"].map(func(c): return Upgrades.has("hacking." + c)), " | spoof threshold %.2f | charge x%.2f | slots %d" % [Stats.healing_threshold_auto_start, 1.0 + Upgrades.cur("hacking.persistent_session"), HackingMods.max_mods])
 	Inventory.add_resource(Items.SQL_INJECTOR, 1000); Inventory.add_resource(Items.PACKET_SPOOF, 1000); Inventory.add_resource(Items.SCHOOL_PAYLOAD, 100)
 	var stu = Stats.hacking_targets["School"].targets[0]
 	var g = load("res://scenes/hacking_game.tscn").instantiate(); add_child(g)
@@ -16,10 +16,10 @@ func _run() -> void:
 	await g.prepare()
 	g.start_hack()
 	for i in 20: await get_tree().process_frame
-	var c0 = Inventory.get_amount(Items.STUDENT_CACHE)
-	g.caches_gained = 5
-	g.lose()
-	print(">>> clean exit: banked 5, inventory +%d (expect 2)" % (Inventory.get_amount(Items.STUDENT_CACHE) - c0))
+	Stats.current_anon = 10.0
+	g.win() # more hacks left: Second Wind restores 25% of max
+	print(">>> second wind: anon 10 -> %d of %d (expect %d)" % [Stats.current_anon, Stats.max_anon, 10 + ceil(Stats.max_anon * 0.25)])
+	g.stop_hacking = true
 	g.queue_free()
 	# exploit kit
 	g = load("res://scenes/hacking_game.tscn").instantiate(); add_child(g)

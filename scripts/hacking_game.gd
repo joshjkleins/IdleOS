@@ -93,7 +93,7 @@ const BASE_ATTACK_HEAT := 0.3
 const ATTACK_HEAT_PER_DAMAGE := 0.1
 var DEFEND_PCT: float = 0.05 # Packet Spoof heal as a fraction of max anonymity
 ## Capstones
-const CLEAN_EXIT_KEEP := 0.5      # share of banked caches kept when traced
+const SECOND_WIND_RESTORE := 0.25 # Second Wind (T1 capstone): max anonymity restored after each win in a multi-hack run
 const EVASION_CHANCE := 0.1       # countermeasure dodged
 const RECYCLER_CHANCE := 0.5      # SQL Injector not consumed
 const SIPHON_PCT := 0.005         # max anonymity restored per SQL hit
@@ -716,12 +716,6 @@ func lose():
 	_shake(you_card.panel, 9.0, 0.45)
 	update_status_label_badge("traced", C_INTEG)
 	var messages = "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
-	var kept = int(floor(caches_gained * CLEAN_EXIT_KEEP)) if Upgrades.has("hacking.clean_exit") else 0
-	if kept > 0:
-		Inventory.add_resource(target_reward, kept)
-		_log("SYS", C_EXP, "Clean Exit: kept %d of %d banked %s" % [kept, caches_gained, target_reward.name])
-		messages += "[color=#4ec994]Clean Exit kept %s x%d[/color]\n" % [target_reward.name, kept]
-		caches_gained -= kept
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]Items lost[/color]\n"
 		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
@@ -764,6 +758,12 @@ func win():
 	update_status_label_badge("breached", C_WIN)
 
 	if more:
+		# anonymity carries over between the fights of a run; Second Wind gives some back after each win
+		if Upgrades.has("hacking.second_wind") and Stats.current_anon < Stats.max_anon:
+			var before = Stats.current_anon
+			Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * SECOND_WIND_RESTORE))
+			anon_bar.value = Stats.current_anon
+			_log("SYS", C_SPOOF, "Second Wind: %s  (%d/%d)" % [_c("+%d anonymity" % int(Stats.current_anon - before), C_YOU), Stats.current_anon, Stats.max_anon])
 		_log_rule()
 		reset()
 	else:
@@ -857,6 +857,7 @@ func prepare():
 		if caches_gained > 0:
 			Signals.update_hack_console("\n\n[color=#4ec994]SUCCESSFULLY HACKED " + target_name + "[/color]")
 			Signals.update_hack_console("[color=#4ec994]Gained " + target_reward.name + " x" + str(caches_gained) + "[/color]\n\n")
+		_grant_rewards() # bank the hacks already won (they used to be dropped here)
 		await get_tree().create_timer(1.5).timeout
 		Stats.overclocked = false
 		Signals.hacking_ended()

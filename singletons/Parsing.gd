@@ -28,7 +28,7 @@ signal parsing_level_up_signal
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 30.0
+@onready var VM_UPTIME = 60.0
 
 ## Modifier commands unlocked by Parsing capstones (see Mining.MODIFIERS for how they work).
 const MODIFIERS = [
@@ -140,7 +140,7 @@ var CORRUPTION = {
 	"ssh command": "ssh parsing corruption",
 	"efficiency": 0.05,
 	"efficiency rate": 0.001,
-	"unlocked": true,
+	"unlocked": false,
 	"unlock level": 15,
 	"base speed": 0.6,
 	"overclock speed": 0.3,
@@ -174,7 +174,7 @@ var NETWORK = {
 	"efficiency": 0.005,
 	"efficiency rate": 0.0002,
 	"efficiency upgrade scale": 0.05, # parsing efficiency upgrades count at 5% here (+1% at max)
-	"unlocked": true,
+	"unlocked": false,
 	"unlock level": 35,
 	"base speed": 0.9,
 	"overclock speed": 0.45,
@@ -206,7 +206,7 @@ var EXTRACTION = {
 	"ssh command": "ssh parsing extraction",
 	"efficiency": 0.08,
 	"efficiency rate": 0.0008,
-	"unlocked": true,
+	"unlocked": false,
 	"unlock level": 55,
 	"base speed": 1.35,
 	"overclock speed": 0.675,

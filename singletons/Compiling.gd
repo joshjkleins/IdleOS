@@ -11,7 +11,7 @@ signal compile_level_up_signal
 var bonus_expires_at: int
 var vm_token = Items.VM_COMPILING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 30.0
+@onready var VM_UPTIME = 60.0
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/compiling_terminal.tscn")
@@ -32,8 +32,6 @@ const DEBUG_DURATION_MULT := 1.5
 const BURST_SPEED := 100.0   # fill speed multiplier during a burst
 const BURST_SECONDS := 1.0
 const MOD_SQL_PER_TIER := 10 # SQL Injectors per full mod, x the item's tier (split across its hacks)
-const ACCESS_STAGES_BASE := 10 # stages for a location's second target; +STEP per target after
-const ACCESS_STAGES_STEP := 5
 
 ## Process efficiency with the Efficiency track: +X% of the process's own (burst) chance, x1.20 at max.
 func get_efficiency(p: Dictionary) -> float:
@@ -103,44 +101,6 @@ func check_mod(item_text: String, example: String = "compile -mod=logs") -> Dict
 	return out
 #endregion
 
-#region access (staged, progress saved per target)
-var access_progress := {} # Stats.target_key -> stages done
-
-func access_stages(target: Dictionary) -> int:
-	var p = Stats.target_place(target)
-	var index = int(p.get("index", 1))
-	return ACCESS_STAGES_BASE + ACCESS_STAGES_STEP * max(0, index - 1)
-
-func access_done(target: Dictionary) -> int:
-	return int(access_progress.get(Stats.target_key(target), 0))
-
-## What stage <stage> (0-based) consumes: the payloads are spread over the stages, the rare items are
-## only taken by the final stage.
-func access_stage_cost(target: Dictionary, stage: int) -> Dictionary:
-	var r = Stats.get_access_recipe(target)
-	if r.is_empty() or r.rare == null:
-		return {}
-	var n = access_stages(target)
-	var total = int(r.payload_amount)
-	var pay = int(floor(float(stage + 1) * total / n)) - int(floor(float(stage) * total / n))
-	var out = {}
-	if pay > 0:
-		out[r.payload] = pay
-	if stage == n - 1:
-		out[r.rare] = int(r.rare_amount)
-	return out
-
-## Called when a stage finishes; returns true when it was the final one (the target unlocks).
-func complete_access_stage(target: Dictionary) -> bool:
-	var key = Stats.target_key(target)
-	access_progress[key] = access_done(target) + 1
-	SaveManager.mark_dirty()
-	if access_progress[key] >= access_stages(target):
-		access_progress.erase(key)
-		Stats.unlock_target(target)
-		return true
-	return false
-#endregion
 
 #GENERAL MODULE DATA
 var SKILL = {
@@ -326,66 +286,6 @@ var GOVERNMENT = {
 	"signal": compile_cycle_complete
 }
 
-## ACCESS: unlocks the next hacking target of a location (one-time per target). The cost comes from
-## Stats.get_access_recipe(): a few of the previous target's rare item (by tier) + that location's payloads.
-var ACCESS = {
-	"name": "Access",
-	"tier name": "UTILITY | ACCESS",
-	"level": 1,
-	"experience": 0,
-	"experience per level": 30, # per stage
-	"command": "compile -access",
-	"ssh command": "ssh compiling access",
-	"display command": "compile -access=<target>",
-	"example commands": [
-		{'cmd': 'compile -access=administrator', 'description': 'Compiles access to the Administrator in 10 stages (progress is saved): 1 School payload per stage, 5 Parents credit cards at the final stage'},
-	],
-	"efficiency": 0.01,
-	"efficiency rate": 0.001,
-	"unlocked": true,
-	"unlock level": 1,
-	"base speed": 3.333, # bar fill per second (100 = one stage, ~30 s)
-	"overclock speed": 6.667,
-	"overheat speed": 1.333,
-	"heat": 3.0,
-	"overclock heat": 3.8,
-	"overheat heat": 0.6,
-	"vm token chance": 0.0,
-	"requirements": "Payloads per stage + the previous target's rare item x5 at the final stage",
-	"resource gained": "Access to the next target",
-	"description": "Compiles access to the next hacking target at a location in stages (10 for the second target, +5 per target after; progress is saved). Each stage uses some of the location's payloads; the final stage also takes a few of the previous target's rare item (2 at School up to 5 from the Bank on).",
-	"efficiency description": "Chance for a burst: 100x speed for 1 second, no heat.",
-	"signal": compile_cycle_complete
-}
-
-## Validates compile -access=<name>: {"ok", "message", "target", "requirements": {item: amount}}
-func check_access(target_name: String) -> Dictionary:
-	var out = {"ok": false, "message": "", "target": {}, "requirements": {}}
-	var t = Stats.find_target_by_name(target_name)
-	if target_name.strip_edges() == "" or t.is_empty():
-		out.message = "Name a target. [color=#666666]ex. compile -access=administrator[/color]"
-		return out
-	if t.get("unlocked", false):
-		out.message = t.name + " is already unlocked."
-		return out
-	var p = Stats.target_place(t)
-	if !Stats.hacking_targets[p.location].get("unlocked", false):
-		out.message = "%s is in a locked location: %s." % [t.name, Stats.get_location_unlock_hint(p.location)]
-		return out
-	var r = Stats.get_access_recipe(t)
-	if r.is_empty() or r.rare == null:
-		out.message = t.name + " " + Stats.get_unlock_hint(t) + "."
-		return out
-	var stage = access_done(t)
-	out.requirements = access_stage_cost(t, stage)
-	if !can_afford(out.requirements):
-		var final = stage == access_stages(t) - 1
-		out.message = "Access to %s, stage %d/%d%s needs: %s" % [t.name, stage + 1, access_stages(t), " (final)" if final else "", cost_text(out.requirements)]
-		return out
-	out.target = t
-	out.ok = true
-	return out
-
 var MOD = {
 	"name": "Mod",
 	"tier name": "UTILITY | MOD",
@@ -396,8 +296,8 @@ var MOD = {
 	"ssh command": "ssh compiling mod",
 	"display command": "compile -mod=<item>",
 	"example commands": [
-		{'cmd': 'compile -mod=logs', 'description': 'Builds a Logs mod one hack per fill (20 Logs + 2 SQL Injectors each), up to 5 hacks.'},
-		{'cmd': 'compile -mod=ip address', 'description': 'Builds an IP address mod the same way. Stop any time: the hacks built so far stay.'}
+		{'cmd': 'compile -mod=logs', 'description': 'Builds the Logs mod (a damage bonus), 1 hack per fill, until it is full'},
+		{'cmd': 'compile -mod=ip address', 'description': 'Same for the IP address mod. Stop any time: hacks built so far stay'}
 	],
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
@@ -410,16 +310,16 @@ var MOD = {
 	"overclock heat": 6.0,
 	"overheat heat": 0.3,
 	"vm token chance": 0.002,
-	"requirements": "Per hack: the item's cost / its hacks + SQL Injectors (10 x tier per full mod). 'ls <item>' shows its mod.",
+	"requirements": "Some of the item + SQL Injectors for every hack built. 'ls <item>' shows its mod and cost.",
 	"resource gained": "Temporary Hacking Modification",
-	"description": "Builds a hacking mod one hack at a time: the first fill equips it, each fill after adds a hack, up to the item's duration. Stop any time and keep what's built; an equipped mod of the same type gets topped up.",
+	"description": "Turns an item into a hacking mod: a bonus that lasts a number of hacks. Every fill of the bar builds 1 hack of it; the first fill equips the mod, and it keeps building up to the item's max hacks. Stop whenever you like and keep what's built. Running it again on a mod you already have tops it back up.",
 	"efficiency description": "Chance for a burst: 100x speed for 1 second, no heat.",
 	"signal": compile_cycle_complete
 }
 
-## The six location payload recipes (School ... Government), without the ACCESS / MOD utilities.
+## The six location payload recipes (School ... Government), without the MOD utility.
 func get_payload_processes() -> Array:
-	return minor_processes.filter(func(p): return p != MOD and p != ACCESS)
+	return minor_processes.filter(func(p): return p != MOD)
 
 var minor_processes = [
 	SCHOOL,
@@ -428,7 +328,6 @@ var minor_processes = [
 	BANK,
 	POLICE,
 	GOVERNMENT,
-	ACCESS,
 	MOD
 ]
 
@@ -486,7 +385,6 @@ func save_data() -> Dictionary:
 		"school_level": SCHOOL["level"],
 		"school_experience": SCHOOL["experience"],
 		"school_efficiency": SCHOOL["efficiency"],
-		"access_progress": access_progress,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -495,9 +393,5 @@ func load_data(data: Dictionary) -> void:
 	SKILL["experience"] = int(data.get("skill_experience", SKILL["experience"]))
 	SCHOOL["level"] = int(data.get("school_level", SCHOOL["level"]))
 	SCHOOL["experience"] = int(data.get("school_experience", SCHOOL["experience"]))
-	access_progress = {}
-	var saved_access: Dictionary = data.get("access_progress", {})
-	for k in saved_access:
-		access_progress[k] = int(saved_access[k])
 	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)

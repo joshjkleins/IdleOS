@@ -214,7 +214,12 @@ func processes_load_data(major, data: Dictionary) -> void:
 		if !saved.is_empty():
 			p["level"] = int(saved.get("level", p.get("level", 1)))
 			p["experience"] = int(saved.get("experience", p.get("experience", 0)))
-			p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
+			# unlocks come from the skill level (refresh_process_unlocks below), so a save can't keep a process
+			# open that its level doesn't reach (e.g. Parsing's processes that used to start unlocked)
+			if !p.has("unlock level"):
+				p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
+			else:
+				p["unlocked"] = int(p["unlock level"]) <= 1
 		# Efficiency always comes from level (base + rate per level), never from the save: retuned bases
 		# apply to old saves, and saves inflated by the old legacy-key bug heal on load.
 		# (The base is captured above, so nothing may write "efficiency" before this runs.)

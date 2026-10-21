@@ -10,7 +10,7 @@ DT = 0.1
 # ---- player progression ----
 LEVEL_AT_TIER = [1, 15, 30, 45, 60, 75]          # hacking level on arrival (assumed)
 TRACK = {"damage": 5, "firewall": 2, "bw_regen": 1, "max_bw": 5, "healing": 0.01, "mod_slots": 1, "spoof_thr": 0.1}
-CAPSTONE_TIER = {"clean_exit": 1, "evasion": 2, "recycler": 3, "siphon": 4, "dead_mans": 5, "exploit_kit": 6}
+CAPSTONE_TIER = {"second_wind": 1, "evasion": 2, "recycler": 3, "siphon": 4, "dead_mans": 5, "exploit_kit": 6}
 COOLING = [0.1, 0.4, 0.75, 1.3, 2.0, 3.05, 4.6]  # C/s after tier n of System (index 0 = none)
 HEAT_RED = [0, .05, .10, .15, .20, .25, .30]
 HEAT_TIER = [1.0, 1.46, 2.08, 3.0, 7.0, 10.0]     # hacking heat x location tier (heat plan; to be wired in game)

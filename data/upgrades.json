@@ -30,7 +30,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -129,7 +129,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 8
+       "amount": 24
       }
      ]
     },
@@ -327,7 +327,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 11
+       "amount": 32
       }
      ]
     },
@@ -342,7 +342,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 12
+       "amount": 37
       }
      ]
     },
@@ -516,7 +516,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 14
+       "amount": 42
       }
      ]
     },
@@ -615,7 +615,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 16
+       "amount": 49
       }
      ]
     },
@@ -714,7 +714,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 19
+       "amount": 56
       }
      ]
     },
@@ -912,7 +912,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 25
+       "amount": 74
       },
       {
        "item": "Parents credit card",
@@ -1080,7 +1080,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -1095,7 +1095,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 8
+       "amount": 24
       }
      ]
     },
@@ -1110,7 +1110,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 9
+       "amount": 28
       }
      ]
     },
@@ -1359,7 +1359,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 11
+       "amount": 32
       }
      ]
     },
@@ -1374,7 +1374,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 12
+       "amount": 37
       }
      ]
     },
@@ -1548,7 +1548,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 14
+       "amount": 42
       }
      ]
     },
@@ -1563,7 +1563,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 16
+       "amount": 49
       }
      ]
     },
@@ -1737,7 +1737,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 19
+       "amount": 56
       }
      ]
     },
@@ -1836,7 +1836,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 21
+       "amount": 64
       }
      ]
     },
@@ -1935,7 +1935,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 25
+       "amount": 74
       },
       {
        "item": "Falsified transcript database",
@@ -2103,15 +2103,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 4
+       "amount": 11
       },
       {
        "item": "Encrypted passwords",
-       "amount": 4
+       "amount": 11
       },
       {
        "item": "Usernames",
-       "amount": 4
+       "amount": 11
       }
      ]
     },
@@ -2126,15 +2126,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 4
+       "amount": 13
       },
       {
        "item": "Encrypted passwords",
-       "amount": 4
+       "amount": 13
       },
       {
        "item": "Usernames",
-       "amount": 4
+       "amount": 13
       }
      ]
     },
@@ -2149,15 +2149,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 5
+       "amount": 15
       },
       {
        "item": "Encrypted passwords",
-       "amount": 5
+       "amount": 15
       },
       {
        "item": "Usernames",
-       "amount": 5
+       "amount": 15
       }
      ]
     },
@@ -2526,15 +2526,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 6
+       "amount": 17
       },
       {
        "item": "Encrypted passwords",
-       "amount": 6
+       "amount": 17
       },
       {
        "item": "Usernames",
-       "amount": 6
+       "amount": 17
       }
      ]
     },
@@ -2549,15 +2549,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 7
+       "amount": 20
       },
       {
        "item": "Encrypted passwords",
-       "amount": 7
+       "amount": 20
       },
       {
        "item": "Usernames",
-       "amount": 7
+       "amount": 20
       }
      ]
     },
@@ -2811,15 +2811,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 8
+       "amount": 23
       },
       {
        "item": "Encrypted passwords",
-       "amount": 8
+       "amount": 23
       },
       {
        "item": "Usernames",
-       "amount": 8
+       "amount": 23
       }
      ]
     },
@@ -2834,15 +2834,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 9
+       "amount": 26
       },
       {
        "item": "Encrypted passwords",
-       "amount": 9
+       "amount": 26
       },
       {
        "item": "Usernames",
-       "amount": 9
+       "amount": 26
       }
      ]
     },
@@ -3096,15 +3096,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 10
+       "amount": 30
       },
       {
        "item": "Encrypted passwords",
-       "amount": 10
+       "amount": 30
       },
       {
        "item": "Usernames",
-       "amount": 10
+       "amount": 30
       }
      ]
     },
@@ -3243,15 +3243,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 12
+       "amount": 35
       },
       {
        "item": "Encrypted passwords",
-       "amount": 12
+       "amount": 35
       },
       {
        "item": "Usernames",
-       "amount": 12
+       "amount": 35
       }
      ]
     },
@@ -3390,15 +3390,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 13
+       "amount": 40
       },
       {
        "item": "Encrypted passwords",
-       "amount": 13
+       "amount": 40
       },
       {
        "item": "Usernames",
-       "amount": 13
+       "amount": 40
       },
       {
        "item": "Student disciplinary records",
@@ -3606,7 +3606,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 5
+       "amount": 14
       }
      ]
     },
@@ -3621,7 +3621,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 5
+       "amount": 16
       }
      ]
     },
@@ -3636,7 +3636,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 6
+       "amount": 18
       }
      ]
     },
@@ -3885,7 +3885,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -3900,7 +3900,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 8
+       "amount": 24
       }
      ]
     },
@@ -4074,7 +4074,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 9
+       "amount": 28
       }
      ]
     },
@@ -4089,7 +4089,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 11
+       "amount": 32
       }
      ]
     },
@@ -4263,7 +4263,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 12
+       "amount": 37
       }
      ]
     },
@@ -4362,7 +4362,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 14
+       "amount": 42
       }
      ]
     },
@@ -4461,7 +4461,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 16
+       "amount": 49
       },
       {
        "item": "School budget embezzlement logs",
@@ -4629,7 +4629,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 3
+       "amount": 8
       }
      ]
     },
@@ -4644,7 +4644,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 3
+       "amount": 9
       }
      ]
     },
@@ -4659,7 +4659,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 3
+       "amount": 10
       }
      ]
     },
@@ -4908,7 +4908,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 4
+       "amount": 12
       }
      ]
     },
@@ -4923,7 +4923,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 5
+       "amount": 14
       }
      ]
     },
@@ -5097,7 +5097,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 5
+       "amount": 16
       }
      ]
     },
@@ -5112,7 +5112,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 6
+       "amount": 18
       }
      ]
     },
@@ -5286,7 +5286,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -5385,7 +5385,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 8
+       "amount": 24
       }
      ]
     },
@@ -5484,7 +5484,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 9
+       "amount": 27
       },
       {
        "item": "District wide master password",
@@ -5652,7 +5652,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 4
+       "amount": 12
       }
      ]
     },
@@ -5667,7 +5667,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 5
+       "amount": 14
       }
      ]
     },
@@ -5682,7 +5682,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 5
+       "amount": 16
       }
      ]
     },
@@ -5931,7 +5931,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 6
+       "amount": 19
       }
      ]
     },
@@ -5946,7 +5946,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -6120,7 +6120,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 8
+       "amount": 25
       }
      ]
     },
@@ -6219,7 +6219,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 9
+       "amount": 28
       }
      ]
     },
@@ -6318,7 +6318,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 11
+       "amount": 32
       }
      ]
     },
@@ -6417,7 +6417,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 12
+       "amount": 37
       }
      ]
     },
@@ -6516,7 +6516,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 14
+       "amount": 43
       },
       {
        "item": "Parents credit card",
@@ -6684,7 +6684,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 55
+       "amount": 166
       }
      ]
     },
@@ -6699,7 +6699,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 64
+       "amount": 191
       }
      ]
     },
@@ -6714,7 +6714,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 73
+       "amount": 220
       }
      ]
     },
@@ -6963,7 +6963,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 84
+       "amount": 253
       }
      ]
     },
@@ -6978,7 +6978,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 97
+       "amount": 291
       }
      ]
     },
@@ -7152,7 +7152,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 111
+       "amount": 334
       }
      ]
     },
@@ -7251,7 +7251,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 128
+       "amount": 384
       }
      ]
     },
@@ -7337,20 +7337,20 @@
    "group": "Decoding",
    "name": "Compression",
    "type": "pointed",
-   "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+   "effect": "More basic resources per decoded cache (stacks with Yield)",
    "levels": [
     {
      "tier": 1,
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "0 % faster packaging",
-     "after": "10 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "0 % more basics",
+     "after": "10 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Logs",
-       "amount": 147
+       "amount": 442
       }
      ]
     },
@@ -7359,9 +7359,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "10 % faster packaging",
-     "after": "20 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "10 % more basics",
+     "after": "20 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Archives",
@@ -7374,9 +7374,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "20 % faster packaging",
-     "after": "30 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "20 % more basics",
+     "after": "30 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Metadata",
@@ -7389,9 +7389,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "30 % faster packaging",
-     "after": "40 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "30 % more basics",
+     "after": "40 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Cookies",
@@ -7404,9 +7404,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "40 % faster packaging",
-     "after": "50 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "40 % more basics",
+     "after": "50 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Repositories",
@@ -7419,9 +7419,9 @@
      "slot": 8,
      "value": 0.1,
      "label": "+10%",
-     "before": "50 % faster packaging",
-     "after": "60 % faster packaging",
-     "effect": "Package passes run faster (on top of Speed), so uploads get fed sooner",
+     "before": "50 % more basics",
+     "after": "60 % more basics",
+     "effect": "More basic resources per decoded cache (stacks with Yield)",
      "costs": [
       {
        "item": "Databases",
@@ -7449,7 +7449,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 169
+       "amount": 508
       }
      ]
     },
@@ -7548,7 +7548,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 195
+       "amount": 585
       },
       {
        "item": "Falsified transcript database",
@@ -7716,7 +7716,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 5
+       "amount": 16
       }
      ]
     },
@@ -7731,7 +7731,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 6
+       "amount": 18
       }
      ]
     },
@@ -7746,7 +7746,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 7
+       "amount": 21
       }
      ]
     },
@@ -7995,7 +7995,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 8
+       "amount": 24
       }
      ]
     },
@@ -8010,7 +8010,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 9
+       "amount": 27
       }
      ]
     },
@@ -8171,7 +8171,7 @@
    "group": "Compiling",
    "name": "Recovery",
    "type": "track",
-   "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+   "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
    "levels": [
     {
      "tier": 1,
@@ -8180,11 +8180,11 @@
      "label": "+1.67%",
      "before": "0 % inputs kept",
      "after": "1.67 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "School payload",
-       "amount": 10
+       "amount": 31
       }
      ]
     },
@@ -8199,7 +8199,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 12
+       "amount": 36
       }
      ]
     },
@@ -8210,7 +8210,7 @@
      "label": "+1.67%",
      "before": "3.33 % inputs kept",
      "after": "5 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8240,7 +8240,7 @@
      "label": "+1.67%",
      "before": "6.67 % inputs kept",
      "after": "8.33 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8270,7 +8270,7 @@
      "label": "+1.67%",
      "before": "10 % inputs kept",
      "after": "11.67 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8300,7 +8300,7 @@
      "label": "+1.67%",
      "before": "13.33 % inputs kept",
      "after": "15 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "Police Payload",
@@ -8330,7 +8330,7 @@
      "label": "+1.67%",
      "before": "16.67 % inputs kept",
      "after": "18.33 % inputs kept",
-     "effect": "Chance a fill's inputs are not consumed (payloads, mod hacks, access stage payloads; never the access rares); 20% at max",
+     "effect": "Chance a fill's inputs are not consumed (payloads and mod hacks); 20% at max",
      "costs": [
       {
        "item": "Government Payload",
@@ -8373,7 +8373,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 14
+       "amount": 41
       }
      ]
     },
@@ -8472,7 +8472,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 16
+       "amount": 47
       }
      ]
     },
@@ -8571,7 +8571,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 18
+       "amount": 55
       },
       {
        "item": "Student disciplinary records",
@@ -8936,7 +8936,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Admin cache",
        "amount": 1
       }
      ]
@@ -8951,7 +8951,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Admin cache",
        "amount": 1
       }
      ]
@@ -8966,7 +8966,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Paralegal cache",
        "amount": 1
       }
      ]
@@ -8981,7 +8981,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Paralegal cache",
        "amount": 1
       }
      ]
@@ -8996,7 +8996,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Orderly cache",
        "amount": 1
       }
      ]
@@ -9011,7 +9011,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Orderly cache",
        "amount": 2
       }
      ]
@@ -9026,7 +9026,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Loan Officer Cache",
        "amount": 2
       }
      ]
@@ -9041,7 +9041,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Loan Officer Cache",
        "amount": 2
       }
      ]
@@ -9056,7 +9056,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Cop cache",
        "amount": 2
       }
      ]
@@ -9071,7 +9071,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Cop cache",
        "amount": 3
       }
      ]
@@ -9086,7 +9086,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Analyst Cache",
        "amount": 3
       }
      ]
@@ -9101,7 +9101,7 @@
      "effect": "Bandwidth regenerated per second",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Analyst Cache",
        "amount": 3
       }
      ]
@@ -9125,7 +9125,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Vice principal cache",
        "amount": 1
       }
      ]
@@ -9140,7 +9140,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Associate attorney cache",
        "amount": 1
       }
      ]
@@ -9155,7 +9155,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Nurse cache",
        "amount": 2
       }
      ]
@@ -9170,7 +9170,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Branch Manager Cache",
        "amount": 2
       }
      ]
@@ -9185,7 +9185,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Detective cache",
        "amount": 3
       }
      ]
@@ -9200,7 +9200,7 @@
      "effect": "Max bandwidth (room for mod bandwidth costs)",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Ambassador Cache",
        "amount": 3
       }
      ]
@@ -9224,7 +9224,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Vice principal cache",
        "amount": 1
       }
      ]
@@ -9239,7 +9239,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Associate attorney cache",
        "amount": 1
       }
      ]
@@ -9254,7 +9254,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Nurse cache",
        "amount": 2
       }
      ]
@@ -9269,7 +9269,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Branch Manager Cache",
        "amount": 3
       }
      ]
@@ -9284,7 +9284,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Detective cache",
        "amount": 3
       }
      ]
@@ -9299,7 +9299,7 @@
      "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Ambassador Cache",
        "amount": 4
       }
      ]
@@ -9323,7 +9323,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Principal cache",
        "amount": 1
       }
      ]
@@ -9338,7 +9338,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Lawyer cache",
        "amount": 2
       }
      ]
@@ -9353,7 +9353,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Doctor cache",
        "amount": 3
       }
      ]
@@ -9368,7 +9368,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Security Cache",
        "amount": 3
       }
      ]
@@ -9383,7 +9383,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Sergeant cache",
        "amount": 4
       }
      ]
@@ -9398,7 +9398,7 @@
      "effect": "+1 hacking mod slot",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Vice President Cache",
        "amount": 5
       }
      ]
@@ -9422,7 +9422,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Principal cache",
        "amount": 1
       }
      ]
@@ -9437,7 +9437,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Lawyer cache",
        "amount": 2
       }
      ]
@@ -9452,7 +9452,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Doctor cache",
        "amount": 3
       }
      ]
@@ -9467,7 +9467,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Security Cache",
        "amount": 4
       }
      ]
@@ -9482,7 +9482,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Sergeant cache",
        "amount": 4
       }
      ]
@@ -9497,7 +9497,7 @@
      "effect": "Packet Spoof starts auto-healing at a higher anonymity %",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "Vice President Cache",
        "amount": 5
       }
      ]
@@ -9521,7 +9521,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Superintendent cache",
        "amount": 2
       }
      ]
@@ -9536,7 +9536,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Partner cache",
        "amount": 2
       }
      ]
@@ -9551,7 +9551,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Chief of medicine cache",
        "amount": 3
       }
      ]
@@ -9566,7 +9566,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Chief Financial Officer Cache",
        "amount": 4
       }
      ]
@@ -9581,7 +9581,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Captain cache",
        "amount": 5
       }
      ]
@@ -9596,7 +9596,7 @@
      "effect": "More EXPLOIT charge from every combat event",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "President Cache",
        "amount": 6
       }
      ]
@@ -9604,11 +9604,11 @@
    ]
   },
   {
-   "id": "hacking.clean_exit",
+   "id": "hacking.second_wind",
    "group": "Hacking",
-   "name": "Clean Exit",
+   "name": "Second Wind",
    "type": "capstone",
-   "effect": "Keep 50% of banked caches when traced",
+   "effect": "Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
    "levels": [
     {
      "tier": 1,
@@ -9617,10 +9617,10 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "Keep 50% of banked caches when traced",
+     "effect": "Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
      "costs": [
       {
-       "item": "Student cache",
+       "item": "Superintendent cache",
        "amount": 2
       },
       {
@@ -9648,7 +9648,7 @@
      "effect": "10% chance to dodge a countermeasure completely",
      "costs": [
       {
-       "item": "Legal assistant cache",
+       "item": "Partner cache",
        "amount": 3
       },
       {
@@ -9676,7 +9676,7 @@
      "effect": "50% chance an SQL Injector is not consumed",
      "costs": [
       {
-       "item": "Receptionist cache",
+       "item": "Chief of medicine cache",
        "amount": 4
       },
       {
@@ -9704,7 +9704,7 @@
      "effect": "Each SQL hit restores 0.5% of max anonymity",
      "costs": [
       {
-       "item": "Teller Cache",
+       "item": "Chief Financial Officer Cache",
        "amount": 5
       },
       {
@@ -9732,7 +9732,7 @@
      "effect": "Once per session, a hit that would trace you leaves you at 1 and restores 25% anonymity",
      "costs": [
       {
-       "item": "Secretary cache",
+       "item": "Captain cache",
        "amount": 6
       },
       {
@@ -9760,7 +9760,7 @@
      "effect": "50% chance a one-time item is not consumed",
      "costs": [
       {
-       "item": "Clerk Cache",
+       "item": "President Cache",
        "amount": 7
       },
       {

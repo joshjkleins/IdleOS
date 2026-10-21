@@ -487,6 +487,7 @@ enum ItemType {
 	CASCADE, #354
 	MIRROR, #355
 	COLD_BOOT, #356
+	VM_CACHE, #357
 }
 
 ### RESOURCES ###
@@ -888,6 +889,7 @@ const ZERO_HOUR = preload("res://items/hacking_mods/zero_hour.tres") #353
 const CASCADE = preload("res://items/hacking_mods/cascade.tres") #354
 const MIRROR = preload("res://items/hacking_mods/mirror.tres") #355
 const COLD_BOOT = preload("res://items/hacking_mods/cold_boot.tres") #356
+const VM_CACHE = preload("res://items/cache_data/vm_cache.tres") #357
 
 var ITEM_NAME_MAP = {}
 
@@ -1252,4 +1254,5 @@ const ITEM_MAP = {
 	ItemType.CASCADE: CASCADE, #354
 	ItemType.MIRROR: MIRROR, #355
 	ItemType.COLD_BOOT: COLD_BOOT, #356
+	ItemType.VM_CACHE: VM_CACHE, #357
 }

@@ -1,7 +1,6 @@
 extends BaseTerminal
 ## Compiling terminal: the bar fills at a RATE (units/sec) while the hex labels resolve. Every full bar is
-## one "fill": a payload (School ... Government), one hack of a hacking mod (MOD) or one stage of a
-## target's access (ACCESS, progress saved in Compiling.access_progress). Bursts (efficiency) fill at
+## one "fill": a payload (School ... Government) or one hack of a hacking mod (MOD). Bursts (efficiency) fill at
 ## 100x for 1 second with no heat; progress past a full bar carries into the next fill.
 
 @onready var item_container_scene = preload("res://scenes/ingredients_row.tscn")
@@ -47,21 +46,15 @@ var _cycle_mode: Mode = Mode.NORMAL # worst mode seen this cycle (decides heat)
 
 
 var hacking_mod_item: ItemData = null
-var access_target: Dictionary = {} # ACCESS: the hacking target being unlocked
-var _reqs: Dictionary = {}         # what one compile consumes (ACCESS's depends on the target)
+var _reqs: Dictionary = {}         # what one compile consumes
 
-## arg: the item to turn into a mod (MOD) or the target dictionary to unlock (ACCESS).
+## arg: the item to turn into a mod (MOD).
 func start(p_type: Dictionary, is_window: bool = false, arg = null):
 	setup_process(Compiling, p_type, is_window)
 	if arg is ItemData:
 		hacking_mod_item = arg
-	elif arg is Dictionary:
-		access_target = arg
 	_reqs = {}
-	if p_type == Compiling.ACCESS:
-		var check = Compiling.check_access(access_target.get("name", ""))
-		_reqs = check.requirements
-	elif p_type.requirements is Dictionary:
+	if p_type.requirements is Dictionary:
 		_reqs = p_type.requirements
 	_refresh_reqs()
 	fill_bar.value = 0.0
@@ -80,18 +73,11 @@ var _fill := 0.0          # bar progress (0..100+), kept apart from the bar so i
 var _fill_seconds := 0.0  # time the current fill took (VM tokens roll on time)
 const MAX_FILLS_PER_FRAME := 20
 
-## What the next fill consumes: payload recipe, the mod's per-hack cost, or the access stage's cost
+## What the next fill consumes: payload recipe or the mod's per-hack cost
 func _refresh_reqs() -> void:
 	if process_data == Compiling.MOD and hacking_mod_item:
 		_reqs = Compiling.mod_fill_cost(hacking_mod_item)
-	elif process_data == Compiling.ACCESS:
-		_reqs = Compiling.access_stage_cost(access_target, Compiling.access_done(access_target)) if !access_target.is_empty() else {}
 
-## Access refuses every modifier; Debug only on Mod
-func modifier_block_reason() -> String:
-	if process_data == Compiling.ACCESS:
-		return "Access compiles at its own pace: no modifiers or overclock while it cooks."
-	return ""
 
 ## Per modifier: Debug only does something on Mod
 func modifier_refuses(command: String) -> String:
@@ -99,20 +85,11 @@ func modifier_refuses(command: String) -> String:
 		return "Debug only works on Mod ('compile -mod=<item>'): it lets the mod build up to +50% more hacks."
 	return ""
 
-func overclock_block_reason() -> String:
-	return modifier_block_reason()
-
-## Access never runs overclocked (overclock is system-wide, so a running overclock just doesn't speed it up)
+## Mod heat follows the working tier
 func heat_tier_mult() -> float:
-	if process_data == Compiling.MOD or process_data == Compiling.ACCESS:
+	if process_data == Compiling.MOD:
 		return Stats.tier_heat(Compiling.HEAT_BY_TIER, Upgrades.working_tier("Compiling"))
 	return 1.0
-
-func get_mode() -> Mode:
-	var m := super.get_mode()
-	if process_data == Compiling.ACCESS and m == Mode.OVERCLOCKED:
-		return Mode.NORMAL
-	return m
 
 func _mod_cap() -> int:
 	return Compiling.mod_cap(hacking_mod_item, has_modifier("debug")) if hacking_mod_item else 0
@@ -174,20 +151,16 @@ func _waiting_for_debug() -> bool:
 	var d = int(HackingMods.current_mods[t].duration)
 	return d >= Compiling.mod_cap(hacking_mod_item) and d < Compiling.mod_cap(hacking_mod_item, true)
 
-## Mod: stop once the mod is at its cap. Access: stop when the target unlocked.
+## Mod: stop once the mod is at its cap.
 func _reached_goal() -> bool:
 	if process_data == Compiling.MOD and hacking_mod_item:
 		var t = hacking_mod_item.hacking_mod_type
 		return HackingMods.has_mod(t) and int(HackingMods.current_mods[t].duration) >= _mod_cap() and !_waiting_for_debug()
-	if process_data == Compiling.ACCESS:
-		return access_target.get("unlocked", false)
 	return false
 
 func _update_labels():
 	if process_data == Compiling.MOD:
 		payload_name.text = "HACKING MOD"
-	elif process_data == Compiling.ACCESS:
-		payload_name.text = "TARGET ACCESS"
 	else:
 		payload_name.text = str(process_data["resource gained"].name).to_upper()
 	if process_data == Compiling.MOD:
@@ -196,16 +169,6 @@ func _update_labels():
 		var hacks = int(HackingMods.current_mods[t].duration) if HackingMods.has_mod(t) else 0
 		payload_item.text = HackingMods.get_mod_name(t) + " " + HackingMods.get_mod_value_text(t, value)
 		amount_gained_label.text = "%d/%d hacks" % [hacks, _mod_cap()]
-		for container in ingredients_container.get_children():
-			container.update_amount()
-	elif process_data == Compiling.ACCESS:
-		payload_item.text = "ACCESS: " + str(access_target.get("name", "?"))
-		if access_target.get("unlocked", false):
-			amount_gained_label.text = "UNLOCKED"
-		else:
-			var n = Compiling.access_stages(access_target)
-			var d = Compiling.access_done(access_target)
-			amount_gained_label.text = "stage %d/%d%s" % [min(d + 1, n), n, "  ·  final" if d == n - 1 else ""]
 		for container in ingredients_container.get_children():
 			container.update_amount()
 	else:
@@ -273,13 +236,6 @@ func _compile_payload():
 		if !has_modifier("survey") or randf() < 0.5:
 			HackingMods.extend_mod(hacking_mod_item, _mod_value_mult(), cap)
 			SaveManager.mark_dirty()
-	elif process_data == Compiling.ACCESS:
-		var r = Stats.get_access_recipe(access_target)
-		_take_inputs(_reqs, r.get("rare"))
-		if Compiling.complete_access_stage(access_target):
-			Signals.system_message_signal.emit("[color=#8B5CF6]ACCESS COMPILED[/color]  %s is unlocked. Find it in Hacking." % access_target.get("name", "?"))
-		_refresh_reqs()
-		_rebuild_item_containers()
 	else:
 		_take_inputs(_reqs)
 		#GIVETH: Linker can build two at once; Survey halves (coin flip on odd amounts)
@@ -305,7 +261,7 @@ func _compile_payload():
 	_cycle_mode = Mode.NORMAL
 	record_cycle(1)
 
-	#EFFICIENCY: a burst can start on any process (payloads, Mod hacks, Access stages)
+	#EFFICIENCY: a burst can start on any process (payloads, Mod hacks)
 	if randf() <= _get_current_eff():
 		_efficiency_trigger()
 	_update_eff_label()
@@ -335,14 +291,10 @@ func _efficiency_trigger():
 func _has_resources_for_more() -> bool:
 	if process_data == Compiling.MOD and hacking_mod_item == null:
 		return false
-	if process_data == Compiling.ACCESS and (access_target.is_empty() or access_target.get("unlocked", false)):
-		return false
 	_refresh_reqs()
 	return Compiling.can_afford(_reqs)
 
 func _stop_compiling():
-	if process_data == Compiling.ACCESS and !access_target.get("unlocked", false) and !Compiling.can_afford(_reqs):
-		payload_item.text = "ACCESS: %s  ·  waiting for %s" % [access_target.get("name", "?"), Compiling.cost_text(_reqs, true)]
 	finish_safely()
 
 func _rebuild_item_containers() -> void:

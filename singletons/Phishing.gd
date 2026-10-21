@@ -12,12 +12,12 @@ signal phishing_level_up_signal
 var bonus_expires_at: int
 var vm_token = Items.VM_PHISHING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 30.0
+@onready var VM_UPTIME = 60.0
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/phishing_terminal.tscn")
 
-var max_lines: int = 3
+var max_lines: int = 5
 
 ## Modifier commands unlocked by Phishing capstones (see Mining.MODIFIERS for how they work).
 ## They don't apply to setting a Trap (PhishingTerminal.modifier_block_reason).
@@ -54,7 +54,7 @@ var SKILL = {
 ## Bait: any Mining item, BAIT_PER_CAST per cast (whale / blast / trap), doubles what that cast brings in.
 ## VM tokens are a bonus on top of the catch: "vm token chance" per attempt at base speed (3 lines for Spear /
 ## Mod), rolled on time spent like every skill, so speed and extra lines don't change tokens per hour.
-const BASE_LINES := 3
+const BASE_LINES := 5
 var SPEAR = {
 	"name": "Spear",
 	"tier name": "TIER I | SPEAR",
@@ -87,8 +87,8 @@ var SPEAR = {
 	"vm token per": "per cast",
 	"requirements": {},
 	"resource gained": [
-		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 90 },
-		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 10 },
+		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 2, "weight": 90 },
+		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 2, "weight": 10 },
 	],
 	"resource amount gained": 1,
 	"description": "Harvest SQL Injectors and Packet Spoofs through targeted phishing emails",

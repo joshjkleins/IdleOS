@@ -42,7 +42,7 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 1 },
 				"heat": 0.5,
 				"exp": 45,
-				"integrity": 148,
+				"integrity": 103,
 				"firewall": 13,
 				"counter": 7,
 				"counter speed": 16.0,
@@ -920,8 +920,7 @@ func remove_vm_count(amount: int = 1):
 ## Who can be hacked (saved as "unlocks"; the "unlocked" flags written in hacking_targets above are
 ## overwritten by apply_default_unlocks() at startup):
 ##  - each location + its FIRST target unlock when the previous tier's upload goal completes (School: from the start)
-##  - every other target: compile -access=<target> (Compiling: a few of the previous target's rare item +
-##    payloads, 10 for the 2nd target and +5 per target after)
+##  - every other target: 'unlock <target>' in Hacking (a few of the previous target's rare item + payloads)
 ##  - hard mode is always open, but each hard target unlocks after beating its normal version HARD_UNLOCK_WINS times
 const DEV_UNLOCK_ALL_TARGETS := false # TESTING: open every location and target
 const HARD_UNLOCK_WINS = 5
@@ -999,6 +998,38 @@ func unlock_target(target: Dictionary) -> void:
 	SaveManager.mark_dirty()
 	unlocks_changed.emit()
 
+## 'unlock <target>' in Hacking: pays the access recipe (rares of the previous target + payloads) and
+## unlocks the target. Returns {ok, message}.
+func buy_access(target: Dictionary) -> Dictionary:
+	var out = {"ok": false, "message": ""}
+	if target.is_empty():
+		out.message = "Target not found."
+		return out
+	if target.get("unlocked", false):
+		out.message = target.name + " is already unlocked."
+		return out
+	var p = target_place(target)
+	if !hacking_targets[p.location].get("unlocked", false):
+		out.message = "%s is in a locked location: %s." % [target.name, get_location_unlock_hint(p.location)]
+		return out
+	var r = get_access_recipe(target)
+	if r.is_empty() or r.rare == null:
+		out.message = "%s %s." % [target.name, get_unlock_hint(target)]
+		return out
+	var missing = []
+	for pair in [[r.rare, int(r.rare_amount)], [r.payload, int(r.payload_amount)]]:
+		if Inventory.get_amount(pair[0]) < pair[1]:
+			missing.append("%s %d/%d" % [pair[0].name, Inventory.get_amount(pair[0]), pair[1]])
+	if !missing.is_empty():
+		out.message = "Access to %s needs %d %s + %d %s. Missing: %s" % [target.name, int(r.rare_amount), r.rare.name, int(r.payload_amount), r.payload.name, ", ".join(missing)]
+		return out
+	Inventory.remove_resource(r.rare, int(r.rare_amount))
+	Inventory.remove_resource(r.payload, int(r.payload_amount))
+	unlock_target(target)
+	out.ok = true
+	out.message = "ACCESS GRANTED: %s is unlocked (used %d %s + %d %s)." % [target.name, int(r.rare_amount), r.rare.name, int(r.payload_amount), r.payload.name]
+	return out
+
 ## Opens a location and its first target (tier completion).
 func unlock_location(location_key: String) -> void:
 	if !hacking_targets.has(location_key):
@@ -1016,7 +1047,7 @@ func _on_tier_completed(tier: int) -> void:
 	if tier < keys.size():
 		unlock_location(keys[tier]) # tier is 1-based, so this is the next location
 
-## What compile -access=<target> costs: {"rare", "rare_amount", "payload", "payload_amount"}, or {} when
+## What 'unlock <target>' (Hacking) costs: {"rare", "rare_amount", "payload", "payload_amount"}, or {} when
 ## the target isn't unlocked that way (first target of a tier, hard targets).
 func get_access_recipe(target: Dictionary) -> Dictionary:
 	var p = target_place(target)
@@ -1047,7 +1078,7 @@ func get_unlock_hint(target: Dictionary) -> String:
 		return "beat %s %d/%d times" % [easy.name, min(get_wins(easy), HARD_UNLOCK_WINS), HARD_UNLOCK_WINS] if !easy.is_empty() else ""
 	if p.index == 0:
 		return "unlocks with the %s location" % p.location
-	return "compile -access=%s" % target.name.to_lower().replace(" ", "-")
+	return "unlock %s" % target.name.to_lower()
 
 func get_location_unlock_hint(location_key: String) -> String:
 	var keys = hacking_targets.keys()

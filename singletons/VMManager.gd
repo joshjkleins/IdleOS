@@ -79,6 +79,10 @@ func _spawn_position(window: VMWindow) -> Vector2:
 		if vm != window and vm.visible:
 			visible_count += 1
 	var start = Vector2(host.size.x - window.size.x - 320.0, 110.0)
+	# below the tutorial window while it's up
+	for c in host.get_children():
+		if c is TutorialWindow and c.visible:
+			start.y = max(start.y, c.position.y + c.size.y + 12.0)
 	return _clamp_to_host(window, start + Vector2(-CASCADE_STEP.x, CASCADE_STEP.y) * (visible_count % 8))
 
 func _clamp_to_host(window: Control, pos: Vector2) -> Vector2:

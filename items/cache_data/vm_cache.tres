@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_vmc"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="2_vmc"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_vmc"]
+
+[resource]
+script = ExtResource("3_vmc")
+entries = Array[ExtResource("1_vmc")]([])
+rare_pool = Array[ExtResource("1_vmc")]([])
+rare_drop_chance = 0.0
+id = 357
+name = "VM cache"
+shortened_name = ""
+description = "A stash of virtual machine tokens. Decode it: each line has a 50% chance at 1-3 VM tokens of a random skill. Can't be parsed into variants."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("2_vmc")]([])
+tier = 1
+color_type = 9
+obtained_from = Array[int]([7])
+obtained_from_additional_hint = "20% chance from every decoded cache (the first Student cache always has one)."
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

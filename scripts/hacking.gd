@@ -69,6 +69,9 @@ func _on_player_hacking_box_command_entered(text):
 	if low == "run" or low.begins_with("run "):
 		handle_run_command(low)
 		return
+	if (low == "unlock" or low.begins_with("unlock ")) and current_context != HackingContext.HACKING:
+		handle_unlock_command(low.trim_prefix("unlock").strip_edges())
+		return
 	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
@@ -266,6 +269,30 @@ func handle_hack_command(text):
 	
 	toggle_hacking_accepted_input_text(true)
 
+## 'unlock <target>': pays a locked target's access recipe. 'unlock' alone lists what can be unlocked.
+var _shown_targets: Array = [] # the cards on screen (PERSONS), redrawn after an unlock
+func handle_unlock_command(name: String) -> void:
+	if name == "":
+		var rows = []
+		for loc in Stats.hacking_targets:
+			if !Stats.hacking_targets[loc].get("unlocked", false):
+				continue
+			for tg in Stats.hacking_targets[loc].get("targets", []):
+				var r = Stats.get_access_recipe(tg)
+				if tg.get("unlocked", false) or r.is_empty() or r.rare == null:
+					continue
+				var ok = Inventory.get_amount(r.rare) >= int(r.rare_amount) and Inventory.get_amount(r.payload) >= int(r.payload_amount)
+				rows.append("  [color=%s]%s[/color] %d/%d %s  ·  %d/%d %s" % ["#33ff33" if ok else "#888888", ("unlock " + tg.name.to_lower()).rpad(28), Inventory.get_amount(r.rare), int(r.rare_amount), r.rare.name, Inventory.get_amount(r.payload), int(r.payload_amount), r.payload.name])
+		player_hacking_box.add_line("LOCKED TARGETS\n" + ("\n".join(rows) if !rows.is_empty() else "  [color=#888888]Nothing to unlock right now.[/color]"))
+		return
+	var res = Stats.buy_access(Stats.find_target_by_name(name))
+	if !res.ok:
+		player_hacking_box.add_line_error(res.message)
+		return
+	player_hacking_box.add_line_success(res.message)
+	if current_context == HackingContext.PERSONS and !_shown_targets.is_empty():
+		enemy_hacking_box._update_persons(_shown_targets)
+
 func handle_back_command():
 	match current_context:
 		HackingContext.PERSONS:
@@ -294,6 +321,7 @@ func handle_view_command(text):
 		player_hacking_box.add_line("Not a valid location.")
 	else:
 		current_context = HackingContext.PERSONS
+		_shown_targets = targets
 		hacking_help_commands()
 		await enemy_hacking_box.select_target(location_name, targets)
 
@@ -336,6 +364,8 @@ func hacking_help_commands():
 		HackingContext.TARGETS:
 			player_hacking_box.add_line(format_command_list("[HACKING COMMANDS]", [
 				["view [location]", "List targets at location", "e.g. view school"],
+				["unlock", "List locked targets and what they cost"],
+				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
 				["cd ..",            "Return to terminal root"]
 			]))
 		HackingContext.PERSONS:
@@ -345,6 +375,7 @@ func hacking_help_commands():
 				["hack [target]", "Hack target once", "e.g. hack student"],
 				["hack [target]=[amount]", "Hack target a set number of times", "e.g. hack student=20"],
 				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
+				["unlock [target]", "Unlock a target ('unlock' lists them)", "e.g. unlock administrator"],
 				["cd ..", "Return to locations directory", "e.g. 'cd ..'"]
 			]
 

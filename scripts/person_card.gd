@@ -143,13 +143,26 @@ func _add_reward(box: VBoxContainer, info) -> void:
 	row.add_child(_icon("reward"))
 	var qty = info.get("loot quantity", 1)
 	row.add_child(_label("%s x%d" % [info.loot.name, qty], 12, C_TEXT))
-	if info.loot is CacheData and !info.loot.rare_pool.is_empty():
-		var rares = []
-		for e in info.loot.rare_pool:
-			rares.append(e.item.name)
-		var r = _label("rare: " + ", ".join(rares), 10, C_RARE)
-		r.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(r)
+	if info.loot is CacheData:
+		_add_loot_pool(box, info.loot)
+
+## What one decoded cache of this target holds (Decoding's drop table for the Cache process): name, amount, chance
+func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:
+	box.add_child(_section("CACHE LOOT"))
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 1)
+	box.add_child(grid)
+	for r in Decoding.get_drop_table(cache, Decoding.CACHE):
+		var col = C_RARE if r.rare else C_DIM
+		var n = _label(r.name.to_lower(), 10, C_RARE if r.rare else C_TEXT)
+		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		n.clip_text = true
+		n.tooltip_text = r.name
+		grid.add_child(n)
+		grid.add_child(_label(str(r.min) if r.min == r.max else "%d-%d" % [r.min, r.max], 10, col))
+		grid.add_child(_label(("%.1f%%" % (r.chance * 100.0)).replace(".0%", "%"), 10, col))
 
 func _add_special(box: VBoxContainer, info) -> void:
 	var special = info.get("special", "")

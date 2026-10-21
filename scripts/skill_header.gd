@@ -282,8 +282,13 @@ func _on_process_xp(amount: int, process: Dictionary) -> void:
 	var key = str(process.get("command", process.name))
 	var prev = _process_levels.get(key, process.level)
 	_process_levels[key] = process.level
-	if main_card:
+	# the "+N xp" popup goes on the card of the skill that earned it: its main card in that skill's
+	# view, its root card in the root view (so several VMs light up their own skills)
+	var owner = _skill_of(process)
+	if main_card and owner != null and main_card.skill == owner:
 		main_card.show_gain(amount)
+	elif current_skill == null and owner != null and root_cards.has(owner) and !root_cards[owner].celebrating:
+		root_cards[owner].show_gain(amount)
 	var card: HeaderCard = _card_for(process)
 	if card:
 		if card.celebrating:
@@ -311,6 +316,13 @@ func _refresh_footers() -> void:
 		for card in detail_cards:
 			card.set_active(_is_running(current_skill, card.process))
 #endregion
+
+func _skill_of(process: Dictionary) -> Node:
+	for skill in _skills():
+		for p in skill.minor_processes:
+			if is_same(p, process):
+				return skill
+	return null
 
 ## Process dicts change as they gain xp, so match by identity, not as dictionary keys.
 func _card_for(process: Dictionary) -> HeaderCard:

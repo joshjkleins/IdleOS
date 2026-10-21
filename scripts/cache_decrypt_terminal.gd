@@ -14,19 +14,15 @@ const C_CORRUPT = "#e24b4a"
 
 var items_from_session = {} #reference for labels
 var item_label = preload("res://scenes/cache_item_label.tscn")
-var target_cache: ItemData = null # Cache / Skim / Deep: only this cache (null = any). Salvage / Package: the item.
+var target_cache: ItemData = null # Cache / Skim / Deep: only this cache (null = any). Salvage: the item.
 var target_arg = null # Intel: the target dictionary
 var current_cache: CacheData = null
 
-## p_type picks what gets decoded ("decode kind"): cache, skim, deep (caches), salvage, package (an item),
+## p_type picks what gets decoded ("decode kind"): cache, skim, deep (caches), salvage (an item),
 ## intel (a hacking target). <arg> is the cache / item / target the command named (or null).
-var package_limit := 0 # Package: stop after this many (0 = until the goal is covered)
 
 func set_cache_type(p_type: Dictionary, window: bool = false, arg = null):
 	setup_process(Decoding, p_type, window)
-	if p_type.get("decode kind", "") == "package":
-		package_limit = Decoding.next_package_limit
-		Decoding.next_package_limit = 0
 	if arg is ItemData:
 		target_cache = arg
 	else:
@@ -51,36 +47,37 @@ func _ready():
 	caches_display_container.get_parent().move_child(drop_rates, caches_display_container.get_index() + 1)
 
 ## One line: "DROPS  Logs 5-10 (100%) · ... · RARE Parents credit card x1 (19.8%)" for the current process.
+## Two lines under the cache: DROPS (basics, VM cache, tokens) and RARE (rare items, one-time items,
+## rare tracker). Name, amount, chance.
 func _show_drop_rates(cache: CacheData) -> void:
-	var parts = []
+	var basics = []
+	var rares = []
 	for r in Decoding.get_drop_table(cache, process_data, Decoding.FORENSICS_EXPLOIT_MULT if _mod() == "forensics" else 1.0):
 		var qty = str(r.min) if r.min == r.max else "%d-%d" % [r.min, r.max]
-		var pct = "%.1f%%" % (r.chance * 100.0)
+		var pct = ("%.1f%%" % (r.chance * 100.0)).replace(".0%", "%")
 		if r.rare:
-			parts.append("[color=#e0c068]RARE %s x%s (%s)[/color]" % [r.name, qty, pct])
+			rares.append("[color=#e0c068]%s[/color] x%s [color=#7d6a3a]%s[/color]" % [r.name, qty, pct])
 		else:
-			parts.append("%s %s [color=#888888](%s)[/color]" % [r.name, qty, pct])
+			basics.append("[color=#c8d0d8]%s[/color] %s [color=#5c6b7a]%s[/color]" % [r.name, qty, pct])
 	if process_data == Decoding.SKIM:
-		parts.append("[color=#888888]%.1f%% chance for +50%% basics[/color]" % (Decoding.get_efficiency(Decoding.SKIM) * 100.0))
+		basics.append("[color=#5c6b7a]%.1f%% chance for +50%% basics[/color]" % (Decoding.get_efficiency(Decoding.SKIM) * 100.0))
 	var tb = Decoding.tracker_bonus(cache) if Decoding.get_rare_chance(process_data) > 0.0 else 0.0
 	if tb > 0.0:
-		parts.append("[color=#e0c068]rare tracker +%.2f%% (%d dry)[/color]" % [tb * 100.0, int(Decoding.rare_tracker.get(Decoding.cache_family(cache), 0))])
-	drop_rates.text = "[color=#5c6b7a]DROPS[/color]  " + "  ·  ".join(parts)
+		rares.append("[color=#7d6a3a]rare tracker +%.2f%% (%d dry)[/color]" % [tb * 100.0, int(Decoding.rare_tracker.get(Decoding.cache_family(cache), 0))])
+	var sep = "   [color=#3a444e]|[/color]   "
+	var t = "[color=#5c6b7a]DROPS[/color]  " + sep.join(basics)
+	if !rares.is_empty():
+		t += "\n[color=#7d6a3a]RARE[/color]   " + sep.join(rares)
+	drop_rates.text = t
 	drop_rates.visible = true
 
 func _kind() -> String:
 	return process_data.get("decode kind", "cache")
 
-## Compression: Package passes run faster on top of Speed
-func get_step_time(mode: Mode) -> float:
-	var t = super.get_step_time(mode)
-	if _kind() == "package":
-		t /= Decoding.compression_multiplier()
-	return t
 
-## Modifiers work on the cache processes and Salvage, not on Package or Intel
+## Modifiers work on the cache processes and Salvage, not on Intel
 func modifier_block_reason() -> String:
-	if _kind() in ["package", "intel"]:
+	if _kind() == "intel":
 		return "Decoding modifiers work on Cache, Skim, Deep Scan and Salvage, not on %s." % process_data.name
 	return ""
 
@@ -94,8 +91,6 @@ func start_decrypting():
 	match _kind():
 		"salvage":
 			await _run_salvage()
-		"package":
-			await _run_package()
 		"intel":
 			await _run_intel()
 		_:
@@ -145,7 +140,7 @@ func _token_chance() -> float:
 		chance *= 2.0
 	return chance
 
-## After every finished cache / salvage / package / intel pass.
+## After every finished cache / salvage / intel pass.
 func _cycle_done(cycle_mode: Mode) -> void:
 	apply_heat(cycle_mode)
 	process_data.signal.emit(1)
@@ -239,6 +234,7 @@ func _run_intel() -> void:
 		_cycle_done(cycle_mode)
 
 ## Session tally row without adding anything to the inventory.
+
 func update_items_gained_label(label_name: String, amount: int) -> void:
 	items_from_session[label_name] = items_from_session.get(label_name, 0) + amount
 	clear_labels()
@@ -248,36 +244,6 @@ func update_items_gained_label(label_name: String, amount: int) -> void:
 		labels_container.add_child(new_label)
 #endregion
 
-#region package
-func _run_package() -> void:
-	var packaged := 0
-	while running and target_cache and Inventory.get_amount(target_cache) > 0 and Uploads.get_still_needed(target_cache) > 0 and (package_limit <= 0 or packaged < package_limit):
-		if stop_requested:
-			return
-		cache_decrypt.reset()
-		# efficiency: package a second one in the same pass (never past the amount asked for)
-		var room = package_limit - packaged if package_limit > 0 else 2
-		var amount = 2 if (room >= 2 and randf() < Decoding.get_efficiency(process_data) and Inventory.get_amount(target_cache) >= 2 and Uploads.get_still_needed(target_cache) >= 2) else 1
-		packaged += amount
-		Inventory.remove_resource(target_cache, amount)
-		cache_name.text = "PACKAGING %s  ·  packaged %d%s  ·  %d left in inventory  ·  goal still needs %d" % [target_cache.name.to_upper(), packaged, ("/%d" % package_limit) if package_limit > 0 else "", Inventory.get_amount(target_cache), Uploads.get_still_needed(target_cache) - amount]
-		cache_decrypt.build_rows([{"item": target_cache, "amount": amount}])
-		hex_display.text = cache_decrypt.render_dump()
-		var cycle_mode := await _reveal_dump()
-		if !running:
-			apply_heat(cycle_mode)
-			if !cache_decrypt.items_found: # killed before the line finished: give the item back
-				Inventory.add_resource(target_cache, amount)
-			return
-		_cycle_done(cycle_mode)
-	if running and target_cache:
-		if package_limit > 0 and packaged >= package_limit:
-			cache_name.text = "Packaged %d %s. Start the upload with 'upload -%s'" % [packaged, target_cache.name, target_cache.name.to_lower()]
-		elif Uploads.get_still_needed(target_cache) <= 0:
-			cache_name.text = "%s packaged for this goal. Start the upload with 'upload -%s'" % [target_cache.name, target_cache.name.to_lower()]
-		else:
-			cache_name.text = "Out of %s to package" % target_cache.name
-#endregion
 
 #region salvage
 func _run_salvage() -> void:
@@ -317,10 +283,7 @@ func update_items_gained(item, amount):
 		var new_label = item_label.instantiate()
 		new_label.update(i, items_from_session[i])
 		labels_container.add_child(new_label)
-	if _kind() == "package":
-		Uploads.stage(item, amount) # packaged items go to the upload staging area, not the inventory
-	else:
-		Inventory.add_resource(item, amount)
+	Inventory.add_resource(item, amount)
 
 	# Corruption variant: each find (except the last) can corrupt the rest of the cache
 	cache_decrypt.items_found += 1

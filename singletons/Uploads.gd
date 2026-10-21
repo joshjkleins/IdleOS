@@ -1,20 +1,20 @@
 extends Node
 ## Upload progression. Each tier has an upload goal: BASIC_GOALS[tier] of every basic resource in that tier's chain
-## plus RARE_GOALS[tier] of each rare item its targets drop. Items get there in two idle steps:
-##   1. decode -package=<item> (Decoding): one item per pass moves from the inventory into the staging area
-##   2. upload -<item>: staged items upload one every get_upload_seconds(), several items in parallel
+## plus RARE_GOALS[tier] of each rare item its targets drop.
+##   upload <item> <amount>: moves that many from the inventory into the upload queue ("staged") and starts it;
+##   queued items upload one every get_upload_seconds(), several items in parallel.
 ## Economy pass (2026-10-20, tools/balance/econ2.py): goals fit each tier's active play time (T1 1-2 h ... T6 6-7 h)
 ## with cache loot counted; upload time makes a tier's goal take ~70% of its play time, all items in parallel.
-## Staged items that aren't needed any more can be returned with unpack -<item>.
+## Queued items can be returned with upload cancel <item>.
 
 signal changed           # staged / uploading / uploaded counts changed
 signal tier_completed(tier: int)
 signal item_uploaded(item: ItemData)
 
-const BASIC_GOALS = [100, 300, 600, 1000, 1600, 2500]
+const BASIC_GOALS = [300, 300, 600, 1000, 1600, 2500] # T1 x3 after the 2026-10-20 playthrough
 const RARE_GOALS = [3, 5, 6, 10, 15, 20]
-const UPLOAD_SECONDS_BY_TIER = [38.0, 21.0, 15.0, 11.0, 9.0, 7.0] # per basic resource, by the item's tier
-const RARE_UPLOAD_SECONDS = 60.0  # per rare item
+const UPLOAD_SECONDS_BY_TIER = [15.0, 15.0, 15.0, 11.0, 9.0, 7.0] # per basic resource, by the item's tier
+const RARE_UPLOAD_SECONDS = 45.0  # per rare item
 ## Upload heat per second of uploading, per item, by tier (~3.5% of that tier's cooling each: all of a tier's
 ## items uploading at once is a light, steady load)
 const UPLOAD_HEAT_PER_SECOND = [0.009, 0.02, 0.035, 0.058, 0.088, 0.133]
@@ -88,9 +88,34 @@ func is_tier_complete(tier: int) -> bool:
 #region staging
 func stage(item: ItemData, amount: int = 1) -> void:
 	staged[item] = get_staged(item) + amount
-	Tutorial.on_items_packaged(item, amount)
 	changed.emit()
 	SaveManager.mark_dirty()
+
+## 'upload <item> <amount>': takes up to <amount> (0 = all the goal still needs) from the inventory, queues
+## them and starts the upload. Returns {ok, amount, message}.
+func queue(item: ItemData, amount: int = 0) -> Dictionary:
+	var out = {"ok": false, "amount": 0, "message": ""}
+	if !is_goal_item(item):
+		out.message = "%s isn't part of the current upload goal. Type 'upload' to see it." % item.name
+		return out
+	var need = get_still_needed(item)
+	if need <= 0:
+		out.message = "%s is already %s for this goal." % [item.name, "fully uploaded" if get_uploaded(item) >= get_goal_amount(item) else "queued"]
+		return out
+	var have = Inventory.get_amount(item)
+	if have <= 0:
+		out.message = "No %s in inventory." % item.name
+		return out
+	var n = min(need, have) if amount <= 0 else min(amount, need, have)
+	Inventory.remove_resource(item, n)
+	stage(item, n)
+	Tutorial.on_items_packaged(item, n)
+	if !active.has(item):
+		active[item] = 0.0
+	changed.emit()
+	out.ok = true
+	out.amount = n
+	return out
 
 ## Returns every staged <item> to the inventory (and stops its upload). Returns how many.
 func unpack(item: ItemData) -> int:
@@ -109,9 +134,9 @@ func unpack(item: ItemData) -> int:
 ## Starts uploading staged <item>. Returns "" on success, otherwise why not.
 func start_upload(item: ItemData) -> String:
 	if get_staged(item) <= 0:
-		return "No packaged %s. Package it first with 'decode -package=%s'." % [item.name, item.name.to_lower()]
+		return "Nothing queued for %s. Queue it with 'upload %s <amount>'." % [item.name, item.name.to_lower()]
 	if !is_goal_item(item):
-		return "%s isn't part of the current upload goal. Use 'unpack -%s' to get it back." % [item.name, item.name.to_lower()]
+		return "%s isn't part of the current upload goal. Use 'upload cancel %s' to get it back." % [item.name, item.name.to_lower()]
 	if get_uploaded(item) >= get_goal_amount(item):
 		return "%s is already fully uploaded for this tier." % item.name
 	if active.has(item):
@@ -196,5 +221,9 @@ func load_data(data: Dictionary) -> void:
 	active = _items(data.get("active", {}))
 	for k in active: active[k] = float(active[k])
 	completed_tiers = data.get("completed_tiers", []).map(func(t): return int(t))
+	# saves from the packaging days: queued goal items just start uploading
+	for k in staged:
+		if is_goal_item(k) and get_uploaded(k) < get_goal_amount(k) and !active.has(k):
+			active[k] = 0.0
 	changed.emit()
 #endregion

@@ -1,7 +1,7 @@
 class_name UploadSection
 extends VBoxContainer
 ## Side panel UPLOADS section: every item in the current tier's upload goal (even at 0) plus anything
-## else packaged, in a scroll area that takes the panel's free space.
+## else queued, in a scroll area that takes the panel's free space.
 ## Uploading rows show a count (uploaded/goal), an overall bar and a thin bar that fills once per item.
 
 const HEADER = Color(0.36, 0.42, 0.48, 1)
@@ -72,7 +72,7 @@ func _process(delta: float) -> void:
 		_rebuild()
 	_refresh()
 
-## Rows: every goal item of the current tier (in goal order), then anything else packaged.
+## Rows: every goal item of the current tier (in goal order), then anything else queued.
 func _wanted_items() -> Array:
 	var items := []
 	for g in Uploads.get_goals():
@@ -137,7 +137,7 @@ func _refresh() -> void:
 			row.count.text = "%d/%d%s" % [up, goal, "  +%d" % staged if staged > 0 else ""]
 			row.bar.value = float(up) / goal
 		else:
-			row.count.text = "%d packaged" % staged
+			row.count.text = "%d queued" % staged
 			row.bar.value = 0.0
 		row.tick.value = Uploads.active.get(item, 0.0)
 		row.tick.visible = uploading

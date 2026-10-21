@@ -647,10 +647,28 @@ func _grouped_text(items: Array, filtered: bool) -> String:
 	if filtered:
 		out += "\n[color=#666666]'ls <item>' for details and where it's used · 'ls' for everything[/color]"
 	else:
-		out += "\n[color=#4ec9b0]FILTERS[/color]  [color=#888888]ls -resources  -payloads  -combat  -caches  -rares  -mods  -exploits  -tokens[/color]\n"
-		out += "         [color=#888888]ls -mining ... (what a skill makes)  ·  ls school / ls t2 (location)  ·  ls cred (name)  ·  combine: ls -caches school[/color]\n"
-		out += "[color=#666666]'ls <item>' for details and where it's used · 'ls -h' explains the item types[/color]"
+		out += "\n" + _filters_help()
 	return out
+
+## Filter help under plain 'ls': one row per kind of filter, commands aligned in columns
+func _filters_help() -> String:
+	var rows = [
+		["By type", ["ls -resources", "ls -payloads", "ls -combat", "ls -caches"]],
+		["", ["ls -rares", "ls -mods", "ls -exploits", "ls -tokens"]],
+		["By skill", ["ls -mining", "ls -parsing", "ls -cracking", "ls -matching"], "what it makes + uses"],
+		["By location", ["ls school", "ls lawfirm", "ls t2"]],
+		["By name", ["ls cred", "ls payload"], "any part of a name"],
+		["Combine", ["ls -caches school", "ls -rares t2"]],
+	]
+	var out = "[color=#4ec9b0]FILTERS[/color]\n"
+	for i in rows.size():
+		var r = rows[i]
+		var branch = "└─ " if i == rows.size() - 1 else ("├─ " if r[0] != "" else "│  ")
+		var cmds = ""
+		for c in r[1]:
+			cmds += pad_text(c, 18)
+		out += "[color=#666666]%s[/color]%s[color=#888888]%s[/color]%s\n" % [branch, pad_text(r[0], 13), cmds, ("[color=#666666]" + r[2] + "[/color]") if r.size() > 2 else ""]
+	return out + "[color=#666666]'ls <item>' for details and where it's used · 'ls -h' explains the item types[/color]"
 
 static func _ls_amount(n: int) -> String:
 	var s = str(n)
@@ -695,10 +713,10 @@ func used_in_text(item: ItemData) -> String:
 		for tg in l.get("targets", []):
 			var r = Stats.get_access_recipe(tg)
 			if !r.is_empty() and r.get("rare") == item:
-				rows.append(["Target access", "compile -access=%s  [color=#666666](%d at the final stage)[/color]" % [tg.name.to_lower(), int(r.rare_amount)]])
+				rows.append(["Target access", "unlock %s in Hacking  [color=#666666](%d needed)[/color]" % [tg.name.to_lower(), int(r.rare_amount)]])
 	# upload goal
 	if Uploads.is_goal_item(item):
-		rows.append(["Upload goal", "%d/%d uploaded for %s  [color=#666666](decode -package=%s <amount>, then upload -%s)[/color]" % [Uploads.get_uploaded(item), Uploads.get_goal_amount(item), Uploads.get_location_name(Uploads.current_tier()), item.name.to_lower(), item.name.to_lower()]])
+		rows.append(["Upload goal", "%d/%d uploaded for %s  [color=#666666](upload %s <amount>)[/color]" % [Uploads.get_uploaded(item), Uploads.get_goal_amount(item), Uploads.get_location_name(Uploads.current_tier()), item.name.to_lower()]])
 	if rows.is_empty():
 		return ""
 	var w = 8

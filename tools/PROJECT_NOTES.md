@@ -450,6 +450,57 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
   next only, Exp.level_bonus_text); 'info <skill> <process>' shows the chance with the bonus. Test: tools/tests/lvlbonus.
 - Upload-goal item bonuses: idea parked until after the playthrough.
 
+## Playthrough notes pass (2026-10-20, Josh's first full playthrough)
+- **Packaging removed.** `upload <item> <amount>` takes items straight from the inventory into the upload
+  queue (`Uploads.queue`; `staged` = queued) and starts uploading. `upload <item>` = all the goal still needs,
+  `upload -a` every goal item, `upload cancel <item>` (alias `unpack <item>`) returns queued items. During the
+  tutorial an exact amount is required and `-a` is refused. Decoding's PACKAGE process, the terminal's package
+  loop and Offline's package job are gone; `decode -package` prints a pointer to upload. Old saves: queued goal
+  items start uploading on load. Tutorial: PACKAGE_5_LOGS = "upload logs 5" (also silently ticks the retired
+  UPLOAD_LOGS step, which is no longer in TUTORIAL_ORDER; `Tutorial.steps()` / `steps_done()` count only
+  TUTORIAL_ORDER). Upload goal text: QUEUED column + stacked, aligned command hints. Test: tools/tests/uptest.
+- **Compression** (decoding.compression) = +10% basic resources per decoded cache per level, stacks with Yield.
+- **compile -access removed.** Locked targets unlock with `unlock <target>` in the Hacking module (targets and
+  locations pages; `unlock` alone lists locked targets with costs) via `Stats.buy_access`: pays
+  `Stats.get_access_recipe` (rares of the previous target + payloads) in one go. `Compiling.access_progress`
+  (old saves' partial stages) is dropped. Test: tools/tests/unlocktest.
+- **Hacking upgrade costs** rotate through the tier's 5 target caches (gen_upgrades.py `TARGET_CACHES`: slots
+  1-2 target 1 ... 9-10 target 5), totals still HACK_CACHE_TOTAL. Only Hacking costs were merged into upgrades.json.
+- **Side panel AVAILABLE TO RUN** (scripts/available_section.gd, above ACCESS): the current upload tier's
+  Mining > Parsing > Cracking > Matching > Compiling, lit when the inventory covers one run (Mining always),
+  with runs available on the right. Collapsible (saved as sections.available). Screens: tools/tests/availshot.
+- **Tutorial window** (scripts/tutorial_window.gd, class TutorialWindow, in VMLayer): docked top right next to
+  the side panel, one page per step, < prev / current / next >, '_' folds, 'x' closes ('tutorial' reopens,
+  'tutorial -l' prints the old checklist). Steps flash OBJECTIVE COMPLETE and jump to the next page; the terminal
+  only gets a one-line notice while the window is up (full message when closed, and the tutorial-complete text
+  always). Hidden in the Hacking module (its console still prints the full messages). Saved: Tutorial
+  window_folded / window_closed. VM windows spawn below it. Test/screens: tools/tests/tutwin.
+- Quick fixes: parsing processes unlock from level on load (Exp.processes_load_data), Student integrity -45,
+  phishing 5 base lines, Spear catch 1-5 SQL / 1-3 spoofs, VM uptime 60 s, every decoded cache gives 1 of every
+  VM token, info modifiers only once unlocked, ls filters tree, demo wording out of intro/tutorial-complete.
+
+## Playthrough notes pass 2 (2026-10-20)
+- Tutorial: page titles from `Tutorial.STEP_TITLES` (enum names kept old counts), PHISH_SPEAR_INFO retired from
+  TUTORIAL_ORDER, UPLOAD_PARENTS_CC moved before the apt step, Parsing step says 'cd ..' then 'cd parsing'
+  (Cracking does it in one), 1 VM token of the skill when the Parse / Crack / Match / Phish / Compile / Decode
+  steps come up (`_grant_step_token`, saved token_steps_granted), post-complete line points at 'flow' and
+  AVAILABLE TO RUN.
+- **VM cache** (id 357, items/cache_data/vm_cache.tres, not parsable) replaces 1-of-every-token per cache:
+  20% from every other cache (first tutorial Student cache always), decoding one = 5 lines x 50% at 1-3 of a
+  random VM token (~4.8 tokens per VM cache). Decoding.VM_CACHE_* / roll_vm_cache.
+- Balance: T1 basic upgrade costs x3 (gen_upgrades BASIC_TIER_MULT; only T1 costs merged), T1 basic upload goal
+  300, upload 15 s (T1-T3) / rares 45 s, Spear SQL 1-2 / spoofs 1-2, Decoding Intel L5 / Skim L15, cache XP x3
+  (Cache 150, Skim 75, Deep 300).
+- Text: rare item descriptions point at 'unlock' in Hacking, compile -mod description rewritten.
+- UI: decoding DROPS / RARE two-line label, apt bulk installs as a cascade of per-package bars, ssh accepts
+  '-process' and singular/plural, vm show/hide/kill -a, AVAILABLE TO RUN < > pages unlocked tiers, hacking
+  cards list CACHE LOOT (Decoding.get_drop_table).
+- Bugs: header "+N xp" popup only on the skill that earned it (root view shows it on that skill's card, so VMs
+  light up their own skills); a multi-hack that runs out of payloads now banks the hacks already won.
+- Hacking T1 capstone Clean Exit -> **Second Wind** (hacking.second_wind): each win in a multi-hack run restores 25% of
+  max anonymity (anonymity already carries over between fights; reset only in setup()). Old saves: Upgrades.RENAMED
+  maps clean_exit installs to second_wind. Test: tools/tests/hackcap.
+
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
 2. ~~Game-loop chart~~ DONE 2026-10-19 (see "Flow chart node"; `flow` + recipe chart in `info <skill> <process>`).
