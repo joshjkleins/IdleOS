@@ -24,6 +24,10 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
     tutorial window). Tests: tools/tests/oldsave2 with olddemo_save.json (Oct 8 demo) and demonf_save.json
     (demo-nextfest v2: packaged items start uploading, Heat Sink installs are dropped), democut.
 - All DEV flags OFF.
+- 2026-10-21 port from cdd c122b18: skills run from any directory (+ $PATH tutorial flavor, which / ls /usr/local/bin
+  easter egg), Tab auto-complete (CommandRegistry; DEMO: 'unlock' completes demo targets only), 'ls' partial-name
+  fix, hacking console history fix, defrag from anywhere, Whaling text. Not ported (balance): drop rates, SQL/spoofs
+  out of caches, intel rework, mod values, payload reset mod, VM Snapshot, Deep Scan +15%, first-time rare.
 
 ## Demo branch: demo-nextfest (Steam Next Fest demo, live 2026-10-19)
 - The live demo is built from `demo-nextfest`. Demo hotfixes go there (export + upload to the demo app); if the

@@ -333,7 +333,16 @@ func apply_effects(id: String = "") -> void:
 		Signals.phishing_lines_increase_upgrade_while_running()
 
 func get_overheat_clear_temp() -> float:
-	return BASE_OVERHEAT_CLEAR + cur("system.thermal_paste")
+	return BASE_OVERHEAT_CLEAR # (Thermal Paste used to raise it; replaced by VM Snapshot 2026-10-21)
+
+## Uses one VM token, unless VM Snapshot saves it. Returns true when the token was kept.
+func spend_vm_token(token: ItemData, announce: bool = true) -> bool:
+	if randf() < cur("system.vm_snapshot"):
+		if announce:
+			Signals.system_message_signal.emit("[color=#14B8A6]VM Snapshot: %s kept[/color]" % token.name)
+		return true
+	Inventory.remove_resource(token, 1)
+	return false
 
 func get_defrag_minutes() -> float:
 	return BASE_DEFRAG_MINUTES + cur("system.defrag_duration")
@@ -380,7 +389,7 @@ func save_data() -> Dictionary:
 	return {"format": 2, "installed": installed_counts}
 
 ## Packages that were replaced: an old save's install carries over to the new one
-const RENAMED = {"hacking.clean_exit": "hacking.second_wind"}
+const RENAMED = {"hacking.clean_exit": "hacking.second_wind", "system.thermal_paste": "system.vm_snapshot"}
 
 ## Saves from the old upgrade system (no "format": 2) start fresh at v0.0.
 func load_data(data: Dictionary) -> void:

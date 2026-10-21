@@ -1,0 +1,21 @@
+--- singletons/ContextCommands.gd
++++ singletons/ContextCommands.gd
+@@ -755,7 +757,7 @@ func get_help() -> String:
+ |                                                                     |
+ | PROGRESS                                                            |
+ |   upload                       Upload goal + what's uploading       |
+-|   upload <item> <amount>       Upload items from your inventory     |
++|   upload <item> [amount]       Upload items from your inventory     |
+ |   upload -a                    Upload everything the goal needs     |
+ |   upload cancel <item>         Return queued items to inventory     |
+ |   intel                        Intel on every hacking target        |
+@@ -1266,8 +1270,7 @@ func upload_goal_text() -> String:
+ 		colors.append("#4ec994" if up >= g.amount else ("#e0c068" if g.rare else ""))
+ 	var header = "UPLOAD GOAL  |  TIER %d: %s%s\n" % [tier, Uploads.get_location_name(tier).to_upper(), "  (COMPLETE)" if Uploads.is_tier_complete(tier) else ""]
+ 	var hints = [
+-		["upload <item> <amount>", "upload from your inventory  (ex. upload logs 5)"],
+-		["upload <item>", "upload all the goal still needs"],
++		["upload <item> [amount]", "upload from your inventory; no amount = all the goal still needs  (ex. upload logs 5)"],
+ 		["upload -a", "upload every goal item you have"],
+ 		["upload cancel <item>", "return queued items to your inventory"],
+ 	]

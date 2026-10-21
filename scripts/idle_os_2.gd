@@ -310,7 +310,7 @@ func _on_input_line_text_submitted(new_text):
 		get_tree().quit()
 	
 	var was_running = process_running
-	if !universal_commands(new_text):
+	if !universal_commands(new_text) and !_run_skill_from_anywhere(new_text):
 		match current_context:
 			Context.ROOT:
 				root_commands(new_text)
@@ -336,6 +336,42 @@ func _on_input_line_text_submitted(new_text):
 		main_command = {"context": int(current_context), "text": new_text} # what Offline resumes
 
 	history_index = -1
+
+## Skills are "installed system-wide" (like binaries on $PATH): 'mine -logs', 'parse -footprint=logs',
+## 'crack -password', 'match -credential', 'phish -spear', 'decode -cache', 'compile -school' run from any
+## directory. 'cd <skill>' is still where its process table, info and help live. Returns true when <text>
+## was a skill command typed outside its own directory (it runs there without changing directory).
+const SKILL_BINARIES = {"mine": "MINING", "parse": "PARSING", "crack": "CRACKING", "match": "MATCHING",
+	"phish": "PHISHING", "decode": "DECODING", "compile": "COMPILING", "defrag": "DEFRAGGING"}
+func _run_skill_from_anywhere(text: String) -> bool:
+	var t = text.to_lower().strip_edges()
+	var verb = t.split(" ", false)[0] if t != "" else ""
+	if !SKILL_BINARIES.has(verb) or t == verb:
+		return false
+	var ctx = Context[SKILL_BINARIES[verb]]
+	if current_context == ctx or current_context == Context.HACKING:
+		return false # in its own directory the skill's handler runs as before
+	match ctx:
+		Context.MINING: mining_commands(t)
+		Context.PARSING: log_parsing_commands(t)
+		Context.CRACKING: password_unscramble_commands(t)
+		Context.MATCHING: cred_matching_commands(t)
+		Context.PHISHING: phishing_commands(t)
+		Context.DECODING: cache_decrypting_commands(t)
+		Context.COMPILING: compiling_commands(t)
+		Context.DEFRAGGING: defragging_commands(t)
+	return true
+
+## 'which <command>': where a skill binary lives
+func which_text(arg: String) -> String:
+	var verb = arg.strip_edges().split(" ", false)[0] if arg.strip_edges() != "" else ""
+	if verb == "":
+		return "usage: which <command>  [color=#666666]ex. which mine[/color]"
+	if SKILL_BINARIES.has(verb):
+		return "/usr/local/bin/" + verb
+	if verb in ["hack"]:
+		return "/opt/idleos/hacking/hack  [color=#666666](runs inside the Hacking module: cd hacking)[/color]"
+	return "which: no %s in (/usr/local/bin:/usr/bin:/bin)" % verb
 
 #return text before command
 func get_context_lead():
@@ -466,6 +502,12 @@ func universal_commands(text):
 		return true
 	if text == "vm" or text.begins_with("vm "):
 		handle_vm_commands(text)
+		return true
+	if text.begins_with("which"):
+		add_line(which_text(text.trim_prefix("which")))
+		return true
+	if text == "ls /usr/local/bin" or text == "ls /usr/local/bin/":
+		add_line("  ".join(SKILL_BINARIES.keys()) + "  [color=#666666](every skill runs from any directory; 'cd <skill>' shows its processes)[/color]")
 		return true
 	if text == "trap" or text.begins_with("trap "):
 		add_line(Phishing.trap_command_text(text.trim_prefix("trap")))
@@ -844,10 +886,13 @@ func handle_cd_commands(text):
 #Root context commands
 func root_commands(text):
 	text = text.to_lower().strip_edges()
-	if text == "overclock":
+	if text.begins_with("hack ") or text == "hack":
+		add_line("Hacking runs in its own module. Go there with 'cd hacking'.")
+	elif text in ["overclock", "overclock -kill", "overclock kill"] and !process_running:
 		add_line("Overclocking requires a process running in the main terminal (not VM window).")
 	else:
-		add_line("Command not found")
+		# a process started from root can be overclocked / given a modifier from here too
+		_handle_process_commands(text, "Stopping after the current cycle...")
 
 func return_to_root():
 	header.update()
@@ -1299,7 +1344,7 @@ func handle_vm_token_commands(text):
 		if !check.ok:
 			add_line(check.message)
 			return
-		Inventory.remove_resource(target_process.vm_token, 1)
+		Upgrades.spend_vm_token(target_process.vm_token)
 		new_window = target_process.create_vm_window(target_minor_process, true, check.arg)
 	
 	elif target_process == Parsing:
@@ -1312,7 +1357,7 @@ func handle_vm_token_commands(text):
 		if parsed_cmd.message != "":
 			add_line(parsed_cmd.message)
 		
-		Inventory.remove_resource(target_process.vm_token, 1)
+		Upgrades.spend_vm_token(target_process.vm_token)
 		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse, parsed_cmd.target)
 	
 	elif target_process == Compiling:
@@ -1322,7 +1367,7 @@ func handle_vm_token_commands(text):
 				add_line(check.message)
 				return
 			var item = check.item
-			Inventory.remove_resource(target_process.vm_token, 1)
+			Upgrades.spend_vm_token(target_process.vm_token)
 			new_window = target_process.create_vm_window(target_minor_process, item)
 		else:
 			var missing = false
@@ -1333,7 +1378,7 @@ func handle_vm_token_commands(text):
 			if missing:
 				return
 			
-			Inventory.remove_resource(target_process.vm_token, 1)
+			Upgrades.spend_vm_token(target_process.vm_token)
 			new_window = target_process.create_vm_window(target_minor_process)
 	
 	elif target_process == Cracking:
@@ -1373,7 +1418,7 @@ func handle_vm_token_commands(text):
 				return
 			#start_cracking(target_minor_process)
 		
-		Inventory.remove_resource(target_process.vm_token, 1)
+		Upgrades.spend_vm_token(target_process.vm_token)
 		new_window = target_process.create_vm_window(target_minor_process, use_item, create_item)
 			
 	elif target_process == Phishing: # ssh phishing spear bait=logs
@@ -1384,10 +1429,10 @@ func handle_vm_token_commands(text):
 		if target_minor_process == Phishing.TRAP:
 			add_line("Traps don't need a VM: set one with 'phish -trap', it fills on its own.")
 			return
-		Inventory.remove_resource(target_process.vm_token, 1)
+		Upgrades.spend_vm_token(target_process.vm_token)
 		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait, parsed_bait.target)
 	else:
-		Inventory.remove_resource(target_process.vm_token, 1)
+		Upgrades.spend_vm_token(target_process.vm_token)
 		new_window = target_process.create_vm_window(target_minor_process, true)
 	
 	if new_window:
@@ -2383,17 +2428,7 @@ func _input(event):
 		if upload_awaiting_player_input and awaiting_player_input and event.keycode == KEY_ENTER:
 			finish_player_uploaded_proper_item()
 		if event.keycode == KEY_TAB:
-			#var completion
-			#if PLAYER_TABBED == 0:
-				#SAVED_LAST_SUBMITTED = input_line.text
-				#completion = CommandRegistry.get_completions(input_line.text, PLAYER_TABBED, get_context_name_string(current_context))
-			#else:
-				#if SAVED_LAST_SUBMITTED == "":
-					#SAVED_LAST_SUBMITTED = input_line.text
-				#completion = CommandRegistry.get_completions(SAVED_LAST_SUBMITTED, PLAYER_TABBED, get_context_name_string(current_context))
-			#input_line.text = completion
-			#input_line.caret_column = input_line.text.length()
-			#PLAYER_TABBED += 1
+			_tab_complete()
 			get_viewport().set_input_as_handled()
 			return
 		if event.keycode == KEY_BACKSPACE:
@@ -2404,6 +2439,23 @@ func _input(event):
 				_navigate_history(-1)
 			elif event.keycode == Key.KEY_DOWN:
 				_navigate_history(1)
+
+## Tab: auto-complete the input line (CommandRegistry); the Hacking console has its own input box
+func _tab_complete() -> void:
+	var in_hack = current_context == Context.HACKING
+	var line: LineEdit = hacking.player_hacking_box.input_line if in_hack else input_line
+	if line == null or !accepting_player_inputs and !in_hack:
+		return
+	var r = CommandRegistry.complete(line.text, in_hack)
+	if r.text != line.text:
+		line.text = r.text
+		line.caret_column = line.text.length()
+	elif !r.options.is_empty():
+		var t = CommandRegistry.options_text(r.options)
+		if in_hack:
+			hacking.player_hacking_box.add_line(t)
+		else:
+			add_line(t)
 
 #command history functionality
 func _navigate_history(delta: int):

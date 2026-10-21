@@ -634,7 +634,7 @@ func get_hack_target_info(location: Dictionary):
 		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
 		return_text += "\t" + pad_text(counter_atk_text, pad_text_length) + pad_text(counter_spd_text, pad_text_length) + pad_text(exp_text, pad_text_length) + "\n"
 		var reboot_text = "[font_size=12]Firewall reboot: %ds[/font_size]" % int(tar.get("firewall reboot", 10))
-		var intel_text = "[font_size=12]Intel weakens: %s (up to %d%%)[/font_size]" % [Decoding.intel_stat(tar), roundi(float(tar.get("intel cap", Decoding.INTEL_CAP_RATIO)) * 100)]
+		var intel_text = "[font_size=12]Intel: up to -10% on every stat[/font_size]"
 		return_text += "\t" + pad_text(reboot_text, pad_text_length) + intel_text + "\n"
 		return_text += "\n"
 		
@@ -735,6 +735,8 @@ func get_help() -> String:
 |                                                                     |
 | SKILLS / TRAVERSAL                                                  |
 |   cd <skill>                   Navigate to a skill                  |
+|   mine -logs, crack ...        Skills run from any directory        |
+|   Tab                          Auto-complete a command              |
 |   cd ..                        Return to root                       |
 |   tree                         Display skill hierarchy              |
 |   flow                         Chart of the game loop               |
@@ -1031,6 +1033,8 @@ func returned_to_root() -> String:
 |                                                                    |
 | SKILLS / TRAVERSAL                                                 |
 |   cd <skill>                   Navigate to a skill                 |
+|   mine -logs, crack ...        Skills run from any directory       |
+|   Tab                          Auto-complete a command             |
 |   info                         Display additional skill info       |
 |                                                                    |
 | SYSTEM                                                             |

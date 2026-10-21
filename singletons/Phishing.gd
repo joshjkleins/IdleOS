@@ -106,7 +106,7 @@ var WHALING = {
 	"command": "phish -whale",
 	"display command": "phish -whale [bait=<item>]",
 	"example commands": [
-		{ 'cmd': 'phish -whale', 'description': 'Every line goes onto one whale (more lines = faster reel)' },
+		{ 'cmd': 'phish -whale', 'description': 'All lines on one whale: wait, bite roll, then a reel split across your lines for a bundle of 10-24 SQL / Spoofs' },
 		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a Mining item: bite chance up, bundle doubled' },
 	],
 	"efficiency": 0.4,
@@ -135,7 +135,7 @@ var WHALING = {
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 15 },
 	],
 	"resource amount gained": 1,
-	"description": "Hooks one big target with every line: slow, but each whale lands a bundle of 10-24 SQL Injectors and Packet Spoofs, and sometimes a one-time exploit item.",
+	"description": "One big catch at a time. All your lines go on a single whale: cast, wait while it circles (30-60s), then it bites or slips away (bite chance = efficiency). A bite starts the reel: 2 minutes split across your lines, so more lines reel faster. A landed whale is a bundle of 10-24 items, mostly SQL Injectors (85%) with some Packet Spoofs (15%), plus a 5% chance of a one-time item. Bait (10 of a Mining item per whale) raises the bite chance and doubles the bundle.",
 	"efficiency description": "Chance the whale bites",
 	"signal": whale_cycle_completed
 }

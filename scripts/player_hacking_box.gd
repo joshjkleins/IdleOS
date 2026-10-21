@@ -33,6 +33,7 @@ func _on_input_line_text_submitted(new_text):
 	input_line.clear()
 	add_line(">" + new_text)
 	command_history.append(new_text)
+	history_index = -1 # a new command resets the up/down position (like the main terminal)
 	var text = new_text.to_lower().strip_edges()
 	command_entered.emit(text)
 

@@ -1,0 +1,11 @@
+--- singletons/Upgrades.gd
++++ singletons/Upgrades.gd
+@@ -23,7 +23,7 @@ const DEV_UNLOCK_ALL_TIERS := false
+ const WIRED_GROUPS := ["System", "Mining", "Parsing", "Cracking", "Matching", "Phishing", "Decoding", "Compiling", "Hacking"]
+ 
+ 
+-const BASE_COOLING := -0.1          # C per cooling tick before upgrades
++const BASE_COOLING := -0.2          # C per cooling tick before upgrades (2026-10-20 demo playtest: was -0.1)
+ const BASE_VM_WINDOWS := 1
+ const BASE_OVERHEAT_CLEAR := 80.0   # overheat clears at this temp (Thermal Paste raises it)
+ const BASE_DEFRAG_MINUTES := 10.0   # Defrag Duration raises it

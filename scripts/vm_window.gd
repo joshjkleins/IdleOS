@@ -90,8 +90,8 @@ func _update_status() -> void:
 
 func _on_run_timer_timeout() -> void:
 	if repeat and Inventory.get_amount(token) > 0:
-		tokens_used += 1
-		Inventory.remove_resource(token, 1)
+		if !Upgrades.spend_vm_token(token, false): # VM Snapshot can keep it (silent on renewals)
+			tokens_used += 1
 		run_timer.start(_token_duration())
 	else:
 		stopping = true

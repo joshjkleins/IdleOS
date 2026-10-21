@@ -1,0 +1,11 @@
+--- scripts/idle_os_2.gd
++++ scripts/idle_os_2.gd
+@@ -1891,7 +1936,7 @@ func start_matching(minor_process):
+ func cache_decrypting_commands(text):
+ 	text = text.to_lower().strip_edges()
+ 	if text.begins_with("decode -package"):
+-		add_line("Packaging is gone: upload straight from your inventory with 'upload <item> <amount>'. Type 'upload' for the goal.")
++		add_line("Packaging is gone: upload straight from your inventory with 'upload <item> [amount]'. Type 'upload' for the goal.")
+ 		return
+ 
+ 	for ms in Decoding.minor_processes:
