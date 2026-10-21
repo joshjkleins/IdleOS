@@ -279,8 +279,8 @@ func handle_unlock_command(name: String) -> void:
 				continue
 			for tg in Stats.hacking_targets[loc].get("targets", []):
 				var r = Stats.get_access_recipe(tg)
-				if tg.get("unlocked", false) or r.is_empty() or r.rare == null:
-					continue
+				if tg.get("unlocked", false) or r.is_empty() or r.rare == null or !DemoRules.is_demo_target(Stats.target_key(tg)):
+					continue # DEMO: only the demo's targets
 				var ok = Inventory.get_amount(r.rare) >= int(r.rare_amount) and Inventory.get_amount(r.payload) >= int(r.payload_amount)
 				rows.append("  [color=%s]%s[/color] %d/%d %s  ·  %d/%d %s" % ["#33ff33" if ok else "#888888", ("unlock " + tg.name.to_lower()).rpad(28), Inventory.get_amount(r.rare), int(r.rare_amount), r.rare.name, Inventory.get_amount(r.payload), int(r.payload_amount), r.payload.name])
 		player_hacking_box.add_line("LOCKED TARGETS\n" + ("\n".join(rows) if !rows.is_empty() else "  [color=#888888]Nothing to unlock right now.[/color]"))
@@ -310,7 +310,7 @@ func handle_view_command(text):
 		player_hacking_box.add_line("Not a valid location.")
 		return
 	if !target.get("unlocked", false):
-		player_hacking_box.add_line("Location not unlocked.")
+		player_hacking_box.add_line(DemoRules.full_game_text("The " + str(target.get("name", "")) + " location")) # DEMO
 		return
 	if text.contains("-hard") and !target.get("hard mode unlocked", false):
 		player_hacking_box.add_line("Hard mode for location not unlocked.")

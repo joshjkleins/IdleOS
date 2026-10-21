@@ -3,6 +3,28 @@
 Read this first. It covers how we work, how to test, the upgrade system, and what's left.
 Last updated: 2026-10-18, after the Phishing upgrade step.
 
+## THIS BRANCH: demo-nextfest-2 (Next Fest demo, re-cut from cdd 270aef9 on 2026-10-20)
+- Replaces demo-nextfest. Full game work continues on `cdd`; shared fixes go to cdd first, then here.
+- Everything the demo keeps is in `scripts/demo_rules.gd` (DemoRules); call sites are marked DEMO:
+  - Exp.MAX_LEVEL / stats MAX_LEVEL = LEVEL_CAP 10 (+ Exp._clamp_to_level_cap for older saves).
+  - Targets: School/Student, School/Administrator (easy; 'unlock administrator' in Hacking: 2 Parents credit cards
+    + 4 School payloads), School/Student (Hard) (5 Student wins). stats.gd `_enforce_demo_unlocks`, `buy_access` /
+    `get_unlock_hint` / `get_location_unlock_hint` say full game, record_win only opens demo hard modes,
+    `_on_tier_completed` returns early, `_demo_hard_beaten`. hacking.gd 'unlock' lists demo targets only.
+  - Upload goal: 300 of each School basic (DemoRules.UPLOAD_BASIC_GOAL) + 3 Parents credit cards + 3 Falsified
+    transcript databases (Uploads.get_tier_rares filtered to demo targets), Uploads.MAX_TIER 1.
+  - Upgrades: Tier 1 slots 1-5 per skill (speed x3, efficiency x2; Hacking: damage, firewall, bandwidth x2, max
+    bandwidth paid in an Admin cache via COST_OVERRIDES), System 1-3. `Upgrades.demo_hidden` / `demo_tier_size` feed
+    the apt "FULL GAME +N more" line and the x/5 bars. No capstones, so overclock / modifiers say FULL GAME.
+  - HackingMods.BASE_MOD_SLOTS = 2. Student (Hard) 290 / 30 / 18 / 17 (tools/tests/demohard, balance/demo_hard_tune.py).
+  - idle_os_2: `_demo_send_off` on Uploads.tier_completed (also after the offline download), 'wishlist',
+    'welcome' / 'demo' replays the send-off once done, DEV_ITEM_COMMANDS off, FULL GAME texts for locked processes.
+  - ContextCommands: FULL GAME statuses, apt texts, demo welcome. Tutorial: demo tutorial-complete text.
+  - SaveManager.SAVE_VERSION 3: saves < 3 with tutorial progress get a WELCOME BACK note (packaging gone, 'unlock',
+    tutorial window). Tests: tools/tests/oldsave2 with olddemo_save.json (Oct 8 demo) and demonf_save.json
+    (demo-nextfest v2: packaged items start uploading, Heat Sink installs are dropped), democut.
+- All DEV flags OFF.
+
 ## Demo branch: demo-nextfest (Steam Next Fest demo, live 2026-10-19)
 - The live demo is built from `demo-nextfest`. Demo hotfixes go there (export + upload to the demo app); if the
   bug is shared, fix it on cdd too. The demo cut lives in `scripts/demo_rules.gd` (DemoRules, demo branch only):

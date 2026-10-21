@@ -225,7 +225,7 @@ func complete_event(event: TutorialEvent) -> void:
 		message += "[color=green]════════════════════════════════[/color]\n\n"
 		
 		message += "Congrats on completing the tutorial!\n"
-		message += "\nFrom here, you're on your own. Work your way through every location: breach its targets, upload what it asks for, and keep upgrading this OS.\n[color=#33ff33]Do not let us down.[/color]"
+		message += "\nFrom here, you're on your own. Finish the School upload goal ('upload'): unlock the Administrator in Hacking ('unlock'), keep the hacks going and keep upgrading this OS. Then see if you can take down the Student (Hard).\n[color=#33ff33]Do not let us down.[/color]" # DEMO
 		message += "\n\nFor help on what to do next, use the 'flow' command to see a flow chart of the steps, and check the AVAILABLE TO RUN section in the side panel. Remember, hacking is the most efficient way to progress."
 		message += "\n\nThoughts or ideas? Come hang out in the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)"
 	else:
@@ -422,11 +422,11 @@ var upload_baseline: Dictionary = {}
 
 ## Returning players: old saves (version < 2) with tutorial progress get a one-time note on load.
 func should_show_old_save_notice() -> bool:
-	return SaveManager.loaded_version < 2 and !completed_events.is_empty()
+	return SaveManager.loaded_version < 3 and !completed_events.is_empty() # DEMO: saves from the Oct demos
 
 func old_save_notice() -> String:
 	var m := "[color=yellow]WELCOME BACK[/color]\n"
-	m += "Your save is from an earlier version of IdleOS. Since then the tutorial has been rebuilt and uploads now unlock new locations.\n"
+	m += "Your save is from an earlier version of the demo. Items now upload straight from your inventory ('upload <item> [amount]', no more packaging), targets unlock in Hacking ('unlock'), and the tutorial has its own window.\n" # DEMO
 	m += "Want a refresher? Type 'tutorial reset' to restart the tutorial. [color=#666666]Your items, levels and upgrades stay as they are.[/color]"
 	return m
 

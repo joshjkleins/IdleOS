@@ -63,7 +63,7 @@ var SPEAR = {
 	"experience": 0,
 	"experience per level": 60,
 	"command": "phish -spear",
-	"display command": "phish -spear (bait=<item>)",
+	"display command": "phish -spear [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -spear', 'description': 'Cast every line' },
 		{ 'cmd': 'phish -spear bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
@@ -104,7 +104,7 @@ var WHALING = {
 	"experience": 0,
 	"experience per level": 900, # per whale landed (a bundle of ~14 items)
 	"command": "phish -whale",
-	"display command": "phish -whale (bait=<item>)",
+	"display command": "phish -whale [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -whale', 'description': 'Every line goes onto one whale (more lines = faster reel)' },
 		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a Mining item: bite chance up, bundle doubled' },
@@ -148,7 +148,7 @@ var SMISH = {
 	"experience": 0,
 	"experience per level": 350, # per reply
 	"command": "phish -smish",
-	"display command": "phish -smish (target=<target>) (bait=<item>)",
+	"display command": "phish -smish [target=<target>] [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -smish', 'description': 'Replies become intel on a random unlocked target that is not maxed' },
 		{ 'cmd': 'phish -smish target=student', 'description': 'Replies become intel on the Student (add "hard" for hard mode)' },
@@ -187,7 +187,7 @@ var TRAP = {
 	"experience": 0,
 	"experience per level": 24000, # for a full trap (scales with how full it was)
 	"command": "phish -trap",
-	"display command": "phish -trap (bait=<item>)",
+	"display command": "phish -trap [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -trap', 'description': 'Sets a watering-hole trap (1 min). Shows its status once set' },
 		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a Mining item: haul doubled, rare chance up' },
@@ -228,7 +228,7 @@ var MOD = {
 	"experience": 0,
 	"experience per level": 1000,
 	"command": "phish -mod",
-	"display command": "phish -mod (bait=<item>)",
+	"display command": "phish -mod [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -mod', 'description': 'Cast every line' },
 		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
