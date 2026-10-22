@@ -718,7 +718,7 @@ func universal_commands(text):
 			add_line(DemoRules.open_wishlist())
 			return true
 		"discord -c":
-			var discord_link = "https://discord.gg/bWFwUsF9a"
+			var discord_link = ContextCommands.DISCORD_LINK
 			DisplayServer.clipboard_set(discord_link)
 			add_line("[color=green]Discord invite copied to clipboard.[/color]")
 			return true

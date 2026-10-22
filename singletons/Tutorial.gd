@@ -227,7 +227,7 @@ func complete_event(event: TutorialEvent) -> void:
 		message += "Congrats on completing the tutorial!\n"
 		message += "\nFrom here, you're on your own. Finish the School upload goal ('upload'): unlock the Administrator in Hacking ('unlock'), keep the hacks going and keep upgrading this OS. Then see if you can take down the Student (Hard).\n[color=#33ff33]Do not let us down.[/color]" # DEMO
 		message += "\n\nFor help on what to do next, use the 'flow' command to see a flow chart of the steps, and check the AVAILABLE TO RUN section in the side panel. Remember, hacking is the most efficient way to progress."
-		message += "\n\nThoughts or ideas? Come hang out in the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)"
+		message += "\n\nThoughts or ideas? Come hang out in the Discord: " + ContextCommands.DISCORD_LINK + "  ('discord -c' copies it)"
 	else:
 		var next_task := get_current_task()
 		
@@ -304,7 +304,7 @@ func test_tutorial_complete():
 		
 		message += "Congrats on completing the tutorial!\n"
 		message += "\nFrom here, you're on your own. Explore more processes, upgrade to better versions, complete the School uploads ('upload'), and try your hand at the Student (Hard)."
-		message += "\n\nThoughts or ideas? Come hang out in the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)"
+		message += "\n\nThoughts or ideas? Come hang out in the Discord: " + ContextCommands.DISCORD_LINK + "  ('discord -c' copies it)"
 	else:
 		var next_task := get_current_task()
 		

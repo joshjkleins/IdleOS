@@ -1,5 +1,8 @@
 extends Node
 
+## the one Discord invite used everywhere (welcome, discord, discord -c, tutorial end). Never-expiring invite.
+const DISCORD_LINK := "https://discord.gg/eaAqGG5FPZ"
+
 func all_commands() -> String:
 	var cmd_text = "MODULES\n"
 	cmd_text += "[font_size=12]" + tab_space() + pad_text("load [module]", 20) +  "Loads specific module [color=888888]example usage: load mining[/color][/font_size]\n"
@@ -1138,14 +1141,14 @@ and the Student (Hard) once you've earned it. Demo goal: complete the School upl
 Progress carries over to the full game.
 
 Enjoying it? Type [color=#e3b341]wishlist[/color] to open the IdleOS store page in Steam, where you can add it to your wishlist.
-Thoughts or suggestions? Join the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)
+Thoughts or suggestions? Join the Discord: """ + DISCORD_LINK + """  ('discord -c' copies it)
 
 To view this message again, use the 'welcome' command.
 """
 
 func discord_message():
 	return """
-Discord link: https://discord.gg/XnrH7zrdb
+Discord link: """ + DISCORD_LINK + """
 
 To copy the discord link to your clipboard use 'discord -c'
 """
