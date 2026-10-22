@@ -1,0 +1,261 @@
+extends Node
+
+## Mod slots: 1 to start, +1 per tier from the 'hacking.mod_slots' upgrade (one level per tier), max 7.
+const BASE_MOD_SLOTS := 1
+const MAX_MOD_SLOTS := 7
+var max_mods: int = BASE_MOD_SLOTS
+
+## recompute slots from the upgrade (called on load and when an upgrade is installed)
+func refresh_slots() -> void:
+	var extra = 0
+	# looked up at runtime: a direct 'Upgrades' reference makes a script cycle (Upgrades -> Items -> ItemData -> HackingMods)
+	var up = get_node_or_null("/root/Upgrades")
+	var p = up.get_package_info("hacking.mod_slots") if up else null
+	if p != null:
+		extra = int(p.current)
+	max_mods = clamp(BASE_MOD_SLOTS + extra, 1, MAX_MOD_SLOTS)
+
+enum MOD_TYPE {
+	DAMAGE,               #logs | parents CC
+	EFFICIENCY,           #pw, e-pw
+	FIREWALL_REDUCTION,   #usernames
+	FIREWALL_DAMAGE,      #IP address
+	RESTORE,              #packet spoof
+	BAND_RATE,            #Falsified transcript-style rares (payloads moved to COUNTER_RESET)
+	ATTACK_SPEED,         #credentials
+	DAMAGE_REDUCTION,     #student cache
+	COUNTER_SLOW,         #sql injector
+	NONE,
+	# equippable mods (Phishing Mod / Corruption drops, 3 per tier; values are % so they stay strong all game)
+	SQL_BOOST,
+	FW_BREAK_SLOW,
+	BW_PCT_REGEN,
+	FW_NO_REBOOT,
+	DAMAGE_PCT,
+	CRIT_CHANCE_MULT,
+	CRIT_DAMAGE_MULT,
+	SPOOF_HEAL_MULT,
+	SPOOF_FREE,
+	IGNORE_COUNTERS,
+	FW_PCT_HIT,
+	COUNTER_SLOW_PCT,
+	STEALTH_START,
+	SPOOF_SPEED,
+	EXPLOIT_FULL,
+	FW_BREAK_INTEGRITY,
+	COUNTER_REFLECT,
+	COLD_BOOT,
+	COUNTER_RESET,        #payloads (2026-10-21): chance per SQL attack to reset the enemy's countermeasure bar
+}
+
+
+## Equippable mods: name, effect, value format (pct = +X%, x = xN, n = count, s = seconds, on = no value)
+const EQUIP_INFO = {
+	MOD_TYPE.SQL_BOOST: ["SQL Booster", "SQL Injectors attack faster", "pct"],
+	MOD_TYPE.FW_BREAK_SLOW: ["Shatter Protocol", "Breaking the firewall slows enemy countermeasures by an extra 25% (75% total).", "pct"],
+	MOD_TYPE.BW_PCT_REGEN: ["Burst Buffer", "Regenerates an extra 20% of max bandwidth per second.", "pct"],
+	MOD_TYPE.FW_NO_REBOOT: ["Firmware Brick", "Once the firewall is broken it never reboots for the rest of the hack.", "on"],
+	MOD_TYPE.DAMAGE_PCT: ["Payload Amplifier", "SQL Injectors deal 25% more damage.", "pct"],
+	MOD_TYPE.CRIT_CHANCE_MULT: ["Vuln Scanner", "Doubles your crit chance.", "x"],
+	MOD_TYPE.CRIT_DAMAGE_MULT: ["Critical Overflow", "Crits deal double again: x4 instead of x2.", "x"],
+	MOD_TYPE.SPOOF_HEAL_MULT: ["Proxy Chain", "Packet Spoofs heal double.", "x"],
+	MOD_TYPE.SPOOF_FREE: ["Ghost Packet", "Packet Spoofs cost no bandwidth.", "on"],
+	MOD_TYPE.IGNORE_COUNTERS: ["Decoy Traffic", "The first 3 countermeasures of each hack miss.", "n"],
+	MOD_TYPE.FW_PCT_HIT: ["Packet Shredder", "Every hit also deals 10% of the target's max firewall.", "pct"],
+	MOD_TYPE.COUNTER_SLOW_PCT: ["Latency Injector", "Enemy countermeasures are 20% slower.", "pct"],
+	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 10 seconds of each hack go unnoticed: no countermeasures.", "s"],
+	MOD_TYPE.SPOOF_SPEED: ["IP Rotator", "Packet Spoofs fill 80% faster.", "pct"],
+	MOD_TYPE.EXPLOIT_FULL: ["Zero Hour", "The EXPLOIT meter starts full at the start of each hack.", "on"],
+	MOD_TYPE.FW_BREAK_INTEGRITY: ["Cascade", "Breaking the firewall also deals 15% of the target's max integrity.", "pct"],
+	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
+	MOD_TYPE.COLD_BOOT: ["Cold Boot", "Overclock adds no extra heat, and overheating doesn't speed up the enemy.", "on"],
+}
+
+var current_mods = {}
+
+## Every equipped mod adds bandwidth cost to each SQL Injector attack. Compiled mods cost by the tier of the item
+## they were made from (+1 per tier: older mods are the cheap option); equippable mods always cost +2.
+## A full loadout can cost more than max bandwidth: the attack then fires once the bar is full (a build trade-off).
+const MOD_BW_COST_BY_TIER = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7}
+const EQUIP_BW_COST := 2
+
+func get_mod_bandwidth_cost(mod) -> int:
+	if !current_mods.has(mod):
+		return 0
+	if EQUIP_INFO.has(mod):
+		return EQUIP_BW_COST
+	return int(MOD_BW_COST_BY_TIER.get(int(current_mods[mod].get("tier", 1)), 2))
+
+## total extra SQL Injector bandwidth cost from all equipped mods
+func get_bandwidth_cost() -> int:
+	var total = 0
+	for m in current_mods:
+		total += get_mod_bandwidth_cost(m)
+	return total
+
+func _ready():
+	refresh_slots.call_deferred() # Upgrades may load after this autoload
+
+func get_mod_description(mod: MOD_TYPE) -> String:
+	match mod:
+		MOD_TYPE.DAMAGE:
+			return "Increases damage of SQL Injectors"
+		MOD_TYPE.EFFICIENCY:
+			return "Increases efficiency"
+		MOD_TYPE.FIREWALL_REDUCTION:
+			return "Reduces target firewall by flat amount"
+		MOD_TYPE.FIREWALL_DAMAGE:
+			return "Increases firewall damage"
+		MOD_TYPE.RESTORE:
+			return "Packet Spoofs restore more: +X% of max anonymity"
+		MOD_TYPE.BAND_RATE:
+			return "Increases bandwith restore amount"
+		MOD_TYPE.ATTACK_SPEED:
+			return "Increases attack speed"
+		MOD_TYPE.DAMAGE_REDUCTION:
+			return "Gives flat countermeasures reduction"
+		MOD_TYPE.COUNTER_SLOW:
+			return "Slows counterattack measures"
+		MOD_TYPE.COUNTER_RESET:
+			return "Each SQL Injector attack has a chance to reset the target's countermeasure bar"
+		_:
+			return EQUIP_INFO[mod][1] if EQUIP_INFO.has(mod) else ""
+
+func get_mod_name(mod: MOD_TYPE) -> String:
+	match mod:
+		MOD_TYPE.DAMAGE:
+			return "SQL Damage"
+		MOD_TYPE.EFFICIENCY:
+			return "Efficiency"
+		MOD_TYPE.FIREWALL_REDUCTION:
+			return "Target Firewall Reduction"
+		MOD_TYPE.FIREWALL_DAMAGE:
+			return "SQL Firewall Damage"
+		MOD_TYPE.RESTORE:
+			return "Packet Spoof Amount"
+		MOD_TYPE.BAND_RATE:
+			return "Bandwidth Restore Amount"
+		MOD_TYPE.ATTACK_SPEED:
+			return "SQL Attack Speed"
+		MOD_TYPE.DAMAGE_REDUCTION:
+			return "Countermeasures Flat Reduction"
+		MOD_TYPE.COUNTER_SLOW:
+			return "Countermeasures Slow"
+		MOD_TYPE.COUNTER_RESET:
+			return "Countermeasure Reset"
+		_:
+			return EQUIP_INFO[mod][0] if EQUIP_INFO.has(mod) else ""
+
+
+func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
+	match mod:
+		MOD_TYPE.DAMAGE:
+			return "+" + str(int(value))
+		MOD_TYPE.EFFICIENCY:
+			return "+%s%%" % str(snappedf(value * 100.0, 0.1)).trim_suffix(".0")
+		MOD_TYPE.FIREWALL_REDUCTION:
+			return "-" + str(int(value))
+		MOD_TYPE.FIREWALL_DAMAGE:
+			return "+" + str(int(value))
+		MOD_TYPE.RESTORE:
+			return "+%d%%" % int(value) # percentage points of max anonymity
+		MOD_TYPE.BAND_RATE:
+			return "+" + str(int(value))
+		MOD_TYPE.ATTACK_SPEED:
+			return "+" + "%.f%%" % (value * 100.0)
+		MOD_TYPE.DAMAGE_REDUCTION:
+			return "-" + str(int(value))
+		MOD_TYPE.COUNTER_SLOW:
+			return "-" + "%.f%%" % (value * 100.0)
+		MOD_TYPE.COUNTER_RESET:
+			return "%.f%%" % (value * 100.0)
+		_:
+			if EQUIP_INFO.has(mod):
+				match EQUIP_INFO[mod][2]:
+					"pct": return "+%.f%%" % (value * 100.0)
+					"x": return "x%s" % str(value).trim_suffix(".0")
+					"n": return str(int(value))
+					"s": return "%ds" % int(value)
+				return "on"
+			return str(0)
+
+
+#MOD_TYPE.DAMAGE: {
+	#"duration": 5,
+	#"value": 10,
+#}
+func add_mod(item: ItemData) -> void:
+	if at_max_mods():
+		return
+	
+	var mod = item.hacking_mod_type
+	var mod_value = item.hacking_mod_value
+	var mod_duration = item.hacking_mod_duration
+	current_mods[mod] = {
+		"duration": mod_duration,
+		"value": mod_value,
+		"tier": item.tier, # sets the extra SQL Injector bandwidth cost (MOD_BW_COST_BY_TIER)
+	}
+
+## Compiling's Mod process: one fill adds one hack. Equips the mod on the first fill (needs a free slot),
+## then extends it up to <cap> hacks; a stronger value (Mod Tuning) replaces a weaker one.
+## Returns the mod's hacks after the fill, or 0 when it couldn't be added (no slot).
+func extend_mod(item, value_mult: float, cap: int) -> int: # item: ItemData (untyped: ItemData refers to HackingMods)
+	var mod = item.hacking_mod_type
+	var value = item.hacking_mod_value * value_mult
+	if !current_mods.has(mod):
+		if at_max_mods():
+			return 0
+		current_mods[mod] = {"duration": 1, "value": value, "tier": item.tier}
+	else:
+		var m = current_mods[mod]
+		m.duration = min(max(int(m.duration), cap), int(m.duration) + 1)
+		m.value = max(float(m.value), value)
+	return int(current_mods[mod].duration) # (the caller marks the save dirty: SaveManager here would be a cyclic reference)
+
+func remove_duration() -> void:
+	for mod in current_mods:
+		current_mods[mod].duration -= 1
+		if current_mods[mod].duration <= 0:
+			remove_mod(mod)
+
+func remove_mod(mod: MOD_TYPE) -> void:
+	if has_mod(mod):
+		current_mods.erase(mod)
+
+func has_mod(mod: MOD_TYPE) -> bool:
+	if current_mods.has(mod):
+		return true
+	return false
+
+func at_max_mods() -> bool:
+	if current_mods.size() >= max_mods:
+		return true
+	return false
+
+func get_mod_value(mod: MOD_TYPE):
+	if current_mods.has(mod):
+		return current_mods[mod].value
+	return 0
+
+
+func save_data() -> Dictionary:
+	return {
+		"current_mods": current_mods,
+		"max_mods": max_mods
+	}
+
+func load_data(data: Dictionary) -> void:
+	var loaded_mods: Dictionary = data.get("current_mods", {})
+
+	current_mods.clear()
+
+	for mod_type in loaded_mods:
+		var mod: Dictionary = loaded_mods[mod_type]
+
+		mod["duration"] = int(mod.get("duration", 0))
+		mod["tier"] = int(mod.get("tier", 1))
+
+		current_mods[int(mod_type)] = mod
+
+	refresh_slots() # slots come from upgrades, not the save (mods already equipped are kept)

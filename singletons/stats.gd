@@ -46,8 +46,6 @@ var hacking_targets = {
 				"firewall": 13,
 				"counter": 7,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.STUDENT_CACHE
 			},
@@ -63,8 +61,6 @@ var hacking_targets = {
 				"firewall": 15,
 				"counter": 5,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ADMIN_CACHE
 			},
@@ -80,8 +76,6 @@ var hacking_targets = {
 				"firewall": 26,
 				"counter": 6,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
@@ -97,8 +91,6 @@ var hacking_targets = {
 				"firewall": 19,
 				"counter": 3,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.PRINCIPAL_CACHE
 			},
@@ -114,8 +106,6 @@ var hacking_targets = {
 				"firewall": 21,
 				"counter": 6,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
@@ -225,8 +215,6 @@ var hacking_targets = {
 				"firewall": 25,
 				"counter": 20,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
@@ -242,8 +230,6 @@ var hacking_targets = {
 				"firewall": 31,
 				"counter": 18,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.PARALEGAL_CACHE
 			},
@@ -259,8 +245,6 @@ var hacking_targets = {
 				"firewall": 74,
 				"counter": 22,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
@@ -276,8 +260,6 @@ var hacking_targets = {
 				"firewall": 41,
 				"counter": 8,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.LAWYER_CACHE
 			},
@@ -293,8 +275,6 @@ var hacking_targets = {
 				"firewall": 56,
 				"counter": 21,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.PARTNER_CACHE
 			}
@@ -322,8 +302,6 @@ var hacking_targets = {
 				"firewall": 52,
 				"counter": 40,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.RECEPTIONIST_CACHE
 			},
@@ -339,8 +317,6 @@ var hacking_targets = {
 				"firewall": 63,
 				"counter": 35,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ORDERLY_CACHE
 			},
@@ -356,8 +332,6 @@ var hacking_targets = {
 				"firewall": 143,
 				"counter": 43,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.NURSE_CACHE
 			},
@@ -373,8 +347,6 @@ var hacking_targets = {
 				"firewall": 91,
 				"counter": 17,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.DOCTOR_CACHE
 			},
@@ -390,8 +362,6 @@ var hacking_targets = {
 				"firewall": 106,
 				"counter": 38,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CHIEF_OF_MEDICINE_CACHE
 			}
@@ -419,8 +389,6 @@ var hacking_targets = {
 				"firewall": 93,
 				"counter": 64,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.TELLER_CACHE
 			},
@@ -436,8 +404,6 @@ var hacking_targets = {
 				"firewall": 106,
 				"counter": 58,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.LOAN_OFFICER_CACHE
 			},
@@ -453,8 +419,6 @@ var hacking_targets = {
 				"firewall": 230,
 				"counter": 67,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.BRANCH_MANAGER_CACHE
 			},
@@ -470,8 +434,6 @@ var hacking_targets = {
 				"firewall": 169,
 				"counter": 34,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SECURITY_CACHE
 			},
@@ -487,8 +449,6 @@ var hacking_targets = {
 				"firewall": 188,
 				"counter": 68,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CFO_CACHE
 			}
@@ -516,8 +476,6 @@ var hacking_targets = {
 				"firewall": 135,
 				"counter": 79,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SECRETARY_CACHE
 			},
@@ -533,8 +491,6 @@ var hacking_targets = {
 				"firewall": 155,
 				"counter": 77,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.COP_CACHE
 			},
@@ -550,8 +506,6 @@ var hacking_targets = {
 				"firewall": 349,
 				"counter": 101,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.DETECTIVE_CACHE
 			},
@@ -567,8 +521,6 @@ var hacking_targets = {
 				"firewall": 354,
 				"counter": 118,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SERGEANT_CACHE
 			},
@@ -584,8 +536,6 @@ var hacking_targets = {
 				"firewall": 346,
 				"counter": 162,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CAPTAIN_CACHE
 			}
@@ -613,8 +563,6 @@ var hacking_targets = {
 				"firewall": 198,
 				"counter": 106,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CLERK_CACHE
 			},
@@ -630,8 +578,6 @@ var hacking_targets = {
 				"firewall": 233,
 				"counter": 115,
 				"counter speed": 16.0,
-				"intel stat": "integrity",
-				"intel cap": 0.25, # share of the intel stat full intel removes
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ANALYST_CACHE
 			},
@@ -647,8 +593,6 @@ var hacking_targets = {
 				"firewall": 491,
 				"counter": 125,
 				"counter speed": 16.0,
-				"intel stat": "firewall",
-				"intel cap": 0.35, # share of the intel stat full intel removes
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.AMBASSADOR_CACHE
 			},
@@ -664,8 +608,6 @@ var hacking_targets = {
 				"firewall": 598,
 				"counter": 168,
 				"counter speed": 30.0,
-				"intel stat": "counter speed",
-				"intel cap": 0.45, # share of the intel stat full intel removes
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRESIDENT_CACHE
 			},
@@ -681,8 +623,6 @@ var hacking_targets = {
 				"firewall": 566,
 				"counter": 223,
 				"counter speed": 20.0,
-				"intel stat": "counter",
-				"intel cap": 0.4, # share of the intel stat full intel removes
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.PRESIDENT_CACHE
 			}

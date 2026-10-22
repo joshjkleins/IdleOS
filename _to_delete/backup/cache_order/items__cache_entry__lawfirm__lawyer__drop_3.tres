@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://du5ju72o7antm"]
+
+[ext_resource type="Resource" uid="uid://csylbpyla7x47" path="res://items/resources/Matching/signed_certificate.tres" id="1_66p0b"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_xgdh6"]
+
+[resource]
+script = ExtResource("2_xgdh6")
+item = ExtResource("1_66p0b")
+min_quantity = 25
+max_quantity = 50
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

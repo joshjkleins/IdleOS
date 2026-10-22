@@ -164,6 +164,8 @@ var throttle_left := 0.0      # SQL bandwidth cost halved
 var spoof_boost_left := 0.0   # Packet Spoof x2
 var bw_freeze_left := 0.0     # bandwidth held at max, actions free
 var crits_left := 0           # guaranteed crits
+var _breach_hit := false
+var breach_crit := false      # the first SQL hit after the firewall goes down is a guaranteed crit
 var ghost_left := 0           # countermeasures that miss
 var _exploit_lock := 0.0      # Exploits.LOCKOUT between uses
 var _poison_tick := 0.0
@@ -318,6 +320,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	Exploits.reset_charge() # charge belongs to one hack session
 	active_intel = {}
 	firewall_down = false
+	breach_crit = false
 	_revealed = false
 
 	start_overclock = overclock
@@ -412,10 +415,16 @@ func attack():
 	var M = HackingMods.MOD_TYPE
 	var crit = 1.0
 	var forced_crit = false
+	_breach_hit = false
 	if crits_left > 0:
 		crits_left -= 1
 		crit = 2.0
 		forced_crit = true
+	elif breach_crit:
+		breach_crit = false
+		crit = 2.0
+		forced_crit = true
+		_breach_hit = true
 	elif randf() <= _get_total_efficiency() * (_mod(M.CRIT_CHANCE_MULT) if HackingMods.has_mod(M.CRIT_CHANCE_MULT) else 1.0):
 		crit = 2.0
 	if crit > 1.0 and HackingMods.has_mod(M.CRIT_DAMAGE_MULT):
@@ -452,8 +461,10 @@ func attack():
 	var line = "SQL Injector -> %s  %s" % [target_name, _c("-%d integrity" % actual_dmg, C_INTEG)]
 	if crit > 1:
 		line = _c("CRIT x%d " % int(crit), C_CRIT) + line
-		if forced_crit:
+		if forced_crit and !_breach_hit:
 			line += "  " + _c("(Zero-Day, %d left)" % crits_left, C_EXP)
+		elif _breach_hit:
+			line += "  " + _c("(firewall breach)", C_FW)
 	if blocked > 0:
 		line += "  " + _c("firewall absorbed %d" % blocked, C_FW)
 	if fw_hit > 0:
@@ -627,6 +638,7 @@ func _break_firewall(earned: bool = true) -> void:
 		Exploits.add_charge("firewall")
 		_float(exp_row.bar, "+%d charge" % int(Exploits.CHARGE_GAIN.firewall), C_EXP, 12, 18.0)
 	firewall_down = true
+	breach_crit = true
 	fw_down_left = _fw_down_time()
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
@@ -976,11 +988,17 @@ func _show_intel(i: Dictionary) -> void:
 	_log("INTEL", C_INTEL, "Decoding intel weakens %s: integrity %s -> %s, firewall %s -> %s, counter %s -> %s dmg, counters %d%% slower  %s" % [target_name,
 		_fmt(i.integrity[0]), _fmt(i.integrity[1]), _fmt(i.firewall[0]), _fmt(i.firewall[1]), _fmt(i.counter[0]), _fmt(i.counter[1]), _ipct("counter speed"),
 		_c("(%d hack%s of intel left)" % [left, "" if left == 1 else "s"], C_DIM)])
-	var anchor: Control = firewall_bar
-	var tw = create_tween()
+	# drain both bars like a hit: max stays the real stat, current drops to the intel value
+	var tw = create_tween().set_parallel()
 	tw.tween_property(firewall_bar, "value", float(i.firewall[1]), 0.6)
-	_float(anchor, "INTEL", C_INTEL, 16)
-	_flash(anchor, Color(1.2, 2.0, 1.9), 0.7)
+	tw.tween_property(integ_bar, "value", float(i.integrity[1]), 0.6)
+	var fw_cut = int(i.firewall[0]) - int(i.firewall[1])
+	var in_cut = int(i.integrity[0]) - int(i.integrity[1])
+	_float(firewall_bar, ("-%d INTEL" % fw_cut) if fw_cut > 0 else "INTEL", C_INTEL, 16)
+	_flash(firewall_bar, Color(1.2, 2.0, 1.9), 0.7)
+	if in_cut > 0:
+		_float(integ_bar, "-%d INTEL" % in_cut, C_INTEL, 16)
+		_flash(integ_bar, Color(1.2, 2.0, 1.9), 0.7)
 	_refresh_panels()
 	await tw.finished
 
@@ -1000,7 +1018,7 @@ func _announce_mods() -> void:
 func _mod_card(t) -> Control:
 	var M = HackingMods.MOD_TYPE
 	match t:
-		M.DAMAGE, M.EFFICIENCY, M.FIREWALL_DAMAGE, M.ATTACK_SPEED:
+		M.DAMAGE, M.DAMAGE_PCT, M.EFFICIENCY, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST:
 			return sql_card.panel
 		M.RESTORE:
 			return spoof_card.panel
@@ -1045,12 +1063,12 @@ func _refresh_panels() -> void:
 	# SQL Injector
 	sql_card.count.text = "x" + _short(Inventory.get_amount(offensive_item))
 	sql_card.stats.text = "   ".join([
-		_stat("DMG", str(ATTACK_AMOUNT), C_MOD if _mod(M.DAMAGE) > 0 else C_TEXT),
+		_stat("DMG", str(int(round(ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT))))), C_MOD if (_mod(M.DAMAGE) > 0 or _mod(M.DAMAGE_PCT) > 0) else C_TEXT),
 		_stat("FW", str(FIREWALL_DAMAGE + int(_mod(M.FIREWALL_DAMAGE))), C_MOD if _mod(M.FIREWALL_DAMAGE) > 0 else C_TEXT),
 		_stat("CRIT", "%d%%" % roundi(_get_total_efficiency() * 100.0), C_MOD if _mod(M.EFFICIENCY) > 0 else C_TEXT),
 		_stat("BW", "0" if bw_freeze_left > 0.0 else _fmt(_sql_cost()), C_EXP if (throttle_left > 0.0 or bw_freeze_left > 0.0) else (C_MOD if HackingMods.get_bandwidth_cost() > 0 else C_TEXT)),
-		_stat("EVERY", _secs(100.0 / max(0.001, ATTACK_SPEED * (1.0 + _mod(M.ATTACK_SPEED)))), C_MOD if _mod(M.ATTACK_SPEED) > 0 else C_TEXT)])
-	var sql_mods = _mods_text([M.DAMAGE, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.EFFICIENCY])
+		_stat("EVERY", _secs(100.0 / max(0.001, ATTACK_SPEED * (1.0 + _mod(M.ATTACK_SPEED) + _mod(M.SQL_BOOST)))), C_MOD if (_mod(M.ATTACK_SPEED) > 0 or _mod(M.SQL_BOOST) > 0) else C_TEXT)])
+	var sql_mods = _mods_text([M.DAMAGE, M.DAMAGE_PCT, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST, M.EFFICIENCY])
 	if HackingMods.get_bandwidth_cost() > 0:
 		sql_mods += ("\n" if sql_mods != "" else "") + _c("MOD bandwidth +%d per attack" % HackingMods.get_bandwidth_cost(), C_MOD) + _c("  · %d mod%s equipped" % [HackingMods.current_mods.size(), "" if HackingMods.current_mods.size() == 1 else "s"], C_DIM)
 	_set_rtl(sql_card.mods, sql_mods)
@@ -1098,7 +1116,7 @@ func _refresh_panels() -> void:
 		_stat("EVERY", _secs(100.0 / max(0.001, rate)) if _revealed else "--", spd_col)])
 	var ctr_mods = _mods_text([M.DAMAGE_REDUCTION, M.COUNTER_SLOW, M.COUNTER_RESET])
 	if !active_intel.is_empty():
-		ctr_mods += ("\n" if ctr_mods != "" else "") + _c("INTEL -%d%% dmg, -%d%% speed" % [_ipct("counter"), _ipct("counter speed")], C_INTEL) + _c("  · this hack", C_DIM)
+		ctr_mods += ("\n" if ctr_mods != "" else "") + _c("INTEL -%d%% dmg, -%d%% speed" % [_ipct("counter"), _ipct("counter speed")], C_INTEL)
 	_set_rtl(ctr_card.mods, ctr_mods)
 	if stun_left > 0.0:
 		_set_state(ctr_card, "STUNNED %.1fs" % stun_left, C_EXP)

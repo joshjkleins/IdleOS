@@ -34,20 +34,26 @@ const COOL_PACKAGE := "decoding.clean_room"
 const FORENSICS_EXPLOIT_MULT := 2.0
 
 ## A process's efficiency with the Efficiency track: +X% of the process's own efficiency (x1.20 at max).
-## Cache / Deep Scan: the rare item chance; every other process its own effect.
+## Cache / Deep Scan: +X% basic resources per cache (2026-10-22; it used to be the rare chance); every other
+## process its own effect.
 func get_efficiency(process: Dictionary = {}) -> float:
 	if process.is_empty():
 		process = CACHE
 	return min(1.0, float(process["efficiency"]) * (1.0 + Upgrades.cur("decoding.efficiency")))
 
-## Chance for a cache's rare item when decoded by <process> (Skim never finds it, Deep Scan doubles it).
-## Without <cache> it's the process's own chance (no Rare Tracker bonus).
+## Chance for a cache's rare item when decoded by <process>: RARE_CHANCE (+ Deep Scan's "rare bonus", + the Rare
+## Tracker for <cache>); Skim never finds it. Not tied to efficiency or level (2026-10-22).
+const RARE_CHANCE := 0.25
 func get_rare_chance(process: Dictionary = {}, cache: CacheData = null) -> float:
 	if process.is_empty():
 		process = CACHE
 	if process.get("rare multiplier", 1.0) <= 0.0:
 		return 0.0
-	return min(1.0, get_efficiency(process) * process.get("rare multiplier", 1.0) + process.get("rare bonus", 0.0) + tracker_bonus(cache))
+	return min(1.0, RARE_CHANCE * process.get("rare multiplier", 1.0) + process.get("rare bonus", 0.0) + tracker_bonus(cache))
+
+## Cache / Deep Scan efficiency: basic resources x (1 + efficiency)
+func efficiency_basic_mult(process: Dictionary) -> float:
+	return 1.0 + get_efficiency(process) if process == CACHE or process == DEEP else 1.0
 
 #region rare tracker
 ## Rare Tracker: every cache of a type that decodes without its rare adds the installed bonus to that type's
@@ -111,7 +117,7 @@ var SKILL = {
 	"experience": 0,
 	"color": Color("#14B8A6"),
 	"level up signal": decoding_level_up_signal,
-	"efficiency description": "Chance to find rare item.",
+	"efficiency description": "Cache / Deep Scan: bonus basic resources from every cache.",
 	"command": "cd decoding",
 	"sfx": "cracking_item_received"
 }
@@ -129,8 +135,8 @@ var CACHE = {
 		{'cmd': 'decode -cache', 'description': 'Decodes every cache you have, starting with least rare.'},
 		{'cmd': 'decode -cache=student cache', 'description': 'Decodes "Student Caches" and stops when done instead of moving on to other caches.'}
 	],
-	"efficiency": 0.35, # rare chance: 35% at L1 (2026-10-21 playthrough; was 20%, 4% before the XP pass)
-	"efficiency rate": 0.0002,
+	"efficiency": 0.05, # +5% basic resources at L1, +0.5% per level (2026-10-22: efficiency = more basics; rare is RARE_CHANCE)
+	"efficiency rate": 0.005,
 	"unlocked": true,
 	"unlock level": 1,
 	"base speed": 0.2,
@@ -142,7 +148,7 @@ var CACHE = {
 	"vm token chance": 0.01,
 	"requirements": "Cache x1", #handled within the decoding terminal script
 	"description": "Decrypt caches gained from hacking to reveal additional items.",
-	"efficiency description": "Chance to find rare item.",
+	"efficiency description": "Bonus basic resources from every cache.",
 	"signal": cache_decode_cycle_completed
 }
 
@@ -224,7 +230,7 @@ var SALVAGE = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 25,
+	"unlock level": 10,
 	"base speed": 0.2, # seconds per byte revealed
 	"overclock speed": 0.1,
 	"overheat speed": 0.5,
@@ -251,8 +257,8 @@ var DEEP = {
 		{'cmd': 'decode -deep', 'description': 'Deep scans every cache you have (1 VM Decoding token each)'},
 		{'cmd': 'decode -deep=student cache', 'description': 'Deep scans only Student caches'}
 	],
-	"efficiency": 0.35, # + rare bonus below: 50% at L1 (2026-10-21)
-	"efficiency rate": 0.0002,
+	"efficiency": 0.05, # +5% basics at L1 like Cache (rare: RARE_CHANCE + rare bonus = 40%)
+	"efficiency rate": 0.005,
 	"rare bonus": 0.15, # Deep Scan: +15% rare chance on top of Cache's (2026-10-21; was x2)
 	"token cost": 1, # VM Decoding tokens per cache
 	"unlocked": false,
@@ -265,8 +271,8 @@ var DEEP = {
 	"overheat heat": 0.6,
 	"vm token chance": 0.02,
 	"requirements": "Cache x1 | VM Decoding token x1",
-	"description": "Deep scans a cache at half speed for double the chance at its rare item. Costs 1 VM Decoding token per cache.",
-	"efficiency description": "Chance to find the rare item (doubled).",
+	"description": "Deep scans a cache at half speed for +15% chance at its rare item. Costs 1 VM Decoding token per cache.",
+	"efficiency description": "Bonus basic resources from every cache.",
 	"signal": cache_decode_cycle_completed
 }
 
@@ -654,7 +660,7 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 	var rows = []
 	for e in cache.entries:
 		var r = _entry_range(cache, e)
-		var y = yield_multiplier() if is_basic_item(e.item) else 1.0
+		var y = yield_multiplier() * compression_multiplier() * efficiency_basic_mult(process if !process.is_empty() else CACHE) if is_basic_item(e.item) else 1.0
 		rows.append({"name": e.item.name, "min": int(ceil(r.x * y)), "max": int(ceil(r.y * y)), "chance": _entry_chance(cache, e), "rare": false})
 	if cache == Items.VM_CACHE:
 		return [{"name": "Random VM token (per line, %d lines)" % VM_CACHE_LINES, "min": VM_CACHE_MIN, "max": VM_CACHE_MAX, "chance": VM_CACHE_LINE_CHANCE, "rare": false}]
@@ -669,13 +675,13 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 	return rows
 
 ## Rolls one decode: [{item, amount, rare}] with the rare item (if any) last.
-## <process> decides the rare chance (Skim: none, Deep Scan: x2); Skim's efficiency can add +50% basics.
+## <process> decides the rare chance (Skim: none, Deep Scan: +15%); Skim's efficiency can add +50% basics.
 ## Yield multiplies basics, the Rare Tracker adds to the rare chance, <mod> is the terminal's modifier
 ## command (forensics: one-time item chance x2, survey: half loot).
 ## VM cache: every other cache has VM_CACHE_CHANCE to drop one (the tutorial's first Student cache always
 ## does). Decoding a VM cache: each of its VM_CACHE_LINES lines has VM_CACHE_LINE_CHANCE at
 ## VM_CACHE_MIN..MAX tokens of a random skill (equal odds). Not parsable.
-const VM_CACHE_CHANCE := 0.2
+const VM_CACHE_CHANCE := 0.4 # 2026-10-22: was 20%
 const VM_CACHE_LINES := 5
 const VM_CACHE_LINE_CHANCE := 0.5
 const VM_CACHE_MIN := 1
@@ -692,7 +698,7 @@ func roll_loot(cache: CacheData, process: Dictionary = {}, mod: String = "") -> 
 		process = CACHE
 	if cache == Items.VM_CACHE:
 		return roll_vm_cache()
-	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier() * compression_multiplier()
+	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier() * compression_multiplier() * efficiency_basic_mult(process)
 	var loot = []
 	for e in cache.entries:
 		if randf() <= _entry_chance(cache, e):

@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://cnjaah617o02f"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_noa5f"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_0gffk"]
+[ext_resource type="Resource" uid="uid://caioa1u0hwwn6" path="res://items/cache_entry/police_station/cop/drop_1.tres" id="3_ydxwk"]
+[ext_resource type="Resource" uid="uid://42hp4fpn6bfa" path="res://items/cache_entry/police_station/cop/drop_2.tres" id="4_uo03b"]
+[ext_resource type="Resource" uid="uid://4vecq4a7q5v1" path="res://items/cache_entry/police_station/cop/drop_3.tres" id="5_kwqrd"]
+[ext_resource type="Resource" uid="uid://2msgbfgjiaf3" path="res://items/cache_entry/police_station/cop/cop_body_cam.tres" id="6_gv8k6"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_apn8r"]
+
+[resource]
+script = ExtResource("7_apn8r")
+entries = Array[ExtResource("2_0gffk")]([ExtResource("3_ydxwk"), ExtResource("4_uo03b"), ExtResource("5_kwqrd")])
+rare_pool = Array[ExtResource("2_0gffk")]([ExtResource("6_gv8k6")])
+rare_drop_chance = 0.05
+id = 252
+name = "Cop cache Footprint"
+shortened_name = ""
+description = "Cache variant. Decodes for double the basic resources, but never a rare item."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_noa5f")]([])
+tier = 5
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

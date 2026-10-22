@@ -72,15 +72,20 @@ func _process(delta: float) -> void:
 		_rebuild()
 	_refresh()
 
-## Rows: every goal item of the current tier (in goal order), then anything else queued.
+## Rows: every unfinished goal item of the current tier (in goal order), then anything else queued,
+## then the finished goals at the bottom (the list re-sorts itself when one completes).
 func _wanted_items() -> Array:
 	var items := []
+	var finished := []
 	for g in Uploads.get_goals():
-		items.append(g.item)
+		if Uploads.get_uploaded(g.item) >= g.amount:
+			finished.append(g.item)
+		else:
+			items.append(g.item)
 	for item in Uploads.staged:
-		if not item in items:
+		if not item in items and not item in finished:
 			items.append(item)
-	return items
+	return items + finished
 
 func _rebuild() -> void:
 	for c in _list.get_children():

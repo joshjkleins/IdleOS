@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://di8yob3dxamnj"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_8vtaf"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_wxucw"]
+[ext_resource type="Resource" uid="uid://dxvuq51w0tsy3" path="res://items/cache_entry/police_station/sergeant/sergeant_evidence.tres" id="2_8vtaf"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_ulb7r"]
+[ext_resource type="Resource" uid="uid://dj41vkg2d3m50" path="res://items/cache_entry/police_station/sergeant/drop_1.tres" id="3_xdl5r"]
+[ext_resource type="Resource" uid="uid://dblacank4afv8" path="res://items/cache_entry/police_station/sergeant/drop_2.tres" id="4_3adh1"]
+[ext_resource type="Resource" uid="uid://0nqa6h7dkqmy" path="res://items/cache_entry/police_station/sergeant/drop_3.tres" id="5_5fnwc"]
+
+[resource]
+script = ExtResource("2_ulb7r")
+entries = Array[ExtResource("1_wxucw")]([ExtResource("3_xdl5r"), ExtResource("4_3adh1"), ExtResource("5_5fnwc")])
+rare_pool = Array[ExtResource("1_wxucw")]([ExtResource("2_8vtaf")])
+rare_drop_chance = 0.05
+id = 65
+name = "Sergeant cache"
+shortened_name = ""
+description = "Received from hacking a Police Sergeant. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_8vtaf")]([])
+tier = 5
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 78.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

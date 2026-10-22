@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CacheEntry" load_steps=3 format=3 uid="uid://bwjxwfc48fbeu"]
+
+[ext_resource type="Resource" uid="uid://ce0yd075v8bsh" path="res://items/resources/Matching/access_badge.tres" id="1_d5qvo"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_edwhj"]
+
+[resource]
+script = ExtResource("2_edwhj")
+item = ExtResource("1_d5qvo")
+min_quantity = 25
+max_quantity = 50
+drop_chance = 0.6
+metadata/_custom_type_script = "uid://ct415ioicqw1p"

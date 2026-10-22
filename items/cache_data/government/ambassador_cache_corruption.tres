@@ -10,7 +10,7 @@
 
 [resource]
 script = ExtResource("7_aatvn")
-entries = Array[ExtResource("2_c0vh0")]([ExtResource("3_bhh1m"), ExtResource("4_qdj5n"), ExtResource("5_w1o60")])
+entries = Array[ExtResource("2_c0vh0")]([ExtResource("4_qdj5n"), ExtResource("3_bhh1m"), ExtResource("5_w1o60")])
 rare_pool = Array[ExtResource("2_c0vh0")]([ExtResource("6_6ux5a")])
 rare_drop_chance = 0.05
 id = 317

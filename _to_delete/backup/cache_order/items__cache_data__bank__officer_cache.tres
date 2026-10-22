@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://baxwufmgbpkah"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_8wdwu"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_v6dul"]
+[ext_resource type="Resource" uid="uid://bpsmfqgbritkp" path="res://items/cache_entry/bank/loan_officer/drop_1.tres" id="3_vbovy"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_wycar"]
+[ext_resource type="Resource" uid="uid://dbc5tu6bb85oc" path="res://items/cache_entry/bank/loan_officer/drop_2.tres" id="4_5o10c"]
+[ext_resource type="Resource" uid="uid://bd1i3tcvaxyml" path="res://items/cache_entry/bank/loan_officer/drop_3.tres" id="5_j08pu"]
+[ext_resource type="Resource" uid="uid://bhxcjytpppnu" path="res://items/cache_entry/bank/loan_officer/rare_item.tres" id="6_m1y35"]
+
+[resource]
+script = ExtResource("3_wycar")
+entries = Array[ExtResource("2_v6dul")]([ExtResource("3_vbovy"), ExtResource("4_5o10c"), ExtResource("5_j08pu")])
+rare_pool = Array[ExtResource("2_v6dul")]([ExtResource("6_m1y35")])
+rare_drop_chance = 0.05
+id = 132
+name = "Loan Officer Cache"
+shortened_name = ""
+description = "Received from hacking a Bank Loan Officer. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_8wdwu")]([])
+tier = 4
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 51.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

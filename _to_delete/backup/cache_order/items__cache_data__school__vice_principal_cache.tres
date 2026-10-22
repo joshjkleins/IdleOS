@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://0tyaq543vqch"]
+
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="1_08qxt"]
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_ts1kr"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="2_5w02g"]
+[ext_resource type="Resource" uid="uid://t3vbokrm640u" path="res://items/cache_entry/school/vice_principal/vice_principal_credential.tres" id="2_gbsyv"]
+[ext_resource type="Resource" uid="uid://c5k06t01wy0fy" path="res://items/cache_entry/school/vice_principal/vice_principal_ip.tres" id="3_mde3a"]
+[ext_resource type="Resource" uid="uid://clde6oisb6ib0" path="res://items/cache_entry/school/vice_principal/vice_principal_stud_disc_record.tres" id="4_kppex"]
+[ext_resource type="Resource" uid="uid://cpr2ov5rp20bm" path="res://items/cache_entry/school/vice_principal/vp_vm_phishing.tres" id="5_jskjs"]
+
+[resource]
+script = ExtResource("2_5w02g")
+entries = Array[ExtResource("1_08qxt")]([ExtResource("2_gbsyv"), ExtResource("3_mde3a"), ExtResource("5_jskjs")])
+rare_pool = Array[ExtResource("1_08qxt")]([ExtResource("4_kppex")])
+rare_drop_chance = 0.05
+id = 14
+name = "Vice principal cache"
+shortened_name = ""
+description = "Received from hacking a School Vice principal. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_ts1kr")]([])
+tier = 1
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 7.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

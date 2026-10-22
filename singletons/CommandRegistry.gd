@@ -104,6 +104,13 @@ func main_candidates() -> Array:
 	for s in _skills():
 		if s != Defragging and s != Cracking:
 			c.append("crack -vm use=%s create=" % s.SKILL.name.to_lower())
+	# ssh takes the same arguments as the main command: 'decode -intel=x' -> 'ssh decoding intel=x',
+	# 'compile -mod=x' -> 'ssh compiling mod=x', 'phish -spear bait=x' -> 'ssh phishing spear bait=x'
+	var verbs = {"decode -": "ssh decoding ", "compile -": "ssh compiling ", "phish -": "ssh phishing ", "crack -": "ssh cracking "}
+	for cmd in c.duplicate():
+		for v in verbs:
+			if str(cmd).begins_with(v) and (str(cmd).contains("=")):
+				c.append(verbs[v] + str(cmd).substr(v.length()))
 	for vm in VMManager.vms:
 		for a in ["show", "hide", "kill"]:
 			c.append("vm %s %d" % [a, vm.vm_id])
@@ -111,7 +118,7 @@ func main_candidates() -> Array:
 
 ## Hacking console: locations, targets, unlocks, one-time items
 func hacking_candidates() -> Array:
-	var c: Array = ["-h", "cd ..", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
+	var c: Array = ["-h", "cd ..", "cd ~", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if l.get("unlocked", false):
@@ -125,7 +132,7 @@ func hacking_candidates() -> Array:
 				c.append("unlock " + t.name.to_lower())
 	for it in _owned_items():
 		if it.get("exploit_id") != null and str(it.exploit_id) != "":
-			c.append("run " + _n(it))
+			c.append(_n(it) + " -force")
 			c.append("run auto " + _n(it))
 	return c
 

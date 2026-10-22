@@ -7,7 +7,7 @@ var game
 var ended := false
 const LEVEL_AT_TIER = [1, 15, 30, 45, 60, 75]
 const MODV = {"dmg": [0, [10, 20, 35, 55, 80, 120]], "fw_dmg": [3, [10, 20, 35, 55, 80, 120]], "atk_spd": [6, [.15, .2, .25, .3, .35, .4]],
-	"band_rate": [5, [2, 3, 4, 5, 6, 7]], "crit": [1, [.03, .06, .09, .12, .15, .18]], "dr": [7, [7, 17, 32, 52, 77, 112]], "fw_red": [2, [15, 30, 53, 83, 120, 180]]}
+	"band_rate": [5, [2, 3, 4, 5, 6, 7]], "crit": [1, [.075, .06, .09, .12, .15, .18]], "ctr_reset": [28, [.05, .07, .09, .11, .13, .15]], "dr": [7, [7, 17, 32, 52, 77, 112]], "fw_red": [2, [15, 30, 53, 83, 120, 180]]}
 func _ready() -> void:
 	_run.call_deferred()
 const EXTRA = {"S3": ["hacking.damage", "hacking.firewall"],
@@ -26,7 +26,9 @@ func _fight(target: Dictionary, intel: float, mods: Dictionary, tier: int) -> Di
 	HackingMods.current_mods.clear()
 	for k in mods: HackingMods.current_mods[k] = {"duration": 99, "value": mods[k], "tier": tier}
 	Decoding.intel.erase(Decoding.intel_key(target))
-	if intel > 0: Decoding.intel[Decoding.intel_key(target)] = {"amount": int(Decoding.intel_cap(target) * intel), "hacks": 99}
+	if intel > 0: # intel 0..1 of full intel (all four stats at 10%): 2% steps
+		var lv = int(round(intel * Decoding.INTEL_MAX_STEPS))
+		Decoding.intel[Decoding.intel_key(target)] = {"lv": [lv, lv, lv, lv], "dur": 99, "hacks": 99}
 	var lvl = LEVEL_AT_TIER[tier - 1]
 	Hacking.SKILL.level = lvl; Hacking.SKILL.experience = Exp.xp_for_level(lvl); Hacking.SKILL.efficiency = 0.05 + 0.00255 * (lvl - 1)
 	Stats.set_max_anon()

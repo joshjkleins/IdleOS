@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://baytluldc74h7"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_pieky"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_iyqvt"]
+[ext_resource type="Resource" uid="uid://ctc6g163mqhr8" path="res://items/cache_entry/school/principal/principal_credential.tres" id="3_c5842"]
+[ext_resource type="Resource" uid="uid://dw5ohhg4bn7ae" path="res://items/cache_entry/school/principal/principal_ip_address.tres" id="4_8wcj4"]
+[ext_resource type="Resource" uid="uid://1ue8nxbcjv8f" path="res://items/cache_entry/school/principal/principal_vm_compiling.tres" id="5_4bhuf"]
+[ext_resource type="Resource" uid="uid://cuv468vper0nq" path="res://items/cache_entry/school/principal/principal_embezz_logs.tres" id="7_43vd8"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="8_wjg5q"]
+
+[resource]
+script = ExtResource("8_wjg5q")
+entries = Array[ExtResource("2_iyqvt")]([ExtResource("3_c5842"), ExtResource("4_8wcj4"), ExtResource("5_4bhuf")])
+rare_pool = Array[ExtResource("2_iyqvt")]([ExtResource("7_43vd8")])
+rare_drop_chance = 0.05
+id = 162
+name = "Principal cache Network"
+shortened_name = ""
+description = "Cache variant. 50% chance to also drop 10-20 random VM tokens."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_pieky")]([])
+tier = 1
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

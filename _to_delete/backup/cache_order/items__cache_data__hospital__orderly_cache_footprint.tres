@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://uo0ula1mtyq6"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_30r6q"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_v0b71"]
+[ext_resource type="Resource" uid="uid://cw0h588xaylm4" path="res://items/cache_entry/hospital/orderly/drop_1.tres" id="3_aoj5p"]
+[ext_resource type="Resource" uid="uid://7f6gnrul83cx" path="res://items/cache_entry/hospital/orderly/drop_2.tres" id="4_gwlaq"]
+[ext_resource type="Resource" uid="uid://gh28oeca13nd" path="res://items/cache_entry/hospital/orderly/drop_3.tres" id="5_6je2l"]
+[ext_resource type="Resource" uid="uid://bs103l063aecf" path="res://items/cache_entry/hospital/orderly/orderly_keycard_clone.tres" id="6_vu757"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_l5rxs"]
+
+[resource]
+script = ExtResource("7_l5rxs")
+entries = Array[ExtResource("2_v0b71")]([ExtResource("3_aoj5p"), ExtResource("4_gwlaq"), ExtResource("5_6je2l")])
+rare_pool = Array[ExtResource("2_v0b71")]([ExtResource("6_vu757")])
+rare_drop_chance = 0.05
+id = 232
+name = "Orderly cache Footprint"
+shortened_name = ""
+description = "Cache variant. Decodes for double the basic resources, but never a rare item."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_30r6q")]([])
+tier = 3
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

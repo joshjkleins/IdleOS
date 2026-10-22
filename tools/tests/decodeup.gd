@@ -1,5 +1,5 @@
 extends Node
-## Decoding upgrade checks. PART=1 numbers, PART=2 live Cache runs (base / max tracks / modifiers), PART=3 package + intel + salvage.
+## Decoding upgrade checks. PART=1 numbers, PART=2 live Cache runs (base / max tracks / modifiers), PART=3 intel build-up (package was removed 2026-10-20).
 var term
 func _ready() -> void:
 	_run.call_deferred()
@@ -51,9 +51,9 @@ func _run() -> void:
 	stu.unlocked = true
 	_all(0)
 	if part == "1":
-		print("L%d | base: cache eff %.4f deep rare %.4f skim %.3f package %.3f intel %.3f salvage %.3f | max hacks %d" % [Decoding.CACHE.level, Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.PACKAGE), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks()])
+		print("L%d | base: cache eff %.4f deep rare %.4f skim %.3f intel %.3f salvage %.3f | max hacks %d" % [Decoding.CACHE.level, Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks()])
 		_all(99)
-		print("max:  cache eff %.4f deep rare %.4f skim %.3f package %.3f intel %.3f salvage %.3f | max hacks %d | yield x%.2f compression x%.2f tracker %.4f/dry | skim rare %.3f" % [Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.PACKAGE), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks(), Decoding.yield_multiplier(), Decoding.compression_multiplier(), Upgrades.cur("decoding.rare_tracker"), Decoding.get_rare_chance(Decoding.SKIM, Items.STUDENT_CACHE)])
+		print("max:  cache eff %.4f deep rare %.4f skim %.3f intel %.3f salvage %.3f | max hacks %d | yield x%.2f compression x%.2f tracker %.4f/dry | skim rare %.3f" % [Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks(), Decoding.yield_multiplier(), Decoding.compression_multiplier(), Upgrades.cur("decoding.rare_tracker"), Decoding.get_rare_chance(Decoding.SKIM, Items.STUDENT_CACHE)])
 		Decoding.first_cache_decoded = true
 		# tracker: count dry streaks and the chance after 10 dry Student caches
 		Decoding.rare_tracker = {"Student cache": 10}
@@ -98,18 +98,11 @@ func _run() -> void:
 		await _scen("cache forensics", Decoding.CACHE, S / 2, null, "forensics")
 		await _scen("cache survey", Decoding.CACHE, S / 2, null, "survey")
 	if part == "3":
-		Inventory.add_resource(Items.LOGS, 100000)
-		Decoding.next_package_limit = 0
-		await _scen("package base", Decoding.PACKAGE, 120, Items.LOGS)
-		Uploads.staged.erase(Items.LOGS)
-		_setpkg("decoding.speed", 99)
-		await _scen("package speed", Decoding.PACKAGE, 60, Items.LOGS)
-		Uploads.staged.erase(Items.LOGS)
-		_setpkg("decoding.compression", 99)
-		await _scen("package spd+compr", Decoding.PACKAGE, 60, Items.LOGS)
-		Uploads.staged.erase(Items.LOGS)
-		# modifier refused on package
-		term = Decoding.terminal_scene.instantiate(); add_child(term); term.set_cache_type(Decoding.PACKAGE, false, Items.LOGS)
-		print("package modifier block: ", term.modifier_block_reason())
-		term.queue_free()
+		# intel build-up: 2% per stat per find, +1 hack each full round, up to 10% / 15 hacks
+		Decoding.intel.erase(Decoding.intel_key(stu))
+		for n in 36:
+			Decoding.add_intel_point(stu)
+			if n in [0, 3, 4, 8, 9, 23, 24, 34]:
+				print("intel after %2d finds: %s" % [n + 1, str(Decoding.get_intel(stu))])
+		print("maxed: %s | %s" % [Decoding.is_intel_maxed(stu), Decoding.intel_text(stu)])
 	get_tree().quit()

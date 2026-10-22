@@ -4,7 +4,7 @@ func _ready() -> void:
 	_run.call_deferred()
 func _run() -> void:
 	for i in 5: await get_tree().process_frame
-	var out := ["loc\ti\tname\tintegrity\tfirewall\tcounter\tcounter speed\theat\texp\treq\tintel stat\tloot\tkeys"]
+	var out := ["loc\ti\tname\tintegrity\tfirewall\tcounter\tcounter speed\theat\texp\treq\tloot\tkeys"]
 	for loc in Stats.hacking_targets:
 		var L = Stats.hacking_targets[loc]
 		var i = 0
@@ -12,7 +12,7 @@ func _run() -> void:
 			i += 1
 			var req = t.requirements
 			out.append("\t".join([loc, str(i), t.name, str(t.integrity), str(t.firewall), str(t.counter), str(t["counter speed"]), str(t.heat), str(t.exp),
-				"%s x%d" % [req.item.name, req.amount], str(t.get("intel stat", "")), t.loot.name if t.loot else "", ",".join(t.keys())]))
+				"%s x%d" % [req.item.name, req.amount], t.loot.name if t.loot else "", ",".join(t.keys())]))
 	out.append("")
 	for id in Upgrades.packages:
 		if id.begins_with("hacking."):

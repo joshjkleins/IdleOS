@@ -147,8 +147,45 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 			return EQUIP_INFO[mod][0] if EQUIP_INFO.has(mod) else ""
 
 
+## short "what the value changes" label for the 'mod' tables (EFFECT column)
+const STAT_LABEL = {
+	MOD_TYPE.DAMAGE: "SQL damage",
+	MOD_TYPE.EFFICIENCY: "crit chance",
+	MOD_TYPE.FIREWALL_REDUCTION: "target firewall",
+	MOD_TYPE.FIREWALL_DAMAGE: "SQL firewall damage",
+	MOD_TYPE.RESTORE: "spoof restore (of max anon)",
+	MOD_TYPE.BAND_RATE: "bandwidth regen",
+	MOD_TYPE.ATTACK_SPEED: "SQL attack speed",
+	MOD_TYPE.DAMAGE_REDUCTION: "countermeasure damage",
+	MOD_TYPE.COUNTER_SLOW: "countermeasure speed",
+	MOD_TYPE.COUNTER_RESET: "counter reset chance / attack",
+	MOD_TYPE.SQL_BOOST: "SQL attack speed",
+	MOD_TYPE.FW_BREAK_SLOW: "counter slow on firewall break",
+	MOD_TYPE.BW_PCT_REGEN: "bandwidth regen (of max) / s",
+	MOD_TYPE.FW_NO_REBOOT: "firewall never reboots",
+	MOD_TYPE.DAMAGE_PCT: "SQL damage",
+	MOD_TYPE.CRIT_CHANCE_MULT: "crit chance",
+	MOD_TYPE.CRIT_DAMAGE_MULT: "crit damage",
+	MOD_TYPE.SPOOF_HEAL_MULT: "spoof restore",
+	MOD_TYPE.SPOOF_FREE: "spoofs cost no bandwidth",
+	MOD_TYPE.IGNORE_COUNTERS: "countermeasures that miss",
+	MOD_TYPE.FW_PCT_HIT: "max firewall dmg / hit",
+	MOD_TYPE.COUNTER_SLOW_PCT: "countermeasure speed",
+	MOD_TYPE.STEALTH_START: "undetected at hack start",
+	MOD_TYPE.SPOOF_SPEED: "spoof fill speed",
+	MOD_TYPE.EXPLOIT_FULL: "EXPLOIT meter starts full",
+	MOD_TYPE.FW_BREAK_INTEGRITY: "max integrity on fw break",
+	MOD_TYPE.COUNTER_REFLECT: "countermeasure dmg reflected",
+	MOD_TYPE.COLD_BOOT: "overclock adds no heat",
+}
+
+func get_mod_stat(mod) -> String:
+	return STAT_LABEL.get(mod, "")
+
 func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 	match mod:
+		MOD_TYPE.COUNTER_SLOW_PCT:
+			return "-%.f%%" % (value * 100.0) # countermeasures slower
 		MOD_TYPE.DAMAGE:
 			return "+" + str(int(value))
 		MOD_TYPE.EFFICIENCY:

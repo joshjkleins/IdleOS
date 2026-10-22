@@ -8,7 +8,7 @@ Prints the hacks, rares and crafting hours available, and what today's costs nee
 import json, os, subprocess
 ACTIVE = [1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
 HACK_SHARE, FIGHT_S, VM_UPTIME, VARIANT = 0.6, 70.0, 0.5, 0.5
-RARE_P = [0.205, 0.214, 0.224, 0.235, 0.245, 0.256]   # xp_plan.py, mid-tier decoding level + tracks
+RARE_P = [0.25] * 6  # 2026-10-22: flat 25% (efficiency now adds basics)
 def run(lvl):
     out = subprocess.run(["python3", "tools/balance/econ.py"], capture_output=True, text=True, env=dict(os.environ, LVL=lvl)).stdout
     rows = {}
@@ -24,7 +24,7 @@ for t in range(1, 7):
     a = ACTIVE[t - 1]
     hacks = a * HACK_SHARE * 3600 / FIGHT_S
     caches = hacks * (1 + 0.2 * 2)                         # 1 in 5 hacks is target 5: +2 lower caches
-    rares = caches * RARE_P[t - 1] * ((1 - VARIANT) + VARIANT * 5)
+    rares = caches * RARE_P[t - 1] * ((1 - VARIANT) + VARIANT * 2)  # extraction +1 rare (was +4)
     vms = 1 + (t - 1) + 0.5
     craft = a * (1 - HACK_SHARE) + a * vms * VM_UPTIME
     m = {k: (L1[t][k] + L99[t][k]) / 2 for k in ("upgrades", "uploads", "payloads", "sql_h")}

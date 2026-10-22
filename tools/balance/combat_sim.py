@@ -2,7 +2,9 @@
 Mirrors: SQL bar 20/s (x attack speed mods), Packet Spoof bar 8/s with first claim on bandwidth, bandwidth regen
 (+ overclock x2 / overheat x0.5), firewall absorbs each hit and loses fw damage per hit, break -> down for
 reboot time (counters -50%), then reboots to its (reduced) start value; counters: bar speed/s, dmg - reduction
-(min 1); crit chance (level + mods) x2; spoof heal % of max anon below the threshold; heat / overheat; intel;
+(min 1); crit chance (level + mods) x2; spoof heal % of max anon below the threshold; heat / overheat; intel
+(2026-10-21 rework: one share off integrity, firewall, counter damage and counter speed, 10% when maxed);
+the Countermeasure Reset payload mod ("ctr_reset": chance per SQL hit to empty the counter bar);
 the equippable mods; Evasion / Siphon / Dead Man's Switch capstones.
 fight(...) -> dict(won, time, anon_left_pct)."""
 import random
@@ -45,27 +47,24 @@ def _player(tier, upg, lvl, mods, overclock, policy):
         cool=COOLING[min(6, int(upg))], heat_red=HEAT_RED[min(6, int(upg))],
         dmg_installs=int(upg),  # damage track installs (1 per tier)
         mods=dict(mods), overclock=overclock, policy=policy)
+INTEL_MAX = 0.10  # Decoding.INTEL_STEP x INTEL_MAX_STEPS: full intel is -10% on all four stats
 def fight(P, E, intel=0.0, seed=None, max_t=600.0):
-    """E: integrity, firewall, counter, counter speed, heat, [firewall reboot]. intel: 0..1 of the intel cap
-    (25% of E's intel stat)."""
+    """E: integrity, firewall, counter, counter speed, heat, [firewall reboot]. intel: 0..1 of full intel
+    (every stat -10% at 1.0; the game builds it 2% per stat at a time)."""
     rnd = random.Random(seed)
     m = P["mods"]; g = lambda k: m.get(k, 0.0)
     integ, fw0, ctr, cspd = E["integrity"], E["firewall"], E["counter"], E["counter speed"]
     reboot = E.get("firewall reboot", 10.0)
-    st = E.get("intel stat", "firewall")
     if intel:
-        cap = E.get("intel cap", 0.25)
-        cut = int(E[st] * cap * intel)
-        if st == "firewall": fw0 = max(0, fw0 - cut)
-        elif st == "integrity": integ = max(1, integ - cut)
-        elif st == "counter": ctr = max(0, ctr - cut)
-        elif st == "counter speed": cspd = max(0.1, cspd - E[st] * cap * intel)
+        k = 1.0 - INTEL_MAX * intel  # same share off every stat (hacking_game._apply_intel)
+        integ = max(1, int(round(integ * k))); fw0 = max(0, int(round(fw0 * k)))
+        ctr = max(0, int(round(ctr * k))); cspd = max(0.1, cspd * k)
     fw_start = max(0, fw0 - g("fw_red"))
     n_mods = len(m)
     sql_cost = min(P["max_bw"], 6 + (P["tier"] + 1) * n_mods)  # compiled mods of this tier: +1 bandwidth per tier
     spoof_cost = 0 if "ghost_packet" in m else 2
     anon = P["max_anon"]; amax = P["max_anon"]; bw = P["max_bw"]
-    hp = integ; fw = fw_start; fw_down = 0.0; bricked = False
+    hp = integ; fw = fw_start; fw_down = 0.0; bricked = False; breach = False
     atk = spd_bar = cbar = 0.0; defending = False
     temp = 30.0; overheated = False; oc = P["overclock"]
     t = 0.0; decoys = int(g("decoys")); dead_used = False
@@ -111,7 +110,8 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
                 defending = anon * 100 <= amax * int(P["thr"] * 100)
             else: def_wait = True
         if atk >= 100 and not def_wait and bw >= sql_cost:
-            crit = 2.0 if rnd.random() <= crit_p else 1.0
+            crit = 2.0 if (breach or rnd.random() <= crit_p) else 1.0  # breach: first hit after a firewall break crits
+            breach = False
             if crit > 1 and "critical_overflow" in m: crit *= 2
             raw = int(round(P["dmg"] + g("dmg")) * (1 + g("dmg_pct")) * crit)
             fb = fw if (fw_down <= 0 and not bricked) else 0
@@ -119,10 +119,11 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
             if fb > 0:
                 fw -= P["fw_dmg"] + g("fw_dmg") + g("shredder") * fw0
             bw -= sql_cost; heat(atk_heat); atk = 0; n_atk += 1
+            if g("ctr_reset") and cbar > 0 and rnd.random() < g("ctr_reset"): cbar = 0.0  # Countermeasure Reset (payloads)
             if "siphon" in P["caps"]: anon = min(amax, anon + -(-amax * 0.005 // 1))
             if hp <= 0: return dict(won=True, time=t, anon=anon / amax, sql=n_atk, spoofs=n_spoof)
             if fb > 0 and fw <= 0:
-                fw = 0; fw_down = reboot
+                fw = 0; fw_down = reboot; breach = True
                 hp -= int(round(integ * g("cascade")))
                 if hp <= 0: return dict(won=True, time=t, anon=anon / amax, sql=n_atk, spoofs=n_spoof)
         if cbar >= 100:

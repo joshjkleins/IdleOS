@@ -2,6 +2,7 @@ class_name CacheDecrypting
 extends RefCounted
 
 signal item_found(item, amount)
+signal text_found(event) # a highlighted text row with an "event" finished revealing (Intel: applied right away)
 
 const DUMP_SIZE: int = 5 #ROWS IN THE DUMP
 const HEX_CHARACTERS_SIZE: int = 20 #number of ?? in body
@@ -62,7 +63,7 @@ func build_rows(rows: Array) -> void:
 			items_total += 1
 			codes.append(get_item_hexes(r.item, r.amount))
 		else:
-			codes.append(get_text_hexes(r.text))
+			codes.append(get_text_hexes(r.text, r.get("event", "")))
 	_set_rows(codes)
 
 func _set_rows(all_codes: Array) -> void:
@@ -94,6 +95,8 @@ func render_dump() -> String:
 				if current_index == (j + 1) and current_row == i:
 					row += "[bgcolor=#4ec994]" + dump_info["codes"][i][j]["hex"] + "[/bgcolor]"
 					words += dump_info["codes"][i][j]["char"]
+					if dump_info["codes"][i][j].has("event"):
+						text_found.emit(dump_info["codes"][i][j]["event"])
 					if dump_info["codes"][i][j].has("item"):
 						#Signals.item_found_in_cache(dump_info["codes"][i][j]["item"], dump_info["codes"][i][j]["amount"])
 						item_found.emit(dump_info["codes"][i][j]["item"], dump_info["codes"][i][j]["amount"])
@@ -196,7 +199,7 @@ func get_item_hexes(item, amount) -> Array:
 	return result
 
 ## A highlighted line that pays nothing (e.g. an Intel find): the text shows in the ascii column.
-func get_text_hexes(text: String) -> Array:
+func get_text_hexes(text: String, event: String = "") -> Array:
 	var result: Array = []
 	var start = randi_range(0, max(0, HEX_CHARACTERS_SIZE - text.length()))
 	var filler = get_random_hexes(HEX_CHARACTERS_SIZE, false)
@@ -204,6 +207,8 @@ func get_text_hexes(text: String) -> Array:
 		var t = i - start
 		if t >= 0 and t < text.length():
 			result.append({"hex": "[color=#4ec9b0]%02X[/color]" % text.unicode_at(t), "char": "[color=#4ec9b0]" + text[t] + "[/color]"})
+			if event != "" and t == text.length() - 1:
+				result[-1]["event"] = event
 		else:
 			result.append(filler[i])
 	return result

@@ -97,7 +97,7 @@ func list_specific_item(item: ItemData):
 		var hacking_mod_display = "Hacking Mod\n"
 		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
 		if item.hacking_mod_item:
-			hacking_mod_display += "└─ Equip with 'mod -add' · lasts %d hacks\n\n" % item.hacking_mod_duration
+			hacking_mod_display += "└─ Manage this mod with the 'mod' command · lasts %d hacks\n\n" % item.hacking_mod_duration
 		else:
 			var cost = Compiling.mod_fill_cost(item)
 			var parts = cost.keys().map(func(k): return "%s x%d" % [k.name, cost[k]])
@@ -698,9 +698,9 @@ func used_in_text(item: ItemData) -> String:
 	if item.is_compilable_mod():
 		rows.append(["Hacking mod", "compile -mod=%s  [color=#666666](%s %s)[/color]" % [item.name.to_lower(), HackingMods.get_mod_name(item.hacking_mod_type), HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)]])
 	if t == "mod":
-		rows.append(["Hacking mod", "mod -add  [color=#666666](equip directly)[/color]"])
+		rows.append(["Hacking mod", "mod  [color=#666666](manage your mods)[/color]"])
 	if t == "exploit":
-		rows.append(["During a hack", "run %s" % Exploits.alias(item)])
+		rows.append(["During a hack", Exploits.use_cmd(item)])
 	if t == "combat":
 		rows.append(["Hacking", "used by every %s in a hack" % ("attack" if item == Items.SQL_INJECTOR else "spoof")])
 	if t == "token":

@@ -12,11 +12,11 @@ var SKILL = {
 
 ## Defragging grants short system-wide boosts (one at a time: they share the cooldown).
 ## Each process: "bonus time" minutes, its effect read through the get_*() helpers below.
-## "expires_at" is the unix time the boost ends (saved). Requirements are placeholders.
+## "expires_at" is the unix time the boost ends (saved). Defragging costs no items; the shared cooldown is the limit.
 var COOLING = {
 	"name": "Cooling",
 	"unlocked": true,
-	"requirements": { "item": Items.LOGS, "amount": 30 },
+	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#4ec9b0"),
 	"bonus time": 10,
 	"bonus cooling": 0.5, # extra °C cooled per second
@@ -30,7 +30,7 @@ var COOLING = {
 var VM = {
 	"name": "VM",
 	"unlocked": true,
-	"requirements": { "item": Items.CREDENTIALS, "amount": 15 },
+	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#7aa2f7"),
 	"bonus time": 10,
 	"bonus vm uptime": 30.0, # extra seconds per VM token (30 -> 60)
@@ -44,7 +44,7 @@ var VM = {
 var UPLOAD = {
 	"name": "Upload",
 	"unlocked": true,
-	"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 5 },
+	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#e0c068"),
 	"bonus time": 10,
 	"bonus upload speed": 0.2, # uploads take 20% less time
@@ -58,7 +58,7 @@ var UPLOAD = {
 var HEAT = {
 	"name": "Heat",
 	"unlocked": true,
-	"requirements": { "item": Items.PASSWORDS, "amount": 15 },
+	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
 	"bonus heat reduction": 0.2, # percent removed from every heat gain (20%)
@@ -94,6 +94,8 @@ func add_xp(amount: int, _type: Dictionary):
 
 
 func has_requirements(skill: Dictionary):
+	if skill.get("requirements", {}).is_empty():
+		return true
 	var item = skill["requirements"]["item"]
 	var amount = skill["requirements"]["amount"]
 	if Inventory.get_amount(item) < amount:

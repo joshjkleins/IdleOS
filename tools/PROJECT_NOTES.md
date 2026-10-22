@@ -531,13 +531,33 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - Intel rework: per target {lv[integrity, firewall, counter, counter speed], dur, hacks}. Each successful line: one stat
   +2% (in that order) until all four match, then +1 hack; repeat to 10% on everything (5 steps), then +1 hack per point
   up to 15 (+ Field Notes). A hack uses 1; the last one spends the intel. 34 points from nothing to maxed.
-  "intel stat" / "intel cap" target keys are unused (tools/balance combat_sim / livecheck still model the old intel).
+  The "intel stat" / "intel cap" target keys were removed from stats.gd (2026-10-22).
 - System Thermal Paste -> VM Snapshot (system.vm_snapshot): chance a VM token isn't used when a VM starts or renews,
   5% at T1 then +3% per tier (Upgrades.spend_vm_token; silent on renewals). Overheat always clears at 80 C.
   Upgrades.RENAMED maps old thermal_paste installs.
 - Fixes: 'ls <partial name>' always lists (no auto-details on a single hit), hacking console up/down history resets
   after a new command, 'defrag -<process>' runs from any directory, Whaling description + terminal header explain the
   bite / reel / bundle. Tab: bait completes Mining items only (Phishing.is_bait), 'ls' completes every item name.
+
+## Tools updated (2026-10-22) to match the playthrough passes
+- combat_sim.py: intel = one share off integrity / firewall / counter / counter speed (intel 1.0 = -10%, INTEL_MAX);
+  "ctr_reset" mod (Countermeasure Reset: chance per SQL hit to empty the counter bar). Cooling already +0.1.
+- combat_tune.py: no intel stat / intel cap per profile; MOD_VALUES T1 crit .075, ctr_reset per tier.
+  write_targets.py no longer writes intel keys. Note combat_tune_T*.json still hold the 10-20 tuning (Student 148
+  integrity; the game has 103 since the -45 playtest change): re-run combat_tune before write_targets.
+- mod_stats.py: T1 crit 5% encrypted / 7.5% cracked, payload role = Countermeasure Reset (28), new "band" role for the
+  target-2 rares (bandwidth regen).
+- econ2.py / econ_plan.py: RARE_P +15% (35% base). Caches no longer drop SQL / spoofs: re-run tools/tests/econdump
+  for loot.json before reading their SQL column.
+- Tests: livecheck writes the new intel format (+ ctr_reset in MODV, T1 crit .075); decodeup PART=3 is the intel
+  build-up (package scenarios removed); tuttest uses 'upload logs 5'; combatdump drops the intel stat column.
+  Live vs sim (T1): Student 47% / 53% anon left, with full intel 64% / 67%, Vice Principal S3 32% / 32%.
+
+## Cache loot order (2026-10-22)
+- Targets 1-4 of every tier: the cache's guaranteed item is listed first, then the other two; drop chances 100% / 80% /
+  60% (was 100 / 50 / 50 at School, 100 / 60 / 60 after; Doctor's payload was 80% with nothing at 100%). Entries
+  reordered in the base cache and all four variants. Target-5 caches (other targets' caches) unchanged.
+  Basics per cache go up ~20% at School, ~9% elsewhere. Backups: _to_delete/backup/cache_order.
 
 ## Backlog (Josh's list, in order after upgrades)
 1. ~~Offline progression~~ DONE 2026-10-19 (see "Offline progression").
@@ -556,3 +576,26 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - ~~Phishing higher tiers~~ settled 2026-10-20: Spear / Whaling / Smish / Trap / Mod are all built. Phishing stays
   tier-independent like Parsing and Decoding (processes unlock by Phishing level; its tier-locked upgrades, e.g.
   +1 line per tier, give the per-tier boost), so no Tier 5-6 processes are needed.
+
+## Playthrough pass 4 (2026-10-22, cdd)
+- Decoding: Salvage unlocks at L10. Rare chance is a flat 25% (`Decoding.RARE_CHANCE`); Cache / Deep Scan efficiency
+  (5% +0.5%/lvl) now adds bonus basic resources (`efficiency_basic_mult`) instead of raising rare chance. Deep Scan keeps +15% rare.
+  VM Cache drop 40%. Extraction variants give +1 rare (was +4). Admin cache order: usernames 100 / passwords 80 / logs 60.
+- Intel applies the moment "INTEL FOUND" reveals in the dump (`CacheDecrypting.text_found`), not at cycle end.
+  In a hack, intel drains integrity like the firewall (bar max stays the real stat; floats "-N INTEL"). Before this, intel
+  integrity never actually reached the bar. Countermeasure box no longer says "this hack".
+- Firewall break: the next SQL hit is a guaranteed crit (`breach_crit`, log tag "firewall breach"; combat_sim models it).
+- One-time items: used with '<full name> -force' (e.g. 'proxy hop -force', tab completes); 'run' lists them, 'run auto <name>'
+  unchanged, old 'run <alias>' still works silently. Proxy Hop restores 50% max anonymity.
+- Hacking console: 'cd ~' (also 'cd', 'cd /', 'home', 'root') returns to the main terminal from locations / targets.
+- SQL card: EVERY includes SQL Booster, DMG includes Payload Amplifier.
+- 'mod': new EFFECT column (`HackingMods.STAT_LABEL`) so values read "bandwidth regen (of max) / s  +20%"; Latency Injector shows -20%.
+  The list re-prints after 'mod -add' / 'mod -rm' (IDs shift). Mod items say "manage this mod with the 'mod' command".
+- apt: a finished tier whose next tier is locked shows "up to date" with a gold 10/10 bar; 'apt <skill>' lists that tier's
+  installed packages plus "Next: Tier N opens with X access".
+- Background Services text: "N h offline progression" (current cap only).
+- Side panel: finished uploads sort to the bottom; the running Defrag boost shows at the very top (DefragBoostSection,
+  shares the collapse-button row); the header Defragging card only shows the cooldown. Defragging costs no items.
+- Tools: econ2 / econ_plan / xp_plan use RARE_P 0.25, extraction x2, efficiency as a basics multiplier.
+- Open: Network cache variant (still 50% x 10-20 VM tokens) vs VM Caches; XP pacing together with the minor-process-levels idea.
+- Tests: tools/tests/p4test.gd (headless checks), p4shot.gd (side panel screenshot).

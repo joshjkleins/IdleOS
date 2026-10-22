@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://ck2pi00mlkcah"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_7nykd"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_rej12"]
+[ext_resource type="Resource" uid="uid://w1nvo45bqci2" path="res://items/cache_entry/government/vp/drop_1.tres" id="3_ywvoj"]
+[ext_resource type="Resource" uid="uid://cs6m31xoj7tk" path="res://items/cache_entry/government/vp/drop_2.tres" id="4_hx5m8"]
+[ext_resource type="Resource" uid="uid://c8tks2ca1j3wm" path="res://items/cache_entry/government/vp/drop_3.tres" id="5_a26k8"]
+[ext_resource type="Resource" uid="uid://bvqpjv076nfep" path="res://items/cache_entry/government/vp/rare_drop.tres" id="6_hh7n3"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="7_deq1m"]
+
+[resource]
+script = ExtResource("7_deq1m")
+entries = Array[ExtResource("2_rej12")]([ExtResource("3_ywvoj"), ExtResource("4_hx5m8"), ExtResource("5_a26k8")])
+rare_pool = Array[ExtResource("2_rej12")]([ExtResource("6_hh7n3")])
+rare_drop_chance = 0.05
+id = 323
+name = "Vice President Cache Extraction"
+shortened_name = "VP Cache"
+description = "Cache variant. When its rare item drops, you get 5 instead of 1."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_7nykd")]([])
+tier = 6
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 9
+hacking_mod_value = 0.0
+hacking_mod_duration = 0
+hacking_mod_consumed = 0
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

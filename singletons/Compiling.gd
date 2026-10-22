@@ -78,7 +78,7 @@ func check_mod(item_text: String, example: String = "compile -mod=logs") -> Dict
 		out.message = "Item not recognized. [color=#666666]ex. %s[/color]" % example
 		return out
 	if item.hacking_mod_item:
-		out.message = "%s is already a hacking mod: equip it with 'mod -add'." % item.name
+		out.message = "%s is already a hacking mod: manage it with the 'mod' command." % item.name
 		return out
 	if !item.is_compilable_mod():
 		out.message = item.name + " cannot be compiled into a Hacking Mod."

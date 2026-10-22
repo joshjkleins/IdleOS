@@ -37,6 +37,7 @@ func heat_tier_mult() -> float:
 
 func _ready():
 	cache_decrypt.item_found.connect(update_items_gained)
+	cache_decrypt.text_found.connect(_on_text_found)
 	drop_rates = RichTextLabel.new()
 	drop_rates.bbcode_enabled = true
 	drop_rates.fit_content = true
@@ -213,11 +214,9 @@ func _run_intel() -> void:
 		cache_decrypt.reset()
 		cache_name.text = "Intel: %s  ·  %s" % [target.name, Decoding.intel_text(target)]
 		var rows = []
-		var finds = 0
 		for i in Decoding.INTEL_LINES:
 			if randf() < Decoding.get_efficiency(process_data):
-				rows.append({"text": "INTEL FOUND"})
-				finds += 1
+				rows.append({"text": "INTEL FOUND", "event": "intel"}) # applied the moment the line reveals (_on_text_found)
 			else:
 				rows.append(null)
 		cache_decrypt.build_rows(rows)
@@ -226,12 +225,15 @@ func _run_intel() -> void:
 		if !running:
 			apply_heat(cycle_mode)
 			return
-		for i in finds:
-			Decoding.add_intel_point(target)
-		if finds > 0:
-			update_items_gained_label("Intel finds", finds)
-		cache_name.text = "Intel: %s  ·  %s" % [target.name, Decoding.intel_text(target)]
 		_cycle_done(cycle_mode)
+
+## Intel lines: each one adds its point the moment it's revealed (like items do)
+func _on_text_found(event: String) -> void:
+	if event != "intel" or !(target_arg is Dictionary) or target_arg.is_empty():
+		return
+	Decoding.add_intel_point(target_arg)
+	update_items_gained_label("Intel finds", 1)
+	cache_name.text = "Intel: %s  ·  %s" % [target_arg.name, Decoding.intel_text(target_arg)]
 
 ## Session tally row without adding anything to the inventory.
 

@@ -25,7 +25,7 @@ lvl = 1; xp_tot = 0
 PROPOSAL = []; SUM = []
 for T, tier in enumerate(d["tiers"], 1):
     dl = ARRIVE[T - 1] + 7                              # decoding level mid-tier ~ hacking level
-    p = (eff0 + rate * (dl - 1)) * (1 + (track("decoding.efficiency", T - 1) + track("decoding.efficiency", T)) / 2)
+    p = 0.25  # 2026-10-22: flat rare chance (efficiency no longer raises it; it adds basic resources)
     tr = track("decoding.rare_tracker", T)
     cpr = caches_per_rare(p, tr)
     tg = tier["targets"]

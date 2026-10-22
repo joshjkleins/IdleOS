@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://dritanm6yuap3"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_h4hda"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_qeoyp"]
+[ext_resource type="Resource" uid="uid://bnkd64ranmkn0" path="res://items/cache_entry/government/analyst/drop_1.tres" id="3_iv1uf"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_x8km5"]
+[ext_resource type="Resource" uid="uid://deaqg4e64qqno" path="res://items/cache_entry/government/analyst/drop_2.tres" id="4_itooy"]
+[ext_resource type="Resource" uid="uid://btm26vegdespx" path="res://items/cache_entry/government/analyst/drop_3.tres" id="5_bofla"]
+[ext_resource type="Resource" uid="uid://bwp1f4n82v3rq" path="res://items/cache_entry/government/analyst/rare_drop.tres" id="6_v8qjk"]
+
+[resource]
+script = ExtResource("3_x8km5")
+entries = Array[ExtResource("2_qeoyp")]([ExtResource("3_iv1uf"), ExtResource("4_itooy"), ExtResource("5_bofla")])
+rare_pool = Array[ExtResource("2_qeoyp")]([ExtResource("6_v8qjk")])
+rare_drop_chance = 0.05
+id = 140
+name = "Analyst Cache"
+shortened_name = ""
+description = "Received from hacking a Government Analyst. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_h4hda")]([])
+tier = 6
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 111.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -66,6 +66,18 @@ func _on_player_hacking_box_command_entered(text):
 		quit_game()
 		return
 	var low = text.to_lower().strip_edges()
+	# one-time items: "<full name> -force"
+	if low.ends_with(" -force"):
+		var forced = Exploits.find_forced(low)
+		if forced == null:
+			player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % low.trim_suffix(" -force"))
+		else:
+			_use_exploit(forced)
+		return
+	# back to the main terminal from anywhere in the hacking console
+	if low in ["cd ~", "cd /", "cd", "home", "root"] and current_context != HackingContext.HACKING:
+		go_to_root()
+		return
 	if low == "run" or low.begins_with("run "):
 		handle_run_command(low)
 		return
@@ -143,7 +155,7 @@ func _on_player_hacking_box_command_entered(text):
 					_:
 						player_hacking_box.add_line("Hacking in progress, to stop hacking type 'kill'")
 
-## 'run' (list), 'run <item>' (use during a hack), 'run auto <item>' / 'run auto off'
+## 'run' (list), 'run auto <item>' / 'run auto off'; items are used with '<name> -force' (_use_exploit)
 func handle_run_command(text: String) -> void:
 	var game = enemy_hacking_box.hacking_game
 	var in_hack = current_context == HackingContext.HACKING and game.is_hacking
@@ -171,10 +183,15 @@ func handle_run_command(text: String) -> void:
 		if Inventory.get_amount(auto_item) <= 0:
 			player_hacking_box.add_line_warning("You don't have any %s yet." % auto_item.name)
 		return
-	var item = Exploits.find(arg)
+	var item = Exploits.find(arg) # old 'run <name>' still works (not shown anywhere)
 	if item == null:
 		player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % arg)
 		return
+	_use_exploit(item)
+
+func _use_exploit(item) -> void:
+	var game = enemy_hacking_box.hacking_game
+	var in_hack = current_context == HackingContext.HACKING and game.is_hacking
 	if !in_hack:
 		player_hacking_box.add_line_warning("One-time items can only be used during a hack.")
 		return
@@ -366,7 +383,8 @@ func hacking_help_commands():
 				["view [location]", "List targets at location", "e.g. view school"],
 				["unlock", "List locked targets and what they cost"],
 				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
-				["cd ..",            "Return to terminal root"]
+				["cd ..",            "Return to terminal root"],
+				["cd ~",             "Return to terminal root from anywhere in hacking"]
 			]))
 		HackingContext.PERSONS:
 			var recursive_unlocked = true # '-r' is always available
@@ -376,7 +394,8 @@ func hacking_help_commands():
 				["hack [target]=[amount]", "Hack target a set number of times", "e.g. hack student=20"],
 				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
 				["unlock [target]", "Unlock a target ('unlock' lists them)", "e.g. unlock administrator"],
-				["cd ..", "Return to locations directory", "e.g. 'cd ..'"]
+				["cd ..", "Return to locations directory", "e.g. 'cd ..'"],
+				["cd ~", "Return to terminal root"]
 			]
 
 			if recursive_unlocked:
@@ -387,7 +406,7 @@ func hacking_help_commands():
 			if true: # hacking overclock is always available
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
-					["run [item]", "Use a one-time item ('run' lists yours)."],
+					["[item name] -force", "Use a one-time item ('run' lists yours)."],
 					["kill", "Kills current hack attempt immediately."],
 					#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
 					["overclock", "Doubles bandwidth regen (more heat per action)"],
@@ -396,7 +415,7 @@ func hacking_help_commands():
 			else:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
-					["run [item]", "Use a one-time item ('run' lists yours)."],
+					["[item name] -force", "Use a one-time item ('run' lists yours)."],
 					["kill", "Kills current hack attempt immediately."],
 				]))
 

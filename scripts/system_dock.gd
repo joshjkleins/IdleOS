@@ -44,6 +44,7 @@ func _ready() -> void:
 	for side in ["left", "top", "right", "bottom"]:
 		monitor_margin.add_theme_constant_override("margin_" + side, 0)
 	_add_upload_section()
+	_add_defrag_boost()
 	_add_vm_toggle()
 	_add_trap_status()
 	VMManager.vms_changed.connect(_rebuild_rows)
@@ -84,6 +85,24 @@ func _add_upload_section() -> void:
 	var spacer = full_view.get_node_or_null("Spacer")
 	if spacer:
 		spacer.size_flags_vertical = Control.SIZE_FILL
+
+## running Defragging boost at the very top (hidden when none is active)
+func _add_defrag_boost() -> void:
+	var boost := DefragBoostSection.new()
+	boost.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var top_bar = collapse_button.get_parent() # shares the row with the collapse button
+	top_bar.add_child(boost)
+	top_bar.move_child(boost, 0)
+	var top_spacer = top_bar.get_node_or_null("Spacer")
+	if top_spacer: # the boost takes the row's free space while it shows (spacer comes back when it hides)
+		boost.visibility_changed.connect(func(): top_spacer.visible = !boost.visible)
+		top_spacer.visible = !boost.visible
+	collapse_button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep)
+	full_view.move_child(sep, top_bar.get_index() + 1)
+	boost.set_separator(sep)
 
 ## Phishing trap: one small row under the temperature widget (hidden until Trap unlocks).
 func _add_trap_status() -> void:

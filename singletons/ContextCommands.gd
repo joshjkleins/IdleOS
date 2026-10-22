@@ -1,5 +1,8 @@
 extends Node
 
+## the one Discord invite used everywhere (welcome, discord, discord -c, tutorial end). Never-expiring invite.
+const DISCORD_LINK := "https://discord.gg/eaAqGG5FPZ"
+
 func all_commands() -> String:
 	var cmd_text = "MODULES\n"
 	cmd_text += "[font_size=12]" + tab_space() + pad_text("load [module]", 20) +  "Loads specific module [color=888888]example usage: load mining[/color][/font_size]\n"
@@ -278,7 +281,6 @@ func get_help_text_defragging(skill: Node) -> String:
 	var text = get_ascii_text(skill)
 	var columns = [
 		{"title": "PROCESS"},
-		{"title": "REQUIREMENT", "drop": 2},
 		{"title": "DURATION", "drop": 1},
 		{"title": "BONUS", "min": 20},
 		{"title": "COMMAND"},
@@ -287,7 +289,7 @@ func get_help_text_defragging(skill: Node) -> String:
 	var colors = []
 	for p in skill.minor_processes:
 		var active = Defragging.is_active(p)
-		rows.append([p.name, p.requirements.item.name + " x" + str(p.requirements.amount), Stats.boost_minutes_text() + (" (ACTIVE " + Stats.get_bonus_time_text(p) + ")" if active else ""), p.get("bonus text", p.get("bonus label", "-")), p.command])
+		rows.append([p.name, Stats.boost_minutes_text() + (" (ACTIVE " + Stats.get_bonus_time_text(p) + ")" if active else ""), p.get("bonus text", p.get("bonus label", "-")), p.command])
 		colors.append("#ffc24a" if active else ("" if p.unlocked else "#666666"))
 	text += build_table(columns, rows, colors)
 	text += "\n[color=#666666]One boost at a time: defragging shares a %d minute cooldown.[/color]" % int(Defragging.get_cooldown_minutes())
@@ -477,7 +479,10 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 	
 	##Requirements
 	return_text += "REQUIREMENTS\n"
-	return_text += "└─ " + process.requirements.item.name + " x" + str(process.requirements.amount) + "\n"
+	if process.get("requirements", {}).is_empty():
+		return_text += "└─ none (limited by the shared cooldown)\n"
+	else:
+		return_text += "└─ " + process.requirements.item.name + " x" + str(process.requirements.amount) + "\n"
 	
 	return_text += "\n\n"
 	
@@ -918,12 +923,17 @@ func get_root_upgrades_text() -> String:
 	var colors = []
 	for g in Upgrades.groups:
 		var wt = Upgrades.working_tier(g)
-		var tier_text = "complete" if wt > 6 else "%d · %s" % [wt, Upgrades.tier_name(wt)]
-		var done = 0 if wt > 6 else Upgrades.tier_installed(g, wt)
+		# tier done but the next one isn't open yet: show the finished tier as up to date (10/10)
+		var waiting = wt <= 6 and wt > 1 and !Upgrades.tier_unlocked(wt)
+		var st = wt - 1 if waiting else wt
+		var tier_text = "complete" if wt > 6 else "%d · %s" % [st, Upgrades.tier_name(st)]
+		var done = 0 if wt > 6 else Upgrades.tier_installed(g, st)
 		var ready = 0
 		var status = ""
 		if !Upgrades.is_wired(g):
 			status = "[color=%s]coming soon[/color]" % APT_DIM
+		elif waiting:
+			status = "[color=%s]up to date[/color]" % APT_OK
 		elif wt <= 6 and !Upgrades.tier_unlocked(wt):
 			status = "[color=%s]tier locked[/color]" % APT_DIM
 		else:
@@ -932,7 +942,7 @@ func get_root_upgrades_text() -> String:
 					ready += 1
 			status = ("[color=%s]%d ready[/color]" % [APT_OK, ready]) if ready > 0 else "[color=%s]-[/color]" % APT_DIM
 		rows.append([_apt_group_name(g), Upgrades.version_text(g), tier_text,
-			(apt_bar(done) + " %d/10" % done) if wt <= 6 else apt_bar(10, 10, APT_GOLD), status, "apt " + g.to_lower()])
+			(apt_bar(done, 10, APT_GOLD if waiting else APT_OK) + " %d/10" % done) if wt <= 6 else apt_bar(10, 10, APT_GOLD), status, "apt " + g.to_lower()])
 		colors.append("")
 	t += build_table(columns, rows, colors)
 	t += "\n[color=%s]apt <skill>[/color] lists a skill's packages · [color=%s]apt install <skill>[/color] installs everything ready · [color=%s]apt install all[/color] for every skill" % [APT_OK, APT_OK, APT_OK]
@@ -946,6 +956,11 @@ func get_skill_upgrades_text(group: String) -> String:
 	if !Upgrades.is_wired(group):
 		t += "[color=%s]%s upgrades can be installed once this skill is migrated.[/color]\n" % [APT_GOLD, group]
 	var wt = Upgrades.working_tier(group)
+	# finished a tier, next one not open yet: list what's installed in the finished tier, then what opens next
+	var waiting = wt <= 6 and wt > 1 and !Upgrades.tier_unlocked(wt)
+	var locked_next = wt
+	if waiting:
+		wt -= 1
 	for tier in range(1, min(wt, 7)):
 		t += "[color=%s]TIER %d · %s[/color]  %s  [color=%s]complete · v%d.0[/color]\n" % [APT_DIM, tier, Upgrades.tier_name(tier).to_upper(), apt_bar(10, 10, APT_GOLD), APT_DIM, tier]
 	if wt > 6:
@@ -953,10 +968,10 @@ func get_skill_upgrades_text(group: String) -> String:
 		return t
 	var done = Upgrades.tier_installed(group, wt)
 	var head = "TIER %d · %s" % [wt, Upgrades.tier_name(wt).to_upper()]
-	if !Upgrades.tier_unlocked(wt):
+	if !waiting and !Upgrades.tier_unlocked(wt):
 		t += "\n[color=%s]%s  locked · opens with %s access (upload goal)[/color]\n" % [APT_DIM, head, Upgrades.tier_name(wt)]
 		return t
-	t += "\n%s  %s %d/10\n" % [head, apt_bar(done), done]
+	t += "\n%s  %s %d/10%s\n" % [head, apt_bar(done, 10, APT_GOLD if waiting else APT_OK), done, ("  [color=%s]up to date · v%d.0[/color]" % [APT_OK, wt]) if waiting else ""]
 	var columns = [{"title": "PACKAGE"}, {"title": "UPGRADE"}, {"title": "CHANGE", "min": 18}, {"title": "COST", "min": 20}, {"title": "STATUS"}]
 	var rows = []
 	var colors = []
@@ -983,7 +998,9 @@ func get_skill_upgrades_text(group: String) -> String:
 		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
 		colors.append("")
 	t += build_table(columns, rows, colors)
-	if wt < 6:
+	if waiting:
+		t += "[color=%s]Next: Tier %d · %s opens with %s access (upload goal)[/color]\n" % [APT_DIM, locked_next, Upgrades.tier_name(locked_next), Upgrades.tier_name(locked_next)]
+	elif wt < 6:
 		var nt = wt + 1
 		var opens = "after v%d.0" % wt if Upgrades.tier_unlocked(nt) else "with %s access and v%d.0" % [Upgrades.tier_name(nt), wt]
 		t += "[color=%s]Next: Tier %d · %s opens %s[/color]\n" % [APT_DIM, nt, Upgrades.tier_name(nt), opens]
@@ -1134,14 +1151,14 @@ walks you through it one terminal command at a time, and teaches you the operati
 Hacking is where the big hauls come from: every breached target drops a cache full of resources,
 far more than your processes make on their own. Your processes keep the hacks supplied.
 
-Thoughts or suggestions? Join the Discord: https://discord.gg/XnrH7zrdb  ('discord -c' copies it)
+Thoughts or suggestions? Join the Discord: """ + DISCORD_LINK + """  ('discord -c' copies it)
 
 To view this message again, use the 'welcome' command.
 """
 
 func discord_message():
 	return """
-Discord link: https://discord.gg/XnrH7zrdb
+Discord link: """ + DISCORD_LINK + """
 
 To copy the discord link to your clipboard use 'discord -c'
 """
@@ -1155,7 +1172,8 @@ func get_mod_command() -> String:
 
 	var return_text = ""
 	var id_col = 5
-	var mod_col = 30
+	var mod_col = 27
+	var eff_col = 32
 	var mod_val = 8
 	
 	var active_mods_title = "\n| ACTIVE MODS " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)  + " |\n"
@@ -1163,12 +1181,13 @@ func get_mod_command() -> String:
 	return_text += "\n------------------"
 	return_text += active_mods_title
 	return_text += "------------------\n\n"
-	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
-	return_text += "--------------------------------------------------------------\n"
+	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("EFFECT", eff_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
+	return_text += "-----------------------------------------------------------------------------------\n"
 
 	if HackingMods.current_mods.is_empty():
 		return_text += pad_text("-", id_col)
 		return_text += pad_text("-", mod_col)
+		return_text += pad_text("-", eff_col)
 		return_text += pad_text("-", mod_val)
 		return_text += "-\n"
 	
@@ -1184,7 +1203,8 @@ func get_mod_command() -> String:
 
 			return_text += pad_text("[" + str(i) + "]", id_col, false)
 			return_text += pad_text(hmn, mod_col)
-			return_text += pad_text(" " + hmv, mod_val)
+			return_text += pad_text(HackingMods.get_mod_stat(mod_type), eff_col)
+			return_text += pad_text(hmv, mod_val)
 			return_text += str(hmd) + " hacks\n"
 	
 	return_text += "\n\n\n-------------"
@@ -1193,11 +1213,11 @@ func get_mod_command() -> String:
 	
 	
 	var mod_id_col = 5
-	var mod_name_col = 25
-	var mod_mod_col = 30
+	var mod_name_col = 27
+	var mod_mod_col = 32
 	var mod_val_col = 8
 	
-	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("MOD", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
+	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
 	return_text += "----------------------------------------------------------------------------------\n"
 	if Inventory.has_mod_item():
 		var player_hacking_mods = Inventory.get_hacking_mods_items()
@@ -1208,12 +1228,11 @@ func get_mod_command() -> String:
 				var mod_type = mod.hacking_mod_type
 
 				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
-				var hmn = HackingMods.get_mod_name(mod_type)
 				var hmd = mod.hacking_mod_duration
 
 				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
 				return_text += pad_text(mod.name, mod_name_col)
-				return_text += pad_text(hmn, mod_mod_col)
+				return_text += pad_text(HackingMods.get_mod_stat(mod_type), mod_mod_col)
 				return_text += pad_text(hmv, mod_val_col)
 				return_text += str(hmd) + " hacks\n"
 		

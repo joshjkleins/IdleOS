@@ -314,16 +314,16 @@
    "group": "System",
    "name": "Background Services",
    "type": "track",
-   "effect": "Offline progression cap: +2 h per install on top of the 1 h base (24 h max)",
+   "effect": "How long offline progression runs while you're away",
    "levels": [
     {
      "tier": 1,
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "0 h added to the 1 h offline cap",
-     "after": "2 h added to the 1 h offline cap",
-     "effect": "Offline progression cap: +2 h per install on top of the 1 h base (24 h max)",
+     "before": "1 h offline progression",
+     "after": "3 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Logs",
@@ -336,9 +336,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "2 h added to the 1 h offline cap",
-     "after": "4 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "3 h offline progression",
+     "after": "5 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Logs",
@@ -351,9 +351,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "4 h added to the 1 h offline cap",
-     "after": "6 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "5 h offline progression",
+     "after": "7 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Archives",
@@ -366,9 +366,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "6 h added to the 1 h offline cap",
-     "after": "8 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "7 h offline progression",
+     "after": "9 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Archives",
@@ -381,9 +381,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "8 h added to the 1 h offline cap",
-     "after": "10 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "9 h offline progression",
+     "after": "11 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Metadata",
@@ -396,9 +396,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "10 h added to the 1 h offline cap",
-     "after": "12 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "11 h offline progression",
+     "after": "13 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Metadata",
@@ -411,9 +411,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "12 h added to the 1 h offline cap",
-     "after": "14 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "13 h offline progression",
+     "after": "15 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Cookies",
@@ -426,9 +426,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "14 h added to the 1 h offline cap",
-     "after": "16 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "15 h offline progression",
+     "after": "17 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Cookies",
@@ -441,9 +441,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "16 h added to the 1 h offline cap",
-     "after": "18 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "17 h offline progression",
+     "after": "19 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Repositories",
@@ -456,9 +456,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "18 h added to the 1 h offline cap",
-     "after": "20 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "19 h offline progression",
+     "after": "21 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Repositories",
@@ -471,9 +471,9 @@
      "slot": 4,
      "value": 2.0,
      "label": "+2 h",
-     "before": "20 h added to the 1 h offline cap",
-     "after": "22 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "21 h offline progression",
+     "after": "23 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Databases",
@@ -486,9 +486,9 @@
      "slot": 5,
      "value": 2.0,
      "label": "+2 h",
-     "before": "22 h added to the 1 h offline cap",
-     "after": "24 h added to the 1 h offline cap",
-     "effect": "Offline progression cap",
+     "before": "23 h offline progression",
+     "after": "24 h offline progression",
+     "effect": "How long offline progression runs while you're away",
      "costs": [
       {
        "item": "Databases",
@@ -6950,7 +6950,7 @@
    "group": "Decoding",
    "name": "Efficiency",
    "type": "track",
-   "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+   "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
    "levels": [
     {
      "tier": 1,
@@ -6959,7 +6959,7 @@
      "label": "+1.67% of eff",
      "before": "0 % of own efficiency",
      "after": "1.67 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Logs",
@@ -6989,7 +6989,7 @@
      "label": "+1.67% of eff",
      "before": "3.33 % of own efficiency",
      "after": "5 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Archives",
@@ -7019,7 +7019,7 @@
      "label": "+1.67% of eff",
      "before": "6.67 % of own efficiency",
      "after": "8.33 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Metadata",
@@ -7049,7 +7049,7 @@
      "label": "+1.67% of eff",
      "before": "10 % of own efficiency",
      "after": "11.67 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Cookies",
@@ -7079,7 +7079,7 @@
      "label": "+1.67% of eff",
      "before": "13.33 % of own efficiency",
      "after": "15 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Repositories",
@@ -7109,7 +7109,7 @@
      "label": "+1.67% of eff",
      "before": "16.67 % of own efficiency",
      "after": "18.33 % of own efficiency",
-     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan rare chance, Skim +50% basics, Package double, Intel finds, Salvage doubles; +20% of its own at max (Cache rare 7.9% -> 9.5% at L99)",
+     "effect": "Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max",
      "costs": [
       {
        "item": "Databases",

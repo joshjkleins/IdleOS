@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CacheData" load_steps=8 format=3 uid="uid://4qubjotyuogx"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_5wcia"]
+[ext_resource type="Script" uid="uid://ct415ioicqw1p" path="res://resource_scripts/cache_entry.gd" id="2_28sns"]
+[ext_resource type="Resource" uid="uid://dua7bbljbg0cd" path="res://items/cache_entry/government/clerk/drop_1.tres" id="3_20ywr"]
+[ext_resource type="Script" uid="uid://vtttl3aisfpi" path="res://resource_scripts/cache_data.gd" id="3_pkerc"]
+[ext_resource type="Resource" uid="uid://n480v6i0c14u" path="res://items/cache_entry/government/clerk/drop_2.tres" id="4_0pe08"]
+[ext_resource type="Resource" uid="uid://b07x55kqj3gn2" path="res://items/cache_entry/government/clerk/drop_3.tres" id="5_unmwu"]
+[ext_resource type="Resource" uid="uid://dbqlfkuhp6pj5" path="res://items/cache_entry/government/clerk/rare_drop.tres" id="6_s4xwc"]
+
+[resource]
+script = ExtResource("3_pkerc")
+entries = Array[ExtResource("2_28sns")]([ExtResource("3_20ywr"), ExtResource("4_0pe08"), ExtResource("5_unmwu")])
+rare_pool = Array[ExtResource("2_28sns")]([ExtResource("6_s4xwc")])
+rare_drop_chance = 0.05
+id = 139
+name = "Clerk Cache"
+shortened_name = ""
+description = "Received from hacking a Government Clerk. Decode it for resources and a chance at a rare item, or Parse it into a variant."
+upgrade_ingredient = false
+value = 0
+parsable = true
+contained_items = Array[ExtResource("1_5wcia")]([])
+tier = 6
+color_type = 7
+obtained_from = Array[int]([6])
+obtained_from_additional_hint = ""
+hacking_mod_type = 7
+hacking_mod_value = 110.0
+hacking_mod_duration = 10
+hacking_mod_consumed = 25
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://vtttl3aisfpi"

@@ -21,7 +21,7 @@ const NETWORK_VM_MIN = 10
 const NETWORK_VM_MAX = 20
 const CORRUPTION_DROP_BONUS = 0.3       # flat bonus to every drop chance (incl. rare)
 const CORRUPTION_CHANCE = 0.2           # chance to corrupt (lose the rest) after each item found
-const EXTRACTION_EXTRA_RARE = 4         # extra copies of the rare item when it drops
+const EXTRACTION_EXTRA_RARE = 1         # extra copies of the rare item when it drops (2026-10-22: was 4)
 
 func get_variant() -> CacheVariant:
 	var n = name.to_lower()

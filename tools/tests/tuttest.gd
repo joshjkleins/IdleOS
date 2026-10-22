@@ -35,19 +35,16 @@ func _run() -> void:
 	Inventory.add_resource(Items.IP_ADDRESS, 5)
 	await _cmd("upload")
 	print(">>> after 'upload': ", _cur())
-	await _cmd("cd decoding")
 	Engine.time_scale = 10.0
-	await _cmd("decode -package=logs 5", 4.0)
-	print(">>> staged logs %d, logs left %d | current: %s" % [Uploads.get_staged(Items.LOGS), Inventory.get_amount(Items.LOGS), _cur()])
-	await _cmd("upload -logs")
+	await _cmd("upload logs 5", 2.0) # packaging was removed: uploads come straight from the inventory
+	print(">>> queued logs %d, logs left %d | current: %s" % [Uploads.get_staged(Items.LOGS), Inventory.get_amount(Items.LOGS), _cur()])
 	print(">>> uploading logs=%s | current: %s" % [Uploads.is_uploading(Items.LOGS), _cur()])
 	# jump to the IP step
 	for e in [Tutorial.TutorialEvent.NAVIGATE_PARSING, Tutorial.TutorialEvent.PARSE_20_LOGS, Tutorial.TutorialEvent.OBTAIN_3_ENCRYPTED_PASSWORDS, Tutorial.TutorialEvent.OBTAIN_3_USERNAMES, Tutorial.TutorialEvent.OBTAIN_3_IP_ADDRESSES]:
 		Tutorial.completed_events.append(e)
 	print(">>> current: ", _cur())
-	await _cmd("decode -package=ip address 1", 3.0)
-	await _cmd("upload -ip address")
-	print(">>> staged/uploading ip %d/%s, IP left %d | current: %s" % [Uploads.get_staged(Items.IP_ADDRESS), Uploads.is_uploading(Items.IP_ADDRESS), Inventory.get_amount(Items.IP_ADDRESS), _cur()])
+	await _cmd("upload ip address 1", 2.0)
+	print(">>> queued/uploading ip %d/%s, IP left %d | current: %s" % [Uploads.get_staged(Items.IP_ADDRESS), Uploads.is_uploading(Items.IP_ADDRESS), Inventory.get_amount(Items.IP_ADDRESS), _cur()])
 	Engine.time_scale = 1.0
 	# mining upgrade step
 	Inventory.add_resource(Items.LOGS, 500)

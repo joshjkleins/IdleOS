@@ -628,6 +628,7 @@ func universal_commands(text):
 			var mod_to_remove = HackingMods.current_mods.keys()[int(id_to_remove)]
 			HackingMods.remove_mod(mod_to_remove)
 			add_line(HackingMods.get_mod_name(mod_to_remove) + " mod deleted.")
+			add_line(ContextCommands.get_mod_command())
 			return true
 		
 		if text.begins_with("mod -add"):
@@ -663,6 +664,7 @@ func universal_commands(text):
 			HackingMods.add_mod(item_mod_to_add)
 			Inventory.remove_resource(item_mod_to_add, 1)
 			add_line(item_mod_to_add.name + " added.")
+			add_line(ContextCommands.get_mod_command()) # IDs shift once an item is used: show the fresh list
 			return true
 			
 			
@@ -712,7 +714,7 @@ func universal_commands(text):
 			add_line(ContextCommands.demo_welcome_message())
 			return true
 		"discord -c":
-			var discord_link = "https://discord.gg/bWFwUsF9a"
+			var discord_link = ContextCommands.DISCORD_LINK
 			DisplayServer.clipboard_set(discord_link)
 			add_line("[color=green]Discord invite copied to clipboard.[/color]")
 			return true

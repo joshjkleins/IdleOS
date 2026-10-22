@@ -44,6 +44,8 @@ func start(minor_skill: Dictionary):
 	setup_sweep()
 
 func consume_requirement(skill: Dictionary):
+	if skill.get("requirements", {}).is_empty():
+		return
 	Inventory.remove_resource(skill["requirements"]["item"], skill["requirements"]["amount"])
 
 func stop():

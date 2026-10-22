@@ -227,11 +227,7 @@ func _fill_defrag_charge(card: HeaderCard) -> void:
 	card.bar.color = C_DEFRAG.lightened(0.15) if ready else C_DEFRAG.darkened(0.12)
 	if abs(card.bar.value - charge) > 0.001:
 		card.bar.animate_to(charge, 0.9) # smooth tick between 1s refreshes
-	var boosts = Defragging.get_active()
-	if !boosts.is_empty(): # a boost is running: show it (and its time left) on the defrag card
-		card.set_footer(card.left_label, "%s %s" % [boosts[0].name.to_upper(), Stats.get_bonus_time_text(boosts[0])], true)
-		card.set_footer(card.right_label, "" if ready else "%d%%" % int(charge * 100))
-		return
+	# (a running boost is shown at the top of the side panel: DefragBoostSection)
 	if ready:
 		card.left_label.text = "available"
 		card.left_label.add_theme_color_override("font_color", C_DEFRAG.lightened(0.3))

@@ -1,44 +1,44 @@
-loc	i	name	integrity	firewall	counter	counter speed	heat	exp	req	intel stat	loot	keys
-School	1	Student	100	10	5	16.0	0.5	100	School payload x1		Student cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-School	2	Administrator	120	13	7	16.0	0.9	1200	School payload x2		Admin cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-School	3	Vice Principal	140	15	9	16.0	1.0	1800	School payload x3		Vice principal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-School	4	Principal	160	20	6	30.0	1.3	2400	School payload x4		Principal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-School	5	Superintendent	200	30	12	20.0	2.0	3000	School payload x5		Superintendent cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Lawfirm	1	Legal Assistant	200	20	10	16.0	0.7	200	Lawfirm Payload x1		Legal assistant cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Lawfirm	2	Paralegal	240	26	14	16.0	1.1	2400	Lawfirm Payload x2		Paralegal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Lawfirm	3	Associate Attorney	280	30	18	16.0	1.2	3600	Lawfirm Payload x3		Associate attorney cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Lawfirm	4	Lawyer	320	40	12	30.0	1.5	4800	Lawfirm Payload x4		Lawyer cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Lawfirm	5	Partner	400	60	24	20.0	2.2	6000	Lawfirm Payload x5		Partner cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Hospital	1	Receptionist	350	35	18	16.0	0.9	350	Hospital Payload x1		Receptionist cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Hospital	2	Orderly	420	45	24	16.0	1.3	4200	Hospital Payload x2		Orderly cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Hospital	3	Nurse	490	52	32	16.0	1.4	6300	Hospital Payload x3		Nurse cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Hospital	4	Doctor	560	70	21	30.0	1.7	8400	Hospital Payload x4		Doctor cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Hospital	5	Chief of Medicine	700	105	42	20.0	2.4	10500	Hospital Payload x5		Chief of medicine cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Bank	1	Teller	550	55	28	16.0	1.1	550	Bank Payload x1		Teller Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Bank	2	Loan Officer	660	71	38	16.0	1.5	6600	Bank Payload x2		Loan Officer Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Bank	3	Branch Manager	770	82	50	16.0	1.6	9900	Bank Payload x3		Branch Manager Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Bank	4	Security	880	110	33	30.0	1.9	13200	Bank Payload x4		Security Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Bank	5	Chief Financial Officer	1100	165	66	20.0	2.6	16500	Bank Payload x5		Chief Financial Officer Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Police Station	1	Secretary	800	80	40	16.0	1.3	800	Police Payload x1		Secretary cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Police Station	2	Cop	960	104	56	16.0	1.7	9600	Police Payload x2		Cop cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Police Station	3	Detective	1120	120	72	16.0	1.8	14400	Police Payload x3		Detective cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Police Station	4	Sergeant	1280	160	48	30.0	2.1	19200	Police Payload x4		Sergeant cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Police Station	5	Captain	1600	240	96	20.0	2.8	24000	Police Payload x5		Captain cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Government	1	Clerk	1200	120	60	16.0	1.5	1200	Government Payload x1		Clerk Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Government	2	Analyst	1440	156	84	16.0	1.9	14400	Government Payload x2		Analyst Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Government	3	Ambassador	1680	180	108	16.0	2.0	21600	Government Payload x3		Ambassador Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Government	4	Vice President	1920	240	72	30.0	2.3	28800	Government Payload x4		Vice President Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
-Government	5	President	2400	360	144	20.0	3.0	36000	Government Payload x5		President Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,loot
+loc	i	name	integrity	firewall	counter	counter speed	heat	exp	req	loot	keys
+School	1	Student	103	13	7	16.0	0.5	45	School payload x1	Student cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+School	2	Administrator	306	15	5	16.0	0.8	500	School payload x2	Admin cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+School	3	Vice Principal	354	26	6	16.0	1.1	753	School payload x3	Vice principal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+School	4	Principal	409	19	3	30.0	1.4	1005	School payload x4	Principal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+School	5	Superintendent	523	21	6	20.0	1.7	1252	School payload x5	Superintendent cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Lawfirm	1	Legal Assistant	164	25	20	16.0	0.5	109	Lawfirm Payload x1	Legal assistant cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Lawfirm	2	Paralegal	419	31	18	16.0	0.8	1287	Lawfirm Payload x2	Paralegal cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Lawfirm	3	Associate Attorney	691	74	22	16.0	1.1	1931	Lawfirm Payload x3	Associate attorney cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Lawfirm	4	Lawyer	826	41	8	30.0	1.4	2578	Lawfirm Payload x4	Lawyer cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Lawfirm	5	Partner	1113	56	21	20.0	1.7	3222	Lawfirm Payload x5	Partner cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Hospital	1	Receptionist	348	52	40	16.0	0.5	155	Hospital Payload x1	Receptionist cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Hospital	2	Orderly	834	63	35	16.0	0.8	1865	Hospital Payload x2	Orderly cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Hospital	3	Nurse	1275	143	43	16.0	1.1	2798	Hospital Payload x3	Nurse cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Hospital	4	Doctor	1890	91	17	30.0	1.4	3731	Hospital Payload x4	Doctor cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Hospital	5	Chief of Medicine	2193	106	38	20.0	1.7	4661	Hospital Payload x5	Chief of medicine cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Bank	1	Teller	672	93	64	16.0	0.5	193	Bank Payload x1	Teller Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Bank	2	Loan Officer	1475	106	58	16.0	0.8	2317	Bank Payload x2	Loan Officer Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Bank	3	Branch Manager	2138	230	67	16.0	1.1	3475	Bank Payload x3	Branch Manager Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Bank	4	Security	3340	169	34	30.0	1.4	4634	Bank Payload x4	Security Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Bank	5	Chief Financial Officer	3876	188	68	20.0	1.7	5792	Bank Payload x5	Chief Financial Officer Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Police Station	1	Secretary	1163	135	79	16.0	0.5	225	Police Payload x1	Secretary cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Police Station	2	Cop	2340	155	77	16.0	0.8	2692	Police Payload x2	Cop cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Police Station	3	Detective	3246	349	101	16.0	1.1	4036	Police Payload x3	Detective cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Police Station	4	Sergeant	4156	354	118	30.0	1.4	5383	Police Payload x4	Sergeant cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Police Station	5	Captain	5502	346	162	20.0	1.7	6728	Police Payload x5	Captain cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Government	1	Clerk	1862	198	106	16.0	0.5	252	Government Payload x1	Clerk Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Government	2	Analyst	3510	233	115	16.0	0.8	3013	Government Payload x2	Analyst Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Government	3	Ambassador	5200	491	125	16.0	1.1	4521	Government Payload x3	Ambassador Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Government	4	Vice President	8341	598	168	30.0	1.4	6027	Government Payload x4	Vice President Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
+Government	5	President	10693	566	223	20.0	1.7	7534	Government Payload x5	President Cache	name,difficulty,unlocked,command,requirements,heat,exp,integrity,firewall,counter,counter speed,firewall reboot,loot
 
-UPG	hacking.damage	track	5.0 10.0 15.0 20.0 25.0 30.0	Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)
-UPG	hacking.firewall	track	2.0 4.0 6.0 8.0 10.0 12.0	Firewall damage per SQL attack
+UPG	hacking.damage	track	5.0 30.0 68.0 118.0 180.0 280.0	Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)
+UPG	hacking.firewall	track	2.0 5.0 10.0 16.0 23.0 35.0	Firewall damage per SQL attack
 UPG	hacking.bandwidth_recovery	track	1.0 2.0 3.0 4.0 5.0 6.0	Bandwidth regenerated per second
 UPG	hacking.max_bandwidth	track	5.0 10.0 15.0 20.0 25.0 30.0	Max bandwidth (room for mod bandwidth costs)
 UPG	hacking.healing	track	0.01 0.02 0.03 0.04 0.05 0.06	Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)
 UPG	hacking.mod_slots	pointed	1.0 2.0 3.0 4.0 5.0 6.0	+1 hacking mod slot
 UPG	hacking.spoof_threshold	pointed	0.1 0.2 0.3 0.4 0.5 0.6	Packet Spoof starts auto-healing at a higher anonymity %
 UPG	hacking.persistent_session	pointed	0.1 0.2 0.3 0.4 0.5 0.6	More EXPLOIT charge from every combat event
-UPG	hacking.clean_exit	capstone	1.0 1.0 1.0 1.0 1.0 1.0	Keep 50% of banked caches when traced
+UPG	hacking.second_wind	capstone	1.0 1.0 1.0 1.0 1.0 1.0	Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)
 UPG	hacking.evasion	capstone	0.0 1.0 1.0 1.0 1.0 1.0	10% chance to dodge a countermeasure completely
 UPG	hacking.recycler	capstone	0.0 0.0 1.0 1.0 1.0 1.0	50% chance an SQL Injector is not consumed
 UPG	hacking.siphon	capstone	0.0 0.0 0.0 1.0 1.0 1.0	Each SQL hit restores 0.5% of max anonymity
