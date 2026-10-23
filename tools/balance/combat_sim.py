@@ -63,7 +63,7 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0, start_anon=None, spoofs=None)
         ctr = max(0, int(round(ctr * k))); cspd = max(0.1, cspd * k)
     fw_start = max(0, fw0 - g("fw_red"))
     n_mods = len(m)
-    sql_cost = min(P["max_bw"], SQL_COST + (P["tier"] + 1) * n_mods)  # compiled mods of this tier: +1 bandwidth per tier
+    sql_cost = min(P["max_bw"], SQL_COST + 1 * len([k for k in m if k != "sql_boost"]))  # 2026-10-23: equipped mods +1 bandwidth each (SQL Booster 0)
     spoof_cost = 0 if "ghost_packet" in m else 2
     anon = P["max_anon"] if start_anon is None else start_anon; amax = P["max_anon"]; bw = P["max_bw"]
     spoofs_left = 10**9 if spoofs is None else spoofs  # Packet Spoofs in the inventory (None = unlimited)

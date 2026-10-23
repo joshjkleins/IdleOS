@@ -20,6 +20,13 @@ const DEFS := {
 		"section": "Volume", "default": 70, "type": "range",
 		"help": "Sets background music volume percentage",
 	},
+	"music_player": {
+		"section": "Volume", "default": "on", "type": "enum",
+		"values": {
+			"on":  "Background music playlist on",
+			"off": "Background music off",
+		},
+	},
 	"window_mode": {
 		"section": "Window", "default": "full_screen", "type": "enum",
 		"values": {
@@ -30,6 +37,7 @@ const DEFS := {
 }
 
 var values: Dictionary = {}
+var _started := false # set once the game has booted (music waits for the boot screen)
 
 signal setting_changed(key: String, value)
 
@@ -107,6 +115,12 @@ func _apply(key: String) -> void:
 			Audiomanager.set_sfx_volume(v / 100.0)
 		"music":
 			Audiomanager.set_music_volume(v / 100.0)
+		"music_player":
+			Audiomanager.music_enabled = (v == "on")
+			if v != "on":
+				Audiomanager.stop_playlist()
+			elif _started:
+				Audiomanager.start_playlist()
 		"window_mode":
 			match v:
 				"windowed":

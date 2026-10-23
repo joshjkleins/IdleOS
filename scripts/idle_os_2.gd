@@ -156,6 +156,7 @@ func _ready():
 	if Tutorial.DEV_ALWAYS_SHOW_INTRO:
 		Tutorial.show_intro = true
 	if !Tutorial.show_intro:
+		_start_music.call_deferred()
 		add_line("[color=#33ff33]" + Ascii.welcome + "[/color]")
 		add_line(ContextCommands.demo_welcome_message())
 		add_line("To get started, type `-h` in the terminal.")
@@ -532,6 +533,24 @@ func universal_commands(text):
 		return true
 	if text == "flow":
 		post_flow_chart(func(c): return c.show_loop())
+		return true
+	if text == "music" or text.begins_with("music "):
+		var arg = text.trim_prefix("music").strip_edges()
+		match arg:
+			"next", "skip":
+				Audiomanager.skip_track()
+				add_line.call_deferred(Audiomanager.now_playing_text())
+			"off", "stop":
+				Settings.set_value("music_player", "off")
+				add_line("Music off. 'music on' turns it back on.")
+			"on", "start", "play":
+				Settings.set_value("music_player", "on")
+				add_line("Music on.")
+			"":
+				add_line(Audiomanager.now_playing_text())
+				add_line("[color=#888888]music next · music off · music on · volume: settings music=50[/color]")
+			_:
+				add_line("music commands: music · music next · music off · music on  [color=#666666](volume: settings music=<0-100>)[/color]")
 		return true
 	if text in ["utility", "utilities", "util"]:
 		add_line(ContextCommands.utility_commands())
@@ -2799,7 +2818,14 @@ func install_idle_os():
 	_finish_boot()
 
 ## End state of the boot (also what a skip lands on): everything visible, terminal cleared, welcome shown.
+## background playlist: after the boot screen (new game) or right away on a normal load
+func _start_music() -> void:
+	Settings._started = true
+	if Settings.get_value("music_player") == "on":
+		Audiomanager.start_playlist()
+
 func _finish_boot() -> void:
+	_start_music()
 	header.modulate.a = 1.0
 	header.visible = true
 	for skill in major_processes:

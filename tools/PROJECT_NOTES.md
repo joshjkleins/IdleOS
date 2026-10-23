@@ -716,3 +716,11 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
   (Phishing.is_rare_bait / tier_mod_pool / bait_cost; offline too). 'ls <rare>' shows the row (before / after).
 - Balance harness: tools/tests/modbal.gd (live fights, MODTIER / MODLAST / MODTARGET env). Finding: the +2 bandwidth
   per equipped mod makes non-damage mods slower at tier arrival (bandwidth-bound); asked Josh about lowering it.
+
+## Music (2026-10-23)
+- Audiomanager playlist: shuffled, no repeats in a row, 3s crossfade into the next track, 4s fade-in after boot.
+  Tracks in audio/music (Pixabay Content License): En Transe Mission (O-KSI-D), Technology Background (momotmusic);
+  credits in Audiomanager.TRACK_INFO, shown by 'music'. Add a track: drop the file in audio/music, add it to MUSIC,
+  DEFAULT_UNLOCKED and TRACK_INFO.
+- 'music' (now playing), 'music next', 'music off' / 'music on' (Settings music_player, saved per device);
+  volume: 'settings music=<0-100>'. Equipped mod bandwidth is now +1 per mod (SQL Booster 0).

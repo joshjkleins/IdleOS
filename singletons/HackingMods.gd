@@ -117,10 +117,10 @@ func pool_items(tier: int = 0) -> Array:
 	return out
 
 ## Every equipped mod adds bandwidth cost to each SQL Injector attack. Compiled mods cost by the tier of the item
-## they were made from (+1 per tier: older mods are the cheap option); equippable mods always cost +2.
+## they were made from (+1 per tier: older mods are the cheap option); equippable mods cost +1 (SQL Booster 0).
 ## A full loadout can cost more than max bandwidth: the attack then fires once the bar is full (a build trade-off).
 const MOD_BW_COST_BY_TIER = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7}
-const EQUIP_BW_COST := 2
+const EQUIP_BW_COST := 1 # 2026-10-23: was 2 (bandwidth-bound early fights made non-damage mods a net loss)
 
 func get_mod_bandwidth_cost(mod) -> int:
 	if !current_mods.has(mod):

@@ -805,6 +805,7 @@ func get_help() -> String:
 |                                                                     |
 | SETTINGS                                                            |
 |   settings                     Player settings menu                 |
+|   music                       Now playing · music next/off/on       |
 |                                                                     |
 | SYSTEM                                                              |
 |   date                         Show date and time                   |

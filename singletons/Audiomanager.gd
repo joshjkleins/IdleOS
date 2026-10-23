@@ -20,11 +20,21 @@ const SFX := {
 }
 
 const MUSIC := {
-	"main_theme": "res://audio/music/background_music_1.mp3",
+	"en_transe_mission": "res://audio/music/en_transe_mission.mp3",
+	"technology_background": "res://audio/music/technology_background.mp3",
 }
 
+## Background playlist (2026-10-23): shuffled, no track twice in a row, crossfades into the next track.
+## Credits are shown by the 'music' command. Both tracks: Pixabay Content License (free, commercial use OK).
+const TRACK_INFO := {
+	"en_transe_mission": {"title": "En Transe Mission", "artist": "O-KSI-D", "source": "Pixabay"},
+	"technology_background": {"title": "Technology Background", "artist": "momotmusic", "source": "Pixabay"},
+}
+const PLAYLIST_FADE := 3.0        # crossfade between tracks
+const PLAYLIST_START_FADE := 4.0  # fade-in when the music starts
+
 # Tracks available from the start. Everything else needs unlock_track().
-const DEFAULT_UNLOCKED: Array[String] = ["main_theme"]
+const DEFAULT_UNLOCKED: Array[String] = ["en_transe_mission", "technology_background"]
 
 const SFX_POOL_SIZE := 8          # how many SFX can overlap at once
 const DEFAULT_FADE := 1.0         # seconds for music crossfade
@@ -116,6 +126,68 @@ func play_music(name: String, fade: float = DEFAULT_FADE) -> void:
 	music_changed.emit(name)
 
 
+# ---------- PLAYLIST ----------
+var playlist_on := false     # the background playlist is running
+var music_enabled := true    # 'music off' / Settings music_player
+var _queue: Array = []
+var _last_track := ""
+
+## Starts the shuffled background playlist (no-op if it's already running or music is off).
+func start_playlist() -> void:
+	if playlist_on or !music_enabled or _music_streams.is_empty():
+		return
+	playlist_on = true
+	_play_next_in_playlist(PLAYLIST_START_FADE)
+
+func stop_playlist(fade: float = PLAYLIST_FADE) -> void:
+	playlist_on = false
+	if current_track != "":
+		stop_music(fade)
+
+func skip_track() -> void:
+	if !music_enabled:
+		return
+	playlist_on = true
+	_play_next_in_playlist(PLAYLIST_FADE)
+
+func set_music_enabled(on: bool) -> void:
+	music_enabled = on
+	if on:
+		start_playlist()
+	else:
+		stop_playlist()
+
+func _play_next_in_playlist(fade: float) -> void:
+	if _queue.is_empty():
+		_queue = unlocked_tracks.filter(func(t): return _music_streams.has(t))
+		_queue.shuffle()
+		if _queue.size() > 1 and _queue[0] == _last_track: # no repeat across reshuffles
+			_queue.append(_queue.pop_front())
+	if _queue.is_empty():
+		return
+	var t = _queue.pop_front()
+	_last_track = t
+	current_track = "" # so play_music doesn't skip a reshuffled repeat
+	play_music(t, fade)
+
+func _process(_delta: float) -> void:
+	# crossfade into the next track as this one ends
+	if !playlist_on or _active_music == null or !_active_music.playing or _active_music.stream == null:
+		return
+	var left = _active_music.stream.get_length() - _active_music.get_playback_position()
+	if left <= PLAYLIST_FADE:
+		_play_next_in_playlist(PLAYLIST_FADE)
+
+func now_playing_text() -> String:
+	if !music_enabled:
+		return "Music is off. 'music on' turns it back on."
+	if current_track == "":
+		return "Nothing playing. 'music next' starts the playlist."
+	var i = TRACK_INFO.get(current_track, {})
+	var pos = _active_music.get_playback_position() if _active_music else 0.0
+	var length = _active_music.stream.get_length() if _active_music and _active_music.stream else 0.0
+	return "[color=#4ec994]Now playing:[/color] %s  [color=#888888]by %s (%s)  ·  %d:%02d / %d:%02d[/color]" % [i.get("title", current_track), i.get("artist", "?"), i.get("source", ""), int(pos) / 60, int(pos) % 60, int(length) / 60, int(length) % 60]
+
 func stop_music(fade: float = DEFAULT_FADE) -> void:
 	if _fade_tween: _fade_tween.kill()
 	_fade_tween = create_tween()
@@ -166,7 +238,13 @@ func _preload(table: Dictionary, target: Dictionary) -> void:
 func _make_music_player() -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
 	p.bus = "Music" if _bus_exists("Music") else "Master"
-	p.finished.connect(func(): if p == _active_music and p.stream: p.play())  # loop fallback
+	p.finished.connect(func():
+		if p != _active_music or p.stream == null:
+			return
+		if playlist_on:
+			_play_next_in_playlist(0.5) # ended before the crossfade caught it
+		else:
+			p.play()) # single track: loop
 	add_child(p)
 	return p
 
