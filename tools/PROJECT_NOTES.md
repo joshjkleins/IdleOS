@@ -719,7 +719,7 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
 
 ## Music (2026-10-23)
 - Audiomanager playlist: shuffled, no repeats in a row, 3s crossfade into the next track, 4s fade-in after boot.
-  Tracks in audio/music (Pixabay Content License): En Transe Mission (O-KSI-D), Technology Background (momotmusic);
+  Tracks in audio/music (Pixabay Content License): En Transe Mission (O-KSI-D), Sunlit Waves (sergepavkinmusic); Technology Background removed;
   credits in Audiomanager.TRACK_INFO, shown by 'music'. Add a track: drop the file in audio/music, add it to MUSIC,
   DEFAULT_UNLOCKED and TRACK_INFO.
 - 'music' (now playing), 'music next', 'music off' / 'music on' (Settings music_player, saved per device);

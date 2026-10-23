@@ -21,20 +21,20 @@ const SFX := {
 
 const MUSIC := {
 	"en_transe_mission": "res://audio/music/en_transe_mission.mp3",
-	"technology_background": "res://audio/music/technology_background.mp3",
+	"sunlit_waves": "res://audio/music/sunlit_waves.mp3",
 }
 
 ## Background playlist (2026-10-23): shuffled, no track twice in a row, crossfades into the next track.
 ## Credits are shown by the 'music' command. Both tracks: Pixabay Content License (free, commercial use OK).
 const TRACK_INFO := {
 	"en_transe_mission": {"title": "En Transe Mission", "artist": "O-KSI-D", "source": "Pixabay"},
-	"technology_background": {"title": "Technology Background", "artist": "momotmusic", "source": "Pixabay"},
+	"sunlit_waves": {"title": "Sunlit Waves", "artist": "sergepavkinmusic", "source": "Pixabay"},
 }
 const PLAYLIST_FADE := 3.0        # crossfade between tracks
 const PLAYLIST_START_FADE := 4.0  # fade-in when the music starts
 
 # Tracks available from the start. Everything else needs unlock_track().
-const DEFAULT_UNLOCKED: Array[String] = ["en_transe_mission", "technology_background"]
+const DEFAULT_UNLOCKED: Array[String] = ["en_transe_mission", "sunlit_waves"]
 
 const SFX_POOL_SIZE := 8          # how many SFX can overlap at once
 const DEFAULT_FADE := 1.0         # seconds for music crossfade
