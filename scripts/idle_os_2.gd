@@ -2,22 +2,12 @@ extends Control
 
 #FINAL TODO LIST FOR 1.0
 
-#ADD ALL TIER ITEMS TO PROPER SKILLS + RECIPES (Mining, Cracking, Matching, Compiling)
-#FLUSH OUT UPLOAD MECHANIC
-#OFFLINE PROGRESSION
 #STEAM ACHIEVEMENTS
 #CLOUD SAVING
 #BUILD OUT ENDING OF GAME
 #BUILD OUT HARD MODE FOR EACH TARGET
 
 #add more Hacking Mods
-
-#Stretch Goals
-# UI Refresh - make things cleaner/pop more, just general polish
-# Unique auto-battle interactions (poison, enemy healing, stun, firewall refresh, custom player inputs (DDoS, slow, crit))
-# Loop chart - shows the general loop of each Tier, for example: Mining > Parsing > Cracking > Matching > Compiling > Hacking < Phishing 
-#                                                                                                                   (down arrow)
-#                                                                                                                     Decoding > Upgrading
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
@@ -172,6 +162,7 @@ func _ready():
 		if Tutorial.should_show_old_save_notice():
 			add_line(Tutorial.old_save_notice())
 		_offline_welcome.call_deferred()
+	Exp.process_unlocked_signal.connect(_flush_unlocks)
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
@@ -203,7 +194,17 @@ func set_line(index: int, text: String, scroll_to_line: bool = false):
 		lines[index] = text
 	update_terminal(scroll_to_line)
 
+## 2 unrecognized commands in a row -> a one-line nudge toward 'hint' (_on_input_line_text_submitted)
+var _cmd_unknown := false
+var _unknown_streak := 0
+var _unknown_re: RegEx
+
 func add_line(text: String) -> void:
+	if _unknown_re == null:
+		_unknown_re = RegEx.new()
+		_unknown_re.compile("(?i)command not found|not recognized|not a recognized")
+	if _unknown_re.search(text) != null:
+		_cmd_unknown = true
 	output_queue.append(text)
 
 	if not processing_queue:
@@ -310,6 +311,7 @@ func _on_input_line_text_submitted(new_text):
 		get_tree().quit()
 	
 	var was_running = process_running
+	_cmd_unknown = false
 	if !universal_commands(new_text) and !_run_skill_from_anywhere(new_text):
 		match current_context:
 			Context.ROOT:
@@ -334,6 +336,12 @@ func _on_input_line_text_submitted(new_text):
 				compiling_commands(new_text)
 	if !was_running and process_running and current_process != null:
 		main_command = {"context": int(current_context), "text": new_text} # what Offline resumes
+	if _cmd_unknown:
+		_unknown_streak += 1
+		if _unknown_streak == 2:
+			add_line("[color=#888888]lost? try[/color] [color=#4ec994]hint[/color] [color=#888888]for what to run next[/color]")
+	else:
+		_unknown_streak = 0
 
 	history_index = -1
 
@@ -443,7 +451,8 @@ func get_context_lead():
 var tutorial_window: TutorialWindow
 func update_context(new_context: Context):
 	current_context = new_context
-	if tutorial_window and new_context == Context.HACKING:
+	# the tutorial window stays up in the Hacking module while the tutorial runs (its steps happen there)
+	if tutorial_window and new_context == Context.HACKING and Tutorial.is_tutorial_complete():
 		tutorial_window.set_context_hidden(true) # shown again in _on_hacking_start_loading
 	lead_text.text = get_context_lead()
 
@@ -478,7 +487,7 @@ func tutorial_event_completed(message: String):
 	if current_context == Context.HACKING:
 		return
 	if tutorial_window and tutorial_window.is_showing() and !Tutorial.is_tutorial_complete():
-		add_line("[color=green]✓ OBJECTIVE COMPLETE[/color]  [color=#888888]%s  ·  next step in the tutorial window[/color]" % Tutorial.get_tutorial_progress_string())
+		add_line("[color=green]✓ OBJECTIVE COMPLETE[/color]  %s  [color=#888888]%s  ·  next step in the tutorial window[/color]" % [Tutorial.step_title(Tutorial.last_completed) if Tutorial.last_completed != -1 else "", Tutorial.get_tutorial_progress_string()])
 		return
 	add_line(message)
 
@@ -524,6 +533,13 @@ func universal_commands(text):
 	if text == "flow":
 		post_flow_chart(func(c): return c.show_loop())
 		return true
+	if text in ["utility", "utilities", "util"]:
+		add_line(ContextCommands.utility_commands())
+		Tutorial.complete_event(Tutorial.TutorialEvent.UTILITY_COMMAND)
+		return true
+	if text in ["hint", "next", "lost", "hints", "help me"]:
+		add_line(HintEngine.text(self))
+		return true
 	if text.begins_with("track"):
 		var item_names = text.trim_prefix("track").strip_edges().split(",")
 		add_line(hud_monitor.add_monitored_items(item_names))
@@ -550,8 +566,7 @@ func universal_commands(text):
 		return true
 
 	if text == "ls mods" or text == "ls mod":
-		#YOU ARE HERE - CREATE FUNCTION IN CONTEXTCOMMANDS TO LIST INVENTORY ITEMS SHOWING THEIR HACKING MOD POTENTIAL
-		add_line(Inventory.list_inventory_hacking_mods())
+		add_line(Inventory.list_filtered("-mods").text) # the mod items you own (equip with 'mod')
 		return true
 	
 	if text.begins_with("ls"):
@@ -664,6 +679,7 @@ func universal_commands(text):
 			HackingMods.add_mod(item_mod_to_add)
 			Inventory.remove_resource(item_mod_to_add, 1)
 			add_line(item_mod_to_add.name + " added.")
+			Tutorial.complete_event(Tutorial.TutorialEvent.EQUIP_FIRST_MOD)
 			add_line(ContextCommands.get_mod_command()) # IDs shift once an item is used: show the fresh list
 			return true
 			
@@ -751,14 +767,14 @@ func universal_commands(text):
 			else:
 				add_line("No process found to focus")
 			return true
-		"sticky", "stick":
+		"pin", "sticky", "stick": # 'pin' is the documented one; the old names still work
 			if current_process != null:
 				sticky_current_process()
 				Tutorial.complete_event(Tutorial.TutorialEvent.USE_STICKY)
 			else:
 				add_line("No process running")
 			return true
-		"unsticky", "unstick":
+		"unpin", "unsticky", "unstick":
 			if current_process != null:
 				unstick_current_process()
 				Tutorial.complete_event(Tutorial.TutorialEvent.USE_UNSTICKY)
@@ -776,6 +792,14 @@ func universal_commands(text):
 			return true
 
 func handle_cd_commands(text):
+	# 'cd root' / 'cd ~' / 'cd /' / bare 'cd': straight to the root (also typed from the hacking console)
+	if text.to_lower().strip_edges() in ["cd root", "cd ~", "cd /", "cd"]:
+		Tutorial.complete_event(Tutorial.TutorialEvent.RETURN_TO_ROOT)
+		if current_context == Context.ROOT:
+			add_line("Already at root.")
+		else:
+			return_to_root()
+		return
 	if (text.to_lower() == "cd .." or text.to_lower() == "cd ../") and current_context == Context.ROOT:
 		add_line("Already at root.")
 		return
@@ -824,6 +848,7 @@ func handle_cd_commands(text):
 			add_line("[ OK ] cracking module loaded")
 			update_context(Context.CRACKING)
 			add_line(ContextCommands.get_help_text(Cracking))
+			Tutorial.complete_event(Tutorial.TutorialEvent.NAVIGATE_CRACKING)
 		"matching":
 			add_line("[ .. ] loading matching module")
 			#header.update_header(Matching)
@@ -835,7 +860,7 @@ func handle_cd_commands(text):
 			if process_running:
 				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.[/color]")
 				return
-			if tutorial_window:
+			if tutorial_window and Tutorial.is_tutorial_complete():
 				tutorial_window.set_context_hidden(true)
 			var tween = create_tween()
 			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
@@ -1139,6 +1164,33 @@ func _apt_progress_text(pct: int) -> String:
 	var filled = pct / 5
 	return "[color=#4ec994][%s%s][/color] %3d%%" % ["#".repeat(filled), "-".repeat(20 - filled), pct]
 
+## PROCESS UNLOCKED banners (same frame as MAJOR RELEASE). Held while hacking, booting or showing the
+## offline download; printed when the main terminal is back (_on_hacking_start_loading / _offline_welcome).
+var _hold_unlocks := true
+func _flush_unlocks() -> void:
+	if _hold_unlocks or _booting or current_context == Context.HACKING or Exp.unlock_queue.is_empty():
+		return
+	var q = Exp.unlock_queue.duplicate()
+	Exp.unlock_queue.clear()
+	for e in q:
+		add_line(_process_unlocked_text(e.skill, e.process))
+
+func _process_unlocked_text(skill: Node, p: Dictionary) -> String:
+	var c = skill.SKILL.color.to_html(false)
+	var t = "\n[color=#ffc24a]════════════════════════════════════════[/color]\n"
+	t += "  [color=#ffc24a]PROCESS UNLOCKED[/color]  ·  [color=#%s]%s[/color]  %s\n" % [c, skill.SKILL.name.to_upper(), p.name]
+	t += "[color=#ffc24a]════════════════════════════════════════[/color]\n"
+	t += " Level %d %s\n" % [int(p.get("unlock level", 1)), skill.SKILL.name]
+	if str(p.get("description", "")) != "":
+		t += "  [color=#4ec994]+[/color] %s\n" % p.description
+	var cmd = str(p.get("display command", p.get("command", "")))
+	if cmd != "":
+		t += "  [color=#888888]run[/color] [color=#4ec994]%s[/color]\n" % cmd
+	var block = Exp.tier_block_reason(skill, p)
+	if block != "":
+		t += "  [color=#888888]%s[/color]\n" % block
+	return t
+
 func _major_release_text(group: String, tier: int) -> String:
 	var c = Upgrades.group_color(group).to_html(false)
 	var t = "\n[color=#ffc24a]════════════════════════════════════════[/color]\n"
@@ -1243,6 +1295,11 @@ func handle_vm_token_commands(text):
 		add_line(ContextCommands.ssh_commands(processes))
 		return
 	var commands = text.split(" ", false)
+	# 'ssh <the normal command>' (ssh mine -logs, ssh parse -footprint=logs, ssh crack -password): read as
+	# 'ssh <skill> <process>'; the older 'ssh mining logs' form still works
+	if commands.size() >= 2 and SKILL_BINARIES.has(commands[1]) and commands[1] != "defrag":
+		commands[1] = SKILL_BINARIES[commands[1]].to_lower()
+		text = " ".join(commands)
 	# 'ssh cracking -password' works like 'ssh cracking password'
 	if commands.size() >= 3 and commands[2].begins_with("-"):
 		commands[2] = commands[2].trim_prefix("-")
@@ -1285,13 +1342,15 @@ func handle_vm_token_commands(text):
 	var target_minor_process = null
 
 	if commands.size() < 3:
-		add_line("SSH command not recognized     [color=#888888]example usage: ssh mining logs[/color]")
+		add_line("SSH command not recognized     [color=#888888]example usage: ssh mine -logs[/color]")
 		return
 	var typed = commands[2].split("=")[0]
 	for mp in target_process.minor_processes:
 		var n = str(mp.name).to_lower()
+		# the process's own flag works too: 'ssh phishing whale' = 'ssh phishing whaling' (phish -whale)
+		var flag = str(mp.get("command", "")).get_slice(" -", 1).get_slice(" ", 0).get_slice("=", 0).to_lower()
 		# singular / plural both work: 'ssh matching credentials' = 'ssh matching credential'
-		if typed == n or typed == n + "s" or typed + "s" == n or typed == n.trim_suffix("s"):
+		if typed == n or typed == n + "s" or typed + "s" == n or typed == n.trim_suffix("s") or (flag != "" and typed == flag):
 			target_minor_process = mp
 			if typed != n:
 				commands[2] = n + commands[2].substr(typed.length())
@@ -1358,7 +1417,7 @@ func handle_vm_token_commands(text):
 	
 	elif target_process == Compiling:
 		if target_minor_process == Compiling.MOD:
-			var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "", "ssh compiling mod=logs")
+			var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "", "ssh compile -mod=logs")
 			if !check.ok:
 				add_line(check.message)
 				return
@@ -1526,7 +1585,7 @@ func handle_vm_commands(text: String) -> void:
 
 func vm_list_text() -> String:
 	if VMManager.vms.is_empty():
-		return "No VMs running. Start one with 'ssh <skill> <process>'."
+		return "No VMs running. Start one with 'ssh' + a process command, e.g. 'ssh mine -logs' ('ssh' lists your tokens)."
 	var text = "ID      SKILL        PROCESS          TIME   TOKENS  STATE\n"
 	for vm in VMManager.vms:
 		text += "%-8s%-13s%-17s%-7s%-8s%s\n" % ["vm-%02d" % vm.vm_id, vm.skill.SKILL.name, str(vm.minor_process.name), str(vm.get_seconds_left()) + "s", str(vm.tokens_used), "minimized" if !vm.visible else ("stopping" if vm.stopping else "running")]
@@ -2030,8 +2089,8 @@ func phishing_commands(text):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-			if parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.BAIT_PER_CAST:
-				add_line("[color=#d29922]Only %d %s: bait needs %d per cast, so casts go out unbaited until you have more.[/color]" % [Inventory.get_amount(parsed_bait.bait), parsed_bait.bait.name, Phishing.BAIT_PER_CAST])
+			if parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.bait_cost(parsed_bait.bait):
+				add_line("[color=#d29922]Only %d %s: bait needs %d per cast, so casts go out unbaited until you have more.[/color]" % [Inventory.get_amount(parsed_bait.bait), parsed_bait.bait.name, Phishing.bait_cost(parsed_bait.bait)])
 			cast_line(ms, -1, parsed_bait.bait, parsed_bait.target)
 			return
 	_handle_process_commands(text, "Finishing current phishing attempt...")
@@ -2476,6 +2535,7 @@ func _on_hacking_start_loading() -> void:
 	if tutorial_window:
 		tutorial_window.set_context_hidden(false)
 	input_line.grab_focus()
+	_flush_unlocks() # anything unlocked while you were hacking
 	var tween = create_tween()
 	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
 	tween.parallel().tween_property(system_dock, "modulate:a", 1.0, 1.0)
@@ -2777,6 +2837,8 @@ const OFFLINE_BAR := 18
 func _offline_welcome() -> void:
 	var r: Dictionary = Offline.report
 	if r.is_empty():
+		_hold_unlocks = false
+		_flush_unlocks()
 		return
 	Offline.report = {}
 	await _wait_for_output()
@@ -2844,6 +2906,9 @@ func _offline_welcome() -> void:
 	for t in r.tiers:
 		add_line(ContextCommands.tier_complete_text(t))
 		await _wait_for_output()
+	_hold_unlocks = false
+	_flush_unlocks() # processes unlocked by offline level ups
+	await _wait_for_output()
 	accepting_player_inputs = true
 	input_line.grab_focus()
 	# resume the process that ran offline
@@ -2911,7 +2976,7 @@ Unfortunately, the rest of IdleOS is still under development. Until version 1.0 
 
 Think you've mastered the system? Try your hand at the Hard Mode Student. This opponent won't go down easily, and brute force alone won't be enough.
 
-You'll need to master Compiling to create powerful Hacking Mods, push your VMs to their full potential, upgrade versions, overclock, and spoof your way to victory.
+You'll need to find powerful Hacking Mods, push your VMs to their full potential, upgrade versions, overclock, and spoof your way to victory.
 
 Good luck.
 

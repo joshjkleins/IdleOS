@@ -1,0 +1,138 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/system_dock.gd" id="1_dock"]
+[ext_resource type="PackedScene" uid="uid://cmkmq8hglqsu4" path="res://scenes/hud_monitor.tscn" id="2_mon"]
+[ext_resource type="PackedScene" path="res://scenes/system_temp.tscn" id="3_temp"]
+[ext_resource type="PackedScene" uid="uid://nvkps616p7hs" path="res://scenes/hud_process_running.tscn" id="5_proc"]
+[ext_resource type="PackedScene" path="res://scenes/item_ledger.tscn" id="6_ledger"]
+[ext_resource type="Script" path="res://scripts/system_dock_compact.gd" id="7_compact"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dock"]
+bg_color = Color(0.0352941, 0.0431373, 0.054902, 1)
+border_width_left = 1
+border_color = Color(0.12549, 0.160784, 0.196078, 1)
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mon"]
+
+[node name="SystemDock" type="PanelContainer"]
+custom_minimum_size = Vector2(284, 0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_dock")
+script = ExtResource("1_dock")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CollapseButton" type="Button" parent="VBox/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(22, 0)
+layout_mode = 2
+tooltip_text = "Collapse panel  (or type 'panel')"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
+theme_override_font_sizes/font_size = 14
+text = "»"
+flat = true
+
+[node name="HUDProcessRunning" parent="VBox" instance=ExtResource("5_proc")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ProcessSeparator" type="HSeparator" parent="VBox"]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+
+[node name="SystemTemp" parent="VBox" instance=ExtResource("3_temp")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SystemSeparator" type="HSeparator" parent="VBox"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+
+[node name="TrackedSection" type="VBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TrackedHeader" type="Label" parent="VBox/TrackedSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "TRACKED"
+
+[node name="HUDMonitor" parent="VBox/TrackedSection" instance=ExtResource("2_mon")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mon")
+
+[node name="Separator" type="HSeparator" parent="VBox"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+
+[node name="VMSection" type="VBoxContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="VMHeader" type="HBoxContainer" parent="VBox/VMSection"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox/VMSection/VMHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "VIRTUAL MACHINES"
+
+[node name="VMCountLabel" type="Label" parent="VBox/VMSection/VMHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.42, 0.48, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/1"
+
+[node name="VMList" type="VBoxContainer" parent="VBox/VMSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="VMEmptyLabel" type="Label" parent="VBox/VMSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.34, 0.38, 1)
+theme_override_font_sizes/font_size = 10
+text = "no vms running  ·  ssh -h"
+
+[node name="Spacer" type="Control" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="LedgerSeparator" type="HSeparator" parent="VBox"]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+
+[node name="ItemLedger" parent="VBox" instance=ExtResource("6_ledger")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Compact" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+script = ExtResource("7_compact")

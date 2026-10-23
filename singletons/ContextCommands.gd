@@ -659,7 +659,7 @@ func list_vm_terminals_for_skill(skill: Node):
 	return_text += "-".repeat(first_col + second_col) + "\n"
 	for mp in skill.minor_processes:
 		if mp.unlocked:
-			var run_command = "ssh " + skill.name.to_lower() + " " + mp.name.to_lower()
+			var run_command = "ssh " + str(mp.get("display command", mp.get("command", ""))) # same as the main terminal's command
 			return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
 		else:
 			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("LOCKED (lvl %d)" % mp['unlock level'], second_col) + "[/color]\n"
@@ -673,7 +673,7 @@ func ssh_commands(major_processes: Array) -> String:
 	var third_col = 25
 
 	var return_text = "\n\nSSH Commands\n\n"
-	return_text += pad_text("Skill", first_col) + pad_text("VM Tokens", second_col) + pad_text("Info", third_col) + "\n"
+	return_text += pad_text("Skill", first_col) + pad_text("VM Tokens", second_col) + pad_text("VM commands", third_col) + "\n"
 	return_text += "-".repeat(first_col + second_col + third_col) + "\n"
 	
 	for p in major_processes:
@@ -683,7 +683,8 @@ func ssh_commands(major_processes: Array) -> String:
 		var tokens = str(Inventory.get_amount(p.vm_token))
 		return_text += pad_text(s_name, first_col) + pad_text(tokens, second_col) + pad_text(info_command, third_col) + "\n"
 		
-	return_text += "\nVM Tokens can be used to run processes in a seperate pop-up window.\nEach window consumes a VM token to run for 30 seconds.\n"
+	return_text += "\nRun any process in a VM window: 'ssh' + the process command, e.g. [color=#4ec994]ssh mine -logs[/color], [color=#4ec994]ssh crack -password[/color].\n"
+	return_text += "VM Tokens run processes in a separate pop-up window. Each window consumes a VM token to run for 30 seconds.\n"
 	return_text += "If there are additional VM tokens they will be consumed to run for an additional 30 seconds until the window is exited out of or you run out of VM Tokens for that skill."
 	return return_text
 	
@@ -695,14 +696,41 @@ func ssh_help_commands() -> String:
 |                            SSH COMMANDS                            |
 |____________________________________________________________________|
 |                                                                    |
-|   ssh                          List available VM tokens            |
-|   ssh <skill>                  List ssh run commands               |
-|   ssh <skill> <process>        Consume VM token to run process     |
-|                                in separate window                  |
+|   ssh                          Your VM tokens for each skill       |
+|   ssh <skill>                  A skill's VM commands               |
+|                                e.g. ssh mining                     |
+|   ssh <process command>        Run that process in a VM window     |
+|                                (uses one VM token)                 |
+|                                e.g. ssh mine -logs                 |
+|                                e.g. ssh parse -footprint=logs      |
 |   ssh -h                       Show this list of commands          |
 |____________________________________________________________________|
 """
 	return text
+
+## 'intel -h' (and the top of 'intel'): same box as ssh -h / process -h
+func intel_help_commands() -> String:
+	return """
+ ____________________________________________________________________
+|                                                                    |
+|                           INTEL COMMANDS                           |
+|____________________________________________________________________|
+|                                                                    |
+| Intel weakens a target's next hacks: integrity, firewall, counter  |
+| damage and counter speed, up to -10% each, for a set number of     |
+| hacks. Gather it with Decoding.                                    |
+|                                                                    |
+|   intel                        Intel on every unlocked target      |
+|   intel <location>             Intel on one location's targets     |
+|                                e.g. intel school                   |
+|   intel <target>               One target's intel in detail        |
+|                                e.g. intel student                  |
+|   intel <target> hard          The hard-mode version               |
+|   decode -intel=<target>       Gather intel on a target            |
+|                                e.g. decode -intel=student          |
+|   intel -h                     Show this list of commands          |
+|____________________________________________________________________|
+"""
 
 func process_commands() -> String:
 	var text := """
@@ -714,16 +742,16 @@ func process_commands() -> String:
 | STARTING / STOPPING                                                |
 |   <skill> -<process>           Run a process                       |
 |   kill                         Stop currently running process      |
+|   kill -s                      Stop it after the current cycle     |
 |   stop                         Stop currently running process      |
+|   stop -s                      Stop it after the current cycle     |
 |                                                                    |
 | DISPLAY & CONTROL                                                  |
 |   focus                        Bring currently running process     |
 |                                to bottom of terminal               |
 |   ps                           List running process                |
-|   sticky                       Anchor process to top of terminal   |
-|   stick                        Anchor process to top of terminal   |
-|   unsticky                     Remove anchored process from top    |
-|   unstick                      Remove anchored process from top    |
+|   pin                          Pin process to top of terminal      |
+|   unpin                        Remove pinned process from top      |
 |                                                                    |
 | DOCUMENTATION                                                      |
 |   process -h                   Show this list of commands          |
@@ -740,19 +768,26 @@ func get_help() -> String:
 |                                                                     |
 | SKILLS / TRAVERSAL                                                  |
 |   cd <skill>                   Navigate to a skill                  |
-|   mine -logs, crack ...        Skills run from any directory        |
 |   Tab                          Auto-complete a command              |
-|   cd ..                        Return to root                       |
+|   cd ..                       Move up one directory                 |
+|   cd root                     Return to root from anywhere          |
 |   tree                         Display skill hierarchy              |
-|   flow                         Chart of the game loop               |
+|   flow                         Chart of resources to hacking        |
+|   hint                         Suggestions on what to run next      |
+|   utility                      Helper commands (sticky, track..)    |
 |   info                         Display additional skill info        |
+|   info <skill>                 A skill's processes + their commands |
 |                                                                     |
 | ITEMS                                                               |
 |   ls                           List items                           |
 |   ls <item>                    Item details                         |
-|   ls mods                      List current items Hacking mod stats |
 |   track <item>, <item>         Track item(s) (comma separated)      |
 |   untrack <item>               Remove tracking                      |
+|                                                                     |
+| VIRTUAL MACHINES                                                    |
+|   ssh                          Your VM tokens for each skill        |
+|   ssh <process command>        Run it in a VM (ssh mine -logs)      |
+|   vm -h                        Manage VM windows                    |
 |                                                                     |
 | UPGRADES                                                            |
 |   apt                          Upgrade package manager              |
@@ -760,11 +795,7 @@ func get_help() -> String:
 |                                                                     |
 | PROGRESS                                                            |
 |   upload                       Upload goal + what's uploading       |
-|   upload <item> [amount]       Upload items from your inventory     |
-|   upload -a                    Upload everything the goal needs     |
-|   upload cancel <item>         Return queued items to inventory     |
-|   intel                        Intel on every hacking target        |
-|   intel <target>               Intel on one target                  |
+|   intel                        Intel on hacking targets (intel -h)  |
 |                                                                     |
 | DOCUMENTATION                                                       |
 |   tutorial                     Show tutorial checklist              |
@@ -785,6 +816,40 @@ func get_help() -> String:
 |_____________________________________________________________________|
 """
 	return text
+
+## 'utility': the helper commands, in the same box as '-h'
+func utility_commands() -> String:
+	var rows = [
+		["", "PROCESSES"],
+		["focus", "Bring the running process to the bottom of the terminal"],
+		["pin / unpin", "Pin the running process to the top of the terminal / unpin it"],
+		["kill / kill -s", "Stop the running process (-s: finish its current cycle first)"],
+		["", ""],
+		["", "ITEMS"],
+		["track <item>, <item>", "Keep a live count of items in the side panel"],
+		["untrack <item> / -a", "Stop tracking one / all"],
+		["ls <item>", "Item details: where it comes from, what it's used for"],
+		["", ""],
+		["", "LOOKUP"],
+		["info", "Every skill: version and level"],
+		["info <skill>", "A skill's processes and the commands that run them"],
+		["tree", "Skill hierarchy"],
+		["flow", "Chart of resources to hacking"],
+		["hint", "Suggestions on what to run next"],
+		["", ""],
+		["", "TERMINAL"],
+		["history", "Commands you've typed"],
+		["clear", "Clear the terminal"],
+		["date / system", "Date and time / system info"],
+		["panel", "Collapse / expand the side panel"],
+	]
+	var W = 96
+	var t = "\n " + "_".repeat(W) + "\n|" + " ".repeat(W) + "|\n|" + (" ".repeat(36) + "IDLEOS UTILITY COMMANDS").rpad(W) + "|\n|" + "_".repeat(W) + "|\n|" + " ".repeat(W) + "|\n"
+	for r in rows:
+		var line = (" " + r[1]) if r[0] == "" else ("   " + r[0].rpad(29) + r[1])
+		t += "|" + line.rpad(W).left(W) + "|\n"
+	t += "|" + "_".repeat(W) + "|\n"
+	return t
 
 func get_ascii_tree(current_context: String) -> String:
 	var skills = [
@@ -1153,6 +1218,8 @@ far more than your processes make on their own. Your processes keep the hacks su
 
 Thoughts or suggestions? Join the Discord: """ + DISCORD_LINK + """  ('discord -c' copies it)
 
+Stuck? 'hint' suggests what to run next.
+
 To view this message again, use the 'welcome' command.
 """
 
@@ -1228,7 +1295,7 @@ func get_mod_command() -> String:
 				var mod_type = mod.hacking_mod_type
 
 				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
-				var hmd = mod.hacking_mod_duration
+				var hmd = HackingMods.mod_duration(mod) # + Kernel Modules
 
 				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
 				return_text += pad_text(mod.name, mod_name_col)
@@ -1244,7 +1311,8 @@ func get_mod_command() -> String:
 		return_text += "-"
 
 	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods.\n"
-	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n\n"
+	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n"
+	return_text += "Mod items are found with 'phish -mod', by parsing Mining items with Corruption, and in caches. Each lasts a few hacks.\n\n"
 	return return_text
 
 

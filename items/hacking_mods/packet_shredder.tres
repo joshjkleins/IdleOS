@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://buyxevxvkq3r7"]
 
 [ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_rxvwc"]
 
@@ -18,7 +18,7 @@ obtained_from = Array[int]([5, 2])
 obtained_from_additional_hint = "Phishing for mods or Corruption parsing, once Bank is unlocked."
 hacking_mod_type = 20
 hacking_mod_value = 0.1
-hacking_mod_duration = 20
+hacking_mod_duration = 5
 hacking_mod_consumed = 1
 hacking_mod_item = true
 exploit_id = ""

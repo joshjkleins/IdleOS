@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dvbe3xmfjbfmu"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_rxvwc"]
+
+[resource]
+script = ExtResource("1_rxvwc")
+id = 340
+name = "Shatter Protocol"
+shortened_name = ""
+description = "Breaking the firewall slows enemy countermeasures by an extra 25% (75% total). Equip directly with 'mod' commands."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_rxvwc")]([])
+tier = 1
+color_type = 9
+obtained_from = Array[int]([5, 2])
+obtained_from_additional_hint = "Phishing for mods or Corruption parsing, once School is unlocked."
+hacking_mod_type = 11
+hacking_mod_value = 0.25
+hacking_mod_duration = 5
+hacking_mod_consumed = 1
+hacking_mod_item = true
+exploit_id = ""
+metadata/_custom_type_script = "uid://gsjwknwpr2hc"

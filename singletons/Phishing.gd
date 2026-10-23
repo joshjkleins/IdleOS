@@ -51,7 +51,7 @@ var SKILL = {
 ##   whale: all lines go onto one whale; each line shortens the reel; the catch is a bundle (Whaling)
 ##   smish: one blast of texts (texts per line x lines); replies trickle in as intel on a target (Smish)
 ##   trap:  a one-minute setup, then it fills in the background on real time; collect it later (Trap)
-## Bait: any Mining item, BAIT_PER_CAST per cast (whale / blast / trap), doubles what that cast brings in.
+## Bait: any basic resource (any tier), BAIT_PER_CAST per cast (whale / blast / trap), doubles what that cast brings in.
 ## VM tokens are a bonus on top of the catch: "vm token chance" per attempt at base speed (3 lines for Spear /
 ## Mod), rolled on time spent like every skill, so speed and extra lines don't change tokens per hour.
 const BASE_LINES := 5
@@ -66,7 +66,7 @@ var SPEAR = {
 	"display command": "phish -spear [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -spear', 'description': 'Cast every line' },
-		{ 'cmd': 'phish -spear bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
+		{ 'cmd': 'phish -spear bait=logs', 'description': 'Each cast uses 10 of a basic resource: bite chance up, a bite catches double' },
 	],
 	"efficiency": 0.3,
 	"efficiency rate": 0.003,
@@ -107,7 +107,7 @@ var WHALING = {
 	"display command": "phish -whale [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -whale', 'description': 'All lines on one whale: wait, bite roll, then a reel split across your lines for a bundle of 10-24 SQL / Spoofs' },
-		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a Mining item: bite chance up, bundle doubled' },
+		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a basic resource: bite chance up, bundle doubled' },
 	],
 	"efficiency": 0.4,
 	"efficiency rate": 0.003,
@@ -135,7 +135,7 @@ var WHALING = {
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 15 },
 	],
 	"resource amount gained": 1,
-	"description": "One big catch at a time. All your lines go on a single whale: cast, wait while it circles (30-60s), then it bites or slips away (bite chance = efficiency). A bite starts the reel: 2 minutes split across your lines, so more lines reel faster. A landed whale is a bundle of 10-24 items, mostly SQL Injectors (85%) with some Packet Spoofs (15%), plus a 5% chance of a one-time item. Bait (10 of a Mining item per whale) raises the bite chance and doubles the bundle.",
+	"description": "One big catch at a time. All your lines go on a single whale: cast, wait while it circles (30-60s), then it bites or slips away (bite chance = efficiency). A bite starts the reel: 2 minutes split across your lines, so more lines reel faster. A landed whale is a bundle of 10-24 items, mostly SQL Injectors (85%) with some Packet Spoofs (15%), plus a 5% chance of a one-time item. Bait (10 of a basic resource per whale) raises the bite chance and doubles the bundle.",
 	"efficiency description": "Chance the whale bites",
 	"signal": whale_cycle_completed
 }
@@ -152,7 +152,7 @@ var SMISH = {
 	"example commands": [
 		{ 'cmd': 'phish -smish', 'description': 'Replies become intel on a random unlocked target that is not maxed' },
 		{ 'cmd': 'phish -smish target=student', 'description': 'Replies become intel on the Student (add "hard" for hard mode)' },
-		{ 'cmd': 'phish -smish bait=logs', 'description': 'Each blast uses 10 of a Mining item: reply chance up, every reply counts twice' },
+		{ 'cmd': 'phish -smish bait=logs', 'description': 'Each blast uses 10 of a basic resource: reply chance up, every reply counts twice' },
 	],
 	"efficiency": 0.03,
 	"efficiency rate": 0.0005,
@@ -190,7 +190,7 @@ var TRAP = {
 	"display command": "phish -trap [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -trap', 'description': 'Sets a watering-hole trap (1 min). Shows its status once set' },
-		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a Mining item: haul doubled, rare chance up' },
+		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a basic resource: haul doubled, rare chance up' },
 		{ 'cmd': 'trap collect', 'description': 'Collects it from anywhere (early = partial haul, no rare rolls)' },
 	],
 	"efficiency": 0.15,
@@ -231,9 +231,9 @@ var MOD = {
 	"display command": "phish -mod [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -mod', 'description': 'Cast every line' },
-		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 10 of a Mining item: bite chance up, a bite catches double' },
+		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 10 of a basic resource: bite chance up, a bite catches double' },
 	],
-	"efficiency": 0.01, # 1% bite chance at L1 (2026-10-21; was 0.1%)
+	"efficiency": 0.015, # 1.5% bite chance at L1 (2026-10-23: was 1%, mods now last 5 hacks)
 	"efficiency rate": 0.0001,
 	"unlocked": false,
 	"unlock level": 5,
@@ -259,23 +259,25 @@ var MOD = {
 }
 
 const BAIT_PER_CAST := 10
-## Bait also multiplies the bite chance: x1.10 (Logs, tier 1) up to x1.35 (Databases, tier 6)
+## Bait also multiplies the bite chance: x1.10 (a School resource, tier 1) up to x1.35 (a Government one, tier 6)
 const BAIT_BASE_BONUS = 0.05
 const BAIT_BONUS_PER_TIER = 0.05
 
 ## Bait Power adds to it (+5% per level)
 func get_bait_multiplier(bait: ItemData) -> float:
-	return 1.0 + BAIT_BASE_BONUS + BAIT_BONUS_PER_TIER * bait.tier + Upgrades.cur("phishing.bait_power") if bait else 1.0
+	return 1.0 + BAIT_BASE_BONUS + BAIT_BONUS_PER_TIER * bait_tier(bait) + Upgrades.cur("phishing.bait_power") if bait else 1.0
 
 ## Process efficiency with the Efficiency track: +X% of the process's own efficiency (x1.20 at max)
 func get_efficiency(p: Dictionary) -> float:
 	return float(p["efficiency"]) * (1.0 + Upgrades.cur("phishing.efficiency"))
 
+## 2026-10-23: any basic resource of any tier is bait (it was Mining items only): a sink for surplus basics
 func is_bait(item: ItemData) -> bool:
-	for mp in Mining.minor_processes:
-		if mp["resource gained"] == item:
-			return true
-	return false
+	return item != null and Decoding.get_resource_tier(item) > 0
+
+## the bait's location tier (1 School ... 6 Government)
+func bait_tier(bait: ItemData) -> int:
+	return max(1, Decoding.get_resource_tier(bait)) if bait else 1
 
 ## "phish -smish target=student hard bait=logs" -> {command, bait, target, error}. Options can come in any order.
 func parse_bait(text: String) -> Dictionary:
@@ -302,8 +304,13 @@ func parse_bait(text: String) -> Dictionary:
 		var bait = Inventory.get_item_by_name(opts.bait.strip_edges())
 		if bait == null:
 			out.error = "Bait item not found: " + opts.bait
+		elif Uploads.is_rare(bait) and (" -mod" in " " + out.command or out.command.ends_with(" mod")):
+			if is_rare_bait(bait):
+				out.bait = bait
+			else:
+				out.error = "%s becomes Mod Phishing bait once its %s upload goal is met (%d/%d uploaded)." % [bait.name, Uploads.get_location_name(Inventory.item_tier(bait)), Uploads.get_uploaded(bait), Uploads.get_goal_amount(bait, Inventory.item_tier(bait))]
 		elif !is_bait(bait):
-			out.error = bait.name + " can't be used as bait. Any Mining item works (logs, archives, metadata...)."
+			out.error = bait.name + " can't be used as bait. Any basic resource works (logs, IP addresses, passwords, credentials...)." + (" Rare items work for 'phish -mod' once their upload goal is met." if Uploads.is_rare(bait) else "")
 		else:
 			out.bait = bait
 	if opts.has("target") and out.error == "":
@@ -315,10 +322,27 @@ func parse_bait(text: String) -> Dictionary:
 ## Every hacking mod item; mod_pool() keeps the ones whose tier is unlocked.
 func _build_mod_list() -> void:
 	var mods = []
-	for item in Items.ITEM_MAP.values():
-		if item.hacking_mod_item:
-			mods.append({"item": item, "min": 1, "max": 1, "weight": 100})
+	for item in HackingMods.pool_items(): # retired mods don't drop
+		mods.append({"item": item, "min": 1, "max": 1, "weight": 100})
 	MOD["resource gained"] = mods
+
+## one tier's mods as a reward list (rare bait guarantees one of these)
+func tier_mod_pool(tier: int) -> Array:
+	return MOD["resource gained"].filter(func(e): return int(e.item.tier) == tier)
+
+## 2026-10-23: a rare item whose upload goal is met is bait for 'phish -mod': 1 per cast, and every cast
+## lands a mod from the rare's tier
+const RARE_BAIT_PER_CAST := 1
+func is_rare_bait(item: ItemData) -> bool:
+	if item == null or !Uploads.is_rare(item):
+		return false
+	var tier = Inventory.item_tier(item)
+	var need = Uploads.get_goal_amount(item, tier)
+	return need > 0 and Uploads.get_uploaded(item) >= need
+
+## what one cast uses of <bait>
+func bait_cost(bait: ItemData) -> int:
+	return RARE_BAIT_PER_CAST if is_rare_bait(bait) else BAIT_PER_CAST
 
 func mod_pool() -> Array:
 	return MOD["resource gained"].filter(func(e): return Upgrades.tier_unlocked(e.item.tier))
@@ -391,7 +415,7 @@ func trap_progress() -> float:
 func trap_seconds_left() -> float:
 	return max(0.0, trap_seconds_total() * (1.0 - trap_progress()))
 
-## bait: the Mining item used (already taken), or null
+## bait: the basic resource used (already taken), or null
 func set_trap(bait: ItemData) -> void:
 	trap = {"set_at": int(Time.get_unix_time_from_system()), "baited": bait != null, "bait_mult": get_bait_multiplier(bait)}
 	SaveManager.mark_dirty()

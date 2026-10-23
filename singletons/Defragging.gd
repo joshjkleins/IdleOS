@@ -36,7 +36,7 @@ var VM = {
 	"bonus vm uptime": 30.0, # extra seconds per VM token (30 -> 60)
 	"bonus label": "+30s/tok",
 	"bonus text": "VM tokens last an additional 30 seconds",
-	"description": "Each VM token runs 30 seconds longer (60s per token).",
+	"description": "Each VM token runs 30 seconds longer.",
 	"command": "defrag -vm",
 	"expires_at": 0,
 }

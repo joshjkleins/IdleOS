@@ -9,6 +9,8 @@ the equippable mods; Evasion / Siphon / Dead Man's Switch capstones.
 fight(...) -> dict(won, time, anon_left_pct)."""
 import random
 DT = 0.1
+SQL_COST = 5     # SQL Injector bandwidth per attack (items/combat/sql_injector.tres; 2026-10-23: was 6)
+SQL_SPEED = 25.0 # SQL Injector bar fill per second (2026-10-23: was 20)
 # ---- player progression ----
 LEVEL_AT_TIER = [1, 15, 30, 45, 60, 75]          # hacking level on arrival (assumed)
 TRACK = {"damage": 5, "firewall": 2, "bw_regen": 1, "max_bw": 5, "healing": 0.01, "mod_slots": 1, "spoof_thr": 0.1}
@@ -48,7 +50,7 @@ def _player(tier, upg, lvl, mods, overclock, policy):
         dmg_installs=int(upg),  # damage track installs (1 per tier)
         mods=dict(mods), overclock=overclock, policy=policy)
 INTEL_MAX = 0.10  # Decoding.INTEL_STEP x INTEL_MAX_STEPS: full intel is -10% on all four stats
-def fight(P, E, intel=0.0, seed=None, max_t=600.0):
+def fight(P, E, intel=0.0, seed=None, max_t=600.0, start_anon=None, spoofs=None):
     """E: integrity, firewall, counter, counter speed, heat, [firewall reboot]. intel: 0..1 of full intel
     (every stat -10% at 1.0; the game builds it 2% per stat at a time)."""
     rnd = random.Random(seed)
@@ -61,10 +63,11 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
         ctr = max(0, int(round(ctr * k))); cspd = max(0.1, cspd * k)
     fw_start = max(0, fw0 - g("fw_red"))
     n_mods = len(m)
-    sql_cost = min(P["max_bw"], 6 + (P["tier"] + 1) * n_mods)  # compiled mods of this tier: +1 bandwidth per tier
+    sql_cost = min(P["max_bw"], SQL_COST + (P["tier"] + 1) * n_mods)  # compiled mods of this tier: +1 bandwidth per tier
     spoof_cost = 0 if "ghost_packet" in m else 2
-    anon = P["max_anon"]; amax = P["max_anon"]; bw = P["max_bw"]
-    hp = integ; fw = fw_start; fw_down = 0.0; bricked = False; breach = False
+    anon = P["max_anon"] if start_anon is None else start_anon; amax = P["max_anon"]; bw = P["max_bw"]
+    spoofs_left = 10**9 if spoofs is None else spoofs  # Packet Spoofs in the inventory (None = unlimited)
+    hp = integ; fw = fw_start; fw_down = 0.0; bricked = False; breach = False; fresh = True
     atk = spd_bar = cbar = 0.0; defending = False
     temp = 30.0; overheated = False; oc = P["overclock"]
     t = 0.0; decoys = int(g("decoys")); dead_used = False
@@ -90,7 +93,7 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
         ocv = 2.0 if oc else (0.5 if overheated else 1.0)
         enemy_x = 2.0 if (overheated and "cold_boot" not in m) else 1.0
         bw = min(P["max_bw"], bw + (P["bw_regen"] + g("band_rate") + g("burst") * P["max_bw"]) * ocv * DT)
-        atk += 20 * (1 + g("atk_spd") + g("sql_boost")) * DT
+        atk += SQL_SPEED * (1 + g("atk_spd") + g("sql_boost")) * DT
         if defending: spd_bar += 8 * (1 + g("spoof_speed")) * DT
         if anon > 0 and t >= g("stealth"):
             slow = max(0.05, 0.5 - g("shatter")) if fw_down > 0 else 1.0
@@ -99,9 +102,10 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
             fw_down -= DT
             if fw_down <= 0:
                 if "firmware_brick" in m: bricked = True
-                else: fw = fw_start
+                else: fw = fw_start; fresh = True
         if P["policy"] == "early" and not defending and anon < amax * 0.8: defending = True
         def_wait = False
+        if defending and spoofs_left - n_spoof <= 0: defending = False  # out of Packet Spoofs
         if defending and spd_bar >= 100:
             if bw >= spoof_cost:
                 amt = int(-(-amax * (P["heal"]) // 1)) + int(-(-amax * g("restore") / 100 // 1))
@@ -117,7 +121,8 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
             fb = fw if (fw_down <= 0 and not bricked) else 0
             hp -= max(raw - fb, 0)
             if fb > 0:
-                fw -= P["fw_dmg"] + g("fw_dmg") + g("shredder") * fw0
+                fw -= P["fw_dmg"] + g("fw_dmg") + g("shredder") * fw0 + (g("opener") if fresh else 0)  # opener: Handshake Exploit
+                fresh = False
             bw -= sql_cost; heat(atk_heat); atk = 0; n_atk += 1
             if g("ctr_reset") and cbar > 0 and rnd.random() < g("ctr_reset"): cbar = 0.0  # Countermeasure Reset (payloads)
             if "siphon" in P["caps"]: anon = min(amax, anon + -(-amax * 0.005 // 1))
@@ -139,7 +144,7 @@ def fight(P, E, intel=0.0, seed=None, max_t=600.0):
                     hp -= int(round(d * g("mirror")))
                     if hp <= 0: return dict(won=True, time=t, anon=anon / amax, sql=n_atk, spoofs=n_spoof)
                 if anon <= 0: return dict(won=False, time=t, anon=0.0, sql=n_atk, spoofs=n_spoof)
-                if anon * 100 <= amax * int(P["thr"] * 100): defending = True
+                if anon * 100 <= amax * int(P["thr"] * 100) and spoofs_left - n_spoof > 0: defending = True
     return dict(won=False, time=t, anon=anon / amax, sql=n_atk, spoofs=n_spoof)
 def summary(P, E, intel=0.0, n=60):
     rs = [fight(P, E, intel, seed=i) for i in range(n)]

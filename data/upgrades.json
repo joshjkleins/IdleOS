@@ -319,10 +319,10 @@
     {
      "tier": 1,
      "slot": 4,
-     "value": 2.0,
-     "label": "+2 h",
+     "value": 1.0,
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
      "before": "1 h offline progression",
-     "after": "3 h offline progression",
+     "after": "2 h offline progression",
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
@@ -332,27 +332,12 @@
      ]
     },
     {
-     "tier": 1,
-     "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "3 h offline progression",
-     "after": "5 h offline progression",
-     "effect": "How long offline progression runs while you're away",
-     "costs": [
-      {
-       "item": "Logs",
-       "amount": 37
-      }
-     ]
-    },
-    {
      "tier": 2,
      "slot": 4,
      "value": 2.0,
-     "label": "+2 h",
-     "before": "5 h offline progression",
-     "after": "7 h offline progression",
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
+     "before": "2 h offline progression",
+     "after": "4 h offline progression",
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
@@ -362,27 +347,12 @@
      ]
     },
     {
-     "tier": 2,
-     "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "7 h offline progression",
-     "after": "9 h offline progression",
-     "effect": "How long offline progression runs while you're away",
-     "costs": [
-      {
-       "item": "Archives",
-       "amount": 95
-      }
-     ]
-    },
-    {
      "tier": 3,
      "slot": 4,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "9 h offline progression",
-     "after": "11 h offline progression",
+     "value": 4.0,
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
+     "before": "4 h offline progression",
+     "after": "8 h offline progression",
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
@@ -392,27 +362,12 @@
      ]
     },
     {
-     "tier": 3,
-     "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "11 h offline progression",
-     "after": "13 h offline progression",
-     "effect": "How long offline progression runs while you're away",
-     "costs": [
-      {
-       "item": "Metadata",
-       "amount": 126
-      }
-     ]
-    },
-    {
      "tier": 4,
      "slot": 4,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "13 h offline progression",
-     "after": "15 h offline progression",
+     "value": 4.0,
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
+     "before": "8 h offline progression",
+     "after": "12 h offline progression",
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
@@ -422,27 +377,12 @@
      ]
     },
     {
-     "tier": 4,
-     "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "15 h offline progression",
-     "after": "17 h offline progression",
-     "effect": "How long offline progression runs while you're away",
-     "costs": [
-      {
-       "item": "Cookies",
-       "amount": 123
-      }
-     ]
-    },
-    {
      "tier": 5,
      "slot": 4,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "17 h offline progression",
-     "after": "19 h offline progression",
+     "value": 6.0,
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
+     "before": "12 h offline progression",
+     "after": "18 h offline progression",
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
@@ -452,13 +392,97 @@
      ]
     },
     {
+     "tier": 6,
+     "slot": 4,
+     "value": 6.0,
+     "label": "+1 / +2 / +4 / +4 / +6 / +6 h",
+     "before": "18 h offline progression",
+     "after": "24 h offline progression",
+     "effect": "How long offline progression runs while you're away",
+     "costs": [
+      {
+       "item": "Databases",
+       "amount": 172
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "system.kernel_modules",
+   "group": "System",
+   "name": "Kernel Modules",
+   "type": "pointed",
+   "effect": "Equipped hacking mods last longer",
+   "levels": [
+    {
+     "tier": 1,
+     "slot": 5,
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "0 extra hacks per mod",
+     "after": "1 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
+     "costs": [
+      {
+       "item": "Logs",
+       "amount": 37
+      }
+     ]
+    },
+    {
+     "tier": 2,
+     "slot": 5,
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "1 extra hacks per mod",
+     "after": "2 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
+     "costs": [
+      {
+       "item": "Archives",
+       "amount": 95
+      }
+     ]
+    },
+    {
+     "tier": 3,
+     "slot": 5,
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "2 extra hacks per mod",
+     "after": "3 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
+     "costs": [
+      {
+       "item": "Metadata",
+       "amount": 126
+      }
+     ]
+    },
+    {
+     "tier": 4,
+     "slot": 5,
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "3 extra hacks per mod",
+     "after": "4 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
+     "costs": [
+      {
+       "item": "Cookies",
+       "amount": 123
+      }
+     ]
+    },
+    {
      "tier": 5,
      "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "19 h offline progression",
-     "after": "21 h offline progression",
-     "effect": "How long offline progression runs while you're away",
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "4 extra hacks per mod",
+     "after": "5 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
      "costs": [
       {
        "item": "Repositories",
@@ -468,27 +492,12 @@
     },
     {
      "tier": 6,
-     "slot": 4,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "21 h offline progression",
-     "after": "23 h offline progression",
-     "effect": "How long offline progression runs while you're away",
-     "costs": [
-      {
-       "item": "Databases",
-       "amount": 172
-      }
-     ]
-    },
-    {
-     "tier": 6,
      "slot": 5,
-     "value": 2.0,
-     "label": "+2 h",
-     "before": "23 h offline progression",
-     "after": "24 h offline progression",
-     "effect": "How long offline progression runs while you're away",
+     "value": 1.0,
+     "label": "+1 hack",
+     "before": "5 extra hacks per mod",
+     "after": "6 extra hacks per mod",
+     "effect": "Equipped hacking mods last longer",
      "costs": [
       {
        "item": "Databases",
@@ -8455,20 +8464,20 @@
    ]
   },
   {
-   "id": "compiling.mod_tuning",
+   "id": "compiling.code_signing",
    "group": "Compiling",
-   "name": "Mod Tuning",
+   "name": "Code Signing",
    "type": "pointed",
-   "effect": "Hacking mods built with Mod are stronger",
+   "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
    "levels": [
     {
      "tier": 1,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "0 % stronger compiled mods",
-     "after": "5 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "0 % payload intel",
+     "after": "2.5 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "School payload",
@@ -8479,11 +8488,11 @@
     {
      "tier": 2,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "5 % stronger compiled mods",
-     "after": "10 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "2.5 % payload intel",
+     "after": "5 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "Lawfirm Payload",
@@ -8494,11 +8503,11 @@
     {
      "tier": 3,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "10 % stronger compiled mods",
-     "after": "15 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "5 % payload intel",
+     "after": "7.5 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "Hospital Payload",
@@ -8509,11 +8518,11 @@
     {
      "tier": 4,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "15 % stronger compiled mods",
-     "after": "20 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "7.5 % payload intel",
+     "after": "10 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "Bank Payload",
@@ -8524,11 +8533,11 @@
     {
      "tier": 5,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "20 % stronger compiled mods",
-     "after": "25 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "10 % payload intel",
+     "after": "12.5 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "Police Payload",
@@ -8539,11 +8548,11 @@
     {
      "tier": 6,
      "slot": 9,
-     "value": 0.05,
-     "label": "+5%",
-     "before": "25 % stronger compiled mods",
-     "after": "30 % stronger compiled mods",
-     "effect": "Hacking mods built with Mod are stronger",
+     "value": 0.025,
+     "label": "+2.5%",
+     "before": "12.5 % payload intel",
+     "after": "15 % payload intel",
+     "effect": "Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)",
      "costs": [
       {
        "item": "Government Payload",
@@ -8614,7 +8623,7 @@
    "group": "Compiling",
    "name": "Debug Build",
    "type": "capstone",
-   "effect": "MODIFIER 'debug': -50% speed, heat x1.5; Mod can build the mod up to +50% more hacks (Mod only)",
+   "effect": "MODIFIER 'debug': -50% speed, heat x1.5; each payload has a 10% chance to also give 1 intel find on a target of its location",
    "levels": [
     {
      "tier": 3,
@@ -8623,7 +8632,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'debug': -50% speed, heat x1.5; Mod can build the mod up to +50% more hacks (Mod only)",
+     "effect": "MODIFIER 'debug': -50% speed, heat x1.5; each payload has a 10% chance to also give 1 intel find on a target of its location",
      "costs": [
       {
        "item": "Hospital Payload",

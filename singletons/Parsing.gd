@@ -300,7 +300,7 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 
 	if !items_string.begins_with("="):
 		if command.begins_with('ssh'):
-			return_dictionary.message = "Command not recognized. [color=666666]example ssh parse command: ssh parsing footprint=logs[/color]"
+			return_dictionary.message = "Command not recognized. [color=666666]example: ssh parse -footprint=logs[/color]"
 		else:
 			return_dictionary.message = "Command not recognized. [color=666666]example parse command: parse -footprint=logs[/color]"
 		return return_dictionary
@@ -329,7 +329,7 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 	#CHECK IF THEY PROVIDED ACTUAL ITEM
 	if items_arr.is_empty():
 		if command.begins_with('ssh'):
-			return_dictionary.message = "Item not found. [color=666666]example ssh parse command: ssh parsing footprint=logs[/color]"
+			return_dictionary.message = "Item not found. [color=666666]example: ssh parse -footprint=logs[/color]"
 		else:
 			return_dictionary.message = "Item not found. [color=666666]example parse command: parse -footprint=logs[/color]"
 		return return_dictionary
@@ -370,9 +370,9 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 ## Corruption's finds, weights out of 100. "item": null = a random Hacking Mod.
 func get_corruption_pool() -> Array:
 	return [
-		{ "item": Items.SQL_INJECTOR, "weight": 60 },
+		{ "item": Items.SQL_INJECTOR, "weight": 59 },
 		{ "item": Items.PACKET_SPOOF, "weight": 38 },
-		{ "item": null, "weight": 2 },
+		{ "item": null, "weight": 3 }, # hacking mod (2026-10-23: was 2, mods now last 5 hacks)
 	]
 
 const CORRUPTION_TIER_BONUS = 0.01 # +1% chance per line for each Mining tier above Logs
@@ -382,9 +382,8 @@ const NETWORK_TIER_BONUS = 0.003 # +0.3% chance per line for each Mining tier ab
 ## own mods it falls back to the highest tier below it that has some (today only tier 1: SQL Booster).
 func get_hacking_mod_items(tier: int = 0) -> Array:
 	var by_tier := {}
-	for item in Items.ITEM_MAP.values():
-		if item and item.hacking_mod_item:
-			by_tier.get_or_add(item.tier, []).append(item)
+	for item in HackingMods.pool_items(): # retired mods don't drop
+		by_tier.get_or_add(item.tier, []).append(item)
 	if tier <= 0:
 		var all := []
 		for t in by_tier: all.append_array(by_tier[t])
@@ -435,9 +434,9 @@ func get_find_table(process: Dictionary, item: ItemData, target: ItemData = null
 	match process:
 		CORRUPTION:
 			return [
-				{ "name": Items.SQL_INJECTOR.name, "pct": 60, "items": [Items.SQL_INJECTOR] },
+				{ "name": Items.SQL_INJECTOR.name, "pct": 59, "items": [Items.SQL_INJECTOR] },
 				{ "name": Items.PACKET_SPOOF.name, "pct": 38, "items": [Items.PACKET_SPOOF] },
-				{ "name": "Hacking Mod (T%d)" % _pool_tier(get_hacking_mod_items(item.tier), item.tier), "pct": 2, "items": get_hacking_mod_items(item.tier) },
+				{ "name": "Hacking Mod (T%d)" % _pool_tier(get_hacking_mod_items(item.tier), item.tier), "pct": 3, "items": get_hacking_mod_items(item.tier) },
 			]
 		NETWORK:
 			# one row per token so the totals row shows exactly what the player has
@@ -477,13 +476,13 @@ func list_vm_commands() -> String:
 	return_text += "-".repeat(first_col + second_col) + "\n"
 	for mp in minor_processes:
 		if mp.unlocked:
-			var run_command = "ssh " + Parsing.name.to_lower() + " " + mp.name.to_lower() + "=<item>" + (" target=<item>" if mp == EXTRACTION else "")
+			var run_command = "ssh " + str(mp.get("display command", mp.command + "=<item>")) # same as the main terminal's command
 			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
 		else:
 			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "LOCKED (lvl %d)[/color]\n" % mp["unlock level"]
 	
 	#return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
-	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma seperated ex. ssh parsing footprint=logs, student cache[/color]"
+	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma separated ex. ssh parse -footprint=logs, student cache[/color]"
 	return return_text
 
 

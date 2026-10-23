@@ -7,9 +7,9 @@
 script = ExtResource("1_tr1om")
 damage = 20
 heal = 0
-speed = 20.0
+speed = 25.0
 speed_name = "MEDIUM"
-bandwidth_cost = 6
+bandwidth_cost = 5
 data_cost = 15
 firewall_damage = 1
 type = "Attack"

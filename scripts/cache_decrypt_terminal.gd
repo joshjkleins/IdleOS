@@ -187,6 +187,7 @@ func _run_caches() -> void:
 				return
 
 		Tutorial.track_event(Tutorial.TutorialEvent.DECODE_1_STUDENT_CACHE, 1)
+		Tutorial.track_event(Tutorial.TutorialEvent.DECODE_2_CACHES, 1) # counts only once it's the current step
 		if has_modifier("index"):
 			var t = Decoding.target_for_cache(current_cache)
 			if !t.is_empty():

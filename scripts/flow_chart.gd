@@ -81,7 +81,7 @@ func show_loop() -> bool:
 	b.call(360, 232, "PARSING", "usernames · IP addresses · encrypted passwords", Parsing.SKILL.color)
 	b.call(656, 232, "CRACKING", "passwords", Cracking.SKILL.color)
 	b.call(952, 232, "MATCHING", "credentials", Matching.SKILL.color)
-	b.call(1248, 232, "COMPILING", "payloads (+ mods)", Compiling.SKILL.color)
+	b.call(1248, 232, "COMPILING", "payloads", Compiling.SKILL.color)
 	b.call(1248, 456, "HACKING", "breach targets, bank caches", Hacking.SKILL.color)
 	b.call(952, 456, "DECODING", "resources · rares · tokens · packaging", Decoding.SKILL.color)
 	b.call(656, 456, "UPLOADS", "the location's goal", Color("#e0c068"))

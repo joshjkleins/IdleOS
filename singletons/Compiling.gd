@@ -17,15 +17,31 @@ var CURRENT_VMS = 0
 var terminal_scene = preload("res://scenes/compiling_terminal.tscn")
 
 ## Modifier commands unlocked by Compiling capstones (see Mining.MODIFIERS for how they work).
-## Access refuses every modifier; Debug only works on Mod (see compiling_terminal.modifier_block_reason).
+## Debug (2026-10-23): payloads can come with intel (DEBUG_INTEL_CHANCE per payload, a random unlocked target
+## of that payload's location gets 1 intel find, like decode -intel).
 const MODIFIERS = [
 	{"command": "debug", "name": "Debug", "package": "compiling.debug_build", "speed": 0.5, "heat": 1.5,
-		"effect": "-50% speed, heat x1.5. Mods compiled with it can be built up to +50% more hacks (Mod only)."},
+		"effect": "-50% speed, heat x1.5. Each payload has a 10% chance to also give 1 intel find on a target of its location."},
 	{"command": "optimize", "name": "Optimize", "package": "compiling.optimize", "speed": 0.6, "heat": 2.0,
 		"effect": "-40% speed, heat x2. Burst chance x2 and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "compiling.survey", "speed": 1.0, "heat": 1.0,
 		"effect": "Half output, +100% Compiling XP."},
 ]
+const DEBUG_INTEL_CHANCE := 0.10
+
+## Debug: 1 intel find on a random unlocked (normal) target of <payload_process>'s location. Returns the target or {}.
+func debug_intel(payload_process: Dictionary) -> Dictionary:
+	var tier = get_payload_processes().find(payload_process) + 1
+	if tier <= 0:
+		return {}
+	var loc = Stats.hacking_targets.keys()[tier - 1]
+	var pool = Stats.hacking_targets[loc].get("targets", []).filter(func(t): return t.get("unlocked", false) and !Decoding.is_intel_maxed(t))
+	if pool.is_empty():
+		return {}
+	var t = pool.pick_random()
+	Decoding.add_intel_point(t)
+	return t
+
 ## Cold Build: overclock and the modifiers add no extra heat
 const COOL_PACKAGE := "compiling.cold_build"
 const DEBUG_DURATION_MULT := 1.5
@@ -328,7 +344,7 @@ var minor_processes = [
 	BANK,
 	POLICE,
 	GOVERNMENT,
-	MOD
+	# MOD retired 2026-10-23 ('compile -mod'): the dict stays for old saves / offline, but it isn't a process any more
 ]
 
 func signal_exp(_amount: int):

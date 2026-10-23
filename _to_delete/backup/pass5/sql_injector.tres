@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CombatItem" load_steps=3 format=3 uid="uid://btjjhl0l0geno"]
+
+[ext_resource type="Script" uid="uid://gsjwknwpr2hc" path="res://resource_scripts/item_resource.gd" id="1_65pr5"]
+[ext_resource type="Script" uid="uid://c7r65t2y40b2d" path="res://resource_scripts/item_combat.gd" id="1_tr1om"]
+
+[resource]
+script = ExtResource("1_tr1om")
+damage = 20
+heal = 0
+speed = 20.0
+speed_name = "MEDIUM"
+bandwidth_cost = 6
+data_cost = 15
+firewall_damage = 1
+type = "Attack"
+id = 77
+name = "SQL Injector"
+shortened_name = ""
+description = "Basic attack used in every hack. Caught with 'phish -spear' or found by parsing with Corruption. Upgrade it with 'apt'."
+upgrade_ingredient = false
+value = 0
+parsable = false
+contained_items = Array[ExtResource("1_65pr5")]([])
+tier = 1
+color_type = 6
+obtained_from = Array[int]([5])
+obtained_from_additional_hint = ""
+hacking_mod_type = 8
+hacking_mod_value = 0.2
+hacking_mod_duration = 5
+hacking_mod_consumed = 100
+hacking_mod_item = false
+exploit_id = ""
+metadata/_custom_type_script = "uid://c7r65t2y40b2d"

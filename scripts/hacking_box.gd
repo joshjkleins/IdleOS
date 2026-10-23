@@ -74,6 +74,10 @@ func persons_to_targets():
 	await _show_container(targets_container)
 
 func hacking_to_persons():
+	# the cards were drawn before the hack: redraw them so requirements (payloads 0/1) are current
+	for card in persons_container.get_children():
+		if card.has_method("update_info") and card.get("target") != null:
+			card.update_info(card.target)
 	await _hide_container(hacking_game)
 	remove_last_title_update()
 	await _show_container(persons_container)

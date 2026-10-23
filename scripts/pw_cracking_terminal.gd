@@ -76,6 +76,8 @@ func _random_from(chars: String, length: int) -> String:
 
 func start():
 	begin_run()
+	if process_data == Cracking.PASSWORD and !in_vm:
+		Tutorial.complete_event(Tutorial.TutorialEvent.START_CRACKING) # the main terminal is cracking: next, add a VM
 	progress_bar.value = 0
 	amount_cracked = 0
 	_update_remaining_label()

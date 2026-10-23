@@ -2,6 +2,11 @@ extends Node
 
 signal gained_xp_signal
 signal exp_updated_signal
+signal process_unlocked_signal # a level up just unlocked processes (they wait in unlock_queue for the terminal)
+
+## [{"skill": major, "process": p}] unlocked by a level up, not yet announced (idle_os_2 prints and clears it:
+## right away at the main terminal, or once you're back from hacking / the offline download).
+var unlock_queue: Array = []
 
 
 const MAX_LEVEL: int = 99 # highest process unlock level is 80 (Compiling: Government)
@@ -65,7 +70,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 	while major.SKILL["level"] < major_new_level:
 		print('leveled up')
 		major.SKILL["level"] += 1
-		refresh_process_unlocks(major)
+		refresh_process_unlocks(major, true)
 		major.SKILL["level up signal"].emit()
 		Audiomanager.play_sfx("level_up")
 		if major != Hacking:
@@ -139,10 +144,16 @@ func level_bonus_text(major) -> String:
 
 ## Processes unlock once their skill reaches "unlock level" (and never re-lock).
 ## (The old header did this as a side effect of displaying a skill; now it happens on level up + load.)
-func refresh_process_unlocks(major) -> void:
+func refresh_process_unlocks(major, announce: bool = false) -> void:
+	var fresh = false
 	for p in major.minor_processes:
 		if major.SKILL.level >= p.get("unlock level", 1):
+			if announce and !p.get("unlocked", false) and int(p.get("unlock level", 1)) > 1:
+				unlock_queue.append({"skill": major, "process": p})
+				fresh = true
 			p["unlocked"] = true
+	if fresh:
+		process_unlocked_signal.emit()
 
 ## Tier of a tier-specific process (Mining, Cracking, Matching, Compiling payloads), else 0.
 func process_tier(major, p: Dictionary) -> int:

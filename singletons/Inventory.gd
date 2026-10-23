@@ -91,13 +91,13 @@ func list_specific_item(item: ItemData):
 	text += "\n"
 	text += used_in_text(item)
 	
-	if item.hacking_mod_duration != 0:
+	if item.hacking_mod_duration != 0 and item.hacking_mod_item: # mod items only ('compile -mod' is retired)
 		var hacking_mod_value = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
 		var hacking_mod_name = HackingMods.get_mod_name(item.hacking_mod_type)
 		var hacking_mod_display = "Hacking Mod\n"
 		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
 		if item.hacking_mod_item:
-			hacking_mod_display += "└─ Manage this mod with the 'mod' command · lasts %d hacks\n\n" % item.hacking_mod_duration
+			hacking_mod_display += "└─ Manage this mod with the 'mod' command · lasts %d hacks\n\n" % HackingMods.mod_duration(item)
 		else:
 			var cost = Compiling.mod_fill_cost(item)
 			var parts = cost.keys().map(func(k): return "%s x%d" % [k.name, cost[k]])
@@ -691,6 +691,14 @@ func used_in_text(item: ItemData) -> String:
 		rows.append(["Parsing", "parse -footprint=%s  [color=#666666](and the other parse processes)[/color]" % item.name.to_lower()])
 	if Phishing.is_bait(item):
 		rows.append(["Phishing bait", "phish -spear bait=%s  [color=#666666](10 per cast)[/color]" % item.name.to_lower()])
+	if Uploads.is_rare(item):
+		# surplus rares: Mod Phishing bait once the upload goal for them is met (1 per cast, a guaranteed mod of its tier)
+		var rt = item_tier(item)
+		var mods = ", ".join(HackingMods.pool_items(rt).map(func(m): return m.name))
+		if Phishing.is_rare_bait(item):
+			rows.append(["Mod Phishing bait", "phish -mod bait=%s  [color=#666666](1 per cast, guarantees one of: %s)[/color]" % [item.name.to_lower(), mods]])
+		else:
+			rows.append(["Mod Phishing bait", "[color=#666666]after the %s upload goal for it is met (%d/%d): then each cast guarantees one of: %s[/color]" % [Uploads.get_location_name(rt), Uploads.get_uploaded(item), Uploads.get_goal_amount(item, rt), mods]])
 	if t == "cache":
 		rows.append(["Decoding", "decode -cache=%s" % item.name.to_lower()])
 		if item.get_variant() == CacheData.CacheVariant.BASE:

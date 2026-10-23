@@ -1,0 +1,286 @@
+class_name SystemDock
+extends PanelContainer
+## Right-side panel: system temperature, tracked items and running VMs. Click a VM row to minimize/restore it.
+
+@onready var tracked_section: VBoxContainer = %TrackedSection
+@onready var hud_monitor = %HUDMonitor
+@onready var vm_section: VBoxContainer = %VMSection
+@onready var vm_count_label: Label = %VMCountLabel
+@onready var vm_list: VBoxContainer = %VMList
+@onready var vm_empty_label: Label = %VMEmptyLabel
+@onready var separator: HSeparator = %Separator
+@onready var system_separator: HSeparator = %SystemSeparator
+@onready var system_temp: SystemTemp = %SystemTemp
+
+@onready var full_view: VBoxContainer = $VBox
+@onready var compact_view: SystemDockCompact = %Compact
+@onready var collapse_button: Button = %CollapseButton
+@onready var process_section = %HUDProcessRunning
+
+## Emitted when the panel changes size so idle_os_2 can re-layout the terminal.
+signal width_changed(new_width: float)
+
+const EXPANDED_WIDTH = 284.0
+const COLLAPSED_WIDTH = 56.0
+
+var collapsed: bool = false
+
+const ROW_FONT_SIZE = 11
+const DIM = Color(0.45, 0.5, 0.55, 1)
+const TEXT = Color(0.8, 0.84, 0.88, 1)
+
+var _rows := {} # VMWindow -> {button, name, status, bar}
+var _refresh_accum := 0.0
+var access_section: AccessSection
+var available_section: AvailableSection
+var upload_section: UploadSection
+var vm_toggle: SectionToggle
+var vm_summary: HBoxContainer # collapsed VM view: one light per running VM
+var vm_collapsed := false
+
+func _ready() -> void:
+	# line tracked rows up with the section headers
+	var monitor_margin: MarginContainer = hud_monitor.get_node("MarginContainer")
+	for side in ["left", "top", "right", "bottom"]:
+		monitor_margin.add_theme_constant_override("margin_" + side, 0)
+	_add_upload_section()
+	_add_defrag_boost()
+	_add_vm_toggle()
+	_add_trap_status()
+	VMManager.vms_changed.connect(_rebuild_rows)
+	_rebuild_rows()
+	add_to_group("system_dock")
+	collapse_button.pressed.connect(func(): set_collapsed(true); Signals.vm_window_focused())
+	compact_view.expand_requested.connect(func(): set_collapsed(false); Signals.vm_window_focused())
+	_apply_collapsed()
+
+## UPLOADS sits under the VM list (built in code; see upload_section.gd).
+func _add_upload_section() -> void:
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep)
+	full_view.move_child(sep, vm_section.get_index() + 1)
+	var avail := AvailableSection.new()
+	available_section = avail
+	full_view.add_child(avail)
+	full_view.move_child(avail, sep.get_index() + 1)
+	var sep_a := HSeparator.new()
+	sep_a.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep_a)
+	full_view.move_child(sep_a, avail.get_index() + 1)
+	var access := AccessSection.new()
+	access_section = access
+	full_view.add_child(access)
+	full_view.move_child(access, sep_a.get_index() + 1)
+	var sep2 := HSeparator.new()
+	sep2.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep2)
+	full_view.move_child(sep2, access.get_index() + 1)
+	sep = sep2
+	var section := UploadSection.new()
+	upload_section = section
+	section.size_flags_vertical = Control.SIZE_EXPAND_FILL # takes the free space (scrolls when VMs crowd it)
+	full_view.add_child(section)
+	full_view.move_child(section, sep.get_index() + 1)
+	var spacer = full_view.get_node_or_null("Spacer")
+	if spacer:
+		spacer.size_flags_vertical = Control.SIZE_FILL
+
+## running Defragging boost at the very top (hidden when none is active)
+func _add_defrag_boost() -> void:
+	var boost := DefragBoostSection.new()
+	boost.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var top_bar = collapse_button.get_parent() # shares the row with the collapse button
+	top_bar.add_child(boost)
+	top_bar.move_child(boost, 0)
+	var top_spacer = top_bar.get_node_or_null("Spacer")
+	if top_spacer: # the boost takes the row's free space while it shows (spacer comes back when it hides)
+		boost.visibility_changed.connect(func(): top_spacer.visible = !boost.visible)
+		top_spacer.visible = !boost.visible
+	collapse_button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep)
+	full_view.move_child(sep, top_bar.get_index() + 1)
+	boost.set_separator(sep)
+
+## Phishing trap: one small row under the temperature widget (hidden until Trap unlocks).
+func _add_trap_status() -> void:
+	var trap := TrapStatus.new()
+	full_view.add_child(trap)
+	full_view.move_child(trap, system_temp.get_index() + 1)
+
+## ▾ on the VIRTUAL MACHINES header; collapsed it shows one small light per running VM.
+func _add_vm_toggle() -> void:
+	var header = vm_section.get_node("VMHeader")
+	vm_toggle = SectionToggle.new()
+	vm_toggle.toggled_section.connect(set_vm_collapsed)
+	header.add_child(vm_toggle)
+	header.move_child(vm_toggle, 0)
+	vm_summary = HBoxContainer.new()
+	vm_summary.add_theme_constant_override("separation", 4)
+	vm_summary.visible = false
+	vm_section.add_child(vm_summary)
+	vm_section.move_child(vm_summary, 1)
+
+func set_vm_collapsed(value: bool) -> void:
+	vm_collapsed = value
+	vm_toggle.set_collapsed(value)
+	vm_list.visible = !value
+	vm_summary.visible = value
+	_update_visibility()
+	SaveManager.mark_dirty()
+
+func _refresh_vm_summary() -> void:
+	for c in vm_summary.get_children():
+		c.queue_free()
+	if VMManager.vms.is_empty():
+		vm_summary.add_child(_label("none running"))
+		return
+	for vm in VMManager.vms:
+		var light := ColorRect.new()
+		light.custom_minimum_size = Vector2(8, 8)
+		light.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		light.color = vm.skill.SKILL.color if vm.visible else Color(vm.skill.SKILL.color, 0.35)
+		light.tooltip_text = "vm-%02d %s/%s  %ds" % [vm.vm_id, vm.skill.SKILL.name.to_lower(), str(vm.minor_process.name).to_lower(), vm.get_seconds_left()]
+		light.mouse_filter = Control.MOUSE_FILTER_PASS
+		vm_summary.add_child(light)
+
+func get_panel_width() -> float:
+	return COLLAPSED_WIDTH if collapsed else EXPANDED_WIDTH
+
+func set_collapsed(value: bool) -> void:
+	if collapsed == value:
+		return
+	collapsed = value
+	_apply_collapsed()
+	SaveManager.mark_dirty()
+
+func toggle() -> void:
+	set_collapsed(!collapsed)
+
+func _apply_collapsed() -> void:
+	full_view.visible = !collapsed
+	compact_view.visible = collapsed
+	custom_minimum_size.x = get_panel_width()
+	offset_left = -get_panel_width()
+	width_changed.emit(get_panel_width())
+
+func save_data() -> Dictionary:
+	return {
+		"collapsed": collapsed,
+		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "available": available_section.collapsed, "uploads": upload_section.collapsed},
+	}
+
+func load_data(data: Dictionary) -> void:
+	set_collapsed(bool(data.get("collapsed", false)))
+	var sections: Dictionary = data.get("sections", {})
+	set_vm_collapsed(bool(sections.get("vm", false)))
+	access_section.set_collapsed(bool(sections.get("access", false)))
+	available_section.set_collapsed(bool(sections.get("available", false)))
+	upload_section.set_collapsed(bool(sections.get("uploads", false)))
+
+func _process(delta: float) -> void:
+	_refresh_accum += delta
+	if _refresh_accum < (0.05 if collapsed else 0.25):
+		return
+	if collapsed:
+		compact_view.refresh(process_section.is_running(), process_section.current_color, _refresh_accum)
+		_refresh_accum = 0.0
+		return
+	_refresh_accum = 0.0
+	_refresh_rows()
+	_update_visibility()
+
+func _update_visibility() -> void:
+	var has_tracked: bool = hud_monitor.tracked_items.size() > 0
+	var vms_unlocked: bool = Stats.MAX_ALL_VMS > 0
+	tracked_section.visible = has_tracked
+	vm_section.visible = vms_unlocked
+	separator.visible = has_tracked and vms_unlocked
+	system_separator.visible = has_tracked or vms_unlocked
+	vm_count_label.text = "%d/%d" % [VMManager.vms.size(), Stats.MAX_ALL_VMS]
+	vm_empty_label.visible = VMManager.vms.is_empty() and !vm_collapsed
+	if vm_collapsed:
+		_refresh_vm_summary()
+
+func _rebuild_rows() -> void:
+	for row in vm_list.get_children():
+		row.queue_free()
+	_rows.clear()
+	for vm in VMManager.vms:
+		_rows[vm] = _make_row(vm)
+	_refresh_rows()
+	_update_visibility()
+
+func _make_row(vm: VMWindow) -> Dictionary:
+	var button := Button.new()
+	button.focus_mode = Control.FOCUS_NONE
+	button.flat = true
+	button.custom_minimum_size = Vector2(0, 30)
+	button.tooltip_text = "Click to minimize / restore"
+	button.pressed.connect(func(): VMManager.toggle(vm); Signals.vm_window_focused())
+	vm_list.add_child(button)
+
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.add_theme_constant_override("separation", 3)
+	button.add_child(box)
+
+	var line := HBoxContainer.new()
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_theme_constant_override("separation", 6)
+	box.add_child(line)
+
+	var dot := ColorRect.new()
+	dot.custom_minimum_size = Vector2(6, 6)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	dot.color = vm.skill.SKILL.color
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_child(dot)
+
+	var name_label := _label("vm-%02d %s/%s" % [vm.vm_id, vm.skill.SKILL.name.to_lower(), str(vm.minor_process.name).to_lower().replace(" ", "-")])
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
+	line.add_child(name_label)
+
+	var status_label := _label("")
+	line.add_child(status_label)
+
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 3)
+	bar.max_value = 1.0
+	bar.step = 0.001
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bg := StyleBoxFlat.new(); bg.bg_color = Color(1, 1, 1, 0.06)
+	var fill := StyleBoxFlat.new(); fill.bg_color = vm.skill.SKILL.color
+	bar.add_theme_stylebox_override("background", bg)
+	bar.add_theme_stylebox_override("fill", fill)
+	box.add_child(bar)
+
+	return {"button": button, "name": name_label, "status": status_label, "bar": bar}
+
+func _refresh_rows() -> void:
+	for vm in _rows:
+		if !is_instance_valid(vm):
+			continue
+		var row = _rows[vm]
+		var minimized: bool = !vm.visible
+		if vm.stopping:
+			row.status.text = "stopping"
+		else:
+			row.status.text = "%ds%s" % [vm.get_seconds_left(), "" if vm.tokens_used <= 1 else " x%d" % vm.tokens_used]
+		row.button.tooltip_text = ("Minimized - click to restore" if minimized else "Click to minimize") + "\nTokens used: %d" % vm.tokens_used
+		row.name.add_theme_color_override("font_color", DIM if minimized else TEXT)
+		row.bar.value = vm.get_progress()
+		row.bar.modulate.a = 0.45 if minimized else 1.0
+
+func _label(text: String) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
+	l.add_theme_color_override("font_color", DIM)
+	return l

@@ -664,11 +664,15 @@ func get_bonus_time_text(what) -> String:
 static func tier_heat(table: Array, t: int) -> float:
 	return float(table[clamp(t, 1, table.size()) - 1]) if !table.is_empty() else 1.0
 
+const TUTORIAL_MAX_TEMP := 92.0 # overheat starts at 95
 func update_tempature(amount: float):
 	if amount >= 0.0:
 		# System Heat Reduction and the defrag heat boost are both a percent of every heat tick
 		amount = max(0.0, amount * (1.0 - HEAT_REDUCTION) * (1.0 - Defragging.get_heat_reduction()))
 	system_tempature += amount
+	# tutorial safety net (silent): the system can't overheat while the tutorial runs
+	if amount > 0.0 and !Tutorial.is_tutorial_complete():
+		system_tempature = min(system_tempature, TUTORIAL_MAX_TEMP)
 	if system_tempature >= MAX_TEMP:
 		system_tempature = MAX_TEMP
 	elif system_tempature <= MIN_TEMP:
@@ -872,6 +876,21 @@ const ACCESS_PAYLOAD_STEP_BY_TIER = [10, 25, 25, 25, 25, 25]
 const ACCESS_RARE_AMOUNT = 5 # (kept for old references; get_access_recipe uses the per-tier tables)
 
 var wins := {} # target_key -> times beaten
+## target_key -> {"sql": avg SQL Injectors per win, "spoof": avg Packet Spoofs per win, "n": wins counted}
+## (HintEngine / the side panel's NEXT HACK row recommend from it)
+var usage := {}
+
+func record_usage(target: Dictionary, sql: int, spoof: int) -> void:
+	var key = target_key(target)
+	var u = usage.get(key, {"sql": 0.0, "spoof": 0.0, "n": 0})
+	var n = min(int(u.n), 9) # rolling: the last ~10 wins count
+	u.sql = (float(u.sql) * n + sql) / (n + 1)
+	u.spoof = (float(u.spoof) * n + spoof) / (n + 1)
+	u.n = int(u.n) + 1
+	usage[key] = u
+
+func get_usage(target: Dictionary) -> Dictionary:
+	return usage.get(target_key(target), {})
 
 func apply_default_unlocks() -> void:
 	var first = true
@@ -1066,6 +1085,7 @@ func save_data() -> Dictionary:
 		"hacking_locations": locations,
 		"unlocks": {"locations": unlocked_locations, "targets": unlocked_targets},
 		"wins": wins,
+		"usage": usage,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -1088,6 +1108,11 @@ func load_data(data: Dictionary) -> void:
 	var saved_wins: Dictionary = data.get("wins", {})
 	for k in saved_wins:
 		wins[k] = int(saved_wins[k])
+	usage = {}
+	var saved_usage: Dictionary = data.get("usage", {})
+	for k in saved_usage:
+		var u = saved_usage[k]
+		usage[k] = {"sql": float(u.get("sql", 0)), "spoof": float(u.get("spoof", 0)), "n": int(u.get("n", 0))}
 	set_max_anon()
 	unlocks_changed.emit()
 	

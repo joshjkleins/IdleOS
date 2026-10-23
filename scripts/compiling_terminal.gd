@@ -79,10 +79,8 @@ func _refresh_reqs() -> void:
 		_reqs = Compiling.mod_fill_cost(hacking_mod_item)
 
 
-## Per modifier: Debug only does something on Mod
-func modifier_refuses(command: String) -> String:
-	if command == "debug" and process_data != Compiling.MOD:
-		return "Debug only works on Mod ('compile -mod=<item>'): it lets the mod build up to +50% more hacks."
+## Per modifier: every modifier works on payloads now (Debug adds an intel chance, see _compile_payload)
+func modifier_refuses(_command: String) -> String:
 	return ""
 
 ## Mod heat follows the working tier
@@ -245,6 +243,13 @@ func _compile_payload():
 		if amount_to_gain > 0:
 			Inventory.add_resource(process_data["resource gained"], amount_to_gain)
 			Tutorial.track_event(Tutorial.TutorialEvent.COMPILE_3_SCHOOL_PAYLOADS, amount_to_gain)
+			# Debug: the payload sometimes carries intel on one of its location's targets
+			# Code Signing: +2.5% per tier for every payload; Debug adds its 10% on top
+			var intel_chance = Upgrades.cur("compiling.code_signing") + (Compiling.DEBUG_INTEL_CHANCE if has_modifier("debug") else 0.0)
+			if intel_chance > 0.0 and randf() < intel_chance:
+				var t = Compiling.debug_intel(process_data)
+				if !t.is_empty():
+					Signals.system_message_signal.emit("[color=#4ec9b0]Payload intel: found on %s[/color]  [color=#666666](%s)[/color]" % [t.name, Decoding.intel_effect_text(t)])
 		amount_gained += amount_to_gain
 	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_COMPILING_TOKEN, 1)

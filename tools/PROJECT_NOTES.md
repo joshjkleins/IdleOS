@@ -599,3 +599,120 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
 - Tools: econ2 / econ_plan / xp_plan use RARE_P 0.25, extraction x2, efficiency as a basics multiplier.
 - Open: Network cache variant (still 50% x 10-20 VM tokens) vs VM Caches; XP pacing together with the minor-process-levels idea.
 - Tests: tools/tests/p4test.gd (headless checks), p4shot.gd (side panel screenshot).
+
+## Playthrough pass 5 (2026-10-22, cdd)
+- PROCESS UNLOCKED banner (MAJOR RELEASE frame) when a level up unlocks a process: `Exp.unlock_queue` +
+  `process_unlocked_signal`; idle_os_2 `_flush_unlocks` prints at the main terminal, holds while hacking / booting / the
+  offline download and prints on return. Tier-blocked processes add "requires X access".
+- Hacking: 'kill -s' finishes the current hack and ends the run (`stop_after_win`); 'kill' prints what you walked away with.
+- Breach crit is one per firewall break; a firewall that starts at 0 never "breaks", so no crit loop.
+- Salvage finds 5-10 VM tokens per line (was 10-20; efficiency doubles). Defrag VM text drops "(60s per token)".
+- 'mod' footer mentions 'ls mod'. ssh accepts a process's flag: 'ssh phishing whale' = Whaling.
+- Tests: tools/tests/p5test.gd, p5kill.gd.
+
+## Demo backlog (from player feedback, 2026-10-23) - port to demo-nextfest-2 once done on cdd
+Feedback: no music; hard to see your situation (management game without an overview); inconsistent command grammar;
+no "I'm lost" helper; first hour feels like 90% waiting. Plan, in order:
+1. 'hint' command (next 1-3 commands from game state)  2. status overview  3. first-hour pacing pass (+ XP / minor-process
+levels)  4. music  5. command-consistency audit.
+Also already done on cdd and not yet in the demo: pass 4/5 fixes (ssh flags + plural, '-force' items, kill -s, process-unlocked banner, etc.).
+
+## hint command + NEXT HACK row (2026-10-23, cdd) - demo backlog item 1
+- scripts/hint_engine.gd (HintEngine, static): 'hint' / 'next' / 'lost' print up to 3 {cmd, why}. Order: tutorial step (only
+  that while the tutorial runs) · overheated · caches · ready to hack · target access · affordable upgrade (tier, then
+  speed > hacking > efficiency > rest > capstones) · chain bottleneck (walks payload <- compile <- match <- crack <- parse
+  <- mine; SQL short -> phish -spear; forced in when the main terminal is idle) · spare VM token -> ssh · upload surplus · goal.
+- Uploads only suggest the surplus over HintEngine.reserved(): next level of every open package + locked-target access
+  + 3 hacks of payload. Conservative on purpose (Josh kept uploading stock he needed).
+- 2 unrecognized commands in a row -> "lost? try hint" (add_line watches for not-found text during a command).
+- Stats.usage (saved): rolling avg SQL / spoofs per win per target; recommended = avg x1.25, else a no-reboot estimate x1.5.
+- Side panel AVAILABLE TO RUN: hacking row (best target, payload + SQL rec, spoofs once known; short parts in red).
+- Mentioned in -h, the welcome message and both tutorial-complete messages. Tests: hinttest / hintup / hintshot.
+
+## First-session timeline (2026-10-23) - tools/balance/first_hour.py
+Tutorial with reading time (160/230/350 wpm) + typing + real T1 process speeds (tools/tests/rates1.gd):
+first hack at ~14-15 min, tutorial done ~15-16 min, ~5 min of pure waiting (mine 35 logs ~1.5 min, parse 30 ~1.4 min).
+At 10 min the player is matching credentials; 13 commands of terminal basics before any output. Reading speed barely
+moves it: the waits and step count dominate. Real players are slower (typos, confusion): steam median session 14 min
+is about where the model's first hack lands. Options discussed: hack-first tutorial, smaller tutorial counts, faster T1.
+
+## Faster fights + tutorial hack kit (2026-10-23)
+- SQL Injector speed 20 -> 25, bandwidth cost 6 -> 5 (items/combat/sql_injector.tres; combat_sim SQL_SPEED / SQL_COST).
+  Student fight ~50s -> ~40s (sim), live test 35-45s; every tier's fights ~15-20% faster (enemy tuning not re-run yet).
+- Live test (tools/tests/fight2.gd, 8 trials with cooling): 1 hack + 'hack student=2' with 35 SQL / 3 spoofs: 8/8 won,
+  SQL used 26-30 (5-9 left), anonymity after the 2-run 12-26 of 105. Sim (1000 runs): 30 SQL = 100% but 0 left at worst,
+  so the starter kit is 35. NB: an overheated system in a 2-run loses it (counters x2, bandwidth x0.5).
+- Tutorial.ensure_hack_kit: during the tutorial's hack steps (KIT_STEPS), before hacking the Student, tops up to 1 payload
+  + 12 SQL per hack + 3 spoofs, so 'kill' experiments can't strand the player (tools/tests/kittest.gd).
+- Mod for the tutorial (sim, Student, cost 5 / speed 25): none 40s / 9.2 SQL · SQL Booster alone 57s (slower: +2 mod bw
+  makes the attack bandwidth-bound) · Payload Amplifier 41s / 6.7 SQL · Burst Buffer 37s · Burst + Booster 27s.
+- New tier 1 equippable mod: Handshake Exploit (items/hacking_mods/handshake_exploit.tres, id 358, MOD_TYPE.FW_OPENER = 29,
+  value 10, 20 hacks): the first hit against a new firewall (start of each hack, after every reboot) deals +10 firewall
+  damage (hacking_game fw_fresh; combat_sim "opener"). Joins the Phishing mod / Corruption tier 1 pools automatically.
+  Student: sim 40s / 9.2 SQL -> 34s / 5.7 SQL; live (fight2m.gd) 6 SQL per fight, 2-run ends ~50% anonymity (vs ~15%).
+  Feels good with the breach crit: handshake nearly breaks the firewall, the 3rd hit breaks it, the 4th crits.
+
+## Hack-first tutorial (2026-10-23) - Tutorial ORDER_VERSION 3
+- 23 steps: -h · cd hacking · view school · hack student · cd root · decode -cache · ls · parse (3 IPs) · crack 3 ·
+  match 3 · compile 2 · mod -add (Handshake Exploit, in the first Student cache) · hack student=2 · decode both ·
+  upload · upload logs 5 · upload parents credit card 1 · phish 10 SQL · mine · mine 15 · kill · apt · utility.
+- Starter kit (Tutorial.STARTER_KIT: 1 payload, 35 SQL, 3 spoofs) when '-h' completes. ensure_hack_kit covers both hack steps.
+- Tutorial.STEP_COMMANDS: each step's "command to run" line (window + terminal + hint). GATED_STEPS only count when current.
+- Window stays up in the Hacking module while the tutorial runs. 'cd root' (and cd ~, cd /, cd) everywhere.
+- Silent overheat guard while the tutorial runs (Stats.TUTORIAL_MAX_TEMP 92; overheat at 95).
+- Old saves: finished stays finished; otherwise shared steps keep state (VIEW_SCHOOL / RETURN_TO_ROOT implied by the
+  next step) and they continue from the first open one, kit given if they're past '-h' without a hack.
+- 'utility' command (ContextCommands.utility_commands) + -h line. Equippable mods last 5 hacks (was 20); mod finds up:
+  phish -mod 1% -> 1.5%, Corruption mod weight 2 -> 3.
+- tools/tests/tutbot.gd plays the whole tutorial from STEP_COMMANDS: all 23 steps pass, 10.2 min of game time.
+  With reading (230 wpm): first hack ~3.1 min (was 14.4), third hack ~9.6, done ~16 min.
+- Tutorial pass 2 (2026-10-23): window drags by its title bar (double-click docks it; Tutorial.window_moved / window_pos
+  saved). First Student cache no longer drops a VM cache. New steps: cd parsing before the parse step, NAVIGATE_CRACKING
+  (cd .. / cd cracking) before crack; $PATH moved to the match step. Multi-command steps list one command per line
+  ("commands to run, in order"). Hack-twice starts with 'cd root'. 25 steps; tutbot passes all of them.
+- Tutorial pass 3 (2026-10-23): 26 steps. Parse 10 logs (PARSE_20_LOGS) instead of 3 IPs; START_CRACKING (main terminal
+  runs Password) then CRACK_3_PASSWORDS = crack 5 with the Cracking VM token. Tutorial._step_needs tops up what the
+  current step needs when it comes up (silent). complete_event: retired steps never complete; a step finished ahead
+  of time is checked off quietly (no terminal line); the line names the step. -h: no 'mine -logs, crack' row, PROGRESS =
+  upload + intel, cd root row; 'intel -h' box (ContextCommands.intel_help_commands); process -h lists kill -s / stop -s.
+  hint ends with the GOAL line (upload the location's goal to unlock the next one).
+- ssh mirrors the process commands (2026-10-23): 'ssh mine -logs', 'ssh parse -footprint=logs', 'ssh crack -password'...
+  (idle_os_2 maps the verb via SKILL_BINARIES; 'ssh mining logs' still works). ssh tables, tab, hint, tutorial, errors
+  all show the new form. -h gained 'info <skill>' and a VIRTUAL MACHINES section (ssh, ssh <process command>, vm -h);
+  side panel's empty VM line: "'ssh' lists your tokens". Tutorial VM step mentions 'ssh'. Test: tools/tests/sshtest.gd.
+- 2026-10-23: SQL / spoof "waiting for bandwidth (N)" shows the real cost (mods included). Target cards redraw when a hack
+  ends (hacking_box.hacking_to_persons) so payload requirements are current. 'pin' / 'unpin' replace sticky in all text
+  (sticky / stick / unsticky / unstick still work). utility box 96 wide. hint: upgrades are one general line near the
+  bottom ("upgrades available: use 'apt'"). Last tutorial step mentions 'focus'.
+
+## compile -mod retired + bait opened up (2026-10-23)
+- ItemData.is_compilable_mod() is always false; Compiling.MOD left out of minor_processes (dict kept for old saves /
+  offline). Gone from tab, info, ls item rows, -h, utility, glossary, flow chart, hacking header. 'ls mods' = the mod
+  items you own. Compiled mods already equipped in a save still work until their hacks run out.
+- OPEN: compiling.mod_tuning (6 levels) and compiling.debug_build (T3 capstone 'debug' modifier) only affected Mod:
+  they need new effects (asked Josh).
+- Bait: any basic resource of any tier (Phishing.is_bait = Decoding.get_resource_tier > 0); bait power / heat by the
+  resource's location tier (Phishing.bait_tier). Rares, caches, SQL / spoofs, tokens aren't bait.
+- Debug Build (Compiling T3 capstone) repurposed: 'debug' modifier = -50% speed, heat x1.5, each payload 10% chance
+  (Compiling.DEBUG_INTEL_CHANCE) to give 1 intel find on a random unlocked target of its location (Compiling.debug_intel).
+  Main terminal / VM only, not offline. Mod Tuning still OPEN (move to System?).
+- Upgrade slots (2026-10-23, gen_upgrades.py + merged into data/upgrades.json): System Background Services 1 per tier
+  (offline cap 2/4/8/12/18/24 h); new System pointed Kernel Modules (+1 hack per equipped mod per tier,
+  HackingMods.mod_duration); Compiling Mod Tuning -> Code Signing (+2.5%/tier chance a payload gives 1 intel find,
+  Debug's 10% stacks). Every group still 10 per tier. Upgrades save format 3: format-2 saves halve Background Services
+  installs (rounded up); mod_tuning installs carry to code_signing (RENAMED). Test: tools/tests/upgtest.gd.
+
+## Mods + one-time items pass (2026-10-23)
+- 30 equippable mods, 5 per tier (HackingMods.pool_items; RETIRED_MOD_ITEMS: Shatter Protocol, Ghost Packet still work
+  if owned). New items 359-371: Backdoor, Reset Loop (COUNTER_RESET), Hardened Shell, Fresh Start, Opening Spoof,
+  Hot Streak, Double Tap, Bleed, Breach Momentum, Leech, Jitter, Failsafe, Data Hoarder (MOD_TYPE 30-41).
+  SQL Booster has no mod bandwidth cost.
+- 30 one-time items, 5 per tier (new ids 372-389), Exploits.DEFS costs 15-20 (T1) .. 40-50 (T6).
+  Ghost Mode = no hits for 8s; Firewall Drain 3% of max/s; Freeze holds the firewall reboot timer; Overcharge adds
+  before the crit multiplier; Port Knock banks its 15s when the firewall is up.
+- Cache drops: 10% each of the tier's one-time items, 5% each of its mods (Deep Scan x2, Skim / Footprint none);
+  drop tables show one row each ("one-time item (10% each of 5)", "hacking mod (5% each of 5)").
+- Rare items whose upload goal is met: 'phish -mod' bait, 1 per cast, every cast lands a mod of the rare's tier
+  (Phishing.is_rare_bait / tier_mod_pool / bait_cost; offline too). 'ls <rare>' shows the row (before / after).
+- Balance harness: tools/tests/modbal.gd (live fights, MODTIER / MODLAST / MODTARGET env). Finding: the +2 bandwidth
+  per equipped mod makes non-damage mods slower at tier arrival (bandwidth-bound); asked Josh about lowering it.

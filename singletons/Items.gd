@@ -488,6 +488,38 @@ enum ItemType {
 	MIRROR, #355
 	COLD_BOOT, #356
 	VM_CACHE, #357
+	HANDSHAKE_EXPLOIT, #358
+	BACKDOOR, #359
+	RESET_LOOP, #360
+	HARDENED_SHELL, #361
+	FRESH_START, #362
+	OPENING_SPOOF, #363
+	HOT_STREAK, #364
+	DOUBLE_TAP, #365
+	BLEED, #366
+	BREACH_MOMENTUM, #367
+	LEECH, #368
+	JITTER, #369
+	FAILSAFE, #370
+	DATA_HOARDER, #371
+	PACKET_FLOOD, #372
+	SMOKE_SCREEN, #373
+	OVERCHARGE, #374
+	PORT_KNOCK, #375
+	QUICK_PATCH, #376
+	TRACE_SCRAMBLER, #377
+	CREDENTIAL_STUFFING, #378
+	HEAT_SINK, #379
+	ROOTKIT, #380
+	MIRROR_IMAGE, #381
+	FIREWALL_DRAIN, #382
+	SUPPLY_DROP, #383
+	CHAIN_REACTION, #384
+	FREEZE, #385
+	EXFIL_WINDOW, #386
+	ROOT_ACCESS, #387
+	TOTAL_RECALL, #388
+	SYSTEM_PURGE, #389
 }
 
 ### RESOURCES ###
@@ -890,6 +922,38 @@ const CASCADE = preload("res://items/hacking_mods/cascade.tres") #354
 const MIRROR = preload("res://items/hacking_mods/mirror.tres") #355
 const COLD_BOOT = preload("res://items/hacking_mods/cold_boot.tres") #356
 const VM_CACHE = preload("res://items/cache_data/vm_cache.tres") #357
+const HANDSHAKE_EXPLOIT = preload("res://items/hacking_mods/handshake_exploit.tres") #358
+const BACKDOOR = preload("res://items/hacking_mods/backdoor.tres") #359
+const RESET_LOOP = preload("res://items/hacking_mods/reset_loop.tres") #360
+const HARDENED_SHELL = preload("res://items/hacking_mods/hardened_shell.tres") #361
+const FRESH_START = preload("res://items/hacking_mods/fresh_start.tres") #362
+const OPENING_SPOOF = preload("res://items/hacking_mods/opening_spoof.tres") #363
+const HOT_STREAK = preload("res://items/hacking_mods/hot_streak.tres") #364
+const DOUBLE_TAP = preload("res://items/hacking_mods/double_tap.tres") #365
+const BLEED = preload("res://items/hacking_mods/bleed.tres") #366
+const BREACH_MOMENTUM = preload("res://items/hacking_mods/breach_momentum.tres") #367
+const LEECH = preload("res://items/hacking_mods/leech.tres") #368
+const JITTER = preload("res://items/hacking_mods/jitter.tres") #369
+const FAILSAFE = preload("res://items/hacking_mods/failsafe.tres") #370
+const DATA_HOARDER = preload("res://items/hacking_mods/data_hoarder.tres") #371
+const PACKET_FLOOD = preload("res://items/exploits/packet_flood.tres") #372
+const SMOKE_SCREEN = preload("res://items/exploits/smoke_screen.tres") #373
+const OVERCHARGE = preload("res://items/exploits/overcharge.tres") #374
+const PORT_KNOCK = preload("res://items/exploits/port_knock.tres") #375
+const QUICK_PATCH = preload("res://items/exploits/quick_patch.tres") #376
+const TRACE_SCRAMBLER = preload("res://items/exploits/trace_scrambler.tres") #377
+const CREDENTIAL_STUFFING = preload("res://items/exploits/credential_stuffing.tres") #378
+const HEAT_SINK = preload("res://items/exploits/heat_sink.tres") #379
+const ROOTKIT = preload("res://items/exploits/rootkit.tres") #380
+const MIRROR_IMAGE = preload("res://items/exploits/mirror_image.tres") #381
+const FIREWALL_DRAIN = preload("res://items/exploits/firewall_drain.tres") #382
+const SUPPLY_DROP = preload("res://items/exploits/supply_drop.tres") #383
+const CHAIN_REACTION = preload("res://items/exploits/chain_reaction.tres") #384
+const FREEZE = preload("res://items/exploits/freeze.tres") #385
+const EXFIL_WINDOW = preload("res://items/exploits/exfil_window.tres") #386
+const ROOT_ACCESS = preload("res://items/exploits/root_access.tres") #387
+const TOTAL_RECALL = preload("res://items/exploits/total_recall.tres") #388
+const SYSTEM_PURGE = preload("res://items/exploits/system_purge.tres") #389
 
 var ITEM_NAME_MAP = {}
 
@@ -1255,4 +1319,36 @@ const ITEM_MAP = {
 	ItemType.MIRROR: MIRROR, #355
 	ItemType.COLD_BOOT: COLD_BOOT, #356
 	ItemType.VM_CACHE: VM_CACHE, #357
+	ItemType.HANDSHAKE_EXPLOIT: HANDSHAKE_EXPLOIT, #358
+	ItemType.BACKDOOR: BACKDOOR, #359
+	ItemType.RESET_LOOP: RESET_LOOP, #360
+	ItemType.HARDENED_SHELL: HARDENED_SHELL, #361
+	ItemType.FRESH_START: FRESH_START, #362
+	ItemType.OPENING_SPOOF: OPENING_SPOOF, #363
+	ItemType.HOT_STREAK: HOT_STREAK, #364
+	ItemType.DOUBLE_TAP: DOUBLE_TAP, #365
+	ItemType.BLEED: BLEED, #366
+	ItemType.BREACH_MOMENTUM: BREACH_MOMENTUM, #367
+	ItemType.LEECH: LEECH, #368
+	ItemType.JITTER: JITTER, #369
+	ItemType.FAILSAFE: FAILSAFE, #370
+	ItemType.DATA_HOARDER: DATA_HOARDER, #371
+	ItemType.PACKET_FLOOD: PACKET_FLOOD, #372
+	ItemType.SMOKE_SCREEN: SMOKE_SCREEN, #373
+	ItemType.OVERCHARGE: OVERCHARGE, #374
+	ItemType.PORT_KNOCK: PORT_KNOCK, #375
+	ItemType.QUICK_PATCH: QUICK_PATCH, #376
+	ItemType.TRACE_SCRAMBLER: TRACE_SCRAMBLER, #377
+	ItemType.CREDENTIAL_STUFFING: CREDENTIAL_STUFFING, #378
+	ItemType.HEAT_SINK: HEAT_SINK, #379
+	ItemType.ROOTKIT: ROOTKIT, #380
+	ItemType.MIRROR_IMAGE: MIRROR_IMAGE, #381
+	ItemType.FIREWALL_DRAIN: FIREWALL_DRAIN, #382
+	ItemType.SUPPLY_DROP: SUPPLY_DROP, #383
+	ItemType.CHAIN_REACTION: CHAIN_REACTION, #384
+	ItemType.FREEZE: FREEZE, #385
+	ItemType.EXFIL_WINDOW: EXFIL_WINDOW, #386
+	ItemType.ROOT_ACCESS: ROOT_ACCESS, #387
+	ItemType.TOTAL_RECALL: TOTAL_RECALL, #388
+	ItemType.SYSTEM_PURGE: SYSTEM_PURGE, #389
 }

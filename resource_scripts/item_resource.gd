@@ -49,5 +49,7 @@ func get_obtained_from_skills() -> Array:
 	return result
 
 ## True when this item can be compiled into a Hacking Mod.
+## 2026-10-23: 'compile -mod' is retired. Items keep their hacking_mod_* fields (old saves, future use) but none
+## can be compiled into a mod any more; mods only come from mod items (phish -mod, Corruption, caches).
 func is_compilable_mod() -> bool:
-	return hacking_mod_type != HackingMods.MOD_TYPE.NONE and hacking_mod_consumed > 0 and not hacking_mod_item
+	return false

@@ -352,19 +352,20 @@ func _expected_roll(list: Array) -> Dictionary:
 func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var lines = Phishing.max_lines + int(Upgrades.cur("phishing.lines"))
 	var bait = Items.ITEM_MAP.get(int(snap.get("bait", -1)))
-	var baited = bait != null and Inventory.get_amount(bait) >= Phishing.BAIT_PER_CAST
+	var baited = bait != null and Inventory.get_amount(bait) >= Phishing.bait_cost(bait)
+	var rare_bait = baited and Phishing.is_rare_bait(bait) # 'phish -mod' with a rare: every cast lands a mod
 	var s = _speed(Phishing)
 	var qh = 1.0 - Upgrades.cur("phishing.quick_hook")
-	var chance = min(1.0, Phishing.get_efficiency(p) * (Phishing.get_bait_multiplier(bait) if baited else 1.0))
+	var chance = 1.0 if rare_bait else min(1.0, Phishing.get_efficiency(p) * (Phishing.get_bait_multiplier(bait) if baited else 1.0))
 	var cast = float(p["cast time"]) / s
 	var wait = (float(p["wait time min"]) + float(p["wait time max"])) / 2.0 / s
-	var mult = 2.0 if baited else 1.0
-	var h = _hc(Phishing, float(p.heat), Stats.tier_heat(Phishing.HEAT_BY_TIER, bait.tier if bait else Upgrades.working_tier("Phishing")))
+	var mult = 2.0 if baited and !rare_bait else 1.0
+	var h = _hc(Phishing, float(p.heat), Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing")))
 	var inp := {}
 	var style = p.get("style", "lines")
 	var casts = lines if style == "lines" else 1
 	if baited:
-		inp[bait] = Phishing.BAIT_PER_CAST * casts * (1.0 - Upgrades.cur("phishing.bait_recycling"))
+		inp[bait] = Phishing.bait_cost(bait) * casts * (1.0 - Upgrades.cur("phishing.bait_recycling"))
 	var job := {"inp": inp, "repeat": baited}
 	match style:
 		"whale":
@@ -403,7 +404,7 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 			var dl = float(p["download time"]) / s * qh
 			var attempt = cast + wait + chance * (dl + 1.0) + (1.0 - chance) * 1.5
 			job.seconds = attempt
-			var list = Phishing.mod_pool() if p == Phishing.MOD else (p["resource gained"] if p["resource gained"] is Array else [])
+			var list = (Phishing.tier_mod_pool(Inventory.item_tier(bait)) if rare_bait else Phishing.mod_pool()) if p == Phishing.MOD else (p["resource gained"] if p["resource gained"] is Array else [])
 			var per = _expected_roll(list)
 			job.out = {}
 			for item in per:

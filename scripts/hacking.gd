@@ -50,6 +50,7 @@ func tutorial_event_completed(message: String):
 		player_hacking_box.add_line(message)
 
 func go_to_root() -> void:
+	Tutorial.complete_event(Tutorial.TutorialEvent.RETURN_TO_ROOT)
 	var tween2 = create_tween()
 	tween2.tween_property(self, "modulate:a", 0.0, 0.5)
 	await tween2.finished
@@ -75,7 +76,7 @@ func _on_player_hacking_box_command_entered(text):
 			_use_exploit(forced)
 		return
 	# back to the main terminal from anywhere in the hacking console
-	if low in ["cd ~", "cd /", "cd", "home", "root"] and current_context != HackingContext.HACKING:
+	if low in ["cd ~", "cd /", "cd", "home", "root", "cd root"] and current_context != HackingContext.HACKING:
 		go_to_root()
 		return
 	if low == "run" or low.begins_with("run "):
@@ -264,6 +265,10 @@ func handle_hack_command(text):
 		player_hacking_box.add_line_error("Target is locked: " + Stats.get_unlock_hint(target))
 		return
 	
+	# tutorial hack steps: never short of payloads / SQL (Tutorial.ensure_hack_kit)
+	var kit = Tutorial.ensure_hack_kit(target, hack_count)
+	if kit != "":
+		player_hacking_box.add_line_system(kit)
 	# Has requirements in inventory
 	if !_has_hacking_requirements(target):
 		await enemy_hacking_box.target_select_error(target)
@@ -339,6 +344,8 @@ func handle_view_command(text):
 	else:
 		current_context = HackingContext.PERSONS
 		_shown_targets = targets
+		if str(target.get("name", "")).to_lower() == "school" and !text.contains("-hard"):
+			Tutorial.complete_event(Tutorial.TutorialEvent.VIEW_SCHOOL)
 		hacking_help_commands()
 		await enemy_hacking_box.select_target(location_name, targets)
 
@@ -384,7 +391,7 @@ func hacking_help_commands():
 				["unlock", "List locked targets and what they cost"],
 				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
 				["cd ..",            "Return to terminal root"],
-				["cd ~",             "Return to terminal root from anywhere in hacking"]
+				["cd root",          "Return to terminal root from anywhere in hacking (or cd ~)"]
 			]))
 		HackingContext.PERSONS:
 			var recursive_unlocked = true # '-r' is always available
@@ -395,7 +402,7 @@ func hacking_help_commands():
 				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
 				["unlock [target]", "Unlock a target ('unlock' lists them)", "e.g. unlock administrator"],
 				["cd ..", "Return to locations directory", "e.g. 'cd ..'"],
-				["cd ~", "Return to terminal root"]
+				["cd root", "Return to terminal root (or cd ~)"]
 			]
 
 			if recursive_unlocked:
@@ -407,8 +414,8 @@ func hacking_help_commands():
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["[item name] -force", "Use a one-time item ('run' lists yours)."],
-					["kill", "Kills current hack attempt immediately."],
-					#["kill -s", "Safely exits hacking attempt at the end of the current attempt."],
+					["kill", "Ends the run now (caches already breached are kept)."],
+					["kill -s", "Finish the current hack, then end the run (for -r / =N runs)."],
 					["overclock", "Doubles bandwidth regen (more heat per action)"],
 					["overclock -kill", "Stops overclocking ('overclock kill' works too)"],
 				]))
@@ -416,7 +423,7 @@ func hacking_help_commands():
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["[item name] -force", "Use a one-time item ('run' lists yours)."],
-					["kill", "Kills current hack attempt immediately."],
+					["kill", "Ends the run now (caches already breached are kept)."],
 				]))
 
 

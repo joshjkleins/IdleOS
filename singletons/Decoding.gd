@@ -239,7 +239,7 @@ var SALVAGE = {
 	"overheat heat": 0.6,
 	"vm token chance": 0.02,
 	"requirements": "Basic resource x100",
-	"description": "Breaks down 100 of a basic resource at a time. Each of its 10 lines has a chance at 10-20 random VM tokens: 3% per line for tier 1 items, 6% for tier 2, up to 18% for tier 6.",
+	"description": "Breaks down 100 of a basic resource at a time. Each of its 10 lines has a chance at 5-10 random VM tokens: 3% per line for tier 1 items, 6% for tier 2, up to 18% for tier 6.",
 	"efficiency description": "Chance a token find is doubled.",
 	"signal": cache_decode_cycle_completed
 }
@@ -372,11 +372,11 @@ func is_basic_item(item: ItemData) -> bool:
 		return false
 	return not item in vm_tokens()
 
-## SALVAGE: 100 of a basic resource per run, 10 lines, each with a chance at 10-20 random VM tokens.
+## SALVAGE: 100 of a basic resource per run, 10 lines, each with a chance at 5-10 random VM tokens.
 const SALVAGE_COST = 100
 const SALVAGE_LINES = 10
-const SALVAGE_TOKENS_MIN = 10
-const SALVAGE_TOKENS_MAX = 20
+const SALVAGE_TOKENS_MIN = 5   # 2026-10-22: was 10-20
+const SALVAGE_TOKENS_MAX = 10
 const SALVAGE_CHANCE_PER_TIER = 0.03 # chance per line: 3% x the item's tier (tier 1 = 3% ... tier 6 = 18%)
 
 ## The tier (1-6) a basic resource belongs to, 0 if none.
@@ -580,6 +580,8 @@ func find_target(text: String) -> Dictionary:
 ## 'intel' / 'intel <location>' / 'intel <target> [hard]'.
 func intel_command_text(arg: String) -> String:
 	arg = arg.to_lower().strip_edges()
+	if arg in ["-h", "help"]:
+		return ContextCommands.intel_help_commands()
 	if arg == "":
 		return intel_list_text()
 	for loc in Stats.hacking_targets:
@@ -609,7 +611,7 @@ func intel_detail_text(target: Dictionary) -> String:
 	return out
 
 func intel_list_text(location_filter: String = "") -> String:
-	var out = "Intel  [color=#666666](intel <location> | intel <target> [hard]  ·  decode -intel=<target> to gather)[/color]\n"
+	var out = "INTEL  [color=#666666]·  intel <location>  ·  intel <target>  ·  gather with decode -intel=<target>  ·  intel -h for help[/color]\n"
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if !l.get("unlocked", true) or (location_filter != "" and loc != location_filter):

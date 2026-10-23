@@ -53,6 +53,11 @@ func _ready() -> void:
 	tb.content_margin_bottom = 3
 	bar_panel.add_theme_stylebox_override("panel", tb)
 	box.add_child(bar_panel)
+	# drag by the title bar; double-click it to dock the window back in its corner
+	bar_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	bar_panel.mouse_default_cursor_shape = Control.CURSOR_MOVE
+	bar_panel.tooltip_text = "drag to move  ·  double-click to dock"
+	bar_panel.gui_input.connect(_on_title_input)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 6)
 	bar_panel.add_child(head)
@@ -169,7 +174,7 @@ func _refresh() -> void:
 	var prog = ""
 	if need > 1 and !done:
 		prog = "  [color=#888888](%d/%d)[/color]" % [min(int(Tutorial.tutorial_progress.get(e, 0)), need), need]
-	var text = "%s  [color=#888888]%s[/color]%s\n\n%s" % [state, step_title(e), prog, Tutorial.tutorial_tasks[e]]
+	var text = "%s  [color=#888888]%s[/color]%s\n\n%s" % [state, step_title(e), prog, Tutorial.task_text(e)]
 	if page > cur:
 		text = "%s  [color=#888888]%s[/color]\n\n[color=#888888]%s[/color]" % [state, step_title(e), Tutorial.tutorial_tasks[e]]
 	_body.text = text
@@ -235,11 +240,45 @@ func open() -> void:
 	_apply_visible()
 	SaveManager.mark_dirty()
 
-## Top right of the terminal area, left of the side panel
+var _dragging := false
+var _drag_offset := Vector2.ZERO
+func _on_title_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.double_click:
+			Tutorial.window_moved = false
+			_dragging = false
+			SaveManager.mark_dirty()
+			_dock()
+		elif event.pressed:
+			_dragging = true
+			_drag_offset = get_global_mouse_position() - global_position
+		else:
+			_dragging = false
+			SaveManager.mark_dirty()
+		accept_event()
+	elif event is InputEventMouseMotion and _dragging:
+		global_position = get_global_mouse_position() - _drag_offset
+		Tutorial.window_moved = true
+		Tutorial.window_pos = position
+		_clamp_to_host()
+		accept_event()
+
+## keeps a dragged window on screen
+func _clamp_to_host() -> void:
+	var host := get_parent() as Control
+	var area = host.size if host else get_viewport_rect().size
+	position = Vector2(clamp(position.x, 0.0, max(0.0, area.x - size.x)), clamp(position.y, 0.0, max(0.0, area.y - 24.0)))
+	Tutorial.window_pos = position
+
+## Top right of the terminal area, left of the side panel (or where the player dragged it)
 func _dock() -> void:
 	if !is_inside_tree():
 		return
 	reset_size()
+	if Tutorial.window_moved:
+		position = Tutorial.window_pos
+		_clamp_to_host()
+		return
 	var host := get_parent() as Control
 	var right = host.size.x if host else get_viewport_rect().size.x
 	var dock = get_tree().get_first_node_in_group("system_dock") as Control

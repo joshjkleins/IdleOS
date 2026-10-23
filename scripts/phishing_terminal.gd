@@ -13,9 +13,9 @@ extends BaseTerminal
 @onready var title_label = $ActiveLines/MarginContainer/VBoxContainer/TitleRow/Title
 
 var vm_lines = []
-var bait: ItemData = null       # Mining item, Phishing.BAIT_PER_CAST used per cast: bite chance up, catch doubled
+var bait: ItemData = null       # basic resource, Phishing.BAIT_PER_CAST used per cast: bite chance up, catch doubled
 func heat_tier_mult() -> float:
-	return Stats.tier_heat(Phishing.HEAT_BY_TIER, bait.tier if bait else Upgrades.working_tier("Phishing"))
+	return Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing"))
 
 var smish_target: Dictionary = {} # Smish: chosen target ({} = random unlocked target that isn't maxed)
 
@@ -61,6 +61,8 @@ func _start(p_type: Dictionary, window: bool) -> void:
 ## What a "lines" catch rolls from (Mod: only mods whose tier is unlocked)
 func reward_list() -> Array:
 	if process_data == Phishing.MOD:
+		if Phishing.is_rare_bait(bait): # rare bait: one of the rare's tier mods
+			return Phishing.tier_mod_pool(Inventory.item_tier(bait))
 		return Phishing.mod_pool()
 	return process_data["resource gained"] if process_data["resource gained"] is Array else []
 
@@ -108,7 +110,10 @@ func update_eff_label(_p_type = null):
 			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite."
 	if bait:
 		var baited = str(get_bite_chance(true) * 100.0).pad_decimals(1)
-		slots_label.text += "  BAIT: %s x%d (-%d/cast, %s%%, catch x2)" % [bait.name, Inventory.get_amount(bait), Phishing.BAIT_PER_CAST, baited]
+		if Phishing.is_rare_bait(bait):
+			slots_label.text += "  BAIT: %s x%d (-1/cast, every cast lands a Tier %d mod)" % [bait.name, Inventory.get_amount(bait), Inventory.item_tier(bait)]
+		else:
+			slots_label.text += "  BAIT: %s x%d (-%d/cast, %s%%, catch x2)" % [bait.name, Inventory.get_amount(bait), Phishing.BAIT_PER_CAST, baited]
 	slots_label.text += "[/font_size][/color]"
 
 ## A line finished. Lines only end on their own after stop_safely() (or a trap is set); once all are done, finish.
@@ -145,15 +150,17 @@ func _get_total_eff() -> float:
 
 ## Bite chance for one cast, capped at 100%. Bait multiplies it (so rare catches stay rare).
 func get_bite_chance(baited: bool) -> float:
+	if baited and Phishing.is_rare_bait(bait):
+		return 1.0 # rare bait: guaranteed
 	var chance = _get_total_eff() * (Phishing.get_bait_multiplier(bait) if baited else 1.0)
 	return min(chance, 1.0)
 
 ## Called as a line casts: uses Phishing.BAIT_PER_CAST bait if there's that much left.
 ## Bait Recycling: a chance the cast is baited without using any.
 func take_bait() -> bool:
-	if bait and Inventory.get_amount(bait) >= Phishing.BAIT_PER_CAST:
+	if bait and Inventory.get_amount(bait) >= Phishing.bait_cost(bait):
 		if randf() >= Upgrades.cur("phishing.bait_recycling"):
-			Inventory.remove_resource(bait, Phishing.BAIT_PER_CAST)
+			Inventory.remove_resource(bait, Phishing.bait_cost(bait))
 		update_eff_label()
 		return true
 	return false
@@ -177,7 +184,7 @@ func wait_seconds(mode: Mode) -> float:
 
 ## What a catch of <amount> becomes: bait x2, Chum x2, Survey halves it (coin flip on odd amounts).
 func catch_amount(amount: int, baited: bool) -> int:
-	amount *= (2 if baited else 1) * (2 if has_modifier("chum") else 1)
+	amount *= (2 if baited and !Phishing.is_rare_bait(bait) else 1) * (2 if has_modifier("chum") else 1)
 	if has_modifier("survey"):
 		amount = amount / 2 + (1 if amount % 2 == 1 and randf() < 0.5 else 0)
 	return amount

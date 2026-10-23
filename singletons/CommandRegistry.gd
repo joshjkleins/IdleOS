@@ -10,11 +10,11 @@ const SKILL_DIRS = ["mining", "parsing", "cracking", "matching", "phishing", "ha
 
 ## Commands that don't depend on the save
 const STATIC = [
-	"-h", "help", "info", "ls", "ls mods", "clear", "tree", "flow", "date", "system", "settings", "history",
+	"-h", "help", "info", "ls", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "date", "system", "settings", "history",
 	"tutorial", "tutorial -l", "tutorial reset", "welcome", "discord", "discord -c", "version", "ps",
 	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
-	"kill", "kill -s", "stop", "stop -s", "focus", "sticky", "unsticky", "overclock", "overclock -kill",
+	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
 	"track ", "untrack ", "untrack -a", "trap", "trap collect", "panel", "cd ..", "quit", "quit -s", "wishlist",
 ]
 
@@ -45,14 +45,7 @@ func main_candidates() -> Array:
 		for mp in s.minor_processes:
 			c.append("info %s %s" % [d, str(mp.name).to_lower().replace(" ", "-")])
 		if s != Hacking and s != Defragging:
-			c.append("ssh " + d)
-			for mp in s.minor_processes:
-				var n = str(mp.name).to_lower()
-				c.append("ssh %s %s" % [d, n])
-				if s == Parsing:
-					for it in owned:
-						if it.parsable:
-							c.append("ssh parsing %s=%s" % [n, _n(it)])
+			c.append("ssh " + d) # lists the skill's VM commands; VM runs themselves mirror the main commands (below)
 	for g in Upgrades.groups:
 		c.append("apt " + g.to_lower())
 		c.append("apt install " + g.to_lower())
@@ -87,9 +80,8 @@ func main_candidates() -> Array:
 				c.append(p + n)
 		if Decoding.is_salvageable(it):
 			c.append("decode -salvage=" + n)
-		if it.is_compilable_mod():
-			c.append("compile -mod=" + n)
-		if Phishing.is_bait(it): # bait is Mining items only
+
+		if Phishing.is_bait(it): # bait: any basic resource
 			for mp in Phishing.minor_processes:
 				c.append("%s bait=%s" % [mp.command, n])
 	for g in Uploads.get_goals():
@@ -106,11 +98,11 @@ func main_candidates() -> Array:
 			c.append("crack -vm use=%s create=" % s.SKILL.name.to_lower())
 	# ssh takes the same arguments as the main command: 'decode -intel=x' -> 'ssh decoding intel=x',
 	# 'compile -mod=x' -> 'ssh compiling mod=x', 'phish -spear bait=x' -> 'ssh phishing spear bait=x'
-	var verbs = {"decode -": "ssh decoding ", "compile -": "ssh compiling ", "phish -": "ssh phishing ", "crack -": "ssh cracking "}
+	# 'ssh' + any process command runs it in a VM: 'ssh mine -logs', 'ssh parse -footprint=logs', 'ssh phish -spear bait=logs'
 	for cmd in c.duplicate():
-		for v in verbs:
-			if str(cmd).begins_with(v) and (str(cmd).contains("=")):
-				c.append(verbs[v] + str(cmd).substr(v.length()))
+		var verb = str(cmd).get_slice(" ", 0)
+		if verb in ["mine", "parse", "crack", "match", "phish", "decode", "compile"] and str(cmd).contains(" -"):
+			c.append("ssh " + str(cmd))
 	for vm in VMManager.vms:
 		for a in ["show", "hide", "kill"]:
 			c.append("vm %s %d" % [a, vm.vm_id])

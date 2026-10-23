@@ -105,6 +105,8 @@ func _refresh() -> void:
 	for r in rows:
 		r.runs = runs(r.needs)
 		key += "|%d" % r.runs
+	var hack = _hack_row()
+	key += "|" + str(hack)
 	if key == _last:
 		return
 	_last = key
@@ -140,8 +142,62 @@ func _refresh() -> void:
 		what.clip_text = true
 		row.add_child(what)
 		row.add_child(_label("ready" if r.runs < 0 else ("x%d" % r.runs if on else "-"), FONT, DIM if on else OFF))
+	if !hack.is_empty():
+		_add_hack_row(hack)
 	_count.text = "T%d %s %d/%d" % [tier, Uploads.get_location_name(tier).to_lower().split(" ")[0], ready, rows.size()]
 	_summary.text = "  ·  ".join(names) if !names.is_empty() else "nothing ready"
+
+## NEXT HACK: the strongest target you can hack and what one hack of it takes (HintEngine.hack_needs:
+## payload + recommended SQL Injectors from your past hacks of it, or an estimate)
+func _hack_row() -> Dictionary:
+	var t = HintEngine.best_target()
+	if t.is_empty():
+		return {}
+	var n = HintEngine.hack_needs(t)
+	var u = Stats.get_usage(t)
+	n["name"] = t.name
+	n["spoof_rec"] = int(ceil(float(u.spoof) * HintEngine.SQL_SAFETY)) if int(u.get("n", 0)) > 0 else -1
+	n["spoof_have"] = Inventory.get_amount(Items.PACKET_SPOOF)
+	return n
+
+func _add_hack_row(h: Dictionary) -> void:
+	var on = h.ready
+	var color: Color = Hacking.SKILL.color if on else OFF
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 0)
+	_rows.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
+	row.tooltip_text = "Next hack: %s. Recommended SQL comes from your past hacks of this target (+25%%), or an estimate before your first." % h.name
+	box.add_child(row)
+	var dot := ColorRect.new()
+	dot.custom_minimum_size = Vector2(6, 6)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	dot.color = color if on else Color(1, 1, 1, 0.12)
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(dot)
+	var name_label = _label("hacking", ROW_FONT, color.lightened(0.3) if on else color)
+	name_label.custom_minimum_size.x = 70
+	row.add_child(name_label)
+	var what = _label(str(h.name).to_lower(), FONT, DIM)
+	what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	what.clip_text = true
+	row.add_child(what)
+	row.add_child(_label("ready" if on else "-", FONT, DIM if on else OFF))
+	# what one hack takes: each part dim when covered, red when short
+	var need := HBoxContainer.new()
+	need.add_theme_constant_override("separation", 0)
+	box.add_child(need)
+	var parts = [["%s %d/%d" % [h.payload.name.to_lower(), h.payload_have, h.payload_need], h.payload_have >= h.payload_need],
+		["sql %d/%d" % [h.sql_have, h.sql_rec], h.sql_have >= h.sql_rec]]
+	if h.spoof_rec >= 0:
+		parts.append(["spoof %d/%d" % [h.spoof_have, h.spoof_rec], h.spoof_have >= h.spoof_rec])
+	need.add_child(_label("   ", FONT - 1, DIM))
+	for i in parts.size():
+		if i > 0:
+			need.add_child(_label("  ·  ", FONT - 1, OFF))
+		need.add_child(_label(parts[i][0], FONT - 1, DIM if parts[i][1] else Color("#c07a6a")))
 
 func set_collapsed(value: bool) -> void:
 	collapsed = value

@@ -46,6 +46,20 @@ enum MOD_TYPE {
 	COUNTER_REFLECT,
 	COLD_BOOT,
 	COUNTER_RESET,        #payloads (2026-10-21): chance per SQL attack to reset the enemy's countermeasure bar
+	FW_OPENER,            #Handshake Exploit (2026-10-23): first hit on a new firewall +N firewall damage
+	# 2026-10-23 mods pass (5 equippable mods per tier)
+	FW_START_PCT,         #Backdoor: firewall starts X% lower (each hack and reboot)
+	COUNTER_DMG_PCT,      #Hardened Shell: countermeasures deal X% less
+	START_ANON,           #Fresh Start: +X% max anonymity at the start of each hack
+	SPOOF_OPENER,         #Opening Spoof: a Packet Spoof engages at the start of each hack
+	CRIT_RAMP,            #Hot Streak: +X crit chance per non-crit, reset on crit
+	DOUBLE_TAP,           #Double Tap: X slower attacks, 2 SQL per attack, double damage
+	BLEED,                #Bleed: X of each hit again over 3s
+	FW_BREAK_HASTE,       #Breach Momentum: +X attack speed for 3 attacks after a firewall break
+	LEECH,                #Leech: X of max anonymity per SQL hit
+	COUNTER_STACK_SLOW,   #Jitter: each countermeasure slows the next by X (max 50%)
+	FAILSAFE,             #Failsafe: the first trace of a hack restores X instead
+	EXTRA_CACHE,          #Data Hoarder: X chance of an extra cache per breach
 }
 
 
@@ -69,9 +83,38 @@ const EQUIP_INFO = {
 	MOD_TYPE.FW_BREAK_INTEGRITY: ["Cascade", "Breaking the firewall also deals 15% of the target's max integrity.", "pct"],
 	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
 	MOD_TYPE.COLD_BOOT: ["Cold Boot", "Overclock adds no extra heat, and overheating doesn't speed up the enemy.", "on"],
+	MOD_TYPE.COUNTER_RESET: ["Reset Loop", "Each SQL Injector hit has a 10% chance to reset the countermeasure bar.", "pct"],
+	MOD_TYPE.FW_START_PCT: ["Backdoor", "The target's firewall starts 25% lower (every hack and every reboot).", "neg"],
+	MOD_TYPE.COUNTER_DMG_PCT: ["Hardened Shell", "Countermeasures deal 15% less damage.", "neg"],
+	MOD_TYPE.START_ANON: ["Fresh Start", "Restores 15% of max anonymity at the start of each hack.", "pct"],
+	MOD_TYPE.SPOOF_OPENER: ["Opening Spoof", "A Packet Spoof engages at the start of each hack.", "on"],
+	MOD_TYPE.CRIT_RAMP: ["Hot Streak", "Every non-crit hit adds +10% crit chance; resets on a crit.", "pct"],
+	MOD_TYPE.DOUBLE_TAP: ["Double Tap", "Attacks 30% slower, but each fires 2 SQL Injectors for double damage.", "on"],
+	MOD_TYPE.BLEED: ["Bleed", "Every SQL hit deals another 10% of its damage over 3 seconds.", "pct"],
+	MOD_TYPE.FW_BREAK_HASTE: ["Breach Momentum", "Breaking the firewall makes your next 3 attacks 100% faster.", "pct"],
+	MOD_TYPE.LEECH: ["Leech", "Every SQL hit restores 2% of max anonymity.", "pct"],
+	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 5% (up to 50%).", "pct"],
+	MOD_TYPE.FAILSAFE: ["Failsafe", "The first time you'd be traced in a hack, restore 20% of max anonymity instead.", "pct"],
+	MOD_TYPE.EXTRA_CACHE: ["Data Hoarder", "Each breach has a 20% chance to win an extra cache.", "pct"],
+	MOD_TYPE.FW_OPENER: ["Handshake Exploit", "The first hit against a new firewall (each hack, and after every reboot) deals +10 firewall damage.", "flat"],
 }
 
 var current_mods = {}
+
+## Mod items that no longer drop (2026-10-23 lineup: 5 per tier). Owned ones still equip and work.
+const RETIRED_MOD_ITEMS = [340, 347] # Shatter Protocol, Ghost Packet
+
+## mod items that can drop: tier 0 = every tier
+func pool_items(tier: int = 0) -> Array:
+	var out = []
+	var items = get_node_or_null("/root/Items") # looked up at runtime: a direct reference is a script cycle (see refresh_slots)
+	if items == null:
+		return out
+	for it in items.ITEM_MAP.values():
+		if it and it.hacking_mod_item and !(int(it.id) in RETIRED_MOD_ITEMS) and (tier <= 0 or int(it.tier) == tier):
+			out.append(it)
+	out.sort_custom(func(a, b): return a.id < b.id)
+	return out
 
 ## Every equipped mod adds bandwidth cost to each SQL Injector attack. Compiled mods cost by the tier of the item
 ## they were made from (+1 per tier: older mods are the cheap option); equippable mods always cost +2.
@@ -82,6 +125,8 @@ const EQUIP_BW_COST := 2
 func get_mod_bandwidth_cost(mod) -> int:
 	if !current_mods.has(mod):
 		return 0
+	if mod == MOD_TYPE.SQL_BOOST:
+		return 0 # 2026-10-23: its faster attacks already spend bandwidth faster
 	if EQUIP_INFO.has(mod):
 		return EQUIP_BW_COST
 	return int(MOD_BW_COST_BY_TIER.get(int(current_mods[mod].get("tier", 1)), 2))
@@ -116,8 +161,6 @@ func get_mod_description(mod: MOD_TYPE) -> String:
 			return "Gives flat countermeasures reduction"
 		MOD_TYPE.COUNTER_SLOW:
 			return "Slows counterattack measures"
-		MOD_TYPE.COUNTER_RESET:
-			return "Each SQL Injector attack has a chance to reset the target's countermeasure bar"
 		_:
 			return EQUIP_INFO[mod][1] if EQUIP_INFO.has(mod) else ""
 
@@ -141,8 +184,6 @@ func get_mod_name(mod: MOD_TYPE) -> String:
 			return "Countermeasures Flat Reduction"
 		MOD_TYPE.COUNTER_SLOW:
 			return "Countermeasures Slow"
-		MOD_TYPE.COUNTER_RESET:
-			return "Countermeasure Reset"
 		_:
 			return EQUIP_INFO[mod][0] if EQUIP_INFO.has(mod) else ""
 
@@ -177,6 +218,19 @@ const STAT_LABEL = {
 	MOD_TYPE.FW_BREAK_INTEGRITY: "max integrity on fw break",
 	MOD_TYPE.COUNTER_REFLECT: "countermeasure dmg reflected",
 	MOD_TYPE.COLD_BOOT: "overclock adds no heat",
+	MOD_TYPE.FW_OPENER: "fw dmg, 1st hit on new firewall",
+	MOD_TYPE.FW_START_PCT: "target firewall at start / reboot",
+	MOD_TYPE.COUNTER_DMG_PCT: "countermeasure damage",
+	MOD_TYPE.START_ANON: "anonymity at hack start",
+	MOD_TYPE.SPOOF_OPENER: "spoof engages at hack start",
+	MOD_TYPE.CRIT_RAMP: "crit chance per non-crit",
+	MOD_TYPE.DOUBLE_TAP: "2 SQL per attack, 30% slower",
+	MOD_TYPE.BLEED: "extra damage over 3s / hit",
+	MOD_TYPE.FW_BREAK_HASTE: "attack speed x3 after fw break",
+	MOD_TYPE.LEECH: "anonymity (of max) per hit",
+	MOD_TYPE.COUNTER_STACK_SLOW: "counter slow per counter",
+	MOD_TYPE.FAILSAFE: "anonymity on first trace",
+	MOD_TYPE.EXTRA_CACHE: "extra cache chance / breach",
 }
 
 func get_mod_stat(mod) -> String:
@@ -204,8 +258,6 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 			return "-" + str(int(value))
 		MOD_TYPE.COUNTER_SLOW:
 			return "-" + "%.f%%" % (value * 100.0)
-		MOD_TYPE.COUNTER_RESET:
-			return "%.f%%" % (value * 100.0)
 		_:
 			if EQUIP_INFO.has(mod):
 				match EQUIP_INFO[mod][2]:
@@ -213,6 +265,8 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 					"x": return "x%s" % str(value).trim_suffix(".0")
 					"n": return str(int(value))
 					"s": return "%ds" % int(value)
+					"flat": return "+%d" % int(value)
+					"neg": return "-%.f%%" % (value * 100.0)
 				return "on"
 			return str(0)
 
@@ -221,13 +275,18 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 	#"duration": 5,
 	#"value": 10,
 #}
+## hacks a mod item lasts once equipped: its own duration + System's Kernel Modules (+1 per tier)
+func mod_duration(item) -> int: # item: ItemData (untyped: see the cycle note in refresh_slots)
+	var up = get_node_or_null("/root/Upgrades")
+	return int(item.hacking_mod_duration) + (int(up.cur("system.kernel_modules")) if up else 0)
+
 func add_mod(item: ItemData) -> void:
 	if at_max_mods():
 		return
 	
 	var mod = item.hacking_mod_type
 	var mod_value = item.hacking_mod_value
-	var mod_duration = item.hacking_mod_duration
+	var mod_duration = mod_duration(item)
 	current_mods[mod] = {
 		"duration": mod_duration,
 		"value": mod_value,
