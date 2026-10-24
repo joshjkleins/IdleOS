@@ -33,6 +33,7 @@ signal installed(package: Dictionary, level: Dictionary)
 
 var groups: Array = []          # group names in display order
 var packages: Dictionary = {}   # id -> package
+var demo_hidden: Dictionary = {} # DEMO: group -> Tier 1 installs not in the demo
 var _by_group: Dictionary = {}  # group -> [package ids], in sheet order
 var _items: Dictionary = {}     # item name (lower) -> ItemData, filled on first use
 
@@ -54,6 +55,16 @@ func _load_data() -> void:
 		return
 	groups = d.get("groups", [])
 	for p in d.get("packages", []):
+		# DEMO: only the kept Tier 1 installs (DemoRules); the rest is counted for the apt note
+		var kept = p.levels.filter(func(l): return DemoRules.keeps_upgrade_level(p.group, l))
+		var t1 = p.levels.filter(func(l): return int(l.tier) == 1).size()
+		demo_hidden[p.group] = demo_hidden.get(p.group, 0) + t1 - kept.size()
+		if kept.is_empty():
+			continue
+		if DemoRules.COST_OVERRIDES.has(p.id):
+			for l in kept:
+				l.costs = [DemoRules.COST_OVERRIDES[p.id].duplicate()]
+		p.levels = kept
 		p["installed"] = 0
 		p["current"] = false if p.type == "capstone" else 0.0
 		packages[p.id] = p
@@ -124,6 +135,13 @@ func get_skill_version(skill: Node) -> String:
 	return version_text(group_for_skill(skill))
 
 ## how many of <group>'s installs in <tier> are done (0-10)
+## DEMO: Tier 1 installs the demo keeps for <group> (the apt bars count out of this, not 10)
+func demo_tier_size(group: String) -> int:
+	var n = 0
+	for p in group_packages(group):
+		n += p.levels.size()
+	return n
+
 func tier_installed(group: String, tier: int) -> int:
 	var n = 0
 	for p in group_packages(group):

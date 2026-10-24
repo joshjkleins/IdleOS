@@ -33,17 +33,17 @@ static func text(os) -> String:
 
 ## the main goal, under every hint list
 static func _goal_line() -> String:
-	var tier = clamp(Uploads.current_tier(), 1, 6)
-	var next = Uploads.get_location_name(tier + 1) if tier < 6 else ""
-	return "[color=%s]GOAL[/color]  [color=%s]upload what %s needs ('upload' shows the goal, %d%% done)%s[/color]" % [GOLD, DIM, Uploads.get_location_name(tier), goal_pct(tier),
-		(" to unlock %s, the next hacking location" % next) if next != "" else ""]
+	var tier = clamp(Uploads.current_tier(), 1, Uploads.MAX_TIER) # DEMO: School only
+	if Uploads.is_tier_complete(1): # DEMO
+		return "[color=%s]GOAL[/color]  [color=%s]School upload goal complete. Last challenge: beat the Student (Hard) ('view school -hard')[/color]" % [GOLD, DIM]
+	return "[color=%s]GOAL[/color]  [color=%s]upload what %s needs ('upload' shows the goal, %d%% done) to finish the demo[/color]" % [GOLD, DIM, Uploads.get_location_name(tier), goal_pct(tier)] # DEMO
 
 static func build(os) -> Array:
 	var out: Array = []
 	var add = func(cmd: String, why: String):
 		if out.size() < MAX_HINTS and !out.any(func(h): return h.cmd == cmd and cmd != ""):
 			out.append({"cmd": cmd, "why": why})
-	var tier = clamp(Uploads.current_tier(), 1, 6)
+	var tier = clamp(Uploads.current_tier(), 1, Uploads.MAX_TIER) # DEMO
 	var running = _running(os)
 	# 1 tutorial: while it runs, its step is the hint (other hints could pull against it)
 	if !Tutorial.is_tutorial_complete():
@@ -166,7 +166,7 @@ static func _locked_targets() -> Array:
 		if !l.get("unlocked", false):
 			continue
 		for t in l.get("targets", []):
-			if !t.get("unlocked", false):
+			if !t.get("unlocked", false) and DemoRules.is_demo_target(Stats.target_key(t)): # DEMO: only the demo's targets
 				out.append(t)
 	return out
 

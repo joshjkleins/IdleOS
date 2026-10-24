@@ -4,7 +4,7 @@ signal unlocks_changed # target / location unlocked, or a win recorded
 
 signal gained_xp_signal
 
-const MAX_LEVEL = 99 # keep in sync with Exp.MAX_LEVEL (legacy helpers below; Exp owns leveling)
+const MAX_LEVEL = DemoRules.LEVEL_CAP # keep in sync with Exp.MAX_LEVEL (legacy helpers below; Exp owns leveling)
 
 var MAX_TEMP = 100.0
 var MIN_TEMP = 30.0
@@ -120,10 +120,13 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 15 },
 				"heat": 0.5,
 				"exp": 4500,
-				"integrity": 500,
-				"firewall": 80,
-				"counter": 20,
-				"counter speed": 50.0,
+				# DEMO tuning (2026-10-23, live fights with the demo kit: hacking L10, every demo Hacking install, 2 mod
+				# slots, T1 mods; tools/tests/demohard): no mods and every single mod lose; 6 of 10 tested pairs win 3/3
+				# in ~45-80 s (SQL damage / firewall mods + another). Was 290/30 before SQL speed 25 / cost 5. Full game: 500/80/20/50.
+				"integrity": 340,
+				"firewall": 34,
+				"counter": 18,
+				"counter speed": 17.0,
 				"loot": Items.STUDENT_CACHE,
 				"loot quantity": 50,
 			},
@@ -945,8 +948,10 @@ func get_wins(target: Dictionary) -> int:
 func record_win(target: Dictionary) -> void:
 	var key = target_key(target)
 	wins[key] = int(wins.get(key, 0)) + 1
+	if key == "School/Student (Hard)/hard" and wins[key] == 1:
+		_demo_hard_beaten.call_deferred() # DEMO
 	var hard = get_hard_counterpart(target)
-	if !hard.is_empty() and !hard.get("unlocked", false) and wins[key] >= HARD_UNLOCK_WINS:
+	if !hard.is_empty() and !hard.get("unlocked", false) and wins[key] >= HARD_UNLOCK_WINS and DemoRules.is_demo_target(target_key(hard)):
 		hard["unlocked"] = true
 		Signals.update_hack_console("[color=#ee4a3a]Hard mode unlocked: %s[/color]" % hard.name)
 	SaveManager.mark_dirty()
@@ -966,6 +971,9 @@ func buy_access(target: Dictionary) -> Dictionary:
 		return out
 	if target.get("unlocked", false):
 		out.message = target.name + " is already unlocked."
+		return out
+	if !DemoRules.is_demo_target(target_key(target)):
+		out.message = DemoRules.full_game_text("Hacking the " + target.name) # DEMO
 		return out
 	var p = target_place(target)
 	if !hacking_targets[p.location].get("unlocked", false):
@@ -1002,6 +1010,7 @@ func unlock_location(location_key: String) -> void:
 	unlocks_changed.emit()
 
 func _on_tier_completed(tier: int) -> void:
+	return # DEMO: finishing the School goal plays the send-off (idle_os_2) instead of opening the Lawfirm
 	var keys = hacking_targets.keys()
 	if tier < keys.size():
 		unlock_location(keys[tier]) # tier is 1-based, so this is the next location
@@ -1030,6 +1039,8 @@ func get_unlock_hint(target: Dictionary) -> String:
 	var p = target_place(target)
 	if p.is_empty():
 		return ""
+	if !DemoRules.is_demo_target(target_key(target)):
+		return "full game" # DEMO
 	if !hacking_targets[p.location].get("unlocked", false):
 		return "unlocks with the %s location" % p.location
 	if p.hard:
@@ -1044,6 +1055,7 @@ func get_location_unlock_hint(location_key: String) -> String:
 	var i = keys.find(location_key)
 	if i <= 0:
 		return ""
+	return "full game" # DEMO
 	return "complete the %s upload goal" % keys[i - 1]
 
 func find_target_by_name(text: String, hard: bool = false) -> Dictionary:
@@ -1113,7 +1125,35 @@ func load_data(data: Dictionary) -> void:
 	for k in saved_usage:
 		var u = saved_usage[k]
 		usage[k] = {"sql": float(u.get("sql", 0)), "spoof": float(u.get("spoof", 0)), "n": int(u.get("n", 0))}
+	_enforce_demo_unlocks()
 	set_max_anon()
 	unlocks_changed.emit()
 	
 	Signals.system_temp_updated(system_tempature)
+
+## DEMO: first Student (Hard) win. With the School uploads done too, that's the whole demo.
+func _demo_hard_beaten() -> void:
+	var done = Uploads.is_tier_complete(1)
+	var g = DemoRules.FULL_GAME_COLOR
+	var msg = "[color=#ee4a3a]════════════════════════════════\nSTUDENT (HARD) DEFEATED\n════════════════════════════════[/color]\n"
+	if done:
+		msg += "[color=#33ff33]DEMO 100%% COMPLETE.[/color] Uploads done, Student (Hard) down: you've beaten everything the demo has.\n"
+		msg += "The full game opens five more locations, each with its own targets and hard modes. Type [color=%s]wishlist[/color] to open the store page in Steam and add IdleOS to your wishlist. Thanks for playing!" % g
+	else:
+		msg += "Not many players get here. Finish the School upload goal ('upload') to complete the demo."
+	Signals.update_hack_console("[color=#ee4a3a]Student (Hard) defeated![/color] Check the main terminal when you're back.")
+	Signals.system_message_signal.emit(msg)
+
+## DEMO: only the School and the demo's targets (DemoRules.TARGETS) can be open, whatever an older save says.
+## The Administrator still has to be unlocked with 'unlock administrator'.
+func _enforce_demo_unlocks() -> void:
+	var first = true
+	for loc in hacking_targets:
+		var l = hacking_targets[loc]
+		if !first:
+			l["unlocked"] = false
+		for list in ["targets", "hard mode targets"]:
+			for t in l.get(list, []):
+				if !DemoRules.is_demo_target(target_key(t)):
+					t["unlocked"] = false
+		first = false

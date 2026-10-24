@@ -152,7 +152,7 @@ func _ready():
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
 	Offline.compute() # offline gains are applied right away (booting saves); shown after the boot
-	Uploads.tier_completed.connect(func(t): add_line(ContextCommands.tier_complete_text(t))) # (after compute: offline ones are in the download)
+	Uploads.tier_completed.connect(_demo_send_off) # DEMO: the School goal ends the demo (after compute: offline ones are in the download)
 	if Tutorial.DEV_ALWAYS_SHOW_INTRO:
 		Tutorial.show_intro = true
 	if !Tutorial.show_intro:
@@ -493,7 +493,7 @@ func tutorial_event_completed(message: String):
 	add_line(message)
 
 ## TESTING: 'add <item>' (+100) and 'rm <item>' (all). Turn off before release (the demo branch removed them).
-const DEV_ITEM_COMMANDS := true
+const DEV_ITEM_COMMANDS := false
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
@@ -746,7 +746,13 @@ func universal_commands(text):
 			add_line(ContextCommands.get_date_command())
 			return true
 		"welcome", "demo":
-			add_line(ContextCommands.demo_welcome_message())
+			if Uploads.is_tier_complete(1):
+				_demo_send_off() # DEMO: demo finished, replay the send-off
+			else:
+				add_line(ContextCommands.demo_welcome_message())
+			return true
+		"wishlist":
+			add_line(DemoRules.open_wishlist())
 			return true
 		"discord -c":
 			var discord_link = ContextCommands.DISCORD_LINK
@@ -1385,7 +1391,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	if !target_minor_process.unlocked:
-		add_line("Process is not unlocked")
+		add_line(DemoRules.locked_process_text(target_minor_process))
 		return
 	if Exp.tier_block_reason(target_process, target_minor_process) != "":
 		add_line(Exp.tier_block_reason(target_process, target_minor_process))
@@ -1719,10 +1725,10 @@ func _handle_process_commands(text: String, safe_stop_message: String, can_overc
 			if can_overclock:
 				overclock_logic()
 			else:
-				add_line("Overclock not available for this process.")
+				add_line(DemoRules.full_game_text("Overclocking"))
 		"overclock -kill", "overclock kill":
 			if !can_overclock:
-				add_line("Overclock not available for this process.")
+				add_line(DemoRules.full_game_text("Overclocking"))
 				return
 			if !Stats.overclocked:
 				add_line("Not currently overclocking.")
@@ -1776,7 +1782,7 @@ func mining_commands(text):
 
 func start_log_mining(minor_process: Dictionary):
 	if !minor_process.unlocked:
-		add_line("Requires mining level " + str(minor_process["unlock level"]))
+		add_line(DemoRules.full_game_text(minor_process.name + " mining (level %d)" % minor_process["unlock level"]) if DemoRules.is_full_game_process(minor_process) else "Requires mining level " + str(minor_process["unlock level"]))
 		return
 	if Exp.tier_block_reason(Mining, minor_process) != "":
 		add_line(Exp.tier_block_reason(Mining, minor_process))
@@ -1806,7 +1812,7 @@ func log_parsing_commands(text):
 		if text.begins_with(ms['command']):
 			#CHECK IF PROCESS IS UNLOCKED
 			if !ms.unlocked:
-				add_line("ERROR: requires parsing level " + str(ms["unlock level"]))
+				add_line(DemoRules.locked_process_text(ms) if DemoRules.is_full_game_process(ms) else "ERROR: requires parsing level " + str(ms["unlock level"]))
 				return
 			
 			#CHECK IF ANOTHER PROCESS IS RUNNING
@@ -1904,7 +1910,7 @@ func password_unscramble_commands(text):
 
 func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create_item: ItemData = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(DemoRules.locked_process_text(minor_process))
 		return
 	if Exp.tier_block_reason(Cracking, minor_process) != "":
 		add_line(Exp.tier_block_reason(Cracking, minor_process))
@@ -1949,7 +1955,7 @@ func cred_matching_commands(text):
 
 func start_matching(minor_process):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(DemoRules.locked_process_text(minor_process))
 		return
 	if Exp.tier_block_reason(Matching, minor_process) != "":
 		add_line(Exp.tier_block_reason(Matching, minor_process))
@@ -1992,7 +1998,7 @@ func cache_decrypting_commands(text):
 
 func start_cache_decrypting(minor_process, cache_item = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(DemoRules.locked_process_text(minor_process))
 		return
 		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
@@ -2026,7 +2032,7 @@ func _handle_modifier_command(text: String) -> bool:
 	if !Upgrades.has(mod.package):
 		var p = Upgrades.get_package_info(mod.package)
 		var tier = int(p.levels[0].tier) if p.has("levels") else 0
-		add_line("%s isn't unlocked yet: it's the %s v%d.0 capstone ('apt %s')." % [mod.name, owner.SKILL.name, tier, owner.SKILL.name.to_lower()])
+		add_line(DemoRules.full_game_text("The %s modifier" % mod.name)) # DEMO: capstones aren't in the demo
 		return true
 	if !process_running or current_process == null or !("modifier" in current_process):
 		add_line("No process running in the main terminal to use %s on." % mod.name)
@@ -2071,7 +2077,7 @@ func overclock_logic():
 		add_line("System is already overclocked")
 		return
 	if !Upgrades.can_overclock(_get_major_from_minor(current_process_info)):
-		add_line("Overclock not available. Check upgrade package manager with 'apt'.")
+		add_line(DemoRules.full_game_text("Overclocking")) # DEMO: the Overclock capstones aren't in the demo
 		return
 	var limit = int(Upgrades.get_overheat_clear_temp())
 	if Stats.overheated: #overheated - still recovering
@@ -2097,7 +2103,7 @@ func phishing_commands(text):
 				add_line(parsed_bait.error)
 				return
 			if !ms.unlocked:
-				add_line("Process not unlocked")
+				add_line(DemoRules.locked_process_text(ms))
 				return
 			if ms == Phishing.TRAP and Phishing.has_trap():
 				add_line(Phishing.trap_status_text())
@@ -2163,7 +2169,7 @@ func compiling_commands(text):
 
 func start_compiling(minor_process: Dictionary, item = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(DemoRules.locked_process_text(minor_process))
 		return
 	if Exp.tier_block_reason(Compiling, minor_process) != "":
 		add_line(Exp.tier_block_reason(Compiling, minor_process))
@@ -2930,7 +2936,7 @@ func _offline_welcome() -> void:
 	block.text = head + done_text + ("\n" + tail if tail != "" else "")
 	await get_tree().create_timer(0.2).timeout
 	for t in r.tiers:
-		add_line(ContextCommands.tier_complete_text(t))
+		await _demo_send_off(t) # DEMO
 		await _wait_for_output()
 	_hold_unlocks = false
 	_flush_unlocks() # processes unlocked by offline level ups
@@ -2951,6 +2957,43 @@ static func _commas(n: int) -> String:
 		s = s.left(s.length() - 3)
 	return ("-" if n < 0 else "") + s + out
 #endregion
+
+#region demo send-off
+## DEMO: completing the School upload goal ends the demo: thanks, wishlist, and the Student (Hard) challenge.
+func _demo_send_off(_tier: int = 1) -> void:
+	await _wait_for_output()
+	var hard = Stats.get_hard_counterpart(Stats.hacking_targets["School"].targets[0])
+	var hard_line: String
+	if Stats.get_wins(hard) > 0:
+		hard_line = "And you've already beaten it. That's everything in the demo: [color=#33ff33]100% complete[/color]."
+	elif hard.get("unlocked", false):
+		hard_line = "It's already unlocked: in Hacking, [color=#ee4a3a]view school -hard[/color]."
+	else:
+		var easy = Stats.hacking_targets["School"].targets[0]
+		hard_line = "Beat the Student %d more time%s to unlock it, then in Hacking: [color=#ee4a3a]view school -hard[/color]." % [max(1, Stats.HARD_UNLOCK_WINS - Stats.get_wins(easy)), "" if Stats.HARD_UNLOCK_WINS - Stats.get_wins(easy) == 1 else "s"]
+	var g = DemoRules.FULL_GAME_COLOR
+	var msg = """[color=#33ff33]════════════════════════════════════════════
+UPLOAD GOAL COMPLETE  ·  SCHOOL
+════════════════════════════════════════════[/color]
+
+Well done, operator. The School is yours.
+
+This is where the demo ends, but IdleOS is just getting started. The full game opens five more locations: [color=%s]Lawfirm, Hospital, Bank, Police and Government[/color], each with new targets, new processes and upgrades all the way to v6.0.
+
+If you enjoyed your time here, a wishlist helps more than you'd think. Type [color=%s]wishlist[/color] to open the IdleOS store page in Steam, where you can add it to your wishlist.
+
+Still hungry? The [color=#ee4a3a]Student (Hard)[/color] doesn't fall to brute force. You'll need compiled mods, VMs working for you, upgrades and well-timed Packet Spoofs. %s
+
+Your progress carries over to the full game. Thanks for playing.""" % [g, g, hard_line]
+	# clear the terminal so the send-off has the screen, then type it into its own block with a fresh
+	# block under it for anything printed meanwhile
+	await _wait_for_output()
+	_clear_terminal()
+	var block = current_scrollback
+	add_new_scrollback()
+	await type_text(msg, INTRO_CPS, block)
+#endregion
+
 
 func player_uploaded_proper_item():
 	accepting_player_inputs = false

@@ -64,7 +64,7 @@ func update_info(info) -> void:
 func _add_locked(box: VBoxContainer, info) -> void:
 	box.add_child(_section("LOCKED", C_BAD))
 	var recipe = Stats.get_access_recipe(info)
-	if !recipe.is_empty() and recipe.rare != null and Stats.hacking_targets[Stats.target_place(info).location].get("unlocked", false):
+	if !recipe.is_empty() and recipe.rare != null and Stats.hacking_targets[Stats.target_place(info).location].get("unlocked", false) and DemoRules.is_demo_target(Stats.target_key(info)): # DEMO: no recipe on full-game targets
 		var cmd = _label(Stats.get_unlock_hint(info), 12, C_TEXT)
 		box.add_child(cmd)
 		for pair in [[recipe.rare, recipe.rare_amount], [recipe.payload, recipe.payload_amount]]:
@@ -75,7 +75,7 @@ func _add_locked(box: VBoxContainer, info) -> void:
 			row.add_child(_label(pair[0].name, 11, C_DIM))
 			box.add_child(row)
 	else:
-		var hint = _label(Stats.get_unlock_hint(info), 11, C_TEXT)
+		var hint = _label(Stats.get_unlock_hint(info), 11, Color(DemoRules.FULL_GAME_COLOR) if !DemoRules.is_demo_target(Stats.target_key(info)) else C_TEXT)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(hint)
 	var stats_box := VBoxContainer.new()

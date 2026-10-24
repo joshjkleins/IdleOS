@@ -720,7 +720,7 @@ func used_in_text(item: ItemData) -> String:
 			rows.append(["Hacking", "hack <target> in %s  [color=#666666](payloads per hack)[/color]" % loc])
 		for tg in l.get("targets", []):
 			var r = Stats.get_access_recipe(tg)
-			if !r.is_empty() and r.get("rare") == item:
+			if !r.is_empty() and r.get("rare") == item and DemoRules.is_demo_target(Stats.target_key(tg)): # DEMO
 				rows.append(["Target access", "unlock %s in Hacking  [color=#666666](%d needed)[/color]" % [tg.name.to_lower(), int(r.rare_amount)]])
 	# upload goal
 	if Uploads.is_goal_item(item):

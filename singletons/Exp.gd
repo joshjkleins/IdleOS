@@ -9,7 +9,7 @@ signal process_unlocked_signal # a level up just unlocked processes (they wait i
 var unlock_queue: Array = []
 
 
-const MAX_LEVEL: int = 99 # highest process unlock level is 80 (Compiling: Government)
+const MAX_LEVEL: int = DemoRules.LEVEL_CAP # DEMO (full game: 99)
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]
@@ -178,8 +178,22 @@ func tier_block_reason(major, p: Dictionary) -> String:
 func refresh_all_process_unlocks() -> void:
 	if DEV_MAX_ALL:
 		_dev_max_all()
+	_clamp_to_level_cap()
 	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
 		refresh_process_unlocks(major)
+
+## DEMO: saves from a build without the cap keep their XP (the full game turns it back into levels),
+## but levels stop at MAX_LEVEL here. Efficiency follows the capped level.
+func _clamp_to_level_cap() -> void:
+	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
+		major.SKILL["level"] = min(int(major.SKILL["level"]), MAX_LEVEL)
+		for p in major.minor_processes:
+			if !p.has("level") or int(p["level"]) <= MAX_LEVEL:
+				continue
+			p["level"] = MAX_LEVEL
+			var key = str(major.SKILL.name) + "/" + str(p.name)
+			if p.has("efficiency") and _base_efficiency.has(key):
+				p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (MAX_LEVEL - 1)
 
 ## TESTING: every skill and process at max level and unlocked (applied at startup and after every
 ## load, so new processes are covered automatically). Turn off before release; saves made with it on

@@ -232,7 +232,7 @@ func get_help_text(skill: Node) -> String:
 	var row_colors = []
 	for p in ordered:
 		var status
-		status = "ONLINE" if p.unlocked else "LOCKED"
+		status = "ONLINE" if p.unlocked else ("FULL GAME" if DemoRules.is_full_game_process(p) else "LOCKED")
 		var efficiency = "-"
 		var efficiency_rate = "-"
 		var run_command = "-"
@@ -390,7 +390,7 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 	var status = "ONLINE"
 
 	if not p["unlocked"]:
-		status = "LOCKED"
+		status = "FULL GAME" if DemoRules.is_full_game_process(p) else "LOCKED"
 	
 	if skill == Defragging:
 		var time = Stats.boost_minutes_text()
@@ -997,8 +997,8 @@ func get_root_upgrades_text() -> String:
 		var ready = 0
 		var status = ""
 		if !Upgrades.is_wired(g):
-			status = "[color=%s]coming soon[/color]" % APT_DIM
-		elif waiting:
+			status = DemoRules.full_game_tag()
+		elif waiting or (wt == 1 and done >= Upgrades.demo_tier_size(g)): # DEMO: every kept install done
 			status = "[color=%s]up to date[/color]" % APT_OK
 		elif wt <= 6 and !Upgrades.tier_unlocked(wt):
 			status = "[color=%s]tier locked[/color]" % APT_DIM
@@ -1008,7 +1008,7 @@ func get_root_upgrades_text() -> String:
 					ready += 1
 			status = ("[color=%s]%d ready[/color]" % [APT_OK, ready]) if ready > 0 else "[color=%s]-[/color]" % APT_DIM
 		rows.append([_apt_group_name(g), Upgrades.version_text(g), tier_text,
-			(apt_bar(done, 10, APT_GOLD if waiting else APT_OK) + " %d/10" % done) if wt <= 6 else apt_bar(10, 10, APT_GOLD), status, "apt " + g.to_lower()])
+			(apt_bar(done, Upgrades.demo_tier_size(g), APT_GOLD if done >= Upgrades.demo_tier_size(g) else APT_OK) + " %d/%d" % [done, Upgrades.demo_tier_size(g)]) if wt <= 6 else apt_bar(10, 10, APT_GOLD), status, "apt " + g.to_lower()]) # DEMO: out of the kept installs
 		colors.append("")
 	t += build_table(columns, rows, colors)
 	t += "\n[color=%s]apt <skill>[/color] lists a skill's packages · [color=%s]apt install <skill>[/color] installs everything ready · [color=%s]apt install all[/color] for every skill" % [APT_OK, APT_OK, APT_OK]
@@ -1020,7 +1020,8 @@ func get_root_upgrades_text() -> String:
 func get_skill_upgrades_text(group: String) -> String:
 	var t = "\n[color=#%s]%s[/color]  %s\n" % [Upgrades.group_color(group).to_html(false), group.to_upper(), Upgrades.version_text(group)]
 	if !Upgrades.is_wired(group):
-		t += "[color=%s]%s upgrades can be installed once this skill is migrated.[/color]\n" % [APT_GOLD, group]
+		t += DemoRules.full_game_text(group + " upgrades", true) + "\n"
+		return t
 	var wt = Upgrades.working_tier(group)
 	# finished a tier, next one not open yet: list what's installed in the finished tier, then what opens next
 	var waiting = wt <= 6 and wt > 1 and !Upgrades.tier_unlocked(wt)
@@ -1037,7 +1038,8 @@ func get_skill_upgrades_text(group: String) -> String:
 	if !waiting and !Upgrades.tier_unlocked(wt):
 		t += "\n[color=%s]%s  locked · opens with %s access (upload goal)[/color]\n" % [APT_DIM, head, Upgrades.tier_name(wt)]
 		return t
-	t += "\n%s  %s %d/10%s\n" % [head, apt_bar(done, 10, APT_GOLD if waiting else APT_OK), done, ("  [color=%s]up to date · v%d.0[/color]" % [APT_OK, wt]) if waiting else ""]
+	var ds = Upgrades.demo_tier_size(group) # DEMO: out of the kept installs
+	t += "\n%s  %s %d/%d%s\n" % [head, apt_bar(done, ds, APT_GOLD if done >= ds else APT_OK), done, ds, ("  [color=%s]up to date[/color]" % APT_OK) if done >= ds else ""]
 	var columns = [{"title": "PACKAGE"}, {"title": "UPGRADE"}, {"title": "CHANGE", "min": 18}, {"title": "COST", "min": 20}, {"title": "STATUS"}]
 	var rows = []
 	var colors = []
@@ -1064,12 +1066,8 @@ func get_skill_upgrades_text(group: String) -> String:
 		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
 		colors.append("")
 	t += build_table(columns, rows, colors)
-	if waiting:
-		t += "[color=%s]Next: Tier %d · %s opens with %s access (upload goal)[/color]\n" % [APT_DIM, locked_next, Upgrades.tier_name(locked_next), Upgrades.tier_name(locked_next)]
-	elif wt < 6:
-		var nt = wt + 1
-		var opens = "after v%d.0" % wt if Upgrades.tier_unlocked(nt) else "with %s access and v%d.0" % [Upgrades.tier_name(nt), wt]
-		t += "[color=%s]Next: Tier %d · %s opens %s[/color]\n" % [APT_DIM, nt, Upgrades.tier_name(nt), opens]
+	# DEMO: what the full game adds
+	t += "%s [color=%s]+%d more %s packages in Tier 1, and 5 more tiers.[/color]\n" % [DemoRules.full_game_tag(), APT_DIM, Upgrades.demo_hidden.get(group, 0), group]
 	if ready > 1:
 		t += "\n[color=%s]apt install %s[/color] installs all %d ready packages at once" % [APT_OK, group.to_lower(), ready]
 	t += "\n[color=%s]apt install <package>[/color] installs one · [color=%s]apt <package>[/color] for details" % [APT_OK, APT_OK]
@@ -1210,13 +1208,18 @@ Bandwidth Restore: +%s/second
 
 func demo_welcome_message():
 	return """
-WELCOME TO IDLEOS
+WELCOME TO THE IDLEOS DEMO
 
 Your first job: prepare and hack your first target, a [color=#e3b341]Student[/color] at the local School. The tutorial
 walks you through it one terminal command at a time, and teaches you the operating system on the way.
 Hacking is where the big hauls come from: every breached target drops a cache full of resources,
 far more than your processes make on their own. Your processes keep the hacks supplied.
 
+This demo covers the School: every skill up to level 10, the Student, the Administrator once you unlock it,
+and the Student (Hard) once you've earned it. Demo goal: complete the School upload goal ('upload').
+Progress carries over to the full game.
+
+Enjoying it? Type [color=#e3b341]wishlist[/color] to open the IdleOS store page in Steam, where you can add it to your wishlist.
 Thoughts or suggestions? Join the Discord: """ + DISCORD_LINK + """  ('discord -c' copies it)
 
 Stuck? 'hint' suggests what to run next.

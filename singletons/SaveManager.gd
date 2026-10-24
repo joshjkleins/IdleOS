@@ -4,7 +4,7 @@ signal save_loaded
 
 const SAVE_PATH = "user://savegame.json"
 ## 2 = Oct 18 2026 demo (uploads woven into the tutorial). Older saves get the 'tutorial reset' notice.
-const SAVE_VERSION = 2
+const SAVE_VERSION = 4 # 3 = demo-nextfest-2 (Oct 20 2026 cut), 4 = demo-nextfest-3 (Oct 23 2026 cut from cdd)
 ## Version of the save that was loaded this session (0 = no save / fresh game)
 var loaded_version: int = SAVE_VERSION
 

@@ -330,7 +330,7 @@ func complete_event(event: TutorialEvent) -> void:
 		message += "[color=green]════════════════════════════════[/color]\n\n"
 		
 		message += "Congrats on completing the tutorial!\n"
-		message += "\nFrom here, you're on your own. Work through every location: breach its targets, upload what it asks for, and keep upgrading this OS.\n[color=#33ff33]Do not let us down.[/color]"
+		message += "\nFrom here, you're on your own. Finish the School upload goal ('upload'): unlock the Administrator in Hacking ('unlock'), keep the hacks going and keep upgrading this OS. Then see if you can take down the Student (Hard).\n[color=#33ff33]Do not let us down.[/color]" # DEMO
 		message += "\n\nType 'hint' any time for what to run next, 'flow' for the whole loop, and keep an eye on AVAILABLE TO RUN in the side panel. Hacking is the fastest way to progress."
 		message += "\n\n'info <skill>' (ex. info cracking) shows every process a skill has and the command that runs it, and new ones unlock as the skill levels. Explore the Defragging skill ('cd defragging') for temporary system-wide bonuses."
 		message += "\n\nThoughts or ideas? Come hang out in the Discord: " + ContextCommands.DISCORD_LINK + "  ('discord -c' copies it)"
@@ -634,11 +634,11 @@ var upload_baseline: Dictionary = {}
 
 ## Returning players: old saves (version < 2) with tutorial progress get a one-time note on load.
 func should_show_old_save_notice() -> bool:
-	return SaveManager.loaded_version < 2 and !completed_events.is_empty()
+	return SaveManager.loaded_version < 4 and !completed_events.is_empty() # DEMO: saves from earlier demo builds
 
 func old_save_notice() -> String:
 	var m := "[color=yellow]WELCOME BACK[/color]\n"
-	m += "Your save is from an earlier version of IdleOS. Since then the tutorial has been rebuilt and uploads now unlock new locations.\n"
+	m += "Your save is from an earlier version of the demo. Since then: 'hint' suggests what to run next, fights are faster, there are 5 new Hacking Mods and 5 new one-time items to find in School caches, mods last 5 hacks, and there's music ('music').\n" # DEMO
 	m += "Want a refresher? Type 'tutorial reset' to restart the tutorial. [color=#666666]Your items, levels and upgrades stay as they are.[/color]"
 	return m
 
