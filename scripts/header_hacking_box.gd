@@ -110,7 +110,7 @@ func update_modifiers_ui() -> void:
 	mods_pips.unlocked = HackingMods.max_mods
 	mods_pips.queue_redraw()
 	if HackingMods.current_mods.is_empty():
-		mods_list.add_child(_label("none active  ·  find mods with phish -mod or Corruption", 10, C_ZERO))
+		mods_list.add_child(_label("none active  ·  find mods with phish -mod or parse -corruption", 10, C_ZERO))
 		return
 	if HackingMods.current_mods.size() > 2:
 		# 3-7 mods: two compact columns so the header keeps its height

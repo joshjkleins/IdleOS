@@ -25,7 +25,7 @@ const MODIFIERS = [
 	{"command": "index", "name": "Index", "package": "decoding.index", "speed": 0.5, "heat": 1.5,
 		"effect": "-50% speed, heat x1.5. Each decoded cache adds 1 intel point on the target it came from."},
 	{"command": "forensics", "name": "Forensics", "package": "decoding.forensics", "speed": 0.6, "heat": 2.0,
-		"effect": "-40% speed, heat x2. One-time item chance x2 and VM token chance x2."},
+		"effect": "-40% speed, heat x2. Exploit chance x2 and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "decoding.survey", "speed": 1.0, "heat": 1.0,
 		"effect": "Half loot, +100% Decoding XP."},
 ]
@@ -179,7 +179,7 @@ var INTEL = {
 	"overheat heat": 0.3,
 	"vm token chance": 0.01,
 	"requirements": "Nothing (an unlocked hacking target)",
-	"description": "Gathers intel on a hacking target, free to run. Each successful line weakens one of its stats (integrity, firewall, counter damage, counter speed) by 2% more, one at a time; every time all four match, the intel lasts 1 more hack. Up to -10% on everything, then more hacks, up to 15. Used up one hack at a time.",
+	"description": "Gathers intel on a hacking target. Each successful line lowers a stat with a maximum of -10% for 15 hacks.",
 	"efficiency description": "Chance per line to gather intel.",
 	"signal": intel_decode_cycle_completed
 }

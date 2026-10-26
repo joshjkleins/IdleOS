@@ -240,7 +240,7 @@ GROUPS["Decoding"] = [
         ["MODIFIER 'overclock': faster, more heat (existing)",
          "Passive: VM Decoding token chance x2",
          "MODIFIER 'index': -50% speed, heat x1.5; each decoded cache adds 1 intel point on the target it came from",
-         "MODIFIER 'forensics': -40% speed; one-time item find chance x2, VM token chance x2, heat x2",
+         "MODIFIER 'forensics': -40% speed; Exploit find chance x2, VM token chance x2, heat x2",
          "MODIFIER 'survey': half loot, +100% Decoding XP",
          "Passive: Overclock, Index and Forensics produce no extra heat"],"one-off",None),
 ]
@@ -279,7 +279,7 @@ GROUPS["Hacking"] = [
          "50% chance an SQL Injector is not consumed",
          "Each SQL hit restores 0.5% of max anonymity",
          "Once per session, a hit that would trace you leaves you at 1 and restores 25% anonymity",
-         "50% chance a one-time item is not consumed"],"one-off",None),
+         "50% chance an Exploit is not consumed"],"one-off",None),
 ]
 
 # capstone flavor per tier (used in notes), can be renamed freely

@@ -4,6 +4,7 @@ extends VBoxContainer
 ##   [ YOU: anonymity, bandwidth ]            [ TARGET: integrity, firewall ]
 ##   [ SQL Injector ] [ Packet Spoof ] [ Countermeasures ]   cycle bar, stats, MOD/INTEL lines, state
 ##   [ COMBAT LOG ]  tagged lines: ATK DEF CTR FW MOD INTEL HEAT SYS
+##   [ EXPLOITS ]    owned Exploits: name xN, charge cost, effect (two per row)
 ##   [ YIELD ]
 ## Colors: gold = boosted by a hacking mod, teal = weakened by Decoding intel, amber = overclock,
 ## red-orange = overheat.
@@ -75,6 +76,10 @@ var defense_bar: ProgressBar
 var counter_bar: ProgressBar
 var log_rtl: RichTextLabel
 var yield_label: Label
+var exp_card: Dictionary = {}
+var exp_hint: RichTextLabel
+var exp_list: RichTextLabel
+var _exp_sig := "-"
 var yield_hint: Label
 var _banner_node: Control
 var _log_empty := true
@@ -1384,7 +1389,7 @@ static func _fmt_bw(v: float) -> String:
 ## Uses <item> now. Returns "" on success or the reason it can't be used.
 func use_exploit(item: ItemData, auto: bool = false) -> String:
 	if !is_hacking or !_revealed:
-		return "One-time items can only be used during a hack."
+		return "Exploits can only be used during a hack."
 	if Inventory.get_amount(item) <= 0:
 		return "You don't have any %s." % item.name
 	if _exploit_lock > 0.0:
@@ -1421,9 +1426,9 @@ func _exploit_blocked(id: String) -> String:
 		"redaction":
 			if firewall_down or firewall_bar.value <= 0.0:
 				return "The firewall is already down."
-		"lag_spike":
-			if counter_bar.value <= 0.0:
-				return "The countermeasure bar is already empty."
+		"lag_spike": # Firewall Crack
+			if firewall_down or firewall_bar.value <= 0.0:
+				return "The firewall is already down."
 		"total_recall":
 			if Stats.current_anon >= Stats.max_anon:
 				return "Anonymity is already full."
@@ -1443,11 +1448,17 @@ func _apply_exploit(id: String, d: Dictionary) -> String:
 			_float(anon_bar, "+%d" % got, C_EXP, 16)
 			_flash(anon_bar, Color(1.8, 1.5, 2.0), 0.4)
 			return "+%d anonymity (%d/%d)" % [got, Stats.current_anon, Stats.max_anon]
-		"lag_spike":
-			var was = counter_bar.value
-			counter_bar.value = 0.0
-			_float(counter_bar, "RESET", C_EXP, 14)
-			return "countermeasure bar reset (was %d%%)" % int(was)
+		"lag_spike": # Firewall Crack: 30% of the firewall that's left
+			var cut = max(1.0, ceil(firewall_bar.value * float(d.amount)))
+			if _fw_tween and _fw_tween.is_valid():
+				_fw_tween.kill()
+			firewall_bar.value = max(0.0, firewall_bar.value - cut)
+			_float(firewall_bar, "-%d" % int(cut), C_EXP, 16)
+			_flash(firewall_bar, Color(1.8, 1.5, 2.0), 0.4)
+			if firewall_bar.value <= 0.0:
+				_break_firewall(true)
+				return "firewall cracked: -%d, firewall down" % int(cut)
+			return "firewall cracked: -%d (%d left)" % [int(cut), int(firewall_bar.value)]
 		"cease_desist":
 			stun_left = max(stun_left, float(d.time))
 			_float(counter_bar, "STUNNED", C_EXP, 14)
@@ -1660,7 +1671,9 @@ func _auto_wants(id: String) -> bool:
 	match id:
 		"proxy_hop":
 			return Stats.current_anon <= Stats.max_anon * 0.5
-		"lag_spike", "cease_desist", "blackout":
+		"lag_spike": # Firewall Crack: while most of the firewall is still up
+			return !firewall_down and firewall_bar.value >= firewall_bar.max_value * 0.5
+		"cease_desist", "blackout":
 			return counter_bar.value >= 60.0 and stun_left <= 0.0
 		"ghost_mode":
 			return counter_bar.value >= 60.0 and ghost_left == 0
@@ -1705,9 +1718,36 @@ func _auto_wants(id: String) -> bool:
 	return true
 
 ## EXPLOIT bar, its tag, and one header chip per active effect
+## The EXPLOITS card: one cell per owned Exploit (name xN, charge cost, effect), rebuilt only when
+## what's owned, what's affordable or the auto pick changes
+func _refresh_exploit_list() -> void:
+	if exp_card.is_empty():
+		return
+	var owned = Exploits.get_items().filter(func(i): return Inventory.get_amount(i) > 0)
+	var sig = str(Exploits.auto_id) + "|" + ",".join(owned.map(func(i): return "%d:%d:%d" % [i.id, Inventory.get_amount(i), 1 if Exploits.charge >= Exploits.cost(i) else 0]))
+	if sig == _exp_sig:
+		return
+	_exp_sig = sig
+	if owned.is_empty():
+		exp_hint.text = _c("none yet: found in caches", C_DIM)
+		exp_list.visible = false
+		return
+	exp_hint.text = "[right]%s %s  %s %s[/right]" % [_c("use", C_DIM), _c("<name> -force", C_EXP), _c("auto", C_DIM), _c("run auto <name>", C_EXP)]
+	var t = "[table=2]"
+	for i in owned:
+		var ready = Exploits.charge >= Exploits.cost(i)
+		var auto = Exploits.auto_id == str(i.exploit_id)
+		t += "[cell]%s %s %s%s  %s[/cell]" % [_c(i.name.to_lower(), C_EXP if ready else C_TEXT), _c("x%d" % Inventory.get_amount(i), C_DIM),
+			_c("%d" % int(Exploits.cost(i)), C_EXP if ready else C_DIM), (" " + _c("AUTO", C_EXP)) if auto else "", _c(Exploits.get_def(i).effect, C_DIM)]
+	if owned.size() % 2 == 1:
+		t += "[cell][/cell]"
+	exp_list.text = t + "[/table]"
+	exp_list.visible = true
+
 func _refresh_exploit_ui() -> void:
 	if exp_row.is_empty():
 		return
+	_refresh_exploit_list()
 	exp_row.bar.value = Exploits.charge
 	exp_row.value.text = "%d/%d" % [int(Exploits.charge), int(Exploits.CHARGE_MAX)]
 	var cheapest = Exploits.cheapest_owned_cost()
@@ -1716,7 +1756,7 @@ func _refresh_exploit_ui() -> void:
 	if Exploits.auto_id != "":
 		tag = _c("auto: " + Exploits.get_item(Exploits.auto_id).name, C_EXP)
 	elif cheapest < 0.0:
-		tag = _c("no one-time items", C_DIM)
+		tag = _c("no Exploits", C_DIM)
 	elif ready:
 		tag = _c("READY - 'run'", C_EXP)
 	else:
@@ -1953,6 +1993,16 @@ func _build_ui() -> void:
 	log_rtl.add_theme_font_size_override("normal_font_size", 12)
 	log_rtl.add_theme_constant_override("line_separation", 3)
 	log_card.body.add_child(log_rtl)
+
+	# exploits (2026-10-24): what you own, cost and effect, two per row
+	exp_card = _card(self, "EXPLOITS", C_EXP)
+	exp_hint = _rtl(11)
+	exp_hint.autowrap_mode = TextServer.AUTOWRAP_OFF
+	exp_card.head.add_child(exp_hint)
+	exp_list = _rtl(11)
+	exp_list.add_theme_constant_override("table_h_separation", 18)
+	exp_list.add_theme_constant_override("line_separation", 2)
+	exp_card.body.add_child(exp_list)
 
 	# yield
 	var y = _card(self, "YIELD", C_WIN)

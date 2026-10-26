@@ -126,7 +126,7 @@ var output_queue: Array[String] = []
 var processing_queue = false
 
 var RICHTEXT_LABEL_LINE_LIMIT = 20 #lines per richtextlabel (aka terminal read) before creating a new one
-var RICHTEXT_LABEL_LIMIT = 10 #amount of richtextlabels before starting to remove old ones
+var RICHTEXT_LABEL_LIMIT = 40 #amount of richtextlabels before starting to remove old ones (2026-10-24: was 10 = ~200 lines, a full ls lost its top)
 
 var NOTIFY_OF_OVERHEAT: bool = false
 
@@ -153,6 +153,7 @@ func _ready():
 		Signals.system_temp_updated(30)
 	Offline.compute() # offline gains are applied right away (booting saves); shown after the boot
 	Uploads.tier_completed.connect(func(t): add_line(ContextCommands.tier_complete_text(t))) # (after compute: offline ones are in the download)
+	Uploads.complete_met_tiers() # goals lowered since the save was made (2026-10-24: School 300 -> 150)
 	if Tutorial.DEV_ALWAYS_SHOW_INTRO:
 		Tutorial.show_intro = true
 	if !Tutorial.show_intro:
@@ -1201,7 +1202,10 @@ func _process_unlocked_text(skill: Node, p: Dictionary) -> String:
 	t += "[color=#ffc24a]════════════════════════════════════════[/color]\n"
 	t += " Level %d %s\n" % [int(p.get("unlock level", 1)), skill.SKILL.name]
 	if str(p.get("description", "")) != "":
-		t += "  [color=#4ec994]+[/color] %s\n" % p.description
+		# wrapped: the terminal doesn't wrap, so a long description ran behind the side panel
+		var desc_lines = ContextCommands._wrap_words(str(p.description), 90)
+		for i in desc_lines.size():
+			t += ("  [color=#4ec994]+[/color] " if i == 0 else "    ") + str(desc_lines[i]) + "\n"
 	var cmd = str(p.get("display command", p.get("command", "")))
 	if cmd != "":
 		t += "  [color=#888888]run[/color] [color=#4ec994]%s[/color]\n" % cmd
@@ -2854,8 +2858,8 @@ func _finish_boot() -> void:
 #region offline welcome back
 ## "While you were away" as a download: a sync header, then one row per resource whose count climbs from 0
 ## to what was made offline behind a filling bar, then uploads / levels / notes, then the process resumes.
-## Not skippable: ~2.5 s per row (down to 1.2 s with many rows), a short beat between rows. XP gained per skill gets
-## a row of its own after the resources.
+## Not skippable: every row fills at the same time (~2.5 s). XP gained per skill gets a row of its own after the
+## resources.
 const OFFLINE_C := "#33ff33"
 const OFFLINE_DIM := "#5c6b7a"
 const OFFLINE_BAR := 18
@@ -2885,25 +2889,27 @@ func _offline_welcome() -> void:
 	var rows: Array = r.gains.slice(0, 12).map(func(g): return {"name": g.item.name, "amount": g.amount})
 	for x in r.get("xp", []):
 		rows.append({"name": x.skill + " XP", "amount": x.amount, "xp": true})
-	var per_row = clamp(20.0 / max(1, rows.size()), 1.2, 2.5)
+	# 2026-10-25: every row downloads at the same time (one bar each), then all flip to 'downloaded'
 	var done_text = ""
 	var name_w = 4
 	for g in rows:
 		name_w = max(name_w, g.name.length())
-	for g in rows:
-		var steps = 60
-		for k in steps + 1:
-			var f = 1.0 - pow(1.0 - float(k) / steps, 2.0) # ease out: quick start, settles at the end
-			var n = int(round(g.amount * f))
-			var filled = int(round(OFFLINE_BAR * f))
-			var line = "downloading  %s  [color=%s]%s[/color][color=%s]%s[/color]  [color=%s]+%s[/color]" % [
-				g.name.rpad(name_w), OFFLINE_C, "█".repeat(filled), OFFLINE_DIM, "░".repeat(OFFLINE_BAR - filled),
-				OFFLINE_C if k == steps else "#cccccc", _commas(n)]
-			block.text = head + done_text + line
-			await get_tree().create_timer(per_row / steps).timeout
-		done_text += "downloaded   %s  [color=%s]%s[/color]  [color=%s]+%s[/color]\n" % [g.name.rpad(name_w), OFFLINE_C, "█".repeat(OFFLINE_BAR), OFFLINE_C, _commas(g.amount)]
-		block.text = head + done_text
-		await get_tree().create_timer(0.25).timeout
+	var steps = 60
+	var duration = 2.5
+	for k in steps + 1:
+		var f = 1.0 - pow(1.0 - float(k) / steps, 2.0) # ease out: quick start, settles at the end
+		var filled = int(round(OFFLINE_BAR * f))
+		var live = ""
+		for g in rows:
+			live += "%s  %s  [color=%s]%s[/color][color=%s]%s[/color]  [color=%s]+%s[/color]\n" % [
+				"downloaded " if k == steps else "downloading", g.name.rpad(name_w), OFFLINE_C, "█".repeat(filled), OFFLINE_DIM,
+				"░".repeat(OFFLINE_BAR - filled), OFFLINE_C if k == steps else "#cccccc", _commas(int(round(g.amount * f)))]
+		block.text = head + live
+		if k < steps:
+			await get_tree().create_timer(duration / steps).timeout
+		else:
+			done_text = live
+	await get_tree().create_timer(0.25).timeout
 	if r.gains.size() > rows.size():
 		done_text += "[color=%s]+ %d more items ('ls')[/color]\n" % [OFFLINE_DIM, r.gains.size() - rows.size()]
 	var tail = ""

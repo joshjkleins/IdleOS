@@ -409,6 +409,26 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 			job.out = {}
 			for item in per:
 				job.out[item] = per[item] * chance * lines * mult
+			if p == Phishing.MOD and !list.is_empty():
+				# 2026-10-24: rolled as whole catches. Spread as averages over every mod in the pool, each one
+				# rounded to 0 on a big pool (2 h offline with all tiers open gave XP and no mods)
+				var catches = chance * lines * mult
+				job.apply = func(cycles: int, m: float) -> int:
+					var total = catches * cycles * m
+					var n = int(floor(total)) + (1 if randf() < total - floor(total) else 0)
+					var wsum = 0.0
+					for e in list:
+						wsum += float(e.weight)
+					for i in n:
+						var r = randf() * wsum
+						for e in list:
+							r -= float(e.weight)
+							if r <= 0.0:
+								Inventory.add_resource(e.item, 1)
+								break
+					for it in inp:
+						Inventory.remove_resource(it, int(round(inp[it] * cycles)))
+					return cycles
 			job.xp = chance * lines * float(p["experience per level"])
 			job.heat = h * lines * (1.0 + chance)
 	return job

@@ -2,7 +2,7 @@ class_name HintEngine
 ## 'hint' / 'next' / 'lost': reads the game state and suggests the next 1-3 commands, most important first.
 ## Each hint is {cmd, why}. Rules in priority order (first three that apply):
 ##   tutorial step · overheated · caches to decode · ready to hack · target access affordable ·
-##   production bottleneck (forced in when the main terminal is idle) · spare VM tokens · upload surplus · upgrades ('apt') · goal.
+##   production bottleneck (forced in when the main terminal is idle) · spare VM tokens · upgrades ('apt') · upload surplus · goal.
 ## Uploads only ever suggest the SURPLUS: what's left after the next upgrades and target unlocks are paid for
 ## (so a player never uploads the stock they need and has to rebuild the loop).
 
@@ -86,14 +86,14 @@ static func build(os) -> Array:
 		var tok = b.skill.vm_token
 		if Inventory.get_amount(tok) > 0:
 			add.call(ssh_cmd(b.cmd), "you have %d %s: run it in a VM alongside the main terminal" % [Inventory.get_amount(tok), tok.name])
-	# 9 upload surplus
-	var u = upload_hint()
-	if !u.is_empty():
-		add.call(u.cmd, u.why)
-	# 10 upgrades (low: which one to buy is the player's call)
+	# 9 upgrades (2026-10-24: above uploads; which one to buy is the player's call)
 	var ready_pkgs = affordable_packages()
 	if !ready_pkgs.is_empty():
 		add.call("apt", "upgrades available: use 'apt' to see what can be installed (%d ready)" % ready_pkgs.size())
+	# 10 upload surplus
+	var u = upload_hint()
+	if !u.is_empty():
+		add.call(u.cmd, u.why)
 	# 11 fallback: the goal
 	if out.is_empty():
 		add.call("upload", "everything's running. %s goal: %d%% uploaded" % [Uploads.get_location_name(tier), goal_pct(tier)])
@@ -239,7 +239,7 @@ static func bottleneck(tier: int, best: Dictionary, idle: bool = true) -> Dictio
 		if !idle and need.payload_have >= need.payload_need * 3 and need.sql_have >= need.sql_rec:
 			return {} # stocked for a few hacks: leave room for other hints
 		if need.payload_have >= need.payload_need and need.sql_have < need.sql_rec and Phishing.SPEAR.get("unlocked", false):
-			return {"cmd": "phish -spear", "skill": Phishing, "why": "%s wants ~%d SQL Injectors, you have %d" % [best.name, need.sql_rec, need.sql_have]}
+			return {"cmd": "phish -spear", "skill": Phishing, "why": "%s uses ~%d SQL Injectors, you have %d" % [best.name, need.sql_rec, need.sql_have]}
 	var rows = AvailableSection.chain(tier)
 	var procs = [Mining.minor_processes[tier - 1], Parsing.FOOTPRINT,
 		Cracking.minor_processes.filter(func(p): return p != Cracking.VM)[tier - 1], Matching.minor_processes[tier - 1],

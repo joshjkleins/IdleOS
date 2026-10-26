@@ -724,3 +724,23 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
   DEFAULT_UNLOCKED and TRACK_INFO.
 - 'music' (now playing), 'music next', 'music off' / 'music on' (Settings music_player, saved per device);
   volume: 'settings music=<0-100>'. Equipped mod bandwidth is now +1 per mod (SQL Booster 0).
+
+## Pass 6 notes (2026-10-24, cdd)
+- One-time items are now called **Exploits** in player text (ls header, run list, hacking console, decoding, cache drops, ls -h, whale/trap descriptions, upgrade effects). Code names unchanged.
+- Cache drop rows: "Exploit" / "Hacking Mod" (chance = at least one of the tier's 5, each rolls on its own: 10% each -> 41%, 5% each -> 23%).
+- 'info phishing mod' lists only the catchable pool (Phishing.mod_pool), with each mod's share.
+- Offline Mod Phishing rolls whole catches (job.apply). It used to spread the average over every mod and round each to 0 on a big pool (XP but no mods).
+- A hack's overclock ends with the hack (hacking.gd hacking_ended).
+- PROCESS UNLOCKED banner wraps the description at 90 chars; Intel description shortened.
+- Overcharge text: no "(crits double it)". hint: apt now above upload surplus.
+- Lag Spike is now **Firewall Crack** (T1, 15 charge): knocks 30% off the firewall that's left (breaks it at 0; blocked while it's down; auto-use above 50%). Internal id stays lag_spike / item 329 for saves.
+
+## Pass 7 notes (2026-10-25, cdd)
+- Hacking game: new EXPLOITS card between COMBAT LOG and YIELD. Owned Exploits two per row: name (purple when affordable), xN, charge cost, effect; head shows '<name> -force' / 'run auto <name>'. Rebuilt only when owned / affordable / auto changes (_refresh_exploit_list).
+- Firewall Crack text: "Knock 30% off the firewall."
+- Tab completion for ls filters (types, skills, single-word locations, t1..t6, -h) in CommandRegistry.
+- Principal counter 3 -> 6, Superintendent 6 -> 8. School normal targets integrity / firewall -15% (Student 88/11, Admin 260/13, VP 301/22, Principal 348/16, Superintendent 445/18). Hard modes unchanged.
+- School upload goal: basics 300 -> 150, rares 3 -> 1. Uploads.complete_met_tiers() on boot completes a tier an old save already meets.
+- Terminal keeps 40 text blocks (was 10, ~200 lines): a full 'ls' kept losing its top.
+- Bug: Patient insurance data had id 49 (same as Prescription pad credentials), so its saves loaded as the other item. Now 50.
+- tools/review/savegame.json is the copy linked for Steam review (made before these changes; keep it as is for that build). tools/review/gensave.gd regenerates one.

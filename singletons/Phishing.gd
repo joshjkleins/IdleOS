@@ -135,7 +135,7 @@ var WHALING = {
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 15 },
 	],
 	"resource amount gained": 1,
-	"description": "One big catch at a time. All your lines go on a single whale: cast, wait while it circles (30-60s), then it bites or slips away (bite chance = efficiency). A bite starts the reel: 2 minutes split across your lines, so more lines reel faster. A landed whale is a bundle of 10-24 items, mostly SQL Injectors (85%) with some Packet Spoofs (15%), plus a 5% chance of a one-time item. Bait (10 of a basic resource per whale) raises the bite chance and doubles the bundle.",
+	"description": "Puts every line on one whale for a big bundle of SQL Injectors and Packet Spoofs, with a small chance of an Exploit. More lines reel it in faster.",
 	"efficiency description": "Chance the whale bites",
 	"signal": whale_cycle_completed
 }
@@ -214,7 +214,7 @@ var TRAP = {
 		{ "item": Items.PACKET_SPOOF, "min": 15, "max": 15, "weight": 100 },
 	],
 	"resource amount gained": 1,
-	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 70 SQL Injectors and 15 Packet Spoofs, plus rare rolls: efficiency is the chance of a one-time exploit item, a fifth of it the chance of a hacking mod.",
+	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 70 SQL Injectors and 15 Packet Spoofs, plus rare rolls: efficiency is the chance of an Exploit, a fifth of it the chance of a hacking mod.",
 	"efficiency description": "Rare roll chance on a full trap",
 	"signal": whale_cycle_completed
 }
@@ -320,6 +320,12 @@ func parse_bait(text: String) -> Dictionary:
 	return out
 
 ## Every hacking mod item; mod_pool() keeps the ones whose tier is unlocked.
+## 2026-10-25: the list is built deferred (Items is a later autoload), but Offline.compute() runs in the same
+## boot frame, before deferred calls: it saw an empty pool and offline Mod Phishing caught nothing
+func _ensure_mod_list() -> void:
+	if MOD["resource gained"].is_empty():
+		_build_mod_list()
+
 func _build_mod_list() -> void:
 	var mods = []
 	for item in HackingMods.pool_items(): # retired mods don't drop
@@ -328,6 +334,7 @@ func _build_mod_list() -> void:
 
 ## one tier's mods as a reward list (rare bait guarantees one of these)
 func tier_mod_pool(tier: int) -> Array:
+	_ensure_mod_list()
 	return MOD["resource gained"].filter(func(e): return int(e.item.tier) == tier)
 
 ## 2026-10-23: a rare item whose upload goal is met is bait for 'phish -mod': 1 per cast, and every cast
@@ -345,6 +352,7 @@ func bait_cost(bait: ItemData) -> int:
 	return RARE_BAIT_PER_CAST if is_rare_bait(bait) else BAIT_PER_CAST
 
 func mod_pool() -> Array:
+	_ensure_mod_list()
 	return MOD["resource gained"].filter(func(e): return Upgrades.tier_unlocked(e.item.tier))
 
 ## Tiers whose location is unlocked (1..6)

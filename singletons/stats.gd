@@ -42,8 +42,8 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 1 },
 				"heat": 0.5,
 				"exp": 45,
-				"integrity": 103,
-				"firewall": 13,
+				"integrity": 88,
+				"firewall": 11,
 				"counter": 7,
 				"counter speed": 16.0,
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
@@ -57,8 +57,8 @@ var hacking_targets = {
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 2},
 				"heat": 0.8,
 				"exp": 500,
-				"integrity": 306,
-				"firewall": 15,
+				"integrity": 260,
+				"firewall": 13,
 				"counter": 5,
 				"counter speed": 16.0,
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
@@ -72,8 +72,8 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
 				"heat": 1.1,
 				"exp": 753,
-				"integrity": 354,
-				"firewall": 26,
+				"integrity": 301,
+				"firewall": 22,
 				"counter": 6,
 				"counter speed": 16.0,
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
@@ -87,9 +87,9 @@ var hacking_targets = {
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 4},
 				"heat": 1.4,
 				"exp": 1005,
-				"integrity": 409,
-				"firewall": 19,
-				"counter": 3,
+				"integrity": 348,
+				"firewall": 16,
+				"counter": 6,
 				"counter speed": 30.0,
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.PRINCIPAL_CACHE
@@ -102,9 +102,9 @@ var hacking_targets = {
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
 				"heat": 1.7,
 				"exp": 1252,
-				"integrity": 523,
-				"firewall": 21,
-				"counter": 6,
+				"integrity": 445,
+				"firewall": 18,
+				"counter": 8,
 				"counter speed": 20.0,
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SUPERINTENDENT_CACHE

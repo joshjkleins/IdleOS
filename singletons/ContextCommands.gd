@@ -551,10 +551,17 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		return_text += "REWARDS\n"
 		#Items gained
 		if process["resource gained"] is Array:
-			for resource in process["resource gained"]:
+			# Mod Phishing: only the mods that can be caught now (unlocked tiers), as a share of the pool
+			var pool: Array = Phishing.mod_pool() if process == Phishing.MOD else process["resource gained"]
+			var total_w = 0.0
+			for r in pool:
+				if r is Dictionary:
+					total_w += float(r.weight)
+			for resource in pool:
 				if resource is Dictionary:
 					var item = resource.item
-					var item_name = item.name + " (" + str(resource.weight) + "%)"
+					var share = float(resource.weight) / max(1.0, total_w) * 100.0
+					var item_name = item.name + " (" + ("%.1f" % share).trim_suffix(".0") + "%)"
 					var dots_amount = 35 - item_name.length()
 					return_text += "├─ " + item_name + ".".repeat(dots_amount) + item.description + "\n"
 			

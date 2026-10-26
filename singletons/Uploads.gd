@@ -11,8 +11,8 @@ signal changed           # staged / uploading / uploaded counts changed
 signal tier_completed(tier: int)
 signal item_uploaded(item: ItemData)
 
-const BASIC_GOALS = [300, 300, 600, 1000, 1600, 2500] # T1 x3 after the 2026-10-20 playthrough
-const RARE_GOALS = [3, 5, 6, 10, 15, 20]
+const BASIC_GOALS = [150, 300, 600, 1000, 1600, 2500] # 2026-10-24 playthrough: T1 300 -> 150 (and T1 rares 3 -> 1)
+const RARE_GOALS = [1, 5, 6, 10, 15, 20]
 const UPLOAD_SECONDS_BY_TIER = [15.0, 15.0, 15.0, 11.0, 9.0, 7.0] # per basic resource, by the item's tier
 const RARE_UPLOAD_SECONDS = 45.0  # per rare item
 ## Upload heat per second of uploading, per item, by tier (~3.5% of that tier's cooling each: all of a tier's
@@ -193,6 +193,19 @@ func _upload_one(item: ItemData) -> void:
 	if not tier in completed_tiers and is_tier_complete(tier):
 		completed_tiers.append(tier)
 		tier_completed.emit(tier) # hook for unlock progression later
+
+## A save whose uploads already meet a goal that has since been lowered completes that tier on load
+func complete_met_tiers() -> void:
+	for guard in MAX_TIER:
+		var tier = current_tier()
+		if tier in completed_tiers or !is_tier_complete(tier):
+			break
+		completed_tiers.append(tier)
+		tier_completed.emit(tier)
+		SaveManager.mark_dirty()
+	for item in active.keys(): # items whose goal is now met stop uploading (the rest stays queued)
+		if get_uploaded(item) >= get_goal_amount(item):
+			active.erase(item)
 #endregion
 
 #region save

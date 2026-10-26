@@ -71,7 +71,7 @@ func _on_player_hacking_box_command_entered(text):
 	if low.ends_with(" -force"):
 		var forced = Exploits.find_forced(low)
 		if forced == null:
-			player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % low.trim_suffix(" -force"))
+			player_hacking_box.add_line_error("Unknown Exploit '%s'. Type 'run' to see yours." % low.trim_suffix(" -force"))
 		else:
 			_use_exploit(forced)
 		return
@@ -176,7 +176,7 @@ func handle_run_command(text: String) -> void:
 			return
 		var auto_item = Exploits.find(name)
 		if auto_item == null:
-			player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % name)
+			player_hacking_box.add_line_error("Unknown Exploit '%s'. Type 'run' to see yours." % name)
 			return
 		Exploits.auto_id = auto_item.exploit_id
 		SaveManager.mark_dirty()
@@ -186,7 +186,7 @@ func handle_run_command(text: String) -> void:
 		return
 	var item = Exploits.find(arg) # old 'run <name>' still works (not shown anywhere)
 	if item == null:
-		player_hacking_box.add_line_error("Unknown one-time item '%s'. Type 'run' to see yours." % arg)
+		player_hacking_box.add_line_error("Unknown Exploit '%s'. Type 'run' to see yours." % arg)
 		return
 	_use_exploit(item)
 
@@ -194,7 +194,7 @@ func _use_exploit(item) -> void:
 	var game = enemy_hacking_box.hacking_game
 	var in_hack = current_context == HackingContext.HACKING and game.is_hacking
 	if !in_hack:
-		player_hacking_box.add_line_warning("One-time items can only be used during a hack.")
+		player_hacking_box.add_line_warning("Exploits can only be used during a hack.")
 		return
 	var err = game.use_exploit(item)
 	if err != "":
@@ -351,6 +351,7 @@ func handle_view_command(text):
 
 
 func hacking_ended():
+	Stats.overclocked = false # 2026-10-24: a hack's overclock ends with the hack (it stayed on in the main terminal after a win)
 	#enemy_hacking_box.end_hack()
 	header_hacking_box.update_hacking_header()
 	header_hacking_box.update_modifiers_ui()
@@ -413,7 +414,7 @@ func hacking_help_commands():
 			if true: # hacking overclock is always available
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
-					["[item name] -force", "Use a one-time item ('run' lists yours)."],
+					["[item name] -force", "Use an Exploit ('run' lists yours)."],
 					["kill", "Ends the run now (caches already breached are kept)."],
 					["kill -s", "Finish the current hack, then end the run (for -r / =N runs)."],
 					["overclock", "Doubles bandwidth regen (more heat per action)"],
@@ -422,7 +423,7 @@ func hacking_help_commands():
 			else:
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
-					["[item name] -force", "Use a one-time item ('run' lists yours)."],
+					["[item name] -force", "Use an Exploit ('run' lists yours)."],
 					["kill", "Ends the run now (caches already breached are kept)."],
 				]))
 

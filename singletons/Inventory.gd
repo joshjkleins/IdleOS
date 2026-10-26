@@ -373,7 +373,7 @@ func list_inventory_hacking_mods():
 ## Item type, worked out from data the items already have (no per-item tagging). Matches the 'ls -h' glossary.
 const TYPE_ORDER = ["resource", "payload", "combat", "cache", "rare", "mod", "exploit", "token"]
 const TYPE_TITLES = {"resource": "RESOURCES", "payload": "PAYLOADS", "combat": "COMBAT", "cache": "CACHES",
-	"rare": "RARE ITEMS", "mod": "MOD ITEMS", "exploit": "ONE-TIME ITEMS", "token": "VM TOKENS"}
+	"rare": "RARE ITEMS", "mod": "MOD ITEMS", "exploit": "EXPLOITS", "token": "VM TOKENS"}
 const TYPE_FLAGS = {"resources": "resource", "resource": "resource", "res": "resource", "payloads": "payload", "payload": "payload",
 	"combat": "combat", "caches": "cache", "cache": "cache", "rares": "rare", "rare": "rare", "valuables": "rare",
 	"mods": "mod", "mod": "mod", "exploits": "exploit", "exploit": "exploit", "one-time": "exploit", "onetime": "exploit",

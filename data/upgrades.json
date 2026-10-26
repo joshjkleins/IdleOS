@@ -7628,7 +7628,7 @@
    "group": "Decoding",
    "name": "Forensics",
    "type": "capstone",
-   "effect": "MODIFIER 'forensics': -40% speed; one-time item find chance x2, VM token chance x2, heat x2",
+   "effect": "MODIFIER 'forensics': -40% speed; Exploit find chance x2, VM token chance x2, heat x2",
    "levels": [
     {
      "tier": 4,
@@ -7637,7 +7637,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'forensics': -40% speed; one-time item find chance x2, VM token chance x2, heat x2",
+     "effect": "MODIFIER 'forensics': -40% speed; Exploit find chance x2, VM token chance x2, heat x2",
      "costs": [
       {
        "item": "Cookies",
@@ -9757,7 +9757,7 @@
    "group": "Hacking",
    "name": "Exploit Kit",
    "type": "capstone",
-   "effect": "50% chance a one-time item is not consumed",
+   "effect": "50% chance an Exploit is not consumed",
    "levels": [
     {
      "tier": 6,
@@ -9766,7 +9766,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "50% chance a one-time item is not consumed",
+     "effect": "50% chance an Exploit is not consumed",
      "costs": [
       {
        "item": "President Cache",

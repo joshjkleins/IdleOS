@@ -64,6 +64,16 @@ func main_candidates() -> Array:
 				continue # only modifiers the player has
 			c.append(m.command)
 			c.append(m.command + " -kill")
+	# 'ls' filters (2026-10-24): types, skills, locations and t1..t6
+	for f in ["-resources", "-payloads", "-combat", "-caches", "-rares", "-mods", "-exploits", "-tokens", "-h"]:
+		c.append("ls " + f)
+	for sk in ["mining", "parsing", "cracking", "matching", "phishing", "hacking", "decoding", "compiling"]:
+		c.append("ls -" + sk)
+	for loc in Stats.hacking_targets:
+		if !(" " in str(loc)): # 'ls police station' would be read as a search
+			c.append("ls " + str(loc).to_lower())
+	for t in range(1, 7):
+		c.append("ls t%d" % t)
 	# 'ls <item>' works for any item, owned or not (caches you haven't found yet, rares, tokens ...)
 	for it in Items.ITEM_MAP.values():
 		if it is ItemData and it.name != "":

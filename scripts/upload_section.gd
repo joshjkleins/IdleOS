@@ -72,7 +72,8 @@ func _process(delta: float) -> void:
 		_rebuild()
 	_refresh()
 
-## Rows: every unfinished goal item of the current tier (in goal order), then anything else queued,
+## Rows: items uploading right now, then every other unfinished goal item of the current tier (in goal order),
+## then anything else queued,
 ## then the finished goals at the bottom (the list re-sorts itself when one completes).
 func _wanted_items() -> Array:
 	var items := []
@@ -85,7 +86,10 @@ func _wanted_items() -> Array:
 	for item in Uploads.staged:
 		if not item in items and not item in finished:
 			items.append(item)
-	return items + finished
+	# 2026-10-25: what's uploading right now goes first (same order otherwise)
+	var uploading = items.filter(func(i): return Uploads.active.has(i))
+	var waiting = items.filter(func(i): return !Uploads.active.has(i))
+	return uploading + waiting + finished
 
 func _rebuild() -> void:
 	for c in _list.get_children():
