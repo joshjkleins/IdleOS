@@ -74,7 +74,7 @@ var hacking_targets = {
 				"exp": 753,
 				"integrity": 301,
 				"firewall": 22,
-				"counter": 6,
+				"counter": 8,
 				"counter speed": 16.0,
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRINCIPAL_CACHE
@@ -88,7 +88,7 @@ var hacking_targets = {
 				"heat": 1.4,
 				"exp": 1005,
 				"integrity": 348,
-				"firewall": 16,
+				"firewall": 20,
 				"counter": 6,
 				"counter speed": 30.0,
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
@@ -103,10 +103,10 @@ var hacking_targets = {
 				"heat": 1.7,
 				"exp": 1252,
 				"integrity": 445,
-				"firewall": 18,
-				"counter": 8,
-				"counter speed": 20.0,
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"firewall": 20,
+				"counter": 14,
+				"counter speed": 25.0,
+				"firewall reboot": 5.0, # seconds the firewall stays down after a break
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],

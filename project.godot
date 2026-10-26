@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="IdleOS"
+config/version="0.1.3"
 run/main_scene="uid://g3kf6mnbkbca"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="IdleOS_Demo"

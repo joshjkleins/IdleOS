@@ -144,7 +144,7 @@ func _refresh() -> void:
 		row.add_child(_label("ready" if r.runs < 0 else ("x%d" % r.runs if on else "-"), FONT, DIM if on else OFF))
 	if !hack.is_empty():
 		_add_hack_row(hack)
-	_count.text = "T%d %s %d/%d" % [tier, Uploads.get_location_name(tier).to_lower().split(" ")[0], ready, rows.size()]
+	_count.text = "%s %d/%d" % [Uploads.get_location_name(tier).to_lower(), ready, rows.size()]
 	_summary.text = "  ·  ".join(names) if !names.is_empty() else "nothing ready"
 
 ## NEXT HACK: the strongest target you can hack and what one hack of it takes (HintEngine.hack_needs:

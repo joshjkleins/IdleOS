@@ -453,6 +453,8 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 						break
 					Decoding.add_intel_point(tg)
 					done += 1
+				if done > 0: # shown in the download (intel isn't an item, so it never showed up in the gains)
+					report["intel"] = {"target": str(tg.name), "points": int(report.get("intel", {}).get("points", 0)) + done, "text": Decoding.intel_text(tg)}
 				return int(ceil(done / max(0.01, finds))) if done < n else cycles
 			return job
 		_:

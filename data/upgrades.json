@@ -921,11 +921,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 74
-      },
-      {
-       "item": "Parents credit card",
-       "amount": 1
+       "amount": 271
       }
      ]
     }
@@ -949,11 +945,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 190
-      },
-      {
-       "item": "Leaked deposition transcripts",
-       "amount": 1
+       "amount": 696
       }
      ]
     }
@@ -977,11 +969,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 254
-      },
-      {
-       "item": "Patient appointment history",
-       "amount": 2
+       "amount": 929
       }
      ]
     }
@@ -1005,11 +993,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 246
-      },
-      {
-       "item": "Cash Drawer Override Codes",
-       "amount": 2
+       "amount": 902
       }
      ]
     }
@@ -1033,11 +1017,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 271
-      },
-      {
-       "item": "Internal affairs complaint archive",
-       "amount": 2
+       "amount": 992
       }
      ]
     }
@@ -1061,11 +1041,7 @@
      "costs": [
       {
        "item": "Databases",
-       "amount": 398
-      },
-      {
-       "item": "Registered Voters Database",
-       "amount": 2
+       "amount": 1455
       }
      ]
     }
@@ -1944,11 +1920,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 74
-      },
-      {
-       "item": "Falsified transcript database",
-       "amount": 1
+       "amount": 271
       }
      ]
     }
@@ -1972,11 +1944,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 190
-      },
-      {
-       "item": "Forged court document templates",
-       "amount": 1
+       "amount": 696
       }
      ]
     }
@@ -2000,11 +1968,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 254
-      },
-      {
-       "item": "Staff keycard clone data",
-       "amount": 2
+       "amount": 929
       }
      ]
     }
@@ -2028,11 +1992,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 246
-      },
-      {
-       "item": "Credit Records",
-       "amount": 2
+       "amount": 902
       }
      ]
     }
@@ -2056,11 +2016,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 271
-      },
-      {
-       "item": "Body cam footage deletion logs",
-       "amount": 2
+       "amount": 992
       }
      ]
     }
@@ -2084,11 +2040,7 @@
      "costs": [
       {
        "item": "Databases",
-       "amount": 398
-      },
-      {
-       "item": "CIA Brief",
-       "amount": 2
+       "amount": 1455
       }
      ]
     }
@@ -3399,19 +3351,15 @@
      "costs": [
       {
        "item": "IP address",
-       "amount": 40
+       "amount": 147
       },
       {
        "item": "Encrypted passwords",
-       "amount": 40
+       "amount": 147
       },
       {
        "item": "Usernames",
-       "amount": 40
-      },
-      {
-       "item": "Student disciplinary records",
-       "amount": 1
+       "amount": 147
       }
      ]
     }
@@ -3435,19 +3383,15 @@
      "costs": [
       {
        "item": "Email Header",
-       "amount": 103
+       "amount": 378
       },
       {
        "item": "Encrypted Signature",
-       "amount": 103
+       "amount": 378
       },
       {
        "item": "Case Number",
-       "amount": 103
-      },
-      {
-       "item": "Sealed case files",
-       "amount": 1
+       "amount": 378
       }
      ]
     }
@@ -3471,19 +3415,15 @@
      "costs": [
       {
        "item": "Mac Address",
-       "amount": 138
+       "amount": 505
       },
       {
        "item": "Encrypted Badge Hash",
-       "amount": 138
+       "amount": 505
       },
       {
        "item": "Staff IDs",
-       "amount": 138
-      },
-      {
-       "item": "Prescription pad credentials",
-       "amount": 2
+       "amount": 505
       }
      ]
     }
@@ -3507,19 +3447,15 @@
      "costs": [
       {
        "item": "Routing Number",
-       "amount": 134
+       "amount": 491
       },
       {
        "item": "Encrypted PINS",
-       "amount": 134
+       "amount": 491
       },
       {
        "item": "Account Numbers",
-       "amount": 134
-      },
-      {
-       "item": "Safe Deposit Box Registry",
-       "amount": 2
+       "amount": 491
       }
      ]
     }
@@ -3543,19 +3479,15 @@
      "costs": [
       {
        "item": "Subnet Map",
-       "amount": 147
+       "amount": 540
       },
       {
        "item": "Encrypted SSH Key",
-       "amount": 147
+       "amount": 540
       },
       {
        "item": "Badge Number",
-       "amount": 147
-      },
-      {
-       "item": "Confidential informant registry",
-       "amount": 2
+       "amount": 540
       }
      ]
     }
@@ -3579,19 +3511,15 @@
      "costs": [
       {
        "item": "Gateway Address",
-       "amount": 216
+       "amount": 792
       },
       {
        "item": "Encrypted Bio Hash",
-       "amount": 216
+       "amount": 792
       },
       {
        "item": "Clearance ID",
-       "amount": 216
-      },
-      {
-       "item": "Black Budget Ledger",
-       "amount": 2
+       "amount": 792
       }
      ]
     }
@@ -4470,11 +4398,7 @@
      "costs": [
       {
        "item": "Passwords",
-       "amount": 49
-      },
-      {
-       "item": "School budget embezzlement logs",
-       "amount": 1
+       "amount": 178
       }
      ]
     }
@@ -4498,11 +4422,7 @@
      "costs": [
       {
        "item": "Digital Signature",
-       "amount": 125
-      },
-      {
-       "item": "Offshore account records",
-       "amount": 1
+       "amount": 458
       }
      ]
     }
@@ -4526,11 +4446,7 @@
      "costs": [
       {
        "item": "Badge Hash",
-       "amount": 167
-      },
-      {
-       "item": "Patient insurance data",
-       "amount": 2
+       "amount": 611
       }
      ]
     }
@@ -4554,11 +4470,7 @@
      "costs": [
       {
        "item": "PINS",
-       "amount": 162
-      },
-      {
-       "item": "Vault Override",
-       "amount": 2
+       "amount": 593
       }
      ]
     }
@@ -4582,11 +4494,7 @@
      "costs": [
       {
        "item": "Private Keys",
-       "amount": 178
-      },
-      {
-       "item": "Evidence locker access codes",
-       "amount": 2
+       "amount": 653
       }
      ]
     }
@@ -4610,11 +4518,7 @@
      "costs": [
       {
        "item": "Bio Template",
-       "amount": 262
-      },
-      {
-       "item": "Deep Cover IDs",
-       "amount": 2
+       "amount": 957
       }
      ]
     }
@@ -5493,11 +5397,7 @@
      "costs": [
       {
        "item": "Credentials",
-       "amount": 27
-      },
-      {
-       "item": "District wide master password",
-       "amount": 1
+       "amount": 100
       }
      ]
     }
@@ -5521,11 +5421,7 @@
      "costs": [
       {
        "item": "Signed Certificate",
-       "amount": 70
-      },
-      {
-       "item": "Witness protection address",
-       "amount": 1
+       "amount": 256
       }
      ]
     }
@@ -5549,11 +5445,7 @@
      "costs": [
       {
        "item": "Access Badge",
-       "amount": 94
-      },
-      {
-       "item": "Falsified drug trial results",
-       "amount": 2
+       "amount": 342
       }
      ]
     }
@@ -5577,11 +5469,7 @@
      "costs": [
       {
        "item": "Account access tokens",
-       "amount": 91
-      },
-      {
-       "item": "Swift Master Key",
-       "amount": 2
+       "amount": 332
       }
      ]
     }
@@ -5605,11 +5493,7 @@
      "costs": [
       {
        "item": "Officer Auth Key",
-       "amount": 100
-      },
-      {
-       "item": "Corruption payout ledger",
-       "amount": 2
+       "amount": 366
       }
      ]
     }
@@ -5633,11 +5517,7 @@
      "costs": [
       {
        "item": "Security Clearance",
-       "amount": 146
-      },
-      {
-       "item": "Nuclear Codes",
-       "amount": 2
+       "amount": 536
       }
      ]
     }
@@ -6525,11 +6405,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 43
-      },
-      {
-       "item": "Parents credit card",
-       "amount": 1
+       "amount": 157
       }
      ]
     }
@@ -6553,11 +6429,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 110
-      },
-      {
-       "item": "Leaked deposition transcripts",
-       "amount": 1
+       "amount": 403
       }
      ]
     }
@@ -6581,11 +6453,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 147
-      },
-      {
-       "item": "Patient appointment history",
-       "amount": 2
+       "amount": 538
       }
      ]
     }
@@ -6609,11 +6477,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 143
-      },
-      {
-       "item": "Cash Drawer Override Codes",
-       "amount": 2
+       "amount": 522
       }
      ]
     }
@@ -6637,11 +6501,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 157
-      },
-      {
-       "item": "Internal affairs complaint archive",
-       "amount": 2
+       "amount": 574
       }
      ]
     }
@@ -6665,11 +6525,7 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 230
-      },
-      {
-       "item": "Registered Voters Database",
-       "amount": 2
+       "amount": 843
       }
      ]
     }
@@ -7557,11 +7413,7 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 585
-      },
-      {
-       "item": "Falsified transcript database",
-       "amount": 1
+       "amount": 2140
       }
      ]
     }
@@ -7585,11 +7437,7 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1501
-      },
-      {
-       "item": "Forged court document templates",
-       "amount": 1
+       "amount": 5493
       }
      ]
     }
@@ -7613,11 +7461,7 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 2005
-      },
-      {
-       "item": "Staff keycard clone data",
-       "amount": 2
+       "amount": 7337
       }
      ]
     }
@@ -7641,11 +7485,7 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1946
-      },
-      {
-       "item": "Credit Records",
-       "amount": 2
+       "amount": 7122
       }
      ]
     }
@@ -7669,11 +7509,7 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 2140
-      },
-      {
-       "item": "Body cam footage deletion logs",
-       "amount": 2
+       "amount": 7834
       }
      ]
     }
@@ -7697,11 +7533,7 @@
      "costs": [
       {
        "item": "Databases",
-       "amount": 3139
-      },
-      {
-       "item": "CIA Brief",
-       "amount": 2
+       "amount": 11490
       }
      ]
     }
@@ -8580,11 +8412,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 55
-      },
-      {
-       "item": "Student disciplinary records",
-       "amount": 1
+       "amount": 200
       }
      ]
     }
@@ -8608,11 +8436,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 140
-      },
-      {
-       "item": "Sealed case files",
-       "amount": 1
+       "amount": 513
       }
      ]
     }
@@ -8636,11 +8460,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 187
-      },
-      {
-       "item": "Prescription pad credentials",
-       "amount": 2
+       "amount": 685
       }
      ]
     }
@@ -8664,11 +8484,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 182
-      },
-      {
-       "item": "Safe Deposit Box Registry",
-       "amount": 2
+       "amount": 665
       }
      ]
     }
@@ -8692,11 +8508,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 200
-      },
-      {
-       "item": "Confidential informant registry",
-       "amount": 2
+       "amount": 731
       }
      ]
     }
@@ -8720,11 +8532,7 @@
      "costs": [
       {
        "item": "Government Payload",
-       "amount": 293
-      },
-      {
-       "item": "Black Budget Ledger",
-       "amount": 2
+       "amount": 1072
       }
      ]
     }
@@ -9630,11 +9438,7 @@
      "costs": [
       {
        "item": "Superintendent cache",
-       "amount": 2
-      },
-      {
-       "item": "School budget embezzlement logs",
-       "amount": 1
+       "amount": 6
       }
      ]
     }
@@ -9658,11 +9462,7 @@
      "costs": [
       {
        "item": "Partner cache",
-       "amount": 3
-      },
-      {
-       "item": "Offshore account records",
-       "amount": 1
+       "amount": 10
       }
      ]
     }
@@ -9686,11 +9486,7 @@
      "costs": [
       {
        "item": "Chief of medicine cache",
-       "amount": 4
-      },
-      {
-       "item": "Patient insurance data",
-       "amount": 2
+       "amount": 14
       }
      ]
     }
@@ -9714,11 +9510,7 @@
      "costs": [
       {
        "item": "Chief Financial Officer Cache",
-       "amount": 5
-      },
-      {
-       "item": "Vault Override",
-       "amount": 2
+       "amount": 18
       }
      ]
     }
@@ -9742,11 +9534,7 @@
      "costs": [
       {
        "item": "Captain cache",
-       "amount": 6
-      },
-      {
-       "item": "Evidence locker access codes",
-       "amount": 2
+       "amount": 22
       }
      ]
     }
@@ -9770,11 +9558,7 @@
      "costs": [
       {
        "item": "President Cache",
-       "amount": 7
-      },
-      {
-       "item": "Deep Cover IDs",
-       "amount": 2
+       "amount": 25
       }
      ]
     }

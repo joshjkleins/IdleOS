@@ -13,6 +13,7 @@ const DONE_COLOR = Color("#4ec994")
 const RARE_COLOR = Color("#e0c068")
 const FONT = 10
 const ROW_FONT = 11
+const COMPLETE_SHADER = preload("res://shaders/upload_complete.gdshader")
 
 var _title: Label
 var _count: Label
@@ -26,6 +27,7 @@ var _summary_bar: ProgressBar
 var _summary_label: Label
 var toggle: SectionToggle
 var collapsed := false
+var _just_completed := {} # ItemData -> true: reached its goal this session (flash once when its row shows it)
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 4)
@@ -61,6 +63,10 @@ func _ready() -> void:
 	_empty = _label("all uploads complete  ·  upload", FONT, EMPTY)
 	add_child(_empty)
 	Uploads.tier_completed.connect(func(_t): _rebuild())
+	Uploads.item_uploaded.connect(func(item):
+		var g = Uploads.get_goal_amount(item)
+		if g > 0 and Uploads.get_uploaded(item) == g:
+			_just_completed[item] = true)
 	_rebuild()
 
 func _process(delta: float) -> void:
@@ -154,6 +160,25 @@ func _refresh() -> void:
 		row.name.add_theme_color_override("font_color", DONE_COLOR if complete else (TEXT if uploading else DIM))
 		row.count.add_theme_color_override("font_color", DONE_COLOR if complete else (TEXT if uploading else DIM))
 		row.bar.modulate.a = 1.0 if uploading or complete else 0.5
+		_set_complete_fx(item, row, complete)
+
+## 2026-10-25: finished goals get the animated bar (upload_complete.gdshader), with a flash the first time
+func _set_complete_fx(item: ItemData, row: Dictionary, complete: bool) -> void:
+	if complete == row.get("fx", false):
+		return
+	row["fx"] = complete
+	if !complete:
+		row.bar.material = null
+		return
+	var m := ShaderMaterial.new()
+	m.shader = COMPLETE_SHADER
+	m.set_shader_parameter("offset", randf())
+	row.bar.material = m
+	if _just_completed.has(item):
+		_just_completed.erase(item)
+		m.set_shader_parameter("flash", 1.0)
+		var tw = row.bar.create_tween()
+		tw.tween_method(func(v): m.set_shader_parameter("flash", v), 1.0, 0.0, 0.8).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 
 func set_collapsed(value: bool) -> void:
 	collapsed = value

@@ -109,6 +109,7 @@ DAMAGE_STEP = [5, 25, 38, 50, 62, 100]
 COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
 BASIC_TIER_MULT = [3, 1, 1, 1, 1, 1]  # basic-resource costs only (2026-10-20 playthrough: T1 x3)
 CAP_RARES = [1, 1, 2, 2, 2, 2]
+CAP_COST_MULT = 3.66 # capstone = ~3.6x the slot's normal cost (T1 compiling.overclock: 55 payloads + a rare -> 200 payloads)
 HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
 FIREWALL_STEP = [2, 3, 5, 6, 7, 12]
 
@@ -348,10 +349,7 @@ for group, slots in GROUPS.items():
                 rkey, cost_item = "tokens", "VM tokens (any skill)"
             else:
                 cost_item = item_fn(tier)
-            rare = ""
-            if stype == CAP:
-                gi = GROUP_ORDER.index(group) % 5
-                rare = TIER_RARES[tier-1][gi]
+            rare = "" # 2026-10-26: no rare items in upgrade costs; a capstone costs CAP_COST_MULT x the tier's main resource instead
             note=""
             if stype==CAP and isinstance(slot[1], list):
                 note = ""
@@ -371,6 +369,8 @@ for group, slots in GROUPS.items():
                 share = "/3" if rkey == "parsing" else ""
                 amt = (f"=MAX(1,ROUND({cs*BASIC_TIER_MULT[tier-1]}*Inputs!$B$4*Inputs!$B$5^(B{r_next}-1)*{rate}{share}*Inputs!$B$7"
                        f"*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))")
+            if stype == CAP and rkey != "tokens" and amt.endswith(",0))"):
+                amt = amt[:-4] + f"*{CAP_COST_MULT},0))"
             rare_amt = CAP_RARES[tier-1] if rare else ""
             base_n = slot[1] if not isinstance(slot[1], list) else slot[1][tier-1]
             pid = package_id(group, base_n)
@@ -461,7 +461,7 @@ notes = [
  "  • 1 Capstone / MAJOR release (gold): the x.0 standout for that tier.",
  "",
  "COSTS (draft)",
- "  • Track rows cost that tier's basic resource; Pointed rows cost that tier's cache; Capstone adds a tier rare item.",
+ "  • Track rows cost that tier's basic resource; Pointed rows cost that tier's cache; Capstone costs ~3.6x the main resource (no rare items).",
  "  • Amounts scale by tier (x1, x2.2, x4.5, x9, x18, x36) and by install index. Tune freely.",
  "",
  "HOW INSTALLS FEEL (planned, not in this sheet)",

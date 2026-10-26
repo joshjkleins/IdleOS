@@ -94,15 +94,15 @@ func list_specific_item(item: ItemData):
 	if item.hacking_mod_duration != 0 and item.hacking_mod_item: # mod items only ('compile -mod' is retired)
 		var hacking_mod_value = HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)
 		var hacking_mod_name = HackingMods.get_mod_name(item.hacking_mod_type)
-		var hacking_mod_display = "Hacking Mod\n"
-		hacking_mod_display += "├─ " + hacking_mod_name + " " + hacking_mod_value + "\n"
-		if item.hacking_mod_item:
-			hacking_mod_display += "└─ Manage this mod with the 'mod' command · lasts %d hacks\n\n" % HackingMods.mod_duration(item)
-		else:
-			var cost = Compiling.mod_fill_cost(item)
-			var parts = cost.keys().map(func(k): return "%s x%d" % [k.name, cost[k]])
-			hacking_mod_display += "├─ Per hack: " + " + ".join(parts) + "  [color=#666666](compile -mod=%s builds it one hack at a time)[/color]\n" % item.name.to_lower()
-			hacking_mod_display += "└─ Up to %d hacks  [color=#666666](%d with the Debug modifier)[/color]\n\n" % [Compiling.mod_cap(item), Compiling.mod_cap(item, true)]
+		# 2026-10-26: what it does in words (was just "<name> +10"), how long it lasts and what it costs
+		var mt = item.hacking_mod_type
+		var effect = HackingMods.EQUIP_INFO[mt][1] if HackingMods.EQUIP_INFO.has(mt) else "%s %s" % [hacking_mod_name, hacking_mod_value]
+		var bw = 0 if mt == HackingMods.MOD_TYPE.SQL_BOOST else HackingMods.EQUIP_BW_COST
+		var hacking_mod_display = "[color=#4ec9b0]HACKING MOD[/color]\n"
+		hacking_mod_display += "├─ Effect     %s\n" % effect
+		hacking_mod_display += "├─ Lasts      %d hacks once equipped\n" % HackingMods.mod_duration(item)
+		hacking_mod_display += "├─ Bandwidth  %s\n" % ("no extra cost" if bw == 0 else "+%d per SQL Injector attack while equipped" % bw)
+		hacking_mod_display += "└─ Equip      use '[color=#4ec994]mod[/color]' to manage Hacking mods\n\n"
 		text += hacking_mod_display
 	
 	if item.contained_items.size() > 0:
@@ -706,7 +706,7 @@ func used_in_text(item: ItemData) -> String:
 	if item.is_compilable_mod():
 		rows.append(["Hacking mod", "compile -mod=%s  [color=#666666](%s %s)[/color]" % [item.name.to_lower(), HackingMods.get_mod_name(item.hacking_mod_type), HackingMods.get_mod_value_text(item.hacking_mod_type, item.hacking_mod_value)]])
 	if t == "mod":
-		rows.append(["Hacking mod", "mod  [color=#666666](manage your mods)[/color]"])
+		rows.append(["Hacking", "equipped as a mod for your hacks"])
 	if t == "exploit":
 		rows.append(["During a hack", Exploits.use_cmd(item)])
 	if t == "combat":

@@ -744,3 +744,34 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
 - Terminal keeps 40 text blocks (was 10, ~200 lines): a full 'ls' kept losing its top.
 - Bug: Patient insurance data had id 49 (same as Prescription pad credentials), so its saves loaded as the other item. Now 50.
 - tools/review/savegame.json is the copy linked for Steam review (made before these changes; keep it as is for that build). tools/review/gensave.gd regenerates one.
+
+## Pass 8 notes (2026-10-26, cdd)
+- School: Vice Principal counter 6 -> 8; Principal firewall 16 -> 20; Superintendent firewall 18 -> 20, reboot 10 -> 5 s, counter 8 -> 14 every 4.0 s (counter speed 25).
+- Exploit costs: Proxy Hop 60, Firewall Crack 50, Packet Flood 80, Smoke Screen 80, Overcharge 50.
+- defrag -upload: +100% upload speed (half the time per item), was 20%.
+- Upgrades: no rare items in any cost. Capstones (slot 10) cost CAP_COST_MULT (3.66) x the slot's main resource (T1: 271 Logs, 200 School payload, 6 Superintendent caches ...). gen_upgrades.py + json costs regenerated.
+- 'ls <mod>': USED IN row reworded; HACKING MOD block shows effect, duration, bandwidth, equip commands.
+- AVAILABLE TO RUN header: location name, no T1/T2.
+- 'version' command (reads application/config/version in project.godot, now 0.1.3).
+- Fixes: offline Mod Phishing empty pool at boot (Phishing._ensure_mod_list), intel per-stat levels now load (Decoding load_data), offline intel shown in the download, offline download rows fill together, completed upload bars shader (shaders/upload_complete.gdshader), uploading rows first.
+
+## PLAN: skills, drivers, firmware (agreed 2026-10-26, not built yet; build slowly, UI/workflow first)
+- Minor processes lose their own level/XP/efficiency. Only main skills level (Mining, Parsing ...).
+  Each process gives skill XP (higher-tier processes give more).
+- Efficiency comes from the skill level: one curve per skill x a per-process multiplier
+  (e.g. Mining eff 50%: Logs x1.0 = 50%, Archives x0.5 = 25%). Chances need caps. apt upgrades are the other source.
+- Skill levels gate nothing else. Processes unlock with tiers (upload goal -> new location): each tier unlock brings
+  its chain (Mining/Cracking/Matching/Compiling tier process) + 1-3 utility processes, shown on a big tier-unlock screen.
+  Open: unlock table, incl. a few milestone unlocks inside School (tutorial done, first upload, Administrator ...).
+- DRIVERS (name agreed; not "modules": clashes with Kernel Modules / Modules singleton / hacking mods):
+  permanent per-skill items, live inside the skill (not in ls). Affect HACKING, themed by skill
+  (Cracking crits, Matching firewall, Phishing anonymity/spoofs, Parsing intel/counters, Decoding loot/charge,
+  Compiling SQL dmg/speed, Mining bandwidth/endurance). Hacking itself has no drivers.
+  - Slots: level 10, 30, 60 (3 per skill). Start with 5 drivers per skill (35 total). Some drivers locked behind
+    hard-mode targets (first win). Equip/unequip inside the skill = free respec ('driver' command, mirrors 'mod').
+  - Mastery = driver rank: equipped drivers rank up from that skill's XP. 3 ranks, rank 3 a bit bigger, no choice.
+- FIRMWARE: level 99 reward per skill (RuneScape/Melvor cape idea): strong passive for that skill's own production.
+- Themed targets so builds matter (Fortress / Swarm / Glass / Regenerator / Escalator ...), hard modes exaggerate.
+- Phases: 1 foundation (tier unlocks, skill-only levels, efficiency curve, tier-unlock screen) -> 2 drivers in Mining
+  only (slot, 2 drivers, UI) -> 3 ranks -> 4 all skills + hard-mode drops -> 5 themed targets -> 6 firmware ->
+  7 old saves (drain into VM tokens / mods / exploits) + new demo cut. Demo: later.

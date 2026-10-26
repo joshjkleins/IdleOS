@@ -731,8 +731,8 @@ func universal_commands(text):
 		"process -h":
 			add_line(ContextCommands.process_commands())
 			return true
-		"version", "v":
-			add_line(ContextCommands.get_build_version())
+		"version", "v", "ver", "--version", "-v":
+			add_line(ContextCommands.version_text())
 			return true
 		"ps":
 			if current_process_info == {}:
@@ -2919,6 +2919,8 @@ func _offline_welcome() -> void:
 		tail += "queued: %s\n" % ", ".join(r.staged.map(func(s): return "%s %s" % [_commas(s.amount), s.item.name]))
 	for u in r.uploaded:
 		tail += "uploaded: %s %s%s\n" % [_commas(u.amount), u.item.name, ("  [color=%s]· goal complete[/color]" % OFFLINE_C) if u.done else ""]
+	if r.has("intel"):
+		tail += "intel: [color=%s]%s +%d[/color]  [color=%s]now %s[/color]\n" % [OFFLINE_C, r.intel.target, r.intel.points, OFFLINE_DIM, _plain_bb(r.intel.text)]
 	for l in r.levels:
 		tail += "[color=%s]%s level %d -> %d[/color]%s\n" % [OFFLINE_C, l.skill, l.from, l.to,
 			("  [color=%s]+%d %s[/color]" % [OFFLINE_DIM, l.tokens, l.token.name]) if l.tokens > 0 and l.token else ""]
@@ -2948,6 +2950,11 @@ func _offline_welcome() -> void:
 		add_line("[color=%s]resuming '%s'[/color]" % [OFFLINE_DIM, r.resume.command])
 		update_context(int(r.resume.context))
 		_on_input_line_text_submitted(r.resume.command)
+
+static func _plain_bb(t: String) -> String:
+	var re = RegEx.new()
+	re.compile("\\[[^\\]]*\\]")
+	return re.sub(t, "", true)
 
 static func _commas(n: int) -> String:
 	var s = str(abs(n))

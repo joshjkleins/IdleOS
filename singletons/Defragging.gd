@@ -47,10 +47,10 @@ var UPLOAD = {
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#e0c068"),
 	"bonus time": 10,
-	"bonus upload speed": 0.2, # uploads take 20% less time
-	"bonus label": "-20% time",
-	"bonus text": "Uploads 20% faster",
-	"description": "Uploads are 20% faster.",
+	"bonus upload speed": 1.0, # +100% upload speed: each item takes half the time (2026-10-26: was 20%)
+	"bonus label": "x2 speed",
+	"bonus text": "Uploads 100% faster",
+	"description": "Uploads are 100% faster (each item takes half the time).",
 	"command": "defrag -upload",
 	"expires_at": 0,
 }
@@ -84,7 +84,7 @@ func get_vm_uptime_bonus() -> float:
 	return VM["bonus vm uptime"] if is_active(VM) else 0.0
 
 func get_upload_time_multiplier() -> float:
-	return 1.0 - UPLOAD["bonus upload speed"] if is_active(UPLOAD) else 1.0
+	return 1.0 / (1.0 + UPLOAD["bonus upload speed"]) if is_active(UPLOAD) else 1.0
 
 func get_heat_reduction() -> float:
 	return HEAT["bonus heat reduction"] if is_active(HEAT) else 0.0

@@ -812,10 +812,11 @@ func get_help() -> String:
 |                                                                     |
 | SETTINGS                                                            |
 |   settings                     Player settings menu                 |
-|   music                       Now playing · music next/off/on       |
+|   music                        Now playing · music next/off/on      |
 |                                                                     |
 | SYSTEM                                                              |
 |   date                         Show date and time                   |
+|   version                      Show the game version                |
 |   clear                        Clear terminal                       |
 |   system                       Show system information              |
 |   panel                        Collapse / expand the side panel     |
@@ -824,6 +825,15 @@ func get_help() -> String:
 |_____________________________________________________________________|
 """
 	return text
+
+## 'version': the build players are on. The number is Project Settings > Application > Config > Version
+## (application/config/version in project.godot): bump it with every Steam build.
+func version_text() -> String:
+	var v = str(ProjectSettings.get_setting("application/config/version", "dev"))
+	var t = "\n[color=#33ff33]IdleOS v%s[/color]\n" % v
+	t += "[color=#888888]save format %d  ·  Godot %s  ·  %s[/color]\n" % [SaveManager.SAVE_VERSION, Engine.get_version_info().string, OS.get_name()]
+	t += "[color=#666666]Include this in bug reports. If Steam hasn't updated the game yet, restart Steam.[/color]"
+	return t
 
 ## 'utility': the helper commands, in the same box as '-h'
 func utility_commands() -> String:
@@ -849,6 +859,7 @@ func utility_commands() -> String:
 		["history", "Commands you've typed"],
 		["clear", "Clear the terminal"],
 		["date / system", "Date and time / system info"],
+		["version", "The game version (handy for bug reports)"],
 		["panel", "Collapse / expand the side panel"],
 	]
 	var W = 96
@@ -1239,7 +1250,7 @@ To copy the discord link to your clipboard use 'discord -c'
 """
 
 func get_build_version() -> String:
-	return System.SKILL.version
+	return "IdleOS v" + str(ProjectSettings.get_setting("application/config/version", "dev"))
 
 func get_mod_command() -> String:
 	#if HackingMods.current_mods.is_empty():

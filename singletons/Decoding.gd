@@ -356,7 +356,12 @@ func load_data(data: Dictionary) -> void:
 	intel = {}
 	var saved_intel: Dictionary = data.get("intel", {})
 	for k in saved_intel:
-		intel[k] = {"amount": int(saved_intel[k].get("amount", 0)), "hacks": int(saved_intel[k].get("hacks", 0))}
+		# 2026-10-25: keeps the per-stat levels ("lv") and duration ("dur"). Load used to keep only the old
+		# amount/hacks fields, so every reload reset intel to -0% with the hacks still counted
+		var si: Dictionary = saved_intel[k]
+		var lv = si.get("lv", [0, 0, 0, 0])
+		var hacks = int(si.get("hacks", 0))
+		intel[k] = {"lv": [int(lv[0]), int(lv[1]), int(lv[2]), int(lv[3])], "dur": int(si.get("dur", hacks)), "hacks": hacks}
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 #region cache variants
