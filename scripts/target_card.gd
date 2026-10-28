@@ -10,6 +10,7 @@ const C_TEXT = HeaderCard.C_TEXT
 const C_LOCKED = HeaderCard.C_LOCKED
 const C_OK = Color("#4ec994")
 const C_HARD = Color("#ee4a3a")
+const C_DRV = Color("#ffc24a") # compromise / drivers
 const C_SECTION = Color(0.4, 0.46, 0.52, 1)
 const TIER_COLORS = [Color("#3d8a3d"), Color("#2aa198"), Color("#3B82F6"), Color("#c6a700"), Color("#d8743a"), Color("#d83a3a")]
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"]
@@ -57,21 +58,22 @@ func update_info(info) -> void:
 		return
 	modulate = Color.WHITE
 
-	# targets + hard mode
+	# targets + compromise (2026-10-28: replaced hard mode)
 	var targets: Array = info.get("targets", [])
-	var hard: Array = info.get("hard mode targets", [])
+	var loc = Compromise.location_key(info.name)
 	var row := HBoxContainer.new()
 	box.add_child(row)
 	var t = _label("%d targets" % targets.size(), 11, C_DIM)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
-	if hard.is_empty():
-		row.add_child(_label("hard mode: none yet", 11, C_LOCKED))
-	elif info.get("hard mode unlocked", false):
-		var open_hard = hard.filter(func(h): return h.get("unlocked", false)).size()
-		row.add_child(_label("hard mode: %d/%d open" % [open_hard, hard.size()], 11, C_HARD if open_hard > 0 else C_DIM))
+	if !Compromise.has_lineup(loc):
+		row.add_child(_label("compromise: later", 11, C_LOCKED))
+	elif Compromise.is_unlocked(loc):
+		var tier = Compromise.tier_of(loc)
+		var n = Compromise.tier_drivers(tier).size()
+		row.add_child(_label("drivers %d/%d" % [n - Compromise.drivers_left(tier).size(), n], 11, C_DRV))
 	else:
-		row.add_child(_label("hard mode: locked", 11, C_LOCKED))
+		row.add_child(_label("compromise: locked", 11, C_LOCKED))
 
 	# payload owned
 	var payload: ItemData = info.get("required payload")
@@ -124,8 +126,8 @@ func update_info(info) -> void:
 	cv.add_theme_constant_override("separation", 1)
 	cmd.add_child(cv)
 	cv.add_child(_label(info.get("command", "view " + info.name.to_lower()), 12, C_TEXT))
-	if !hard.is_empty():
-		cv.add_child(_label(info.get("hard mode command", ""), 11, C_HARD if info.get("hard mode unlocked", false) else C_LOCKED))
+	if Compromise.has_lineup(loc):
+		cv.add_child(_label("recon " + info.name.to_lower().replace(" ", "-"), 11, C_DRV if Compromise.is_unlocked(loc) else C_LOCKED))
 	box.add_child(cmd)
 
 #region helpers

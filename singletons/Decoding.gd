@@ -88,9 +88,10 @@ func note_rare_roll(cache: CacheData, got_rare: bool) -> void:
 func yield_multiplier() -> float:
 	return 1.0 + Upgrades.cur("decoding.yield")
 
-## Compression: more basic resources per decoded cache (stacks with Yield)
-func compression_multiplier() -> float:
-	return 1.0 + Upgrades.cur("decoding.compression")
+## Salvage Sweep: chance per cache to sweep up one extra Exploit or Hacking Mod of the cache's tier
+## (2026-10-28, replaced Compression; rolled in Exploits.roll_drops, so no Skim / Footprint)
+func salvage_sweep_chance() -> float:
+	return Upgrades.cur("decoding.salvage_sweep")
 
 ## Survey: half an amount (coin flip on odd amounts)
 static func survey_half(amount: int) -> int:
@@ -138,7 +139,8 @@ var CACHE = {
 	"efficiency": 0.05, # +5% basic resources at L1, +0.5% per level (2026-10-22: efficiency = more basics; rare is RARE_CHANCE)
 	"efficiency rate": 0.005,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.2,
 	"overclock speed": 0.05,
 	"overheat speed": 1.0,
@@ -170,7 +172,8 @@ var INTEL = {
 	"efficiency": 0.15,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 5,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 5, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.2,
 	"overclock speed": 0.1,
 	"overheat speed": 0.5,
@@ -201,7 +204,8 @@ var SKIM = {
 	"efficiency": 0.1,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.1, # seconds per byte revealed
 	"overclock speed": 0.05,
 	"overheat speed": 0.25,
@@ -230,7 +234,8 @@ var SALVAGE = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 10,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 10, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.2, # seconds per byte revealed
 	"overclock speed": 0.1,
 	"overheat speed": 0.5,
@@ -262,7 +267,8 @@ var DEEP = {
 	"rare bonus": 0.15, # Deep Scan: +15% rare chance on top of Cache's (2026-10-21; was x2)
 	"token cost": 1, # VM Decoding tokens per cache
 	"unlocked": false,
-	"unlock level": 40,
+	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 40, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.4, # seconds per byte revealed
 	"overclock speed": 0.2,
 	"overheat speed": 1.0,
@@ -359,9 +365,8 @@ func load_data(data: Dictionary) -> void:
 		# 2026-10-25: keeps the per-stat levels ("lv") and duration ("dur"). Load used to keep only the old
 		# amount/hacks fields, so every reload reset intel to -0% with the hacks still counted
 		var si: Dictionary = saved_intel[k]
-		var lv = si.get("lv", [0, 0, 0, 0])
 		var hacks = int(si.get("hacks", 0))
-		intel[k] = {"lv": [int(lv[0]), int(lv[1]), int(lv[2]), int(lv[3])], "dur": int(si.get("dur", hacks)), "hacks": hacks}
+		intel[k] = {"lv": _lv5(si.get("lv", [])), "dur": int(si.get("dur", hacks)), "hacks": hacks}
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
 
 #region cache variants
@@ -485,7 +490,8 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 ##   then +1 hack per point up to INTEL_MAX_HACKS (15, + Field Notes).
 ## Each hack attempt uses 1 hack of intel; when the last one is used the intel is spent (back to nothing).
 const INTEL_LINES = 5
-const INTEL_STATS = ["integrity", "firewall", "counter", "counter speed"]
+## 2026-10-28: 5th stat, "firewall reboot": the firewall stays down longer (+2% per step) instead of a stat going down
+const INTEL_STATS = ["integrity", "firewall", "counter", "counter speed", "firewall reboot"]
 const INTEL_STEP = 0.02
 const INTEL_MAX_STEPS = 5 # 10%
 const INTEL_MAX_HACKS = 15 # base; Field Notes adds +1 per tier installed (intel_max_hacks())
@@ -497,9 +503,16 @@ func intel_key(target: Dictionary) -> String:
 
 func get_intel(target: Dictionary) -> Dictionary:
 	var i: Dictionary = intel.get(intel_key(target), {})
-	var lv = i.get("lv", [0, 0, 0, 0])
 	var hacks = int(i.get("hacks", 0))
-	return {"lv": [int(lv[0]), int(lv[1]), int(lv[2]), int(lv[3])], "dur": int(i.get("dur", hacks)), "hacks": hacks}
+	return {"lv": _lv5(i.get("lv", [])), "dur": int(i.get("dur", hacks)), "hacks": hacks}
+
+## per-stat steps, one per INTEL_STATS. Saves from before the 5th stat (firewall reboot) get it at their lowest
+## level, so a round in progress stays a round in progress.
+static func _lv5(lv) -> Array:
+	var out = []
+	for k in INTEL_STATS.size():
+		out.append(int(lv[k]) if k < lv.size() else (int(Array(lv).min()) if lv.size() > 0 else 0))
+	return out
 
 ## stat -> share removed (0.0 .. 0.10)
 func intel_pcts(target: Dictionary) -> Dictionary:
@@ -524,7 +537,10 @@ func add_intel_point(target: Dictionary) -> void:
 	var i = get_intel(target)
 	var lo = i.lv.min()
 	if i.hacks <= 0:
-		i = {"lv": [1, 0, 0, 0], "dur": 1 + field_notes(), "hacks": 1 + field_notes()}
+		var fresh = []
+		for k in INTEL_STATS.size():
+			fresh.append(1 if k == 0 else 0)
+		i = {"lv": fresh, "dur": 1 + field_notes(), "hacks": 1 + field_notes()}
 	elif lo < i.lv.max():
 		i.lv[i.lv.find(lo)] += 1 # finish the round: next stat up to the same %
 	elif lo >= INTEL_MAX_STEPS:
@@ -554,10 +570,10 @@ func use_intel(target: Dictionary) -> Dictionary:
 	SaveManager.mark_dirty()
 	return out
 
-## "-4% integrity · -4% firewall · -2% counter · -2% counter speed"
+## "-4% integrity · -4% firewall · -2% counter · -2% counter speed · +2% firewall down time"
 func intel_effect_text(target: Dictionary) -> String:
 	var p = intel_pcts(target)
-	return " · ".join(INTEL_STATS.map(func(s): return "-%d%% %s" % [roundi(p[s] * 100), s]))
+	return " · ".join(INTEL_STATS.map(func(s): return ("+%d%% firewall down time" % roundi(p[s] * 100)) if s == "firewall reboot" else "-%d%% %s" % [roundi(p[s] * 100), s]))
 
 func intel_text(target: Dictionary) -> String:
 	var i = get_intel(target)
@@ -608,10 +624,10 @@ func intel_detail_text(target: Dictionary) -> String:
 	else:
 		out += "  current        %s\n" % intel_effect_text(target)
 		out += "  hacks left     %d  [color=#666666](max %d)[/color]\n" % [i.hacks, intel_max_hacks()]
-	out += "  target stats   integrity %s  ·  firewall %s  ·  counter %s  ·  counter speed %s\n" % [str(target.get("integrity", "-")), str(target.get("firewall", "-")), str(target.get("counter", "-")), str(target.get("counter speed", "-"))]
+	out += "  target stats   integrity %s  ·  firewall %s  ·  counter %s  ·  counter speed %s  ·  reboot %ss\n" % [str(target.get("integrity", "-")), str(target.get("firewall", "-")), str(target.get("counter", "-")), str(target.get("counter speed", "-")), str(target.get("firewall reboot", "-"))]
 	if i.hacks > 0:
-		out += "  next hack      integrity %d  ·  firewall %d  ·  counter %d  ·  counter speed %s\n" % [int(round(float(target.get("integrity", 0)) * (1.0 - p.integrity))), int(round(float(target.get("firewall", 0)) * (1.0 - p.firewall))), int(round(float(target.get("counter", 0)) * (1.0 - p.counter))), str(snappedf(float(target.get("counter speed", 0)) * (1.0 - p["counter speed"]), 0.1))]
-	out += "  [color=#666666]builds 2%% at a time, one stat per find, +1 hack each time all four match; at 10%% every find adds a hack (max %d)[/color]\n" % intel_max_hacks()
+		out += "  next hack      integrity %d  ·  firewall %d  ·  counter %d  ·  counter speed %s  ·  reboot %ss\n" % [int(round(float(target.get("integrity", 0)) * (1.0 - p.integrity))), int(round(float(target.get("firewall", 0)) * (1.0 - p.firewall))), int(round(float(target.get("counter", 0)) * (1.0 - p.counter))), str(snappedf(float(target.get("counter speed", 0)) * (1.0 - p["counter speed"]), 0.1)), str(snappedf(float(target.get("firewall reboot", 0)) * (1.0 + p["firewall reboot"]), 0.1))]
+	out += "  [color=#666666]builds 2%% at a time, one stat per find, +1 hack each time all five match; at 10%% every find adds a hack (max %d)[/color]\n" % intel_max_hacks()
 	out += "[color=#666666]gather more with: decode -intel=%s%s[/color]" % [target.name.to_lower().replace(" (hard)", "").replace(" ", "-"), " hard" if hard else ""]
 	return out
 
@@ -667,7 +683,7 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 	var rows = []
 	for e in cache.entries:
 		var r = _entry_range(cache, e)
-		var y = yield_multiplier() * compression_multiplier() * efficiency_basic_mult(process if !process.is_empty() else CACHE) if is_basic_item(e.item) else 1.0
+		var y = yield_multiplier() * efficiency_basic_mult(process if !process.is_empty() else CACHE) if is_basic_item(e.item) else 1.0
 		rows.append({"name": e.item.name, "min": int(ceil(r.x * y)), "max": int(ceil(r.y * y)), "chance": _entry_chance(cache, e), "rare": false})
 	if cache == Items.VM_CACHE:
 		return [{"name": "Random VM token (per line, %d lines)" % VM_CACHE_LINES, "min": VM_CACHE_MIN, "max": VM_CACHE_MAX, "chance": VM_CACHE_LINE_CHANCE, "rare": false}]
@@ -705,7 +721,7 @@ func roll_loot(cache: CacheData, process: Dictionary = {}, mod: String = "") -> 
 		process = CACHE
 	if cache == Items.VM_CACHE:
 		return roll_vm_cache()
-	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier() * compression_multiplier() * efficiency_basic_mult(process)
+	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier() * efficiency_basic_mult(process)
 	var loot = []
 	for e in cache.entries:
 		if randf() <= _entry_chance(cache, e):

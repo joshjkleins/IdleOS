@@ -17,6 +17,7 @@ enum HackingContext {
 }
 
 var current_context: HackingContext = HackingContext.TARGETS
+var recon_loc := "" # PERSONS context showing a compromise lineup ('recon school'), "" for a normal 'view'
 
 func _ready():
 	Signals.hacking_ended_signal.connect(hacking_ended)
@@ -57,6 +58,7 @@ func go_to_root() -> void:
 	visible = false
 	is_in_hacking_context = false
 	start_loading.emit()
+	recon_loc = ""
 	enemy_hacking_box.persons_to_targets()
 
 func _on_player_hacking_box_command_entered(text):
@@ -85,6 +87,13 @@ func _on_player_hacking_box_command_entered(text):
 	if (low == "unlock" or low.begins_with("unlock ")) and current_context != HackingContext.HACKING:
 		handle_unlock_command(low.trim_prefix("unlock").strip_edges())
 		return
+	# compromise: 'recon <location>' (lineup) and 'compromise -<location>' (start), outside a hack
+	if current_context != HackingContext.HACKING and (low == "recon" or low.begins_with("recon ")):
+		handle_recon_command(low.trim_prefix("recon").strip_edges())
+		return
+	if current_context != HackingContext.HACKING and (low == "compromise" or low.begins_with("compromise ")):
+		handle_compromise_command(low.trim_prefix("compromise").strip_edges())
+		return
 	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
@@ -104,6 +113,16 @@ func _on_player_hacking_box_command_entered(text):
 					_:
 						player_hacking_box.add_line("Command not found.")
 			HackingContext.PERSONS:
+				if text.begins_with("view"): # straight from one location's cards (or the recon lineup) to another view
+					recon_loc = ""
+					await enemy_hacking_box.persons_to_targets()
+					current_context = HackingContext.TARGETS
+					handle_view_command(text)
+					return
+				if text.begins_with("hack") and recon_loc != "":
+					var n = Stats.hacking_targets[recon_loc].name.to_lower()
+					player_hacking_box.add_line("This is the compromise lineup. Start it with [color=#4ec994]compromise -%s[/color], or 'view %s' for single hacks." % [n, n])
+					return
 				if text.begins_with("hack"):
 					handle_hack_command(text)
 					return
@@ -318,6 +337,7 @@ func handle_unlock_command(name: String) -> void:
 func handle_back_command():
 	match current_context:
 		HackingContext.PERSONS:
+			recon_loc = ""
 			await enemy_hacking_box.persons_to_targets()
 			current_context = HackingContext.TARGETS
 			hacking_help_commands()
@@ -334,9 +354,10 @@ func handle_view_command(text):
 	if !target.get("unlocked", false):
 		player_hacking_box.add_line("Location not unlocked.")
 		return
-	if text.contains("-hard") and !target.get("hard mode unlocked", false):
-		player_hacking_box.add_line("Hard mode for location not unlocked.")
+	if text.contains("-hard"): # 2026-10-28: hard mode was replaced by compromises
+		player_hacking_box.add_line("Hard mode was replaced by compromises: 'recon %s'." % str(target.get("name", "")).to_lower())
 		return
+	recon_loc = ""
 	var targets: Array = Stats.get_hacking_targets_by_command(text)
 	var location_name: String = str(target.get("name", "")) + (" - hard mode" if text.contains("-hard") else "")
 	if targets.is_empty():
@@ -350,6 +371,80 @@ func handle_view_command(text):
 		await enemy_hacking_box.select_target(location_name, targets)
 
 
+## 'recon <location>': the compromise lineup (numbered target cards with their compromise traits) + cost and rules
+func handle_recon_command(arg: String) -> void:
+	var loc = Compromise.location_key(arg)
+	if arg == "" or loc == "":
+		player_hacking_box.add_line("Usage: recon <location>  [color=#888888]e.g. recon school[/color]")
+		return
+	var info = Stats.hacking_targets[loc]
+	if !info.get("unlocked", false):
+		player_hacking_box.add_line("Location not unlocked.")
+		return
+	if !Compromise.has_lineup(loc):
+		player_hacking_box.add_line("No compromise at %s yet." % info.name)
+		return
+	if current_context == HackingContext.PERSONS:
+		await enemy_hacking_box.persons_to_targets()
+	recon_loc = loc
+	current_context = HackingContext.PERSONS
+	_shown_targets = []
+	hacking_help_commands()
+	await enemy_hacking_box.select_recon(info.name, Compromise.lineup(loc), _recon_text(loc))
+
+## cost, drivers left and rules under the recon cards
+func _recon_text(loc: String) -> String:
+	var name = Stats.hacking_targets[loc].name
+	var tier = Compromise.tier_of(loc)
+	var pay = Compromise.payload(loc)
+	var have = Inventory.get_amount(pay)
+	var left = Compromise.drivers_left(tier).size()
+	var total = Compromise.tier_drivers(tier).size()
+	var G = "#4ec994"; var D = "#888888"; var Y = "#ffc24a"; var R = "#e26d5a"
+	var t = "[color=%s]COMPROMISE[/color]  [color=%s]%s · %d targets in order: 1 → %d[/color]\n" % [Y, D, name, Compromise.LINEUPS[loc].size(), Compromise.LINEUPS[loc].size()]
+	if !Compromise.is_unlocked(loc):
+		t += "[color=%s]LOCKED[/color]  [color=%s]complete the %s upload goals to unlock it[/color]\n" % [R, D, name]
+	t += "[color=%s]cost[/color]  %d %s  [color=%s](you have %d)[/color]      " % [D, Compromise.cost(loc), pay.name, G if have >= Compromise.cost(loc) else R, have]
+	t += "[color=%s]prize[/color]  [color=%s]a random %s driver[/color]  [color=%s](%d of %d left)[/color]      " % [D, Y, name, D, left, total]
+	t += "[color=%s]start[/color]  [color=%s]compromise -%s[/color]\n\n" % [D, G, name.to_lower().replace(" ", "-")]
+	for k in Compromise.RULES.size():
+		var line = Compromise.RULES[k] % name if Compromise.RULES[k].contains("%s") else Compromise.RULES[k]
+		t += "[color=%s]·[/color] [color=#cccccc]%s[/color]\n" % [D, line]
+	t += "\n[color=%s]%s[/color]" % [Y, Compromise.RECOMMEND]
+	return t
+
+## 'compromise -<location>' (optionally with -overclock): pays the payloads and starts the six fights
+func handle_compromise_command(arg: String) -> void:
+	var tokens = Array(arg.split(" ", false))
+	var overclock = false
+	if "-overclock" in tokens:
+		tokens.erase("-overclock")
+		if !Upgrades.can_overclock(Hacking):
+			player_hacking_box.add_line_error("Overclocking for hacking not unlocked, continuing without overclock.")
+		elif !Stats.overheated:
+			overclock = true
+	var loc = Compromise.location_key(" ".join(tokens))
+	if tokens.is_empty() or loc == "":
+		player_hacking_box.add_line("Usage: compromise -<location>  [color=#888888]e.g. compromise -school ('recon school' shows the lineup)[/color]")
+		return
+	var problem = Compromise.start_problem(loc)
+	if problem != "":
+		player_hacking_box.add_line_error(problem)
+		return
+	# the lineup on screen first (also when started from the locations list)
+	if recon_loc != loc or current_context != HackingContext.PERSONS:
+		await handle_recon_command(Stats.hacking_targets[loc].name.to_lower())
+	Inventory.remove_resource(Compromise.payload(loc), Compromise.cost(loc))
+	SaveManager.save_game() # paid for good: quitting mid-run can't undo it
+	player_hacking_box.add_line("[color=#ffc24a]COMPROMISE STARTED[/color]  [color=#888888]%d %s spent · 'kill' forfeits the run[/color]" % [Compromise.cost(loc), Compromise.payload(loc).name])
+	toggle_hacking_accepted_input_text(false)
+	current_context = HackingContext.HACKING
+	hacking_help_commands()
+	Stats.current_anon = Stats.max_anon
+	var fights = Compromise.lineup(loc)
+	await enemy_hacking_box.select_person(fights[0], fights.size(), overclock, fights)
+	toggle_hacking_accepted_input_text(true)
+
 func hacking_ended():
 	Stats.overclocked = false # 2026-10-24: a hack's overclock ends with the hack (it stayed on in the main terminal after a win)
 	#enemy_hacking_box.end_hack()
@@ -357,6 +452,8 @@ func hacking_ended():
 	header_hacking_box.update_modifiers_ui()
 	current_context = HackingContext.PERSONS
 	hacking_help_commands()
+	if recon_loc != "": # payloads / drivers left changed
+		enemy_hacking_box._set_recon_info(_recon_text(recon_loc))
 	await enemy_hacking_box.hacking_to_persons()
 
 func message_from_hack_game(message: String):
@@ -389,12 +486,22 @@ func hacking_help_commands():
 		HackingContext.TARGETS:
 			player_hacking_box.add_line(format_command_list("[HACKING COMMANDS]", [
 				["view [location]", "List targets at location", "e.g. view school"],
+				["recon [location]", "A location's compromise: six targets back to back for a driver", "e.g. recon school"],
 				["unlock", "List locked targets and what they cost"],
 				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
 				["cd ..",            "Return to terminal root"],
 				["cd root",          "Return to terminal root from anywhere in hacking (or cd ~)"]
 			]))
 		HackingContext.PERSONS:
+			if recon_loc != "":
+				var n = Stats.hacking_targets[recon_loc].name.to_lower().replace(" ", "-")
+				player_hacking_box.add_line(format_command_list("COMPROMISE COMMANDS", [
+					["compromise -" + n, "Start the compromise (pays the payloads up front)", "e.g. compromise -%s -overclock" % n],
+					["view " + n, "The normal targets, for single hacks"],
+					["cd ..", "Return to locations directory"],
+					["cd root", "Return to terminal root (or cd ~)"]
+				]))
+				return
 			var recursive_unlocked = true # '-r' is always available
 
 			var commands = [
@@ -415,7 +522,7 @@ func hacking_help_commands():
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["[item name] -force", "Use an Exploit ('run' lists yours)."],
-					["kill", "Ends the run now (caches already breached are kept)."],
+					["kill", "Ends the run now (caches already breached are kept; a compromise is forfeited)."],
 					["kill -s", "Finish the current hack, then end the run (for -r / =N runs)."],
 					["overclock", "Doubles bandwidth regen (more heat per action)"],
 					["overclock -kill", "Stops overclocking ('overclock kill' works too)"],

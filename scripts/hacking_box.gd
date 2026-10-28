@@ -46,15 +46,16 @@ func select_target(location_name: String, targets: Array = []):
 	#update_box_title("IdleOS > Hacking > " + target.name)
 	#await _show_container(persons_container)
 
-func select_person(target: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
+func select_person(target: Dictionary = {}, hack_count: int = 1, overclock: bool = false, fights: Array = []):
 	#await _green_flash(target, persons_container)
 	await _hide_container(persons_container)
 	var loadout = {
 		"offensive": Items.SQL_INJECTOR,
 		"defensive": Items.PACKET_SPOOF
 	}
-	hacking_game.setup(target, loadout, hack_count, overclock)
-	update_box_title(rtl.text + " > " + target.name)
+	hacking_game.setup(target, loadout, hack_count, overclock, fights)
+	if fights.is_empty(): # a compromise keeps the lineup's title ("... > School compromise")
+		update_box_title(rtl.text + " > " + target.name)
 	await _show_container(hacking_game)
 	await hacking_game.prepare()
 	hacking_game.start_hack()
@@ -70,16 +71,20 @@ func can_hack_person(_target: Dictionary = {}):
 
 func persons_to_targets():
 	await _hide_container(persons_container)
+	if _recon_box != null:
+		_set_recon_info("")
 	remove_last_title_update()
 	await _show_container(targets_container)
 
 func hacking_to_persons():
+	var was_compromise = !hacking_game.compromise_fights.is_empty()
 	# the cards were drawn before the hack: redraw them so requirements (payloads 0/1) are current
 	for card in persons_container.get_children():
 		if card.has_method("update_info") and card.get("target") != null:
 			card.update_info(card.target)
 	await _hide_container(hacking_game)
-	remove_last_title_update()
+	if !was_compromise:
+		remove_last_title_update()
 	await _show_container(persons_container)
 
 func _hide_container(container):
@@ -114,8 +119,45 @@ func _red_flash(target, container):
 		if tar.target.name == target.name:
 			await tar.flash_red()
 
+## 'recon <location>': the compromise lineup as numbered cards, with the cost and rules under them
+var _recon_box: VBoxContainer = null
+func select_recon(location_name: String, fights: Array, info_text: String):
+	await _green_flash(location_name)
+	await _hide_container(targets_container)
+	_update_persons(fights)
+	_set_recon_info(info_text)
+	update_box_title("IdleOS > Hacking > " + location_name.capitalize() + " compromise")
+	await _show_container(persons_container)
+
+## the rules panel under the recon cards (the persons grid is moved into a VBox with it on first use)
+func _set_recon_info(info_text: String) -> void:
+	if _recon_box == null:
+		_recon_box = VBoxContainer.new()
+		_recon_box.add_theme_constant_override("separation", 10)
+		_recon_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var parent = persons_container.get_parent()
+		var idx = persons_container.get_index()
+		parent.remove_child(persons_container)
+		parent.add_child(_recon_box)
+		parent.move_child(_recon_box, idx)
+		_recon_box.add_child(persons_container)
+		var info := RichTextLabel.new()
+		info.name = "ReconInfo"
+		info.bbcode_enabled = true
+		info.fit_content = true
+		info.scroll_active = false
+		info.add_theme_font_size_override("normal_font_size", 12)
+		_recon_box.add_child(info)
+		# the rules show only with the cards (they fade out for a hack and back in after it)
+		persons_container.visibility_changed.connect(func(): info.visible = persons_container.visible and info.text != "")
+	var lbl: RichTextLabel = _recon_box.get_node("ReconInfo")
+	lbl.text = info_text
+	lbl.visible = info_text != "" and persons_container.visible
+
 #lists each person at specific location
 func _update_persons(targets: Array):
+	if _recon_box != null:
+		_set_recon_info("")
 	for child in persons_container.get_children():
 		child.queue_free()
 	

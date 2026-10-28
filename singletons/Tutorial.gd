@@ -243,7 +243,7 @@ var tutorial_tasks := {
 	TutorialEvent.EQUIP_FIRST_MOD: "The cache also held a Hacking Mod: a Handshake Exploit. Mods change how your hacks play, and each lasts a few hacks. List your mods, then equip it. Every equipped mod adds a little bandwidth to each attack, so you choose which ones are worth it.",
 	TutorialEvent.HACK_STUDENT_TWICE: "Back to Hacking, and this time hack the Student twice in a row. Watch your first hit, and the first after each firewall reboot. Anonymity carries over between the hacks of a run, so keep an eye on it. (The Hacking module needs the main terminal free: 'kill' anything still running first.)",
 	TutorialEvent.DECODE_2_CACHES: "Back at the main terminal, decode both new caches. 'decode -cache' works through them one at a time.",
-	TutorialEvent.UTILITY_COMMAND: "One last thing: 'utility' lists the helper commands. Pin a process to the top of the terminal with 'pin', bring the active process back to the bottom with 'focus', keep a live count of an item with 'track', look anything up with 'info', and more. As your skills level up, new processes unlock in each one: keep an eye out for them.",
+	TutorialEvent.UTILITY_COMMAND: "One last thing: 'utility' lists the helper commands. Pin a process to the top of the terminal with 'pin', bring the active process back to the bottom with 'focus', keep a live count of an item with 'track', look anything up with 'info', and more. Every new location you open with the upload goal brings a batch of new processes: keep an eye out for them.",
 	TutorialEvent.NAVIGATE_CRACKING: "Next up is Cracking. Go back up to the root with 'cd ..', then into Cracking. (Parsing keeps running in the background while you move around.)",
 	TutorialEvent.START_CRACKING: "This operating system can only run one process in the main terminal at a time, so kill the Parsing process if it's still running with 'kill'. Then run the Password Cracking process to turn your Encrypted Passwords into something usable.",
 }
@@ -332,7 +332,7 @@ func complete_event(event: TutorialEvent) -> void:
 		message += "Congrats on completing the tutorial!\n"
 		message += "\nFrom here, you're on your own. Work through every location: breach its targets, upload what it asks for, and keep upgrading this OS.\n[color=#33ff33]Do not let us down.[/color]"
 		message += "\n\nType 'hint' any time for what to run next, 'flow' for the whole loop, and keep an eye on AVAILABLE TO RUN in the side panel. Hacking is the fastest way to progress."
-		message += "\n\n'info <skill>' (ex. info cracking) shows every process a skill has and the command that runs it, and new ones unlock as the skill levels. Explore the Defragging skill ('cd defragging') for temporary system-wide bonuses."
+		message += "\n\n'info <skill>' (ex. info cracking) shows every process a skill has and the command that runs it. Each new location (upload goal) opens more of them, and leveling a skill makes all of its processes more efficient. Explore the Defragging skill ('cd defragging') for temporary system-wide bonuses."
 		message += "\n\nThoughts or ideas? Come hang out in the Discord: " + ContextCommands.DISCORD_LINK + "  ('discord -c' copies it)"
 	else:
 		var next_task := get_current_task()

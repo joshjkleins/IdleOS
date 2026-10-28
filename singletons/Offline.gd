@@ -21,6 +21,7 @@ const MATCH_PAUSE := 0.3         # cred_matching_terminal: pause between matches
 
 var session := {}   # from the save: {"saved_at": unix, "process": snapshot}
 var report := {}    # what compute() did ({} = nothing to show)
+var computing := false # true while compute() runs: level / rank notices stay out of the terminal (the download shows them)
 var _match_steps := -1
 
 func cap_seconds() -> float:
@@ -88,19 +89,22 @@ func compute() -> void:
 	var tiers_before = Uploads.completed_tiers.duplicate()
 	var levels_before = {}
 	var xp_before = {}
+	var drivers_before = Drivers.owned.duplicate() # equipped drivers earn skill XP offline too (Exp.add_xp)
 	for s in _skills():
 		levels_before[s.SKILL.name] = int(s.SKILL.level)
 		xp_before[s.SKILL.name] = int(s.SKILL.experience)
 	report = {"away": away, "secs": secs, "capped": away > cap_seconds(), "process": "", "resume": {},
 		"overheat": false, "notes": [], "gains": [], "spent": [], "uploaded": [], "staged": [], "levels": [], "ran": 0.0,
-		"tiers": [], "trap": -1.0, "xp": [], "lost": {}}
+		"tiers": [], "trap": -1.0, "xp": [], "lost": {}, "drivers": []}
 	if !snap.is_empty():
 		var skill = _skill(snap.skill)
 		var p = _find_process(skill, snap.process)
 		if skill and !p.is_empty():
 			report.process = "%s %s" % [skill.SKILL.name, p.name]
 			report.resume = {"context": int(snap.context), "command": str(snap.command)}
+			computing = true
 			report.ran = _run(skill, p, snap, secs)
+			computing = false
 	_run_uploads(secs)
 	Stats.system_tempature = Stats.MIN_TEMP # it cooled down while you were away
 	Stats.overheated = false
@@ -131,13 +135,21 @@ func compute() -> void:
 		var gained = int(s.SKILL.experience) - int(xp_before[s.SKILL.name])
 		if gained > 0:
 			report.xp.append({"skill": s.SKILL.name, "amount": gained})
+	for id in Drivers.owned:
+		var gained = int(Drivers.owned[id]) - int(drivers_before.get(id, 0))
+		if gained > 0:
+			var was = Drivers.owned[id]
+			Drivers.owned[id] = int(drivers_before.get(id, 0))
+			var r_from = Drivers.rank(id)
+			Drivers.owned[id] = was
+			report.drivers.append({"name": Drivers.DEFS[id].name, "skill": Drivers.DEFS[id].skill, "xp": gained, "from": r_from, "to": Drivers.rank(id)})
 	for t in Uploads.completed_tiers:
 		if not t in tiers_before:
 			report.tiers.append(int(t))
 	if Phishing.has_trap():
 		report.trap = Phishing.trap_progress() # the Trap fills on real time (offline too); collecting stays manual
 	report.gains.sort_custom(func(a, b): return a.amount > b.amount)
-	if report.gains.is_empty() and report.uploaded.is_empty() and report.staged.is_empty() and report.notes.is_empty() and report.trap < 0.0:
+	if report.gains.is_empty() and report.drivers.is_empty() and report.uploaded.is_empty() and report.staged.is_empty() and report.notes.is_empty() and report.trap < 0.0:
 		report.notes.append("nothing was running in the main terminal")
 	SaveManager.mark_dirty()
 

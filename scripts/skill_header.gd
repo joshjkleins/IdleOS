@@ -13,6 +13,8 @@ var row: HBoxContainer
 var root_cards := {}        # skill Node -> HeaderCard (root view, kept alive for intro + updates)
 var detail_cards: Array[HeaderCard] = [] # process cards in skill view (card.process = its dict)
 var main_card: HeaderCard   # skill view main card
+var driver_card: HeaderCard # skill view: the small DRIVERS card (skills that have drivers)
+const C_DRIVER = Color("#ffc24a")
 var current_skill: Node = null  # null = root view
 var _switch_tween: Tween
 var _view_token := 0
@@ -32,12 +34,21 @@ func _ready() -> void:
 	Exp.exp_updated_signal.connect(_on_process_xp)
 	SaveManager.save_loaded.connect(func(): _rebuild())
 	Upgrades.installed.connect(_on_upgrade_installed)
+	Drivers.changed.connect(_on_drivers_changed)
 	var tick := Timer.new()
 	tick.wait_time = 1.0
 	tick.autostart = true
 	tick.timeout.connect(_refresh_footers)
 	add_child(tick)
 	_build_root()
+
+func _on_drivers_changed() -> void:
+	if current_skill == null:
+		for skill in root_cards:
+			if skill != Defragging:
+				_fill_root_card(root_cards[skill])
+	else:
+		_fill_driver_card()
 
 #region view switching
 func update() -> void: # root view
@@ -103,6 +114,7 @@ func _clear_row() -> void:
 			c.queue_free()
 	detail_cards.clear()
 	main_card = null
+	driver_card = null
 #endregion
 
 #region root view
@@ -137,6 +149,8 @@ func _fill_root_card(card: HeaderCard) -> void:
 	card.bar.value = xp.progress
 	card.set_footer(card.left_label, _left_footer(skill, xp), Stats.has_bonus(skill))
 	card.right_label.text = Upgrades.get_skill_version(skill) # apt version (efficiency is per process: skill view)
+	card.level_label.text = "LV %d" % skill.SKILL.level
+	_pip_label(card).text = _driver_pips(skill)
 #endregion
 
 #region skill view
@@ -147,6 +161,15 @@ func _build_skill_detail(skill: Node) -> void:
 	main_card.build(skill.SKILL.color, true, 250.0)
 	row.add_child(main_card)
 	_fill_main_card()
+	# 2026-10-27: a small DRIVERS card next to the skill (slots, what's equipped)
+	driver_card = null
+	if Drivers.has_drivers(str(skill.SKILL.name)):
+		driver_card = HeaderCard.new()
+		driver_card.skill = skill
+		driver_card.build(C_DRIVER, false, 120.0)
+		driver_card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		row.add_child(driver_card)
+		_fill_driver_card()
 	for p in skill.minor_processes:
 		var card := HeaderCard.new()
 		card.skill = skill
@@ -167,20 +190,66 @@ func _fill_main_card() -> void:
 	main_card.left_label.text = ("MAX LEVEL" if xp.display == "MAX" else "%s xp" % xp.display.replace("/", " / "))
 	main_card.set_footer(main_card.right_label, Upgrades.get_skill_version(skill))
 
+## "▮▯": one per open driver slot (filled = equipped); "" when the skill has no slot open yet
+func _driver_pips(skill: Node) -> String:
+	var n = str(skill.SKILL.name)
+	if !Drivers.has_drivers(n) or Drivers.slots(n) == 0:
+		return ""
+	var on = Drivers.equipped.get(n, []).size()
+	return "▮".repeat(on) + "▯".repeat(Drivers.slots(n) - on)
+
+## a small gold label left of the level on a root card: the skill's driver slots
+func _pip_label(card: HeaderCard) -> Label:
+	if card.has_meta("pips"):
+		return card.get_meta("pips")
+	var l := Label.new()
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.add_theme_font_size_override("font_size", 10)
+	l.add_theme_color_override("font_color", C_DRIVER)
+	var top = card.level_label.get_parent()
+	top.add_child(l)
+	top.move_child(l, card.level_label.get_index())
+	card.set_meta("pips", l)
+	return l
+
+func _fill_driver_card() -> void:
+	if driver_card == null or driver_card.celebrating:
+		return
+	var n = str(driver_card.skill.SKILL.name)
+	driver_card.title_label.text = "Drivers"
+	# one long segment per open slot (2 when none is open yet): empty, equipped and filling toward its next
+	# rank, or solid at max rank (HeaderBar.segment_values)
+	driver_card.bar.gap = 4.0
+	var segs = []
+	var eq: Array = Drivers.equipped.get(n, [])
+	for i in max(1, Drivers.slots(n)) if Drivers.slots(n) > 0 else Drivers.SLOT_LEVELS.size():
+		segs.append(Drivers.rank_progress(eq[i]) if i < eq.size() else -1.0)
+	driver_card.bar.set_segment_values(segs)
+	if Drivers.slots(n) == 0:
+		driver_card.set_locked(true, "LOCKED · LV %d" % Drivers.SLOT_LEVELS[0])
+		return
+	driver_card.set_locked(false)
+	var list: Array = Drivers.equipped.get(n, [])
+	driver_card.level_label.text = _driver_pips(driver_card.skill)
+	driver_card.level_label.add_theme_color_override("font_color", C_DRIVER)
+	driver_card.left_label.text = ", ".join(list.map(func(id): return Drivers.DEFS[id].name)) if !list.is_empty() else ""
+	driver_card.right_label.text = ""
+
 func _fill_process_card(card: HeaderCard) -> void:
 	if card.celebrating:
 		return
 	var p = card.process
 	var skill = card.skill
 	card.title_label.text = str(p.name)
-	if skill.SKILL.level < p["unlock level"]:
-		card.set_locked(true, "LOCKED · LV %d" % p["unlock level"])
+	# 2026-10-26 (skill revamp): no process levels. Locked cards name the location they open with; open ones show
+	# the XP a cycle gives the skill and the efficiency (from the skill level)
+	if !p.get("unlocked", false):
+		card.set_locked(true, "LOCKED · " + Upgrades.tier_name(int(p.get("unlock tier", 1))).to_upper())
 		return
 	card.set_locked(false)
-	var xp = Exp.get_xp_display(p)
-	card.level_label.text = "LV %d" % p.level
-	card.bar.value = xp.progress
-	card.left_label.text = "MAX" if xp.display == "MAX" else "%d%%" % int(xp.progress * 100)
+	card.level_label.text = ""
+	card.bar.value = 0.0
+	card.left_label.text = "+%s xp" % _fmt_xp(float(p.get("experience per level", 0)))
 	card.right_label.text = _eff_text(_process_efficiency(skill, p))
 	card.set_active(_is_running(skill, p))
 
@@ -210,7 +279,7 @@ func _fill_defrag_detail() -> void:
 		var p = card.process
 		card.title_label.text = str(p.name)
 		if !p.get("unlocked", false):
-			card.set_locked(true, "LOCKED")
+			card.set_locked(true, "LOCKED · " + Upgrades.tier_name(int(p.get("unlock tier", 1))).to_upper())
 			continue
 		card.set_locked(false)
 		var active = Defragging.is_active(p)
@@ -246,6 +315,8 @@ func _on_xp_gained(skill: Node) -> void:
 		card.bar.animate_to(xp.progress)
 		card.level_label.text = "LV %d" % skill.SKILL.level
 		card.set_footer(card.left_label, _left_footer(skill, xp), Stats.has_bonus(skill))
+	if driver_card and driver_card.skill == skill:
+		_fill_driver_card() # equipped drivers fill toward their next rank
 	if main_card and main_card.skill == skill and !main_card.celebrating:
 		var xp2 = Exp.get_xp_display(skill.SKILL)
 		main_card.bar.animate_to(xp2.progress)
@@ -267,17 +338,14 @@ func _on_level_up(skill: Node) -> void:
 		mc.play_level_up("LV %d/%d" % [skill.SKILL.level, Exp.MAX_LEVEL], xp.progress)
 		for card in detail_cards: # newly unlocked processes
 			_fill_process_card(card)
+		_fill_driver_card() # a level can open a driver slot
 
 ## Refill a card the moment its level-up effect ends (one-shot).
 func _refill_when_done(card: HeaderCard, refill: Callable) -> void:
 	if !card.level_up_finished.is_connected(refill):
 		card.level_up_finished.connect(refill, CONNECT_ONE_SHOT)
 
-var _process_levels := {} # "skill|process" -> last seen level (to detect process level ups)
 func _on_process_xp(amount: int, process: Dictionary) -> void:
-	var key = str(process.get("command", process.name))
-	var prev = _process_levels.get(key, process.level)
-	_process_levels[key] = process.level
 	# the "+N xp" popup goes on the card of the skill that earned it: its main card in that skill's
 	# view, its root card in the root view (so several VMs light up their own skills)
 	var owner = _skill_of(process)
@@ -287,17 +355,8 @@ func _on_process_xp(amount: int, process: Dictionary) -> void:
 		root_cards[owner].show_gain(amount)
 	var card: HeaderCard = _card_for(process)
 	if card:
-		if card.celebrating:
-			pass
-		elif process.level > prev:
+		if !card.celebrating:
 			_fill_process_card(card)
-			_refill_when_done(card, func(): _fill_process_card(card))
-			card.play_level_up("LV %d" % process.level, Exp.get_xp_display(process).progress, false)
-		else:
-			var xp = Exp.get_xp_display(process)
-			card.bar.animate_to(xp.progress)
-			card.left_label.text = "MAX" if xp.display == "MAX" else "%d%%" % int(xp.progress * 100)
-			card.right_label.text = _eff_text(_process_efficiency(card.skill, process))
 
 ## Once a second: defrag timers/cooldowns and the running-process highlight.
 func _refresh_footers() -> void:
@@ -359,6 +418,9 @@ func _left_footer(skill: Node, xp: Dictionary) -> String:
 
 func _bonus_text(skill: Node) -> String:
 	return "DEFRAG " + Stats.get_bonus_time_text(skill) if Stats.has_bonus(skill) else ""
+
+static func _fmt_xp(v: float) -> String:
+	return ("%.1fk" % (v / 1000.0)).replace(".0k", "k") if v >= 1000.0 else str(int(round(v)))
 
 func _eff_text(eff: float) -> String:
 	if eff < 0.0:

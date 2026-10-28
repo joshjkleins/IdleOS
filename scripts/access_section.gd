@@ -1,7 +1,9 @@
 class_name AccessSection
 extends VBoxContainer
 ## Side panel ACCESS section: one row per location, one square per target.
-##   empty outline = locked · filled (tier color) = unlocked · gold = its hard mode has been beaten
+##   empty outline = locked · filled (tier color) = unlocked
+## then a 7-pip bar of that tier's drivers (from its compromise), gold per driver owned; the location name
+## turns gold once all 7 are collected (2026-10-28: replaced the gold "hard mode beaten" squares).
 ## Hover a square for the target and how to unlock it.
 
 const HEADER = Color(0.36, 0.42, 0.48, 1)
@@ -38,6 +40,7 @@ func _ready() -> void:
 	_summary.visible = false
 	add_child(_summary)
 	Stats.unlocks_changed.connect(_rebuild)
+	Drivers.changed.connect(_rebuild)
 	SaveManager.save_loaded.connect(_rebuild)
 	_rebuild()
 
@@ -58,7 +61,6 @@ func _rebuild() -> void:
 		name_label.clip_text = true
 		row.add_child(name_label)
 		var targets: Array = l.get("targets", [])
-		var hard: Array = l.get("hard mode targets", [])
 		for k in targets.size():
 			var t = targets[k]
 			total += 1
@@ -66,22 +68,24 @@ func _rebuild() -> void:
 			if t.get("unlocked", false):
 				unlocked += 1
 				state = "unlocked"
-				if k < hard.size() and Stats.get_wins(hard[k]) > 0:
-					state = "hard"
-			row.add_child(_square(state, color, t, hard[k] if k < hard.size() else {}))
+			row.add_child(_square(state, color, t, {}))
+		var tier = i + 1
+		var drv = Compromise.tier_drivers(tier)
+		if !drv.is_empty():
+			var got = drv.size() - Compromise.drivers_left(tier).size()
+			if got >= drv.size():
+				name_label.add_theme_color_override("font_color", GOLD)
+			row.add_child(_driver_bar(loc, got, drv.size()))
 		i += 1
 	_count.text = "%d/%d" % [unlocked, total]
-	# collapsed: one line, unlocked count per open location (+ hard modes beaten)
+	# collapsed: one line, unlocked count per open location (+ drivers collected)
 	var parts = []
-	var gold = 0
+	var gold = Drivers.owned.size()
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
-		for h in l.get("hard mode targets", []):
-			if Stats.get_wins(h) > 0:
-				gold += 1
 		if l.get("unlocked", false):
 			parts.append("%s %d/%d" % [loc.to_lower().split(" ")[0], l.targets.filter(func(t): return t.get("unlocked", false)).size(), l.targets.size()])
-	_summary.text = "  ·  ".join(parts) + ("  ·  %d hard" % gold if gold > 0 else "")
+	_summary.text = "  ·  ".join(parts) + ("  ·  %d drivers" % gold if gold > 0 else "")
 
 func set_collapsed(value: bool) -> void:
 	collapsed = value
@@ -107,6 +111,24 @@ func _square(state: String, color: Color, target: Dictionary, hard: Dictionary) 
 			tip += "  ·  hard mode beaten"
 	c.tooltip_text = tip
 	c.draw.connect(_draw_square.bind(c, state, color))
+	return c
+
+## the tier's drivers: one pip each, gold when owned
+func _driver_bar(loc: String, got: int, n: int) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(10 + n * 4, SQUARE)
+	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	c.mouse_filter = Control.MOUSE_FILTER_PASS
+	var name = Stats.hacking_targets[loc].name
+	var tip = "%s drivers %d/%d" % [name, got, n]
+	if Compromise.has_lineup(loc):
+		tip += "  ·  " + ("compromise: 'recon %s'" % name.to_lower() if Compromise.is_unlocked(loc) else "compromise unlocks with the %s upload goals" % name)
+	else:
+		tip += "  ·  compromise coming later"
+	c.tooltip_text = tip
+	c.draw.connect(func():
+		for k in n:
+			c.draw_rect(Rect2(Vector2(8 + k * 4, 1), Vector2(3, SQUARE - 2)), GOLD if k < got else EMPTY))
 	return c
 
 func _draw_square(c: Control, state: String, color: Color) -> void:

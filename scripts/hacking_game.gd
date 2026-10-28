@@ -29,6 +29,7 @@ const C_CRIT = Color("#ffc24a")
 const C_OC = Color("#f59e0b")
 const C_HEAT = Color("#ff5a3c")
 const C_WIN = Color("#4ec994")
+const C_DRV = Color("#ffc24a") # drivers
 const C_EXP = Color("#c084fc") # one-time items / EXPLOIT charge
 
 const FW_BREAK_SLOW := 0.5   # enemy countermeasure speed multiplier while the firewall is down
@@ -137,6 +138,7 @@ var COMBAT_QUEUE = []
 
 var stop_hacking: bool = false
 var caches_gained: int = 0
+var vm_caches_gained: int = 0 # Salvage Rights (driver)
 
 # Number of hacks remaining. -1 means recursive/unlimited.
 var hacks_remaining: int = 1
@@ -172,6 +174,8 @@ var crits_left := 0           # guaranteed crits
 var _breach_hit := false
 var breach_crit := false
 var stop_after_win := false
+var compromise_fights: Array = [] # Compromise run: the six fights (Compromise.lineup), [] for a normal hack
+var compromise_xp := 0             # Hacking XP banked during a compromise (paid on the final breach)
 var fw_fresh := false        # Handshake Exploit: the next hit is the first against this firewall
 var _hack_sql := 0           # SQL Injectors / Packet Spoofs used this hack (Stats.record_usage on a win)
 var _hack_spoof := 0   # 'kill -s': finish the current hack, then end the run      # the first SQL hit after the firewall goes down is a guaranteed crit
@@ -198,6 +202,14 @@ var _exploit_lock := 0.0      # Exploits.LOCKOUT between uses
 var _poison_tick := 0.0
 var _bw_cap_warned := false
 var _exp_ready := false
+var cool_head_used := false   # Cool Head (driver): once per hack
+# drivers (2026-10-27): per-hack counters
+var drv_attacks := 0          # Hash Collision: attacks this run (a short hack would never reach the 10th)
+var drv_counters := 0         # Read Ahead / Countermeasure Log: countermeasures taken this hack
+var master_key_ready := false # Master Key: armed by a firewall reboot
+var _lure_chain := false      # Lure: the extra spoof doesn't chain again
+var _last_hit_time := 0.0     # Regenerator (trait): hack_time of the last hit that did integrity damage
+var driver_row: RichTextLabel # YOU card: equipped drivers
 var exp_row: Dictionary
 var _effect_chips := {}
 var _bw_warned := {}              # action -> true: the bandwidth wait is logged once per hack
@@ -209,6 +221,9 @@ func _ready():
 	Signals.end_hacking_safely_signal.connect(kill_hack_safely)
 	Signals.end_hacking_signal.connect(kill_hack)
 	Signals.manual_packet_spoof_signal.connect(manual_defense)
+	Signals.system_overheated_signal.connect(func(): _on_overheated.call_deferred()) # after Stats finishes setting the overheat
+	Drivers.changed.connect(_refresh_driver_row)
+	Drivers.ranked_up.connect(func(_id, _r): _refresh_driver_row())
 
 #region combat loop
 func _process(delta):
@@ -251,6 +266,9 @@ func _process(delta):
 	# Silent Entry: the first seconds of each hack go unnoticed
 	if Stats.current_anon > 0 and stun_left <= 0.0 and freeze_left <= 0.0 and hack_time >= _mod(HackingMods.MOD_TYPE.STEALTH_START):
 		counter_bar.value += _counter_rate() * delta
+	# Regenerator (trait): repairs while it isn't being hit (Freeze pauses it)
+	if _trait("regenerator") and _revealed and freeze_left <= 0.0 and integ_bar.value < integ_bar.max_value and hack_time - _last_hit_time >= float(_tv("regenerator", "regen_delay", 2.0)):
+		integ_bar.value = min(integ_bar.max_value, integ_bar.value + integ_bar.max_value * float(_tv("regenerator", "regen", 0.0)) * delta)
 
 	if firewall_down and freeze_left <= 0.0: # Freeze also holds the reboot timer
 		fw_down_left -= delta
@@ -293,7 +311,10 @@ func _counter_rate() -> float:
 	var fw_slow = max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW)) if firewall_down else 1.0
 	var scramble = float(Exploits.DEFS.trace_scrambler.mult) if scramble_left > 0 else 1.0 # Trace Scrambler
 	var jitter = 1.0 - min(0.5, jitter_stacks * _mod(HackingMods.MOD_TYPE.COUNTER_STACK_SLOW)) # Jitter
-	return COUNTER_SPEED * OVERHEAT_VALUE * fw_slow * scramble * jitter / (1.0 + _mod(HackingMods.MOD_TYPE.COUNTER_SLOW)) * (1.0 - _mod(HackingMods.MOD_TYPE.COUNTER_SLOW_PCT))
+	var read_ahead = 1.0 / (1.0 + Drivers.value("read_ahead")) if drv_counters == 0 else 1.0 # Read Ahead (driver): the first one only
+	if _trait("escalator"): # Escalator (trait): +5% every 5 s, up to +100%
+		read_ahead *= 1.0 + min(float(_tv("escalator", "escalate_max", 1.0)), float(_tv("escalator", "escalate", 0.0)) * floor(fight_time / float(_tv("escalator", "escalate_every", 5.0))))
+	return COUNTER_SPEED * OVERHEAT_VALUE * fw_slow * scramble * jitter * read_ahead / (1.0 + _mod(HackingMods.MOD_TYPE.COUNTER_SLOW)) * (1.0 - _mod(HackingMods.MOD_TYPE.COUNTER_SLOW_PCT))
 
 ## SQL bar speed multiplier: mods (attack speed, SQL Booster, Double Tap -30%, Breach Momentum) and Packet Flood
 func _attack_speed_mult() -> float:
@@ -305,11 +326,11 @@ func _attack_speed_mult() -> float:
 		m *= 1.0 + _mod(M.FW_BREAK_HASTE)
 	if flood_left > 0.0:
 		m *= float(Exploits.DEFS.packet_flood.mult)
-	return m
+	return m * (1.0 + Drivers.value("quick_compile")) # Quick Compile (driver)
 
 ## Packet Spoof bandwidth (Ghost Packet: free)
 func _spoof_cost() -> float:
-	return 0.0 if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_FREE) else float(DEFEND_BW_COST)
+	return 0.0 if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_FREE) else float(DEFEND_BW_COST) + float(_tv("throttle", "bandwidth", 0.0)) # Throttle (trait)
 
 func has_bandwidth(cost: float) -> bool:
 	return bw_freeze_left > 0.0 or Hacking.current_bandwidth >= cost
@@ -317,7 +338,7 @@ func has_bandwidth(cost: float) -> bool:
 ## SQL Injector bandwidth per attack: item + equipped mods (by tier), halved by Throttle Patch.
 ## Capped at max bandwidth so an attack can always eventually fire.
 func _sql_cost() -> float:
-	var c = float(ATTACK_BW_COST + HackingMods.get_bandwidth_cost())
+	var c = float(ATTACK_BW_COST + HackingMods.get_bandwidth_cost()) + float(_tv("throttle", "bandwidth", 0.0)) # Throttle (trait)
 	if throttle_left > 0.0:
 		c *= float(Exploits.DEFS.throttle_patch.mult)
 	if c > MAX_BANDWIDTH and MAX_BANDWIDTH > 0:
@@ -347,13 +368,20 @@ func _warn_bandwidth(action: String, cost: float) -> void:
 #endregion
 
 #region setup
-func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, overclock: bool = false):
+func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, overclock: bool = false, fights: Array = []):
+	compromise_fights = fights
+	compromise_xp = 0
+	if !fights.is_empty():
+		target = fights[0]
+		hack_count = fights.size()
 	current_target = target
 	caches_gained = 0
+	vm_caches_gained = 0
 	stop_hacking = false
 	hacks_remaining = hack_count
 	hack_total = hack_count
 	hack_index = 0
+	drv_attacks = 0
 	fight_time = 0.0
 	_state = ""
 	_bw_cap_warned = false
@@ -440,9 +468,41 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
 
+## Compromise: the next fight's target (the rest of the run carries over)
+func _load_target(target: Dictionary) -> void:
+	current_target = target
+	COUNTER_SPEED = target["counter speed"]
+	integ_bar.max_value = target.integrity
+	integ_bar.value = 0
+	firewall_bar.max_value = max(1, target.firewall)
+	firewall_bar.value = 0
+	requirements = target.requirements
+	COUNTER_AMOUNT = target["counter"]
+	COUNTER_HEAT = target["heat"]
+	EXP_AMOUNT = target["exp"]
+	INTEGRITY_AMOUNT = target["integrity"]
+	target_reward = target["loot"]
+	target_reward_amount = target.get("loot quantity", 1)
+	target_name = target["name"]
+	FIREWALL_AMOUNT = target["firewall"]
+	target_name_label.text = target_name
+	target_card.title.text = target_name.to_upper()
+
 func _update_sub_label() -> void:
 	var p = Stats.target_place(current_target)
 	var parts = []
+	if !compromise_fights.is_empty():
+		var n = compromise_fights.size()
+		var k = clamp(hack_index, 1, n)
+		parts.append("%s COMPROMISE" % str(p.get("location", "")).to_upper())
+		parts.append("%s %d/%d" % ["■".repeat(k - 1) + "▣" + "□".repeat(n - k), k, n])
+		if k < n:
+			var nx = compromise_fights[k]
+			parts.append("next: %s (%s)" % [nx.name, " + ".join(Stats.target_traits(nx).map(func(t): return Stats.TRAITS[t].name.capitalize()))])
+		else:
+			parts.append("final target")
+		sub_label.text = "  ·  ".join(parts)
+		return
 	if !p.is_empty():
 		parts.append(str(p.location).capitalize() + (" · hard mode" if p.hard else ""))
 	if hack_total == -1:
@@ -458,6 +518,8 @@ func attack():
 	var crit = 1.0
 	var forced_crit = false
 	_breach_hit = false
+	var hash_hit = Drivers.value("hash_collision") > 0.0 and (drv_attacks + 1) % int(max(1.0, Drivers.value("hash_collision"))) == 0
+	drv_attacks += 1
 	if crits_left > 0:
 		crits_left -= 1
 		crit = 2.0
@@ -467,6 +529,8 @@ func attack():
 		crit = 2.0
 		forced_crit = true
 		_breach_hit = true
+	elif hash_hit:
+		crit = 2.0 # Hash Collision (driver): every Nth attack
 	elif randf() <= (_get_total_efficiency() + crit_ramp) * (_mod(M.CRIT_CHANCE_MULT) if HackingMods.has_mod(M.CRIT_CHANCE_MULT) else 1.0):
 		crit = 2.0
 	# Hot Streak: non-crits build crit chance, a crit resets it
@@ -482,13 +546,49 @@ func attack():
 	# Double Tap: 2 SQL Injectors per attack (when you have them) for double damage
 	var double_tap = HackingMods.has_mod(M.DOUBLE_TAP) and Inventory.get_amount(offensive_item) >= 2
 	var bw_cost = _sql_cost()
-	var base_dmg = ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) + overcharge_dmg # Overcharge adds before the crit
+	# drivers (2026-10-27, Mining): Steady Flow at max bandwidth, Long Haul per breach this run, Stockpile fires 2,
+	# Deep Reserves skips the bandwidth
+	var drv_tags = []
+	var drv_mult = 1.0
+	if Drivers.value("steady_flow") > 0.0 and Hacking.current_bandwidth >= float(MAX_BANDWIDTH) - 0.01:
+		drv_mult += Drivers.value("steady_flow")
+		drv_tags.append("Steady Flow +%d%%" % roundi(Drivers.value("steady_flow") * 100))
+	var haul = mini(int(Drivers.DEFS.long_haul.max_stacks), max(0, hack_index - 1))
+	if Drivers.value("long_haul") > 0.0 and haul > 0:
+		drv_mult += Drivers.value("long_haul") * haul
+		drv_tags.append("Long Haul +%d%%" % roundi(Drivers.value("long_haul") * haul * 100))
+	var stockpile = !double_tap and Drivers.value("stockpile") > 0.0 and Inventory.get_amount(offensive_item) >= 2 and randf() < Drivers.value("stockpile")
+	if stockpile:
+		drv_tags.append("Stockpile x2")
+	var free_bw = Drivers.value("deep_reserves") > 0.0 and randf() < Drivers.value("deep_reserves")
+	if free_bw:
+		drv_tags.append("Deep Reserves: no bandwidth")
+	var fw_up = !firewall_down and firewall_bar.value > 0.0
+	for pair in [["optimized_build", true, "Optimized Build"], ["overclocked_build", Stats.overclocked, "Overclocked Build"],
+			["brute_match", fw_up, "Brute Match"], ["weak_point", _full_intel(), "Weak Point"]]:
+		if Drivers.value(pair[0]) > 0.0 and pair[1]:
+			drv_mult += Drivers.value(pair[0])
+			drv_tags.append("%s +%d%%" % [pair[2], roundi(Drivers.value(pair[0]) * 100)])
+	if crit > 1.0 and firewall_down and Drivers.value("rainbow_table") > 0.0: # Rainbow Table: crits while the firewall is down
+		drv_mult += Drivers.value("rainbow_table")
+		drv_tags.append("Rainbow Table +%d%%" % roundi(Drivers.value("rainbow_table") * 100))
+	if hash_hit and !forced_crit:
+		drv_tags.append("Hash Collision crit")
+	var master = master_key_ready and fw_up and Drivers.value("master_key") > 0.0 # Master Key: past the firewall
+	master_key_ready = false
+	if master:
+		drv_mult += Drivers.value("master_key")
+		drv_tags.append("Master Key: ignores firewall +%d%%" % roundi(Drivers.value("master_key") * 100))
+	var base_dmg = (ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) + overcharge_dmg) * drv_mult # Overcharge adds before the crit
 	var used_overcharge = overcharge_dmg
 	overcharge_dmg = 0.0
-	var raw_dmg = int(round(base_dmg * crit * (float(Exploits.DEFS.rootkit.mult) if rootkit_left > 0.0 else 1.0) * (2.0 if double_tap else 1.0)))
-	var fw_before = firewall_bar.value if !firewall_down else 0.0
+	var raw_dmg = int(round(base_dmg * crit * (float(Exploits.DEFS.rootkit.mult) if rootkit_left > 0.0 else 1.0) * (2.0 if double_tap or stockpile else 1.0)))
+	var fw_before = firewall_bar.value if !firewall_down and !master else 0.0
 	var blocked = min(fw_before, raw_dmg) # only the part the firewall actually absorbed
 	var actual_dmg = max(raw_dmg - fw_before, 0)
+	if fw_before > 0.0 and _trait("fortress"): # Fortress (trait): nothing gets through until the firewall is down
+		blocked = raw_dmg
+		actual_dmg = 0
 
 	var fw_hit = 0
 	var opener = 0.0
@@ -498,6 +598,10 @@ func attack():
 	if fw_before > 0:
 		fw_fresh = false
 		var fw_dmg = FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE) + _mod(M.FW_PCT_HIT) * fw_base + opener # Packet Shredder: % of max firewall
+		fw_dmg *= 1.0 + Drivers.value("credential_reuse") # Credential Reuse (driver)
+		if crit > 1.0 and Drivers.value("cracked_wide") > 0.0: # Cracked Wide (driver)
+			fw_dmg *= Drivers.value("cracked_wide")
+			drv_tags.append("Cracked Wide x%s fw" % str(Drivers.value("cracked_wide")).trim_suffix(".0"))
 		if stuff_left > 0: # Credential Stuffing
 			stuff_left -= 1
 			fw_dmg *= float(Exploits.DEFS.credential_stuffing.mult)
@@ -505,16 +609,25 @@ func attack():
 		fw_hit = int(min(fw_before, fw_dmg))
 		firewall_bar.value -= fw_dmg
 
-	_spend_bandwidth(bw_cost)
+	if !free_bw:
+		_spend_bandwidth(bw_cost)
+	if crit > 1.0 and Drivers.value("salted_hash") > 0.0: # Salted Hash (driver): crits refund bandwidth
+		var back = MAX_BANDWIDTH * Drivers.value("salted_hash")
+		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + back)
+		drv_tags.append("Salted Hash +%s bw" % _fmt_bw(back))
 	band_bar.value = Hacking.current_bandwidth
 	integ_bar.value -= actual_dmg
+	if actual_dmg > 0:
+		_last_hit_time = hack_time # Regenerator (trait)
 	Exploits.add_charge("crit" if crit > 1 else "attack")
 	add_heat(ATTACK_HEAT)
 	var recycled = Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE
 	if !recycled:
-		Inventory.remove_resource(offensive_item, 1)
-		_hack_sql += 1
-	if double_tap and !(Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE):
+		var n_sql = int(_tv("packet_loss", "items", 1)) # Packet Loss (trait): used 2 at a time
+		var used = min(n_sql, Inventory.get_amount(offensive_item))
+		Inventory.remove_resource(offensive_item, used)
+		_hack_sql += used
+	if (double_tap or stockpile) and !(Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE):
 		Inventory.remove_resource(offensive_item, 1)
 		_hack_sql += 1
 	if haste_attacks > 0:
@@ -572,6 +685,8 @@ func attack():
 		line += "  " + _c("(" + ", ".join(run_tags) + ")", C_EXP)
 	if recycled:
 		line += "  " + _c("(recycled)", C_EXP)
+	if !drv_tags.is_empty():
+		line += "  " + _c("(DRV " + ", ".join(drv_tags) + ")", C_DRV)
 	if _mod(M.COUNTER_RESET) > 0 and counter_bar.value > 0.0 and randf() < _mod(M.COUNTER_RESET):
 		counter_bar.value = 0.0 # Countermeasure Reset mod (payloads)
 		line += "  " + _c("(MOD countermeasures reset)", C_MOD)
@@ -615,16 +730,29 @@ func defense():
 	var boosted = spoof_boost_left > 0.0
 	if boosted:
 		amount = int(amount * float(Exploits.DEFS.booster_shot.mult))
+	var d_tags = []
+	if Drivers.value("social_proof") > 0.0: # Social Proof (driver)
+		amount = int(round(amount * (1.0 + Drivers.value("social_proof"))))
+		d_tags.append("Social Proof +%d%%" % roundi(Drivers.value("social_proof") * 100))
+	var free_spoof = _lure_chain or (Drivers.value("cheap_spoof") > 0.0 and randf() < Drivers.value("cheap_spoof"))
+	if free_spoof and !_lure_chain:
+		d_tags.append("Cheap Spoof: no bandwidth")
+	var kept_spoof = Drivers.value("burner_account") > 0.0 and randf() < Drivers.value("burner_account")
+	if kept_spoof:
+		d_tags.append("Burner Account: not used up")
 	var before = Stats.current_anon
 	Stats.current_anon = min(Stats.max_anon, Stats.current_anon + amount)
 	var healed = int(Stats.current_anon - before)
 	add_heat(DEFEND_HEAT)
-	_spend_bandwidth(_spoof_cost())
+	if !free_spoof:
+		_spend_bandwidth(_spoof_cost())
 	band_bar.value = Hacking.current_bandwidth
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("spoof")
-	Inventory.remove_resource(defensive_item, 1)
-	_hack_spoof += 1
+	if !kept_spoof:
+		var n_sp = min(int(_tv("packet_loss", "items", 1)), Inventory.get_amount(defensive_item)) # Packet Loss (trait)
+		Inventory.remove_resource(defensive_item, n_sp)
+		_hack_spoof += n_sp
 	Signals.update_hacking_header()
 
 	var line = "Packet Spoof -> you  %s  (%d/%d)" % [_c("+%d anonymity" % healed, C_YOU), Stats.current_anon, Stats.max_anon]
@@ -634,7 +762,11 @@ func defense():
 		line += "  " + _c("(Booster Shot x2)", C_EXP)
 	if healed < amount:
 		line += "  " + _c("%d over max" % (amount - healed), C_DIM)
-	line += "  " + _c("bw -%d" % DEFEND_BW_COST, C_DIM)
+	if _lure_chain:
+		d_tags.append("Lure: instant extra spoof")
+	if !d_tags.is_empty():
+		line += "  " + _c("(DRV " + ", ".join(d_tags) + ")", C_DRV)
+	line += "  " + _c("bw -%d" % (0 if free_spoof else DEFEND_BW_COST), C_DIM)
 	_log("DEF", C_SPOOF, line)
 	_float(anon_bar, "+%d" % healed, C_MOD if mod_restore > 0 else C_YOU, 15)
 	_flash(anon_bar, Color(1.6, 2.0, 1.6), 0.3)
@@ -650,6 +782,11 @@ func defense():
 			_log("DEF", C_INTEG, "out of Packet Spoofs")
 	defense_bar.value = 0.0
 	_refresh_panels()
+	# Lure (driver): sometimes a second spoof goes out right away (free bandwidth, it doesn't chain again)
+	if !_lure_chain and Drivers.value("lure") > 0.0 and randf() < Drivers.value("lure") and Inventory.get_amount(defensive_item) > 0 and Stats.current_anon < Stats.max_anon:
+		_lure_chain = true
+		defense()
+		_lure_chain = false
 
 func counter():
 	var M = HackingMods.MOD_TYPE
@@ -680,12 +817,18 @@ func counter():
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Decoy Traffic, %d left)" % decoys_left, C_MOD)])
 		_float(anon_bar, "DECOY", C_MOD, 15)
 		return
+	drv_counters += 1
+	if Drivers.value("cover_story") > 0.0 and randf() < Drivers.value("cover_story"): # Cover Story (driver)
+		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_DRV), _c("(DRV Cover Story)", C_DRV)])
+		_float(anon_bar, "MISS", C_DRV, 15)
+		return
 	if Upgrades.has("hacking.evasion") and randf() < EVASION_CHANCE:
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("EVADED", C_EXP), _c("(Evasion)", C_DIM)])
 		_float(anon_bar, "EVADED", C_EXP, 15)
 		return
 	var reduce = int(_mod(M.DAMAGE_REDUCTION))
-	var dmg = max(1, int(round((COUNTER_AMOUNT - reduce) * (1.0 - _mod(M.COUNTER_DMG_PCT))))) # min 1 damage; Hardened Shell -15%
+	var log_cut = Drivers.value("countermeasure_log") * min(int(Drivers.DEFS.countermeasure_log.max_stacks), drv_counters - 1) # Countermeasure Log (driver)
+	var dmg = max(1, int(round((COUNTER_AMOUNT - reduce) * (1.0 - _mod(M.COUNTER_DMG_PCT)) * (1.0 - log_cut)))) # min 1 damage; Hardened Shell -15%
 	Stats.current_anon = max(0.0, Stats.current_anon - dmg)
 	var failsafe = false
 	if Stats.current_anon <= 0.0 and HackingMods.has_mod(M.FAILSAFE) and !failsafe_used: # Failsafe: first trace of the hack
@@ -697,9 +840,21 @@ func counter():
 		dead_mans_used = true
 		switched = true
 		Stats.current_anon = 1.0 + ceil(Stats.max_anon * DEAD_MANS_RESTORE)
-	add_heat(COUNTER_HEAT)
+	if Stats.overclocked and current_target.has("overclock heat") and !HackingMods.has_mod(HackingMods.MOD_TYPE.COLD_BOOT): # per-target heat per counter while overclocked (Cold Boot: no overclock heat)
+		NEXT_HEAT_APPLICATION = 0 # replaces overclock's usual +2 (Superintendent: many small counters)
+		add_heat(float(current_target["overclock heat"]))
+	else:
+		add_heat(COUNTER_HEAT)
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("hit_taken")
+	var drained = MAX_BANDWIDTH * float(_tv("siphon", "drain", 0.0)) # Siphon (trait)
+	if drained > 0.0:
+		Hacking.current_bandwidth = max(0.0, Hacking.current_bandwidth - drained)
+		band_bar.value = Hacking.current_bandwidth
+	var sig = MAX_BANDWIDTH * Drivers.value("signal_boost") # Signal Boost (driver)
+	if sig > 0.0:
+		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + sig)
+		band_bar.value = Hacking.current_bandwidth
 	var reflected = int(round(dmg * _mod(M.COUNTER_REFLECT))) # Mirror
 	if reflected > 0 and Stats.current_anon > 0.0:
 		integ_bar.value -= reflected
@@ -709,8 +864,17 @@ func counter():
 			return
 
 	var line = "%s countermeasures -> you  %s  (%d/%d)" % [target_name, _c("-%d anonymity" % dmg, C_INTEG), Stats.current_anon, Stats.max_anon]
+	if drained > 0.0:
+		line += "  " + _c("(SIPHON -%s bw)" % _fmt_bw(drained), C_CTR)
 	if reduce > 0:
 		line += "  " + _c("(MOD -%d dmg)" % reduce, C_MOD)
+	var c_tags = []
+	if log_cut > 0.0:
+		c_tags.append("Countermeasure Log -%d%%" % roundi(log_cut * 100))
+	if sig > 0.0:
+		c_tags.append("Signal Boost +%s bw" % _fmt_bw(sig))
+	if !c_tags.is_empty():
+		line += "  " + _c("(DRV " + ", ".join(c_tags) + ")", C_DRV)
 	if !active_intel.is_empty():
 		line += "  " + _c("(INTEL -%d%% dmg)" % _ipct("counter"), C_INTEL)
 	if firewall_down:
@@ -749,8 +913,9 @@ func manual_defense():
 
 #region firewall break
 ## seconds the target's firewall stays down after a break (per target, "firewall reboot")
+## seconds the firewall stays down after a break: the target's (after traits), + intel's share (2026-10-28)
 func _fw_down_time() -> float:
-	return float(current_target.get("firewall reboot", FW_BREAK_TIME))
+	return float(Stats.trait_stats(current_target)["firewall reboot"]) * (1.0 + float(active_intel.get("pcts", {}).get("firewall reboot", 0.0)))
 
 func _break_firewall(earned: bool = true) -> void:
 	if earned:
@@ -758,14 +923,14 @@ func _break_firewall(earned: bool = true) -> void:
 		_float(exp_row.bar, "+%d charge" % int(Exploits.CHARGE_GAIN.firewall), C_EXP, 12, 18.0)
 	firewall_down = true
 	breach_crit = true
-	fw_down_left = _fw_down_time() + knock_bank # Port Knock used while it was up
+	fw_down_left = _fw_down_time() + knock_bank + Drivers.value("session_hijack") # Port Knock used while it was up; Session Hijack (driver)
 	knock_bank = 0.0
 	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_BREAK_HASTE): # Breach Momentum
 		haste_attacks = 3
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
 	firewall_bar.value = 0
-	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ds" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(_fw_down_time())])
+	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ss" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), _fmt(snappedf(_fw_down_time(), 0.1))])
 	var cascade = int(round(integ_base * _mod(HackingMods.MOD_TYPE.FW_BREAK_INTEGRITY))) # Cascade
 	if cascade > 0:
 		integ_bar.value -= cascade
@@ -773,7 +938,7 @@ func _break_firewall(earned: bool = true) -> void:
 		if integ_bar.value <= 0.0:
 			win()
 			return
-	_banner("FIREWALL DOWN", "enemy countermeasures -%d%% for %ds" % [roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), int(_fw_down_time())], C_FW, 0.9)
+	_banner("FIREWALL DOWN", "enemy countermeasures -%d%% for %ss" % [roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), _fmt(snappedf(_fw_down_time(), 0.1))], C_FW, 0.9)
 	_shake(target_card.panel, 7.0, 0.35)
 	_flash(target_card.panel, Color(1.9, 1.5, 1.0), 0.5)
 	_refresh_labels()
@@ -786,10 +951,14 @@ func _restore_firewall() -> void:
 		_log("FW", C_FW, "firewall bricked - it won't reboot this hack (countermeasures back to full speed)")
 		_refresh_panels()
 		return
-	_log("FW", C_FW, "firewall rebooting to %d - countermeasures back to full speed" % int(fw_start_value))
+	var reboot_to = fw_start_value
+	if Drivers.value("token_replay") > 0.0: # Token Replay (driver): reboots weaker
+		reboot_to = int(round(fw_start_value * Drivers.value("token_replay")))
+	_log("FW", C_FW, "firewall rebooting to %d - countermeasures back to full speed%s" % [int(reboot_to), ("  " + _c("(DRV Token Replay %d%%)" % roundi(Drivers.value("token_replay") * 100), C_DRV)) if reboot_to != fw_start_value else ""])
 	fw_fresh = true # a new firewall: Handshake Exploit hits it again
+	master_key_ready = true # Master Key (driver)
 	_fw_tween = create_tween()
-	_fw_tween.tween_property(firewall_bar, "value", fw_start_value, FW_REFILL_TIME).set_ease(Tween.EASE_OUT)
+	_fw_tween.tween_property(firewall_bar, "value", reboot_to, FW_REFILL_TIME).set_ease(Tween.EASE_OUT)
 	_flash(firewall_bar, Color(1.8, 1.6, 1.3), FW_REFILL_TIME)
 	_refresh_labels()
 	_refresh_panels()
@@ -804,7 +973,7 @@ func _heat_mult() -> float:
 	return Stats.tier_heat(HEAT_BY_TIER, t)
 
 func add_heat(amount: float):
-	var hm = _heat_mult()
+	var hm = _heat_mult() * float(_tv("heater", "heat")) # Heater (trait)
 	if Stats.overheated:
 		Stats.update_tempature(0.3 * hm)
 		return
@@ -855,10 +1024,14 @@ func lose():
 	_shake(you_card.panel, 9.0, 0.45)
 	update_status_label_badge("traced", C_INTEG)
 	var messages = "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
+	if !compromise_fights.is_empty():
+		messages += _compromise_forfeit_text("traced")
+		compromise_xp = 0
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]Items lost[/color]\n"
 		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
 	caches_gained = 0
+	vm_caches_gained = 0
 	remove_mod_duration()
 	Signals.update_hack_console(messages)
 	await get_tree().create_timer(1.5).timeout
@@ -872,6 +1045,9 @@ func win():
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
 	firewall_bar.value = 0
+	if !compromise_fights.is_empty():
+		_compromise_win()
+		return
 	Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT)
 	if hack_total >= 2 and hack_index >= 2:
 		Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT_TWICE) # a run of 2+, second win
@@ -885,6 +1061,12 @@ func win():
 	if HackingMods.has_mod(HackingMods.MOD_TYPE.EXTRA_CACHE) and randf() < _mod(HackingMods.MOD_TYPE.EXTRA_CACHE): # Data Hoarder
 		extra += 1
 		_log("MOD", C_MOD, "Data Hoarder: +1 %s" % target_reward.name)
+	if Drivers.value("bonus_cache") > 0.0 and randf() < Drivers.value("bonus_cache"): # Bonus Cache (driver)
+		extra += 1
+		_log("DRV", C_DRV, "Bonus Cache: +1 %s" % target_reward.name)
+	if Drivers.value("salvage_rights") > 0.0 and randf() < Drivers.value("salvage_rights"): # Salvage Rights (driver)
+		vm_caches_gained += 1 # banked with the target caches (lost with them if the run is traced)
+		_log("DRV", C_DRV, "Salvage Rights: +1 %s" % Items.VM_CACHE.name)
 	caches_gained += extra
 	reward_amount += extra
 	exfil_left = 0.0
@@ -921,6 +1103,69 @@ func win():
 	else:
 		_finish_hack()
 
+#region compromise
+## One compromise fight won: bank its XP, then the next target (everything else carries over) or the prize.
+## No caches and no breach count (Stats.record_win) for compromise fights.
+func _compromise_win() -> void:
+	compromise_xp += EXP_AMOUNT
+	remove_mod_duration() # 1 hack of mod duration per fight
+	update_bottom_row()
+	Signals.update_hacking_header()
+	var n = compromise_fights.size()
+	var k = hack_index
+	_log("WIN", C_WIN, "%s breached  %s  %s" % [target_name, _c("%d/%d down" % [k, n], C_WIN), _c("+%d xp banked" % EXP_AMOUNT, C_DIM)])
+	_flash(target_card.panel, Color(1.3, 1.9, 1.4), 0.7)
+	if k < n and !stop_hacking:
+		var nx = compromise_fights[k]
+		_banner("BREACHED", "%d/%d down  ·  next: %s" % [k, n, nx.name], C_WIN, 1.0)
+		update_status_label_badge("breached", C_WIN)
+		if Upgrades.has("hacking.second_wind") and Stats.current_anon < Stats.max_anon:
+			var before = Stats.current_anon
+			Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * SECOND_WIND_RESTORE))
+			anon_bar.value = Stats.current_anon
+			_log("SYS", C_SPOOF, "Second Wind: %s  (%d/%d)" % [_c("+%d anonymity" % int(Stats.current_anon - before), C_YOU), Stats.current_anon, Stats.max_anon])
+		_log_rule()
+		await get_tree().create_timer(0.8).timeout
+		if stop_hacking:
+			return
+		_load_target(nx)
+		reset()
+	else:
+		_compromise_complete()
+
+## Final breach: banked XP, a random driver of the tier, then back to the lineup.
+func _compromise_complete() -> void:
+	bandwidth_timer.stop()
+	is_hacking = false
+	stop_hacking = true
+	var loc = str(Stats.target_place(current_target).get("location", ""))
+	var tier = Compromise.tier_of(loc)
+	Exp.add_xp(Hacking, null, compromise_xp)
+	var id = Compromise.roll_driver(tier)
+	SaveManager.save_game()
+	var loc_name = Stats.hacking_targets[loc].name if Stats.hacking_targets.has(loc) else loc
+	_banner("COMPROMISED", ("driver acquired: " + Drivers.DEFS[id].name) if id != "" else loc_name + " fully compromised", C_DRV, 2.2)
+	_flash(self, Color(1.5, 1.4, 1.0), 0.9)
+	update_status_label_badge("compromised", C_DRV)
+	_log("WIN", C_DRV, "%s COMPROMISED  %s" % [loc_name.to_upper(), _c("+%d xp" % compromise_xp, C_DIM)])
+	var msg = "\n\n[color=#ffc24a]%s COMPROMISED[/color]  [color=#888888]all %d targets breached[/color]\n" % [loc_name.to_upper(), compromise_fights.size()]
+	msg += "[color=#4ec994]+%d Hacking XP[/color]\n" % compromise_xp
+	if id != "":
+		var d = Drivers.DEFS[id]
+		_log("DRV", C_DRV, "driver acquired: %s (%s)" % [d.name, d.skill])
+		msg += "\n[bgcolor=#2a2410][color=#ffc24a] DRIVER ACQUIRED [/color][/bgcolor]\n"
+		msg += "[color=#ffc24a]%s[/color]  [color=#888888]%s driver · %s · rank 1[/color]\n" % [d.name, d.skill, Uploads.get_location_name(tier)]
+		msg += "[color=#cccccc]%s[/color]\n" % Drivers.value_text(id, 1)
+		msg += "[color=#888888]Equip it in %s: 'cd %s' then 'driver'. %d of %d %s drivers left.[/color]\n" % [d.skill, d.skill.to_lower(), Compromise.drivers_left(tier).size(), Compromise.tier_drivers(tier).size(), loc_name]
+	Signals.update_hack_console(msg)
+	compromise_xp = 0
+	await get_tree().create_timer(3.0).timeout
+	Signals.hacking_ended()
+
+func _compromise_forfeit_text(why: String) -> String:
+	return "\n\n[color=#e24b4a]COMPROMISE FAILED[/color]  [color=#888888]%s at target %d/%d[/color]\n[color=#888888]Payloads and banked Hacking XP (%d) are lost. The next attempt starts from the first target.[/color]\n\n" % [why, max(1, hack_index), compromise_fights.size(), compromise_xp]
+#endregion
+
 ## Ends the session after the last win: bank the rewards and signal that hacking has ended.
 func _finish_hack():
 	bandwidth_timer.stop()
@@ -937,7 +1182,7 @@ func _finish_hack():
 
 func _notification(what: int) -> void:
 	# closing the window mid-session: keep targets already beaten (saved by SaveManager's close handler)
-	if what == NOTIFICATION_WM_CLOSE_REQUEST and caches_gained > 0:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and (caches_gained > 0 or vm_caches_gained > 0):
 		_grant_rewards()
 		SaveManager.save_game()
 
@@ -945,6 +1190,9 @@ func _grant_rewards():
 	if caches_gained > 0:
 		Inventory.add_resource(target_reward, caches_gained)
 		caches_gained = 0
+	if vm_caches_gained > 0:
+		Inventory.add_resource(Items.VM_CACHE, vm_caches_gained)
+		vm_caches_gained = 0
 
 func reset():
 	attack_bar.value = 0
@@ -958,6 +1206,14 @@ func reset():
 func start_hack():
 	is_hacking = true
 	fw_fresh = true
+	drv_counters = 0
+	master_key_ready = false
+	_last_hit_time = 0.0
+	if Drivers.value("head_start") > 0.0 and Exploits.charge < Drivers.value("head_start"): # Head Start
+		Exploits.set_charge(Drivers.value("head_start"))
+		_log("DRV", C_DRV, "Head Start: Exploit charge %d" % int(Exploits.charge))
+	if Drivers.value("warm_start") > 0.0: # Warm Start: first attack fires right away
+		attack_bar.value = attack_bar.max_value
 	crit_ramp = 0.0
 	jitter_stacks = 0
 	failsafe_used = false
@@ -987,7 +1243,10 @@ func start_hack():
 
 func kill_hack():
 	var kept = caches_gained
-	if kept > 0:
+	if !compromise_fights.is_empty():
+		Signals.update_hack_console(_compromise_forfeit_text("killed"))
+		compromise_xp = 0
+	elif kept > 0:
 		Signals.update_hack_console("\n\n[color=#e0c068]HACK KILLED[/color]\n[color=#4ec994]Walked away with " + target_reward.name + " x" + str(kept) + "[/color]\n\n")
 	else:
 		Signals.update_hack_console("\n\n[color=#e0c068]HACK KILLED[/color]  [color=#888888](nothing breached this run)[/color]\n\n")
@@ -1000,6 +1259,9 @@ func kill_hack():
 ## (a loss still loses the run's caches, like any trace).
 func kill_hack_safely():
 	if stop_after_win:
+		return
+	if !compromise_fights.is_empty():
+		Signals.update_hack_console("[color=#e0c068]'kill -s' doesn't apply to a compromise: there's nothing to bank until the last target. 'kill' forfeits the run.[/color]")
 		return
 	stop_after_win = true
 	_log("SYS", C_OC, "finishing this hack, then disconnecting  " + _c("('kill' stops now)", C_DIM))
@@ -1019,6 +1281,9 @@ func end():
 
 #region prepare (access, intel, mods)
 func _remove_required_resources():
+	if Drivers.value("payload_recycler") > 0.0 and randf() < Drivers.value("payload_recycler"): # Payload Recycler (driver)
+		_log("DRV", C_DRV, "Payload Recycler: %s x%d not spent" % [requirements.item.name, requirements.amount])
+		return
 	Inventory.remove_resource(requirements.item, requirements.amount)
 	SaveManager.save_game() # spent payloads are saved right away: quitting mid-hack can't undo them
 	_log("PAY", Compiling.SKILL.color, "%s x%d spent to gain access" % [requirements.item.name, requirements.amount])
@@ -1027,7 +1292,7 @@ func _has_requirements() -> bool:
 	return Inventory.get_amount(requirements.item) >= requirements.amount
 
 func prepare():
-	if !_has_requirements():
+	if compromise_fights.is_empty() and !_has_requirements():
 		Stats.overclocked = false
 		_log("SYS", C_INTEG, "unable to reach target - missing " + requirements.item.name)
 		update_status_label_badge("no payload", C_INTEG)
@@ -1044,6 +1309,8 @@ func prepare():
 	hack_index += 1
 	_update_sub_label()
 	_clear_effects()
+	Exploits.cost_mult = float(_tv("encrypted", "exploit_cost")) # Encrypted (trait)
+	_show_trait_chips()
 	_bw_warned = {}
 	_revealed = false
 	firewall_down = false
@@ -1064,7 +1331,8 @@ func prepare():
 	if stop_hacking:
 		return
 	update_bottom_row()
-	_remove_required_resources()
+	if compromise_fights.is_empty(): # a compromise paid its payloads up front
+		_remove_required_resources()
 	var intel = _apply_intel()
 	Signals.update_hacking_header()
 	await get_tree().create_timer(0.3).timeout
@@ -1124,9 +1392,19 @@ func _apply_intel() -> Dictionary:
 	INTEGRITY_AMOUNT = current_target.get("integrity", INTEGRITY_AMOUNT)
 	COUNTER_AMOUNT = current_target.get("counter", COUNTER_AMOUNT)
 	COUNTER_SPEED = current_target.get("counter speed", COUNTER_SPEED)
+	# traits that reshape the target's stats (Fortress, Swarm, Heavy Hitter)
+	if !Stats.target_traits(current_target).is_empty():
+		var ts = Stats.trait_stats(current_target)
+		FIREWALL_AMOUNT = int(ts.firewall)
+		INTEGRITY_AMOUNT = int(ts.integrity)
+		COUNTER_AMOUNT = int(ts.counter)
+		COUNTER_SPEED = float(ts["counter speed"])
 	fw_base = FIREWALL_AMOUNT
 	integ_base = INTEGRITY_AMOUNT
-	var i = Decoding.use_intel(current_target)
+	var reserve = Drivers.value("intel_reserve") > 0.0 and Decoding.get_intel(current_target).hacks > 0 and randf() < Drivers.value("intel_reserve")
+	var i = {"pcts": Decoding.intel_pcts(current_target), "hacks_left": Decoding.get_intel(current_target).hacks} if reserve else Decoding.use_intel(current_target)
+	if reserve:
+		_log("DRV", C_DRV, "Intel Reserve: this hack doesn't use up intel")
 	active_intel = i
 	if i.is_empty():
 		return {}
@@ -1153,8 +1431,8 @@ func _show_intel(i: Dictionary) -> void:
 	label.text = "INTEL"
 	chip_intel.visible = true
 	_flash(chip_intel, Color(2, 2, 2), 0.6)
-	_log("INTEL", C_INTEL, "Decoding intel weakens %s: integrity %s -> %s, firewall %s -> %s, counter %s -> %s dmg, counters %d%% slower  %s" % [target_name,
-		_fmt(i.integrity[0]), _fmt(i.integrity[1]), _fmt(i.firewall[0]), _fmt(i.firewall[1]), _fmt(i.counter[0]), _fmt(i.counter[1]), _ipct("counter speed"),
+	_log("INTEL", C_INTEL, "Decoding intel weakens %s: integrity %s -> %s, firewall %s -> %s, counter %s -> %s dmg, counters %d%% slower, firewall down %d%% longer  %s" % [target_name,
+		_fmt(i.integrity[0]), _fmt(i.integrity[1]), _fmt(i.firewall[0]), _fmt(i.firewall[1]), _fmt(i.counter[0]), _fmt(i.counter[1]), _ipct("counter speed"), _ipct("firewall reboot"),
 		_c("(%d hack%s of intel left)" % [left, "" if left == 1 else "s"], C_DIM)])
 	# drain both bars like a hit: max stays the real stat, current drops to the intel value
 	var tw = create_tween().set_parallel()
@@ -1321,6 +1599,8 @@ func _refresh_panels() -> void:
 	var fw_tags = []
 	if firewall_down:
 		fw_tags.append(_c("DOWN - reboot in %.1fs" % fw_down_left, C_FW))
+		if _ipct("firewall reboot") > 0:
+			fw_tags.append(_c("INTEL +%d%%" % _ipct("firewall reboot"), C_INTEL))
 	else:
 		if _ipct("firewall") > 0:
 			fw_tags.append(_c("INTEL -%d%%" % _ipct("firewall"), C_INTEL))
@@ -1333,6 +1613,11 @@ func _refresh_panels() -> void:
 		chip_firewall.get_meta("label").text = "FIREWALL DOWN %ds" % ceili(fw_down_left)
 
 func update_bottom_row():
+	if !compromise_fights.is_empty():
+		var loc = str(Stats.target_place(current_target).get("location", ""))
+		yield_label.text = "random %s driver" % (Stats.hacking_targets[loc].name if Stats.hacking_targets.has(loc) else "")
+		yield_hint.text = "on the final breach  ·  %d Hacking XP banked  ·  lost if anonymity hits 0" % compromise_xp
+		return
 	if reward_amount > 0:
 		yield_label.text = target_reward.name + " x" + str(reward_amount)
 		yield_hint.text = "lost if anonymity hits 0"
@@ -1363,7 +1648,7 @@ func is_anon_below_healing_threshold() -> bool:
 func _get_total_efficiency() -> float:
 	var base = Hacking.SKILL.efficiency
 	var mod_eff = _mod(HackingMods.MOD_TYPE.EFFICIENCY)
-	return snapped(base + mod_eff, 0.01)
+	return snapped(base + mod_eff + Drivers.value("brute_force"), 0.01) # Brute Force (driver)
 
 func remove_mod_duration():
 	HackingMods.remove_duration()
@@ -1402,6 +1687,9 @@ func use_exploit(item: ItemData, auto: bool = false) -> String:
 	var d = Exploits.get_def(item)
 	Exploits.set_charge(Exploits.charge - Exploits.cost(item))
 	var kit_saved = Upgrades.has("hacking.exploit_kit") and randf() < EXPLOIT_KIT_CHANCE
+	var refunded = !kit_saved and Drivers.value("refund") > 0.0 and randf() < Drivers.value("refund") # Refund (driver)
+	if refunded:
+		kit_saved = true
 	if !kit_saved:
 		Inventory.remove_resource(item, 1)
 	Signals.update_hacking_header()
@@ -1409,7 +1697,7 @@ func use_exploit(item: ItemData, auto: bool = false) -> String:
 	var result = _apply_exploit(item.exploit_id, d)
 	_log("RUN", C_EXP, "%s%s: %s  %s%s" % ["auto " if auto else "", item.name, result,
 		_c("(-%d charge · %d left)" % [int(Exploits.cost(item)), Inventory.get_amount(item)], C_DIM),
-		("  " + _c("(Exploit Kit: not consumed)", C_EXP)) if kit_saved else ""])
+		("  " + _c("(DRV Refund: not consumed)" if refunded else "(Exploit Kit: not consumed)", C_DRV if refunded else C_EXP)) if kit_saved else ""])
 	_banner(item.name.to_upper(), d.effect, C_EXP, 0.8)
 	_flash(exp_row.bar, Color(2, 1.6, 2.2), 0.5)
 	_refresh_panels()
@@ -1656,6 +1944,7 @@ func _clear_effects() -> void:
 	exfil_left = 0.0
 	bleeds.clear()
 	haste_attacks = 0
+	cool_head_used = false
 
 ## 'run auto <item>': fire it when it's affordable and would actually help
 func _try_auto_exploit() -> void:
@@ -1718,6 +2007,54 @@ func _auto_wants(id: String) -> bool:
 	return true
 
 ## EXPLOIT bar, its tag, and one header chip per active effect
+var _trait_chips: Array = []
+## header: one chip per trait of the current target
+func _show_trait_chips() -> void:
+	for c in _trait_chips:
+		c.queue_free()
+	_trait_chips.clear()
+	for tr in Stats.target_traits(current_target):
+		var c = _chip(header_card.head, Stats.TRAITS[tr].name, C_CTR)
+		c.tooltip_text = Stats.TRAITS[tr].text
+		header_card.head.move_child(c, 2)
+		_trait_chips.append(c)
+
+## target traits (Stats.TRAITS, 2026-10-27)
+func _trait(id: String) -> bool:
+	return Stats.has_trait(current_target, id)
+
+func _tv(id: String, key: String, default = 1.0):
+	return Stats.TRAITS[id].get(key, default) if _trait(id) else default
+
+## Weak Point (driver): this attempt has the full -10% intel on every stat
+func _full_intel() -> bool:
+	var p: Dictionary = active_intel.get("pcts", {})
+	if p.is_empty():
+		return false
+	var full = Decoding.INTEL_STEP * Decoding.INTEL_MAX_STEPS - 0.0001
+	for k in p:
+		if float(p[k]) < full:
+			return false
+	return true
+
+## YOU card: equipped drivers with their rank (hidden when none)
+func _refresh_driver_row() -> void:
+	if driver_row == null:
+		return
+	var ids = Drivers.all_equipped()
+	driver_row.visible = !ids.is_empty()
+	driver_row.text = "%s  %s" % [_c("DRIVERS", C_DIM), "  ".join(ids.map(func(id): return _c(Drivers.DEFS[id].name, C_DRV) + _c(" r%d" % Drivers.rank(id), C_DIM)))]
+
+## Cool Head (driver): the first overheat of a hack resets the temperature instead
+func _on_overheated() -> void:
+	if !is_hacking or cool_head_used or Drivers.value("cool_head") <= 0.0:
+		return
+	cool_head_used = true
+	Stats.system_tempature = Drivers.value("cool_head")
+	Stats.overheated = false
+	Signals.system_temp_updated(Stats.system_tempature)
+	_log("DRV", C_DRV, "Cool Head: overheat caught, temperature reset to %d°C" % int(Drivers.value("cool_head")))
+
 ## The EXPLOITS card: one cell per owned Exploit (name xN, charge cost, effect), rebuilt only when
 ## what's owned, what's affordable or the auto pick changes
 func _refresh_exploit_list() -> void:
@@ -1954,6 +2291,9 @@ func _build_ui() -> void:
 	band_row = _stat_row(you_card.body, "BANDWIDTH", C_BAND, 10)
 	exp_row = _stat_row(you_card.body, "EXPLOIT", C_EXP, 6)
 	exp_row.bar.max_value = Exploits.CHARGE_MAX
+	driver_row = _rtl(11)
+	you_card.body.add_child(driver_row)
+	_refresh_driver_row()
 	Exploits.charge_changed.connect(_refresh_exploit_ui)
 	integ_row = _stat_row(target_card.body, "INTEGRITY", C_INTEG, 14)
 	fw_row = _stat_row(target_card.body, "FIREWALL", C_FW, 10)
@@ -1983,7 +2323,7 @@ func _build_ui() -> void:
 	log_card.body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var legend = _rtl(11)
 	legend.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	legend.text = "[right]%s  %s  %s  %s  %s  %s  %s[/right]" % [_c("ATK", C_SQL), _c("DEF", C_SPOOF), _c("CTR", C_CTR), _c("FW", C_FW), _c("MOD", C_MOD), _c("INTEL", C_INTEL), _c("RUN", C_EXP)]
+	legend.text = "[right]%s  %s  %s  %s  %s  %s  %s  %s[/right]" % [_c("ATK", C_SQL), _c("DEF", C_SPOOF), _c("CTR", C_CTR), _c("FW", C_FW), _c("MOD", C_MOD), _c("INTEL", C_INTEL), _c("RUN", C_EXP), _c("DRV", C_DRV)]
 	log_card.head.add_child(legend)
 	log_rtl = RichTextLabel.new()
 	log_rtl.bbcode_enabled = true

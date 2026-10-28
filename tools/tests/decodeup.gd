@@ -53,7 +53,7 @@ func _run() -> void:
 	if part == "1":
 		print("L%d | base: cache eff %.4f deep rare %.4f skim %.3f intel %.3f salvage %.3f | max hacks %d" % [Decoding.CACHE.level, Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks()])
 		_all(99)
-		print("max:  cache eff %.4f deep rare %.4f skim %.3f intel %.3f salvage %.3f | max hacks %d | yield x%.2f compression x%.2f tracker %.4f/dry | skim rare %.3f" % [Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks(), Decoding.yield_multiplier(), Decoding.compression_multiplier(), Upgrades.cur("decoding.rare_tracker"), Decoding.get_rare_chance(Decoding.SKIM, Items.STUDENT_CACHE)])
+		print("max:  cache eff %.4f deep rare %.4f skim %.3f intel %.3f salvage %.3f | max hacks %d | yield x%.2f sweep %.2f tracker %.4f/dry | skim rare %.3f" % [Decoding.get_efficiency(Decoding.CACHE), Decoding.get_rare_chance(Decoding.DEEP), Decoding.get_efficiency(Decoding.SKIM), Decoding.get_efficiency(Decoding.INTEL), Decoding.get_efficiency(Decoding.SALVAGE), Decoding.intel_max_hacks(), Decoding.yield_multiplier(), Decoding.salvage_sweep_chance(), Upgrades.cur("decoding.rare_tracker"), Decoding.get_rare_chance(Decoding.SKIM, Items.STUDENT_CACHE)])
 		Decoding.first_cache_decoded = true
 		# tracker: count dry streaks and the chance after 10 dry Student caches
 		Decoding.rare_tracker = {"Student cache": 10}

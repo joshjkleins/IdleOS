@@ -55,7 +55,8 @@ var SCHOOL = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 3.0,
 	"overclock speed": 1.0,
 	"overheat speed": 9.0,

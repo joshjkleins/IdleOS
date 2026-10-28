@@ -55,7 +55,8 @@ var LOGS = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.4,
 	"overclock speed": 0.2,
 	"overheat speed": 1,
@@ -81,7 +82,8 @@ var ARCHIVES = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.9193,
 	"overclock speed": 0.4596,
 	"overheat speed": 2.2981,
@@ -107,7 +109,8 @@ var METADATA = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
-	"unlock level": 30,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 30, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 1.8501,
 	"overclock speed": 0.9251,
 	"overheat speed": 4.6253,
@@ -133,7 +136,8 @@ var COOKIES = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
-	"unlock level": 45,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 3.8609,
 	"overclock speed": 1.9305,
 	"overheat speed": 9.6523,
@@ -159,7 +163,8 @@ var REPOSITORIES = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
-	"unlock level": 60,
+	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 60, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 8.9642,
 	"overclock speed": 4.4821,
 	"overheat speed": 22.4105,
@@ -185,7 +190,8 @@ var DATABASES = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
-	"unlock level": 75,
+	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 75, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 20.9114,
 	"overclock speed": 10.4557,
 	"overheat speed": 52.2784,

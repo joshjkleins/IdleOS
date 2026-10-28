@@ -43,6 +43,7 @@ func save_game() -> void:
 		"mods": HackingMods.save_data(),
 		"uploads": Uploads.save_data(),
 		"exploits": Exploits.save_data(),
+		"drivers": Drivers.save_data(),
 		"offline": Offline.save_data(),
 	}
 	
@@ -106,7 +107,9 @@ func load_game() -> bool:
 	HackingMods.load_data(data.get("mods", {}))
 	Uploads.load_data(data.get("uploads", {}))
 	Exploits.load_data(data.get("exploits", {}))
+	Drivers.load_data(data.get("drivers", {}))
 	Offline.load_data(data.get("offline", {})) # applied by Offline.compute() once idle_os_2 is ready
+	Exp.refresh_all_process_unlocks() # 2026-10-26: unlocks follow the tiers, so after Stats (locations) has loaded
 	
 	print(data.get("mods"))
 	

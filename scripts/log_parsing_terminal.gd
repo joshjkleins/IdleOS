@@ -48,6 +48,7 @@ func set_parse_type(p_type: Dictionary, items_for_parsing: Array[ItemData], i_wi
 func begin():
 	begin_run()
 	_reset_logs()
+	_fit_log_area()
 	
 	while running:
 		if stop_requested:
@@ -71,6 +72,7 @@ func begin():
 		
 		while Inventory.get_amount(current_item) > 0 and running and !stop_requested:
 			_reset_logs()
+			_fit_log_area()
 			#main reason to split these loops is because of item removal. Cache item isn't removed/added until its looped multiple times, item loop is removed right away
 			if current_item is CacheData:
 				await parsing_cache_loop(current_item)
@@ -230,6 +232,14 @@ func _finished_log(heat_mode: Mode):
 	apply_heat(heat_mode)
 	#if !stop_requested:
 		#_reset_logs()
+
+## 2026-10-27: the log area holds every line of an item (10 + Rows upgrades). It was sized for 10, so an 11th
+## line grew the terminal for a moment and the reset shrank it again (the whole terminal dipped).
+const LOG_LINE_HEIGHT := 24.0
+func _fit_log_area() -> void:
+	var area = logs_container.get_parent() as Control
+	if area:
+		area.custom_minimum_size.y = LOG_LINE_HEIGHT * (MAX_LOG_LINES + int(Upgrades.cur("parsing.rows")))
 
 func _reset_logs():
 	for n in logs_container.get_children():

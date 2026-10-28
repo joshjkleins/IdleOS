@@ -7198,20 +7198,20 @@
    ]
   },
   {
-   "id": "decoding.compression",
+   "id": "decoding.salvage_sweep",
    "group": "Decoding",
-   "name": "Compression",
+   "name": "Salvage Sweep",
    "type": "pointed",
-   "effect": "More basic resources per decoded cache (stacks with Yield)",
+   "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
    "levels": [
     {
      "tier": 1,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "0 % more basics",
-     "after": "10 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "0 % sweep chance per cache",
+     "after": "2 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Logs",
@@ -7222,11 +7222,11 @@
     {
      "tier": 2,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "10 % more basics",
-     "after": "20 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "2 % sweep chance per cache",
+     "after": "4 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Archives",
@@ -7237,11 +7237,11 @@
     {
      "tier": 3,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "20 % more basics",
-     "after": "30 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "4 % sweep chance per cache",
+     "after": "6 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Metadata",
@@ -7252,11 +7252,11 @@
     {
      "tier": 4,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "30 % more basics",
-     "after": "40 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "6 % sweep chance per cache",
+     "after": "8 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Cookies",
@@ -7267,11 +7267,11 @@
     {
      "tier": 5,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "40 % more basics",
-     "after": "50 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "8 % sweep chance per cache",
+     "after": "10 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Repositories",
@@ -7282,11 +7282,11 @@
     {
      "tier": 6,
      "slot": 8,
-     "value": 0.1,
-     "label": "+10%",
-     "before": "50 % more basics",
-     "after": "60 % more basics",
-     "effect": "More basic resources per decoded cache (stacks with Yield)",
+     "value": 0.02,
+     "label": "+2%",
+     "before": "10 % sweep chance per cache",
+     "after": "12 % sweep chance per cache",
+     "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
        "item": "Databases",

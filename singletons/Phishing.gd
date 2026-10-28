@@ -71,7 +71,8 @@ var SPEAR = {
 	"efficiency": 0.3,
 	"efficiency rate": 0.003,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"cast time": 2.0,
 	"overclock cast time": 1.0,
 	"overheat cast time": 7.0,
@@ -112,7 +113,8 @@ var WHALING = {
 	"efficiency": 0.4,
 	"efficiency rate": 0.003,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"cast time": 6.0,
 	"overclock cast time": 3.0,
 	"overheat cast time": 15.0,
@@ -151,13 +153,14 @@ var SMISH = {
 	"display command": "phish -smish [target=<target>] [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -smish', 'description': 'Replies become intel on a random unlocked target that is not maxed' },
-		{ 'cmd': 'phish -smish target=student', 'description': 'Replies become intel on the Student (add "hard" for hard mode)' },
+		{ 'cmd': 'phish -smish target=student', 'description': 'Replies become intel on the Student' },
 		{ 'cmd': 'phish -smish bait=logs', 'description': 'Each blast uses 10 of a basic resource: reply chance up, every reply counts twice' },
 	],
 	"efficiency": 0.03,
 	"efficiency rate": 0.0005,
 	"unlocked": false,
-	"unlock level": 30,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 30, # efficiency grows from this skill level (its old unlock level)
 	"texts per line": 8,
 	"cast time": 10.0, # sending the whole blast
 	"overclock cast time": 5.0,
@@ -196,7 +199,8 @@ var TRAP = {
 	"efficiency": 0.15,
 	"efficiency rate": 0.0010204, # 25% at level 99
 	"unlocked": false,
-	"unlock level": 45,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
 	"cast time": 60.0, # setting the trap
 	"overclock cast time": 30.0,
 	"overheat cast time": 150.0,
@@ -236,7 +240,8 @@ var MOD = {
 	"efficiency": 0.015, # 1.5% bite chance at L1 (2026-10-23: was 1%, mods now last 5 hacks)
 	"efficiency rate": 0.0001,
 	"unlocked": false,
-	"unlock level": 5,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 5, # efficiency grows from this skill level (its old unlock level)
 	"cast time": 4.0,
 	"overclock cast time": 1.5,
 	"overheat cast time": 9.0,
@@ -465,7 +470,7 @@ func collect_trap() -> Array:
 ## One line for the terminal: "Trap 62% full · 17m left" / "Trap full: 'trap collect'"
 func trap_status_text() -> String:
 	if !has_trap():
-		return "No trap set. Use 'phish -trap' in Phishing to set one." if TRAP.unlocked else "Trap unlocks at Phishing level %d." % TRAP["unlock level"]
+		return "No trap set. Use 'phish -trap' in Phishing to set one." if TRAP.unlocked else "Trap opens with %s access." % Upgrades.tier_name(int(TRAP.get("unlock tier", 1)))
 	var p = trap_progress()
 	var baited = " (baited)" if trap.get("baited", false) else ""
 	if p >= 1.0:

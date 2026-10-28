@@ -30,7 +30,7 @@ var hacking_targets = {
 		"hard mode command": "view school -hard",
 		"name": "School",
 		"unlocked": true,
-		"hard mode unlocked": true,
+		"hard mode unlocked": false, # retired 2026-10-28
 		"difficulty": "Easy",
 		"required payload": Items.SCHOOL_PAYLOAD,
 		"targets": [
@@ -72,11 +72,12 @@ var hacking_targets = {
 				"requirements": { "item": Items.SCHOOL_PAYLOAD, "amount": 3 },
 				"heat": 1.1,
 				"exp": 753,
-				"integrity": 301,
+				"integrity": 180,
 				"firewall": 22,
 				"counter": 8,
 				"counter speed": 16.0,
-				"firewall reboot": 14.0, # seconds the firewall stays down after a break
+				"firewall reboot": 15.5, # fortress halves it to 7.75s: one SQL hit at ~4.1s attacks, two with full intel (8.5s) # seconds the firewall stays down after a break
+				"traits": ["fortress"],
 				"loot": Items.VICE_PRINCIPAL_CACHE
 			},
 			{
@@ -89,9 +90,10 @@ var hacking_targets = {
 				"exp": 1005,
 				"integrity": 348,
 				"firewall": 20,
-				"counter": 6,
+				"counter": 8, # x5 Heavy = 40 dmg
 				"counter speed": 30.0,
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
+				"traits": ["heavy"],
 				"loot": Items.PRINCIPAL_CACHE
 			},
 			{
@@ -100,19 +102,21 @@ var hacking_targets = {
 				"unlocked": true,
 				"command": "hack superintendent",
 				"requirements": {"item": Items.SCHOOL_PAYLOAD, "amount": 5},
-				"heat": 1.7,
+				"heat": 0.5, # per countermeasure (Swarm: they come every 1.0s)
+				"overclock heat": 0.8, # per countermeasure while overclocked (instead of heat + overclock's +2)
 				"exp": 1252,
-				"integrity": 445,
-				"firewall": 20,
-				"counter": 14,
-				"counter speed": 25.0,
-				"firewall reboot": 5.0, # seconds the firewall stays down after a break
+				"integrity": 355,
+				"firewall": 25,
+				"counter": 15, # x0.2 Swarm = 3 dmg
+				"counter speed": 33.4, # x3 Swarm = every 1.0s
+				"firewall reboot": 12.0, # seconds the firewall stays down after a break
+				"traits": ["swarm"],
 				"loot": Items.SUPERINTENDENT_CACHE
 			}
 		],
 		"hard mode targets": [
 			{ #generally hard - requires 2 mods to beat (hopefully) and manually spoof and overclock management
-				"special": "Tough all-rounder: expect to need 2 Hacking Mods, manual Packet Spoofs and careful overclock management.",
+				"special": "Tough all-rounder.",
 				"name": "Student (Hard)",
 				"difficulty": "Hard",
 				"unlocked": true,
@@ -128,7 +132,7 @@ var hacking_targets = {
 				"loot quantity": 50,
 			},
 			{ #insane amount of integrity, needs speed + dmg
-				"special": "Massive integrity. Bring attack speed and damage.",
+				"special": "Massive integrity.",
 				"name": "Administrator",
 				"difficulty": "Hard",
 				"unlocked": true,
@@ -144,7 +148,7 @@ var hacking_targets = {
 				"loot quantity": 50,
 			},
 			{ #huge firewall, needs firewall reduction + damage
-				"special": "Huge firewall. Bring firewall reduction and damage.",
+				"special": "Huge firewall.",
 				"name": "Vice Principal",
 				"difficulty": "Hard",
 				"unlocked": true,
@@ -160,7 +164,7 @@ var hacking_targets = {
 				"loot quantity": 50,
 			},
 			{ #hits slow and hard, needs restore to win
-				"special": "Hits slow but hard. You will need restores (Packet Spoofs) to outlast it.",
+				"special": "Slow, crushing countermeasures.",
 				"name": "Principal",
 				"difficulty": "Hard",
 				"unlocked": true,
@@ -176,7 +180,7 @@ var hacking_targets = {
 				"loot quantity": 50,
 			},
 			{ #hits fast and weak, damage reduction + restore
-				"special": "Hits fast but weak. Damage reduction and restores win this one.",
+				"special": "Constant, light countermeasures.",
 				"name": "Superintendent",
 				"difficulty": "Hard",
 				"unlocked": true,
@@ -231,6 +235,7 @@ var hacking_targets = {
 				"counter": 18,
 				"counter speed": 16.0,
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
+				"traits": ["throttle"],
 				"loot": Items.PARALEGAL_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -246,6 +251,7 @@ var hacking_targets = {
 				"counter": 22,
 				"counter speed": 16.0,
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
+				"traits": ["fortress"],
 				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -261,6 +267,7 @@ var hacking_targets = {
 				"counter": 8,
 				"counter speed": 30.0,
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
+				"traits": ["regenerator"],
 				"loot": Items.LAWYER_CACHE
 			},
 			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
@@ -271,11 +278,12 @@ var hacking_targets = {
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 5},
 				"heat": 1.7,
 				"exp": 3222,
-				"integrity": 1113,
+				"integrity": 880,
 				"firewall": 56,
-				"counter": 21,
+				"counter": 17,
 				"counter speed": 20.0,
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"traits": ["escalator"],
 				"loot": Items.PARTNER_CACHE
 			}
 		],
@@ -868,6 +876,52 @@ func remove_vm_count(amount: int = 1):
 ##  - hard mode is always open, but each hard target unlocks after beating its normal version HARD_UNLOCK_WINS times
 const DEV_UNLOCK_ALL_TARGETS := false # TESTING: open every location and target
 const HARD_UNLOCK_WINS = 5
+
+## 2026-10-27 (phase 5): target traits. A rule on top of a target's stats, shown as a tag + a short
+## description on its card (no solution hints: players work out the answer). hacking_game applies them.
+const TRAITS = {
+	"fortress":    {"name": "FORTRESS", "text": "Huge firewall that reboots fast. Nothing gets through until it's down",
+		"firewall": 1.6, "integrity": 0.7, "reboot": 0.5, "no_leak": true}, # no damage reaches integrity while the firewall is up
+	"regenerator": {"name": "REGENERATOR", "text": "Repairs its integrity when it isn't being hit",
+		"regen": 0.02, "regen_delay": 2.0},            # share of max integrity per second, after this long unhit
+	"swarm":       {"name": "SWARM", "text": "Constant, light countermeasures",
+		"counter_speed": 3.0, "counter": 0.2},
+	"heavy":       {"name": "HEAVY HITTER", "text": "Slow, crushing countermeasures",
+		"counter_speed": 0.3, "counter": 5.0},
+	"escalator":   {"name": "ESCALATOR", "text": "Countermeasures speed up the longer you keep hacking it",
+		"escalate": 0.04, "escalate_every": 5.0, "escalate_max": 1.5}, # over the whole run (fight time), not per hack
+	"siphon":      {"name": "SIPHON", "text": "Countermeasures drain your bandwidth",
+		"drain": 1.0},                                  # share of max bandwidth per countermeasure (1.0 = empties it)
+	"heater":      {"name": "HEATER", "text": "Runs your system hot",
+		"heat": 2.5},
+	"throttle":    {"name": "THROTTLE", "text": "SQL Injectors and Packet Spoofs cost more bandwidth",
+		"bandwidth": 2.0},
+	"encrypted":   {"name": "ENCRYPTED", "text": "Exploits cost more charge",
+		"exploit_cost": 1.5},
+	"packet_loss": {"name": "PACKET LOSS", "text": "SQL Injectors and Packet Spoofs are used 2 at a time",
+		"items": 2},
+}
+
+func target_traits(target: Dictionary) -> Array:
+	return Array(target.get("traits", [])).filter(func(t): return TRAITS.has(t))
+
+func has_trait(target: Dictionary, id: String) -> bool:
+	return target_traits(target).has(id)
+
+## the target's stats after its traits (what a hack starts from, before intel)
+func trait_stats(target: Dictionary) -> Dictionary:
+	var out = {"integrity": float(target.get("integrity", 0)), "firewall": float(target.get("firewall", 0)),
+		"counter": float(target.get("counter", 0)), "counter speed": float(target.get("counter speed", 1.0)),
+		"firewall reboot": float(target.get("firewall reboot", 10.0))} # seconds the firewall stays down after a break
+	for tr in ["fortress", "swarm", "heavy"]:
+		if has_trait(target, tr):
+			var d = TRAITS[tr]
+			out.firewall = round(out.firewall * float(d.get("firewall", 1.0)))
+			out.integrity = max(1.0, round(out.integrity * float(d.get("integrity", 1.0))))
+			out.counter = max(1.0, round(out.counter * float(d.get("counter", 1.0))))
+			out["counter speed"] = out["counter speed"] * float(d.get("counter_speed", 1.0))
+			out["firewall reboot"] = out["firewall reboot"] * float(d.get("reboot", 1.0))
+	return out
 ## Target access by tier (economy pass 2026-10-20): rares of the previous target, and payloads for target 2 (+ step
 ## per target after it). Tier 1 is short (~46 hacks), so its access is cheaper.
 const ACCESS_RARE_BY_TIER = [2, 3, 4, 5, 5, 5]
@@ -897,7 +951,7 @@ func apply_default_unlocks() -> void:
 	for loc in hacking_targets:
 		var l = hacking_targets[loc]
 		l["unlocked"] = first or DEV_UNLOCK_ALL_TARGETS
-		l["hard mode unlocked"] = true
+		l["hard mode unlocked"] = false # 2026-10-28: hard mode retired (compromises replaced it); data kept for old saves
 		for i in l.get("targets", []).size():
 			l.targets[i]["unlocked"] = (first and i == 0) or DEV_UNLOCK_ALL_TARGETS
 		for t in l.get("hard mode targets", []):
@@ -906,6 +960,8 @@ func apply_default_unlocks() -> void:
 
 ## "School/Student" or "School/Student (Hard)/hard": stable id for saves (wins, unlocks, intel).
 func target_key(target: Dictionary) -> String:
+	if target.has("_base"): # a Compromise fight: the real target behind it
+		target = target._base
 	for loc in hacking_targets:
 		for list in ["targets", "hard mode targets"]:
 			for t in hacking_targets[loc].get(list, []):
@@ -915,6 +971,8 @@ func target_key(target: Dictionary) -> String:
 
 ## {"location", "index", "hard"} for a target, or {}.
 func target_place(target: Dictionary) -> Dictionary:
+	if target.has("_base"):
+		target = target._base
 	for loc in hacking_targets:
 		for list in ["targets", "hard mode targets"]:
 			var arr = hacking_targets[loc].get(list, [])
@@ -998,6 +1056,7 @@ func unlock_location(location_key: String) -> void:
 	if !l.get("targets", []).is_empty():
 		l.targets[0]["unlocked"] = true
 	set_max_anon()
+	Exp.refresh_all_process_unlocks(true) # 2026-10-26: the tier's processes open with it (tier-unlock screen)
 	SaveManager.mark_dirty()
 	unlocks_changed.emit()
 
@@ -1102,7 +1161,7 @@ func load_data(data: Dictionary) -> void:
 	for loc in hacking_targets:
 		for list in ["targets", "hard mode targets"]:
 			for t in hacking_targets[loc].get(list, []):
-				if target_key(t) in keys:
+				if target_key(t) in keys and list == "targets": # hard mode retired
 					t["unlocked"] = true
 	wins = {}
 	var saved_wins: Dictionary = data.get("wins", {})

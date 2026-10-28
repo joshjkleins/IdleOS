@@ -152,7 +152,8 @@ static func recommended_sql(t: Dictionary) -> int:
 	var sql = Items.SQL_INJECTOR
 	var dmg = float(sql.damage + Upgrades.cur("hacking.damage"))
 	var fw_dmg = float(sql.firewall_damage + Upgrades.cur("hacking.firewall"))
-	var hp = float(t.integrity); var fw = float(t.firewall); var n = 0
+	var ts = Stats.trait_stats(t)
+	var hp = float(ts.integrity); var fw = float(ts.firewall); var n = 0
 	while hp > 0.0 and n < 999:
 		hp -= max(0.0, dmg - fw)
 		fw = max(0.0, fw - fw_dmg)

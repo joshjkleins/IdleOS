@@ -775,3 +775,89 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
 - Phases: 1 foundation (tier unlocks, skill-only levels, efficiency curve, tier-unlock screen) -> 2 drivers in Mining
   only (slot, 2 drivers, UI) -> 3 ranks -> 4 all skills + hard-mode drops -> 5 themed targets -> 6 firmware ->
   7 old saves (drain into VM tokens / mods / exploits) + new demo cut. Demo: later.
+
+## Phase 1 built (branch skill-revamp, 2026-10-26)
+- Processes: "unlock tier" (1 = start) + "efficiency level" (old unlock level). Exp.refresh_process_unlocks opens them
+  with Upgrades.tier_unlocked(tier); Stats.unlock_location refreshes with announce. Saves don't store unlocks.
+- Efficiency: Exp.process_efficiency = base + rate x max(0, skill level - efficiency level) (balance kept: a later
+  process still starts at its base when its old unlock level is reached). Refreshed on every level up and load.
+- Process level / XP no longer tracked (keys left in the dicts, unused; legacy save keys ignored). add_xp only levels
+  the skill. Defrag XP (Police, +50% skill XP) in Exp.add_xp.
+- Defragging per tier: VM start, Upload Lawfirm, Cooling Hospital, Heat Bank, XP Police (Defragging.XP), Government TBD.
+- Tier screen: ContextCommands.tier_complete_text lists NEW PROCESSES (tier_process_rows) + ALSO NEW; the per-process
+  PROCESS UNLOCKED banners are gone (_flush_unlocks just clears Exp.unlock_queue).
+- UI: info tables' UNLOCK column = location; process pages "Opens with"; header cards "LOCKED · <LOCATION>" and
+  "+N xp" per cycle; locked messages via Exp.tier_block_reason / idle_os_2._locked_text; tutorial lines updated.
+- Tests: tutbot 26/26 (707 s game time, was ~600 s), old saves load (demonf, olddemo, review), offline mining/matching ok.
+
+## Phase 2 built (skill-revamp, 2026-10-27): drivers, Mining only
+- singletons/Drivers.gd (autoload): DEFS (Mining: deep_reserves, steady_flow, stockpile, cool_head, long_haul),
+  owned {id: xp while equipped}, equipped {skill: [ids]}, SLOT_LEVELS [10, 60] (2 slots max), RANK_XP [0, 25k, 150k].
+  Saved under "drivers". No drop source yet (gauntlet idea open): DEV_GIVE 'driver give <id|all>'.
+- Commands: 'driver' (in a skill: slots + owned; at root: summary), 'driver -add <id|name>', 'driver -remove <id>'.
+- Exp.add_xp -> Drivers.add_skill_xp (rank ups announced) and Drivers.on_level_up ("<Skill> Driver slot unlocked.
+  cd into <skill> to view more details.").
+- hacking_game: Steady Flow (+dmg at max bandwidth), Long Haul (+dmg per breach this run, 5 stacks, hack_index - 1),
+  Stockpile (chance to fire 2 SQL, double damage), Deep Reserves (chance no bandwidth), Cool Head (first overheat of a
+  hack -> temp reset, deferred after Stats sets the overheat). Log tag DRV (gold), YOU card DRIVERS row.
+- Driver UI pass (2026-10-27): 'driver' screen wording (AVAILABLE, '-', "Drivers increase in rank with <Skill> XP",
+  no next-slot note in the title); Stockpile / Long Haul text. Header: gold slot pips left of LV on root cards
+  (skill_header._pip_label) and a small "Drivers" card after the skill's main card in skill view.
+- Fix: parsing log area sized for 10 + Rows lines (log_parsing_terminal._fit_log_area): the terminal no longer dips.
+- Driver card bar: HeaderBar.segment_values (one segment per slot: -1 empty, 0..1 toward next rank, 1 = max rank).
+- Offline: equipped drivers' XP shown in the download (report.drivers rows + rank lines), slot unlocks listed there;
+  Offline.computing keeps level / rank / slot notices out of the terminal during compute. Resume after offline syncs
+  the header to the resumed skill (idle_os_2._sync_header_to_context).
+
+## Phase 4 built (skill-revamp, 2026-10-27): drivers for every skill but Hacking (35 total, Drivers.DEFS)
+- Cracking crits, Matching firewall, Phishing spoofs, Parsing intel/countermeasures, Decoding loot/charge, Compiling
+  SQL. Hooks in hacking_game (search "driver"/"Drivers.value"): attack (dmg mults, Hash Collision every Nth attack of
+  the RUN, Master Key bypass, Cracked Wide / Credential Reuse fw dmg, Salted Hash refund), defense (Social Proof,
+  Burner, Cheap Spoof, Lure extra free spoof), counter (Cover Story miss, Countermeasure Log stacks, Signal Boost),
+  _counter_rate (Read Ahead: first countermeasure / (1 + v)), firewall break/reboot (Session Hijack, Token Replay,
+  arms Master Key), win (Bonus Cache, Salvage Rights), _remove_required_resources (Payload Recycler), use_exploit
+  (Refund), _apply_intel (Intel Reserve), start_hack (Head Start, Warm Start), Exploits.add_charge (Charged Up).
+- Interpretations: Salted Hash / Signal Boost = % of max bandwidth; Credential Reuse = +% firewall damage per hit;
+  Read Ahead "100% slower" = twice as long; Head Start tops charge up to the value at each hack's start.
+
+## Phase 5 in progress (skill-revamp, 2026-10-27): target traits
+- Stats.TRAITS (fortress, regenerator, swarm, heavy, escalator, siphon, heater + throttle, encrypted, packet_loss
+  defined but unassigned), target "traits": [..]; Stats.trait_stats(target) = stats after traits (cards, hints, fights).
+  School: VP fortress, Principal heavy, Superintendent swarm. Lawfirm: Paralegal siphon, Associate fortress,
+  Lawyer regenerator, Partner escalator. Card TRAITS section (tag + plain text, no hints); hack header chips.
+- Current values: fortress fw x1.6, integrity x0.7, reboot x0.5, no damage leaks through while it's up; regenerator 2%/s
+  after 2 s unhit; swarm speed x3 / dmg x0.2; heavy speed x0.4 / dmg x4; escalator +4% per 5 s of the RUN (max +150%);
+  siphon empties bandwidth per countermeasure; heater heat x2.5; throttle +2 bw; encrypted exploits x1.5; packet loss 2.
+- tools/tests/traitbal.gd: TIER, GEAR=late|early, N, RUN (hacks per run, anonymity carries), ONLY (=exact), INTEL=0,
+  DBG=ATK,FW. Gear = apt hacking+system up to the tier, skills at LEVEL_AT_TIER, locations up to the tier only.
+- Round 3 (2026-10-27): heavy x5 dmg / x0.3 speed; Superintendent 340 integrity / 11 counter (was 445 / 14);
+  Partner 880 / 17 (was 1113 / 21); Paralegal throttle (siphon unassigned). Results in the chat log of that day.
+
+### 2026-10-28: Salvage Sweep, firewall reboot intel, Vice Principal
+- `decoding.compression` (was a 2nd Yield) -> `decoding.salvage_sweep` (Batch Decode was tried first, then dropped):
+  +2% per install (6 tiers, max 12%) chance per cache to also drop one Exploit or Hacking Mod of the cache's tier
+  (even odds between the two, then a random item). Rolled in `Exploits.roll_drops`, so it follows the same rules
+  (none on Skim / Footprint) and works offline. Drop tables show a "Sweep: Exploit/Mod" row once it's installed.
+  `RENAMED` maps compression and batch_decode to it.
+- Intel has a 5th stat, "firewall reboot": +2% per step (max +10%) on how long the firewall stays down. Old saves pad
+  the new stat with their lowest level. Target cards show a Reboot row (after traits; intel as old -> new).
+  `Stats.trait_stats` returns "firewall reboot"; `_fw_down_time` = that x (1 + intel).
+- Vice Principal: integrity 180 (126 after Fortress), firewall reboot 15.5 (7.75s after Fortress, 8.5s with full intel).
+  Harness (tier 1 late gear, SQL every ~4.1s): 1 hit on the downed firewall without intel, 2 with full intel
+  (the 2nd lands ~0.4s before the reboot).
+
+### 2026-10-28: Compromise (replaces hard mode) - School only
+- `singletons/Compromise.gd` (autoload): LINEUPS (School: Student swarm, Student fortress, Administrator heavy,
+  Vice Principal fortress, Principal heavy+throttle, Superintendent swarm+heater; traits replace the target's own).
+  Fights are copies of the real targets with "_base" (Stats.target_key / target_place follow it, so intel and
+  heat tier work). Cost 20 x tier payloads up front; unlocks with the tier's upload goals; prize = random unowned
+  driver of the tier (a driver's tier = its place among its skill's DEFS). Refuses to start with all 7 owned
+  (repeat rewards TBD).
+- hacking_game: `setup(..., fights)`; `_compromise_win` (XP banked, 1 mod tick per fight, no caches, no
+  Stats.record_win, next target via `_load_target` + reset - everything else carries over), `_compromise_complete`
+  (XP + driver + console card), forfeits on trace / kill (kill -s refused). Sub label: "SCHOOL COMPROMISE ■▣□□□□ 2/6 · next".
+- hacking.gd: `recon <location>` (numbered cards, no hack/reward sections, rules text under them via
+  hacking_box._set_recon_info), `compromise -<location> [-overclock]`. `view x -hard` says it was replaced.
+- Access panel: 7-pip driver bar per tier (gold per driver owned, name gold at 7/7). Target card: drivers / recon.
+- Hard mode retired: "hard mode unlocked" forced false, hard targets never load as unlocked (data kept).
+- Test: tools/tests/comptest.gd (WIN=1 big anonymity, FORFEIT=1, SHOTS=1, TS=time scale).

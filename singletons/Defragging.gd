@@ -15,7 +15,8 @@ var SKILL = {
 ## "expires_at" is the unix time the boost ends (saved). Defragging costs no items; the shared cooldown is the limit.
 var COOLING = {
 	"name": "Cooling",
-	"unlocked": true,
+	"unlocked": false,
+	"unlock tier": 3, # 2026-10-26: one Defrag process per tier
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#4ec9b0"),
 	"bonus time": 10,
@@ -30,6 +31,7 @@ var COOLING = {
 var VM = {
 	"name": "VM",
 	"unlocked": true,
+	"unlock tier": 1, # 2026-10-26: one Defrag process per tier
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#7aa2f7"),
 	"bonus time": 10,
@@ -43,7 +45,8 @@ var VM = {
 
 var UPLOAD = {
 	"name": "Upload",
-	"unlocked": true,
+	"unlocked": false,
+	"unlock tier": 2, # 2026-10-26: one Defrag process per tier
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#e0c068"),
 	"bonus time": 10,
@@ -57,7 +60,8 @@ var UPLOAD = {
 
 var HEAT = {
 	"name": "Heat",
-	"unlocked": true,
+	"unlocked": false,
+	"unlock tier": 4, # 2026-10-26: one Defrag process per tier
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
@@ -69,7 +73,23 @@ var HEAT = {
 	"expires_at": 0,
 }
 
-var minor_processes = [COOLING, VM, UPLOAD, HEAT]
+## 2026-10-26: Police's Defrag process
+var XP = {
+	"name": "XP",
+	"unlocked": false,
+	"unlock tier": 5,
+	"requirements": {},
+	"color": Color("#c084fc"),
+	"bonus time": 10,
+	"bonus xp": 0.5, # +50% skill XP from every process
+	"bonus label": "+50% XP",
+	"bonus text": "Skill XP increased by 50%",
+	"description": "Every process gives 50% more skill XP.",
+	"command": "defrag -xp",
+	"expires_at": 0,
+}
+
+var minor_processes = [VM, UPLOAD, COOLING, HEAT, XP] # in unlock order
 
 func is_active(process: Dictionary) -> bool:
 	return Time.get_unix_time_from_system() < process.get("expires_at", 0)
@@ -85,6 +105,14 @@ func get_vm_uptime_bonus() -> float:
 
 func get_upload_time_multiplier() -> float:
 	return 1.0 / (1.0 + UPLOAD["bonus upload speed"]) if is_active(UPLOAD) else 1.0
+
+func get_xp_multiplier() -> float:
+	return 1.0 + XP["bonus xp"] if is_active(XP) else 1.0
+
+## unlocks follow the tiers (Exp.refresh_all_process_unlocks), never the save
+func refresh_unlocks() -> void:
+	for p in minor_processes:
+		p["unlocked"] = Upgrades.tier_unlocked(int(p.get("unlock tier", 1)))
 
 func get_heat_reduction() -> float:
 	return HEAT["bonus heat reduction"] if is_active(HEAT) else 0.0
@@ -158,5 +186,4 @@ func load_data(data: Dictionary):
 	var boosts: Dictionary = data.get("boosts", {})
 	for p in minor_processes:
 		var b: Dictionary = boosts.get(p.name.to_lower(), {})
-		p["unlocked"] = bool(b.get("unlocked", p.unlocked))
 		p["expires_at"] = int(b.get("expires_at", 0))

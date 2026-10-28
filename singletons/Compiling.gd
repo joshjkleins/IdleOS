@@ -144,7 +144,8 @@ var SCHOOL = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 10, # bar fill per second (100 = one payload)
 	"overclock speed": 20,
 	"overheat speed": 4,
@@ -172,7 +173,8 @@ var LAWFIRM = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 6.4868, # bar fill per second (100 = one payload)
 	"overclock speed": 12.9726,
 	"overheat speed": 2.5949,
@@ -200,7 +202,8 @@ var HOSPITAL = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 30,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 30, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 4.2101, # bar fill per second (100 = one payload)
 	"overclock speed": 8.4212,
 	"overheat speed": 1.6844,
@@ -228,7 +231,8 @@ var BANK = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 45,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 2.7351, # bar fill per second (100 = one payload)
 	"overclock speed": 5.4702,
 	"overheat speed": 1.0938,
@@ -256,7 +260,8 @@ var POLICE = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 60,
+	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 60, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 1.7775, # bar fill per second (100 = one payload)
 	"overclock speed": 3.5559,
 	"overheat speed": 0.711,
@@ -284,7 +289,8 @@ var GOVERNMENT = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 75,
+	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 75, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 1.1538, # bar fill per second (100 = one payload)
 	"overclock speed": 2.3077,
 	"overheat speed": 0.4617,
@@ -318,7 +324,8 @@ var MOD = {
 	"efficiency": 0.01,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 3,
+	"unlock tier": 99, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 3, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 10.0, # bar fill per second (100 = one hack of duration, ~10 s)
 	"overclock speed": 15.0,
 	"overheat speed": 5.0,

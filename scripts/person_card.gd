@@ -15,6 +15,7 @@ const C_BAD = Color("#e26d5a")
 const C_RARE = Color("#e0c068")
 const C_INTEL = Color("#4ec9b0")
 const C_SPECIAL = Color("#d29922")
+const C_DRV = Color("#ffc24a") # compromise step pills
 const C_SECTION = Color(0.4, 0.46, 0.52, 1)
 
 const ICONS = {
@@ -22,6 +23,7 @@ const ICONS = {
 	"firewall": "res://art/icons/shield(2).png",
 	"counter": "res://art/icons/swords(1).png",
 	"counter speed": "res://art/icons/zap(2).png",
+	"firewall reboot": "res://art/icons/loader(2).png",
 	"reward": "res://art/icons/database(1).png",
 	"command": "res://art/icons/square-terminal(1).png",
 }
@@ -29,6 +31,7 @@ const COUNTER_BAR_MAX = 100.0 # hacking_game's counter bar fills at "counter spe
 
 var target
 var _accent := Color.WHITE
+## 2026-10-27 layout: the 4 stats as a list (left) next to the traits (right), intel on one line, loot in 2 columns
 
 func update_info(info) -> void:
 	target = info
@@ -43,20 +46,40 @@ func update_info(info) -> void:
 	# name + difficulty
 	var head := HBoxContainer.new()
 	box.add_child(head)
+	var step = int(info.get("_step", 0)) # a Compromise fight (recon view): numbered, no hack / reward sections
+	if step > 0:
+		head.add_theme_constant_override("separation", 8)
+		head.add_child(_pill("%d" % step, C_DRV))
 	var name_label = _label(info.name, 14, C_TEXT)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
-	head.add_child(_pill(info.get("difficulty", "Easy"), _accent))
+	if step > 0:
+		head.add_child(_label(("then %d →" % (step + 1)) if step < int(info._steps) else "final", 10, C_DIM))
+	else:
+		head.add_child(_pill(info.get("difficulty", "Easy"), _accent))
 
 	if !info.get("unlocked", false):
 		_add_locked(box, info)
 		return
 	modulate = Color.WHITE
 
-	_add_hack_section(box, info)
-	_add_stats(box, info)
-	_add_reward(box, info)
-	_add_special(box, info)
+	if step == 0:
+		_add_hack_section(box, info)
+	var split := HBoxContainer.new()
+	split.add_theme_constant_override("separation", 8)
+	box.add_child(split)
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 1.0
+	split.add_child(left)
+	_add_stats_rows(left, info)
+	var right := VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	split.add_child(right)
+	_add_traits(right, info, true)
+	if step == 0:
+		_add_reward(box, info)
+		_add_special(box, info)
 	_add_intel(box, info)
 
 #region sections
@@ -121,11 +144,13 @@ func _add_stats(box: VBoxContainer, info) -> void:
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	box.add_child(grid)
+	var ts = Stats.trait_stats(info) # after traits (Fortress, Swarm ...)
 	var stats = [
-		["integrity", "Integrity", str(info.integrity), "health to break through"],
-		["firewall", "Firewall", str(info.firewall), "absorbs attack damage"],
-		["counter", "Counter", "%s dmg" % str(info.counter), "damage per counterattack"],
-		["counter speed", "Counter rate", "every %ss" % _fmt(COUNTER_BAR_MAX / max(0.01, float(info["counter speed"]))), "time between counterattacks"],
+		["integrity", "Integrity", str(int(ts.integrity)), "health to break through"],
+		["firewall", "Firewall", str(int(ts.firewall)), "absorbs attack damage"],
+		["counter", "Counter", "%s dmg" % str(int(ts.counter)), "damage per counterattack"],
+		["counter speed", "Counter rate", "every %ss" % _fmt(COUNTER_BAR_MAX / max(0.01, float(ts["counter speed"]))), "time between counterattacks"],
+		["firewall reboot", "Reboot", "%ss" % _fmt(float(ts["firewall reboot"])), "how long the firewall stays down after it breaks"],
 	]
 	for s in stats:
 		var value = s[2]
@@ -135,6 +160,33 @@ func _add_stats(box: VBoxContainer, info) -> void:
 			value = _intel_value(s[0], info, ip[s[0]])
 			color = C_INTEL
 		grid.add_child(_stat_box(s[0], s[1], value, color, s[3]))
+
+## the 5 stats as [key, title, value text, color] (after traits; intel shown as old -> new)
+func _stat_values(info) -> Array:
+	var ts = Stats.trait_stats(info)
+	var intel = Decoding.get_intel(info)
+	var ip = Decoding.intel_pcts(info)
+	var out = []
+	for s in [["integrity", "Integrity", str(int(ts.integrity))], ["firewall", "Firewall", str(int(ts.firewall))],
+			["counter", "Counter", "%d dmg" % int(ts.counter)], ["counter speed", "Rate", "every %ss" % _fmt(COUNTER_BAR_MAX / max(0.01, float(ts["counter speed"])))],
+			["firewall reboot", "Reboot", "%ss" % _fmt(float(ts["firewall reboot"]))]]:
+		if int(intel.hacks) > 0 and ip[s[0]] > 0.0:
+			out.append([s[0], s[1], _intel_value(s[0], info, ip[s[0]]), C_INTEL])
+		else:
+			out.append([s[0], s[1], s[2], C_TEXT])
+	return out
+
+## one stat per row (icon, name, value)
+func _add_stats_rows(box: VBoxContainer, info) -> void:
+	for s in _stat_values(info):
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		row.add_child(_icon(s[0]))
+		var n = _label(s[1], 10, C_DIM)
+		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(n)
+		row.add_child(_label(s[2], 11, s[3]))
+		box.add_child(row)
 
 func _add_reward(box: VBoxContainer, info) -> void:
 	box.add_child(_section("REWARD"))
@@ -151,7 +203,7 @@ func _add_reward(box: VBoxContainer, info) -> void:
 func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:
 	box.add_child(_section("CACHE LOOT"))
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 6 # 2026-10-27: two items per row
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 1)
 	box.add_child(grid)
@@ -159,11 +211,39 @@ func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:
 		var col = C_RARE if r.rare else C_DIM
 		var n = _label(r.name.to_lower(), 10, C_RARE if r.rare else C_TEXT)
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		n.clip_text = true
+		n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # long names break between words (2 lines)
+		n.custom_minimum_size.x = 60
 		n.tooltip_text = r.name
 		grid.add_child(n)
 		grid.add_child(_label(str(r.min) if r.min == r.max else "%d-%d" % [r.min, r.max], 10, col))
-		grid.add_child(_label(("%.1f%%" % (r.chance * 100.0)).replace(".0%", "%"), 10, col))
+		var pc = _label(("%.1f%%" % (r.chance * 100.0)).replace(".0%", "%"), 10, col)
+		pc.custom_minimum_size.x = 34
+		grid.add_child(pc)
+
+## 2026-10-27: target traits (Stats.TRAITS): a tag + what it does, no solution hints
+func _add_traits(box: VBoxContainer, info, stacked: bool = false) -> void:
+	var traits = Stats.target_traits(info)
+	if traits.is_empty():
+		return
+	if stacked: # layout b: tag over its text
+		for tr in traits:
+			var tp = _pill(Stats.TRAITS[tr].name, C_SPECIAL)
+			tp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			box.add_child(tp)
+			var tl = _label(Stats.TRAITS[tr].text, 10, C_TEXT)
+			tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			box.add_child(tl)
+		return
+	box.add_child(_section("TRAITS", C_SPECIAL))
+	for tr in traits:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		row.add_child(_pill(Stats.TRAITS[tr].name, C_SPECIAL))
+		var l = _label(Stats.TRAITS[tr].text, 10, C_TEXT)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		box.add_child(row)
 
 func _add_special(box: VBoxContainer, info) -> void:
 	var special = info.get("special", "")
@@ -176,24 +256,26 @@ func _add_special(box: VBoxContainer, info) -> void:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(l)
 
+## 2026-10-27: one line. "INTEL  -" or "INTEL [5 hacks]  -4% all stats" / "-4% int · -2% fw · -2% ctr · -2% speed"
 func _add_intel(box: VBoxContainer, info) -> void:
-	box.add_child(_section("INTEL", C_INTEL))
 	var intel = Decoding.get_intel(info)
-	if int(intel.hacks) > 0:
-		var p = Decoding.intel_pcts(info)
-		var l1 = _label("-%d%% integrity · -%d%% firewall · -%d%% counter · -%d%% speed" % [roundi(p.integrity * 100), roundi(p.firewall * 100), roundi(p.counter * 100), roundi(p["counter speed"] * 100)], 10, C_INTEL)
-		l1.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(l1)
-		box.add_child(_label("for %d hack%s  ·  up to -10%% / %d hacks" % [intel.hacks, "" if int(intel.hacks) == 1 else "s", Decoding.intel_max_hacks()], 10, C_DIM))
-	else:
-		var l = _label("none  ·  gather intel with Decoding to weaken this target (up to -10% on every stat)", 10, C_DIM)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(l)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	box.add_child(row)
+	if int(intel.hacks) <= 0:
+		row.add_child(_section("INTEL", C_INTEL))
+		row.add_child(_label("-", 10, C_DIM))
+		return
+	row.add_child(_section("INTEL [%d hack%s]" % [intel.hacks, "" if int(intel.hacks) == 1 else "s"], C_INTEL))
+	var p = Decoding.intel_pcts(info)
+	var v = [roundi(p.integrity * 100), roundi(p.firewall * 100), roundi(p.counter * 100), roundi(p["counter speed"] * 100), roundi(p["firewall reboot"] * 100)]
+	var t = ("%d%% weaker, all stats" % v[0]) if v.min() == v.max() else "-%d%% int · -%d%% fw · -%d%% ctr · -%d%% speed · +%d%% reboot" % v
+	row.add_child(_label(t, 10, C_INTEL))
 #endregion
 
 #region helpers
 func _intel_value(stat: String, info, pct: float) -> String:
-	var base = float(info[stat])
+	var base = float(Stats.trait_stats(info)[stat])
 	var k = 1.0 - pct
 	match stat:
 		"counter":
@@ -203,6 +285,8 @@ func _intel_value(stat: String, info, pct: float) -> String:
 			return "%ss → %ss" % [_fmt(COUNTER_BAR_MAX / base), _fmt(COUNTER_BAR_MAX / after)]
 		"integrity":
 			return "%d → %d" % [int(base), int(max(1, round(base * k)))]
+		"firewall reboot": # intel keeps the firewall down longer
+			return "%ss → %ss" % [_fmt(base), _fmt(base * (1.0 + pct))]
 	return "%d → %d" % [int(base), int(max(0, round(base * k)))]
 
 func _style() -> void:

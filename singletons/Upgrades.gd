@@ -372,7 +372,9 @@ func save_data() -> Dictionary:
 
 ## Packages that were replaced: an old save's install carries over to the new one
 const RENAMED = {"hacking.clean_exit": "hacking.second_wind", "system.thermal_paste": "system.vm_snapshot",
-	"compiling.mod_tuning": "compiling.code_signing"} # 2026-10-23: compile -mod retired, its slot is Code Signing
+	"compiling.mod_tuning": "compiling.code_signing", # 2026-10-23: compile -mod retired, its slot is Code Signing
+	"decoding.compression": "decoding.salvage_sweep", # 2026-10-28: Compression doubled Yield; its slot is Salvage Sweep
+	"decoding.batch_decode": "decoding.salvage_sweep"}
 
 ## Saves from the old upgrade system (no "format": 2) start fresh at v0.0.
 func load_data(data: Dictionary) -> void:

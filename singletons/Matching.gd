@@ -54,7 +54,8 @@ var CREDENTIAL = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 0.1407, # seconds per terminal message (24 per match)
 	"base speed max": 0.844,
 	"overclock speed min": 0.0703,
@@ -86,7 +87,8 @@ var CERTIFICATE = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 0.3158, # seconds per terminal message (24 per match)
 	"base speed max": 1.8951,
 	"overclock speed min": 0.1579,
@@ -118,7 +120,8 @@ var BADGE = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 30,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 30, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 0.6963, # seconds per terminal message (24 per match)
 	"base speed max": 4.1777,
 	"overclock speed min": 0.3481,
@@ -150,7 +153,8 @@ var ACCOUNT = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 45,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 1.5164, # seconds per terminal message (24 per match)
 	"base speed max": 9.0986,
 	"overclock speed min": 0.7593,
@@ -182,7 +186,8 @@ var OFFICER = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 60,
+	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 60, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 3.3022, # seconds per terminal message (24 per match)
 	"base speed max": 19.8228,
 	"overclock speed min": 1.6511,
@@ -214,7 +219,8 @@ var CLEARANCE = {
 	"efficiency": 0.0,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 75,
+	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 75, # efficiency grows from this skill level (its old unlock level)
 	"base speed min": 7.2963, # seconds per terminal message (24 per match)
 	"base speed max": 43.7681,
 	"overclock speed min": 3.6457,

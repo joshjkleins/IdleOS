@@ -458,6 +458,19 @@ func update_context(new_context: Context):
 		tutorial_window.set_context_hidden(true) # shown again in _on_hacking_start_loading
 	lead_text.text = get_context_lead()
 
+## header view for the current directory (for context changes that don't go through 'cd')
+func _sync_header_to_context() -> void:
+	match current_context:
+		Context.MINING: header.display_skill(Mining)
+		Context.PARSING: header.display_skill(Parsing)
+		Context.CRACKING: header.display_skill(Cracking)
+		Context.MATCHING: header.display_skill(Matching)
+		Context.DECODING: header.display_skill(Decoding)
+		Context.PHISHING: header.display_skill(Phishing)
+		Context.COMPILING: header.display_skill(Compiling)
+		Context.DEFRAGGING: header.display_defragging()
+		_: header.update()
+
 func update_market_context(new_context: MarketContext):
 	current_marketplace_context = new_context
 	lead_text.text = get_context_lead()
@@ -505,6 +518,12 @@ func universal_commands(text):
 		add_line(Settings.handle_settings_command(text))
 		return true
 	
+	if text == "driver" or text == "drivers" or text.begins_with("driver "):
+		# 2026-10-27: drivers live inside each skill ('cd mining' -> 'driver'); root shows a summary
+		var sk = get_context_name_string(current_context) if current_context in [Context.MINING, Context.PARSING, Context.CRACKING, Context.MATCHING, Context.PHISHING, Context.DECODING, Context.COMPILING] else ""
+		var out = Drivers.handle(text, sk)
+		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -remove <id>")
+		return true
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
@@ -629,6 +648,28 @@ func universal_commands(text):
 			Inventory.add_resource(item, 100)
 			return true
 	#
+	# TESTING: 'setlevel <skill> <level>' (raising it runs the normal level ups: tokens, driver slot notices)
+	if DEV_ITEM_COMMANDS and text.begins_with("setlevel"):
+		var parts = text.trim_prefix("setlevel").strip_edges().split(" ", false)
+		var sk = null
+		for m in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
+			if parts.size() >= 1 and m.SKILL.name.to_lower() == parts[0]:
+				sk = m
+		if sk == null or parts.size() < 2 or !parts[1].is_valid_int():
+			add_line("usage: setlevel <skill> <level>  [color=#666666]ex. setlevel mining 60[/color]")
+			return true
+		var lvl = clamp(int(parts[1]), 1, Exp.MAX_LEVEL)
+		if lvl > int(sk.SKILL.level):
+			sk.SKILL.experience = Exp.xp_for_level(lvl)
+			Exp.add_xp(sk, null, 0)
+		else:
+			sk.SKILL.level = lvl
+			sk.SKILL.experience = Exp.xp_for_level(lvl)
+			Exp.refresh_efficiency(sk)
+			Drivers.changed.emit()
+		add_line("[color=#888888](dev) %s is now level %d[/color]" % [sk.SKILL.name, int(sk.SKILL.level)])
+		SaveManager.mark_dirty()
+		return true
 	if DEV_ITEM_COMMANDS and text.begins_with("rm"):
 		var item_name = text.trim_prefix("rm").strip_edges()
 		var item = Inventory.get_item_by_name(item_name)
@@ -1184,35 +1225,19 @@ func _apt_progress_text(pct: int) -> String:
 	var filled = pct / 5
 	return "[color=#4ec994][%s%s][/color] %3d%%" % ["#".repeat(filled), "-".repeat(20 - filled), pct]
 
-## PROCESS UNLOCKED banners (same frame as MAJOR RELEASE). Held while hacking, booting or showing the
-## offline download; printed when the main terminal is back (_on_hacking_start_loading / _offline_welcome).
+## why a locked process can't run (2026-10-26: processes open with their tier's location)
+func _locked_text(p: Dictionary) -> String:
+	var r = Exp.tier_block_reason(null, p)
+	return r if r != "" else "Process not unlocked"
+
+## 2026-10-26 (skill revamp): processes only open with tiers, and the UPLOAD GOAL COMPLETE screen
+## (ContextCommands.tier_complete_text) lists everything a tier opens, so the per-process banners are gone.
+## The queue is still cleared here (held while hacking, booting or showing the offline download).
 var _hold_unlocks := true
 func _flush_unlocks() -> void:
 	if _hold_unlocks or _booting or current_context == Context.HACKING or Exp.unlock_queue.is_empty():
 		return
-	var q = Exp.unlock_queue.duplicate()
 	Exp.unlock_queue.clear()
-	for e in q:
-		add_line(_process_unlocked_text(e.skill, e.process))
-
-func _process_unlocked_text(skill: Node, p: Dictionary) -> String:
-	var c = skill.SKILL.color.to_html(false)
-	var t = "\n[color=#ffc24a]════════════════════════════════════════[/color]\n"
-	t += "  [color=#ffc24a]PROCESS UNLOCKED[/color]  ·  [color=#%s]%s[/color]  %s\n" % [c, skill.SKILL.name.to_upper(), p.name]
-	t += "[color=#ffc24a]════════════════════════════════════════[/color]\n"
-	t += " Level %d %s\n" % [int(p.get("unlock level", 1)), skill.SKILL.name]
-	if str(p.get("description", "")) != "":
-		# wrapped: the terminal doesn't wrap, so a long description ran behind the side panel
-		var desc_lines = ContextCommands._wrap_words(str(p.description), 90)
-		for i in desc_lines.size():
-			t += ("  [color=#4ec994]+[/color] " if i == 0 else "    ") + str(desc_lines[i]) + "\n"
-	var cmd = str(p.get("display command", p.get("command", "")))
-	if cmd != "":
-		t += "  [color=#888888]run[/color] [color=#4ec994]%s[/color]\n" % cmd
-	var block = Exp.tier_block_reason(skill, p)
-	if block != "":
-		t += "  [color=#888888]%s[/color]\n" % block
-	return t
 
 func _major_release_text(group: String, tier: int) -> String:
 	var c = Upgrades.group_color(group).to_html(false)
@@ -1389,7 +1414,7 @@ func handle_vm_token_commands(text):
 		return
 	
 	if !target_minor_process.unlocked:
-		add_line("Process is not unlocked")
+		add_line(_locked_text(target_minor_process))
 		return
 	if Exp.tier_block_reason(target_process, target_minor_process) != "":
 		add_line(Exp.tier_block_reason(target_process, target_minor_process))
@@ -1780,7 +1805,7 @@ func mining_commands(text):
 
 func start_log_mining(minor_process: Dictionary):
 	if !minor_process.unlocked:
-		add_line("Requires mining level " + str(minor_process["unlock level"]))
+		add_line(Exp.tier_block_reason(Mining, minor_process))
 		return
 	if Exp.tier_block_reason(Mining, minor_process) != "":
 		add_line(Exp.tier_block_reason(Mining, minor_process))
@@ -1810,7 +1835,7 @@ func log_parsing_commands(text):
 		if text.begins_with(ms['command']):
 			#CHECK IF PROCESS IS UNLOCKED
 			if !ms.unlocked:
-				add_line("ERROR: requires parsing level " + str(ms["unlock level"]))
+				add_line(Exp.tier_block_reason(Parsing, ms))
 				return
 			
 			#CHECK IF ANOTHER PROCESS IS RUNNING
@@ -1908,7 +1933,7 @@ func password_unscramble_commands(text):
 
 func start_cracking(minor_process: Dictionary, use_item: ItemData = null, create_item: ItemData = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(_locked_text(minor_process))
 		return
 	if Exp.tier_block_reason(Cracking, minor_process) != "":
 		add_line(Exp.tier_block_reason(Cracking, minor_process))
@@ -1953,7 +1978,7 @@ func cred_matching_commands(text):
 
 func start_matching(minor_process):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(_locked_text(minor_process))
 		return
 	if Exp.tier_block_reason(Matching, minor_process) != "":
 		add_line(Exp.tier_block_reason(Matching, minor_process))
@@ -1996,7 +2021,7 @@ func cache_decrypting_commands(text):
 
 func start_cache_decrypting(minor_process, cache_item = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(_locked_text(minor_process))
 		return
 		
 	var new_cache_decrypt_terminal = cache_decrypt_scene.instantiate()
@@ -2101,7 +2126,7 @@ func phishing_commands(text):
 				add_line(parsed_bait.error)
 				return
 			if !ms.unlocked:
-				add_line("Process not unlocked")
+				add_line(_locked_text(ms))
 				return
 			if ms == Phishing.TRAP and Phishing.has_trap():
 				add_line(Phishing.trap_status_text())
@@ -2167,7 +2192,7 @@ func compiling_commands(text):
 
 func start_compiling(minor_process: Dictionary, item = null):
 	if !minor_process.unlocked:
-		add_line("Process not unlocked")
+		add_line(_locked_text(minor_process))
 		return
 	if Exp.tier_block_reason(Compiling, minor_process) != "":
 		add_line(Exp.tier_block_reason(Compiling, minor_process))
@@ -2194,7 +2219,7 @@ func defragging_commands(text):
 				add_line("Process already running.")
 				return
 			if !ms.unlocked:
-				add_line(ms.name + " defragging not unlocked. Purchase from marketplace.")
+				add_line("%s defragging opens with %s access." % [ms.name, Upgrades.tier_name(int(ms.get("unlock tier", 1)))])
 				return
 			if Defragging.on_cooldown():
 				add_line("Defragging is currently cooling down.")
@@ -2885,18 +2910,21 @@ func _offline_welcome() -> void:
 		block.text = head + "connecting  [color=%s]%s[/color][color=%s]%s[/color]" % [OFFLINE_C, "█".repeat(i), OFFLINE_DIM, "░".repeat(OFFLINE_BAR - i)]
 		await get_tree().create_timer(0.05).timeout
 	await get_tree().create_timer(0.3).timeout
-	head += "connected  [color=%s]session found · downloading offline progress[/color]\n\n" % OFFLINE_DIM
 	var rows: Array = r.gains.slice(0, 12).map(func(g): return {"name": g.item.name, "amount": g.amount})
 	for x in r.get("xp", []):
 		rows.append({"name": x.skill + " XP", "amount": x.amount, "xp": true})
+	for d in r.get("drivers", []): # equipped drivers rank up from offline skill XP too
+		rows.append({"name": d.name + " XP", "amount": d.xp, "xp": true})
+	# 2026-10-28: nothing to download (only uploads / notes): skip the bars, they ran 2.5s with nothing on screen
+	head += "connected  [color=%s]session found · %s[/color]\n\n" % [OFFLINE_DIM, "downloading offline progress" if !rows.is_empty() else "syncing"]
 	# 2026-10-25: every row downloads at the same time (one bar each), then all flip to 'downloaded'
 	var done_text = ""
 	var name_w = 4
 	for g in rows:
 		name_w = max(name_w, g.name.length())
-	var steps = 60
+	var steps = 60 if !rows.is_empty() else 0
 	var duration = 2.5
-	for k in steps + 1:
+	for k in (steps + 1 if !rows.is_empty() else 0):
 		var f = 1.0 - pow(1.0 - float(k) / steps, 2.0) # ease out: quick start, settles at the end
 		var filled = int(round(OFFLINE_BAR * f))
 		var live = ""
@@ -2909,7 +2937,8 @@ func _offline_welcome() -> void:
 			await get_tree().create_timer(duration / steps).timeout
 		else:
 			done_text = live
-	await get_tree().create_timer(0.25).timeout
+	if !rows.is_empty():
+		await get_tree().create_timer(0.25).timeout
 	if r.gains.size() > rows.size():
 		done_text += "[color=%s]+ %d more items ('ls')[/color]\n" % [OFFLINE_DIM, r.gains.size() - rows.size()]
 	var tail = ""
@@ -2921,9 +2950,15 @@ func _offline_welcome() -> void:
 		tail += "uploaded: %s %s%s\n" % [_commas(u.amount), u.item.name, ("  [color=%s]· goal complete[/color]" % OFFLINE_C) if u.done else ""]
 	if r.has("intel"):
 		tail += "intel: [color=%s]%s +%d[/color]  [color=%s]now %s[/color]\n" % [OFFLINE_C, r.intel.target, r.intel.points, OFFLINE_DIM, _plain_bb(r.intel.text)]
+	for d in r.get("drivers", []):
+		if d.to > d.from:
+			tail += "[color=#ffc24a]%s driver %s rank %d -> %d[/color]\n" % [d.skill, d.name, d.from, d.to]
 	for l in r.levels:
 		tail += "[color=%s]%s level %d -> %d[/color]%s\n" % [OFFLINE_C, l.skill, l.from, l.to,
 			("  [color=%s]+%d %s[/color]" % [OFFLINE_DIM, l.tokens, l.token.name]) if l.tokens > 0 and l.token else ""]
+		for sl in Drivers.SLOT_LEVELS:
+			if l.from < sl and l.to >= sl and Drivers.has_drivers(l.skill):
+				tail += "[color=#ffc24a]%s Driver slot unlocked.[/color] cd into %s to view more details.\n" % [l.skill, l.skill.to_lower()]
 	if r.trap >= 0.0:
 		tail += ("[color=%s]trap full: 'trap collect'[/color]\n" % OFFLINE_C) if r.trap >= 1.0 else ("trap: %d%% full  [color=%s](fills on real time)[/color]\n" % [int(r.trap * 100), OFFLINE_DIM])
 	for n in r.notes:
@@ -2935,7 +2970,7 @@ func _offline_welcome() -> void:
 		var what = ", ".join(keys.slice(0, 4).map(func(k): return "%s %s" % [_commas(lost[k]), k.name]))
 		tail += "[color=#e0c068]ran hot: overheating cost you %s[/color]\n" % (what if what != "" else "%d%% of the output" % int(Offline.OVERHEAT_PENALTY * 100))
 		tail += "[color=%s]  (-%d%%: the process makes more heat than your system cools; more cooling in 'apt system' fixes it)[/color]\n" % [OFFLINE_DIM, int(Offline.OVERHEAT_PENALTY * 100)]
-	block.text = head + done_text + ("\n" + tail if tail != "" else "")
+	block.text = head + done_text + (("\n" if done_text != "" else "") + tail if tail != "" else "")
 	await get_tree().create_timer(0.2).timeout
 	for t in r.tiers:
 		add_line(ContextCommands.tier_complete_text(t))
@@ -2949,6 +2984,7 @@ func _offline_welcome() -> void:
 	if !r.resume.is_empty() and !process_running:
 		add_line("[color=%s]resuming '%s'[/color]" % [OFFLINE_DIM, r.resume.command])
 		update_context(int(r.resume.context))
+		_sync_header_to_context() # 2026-10-27: the header stayed on root after coming back into a skill
 		_on_input_line_text_submitted(r.resume.command)
 
 static func _plain_bb(t: String) -> String:

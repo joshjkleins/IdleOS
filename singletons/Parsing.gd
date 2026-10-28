@@ -110,7 +110,8 @@ var FOOTPRINT = {
 	"efficiency": 0.15,
 	"efficiency rate": 0.0012,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.4,
 	"overclock speed": 0.2,
 	"overheat speed": 1.0,
@@ -141,7 +142,8 @@ var CORRUPTION = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.001,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.6,
 	"overclock speed": 0.3,
 	"overheat speed": 1.5,
@@ -175,7 +177,8 @@ var NETWORK = {
 	"efficiency rate": 0.0002,
 	"efficiency upgrade scale": 0.05, # parsing efficiency upgrades count at 5% here (+1% at max)
 	"unlocked": false,
-	"unlock level": 35,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 35, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.9,
 	"overclock speed": 0.45,
 	"overheat speed": 2.25,
@@ -207,7 +210,8 @@ var EXTRACTION = {
 	"efficiency": 0.08,
 	"efficiency rate": 0.0008,
 	"unlocked": false,
-	"unlock level": 55,
+	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 55, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 1.35,
 	"overclock speed": 0.675,
 	"overheat speed": 3.375,
@@ -479,7 +483,7 @@ func list_vm_commands() -> String:
 			var run_command = "ssh " + str(mp.get("display command", mp.command + "=<item>")) # same as the main terminal's command
 			return_text += mp.name + " ".repeat(first_col - mp.name.length()) + run_command + " ".repeat(second_col - run_command.length()) + "\n"
 		else:
-			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "LOCKED (lvl %d)[/color]\n" % mp["unlock level"]
+			return_text += "[color=#666666]" + mp.name + " ".repeat(first_col - mp.name.length()) + "LOCKED · %s[/color]\n" % Upgrades.tier_name(int(mp.get("unlock tier", 1)))
 	
 	#return_text += " \n[color=#666666]usage: ssh parsing footprint=logs[/color]"
 	return_text += " \n[color=#666666]tip: multiple items can be passed as long as they are comma separated ex. ssh parse -footprint=logs, student cache[/color]"

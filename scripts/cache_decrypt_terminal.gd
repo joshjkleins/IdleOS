@@ -129,7 +129,7 @@ func _reveal_dump() -> Mode:
 		_cycle_steps += 1
 	return cycle_mode
 
-## VM token chance for the pass just finished, rolled on time spent (speed, Compression and overclock don't
+## VM token chance for the pass just finished, rolled on time spent (speed, overclock don't
 ## change tokens per hour): "vm token chance" is for a base-speed pass, scaled by how long this one took.
 ## Token Vault and Forensics double it.
 func _token_chance() -> float:

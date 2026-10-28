@@ -10,7 +10,7 @@ func update(skill: Dictionary): #minor
 	$Unlocked/VBoxContainer/HBoxContainer/SkillLevel.text = str(skill.level) + "/" + str(Exp.MAX_LEVEL)
 	
 	$Locked/VBoxContainer/SkillName.text = skill.name
-	$Locked/VBoxContainer/UnlockLevel.text = "(lvl " + str(skill["unlock level"]) + ")"
+	$Locked/VBoxContainer/UnlockLevel.text = "(" + Upgrades.tier_name(int(skill.get("unlock tier", 1))) + ")"
 	
 	var experience = Exp.get_xp_display(skill)
 	$Unlocked/VBoxContainer/SkillExpBar.max_value = experience["needed"]

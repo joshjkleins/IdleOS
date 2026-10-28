@@ -105,7 +105,7 @@ func _refresh() -> void:
 	for r in rows:
 		r.runs = runs(r.needs)
 		key += "|%d" % r.runs
-	var hack = _hack_row()
+	var hack = _hack_row(tier)
 	key += "|" + str(hack)
 	if key == _last:
 		return
@@ -148,17 +148,33 @@ func _refresh() -> void:
 	_summary.text = "  ·  ".join(names) if !names.is_empty() else "nothing ready"
 
 ## NEXT HACK: the strongest target you can hack and what one hack of it takes (HintEngine.hack_needs:
-## payload + recommended SQL Injectors from your past hacks of it, or an estimate)
-func _hack_row() -> Dictionary:
-	var t = HintEngine.best_target()
+## payload + recommended SQL Injectors from your past hacks of it, or an estimate). Paged to another tier
+## (2026-10-28): that location's target instead - a completed tier shows its 5th (the final, priciest one),
+## a later one its strongest unlocked target (or its first). Spoofs dropped: only payload and SQL are required.
+func _hack_row(tier: int) -> Dictionary:
+	var t = _tier_target(tier)
 	if t.is_empty():
 		return {}
 	var n = HintEngine.hack_needs(t)
-	var u = Stats.get_usage(t)
 	n["name"] = t.name
-	n["spoof_rec"] = int(ceil(float(u.spoof) * HintEngine.SQL_SAFETY)) if int(u.get("n", 0)) > 0 else -1
-	n["spoof_have"] = Inventory.get_amount(Items.PACKET_SPOOF)
 	return n
+
+func _tier_target(tier: int) -> Dictionary:
+	if tier == Uploads.current_tier():
+		return HintEngine.best_target()
+	var locs = Stats.hacking_targets.values()
+	if tier < 1 or tier > locs.size():
+		return {}
+	var targets: Array = locs[tier - 1].get("targets", [])
+	if targets.is_empty():
+		return {}
+	if tier < Uploads.current_tier():
+		return targets[min(4, targets.size() - 1)]
+	var best = targets[0]
+	for t in targets:
+		if t.get("unlocked", false):
+			best = t
+	return best
 
 func _add_hack_row(h: Dictionary) -> void:
 	var on = h.ready
@@ -191,8 +207,6 @@ func _add_hack_row(h: Dictionary) -> void:
 	box.add_child(need)
 	var parts = [["%s %d/%d" % [h.payload.name.to_lower(), h.payload_have, h.payload_need], h.payload_have >= h.payload_need],
 		["sql %d/%d" % [h.sql_have, h.sql_rec], h.sql_have >= h.sql_rec]]
-	if h.spoof_rec >= 0:
-		parts.append(["spoof %d/%d" % [h.spoof_have, h.spoof_rec], h.spoof_have >= h.spoof_rec])
 	need.add_child(_label("   ", FONT - 1, DIM))
 	for i in parts.size():
 		if i > 0:

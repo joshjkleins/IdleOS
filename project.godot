@@ -57,7 +57,9 @@ HackingMods="*res://singletons/HackingMods.gd"
 VMManager="*res://singletons/VMManager.gd"
 Uploads="*res://singletons/Uploads.gd"
 Exploits="*res://singletons/Exploits.gd"
+Drivers="*res://singletons/Drivers.gd"
 Offline="*res://singletons/Offline.gd"
+Compromise="*res://singletons/Compromise.gd"
 
 [display]
 

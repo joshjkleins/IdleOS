@@ -9,7 +9,7 @@ signal process_unlocked_signal # a level up just unlocked processes (they wait i
 var unlock_queue: Array = []
 
 
-const MAX_LEVEL: int = 99 # highest process unlock level is 80 (Compiling: Government)
+const MAX_LEVEL: int = 99
 
 func get_xp_display(skill_data: Dictionary) -> Dictionary:
 	var level = skill_data["level"]
@@ -58,24 +58,28 @@ func get_xp_progress(skill_data: Dictionary) -> float:
 	var next_level_xp = xp_for_level(skill_data["level"] + 1)
 	return float(skill_data["experience"] - current_level_xp) / float(next_level_xp - current_level_xp)
 
+## 2026-10-26 (skill revamp): only the main skill levels. A process gives its skill XP (minor is the process
+## that earned it, passed on to listeners) and its efficiency follows the skill level (refresh_efficiency).
+## Defrag XP (Police) adds +50% while it runs.
 func add_xp(major, minor, amount: int = 0): #singleton as param
-	
+	if amount > 0 and major != Defragging:
+		amount = int(round(amount * Defragging.get_xp_multiplier()))
 	if amount > 0:
 		major.SKILL["experience"] += amount
 		gained_xp_signal.emit(amount)
+		Drivers.add_skill_xp(str(major.SKILL.name), amount) # equipped drivers rank up from their skill's XP
 		
 	var major_new_level = get_level_from_xp(major.SKILL["experience"])
-	
 	#MAJOR LEVEL UPDATES
 	while major.SKILL["level"] < major_new_level:
-		print('leveled up')
 		major.SKILL["level"] += 1
-		refresh_process_unlocks(major, true)
+		refresh_efficiency(major) # before the signal: listeners show the new efficiency
 		major.SKILL["level up signal"].emit()
+		Drivers.on_level_up(str(major.SKILL.name), int(major.SKILL["level"]))
 		Audiomanager.play_sfx("level_up")
 		if major != Hacking:
 			Inventory.add_resource(major.vm_token, 1)
-		if level_bonus_applies(major) and int(major.SKILL["level"]) % LEVEL_BONUS_STEP == 0:
+		if level_bonus_applies(major) and int(major.SKILL["level"]) % LEVEL_BONUS_STEP == 0 and !Offline.computing:
 			Signals.system_message_signal.emit("[color=#4ec9b0]%s level %d bonus: +%s VM token chance per cycle (total +%s)[/color]" % [
 				major.SKILL.name, int(major.SKILL["level"]), _pct(LEVEL_TOKEN_BONUS), _pct(vm_token_level_bonus(major))])
 		if major.SKILL.has("efficiency"):
@@ -86,18 +90,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 			break
 	major.signal_exp(amount)
 	if minor != null:
-		minor["experience"] += amount
-		var minor_new_level = get_level_from_xp(minor["experience"])
-		#MINOR LEVEL UPDATES
-		while minor["level"] < minor_new_level:
-			minor["level"] += 1
-			minor["efficiency"] += minor["efficiency rate"]
-			if minor["level"] >= MAX_LEVEL:
-				minor["level"] = MAX_LEVEL
-				break
-
 		exp_updated_signal.emit(amount, minor)
-	
 
 
 func on_level_up(skill_data: Dictionary):
@@ -142,48 +135,62 @@ func level_bonus_text(major) -> String:
 			t += "└─ Next     level %d: +%s total\n" % [nxt, _pct(LEVEL_TOKEN_BONUS * int(nxt / LEVEL_BONUS_STEP))]
 	return t
 
-## Processes unlock once their skill reaches "unlock level" (and never re-lock).
-## (The old header did this as a side effect of displaying a skill; now it happens on level up + load.)
+## 2026-10-26 (skill revamp): processes unlock with their tier ("unlock tier": that tier's location is open;
+## 1 = from the start), never from levels, and never re-lock. Newly opened ones queue for the tier-unlock screen.
 func refresh_process_unlocks(major, announce: bool = false) -> void:
 	var fresh = false
 	for p in major.minor_processes:
-		if major.SKILL.level >= p.get("unlock level", 1):
-			if announce and !p.get("unlocked", false) and int(p.get("unlock level", 1)) > 1:
-				unlock_queue.append({"skill": major, "process": p})
-				fresh = true
-			p["unlocked"] = true
+		var open = Upgrades.tier_unlocked(int(p.get("unlock tier", 1)))
+		if open and announce and !p.get("unlocked", false):
+			unlock_queue.append({"skill": major, "process": p, "tier": int(p.get("unlock tier", 1))})
+			fresh = true
+		p["unlocked"] = open
 	if fresh:
 		process_unlocked_signal.emit()
 
-## Tier of a tier-specific process (Mining, Cracking, Matching, Compiling payloads), else 0.
-func process_tier(major, p: Dictionary) -> int:
-	match major:
-		Mining:
-			return Mining.minor_processes.find(p) + 1
-		Cracking:
-			return Cracking.minor_processes.filter(func(x): return x != Cracking.VM).find(p) + 1
-		Matching:
-			return Matching.minor_processes.find(p) + 1
-		Compiling:
-			return Compiling.get_payload_processes().find(p) + 1
-	return 0
+## The tier a process opens with (1 = from the start)
+func process_tier(_major, p: Dictionary) -> int:
+	return int(p.get("unlock tier", 1))
 
-## Tier-specific processes also need their tier (location) unlocked, not just the skill level. "" = ok.
+## "" when the process's tier is open, otherwise why it can't run yet
 func tier_block_reason(major, p: Dictionary) -> String:
 	var t = process_tier(major, p)
 	if t > 1 and !Upgrades.tier_unlocked(t):
-		return "%s requires %s access (Tier %d)." % [p.name, Upgrades.tier_name(t), t]
+		return "%s opens with %s access (Tier %d): finish the upload goal before it ('upload')." % [p.name, Upgrades.tier_name(t), t]
 	return ""
 
-func refresh_all_process_unlocks() -> void:
+## announce: a tier just opened (Stats.unlock_location), so what it brings goes to the tier-unlock screen
+func refresh_all_process_unlocks(announce: bool = false) -> void:
 	if DEV_MAX_ALL:
 		_dev_max_all()
 	for major in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
-		refresh_process_unlocks(major)
+		refresh_process_unlocks(major, announce)
+		refresh_efficiency(major)
+	for p in Defragging.minor_processes:
+		var open = Upgrades.tier_unlocked(int(p.get("unlock tier", 1)))
+		if open and announce and !p.get("unlocked", false):
+			unlock_queue.append({"skill": Defragging, "process": p, "tier": int(p.get("unlock tier", 1))})
+		p["unlocked"] = open
+	if announce and !unlock_queue.is_empty():
+		process_unlocked_signal.emit()
 
-## TESTING: every skill and process at max level and unlocked (applied at startup and after every
-## load, so new processes are covered automatically). Turn off before release; saves made with it on
-## keep the levels.
+## Process efficiency from the skill level: base + rate per level above "efficiency level" (the process's old unlock
+## level, so a later process still starts near its base). One number per skill drives every process.
+func process_efficiency(major, p: Dictionary) -> float:
+	var key = str(major.SKILL.name) + "/" + str(p.name)
+	if !_base_efficiency.has(key):
+		_base_efficiency[key] = float(p.get("efficiency", 0.0))
+	var lvl = int(major.SKILL.get("level", 1))
+	var from = int(p.get("efficiency level", 1))
+	return _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * max(0, lvl - max(1, from))
+
+func refresh_efficiency(major) -> void:
+	for p in major.minor_processes:
+		if p.has("efficiency"):
+			p["efficiency"] = process_efficiency(major, p)
+
+## TESTING: every skill at max level and every tier's processes open (applied at startup and after every
+## load). Turn off before release.
 const DEV_MAX_ALL := false
 
 func _dev_max_all() -> void:
@@ -191,52 +198,23 @@ func _dev_max_all() -> void:
 		major.SKILL["level"] = MAX_LEVEL
 		major.SKILL["experience"] = max(major.SKILL["experience"], xp_for_level(MAX_LEVEL))
 		for p in major.minor_processes:
-			if !p.has("level"):
-				continue
-			var key = str(major.SKILL.name) + "/" + str(p.name)
-			if p.has("efficiency") and !_base_efficiency.has(key):
-				_base_efficiency[key] = float(p["efficiency"])
-			p["level"] = MAX_LEVEL
-			p["experience"] = max(int(p.get("experience", 0)), xp_for_level(MAX_LEVEL))
-			if p.has("efficiency"):
-				p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (MAX_LEVEL - 1)
 			p["unlocked"] = true
 
-## Every process's progress, keyed by process name (skills used to save only their first process).
-func processes_save_data(major) -> Dictionary:
-	var out := {}
-	for p in major.minor_processes:
-		out[str(p.name)] = {
-			"level": p.get("level", 1),
-			"experience": p.get("experience", 0),
-			"efficiency": p.get("efficiency", 0.0),
-			"unlocked": p.get("unlocked", false),
-		}
-	return out
+## Processes no longer save progress (no process levels since the skill revamp); kept for the save layout.
+func processes_save_data(_major) -> Dictionary:
+	return {}
 
 var _base_efficiency := {} # "Skill/Process" -> efficiency as defined in code, captured before any load
 
-func processes_load_data(major, data: Dictionary) -> void:
+## Old saves' process levels / XP are ignored (2026-10-26). Unlocks and efficiency are worked out again.
+func processes_load_data(major, _data: Dictionary) -> void:
 	for p in major.minor_processes:
 		var key = str(major.SKILL.name) + "/" + str(p.name)
 		if p.has("efficiency") and !_base_efficiency.has(key):
 			_base_efficiency[key] = float(p["efficiency"])
-		var saved: Dictionary = data.get(str(p.name), {})
-		if !saved.is_empty():
-			p["level"] = int(saved.get("level", p.get("level", 1)))
-			p["experience"] = int(saved.get("experience", p.get("experience", 0)))
-			# unlocks come from the skill level (refresh_process_unlocks below), so a save can't keep a process
-			# open that its level doesn't reach (e.g. Parsing's processes that used to start unlocked)
-			if !p.has("unlock level"):
-				p["unlocked"] = p.get("unlocked", false) or bool(saved.get("unlocked", false))
-			else:
-				p["unlocked"] = int(p["unlock level"]) <= 1
-		# Efficiency always comes from level (base + rate per level), never from the save: retuned bases
-		# apply to old saves, and saves inflated by the old legacy-key bug heal on load.
-		# (The base is captured above, so nothing may write "efficiency" before this runs.)
-		if p.has("efficiency"):
-			p["efficiency"] = _base_efficiency[key] + float(p.get("efficiency rate", 0.0)) * (p.get("level", 1) - 1)
+		p["unlocked"] = false
 	refresh_process_unlocks(major)
+	refresh_efficiency(major)
 
 func _ready() -> void:
 	SaveManager.save_loaded.connect(refresh_all_process_unlocks)

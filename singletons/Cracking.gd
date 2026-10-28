@@ -52,7 +52,8 @@ var PASSWORD = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": true,
-	"unlock level": 1,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 3, # seconds per character (4 per crack)
 	"overclock speed": 1.5,
 	"overheat speed": 7.5,
@@ -79,7 +80,8 @@ var SIGNATURE = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 15,
+	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 6.7491, # seconds per character (4 per crack)
 	"overclock speed": 3.3746,
 	"overheat speed": 16.8728,
@@ -106,7 +108,8 @@ var BADGE = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 30,
+	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 30, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 14.8067, # seconds per character (4 per crack)
 	"overclock speed": 7.4034,
 	"overheat speed": 37.0168,
@@ -133,7 +136,8 @@ var PIN = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 45,
+	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 35.3957, # seconds per character (4 per crack)
 	"overclock speed": 17.6978,
 	"overheat speed": 88.4892,
@@ -160,7 +164,8 @@ var KEYS = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 60,
+	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 60, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 72.8274, # seconds per character (4 per crack)
 	"overclock speed": 36.4137,
 	"overheat speed": 182.0686,
@@ -187,7 +192,8 @@ var BIOMETRIC = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 75,
+	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 75, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 169.9523, # seconds per character (4 per crack)
 	"overclock speed": 84.9762,
 	"overheat speed": 424.8808,
@@ -219,7 +225,8 @@ var VM = {
 	"efficiency": 0.05,
 	"efficiency rate": 0.002,
 	"unlocked": false,
-	"unlock level": 5,
+	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
+	"efficiency level": 5, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 3.0,
 	"overclock speed": 1.5,
 	"overheat speed": 7.5,

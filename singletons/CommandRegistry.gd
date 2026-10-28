@@ -10,7 +10,7 @@ const SKILL_DIRS = ["mining", "parsing", "cracking", "matching", "phishing", "ha
 
 ## Commands that don't depend on the save
 const STATIC = [
-	"-h", "help", "info", "ls", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "system", "settings", "history",
+	"-h", "help", "info", "ls", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "driver", "system", "settings", "history",
 	"tutorial", "tutorial -l", "tutorial reset", "welcome", "discord", "discord -c", "version", "ps",
 	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
@@ -64,6 +64,10 @@ func main_candidates() -> Array:
 				continue # only modifiers the player has
 			c.append(m.command)
 			c.append(m.command + " -kill")
+	# drivers (2026-10-27)
+	for id in Drivers.owned:
+		c.append("driver -add " + id)
+		c.append("driver -remove " + id)
 	# 'ls' filters (2026-10-24): types, skills, locations and t1..t6
 	for f in ["-resources", "-payloads", "-combat", "-caches", "-rares", "-mods", "-exploits", "-tokens", "-h"]:
 		c.append("ls " + f)
@@ -125,7 +129,9 @@ func hacking_candidates() -> Array:
 		var l = Stats.hacking_targets[loc]
 		if l.get("unlocked", false):
 			c.append(str(l.command))
-			c.append(str(l.get("hard mode command", "")))
+			if Compromise.has_lineup(loc): # 2026-10-28: compromises replaced hard mode
+				c.append("recon " + str(l.name).to_lower().replace(" ", "-"))
+				c.append("compromise -" + str(l.name).to_lower().replace(" ", "-"))
 		for t in l.get("targets", []):
 			if t.get("unlocked", false):
 				for suf in ["", " -r", " -overclock", "="]:
@@ -174,7 +180,7 @@ func complete(text: String, hacking: bool = false) -> Dictionary:
 	# yet, or after a command whose arguments are single words (cd, info, ssh, apt, vm ...), also at the next space.
 	# Item names (ls / track / upload ...) keep their spaces.
 	var head = typed.split(" ", false)[0] if typed.contains(" ") else ""
-	var word_args = head == "" or head in ["cd", "info", "ssh", "apt", "vm", "tutorial", "discord", "quit", "trap", "kill", "stop", "overclock", "view", "hack", "run"]
+	var word_args = head == "" or head in ["cd", "info", "ssh", "apt", "vm", "tutorial", "discord", "quit", "trap", "kill", "stop", "overclock", "view", "hack", "run", "recon", "compromise"]
 	var opts = []
 	for m in matches:
 		var rest = m.substr(start)

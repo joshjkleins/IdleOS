@@ -238,14 +238,14 @@ func get_help_text(skill: Node) -> String:
 		var run_command = "-"
 		var info_cmd = "-"
 		var req_items = "-"
-		if true: # details shown for every process (unlock level is in the UNLOCK column)
+		if true: # details shown for every process (the tier it opens with is in the UNLOCK column)
 			efficiency = "%.1f%%" % (p.efficiency * 100.0)
 			var r = p["efficiency rate"] * 100.0
 			efficiency_rate = ("%.2f%%" if r < 0.1 else "%.1f%%") % r
 			run_command = p['display command'] if p.has('display command') else p.command
 			info_cmd = "info " + skill.SKILL.name.to_lower() + " " + p.name.to_lower().replace(" ", "-")
 			req_items = get_requirements_text(p)
-		rows.append([p.name, status, str(p['unlock level']), efficiency, efficiency_rate, run_command, info_cmd, req_items])
+		rows.append([p.name, status, Upgrades.tier_name(int(p.get("unlock tier", 1))), efficiency, efficiency_rate, run_command, info_cmd, req_items])
 		row_colors.append("" if p.unlocked else "#666666")
 
 	text += build_table(columns, rows, row_colors)
@@ -253,15 +253,15 @@ func get_help_text(skill: Node) -> String:
 		text += "\nEFFICIENCY (EFF) BY PROCESS\n"
 		for line in eff_lines:
 			text += "  %-12s %s\n" % line
-	return text + Exp.level_bonus_text(skill) + "\n\n" + get_modifier_info_text(skill)
+	return text + Exp.level_bonus_text(skill) + Drivers.info_text(str(skill.SKILL.name)) + "\n\n" + get_modifier_info_text(skill)
 
 
 
-## Info table order: tier processes by unlock level, then utilities ("UTILITY | ...", "UPLOAD | ...") in their own order
+## Info table order: tier processes by unlock tier, then utilities ("UTILITY | ...", "UPLOAD | ...") in their own order
 static func info_process_order(skill: Node) -> Array:
 	var tiers = skill.minor_processes.filter(func(p): return str(p.get("tier name", "TIER")).begins_with("TIER"))
 	var others = skill.minor_processes.filter(func(p): return !str(p.get("tier name", "TIER")).begins_with("TIER"))
-	tiers.sort_custom(func(a, b): return int(a.get("unlock level", 1)) < int(b.get("unlock level", 1)))
+	tiers.sort_custom(func(a, b): return int(a.get("unlock tier", 1)) < int(b.get("unlock tier", 1)))
 	return tiers + others
 
 func get_requirements_text(p: Dictionary) -> String:
@@ -289,7 +289,7 @@ func get_help_text_defragging(skill: Node) -> String:
 	var colors = []
 	for p in skill.minor_processes:
 		var active = Defragging.is_active(p)
-		rows.append([p.name, Stats.boost_minutes_text() + (" (ACTIVE " + Stats.get_bonus_time_text(p) + ")" if active else ""), p.get("bonus text", p.get("bonus label", "-")), p.command])
+		rows.append([p.name, Stats.boost_minutes_text() + (" (ACTIVE " + Stats.get_bonus_time_text(p) + ")" if active else ""), p.get("bonus text", p.get("bonus label", "-")), p.command if p.unlocked else "opens with " + Upgrades.tier_name(int(p.get("unlock tier", 1)))])
 		colors.append("#ffc24a" if active else ("" if p.unlocked else "#666666"))
 	text += build_table(columns, rows, colors)
 	text += "\n[color=#666666]One boost at a time: defragging shares a %d minute cooldown.[/color]" % int(Defragging.get_cooldown_minutes())
@@ -423,20 +423,20 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var info_text_mp = p["name"].to_lower().replace(" ", "-")
 		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), info_text_mp]
 		if !unlocked:
-			return "[color=666666]│ %-17s %-11s %-7d %-7s %-10s %-27s %-32s  │[/color]\n" % [
+			return "[color=666666]│ %-17s %-11s %-7s %-7s %-10s %-27s %-32s  │[/color]\n" % [
 				p["name"],
 				status,
-				p["unlock level"],
+				Upgrades.tier_name(int(p.get("unlock tier", 1))),
 				eff,
 				effr,
 				p["command"],
 				info_text
 			]
 		else:
-			return "│ %-17s %-11s %-7d %-7s %-10s %-27s %-32s  │\n" % [
+			return "│ %-17s %-11s %-7s %-7s %-10s %-27s %-32s  │\n" % [
 				p["name"],
 				status,
-				p["unlock level"],
+				Upgrades.tier_name(int(p.get("unlock tier", 1))),
 				eff,
 				effr,
 				p["command"],
@@ -492,6 +492,11 @@ func get_mp_dfg_info(skill: Node, process: Dictionary):
 	
 	return return_text
 
+## "Lawfirm access (Tier 2)" / "Open from the start" (2026-10-26: processes open with tiers, not levels)
+func _opens_with_text(p: Dictionary) -> String:
+	var t = int(p.get("unlock tier", 1))
+	return "Open from the start" if t <= 1 else "%s access (Tier %d)" % [Upgrades.tier_name(t), t]
+
 func get_mp_info(skill: Node, process: Dictionary) -> String:
 	if skill == Defragging:
 		return get_mp_dfg_info(skill, process)
@@ -502,7 +507,7 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 	var colored_name = "[color=#%s]%s[/color]" % [color_string, skill.SKILL.name]
 	return_text += "├─ Skill: %s\n" % colored_name
 	return_text += "├─ Process: " + process.name + "\n"
-	return_text += "├─ Level: " + str(process.level) + "\n"
+	return_text += "├─ Opens with: " + Upgrades.tier_name(int(process.get("unlock tier", 1))) + (" (from the start)" if int(process.get("unlock tier", 1)) <= 1 else " access (upload goal)") + "\n"
 	return_text += "└─ Description: " + process.description + "\n"
 	
 	return_text += "\n"
@@ -528,9 +533,9 @@ func get_mp_info(skill: Node, process: Dictionary) -> String:
 		requirements_list["???"] = 1
 	
 	if requirements_list.is_empty():
-		return_text += "└─ " + colored_name + " level " + str(process["unlock level"]) + "\n"
+		return_text += "└─ " + _opens_with_text(process) + "\n"
 	else:
-		return_text += "├─ " + colored_name + " level " + str(process["unlock level"]) + "\n"
+		return_text += "├─ " + _opens_with_text(process) + "\n"
 		
 	var i = 0
 	for item in requirements_list.keys():
@@ -631,27 +636,65 @@ func info_command_text():
 
 
 
-func get_hack_target_info(location: Dictionary):
-	var return_text = ""
-	return_text += location.name + "\n"
+## 'info hacking <location>': every target with its stats after traits (and after intel, when it has some),
+## in the tree style of the other info blocks. Rewritten 2026-10-28 (was raw stats before traits).
+func get_hack_target_info(location: Dictionary) -> String:
+	var t = "\n" + Exploits._header(location.name.to_upper() + " TARGETS") + "\n"
 	for tar in location["targets"]:
-		return_text += tar.name + "\n"
-		var integrity_text = "[font_size=12]♥Integrity: " + str(tar.integrity) + "[/font_size]"
-		var firewall_text = "[font_size=12]🛡Firewall: " + str(tar.firewall) + "[/font_size]"
-		var require_text = "[font_size=12]Requirements: " + str(tar.requirements.item.name) + " x" + str(tar.requirements.amount) + "[/font_size]"
-		var counter_atk_text = "[font_size=12]⚔Counter attack: " + str(tar.counter) + "[/font_size]"
-		var counter_spd_text = "[font_size=12]Counter speed: " + get_speed_text(tar["counter speed"]) + "/s[/font_size]"
-		var exp_text = "[font_size=12]Exp: " + str(tar.exp) + "[/font_size]"
-		var pad_text_length = 30
-		return_text += "\t" + pad_text(integrity_text, pad_text_length) + pad_text(firewall_text, pad_text_length) + pad_text(require_text, pad_text_length) + "\n"
-		return_text += "\t" + pad_text(counter_atk_text, pad_text_length) + pad_text(counter_spd_text, pad_text_length) + pad_text(exp_text, pad_text_length) + "\n"
-		var reboot_text = "[font_size=12]Firewall reboot: %ds[/font_size]" % int(tar.get("firewall reboot", 10))
-		var intel_text = "[font_size=12]Intel: up to -10% on every stat[/font_size]"
-		return_text += "\t" + pad_text(reboot_text, pad_text_length) + intel_text + "\n"
-		return_text += "\n"
-		
-	
-	return return_text
+		t += _target_info(tar)
+	t += "\n[color=#666666]Stats include traits; intel from Decoding shows as before → after for your next hack.[/color]\n"
+	return t
+
+const _TI_DIM = "#888888"
+const _TI_TEXT = "#e6e8eb"
+const _TI_INTEL = "#4ec9b0"
+const _TI_TRAIT = "#d29922"
+
+func _target_info(tar: Dictionary) -> String:
+	var D = _TI_DIM
+	var diff = str(tar.get("difficulty", ""))
+	var dcol = {"medium": "#b89324", "hard": "#ee0e00"}.get(diff.to_lower(), "#3d8a3d")
+	var locked = !tar.get("unlocked", false)
+	var t = " \n[color=%s]%s[/color]  [color=%s]%s[/color]" % [D if locked else _TI_TEXT, tar.name, dcol, diff] # " ": the terminal can drop a bare blank line
+	t += ("   [color=%s]LOCKED · unlock %s[/color]\n" % [D, tar.name.to_lower().replace(" ", "-")]) if locked \
+		else ("   [color=#4ec994]%s[/color]\n" % tar.get("command", ""))
+	var ts = Stats.trait_stats(tar)
+	var intel = Decoding.get_intel(tar)
+	var ip = Decoding.intel_pcts(tar) if int(intel.hacks) > 0 else {}
+	var lines = []
+	var req = tar.get("requirements", {})
+	if req.has("item"):
+		var have = Inventory.get_amount(req.item)
+		lines.append(["Needs", "%d %s  [color=%s](you have %d)[/color]" % [int(req.amount), req.item.name, D if have >= int(req.amount) else "#e26d5a", have]])
+	lines.append(["Integrity", _ti_val(ts.integrity, ip.get("integrity", 0.0), -1, "%d")])
+	lines.append(["Firewall", _ti_val(ts.firewall, ip.get("firewall", 0.0), -1, "%d") + "  [color=%s]down for[/color] " % D
+		+ _ti_val(ts["firewall reboot"], ip.get("firewall reboot", 0.0), 1, "%ss") + " [color=%s]once broken[/color]" % D])
+	var spd = float(ts["counter speed"])
+	var spd_after = spd * (1.0 - ip.get("counter speed", 0.0))
+	var every = "every " + (_ti_fmt(100.0 / spd) + "s" if spd_after == spd else "%s → [color=%s]%ss[/color]" % [_ti_fmt(100.0 / spd), _TI_INTEL, _ti_fmt(100.0 / max(0.1, spd_after))])
+	lines.append(["Counter", _ti_val(ts.counter, ip.get("counter", 0.0), -1, "%d") + " dmg " + every])
+	var loot = tar.get("loot")
+	lines.append(["Reward", "%d xp" % int(tar.get("exp", 0)) + ("  ·  %s" % loot.name if loot else "") + "  [color=%s]· breached %dx[/color]" % [D, Stats.get_wins(tar)]])
+	for tr in Stats.target_traits(tar):
+		lines.append(["Trait", "[color=%s]%s[/color]  %s" % [_TI_TRAIT, Stats.TRAITS[tr].name, Stats.TRAITS[tr].text]])
+	if str(tar.get("special", "")) != "":
+		lines.append(["Special", str(tar.special)])
+	lines.append(["Intel", ("[color=%s]%s[/color]  [color=%s](%d hack%s)[/color]" % [_TI_INTEL, Decoding.intel_effect_text(tar), D, int(intel.hacks), "" if int(intel.hacks) == 1 else "s"])
+		if int(intel.hacks) > 0 else "[color=%s]none · gather it with 'decode -intel'[/color]" % D])
+	for k in lines.size():
+		t += "[color=%s]%s[/color] [color=%s]%s[/color]%s\n" % [D, "└─" if k == lines.size() - 1 else "├─", D, pad_text(lines[k][0], 11), lines[k][1]]
+	return t
+
+## "126" or "126 → 113" (intel). <dir> -1: intel lowers it, 1: intel raises it.
+func _ti_val(v: float, pct: float, dir: int, f: String) -> String:
+	var a = f % (_ti_fmt(v) if f == "%ss" else int(round(v)))
+	if pct <= 0.0:
+		return a
+	var after = v * (1.0 + dir * pct)
+	return "%s → [color=%s]%s[/color]" % [a, _TI_INTEL, f % (_ti_fmt(after) if f == "%ss" else int(round(after)))]
+
+func _ti_fmt(v: float) -> String:
+	return str(int(round(v))) if is_equal_approx(v, round(v)) else "%.1f" % v
 
 func get_speed_text(speed: float) -> String:
 	var sp = 1.0 / (100.0 / speed)
@@ -669,7 +712,7 @@ func list_vm_terminals_for_skill(skill: Node):
 			var run_command = "ssh " + str(mp.get("display command", mp.get("command", ""))) # same as the main terminal's command
 			return_text += pad_text(mp.name, first_col) + pad_text(run_command, second_col) + "\n"
 		else:
-			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("LOCKED (lvl %d)" % mp['unlock level'], second_col) + "[/color]\n"
+			return_text += "[color=#666666]" + pad_text(mp.name, first_col) + pad_text("LOCKED · " + Upgrades.tier_name(int(mp.get("unlock tier", 1))), second_col) + "[/color]\n"
 			
 			
 	return return_text
@@ -724,8 +767,9 @@ func intel_help_commands() -> String:
 |____________________________________________________________________|
 |                                                                    |
 | Intel weakens a target's next hacks: integrity, firewall, counter  |
-| damage and counter speed, up to -10% each, for a set number of     |
-| hacks. Gather it with Decoding.                                    |
+| damage and counter speed, up to -10% each, and the firewall stays  |
+| down up to 10% longer, for a set number of hacks. Gather it with   |
+| Decoding.                                                          |
 |                                                                    |
 |   intel                        Intel on every unlocked target      |
 |   intel <location>             Intel on one location's targets     |
@@ -1270,28 +1314,26 @@ func get_mod_command() -> String:
 	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("EFFECT", eff_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
 	return_text += "-----------------------------------------------------------------------------------\n"
 
-	if HackingMods.current_mods.is_empty():
+	for i in range(HackingMods.current_mods.size()):
+		var mod_type = HackingMods.current_mods.keys()[i]
+		var mod = HackingMods.current_mods[mod_type]
+
+		var hmv = HackingMods.get_mod_value_text(mod_type, mod.value)
+		var hmn = HackingMods.get_mod_name(mod_type)
+		var hmd = mod.duration
+
+		return_text += pad_text("[" + str(i) + "]", id_col, false)
+		return_text += pad_text(hmn, mod_col)
+		return_text += pad_text(HackingMods.get_mod_stat(mod_type), eff_col)
+		return_text += pad_text(hmv, mod_val)
+		return_text += str(hmd) + " hacks\n"
+	# one "-" row per empty slot (at least one row when nothing is equipped)
+	for i in range(max(1, int(HackingMods.max_mods)) - HackingMods.current_mods.size()):
 		return_text += pad_text("-", id_col)
 		return_text += pad_text("-", mod_col)
 		return_text += pad_text("-", eff_col)
 		return_text += pad_text("-", mod_val)
 		return_text += "-\n"
-	
-	else:
-
-		for i in range(HackingMods.current_mods.size()):
-			var mod_type = HackingMods.current_mods.keys()[i]
-			var mod = HackingMods.current_mods[mod_type]
-
-			var hmv = HackingMods.get_mod_value_text(mod_type, mod.value)
-			var hmn = HackingMods.get_mod_name(mod_type)
-			var hmd = mod.duration
-
-			return_text += pad_text("[" + str(i) + "]", id_col, false)
-			return_text += pad_text(hmn, mod_col)
-			return_text += pad_text(HackingMods.get_mod_stat(mod_type), eff_col)
-			return_text += pad_text(hmv, mod_val)
-			return_text += str(hmd) + " hacks\n"
 	
 	return_text += "\n\n\n-------------"
 	return_text += "\n| MOD ITEMS |\n"
@@ -1354,11 +1396,37 @@ func tier_complete_text(tier: int) -> String:
 	var next = Uploads.get_location_name(tier + 1)
 	var loc = Stats.hacking_targets.get(next, {})
 	var first = loc.get("targets", [{}])[0].get("name", "?") if !loc.get("targets", []).is_empty() else "?"
-	t += "[color=#e3b341]%s UNLOCKED[/color]\n" % next.to_upper()
-	t += "  · new target: %s  [color=#666666](in Hacking: view %s)[/color]\n" % [first, next.to_lower()]
+	t += "[color=#e3b341]%s UNLOCKED  ·  TIER %d[/color]\n\n" % [next.to_upper(), tier + 1]
+	# 2026-10-26 (skill revamp): every process the new tier opens, by skill
+	var rows = tier_process_rows(tier + 1)
+	if !rows.is_empty():
+		t += "[color=#4ec9b0]NEW PROCESSES[/color]\n"
+		var w_skill = 4
+		var w_name = 4
+		for r in rows:
+			w_skill = max(w_skill, r.skill.SKILL.name.length())
+			w_name = max(w_name, str(r.process.name).length())
+		for r in rows:
+			var cmd = str(r.process.get("display command", r.process.get("command", "")))
+			t += "  [color=#%s]%s[/color]  %s  [color=#4ec994]%s[/color]\n" % [r.skill.SKILL.color.to_html(false), r.skill.SKILL.name.rpad(w_skill), str(r.process.name).rpad(w_name), cmd]
+		t += "\n"
+	t += "[color=#4ec9b0]ALSO NEW[/color]\n"
+	var cloc = Stats.hacking_targets.keys()[tier - 1] if tier - 1 < Stats.hacking_targets.size() else ""
+	if Compromise.has_lineup(cloc): # 2026-10-28: the finished tier's compromise opens
+		t += "  · [color=#ffc24a]%s compromise[/color]: six targets back to back for a driver  [color=#666666](in Hacking: recon %s)[/color]\n" % [done, done.to_lower()]
+	t += "  · Hacking target: %s  [color=#666666](in Hacking: view %s)[/color]\n" % [first, next.to_lower()]
 	t += "  · Tier %d upgrades  [color=#666666](apt: each skill's v%d.0 installs open once v%d.0 is done)[/color]\n" % [tier + 1, tier + 1, tier]
 	t += "  · next upload goal: %s  [color=#666666]('upload')[/color]" % next
 	return t
+
+## [{skill, process}] that open with <tier>, chain skills first, then the utilities, then Defragging
+func tier_process_rows(tier: int) -> Array:
+	var out = []
+	for skill in [Mining, Cracking, Matching, Compiling, Parsing, Phishing, Decoding, Defragging]:
+		for p in skill.minor_processes:
+			if int(p.get("unlock tier", 1)) == tier:
+				out.append({"skill": skill, "process": p})
+	return out
 
 func upload_goal_text() -> String:
 	var tier = Uploads.current_tier()

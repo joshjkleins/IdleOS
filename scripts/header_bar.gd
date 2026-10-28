@@ -31,7 +31,36 @@ func sweep_to(v: float) -> void:
 	_tween.tween_property(self, "value", 0.0, 0.0)
 	_tween.tween_property(self, "value", clamp(v, 0.0, 1.0), 0.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
+## 2026-10-27 (driver card): when set, each segment draws on its own: -1 = empty slot, 0..1 = equipped and that far
+## to its next rank (a faint full-length fill marks it as equipped), >= 1 = maxed (solid, bright)
+var segment_values: Array = []
+
+func set_segment_values(v: Array) -> void:
+	segment_values = v
+	segments = max(1, v.size())
+	queue_redraw()
+
+func _draw_segment_values() -> void:
+	var seg_w = (size.x - gap * (segments - 1)) / segments
+	for i in segments:
+		var rect = Rect2(i * (seg_w + gap), 0, seg_w, size.y)
+		var v = float(segment_values[i]) if i < segment_values.size() else -1.0
+		draw_rect(rect, C_EMPTY)
+		if v < 0.0:
+			continue
+		if v >= 1.0:
+			draw_rect(rect, color.lightened(0.15))
+			continue
+		draw_rect(rect, Color(color, 0.18)) # equipped
+		if v > 0.0:
+			var part = rect
+			part.size.x *= v
+			draw_rect(part, color)
+
 func _draw() -> void:
+	if !segment_values.is_empty():
+		_draw_segment_values()
+		return
 	var seg_w = (size.x - gap * (segments - 1)) / segments
 	var filled_exact = value * segments
 	var filled = int(filled_exact)
