@@ -49,6 +49,7 @@ func main_candidates() -> Array:
 	for g in Upgrades.groups:
 		c.append("apt " + g.to_lower())
 		c.append("apt install " + g.to_lower())
+		c.append("apt " + g.to_lower() + " -installed")
 	for id in Upgrades.packages:
 		c.append("apt " + id)
 		c.append("apt install " + id)
@@ -124,7 +125,7 @@ func main_candidates() -> Array:
 
 ## Hacking console: locations, targets, unlocks, one-time items
 func hacking_candidates() -> Array:
-	var c: Array = ["-h", "cd ..", "cd ~", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
+	var c: Array = ["-h", "cd ..", "cd ~", "cd root", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if l.get("unlocked", false):

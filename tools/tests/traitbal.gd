@@ -1,7 +1,7 @@
 extends Node
 ## Phase 5 (2026-10-27): live fights per target and build, for the target traits (Stats.TRAITS).
 ## TIER=1|2 (School / Lawfirm), GEAR=late|early (apt hacking + system tiers <= TIER, or < TIER), N fights each,
-## ONLY=<target name part>. Builds: base (no mods / drivers / exploits), wrong (raw damage), right (answers the trait).
+## ONLY=<target name part>, SETTRAITS=<trait[,trait]> replaces the tested targets' traits (to try new ones). Builds: base (no mods / drivers / exploits), wrong (raw damage), right (answers the trait).
 ## Each sample is a RUN of RUN hacks (anonymity carries over, like 'hack x=5'): prints hacks won per run, time and
 ## SQL / spoofs per win, anonymity left at the end of the run.
 var os
@@ -19,12 +19,13 @@ func _item(n: String) -> ItemData:
 const BUILDS = {
 	"base": {},
 	"wrong": {"mods": ["SQL Booster", "Payload Amplifier"], "drivers": ["optimized_build"]},
-	"fortress": {"mods": ["Handshake Exploit", "Backdoor"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Firewall Crack"},
+	"fortress": {"mods": ["Handshake Exploit", "Breach Strike"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Firewall Crack"},
 	"heavy": {"mods": ["Hardened Shell", "Fresh Start"], "drivers": ["burner_account", "read_ahead", "social_proof"], "auto": "Proxy Hop"},
 	"swarm": {"mods": ["Hardened Shell", "Reset Loop"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Smoke Screen"},
 	"siphon": {"mods": ["Burst Buffer", "SQL Booster"], "drivers": ["deep_reserves", "signal_boost", "cheap_spoof"], "auto": ""},
 	"throttle": {"mods": ["Burst Buffer", "SQL Booster"], "drivers": ["deep_reserves", "steady_flow", "cheap_spoof"], "auto": ""},
 	"regenerator": {"mods": ["SQL Booster", "Payload Amplifier"], "drivers": ["optimized_build", "steady_flow", "brute_force"], "auto": "Packet Flood"},
+	"adaptive": {"mods": ["SQL Booster", "Payload Amplifier"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Overcharge"},
 	"escalator": {"mods": ["SQL Booster", "Payload Amplifier"], "drivers": ["quick_compile", "warm_start", "read_ahead"], "auto": "Packet Flood"},
 }
 
@@ -38,7 +39,7 @@ func _set_gear(tier: int, late: bool) -> void:
 	if ic: ic.installed = 0; Upgrades._recompute(ic)
 	Upgrades.apply_effects()
 	HackingMods.refresh_slots()
-	var lvl = LEVEL_AT_TIER[tier - 1]
+	var lvl = int(OS.get_environment("LEVEL")) if OS.get_environment("LEVEL") != "" else LEVEL_AT_TIER[tier - 1] # LEVEL=12: skill levels
 	for m in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling, Hacking]:
 		m.SKILL.level = lvl; m.SKILL.experience = Exp.xp_for_level(lvl)
 		Exp.refresh_efficiency(m)
@@ -132,12 +133,15 @@ func _run() -> void:
 	var loc = Stats.hacking_targets.values()[tier - 1]
 	Inventory.add_resource(loc["required payload"], 10000)
 	Stats.set_max_anon()
-	print(">>> TIER %d %s gear · hacking L%d · mod slots %d · +%d max bandwidth · max anonymity %d" % [tier, "late" if late else "early", LEVEL_AT_TIER[tier - 1], HackingMods.max_mods, int(Upgrades.cur("hacking.max_bandwidth")), int(Stats.max_anon)])
+	print(">>> TIER %d %s gear · hacking L%d · mod slots %d · +%d max bandwidth · max anonymity %d" % [tier, "late" if late else "early", Hacking.SKILL.level, HackingMods.max_mods, int(Upgrades.cur("hacking.max_bandwidth")), int(Stats.max_anon)])
 	for target in loc.targets:
 		if only.begins_with("="):
 			if target.name.to_lower() != only.substr(1): continue # ONLY==name: exact
 		elif only != "" and !(only in target.name.to_lower()): continue
 		target.unlocked = true
+		var st = OS.get_environment("SETTRAITS") # SETTRAITS=adaptive (or a,b): try traits on the tested targets
+		if st != "":
+			target["traits"] = Array(st.split(","))
 		var traits = Stats.target_traits(target)
 		var builds = ["base", "wrong"]
 		for tr in traits:

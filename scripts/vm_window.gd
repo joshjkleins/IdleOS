@@ -21,6 +21,7 @@ var token: ItemData
 var duration: float = 30.0
 var repeat: bool = true
 var tokens_used: int = 1
+var token_cost: int = 1 # tokens per uptime period (VMManager.token_cost; set by the ssh command)
 var stopping: bool = false
 
 var _dragging: bool = false
@@ -88,10 +89,20 @@ func _process(_delta: float) -> void:
 func _update_status() -> void:
 	status_label.text = get_status_text()
 
+## Decoding: what the VM decodes now decides the cost (any-cache VMs move between tiers)
+func _renew_cost() -> int:
+	if skill == Decoding:
+		var arg = terminal.get("target_arg") if terminal.get("target_arg") is Dictionary else terminal.get("current_cache")
+		if arg == null:
+			arg = terminal.get("target_cache")
+		token_cost = VMManager.token_cost(skill, minor_process, arg)
+	return token_cost
+
 func _on_run_timer_timeout() -> void:
-	if repeat and Inventory.get_amount(token) > 0:
-		if !Upgrades.spend_vm_token(token, false): # VM Snapshot can keep it (silent on renewals)
-			tokens_used += 1
+	var cost = _renew_cost()
+	if repeat and Inventory.get_amount(token) >= cost:
+		if !Upgrades.spend_vm_token(token, false, cost): # VM Snapshot can keep them (silent on renewals)
+			tokens_used += cost
 		run_timer.start(_token_duration())
 	else:
 		stopping = true

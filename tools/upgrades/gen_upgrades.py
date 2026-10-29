@@ -103,7 +103,7 @@ SPEED_STEP = [round((1.5**t - 1.5**(t-1)) / 3, 4) for t in range(1, 7)]
 # Cooling added by each tier's install: totals 0.4 / 0.75 / 1.3 / 2.0 / 3.05 / 4.6 C/s (base 0.1)
 COOLING_STEP = [0.3, 0.35, 0.55, 0.7, 1.05, 1.55]
 # SQL damage / firewall damage added per tier: totals +5/30/68/118/180/280 and +2/5/10/16/23/35
-DAMAGE_STEP = [5, 25, 38, 50, 62, 100]
+DAMAGE_STEP = [5, 10, 38, 50, 62, 100] # 2026-10-28: T2 was +25 (tier 2 hacking jumped from impossible to trivial)
 # Economy pass (2026-10-20, tools/balance/econ2.py): cost scale per tier so each tier fits Josh's active-play time
 # (T1 1-2 h ... T6 6-7 h, cache loot counted), and rare items per capstone by tier
 COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
@@ -111,7 +111,7 @@ BASIC_TIER_MULT = [3, 1, 1, 1, 1, 1]  # basic-resource costs only (2026-10-20 pl
 CAP_RARES = [1, 1, 2, 2, 2, 2]
 CAP_COST_MULT = 3.66 # capstone = ~3.6x the slot's normal cost (T1 compiling.overclock: 55 payloads + a rare -> 200 payloads)
 HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
-FIREWALL_STEP = [2, 3, 5, 6, 7, 12]
+FIREWALL_STEP = [2, 2, 5, 6, 7, 12] # 2026-10-28: T2 was +3
 
 GROUPS = {}
 
@@ -275,7 +275,7 @@ GROUPS["Hacking"] = [
     (PTD,"Spoof Threshold","Packet Spoof starts auto-healing at a higher anonymity %","+10%",(30,10,"% auto-spoof threshold")),
     (PTD,"Persistent Session","More EXPLOIT charge from every combat event","+10% charge gain",(0,10,"% charge gain")),
     (CAP,["Second Wind","Evasion","Recycler","Siphon","Dead Man's Switch","Exploit Kit"],
-        ["Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
+        ["Each win in a multi-hack run restores 15% of max anonymity (anonymity carries over between fights)",
          "10% chance to dodge a countermeasure completely",
          "50% chance an SQL Injector is not consumed",
          "Each SQL hit restores 0.5% of max anonymity",
@@ -285,7 +285,7 @@ GROUPS["Hacking"] = [
 
 # capstone flavor per tier (used in notes), can be renamed freely
 CAPSTONE_NOTES = {
- "Hacking": ["Second Wind: each win in a multi-hack run restores 25% of max anonymity",
+ "Hacking": ["Second Wind: each win in a multi-hack run restores 15% of max anonymity",
              "Spoof Threshold: auto-spoof triggers at 40% then higher",
              "Overkill Carry: damage past 0 carries to the next target's firewall",
              "Multi-Thread: a 2nd SQL Injector fires at reduced rate",

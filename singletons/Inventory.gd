@@ -132,11 +132,15 @@ func list_specific_item(item: ItemData):
 			text += "[color=#dd9426]" + item.get_variant_description() + "[/color]\n\n"
 		text += "Potential items\n"
 		var rows: Array = Decoding.get_drop_table(item)
+		var sweep = rows.filter(func(r): return r.get("sweep", false)) # Salvage Sweep: its own line under the table
+		rows = rows.filter(func(r): return !r.get("sweep", false))
 		var name_width = 0
 		for row in rows:
 			name_width = max(name_width, row.name.length())
 		for row in rows:
 			text += _build_cache_item_row(row, name_width)
+		for row in sweep:
+			text += "  [color=#888888]Salvage Sweep (apt upgrade): %.0f%% extra chance for an Exploit or Mod from caches[/color]\n" % (row.chance * 100)
 		text += "\n"
 
 	if item.name.contains("VM"):

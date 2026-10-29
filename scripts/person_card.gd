@@ -208,6 +208,8 @@ func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:
 	grid.add_theme_constant_override("v_separation", 1)
 	box.add_child(grid)
 	for r in Decoding.get_drop_table(cache, Decoding.CACHE):
+		if r.get("sweep", false): # Salvage Sweep: only in 'ls' and the decode screen
+			continue
 		var col = C_RARE if r.rare else C_DIM
 		var n = _label(r.name.to_lower(), 10, C_RARE if r.rare else C_TEXT)
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL

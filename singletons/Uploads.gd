@@ -12,7 +12,7 @@ signal tier_completed(tier: int)
 signal item_uploaded(item: ItemData)
 
 const BASIC_GOALS = [150, 300, 600, 1000, 1600, 2500] # 2026-10-24 playthrough: T1 300 -> 150 (and T1 rares 3 -> 1)
-const RARE_GOALS = [1, 5, 6, 10, 15, 20]
+const RARE_GOALS = [1, 3, 6, 10, 15, 20] # 2026-10-28: T2 5 -> 3
 const UPLOAD_SECONDS_BY_TIER = [15.0, 15.0, 15.0, 11.0, 9.0, 7.0] # per basic resource, by the item's tier
 const RARE_UPLOAD_SECONDS = 45.0  # per rare item
 ## Upload heat per second of uploading, per item, by tier (~3.5% of that tier's cooling each: all of a tier's

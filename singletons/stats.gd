@@ -207,7 +207,7 @@ var hacking_targets = {
 		"required payload": Items.LAWFIRM_PAYLOAD,
 		"hard mode targets": [], # none built yet
 		"targets": [
-			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
+			{ # 2026-10-28 balance pass (tier 2 gear: 35 SQL dmg, 5 firewall dmg)
 				"name": "Legal Assistant",
 				"difficulty": "Easy",
 				"unlocked": true,
@@ -215,72 +215,72 @@ var hacking_targets = {
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 1},
 				"heat": 0.5,
 				"exp": 109,
-				"integrity": 164,
-				"firewall": 25,
-				"counter": 20,
+				"integrity": 160,
+				"firewall": 28,
+				"counter": 30,
 				"counter speed": 16.0,
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"firewall reboot": 8, # seconds the firewall stays down after a break
 				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
-			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
+			{ # 2026-10-28 balance pass (tier 2 gear: 35 SQL dmg, 5 firewall dmg)
 				"name": "Paralegal",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack paralegal",
-				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 4},
 				"heat": 0.8,
 				"exp": 1287,
-				"integrity": 419,
-				"firewall": 31,
-				"counter": 18,
-				"counter speed": 16.0,
-				"firewall reboot": 8.0, # seconds the firewall stays down after a break
+				"integrity": 340,
+				"firewall": 40,
+				"counter": 35,
+				"counter speed": 20,
+				"firewall reboot": 6, # seconds the firewall stays down after a break
 				"traits": ["throttle"],
 				"loot": Items.PARALEGAL_CACHE
 			},
-			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
+			{ # 2026-10-28 balance pass (tier 2 gear: 35 SQL dmg, 5 firewall dmg)
 				"name": "Associate Attorney",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack associate-attorney",
-				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 3},
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 7},
 				"heat": 1.1,
 				"exp": 1931,
-				"integrity": 691,
-				"firewall": 74,
-				"counter": 22,
+				"integrity": 300,
+				"firewall": 25,
+				"counter": 40,
 				"counter speed": 16.0,
-				"firewall reboot": 14.0, # seconds the firewall stays down after a break
+				"firewall reboot": 18, # seconds the firewall stays down after a break
 				"traits": ["fortress"],
 				"loot": Items.ASSOCIATE_ATTORNEY_CACHE
 			},
-			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
+			{ # 2026-10-28 balance pass (tier 2 gear: 35 SQL dmg, 5 firewall dmg)
 				"name": "Lawyer",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack lawyer",
-				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 10},
 				"heat": 1.4,
 				"exp": 2578,
-				"integrity": 826,
-				"firewall": 41,
-				"counter": 8,
+				"integrity": 450,
+				"firewall": 30,
+				"counter": 18,
 				"counter speed": 30.0,
-				"firewall reboot": 6.0, # seconds the firewall stays down after a break
+				"firewall reboot": 8, # seconds the firewall stays down after a break
 				"traits": ["regenerator"],
 				"loot": Items.LAWYER_CACHE
 			},
-			{ # PLACEHOLDER stats (School x2.0, tier 2) - balance later
+			{ # 2026-10-28 balance pass (tier 2 gear: 35 SQL dmg, 5 firewall dmg)
 				"name": "Partner",
 				"difficulty": "Hard",
 				"unlocked": true,
 				"command": "hack partner",
-				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 13},
 				"heat": 1.7,
 				"exp": 3222,
-				"integrity": 880,
-				"firewall": 56,
-				"counter": 17,
+				"integrity": 520,
+				"firewall": 34,
+				"counter": 30,
 				"counter speed": 20.0,
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"traits": ["escalator"],
@@ -891,13 +891,14 @@ const TRAITS = {
 	"escalator":   {"name": "ESCALATOR", "text": "Countermeasures speed up the longer you keep hacking it",
 		"escalate": 0.04, "escalate_every": 5.0, "escalate_max": 1.5}, # over the whole run (fight time), not per hack
 	"siphon":      {"name": "SIPHON", "text": "Countermeasures drain your bandwidth",
-		"drain": 1.0},                                  # share of max bandwidth per countermeasure (1.0 = empties it)
+		"drain": 0.5},                                  # share of max bandwidth per countermeasure (2026-10-28: was 1.0)
 	"heater":      {"name": "HEATER", "text": "Runs your system hot",
 		"heat": 2.5},
 	"throttle":    {"name": "THROTTLE", "text": "SQL Injectors and Packet Spoofs cost more bandwidth",
 		"bandwidth": 2.0},
-	"encrypted":   {"name": "ENCRYPTED", "text": "Exploits cost more charge",
-		"exploit_cost": 1.5},
+	# 2026-10-28: ENCRYPTED (Exploits cost x1.5 charge) removed
+	"adaptive":    {"name": "ADAPTIVE", "text": "Small firewall that reboots fast and comes back bigger every time",
+		"firewall": 0.5, "reboot": 0.5, "grow": 0.5},   # each reboot adds 50% of its starting firewall: hit hard and crit
 	"packet_loss": {"name": "PACKET LOSS", "text": "SQL Injectors and Packet Spoofs are used 2 at a time",
 		"items": 2},
 }
@@ -913,7 +914,7 @@ func trait_stats(target: Dictionary) -> Dictionary:
 	var out = {"integrity": float(target.get("integrity", 0)), "firewall": float(target.get("firewall", 0)),
 		"counter": float(target.get("counter", 0)), "counter speed": float(target.get("counter speed", 1.0)),
 		"firewall reboot": float(target.get("firewall reboot", 10.0))} # seconds the firewall stays down after a break
-	for tr in ["fortress", "swarm", "heavy"]:
+	for tr in ["fortress", "swarm", "heavy", "adaptive"]:
 		if has_trait(target, tr):
 			var d = TRAITS[tr]
 			out.firewall = round(out.firewall * float(d.get("firewall", 1.0)))

@@ -142,7 +142,7 @@ var CACHE = {
 	"unlock tier": 1, # 2026-10-26: opens with this tier's location (1 = from the start)
 	"efficiency level": 1, # efficiency grows from this skill level (its old unlock level)
 	"base speed": 0.2,
-	"overclock speed": 0.05,
+	"overclock speed": 0.1, # 2026-10-28: was 0.05 (x4, too fast); now x2 like every other process
 	"overheat speed": 1.0,
 	"heat": 3.2,
 	"overclock heat": 3.5,
@@ -182,7 +182,7 @@ var INTEL = {
 	"overheat heat": 0.3,
 	"vm token chance": 0.01,
 	"requirements": "Nothing (an unlocked hacking target)",
-	"description": "Gathers intel on a hacking target. Each successful line lowers a stat with a maximum of -10% for 15 hacks.",
+	"description": "Gathers intel on a hacking target. Each successful line lowers a stat with a maximum of -10% for 5 hacks.",
 	"efficiency description": "Chance per line to gather intel.",
 	"signal": intel_decode_cycle_completed
 }
@@ -244,7 +244,7 @@ var SALVAGE = {
 	"overheat heat": 0.6,
 	"vm token chance": 0.02,
 	"requirements": "Basic resource x100",
-	"description": "Breaks down 100 of a basic resource at a time. Each of its 10 lines has a chance at 5-10 random VM tokens: 3% per line for tier 1 items, 6% for tier 2, up to 18% for tier 6.",
+	"description": "Breaks down 100 of a basic resource at a time. Each of its 10 lines has a chance at 3-6 random VM tokens: 1% per line for tier 1 items, 3% for tier 2, 5% for tier 3, up to 11% for tier 6.",
 	"efficiency description": "Chance a token find is doubled.",
 	"signal": cache_decode_cycle_completed
 }
@@ -382,12 +382,12 @@ func is_basic_item(item: ItemData) -> bool:
 		return false
 	return not item in vm_tokens()
 
-## SALVAGE: 100 of a basic resource per run, 10 lines, each with a chance at 5-10 random VM tokens.
+## SALVAGE: 100 of a basic resource per run, 10 lines, each with a chance at 3-6 random VM tokens.
 const SALVAGE_COST = 100
 const SALVAGE_LINES = 10
-const SALVAGE_TOKENS_MIN = 5   # 2026-10-22: was 10-20
-const SALVAGE_TOKENS_MAX = 10
-const SALVAGE_CHANCE_PER_TIER = 0.03 # chance per line: 3% x the item's tier (tier 1 = 3% ... tier 6 = 18%)
+const SALVAGE_TOKENS_MIN = 3   # 2026-10-28: was 5-10 (2026-10-22: was 10-20)
+const SALVAGE_TOKENS_MAX = 6
+const SALVAGE_CHANCE_PER_TIER = 0.02 # 2026-10-28: chance per line 1% at tier 1, +2% per tier (3%, 5% ... 11% at tier 6); was 3% x tier
 
 ## The tier (1-6) a basic resource belongs to, 0 if none.
 func get_resource_tier(item: ItemData) -> int:
@@ -397,7 +397,8 @@ func get_resource_tier(item: ItemData) -> int:
 	return 0
 
 func get_salvage_line_chance(item: ItemData) -> float:
-	return SALVAGE_CHANCE_PER_TIER * get_resource_tier(item)
+	var t = get_resource_tier(item)
+	return 0.0 if t <= 0 else 0.01 + SALVAGE_CHANCE_PER_TIER * (t - 1)
 
 ## The basic resources of each tier, in chain order: mined, address, encrypted, identifier, cracked, matched, payload.
 func get_tier_resources(tier: int) -> Array:
@@ -487,14 +488,14 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 ## "hacks": hacks left}. Each step is INTEL_STEP (2%) off that stat for a hack that uses the intel. Gathering builds
 ## it up one point per successful line, in this order (2026-10-21):
 ##   one stat +2% at a time until all four are at 2%, then +1 hack; all four to 4%, +1 hack; ... all at 10%,
-##   then +1 hack per point up to INTEL_MAX_HACKS (15, + Field Notes).
+##   then +1 hack per point up to INTEL_MAX_HACKS (5, + Field Notes).
 ## Each hack attempt uses 1 hack of intel; when the last one is used the intel is spent (back to nothing).
 const INTEL_LINES = 5
 ## 2026-10-28: 5th stat, "firewall reboot": the firewall stays down longer (+2% per step) instead of a stat going down
 const INTEL_STATS = ["integrity", "firewall", "counter", "counter speed", "firewall reboot"]
 const INTEL_STEP = 0.02
 const INTEL_MAX_STEPS = 5 # 10%
-const INTEL_MAX_HACKS = 15 # base; Field Notes adds +1 per tier installed (intel_max_hacks())
+const INTEL_MAX_HACKS = 5 # 2026-10-28: was 15. base; Field Notes adds +1 per tier installed (intel_max_hacks())
 var intel := {}
 
 ## "School/Student" or "School/Student (Hard)/hard" style key (easy and hard mode are separate).
@@ -580,6 +581,18 @@ func intel_text(target: Dictionary) -> String:
 	if i.hacks <= 0:
 		return "no intel  (builds up to -%d%% on every stat for %d hacks)" % [roundi(INTEL_STEP * INTEL_MAX_STEPS * 100), intel_max_hacks()]
 	return "%s  for %d hack%s" % [intel_effect_text(target), i.hacks, "" if i.hacks == 1 else "s"]
+
+## Two short lines for the Intel decode window (2026-10-28: one line pushed the VM window wider):
+## "Intel: Vice Principal  ·  4 hacks" / "-10% int · -8% fw · -8% ctr · -8% speed · +8% reboot"
+func intel_window_text(target: Dictionary, maxed: bool = false) -> String:
+	var i = get_intel(target)
+	var head = "Intel%s: %s" % [" maxed" if maxed else "", target.name]
+	if i.hacks <= 0:
+		return head + "\nno intel yet  (builds up to -%d%% on every stat)" % roundi(INTEL_STEP * INTEL_MAX_STEPS * 100)
+	var p = intel_pcts(target)
+	var short = {"integrity": "int", "firewall": "fw", "counter": "ctr", "counter speed": "speed", "firewall reboot": "reboot"}
+	var parts = INTEL_STATS.map(func(s): return ("+%d%% %s" if s == "firewall reboot" else "-%d%% %s") % [roundi(p[s] * 100), short[s]])
+	return "%s  ·  %d hack%s\n%s" % [head, i.hacks, "" if i.hacks == 1 else "s", " · ".join(parts)]
 
 ## "student", "student hard", "legal-assistant", "student (hard)" -> the unlocked target, or {}.
 func find_target(text: String) -> Dictionary:

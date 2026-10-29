@@ -8563,10 +8563,10 @@
     {
      "tier": 2,
      "slot": 1,
-     "value": 25.0,
-     "label": "+25 dmg, +0.1 heat",
+     "value": 10.0,
+     "label": "+10 dmg, +0.1 heat",
      "before": "25 dmg",
-     "after": "50 dmg",
+     "after": "35 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8580,8 +8580,8 @@
      "slot": 1,
      "value": 38.0,
      "label": "+38 dmg, +0.1 heat",
-     "before": "50 dmg",
-     "after": "88 dmg",
+     "before": "35 dmg",
+     "after": "73 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8595,8 +8595,8 @@
      "slot": 1,
      "value": 50.0,
      "label": "+50 dmg, +0.1 heat",
-     "before": "88 dmg",
-     "after": "138 dmg",
+     "before": "73 dmg",
+     "after": "123 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8610,8 +8610,8 @@
      "slot": 1,
      "value": 62.0,
      "label": "+62 dmg, +0.1 heat",
-     "before": "138 dmg",
-     "after": "200 dmg",
+     "before": "123 dmg",
+     "after": "185 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8625,8 +8625,8 @@
      "slot": 1,
      "value": 100.0,
      "label": "+100 dmg, +0.1 heat",
-     "before": "200 dmg",
-     "after": "300 dmg",
+     "before": "185 dmg",
+     "after": "285 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8662,10 +8662,10 @@
     {
      "tier": 2,
      "slot": 2,
-     "value": 3.0,
-     "label": "+3",
+     "value": 2.0,
+     "label": "+2",
      "before": "3 firewall dmg",
-     "after": "6 firewall dmg",
+     "after": "5 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8679,8 +8679,8 @@
      "slot": 2,
      "value": 5.0,
      "label": "+5",
-     "before": "6 firewall dmg",
-     "after": "11 firewall dmg",
+     "before": "5 firewall dmg",
+     "after": "10 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8694,8 +8694,8 @@
      "slot": 2,
      "value": 6.0,
      "label": "+6",
-     "before": "11 firewall dmg",
-     "after": "17 firewall dmg",
+     "before": "10 firewall dmg",
+     "after": "16 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8709,8 +8709,8 @@
      "slot": 2,
      "value": 7.0,
      "label": "+7",
-     "before": "17 firewall dmg",
-     "after": "24 firewall dmg",
+     "before": "16 firewall dmg",
+     "after": "23 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8724,8 +8724,8 @@
      "slot": 2,
      "value": 12.0,
      "label": "+12",
-     "before": "24 firewall dmg",
-     "after": "36 firewall dmg",
+     "before": "23 firewall dmg",
+     "after": "35 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -9425,7 +9425,7 @@
    "group": "Hacking",
    "name": "Second Wind",
    "type": "capstone",
-   "effect": "Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
+   "effect": "Each win in a multi-hack run restores 15% of max anonymity (anonymity carries over between fights)",
    "levels": [
     {
      "tier": 1,
@@ -9434,7 +9434,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "Each win in a multi-hack run restores 25% of max anonymity (anonymity carries over between fights)",
+     "effect": "Each win in a multi-hack run restores 15% of max anonymity (anonymity carries over between fights)",
      "costs": [
       {
        "item": "Superintendent cache",

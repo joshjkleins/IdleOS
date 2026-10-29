@@ -5,9 +5,6 @@ extends Control
 #STEAM ACHIEVEMENTS
 #CLOUD SAVING
 #BUILD OUT ENDING OF GAME
-#BUILD OUT HARD MODE FOR EACH TARGET
-
-#add more Hacking Mods
 
 #MINING | PARSING | CRACKING | MATCHING | PHISHING | COMPILING | HACKING | DECODING | DEFRAGGING
 
@@ -642,10 +639,16 @@ func universal_commands(text):
 		return true
 	
 	if DEV_ITEM_COMMANDS and text.begins_with("add"):
+		# 'add <item>' = 100, 'add <item> <amount>' (ex. add admin cache 1)
 		var item_name = text.trim_prefix("add").strip_edges()
+		var amount = 100
 		var item = Inventory.get_item_by_name(item_name)
-		if item != null:
-			Inventory.add_resource(item, 100)
+		var words = item_name.split(" ", false)
+		if item == null and words.size() >= 2 and words[-1].is_valid_int():
+			amount = int(words[-1])
+			item = Inventory.get_item_by_name(" ".join(words.slice(0, words.size() - 1)))
+		if item != null and amount > 0:
+			Inventory.add_resource(item, amount)
 			return true
 	#
 	# TESTING: 'setlevel <skill> <level>' (raising it runs the normal level ups: tokens, driver slot notices)
@@ -1022,6 +1025,14 @@ func handle_apt_commands(text):
 			add_line("Package not found. [color=#666666]example: apt system · apt system.cooling_amount[/color]")
 			return
 		add_line(ContextCommands.get_upgrades_package_info(arg))
+		return
+	# 'apt <skill> -installed': everything installed for that skill, across all tiers
+	if parts.size() == 3 and parts[2].to_lower() == "-installed":
+		for g in Upgrades.groups:
+			if parts[1].to_lower() == g.to_lower():
+				add_line(ContextCommands.get_installed_upgrades_text(g))
+				return
+		add_line("Skill not found. [color=#666666]example: apt mining -installed[/color]")
 		return
 	if parts.size() >= 3 and parts[1] == "install":
 		var id = parts[2].to_lower()
@@ -1447,7 +1458,7 @@ func handle_vm_token_commands(text):
 		if !check.ok:
 			add_line(check.message)
 			return
-		Upgrades.spend_vm_token(target_process.vm_token)
+		if !_vm_pay(target_process, target_minor_process, check.arg): return
 		new_window = target_process.create_vm_window(target_minor_process, true, check.arg)
 	
 	elif target_process == Parsing:
@@ -1460,7 +1471,7 @@ func handle_vm_token_commands(text):
 		if parsed_cmd.message != "":
 			add_line(parsed_cmd.message)
 		
-		Upgrades.spend_vm_token(target_process.vm_token)
+		if !_vm_pay(target_process, target_minor_process, parsed_cmd.items_to_parse): return
 		new_window = target_process.create_vm_window(target_minor_process, parsed_cmd.items_to_parse, parsed_cmd.target)
 	
 	elif target_process == Compiling:
@@ -1470,7 +1481,7 @@ func handle_vm_token_commands(text):
 				add_line(check.message)
 				return
 			var item = check.item
-			Upgrades.spend_vm_token(target_process.vm_token)
+			if !_vm_pay(target_process, target_minor_process, null): return
 			new_window = target_process.create_vm_window(target_minor_process, item)
 		else:
 			var missing = false
@@ -1481,7 +1492,7 @@ func handle_vm_token_commands(text):
 			if missing:
 				return
 			
-			Upgrades.spend_vm_token(target_process.vm_token)
+			if !_vm_pay(target_process, target_minor_process, null): return
 			new_window = target_process.create_vm_window(target_minor_process)
 	
 	elif target_process == Cracking:
@@ -1521,7 +1532,7 @@ func handle_vm_token_commands(text):
 				return
 			#start_cracking(target_minor_process)
 		
-		Upgrades.spend_vm_token(target_process.vm_token)
+		if !_vm_pay(target_process, target_minor_process, null): return
 		new_window = target_process.create_vm_window(target_minor_process, use_item, create_item)
 			
 	elif target_process == Phishing: # ssh phishing spear bait=logs
@@ -1532,16 +1543,29 @@ func handle_vm_token_commands(text):
 		if target_minor_process == Phishing.TRAP:
 			add_line("Traps don't need a VM: set one with 'phish -trap', it fills on its own.")
 			return
-		Upgrades.spend_vm_token(target_process.vm_token)
+		if !_vm_pay(target_process, target_minor_process, null): return
 		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait, parsed_bait.target)
 	else:
-		Upgrades.spend_vm_token(target_process.vm_token)
+		if !_vm_pay(target_process, target_minor_process, null): return
 		new_window = target_process.create_vm_window(target_minor_process, true)
 	
 	if new_window:
-		add_line("Started [color=#%s]vm-%02d[/color] %s / %s. Use 'vm -h' to manage VM windows." % [target_process.SKILL.color.to_html(false), new_window.vm_id, target_process.SKILL.name, target_minor_process.name])
+		new_window.token_cost = _vm_paid
+		new_window.tokens_used = _vm_paid
+		add_line("Started [color=#%s]vm-%02d[/color] %s / %s%s. Use 'vm -h' to manage VM windows." % [target_process.SKILL.color.to_html(false), new_window.vm_id, target_process.SKILL.name, target_minor_process.name,
+			("  [color=#888888](%d tokens per %ds, tier %d)[/color]" % [_vm_paid, int(target_process.VM_UPTIME), _vm_paid]) if _vm_paid > 1 else ""])
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
+
+## Pays a new VM's first uptime period: VMManager.token_cost tokens (2026-10-28: tier 2 work costs 2, ...).
+var _vm_paid := 1
+func _vm_pay(skill: Node, minor: Dictionary, arg) -> bool:
+	_vm_paid = VMManager.token_cost(skill, minor, arg)
+	if Inventory.get_amount(skill.vm_token) < _vm_paid:
+		add_line("Not enough %s: this VM costs %d per %ds (tier %d work). You have %d." % [skill.vm_token.name, _vm_paid, int(skill.VM_UPTIME), _vm_paid, Inventory.get_amount(skill.vm_token)])
+		return false
+	Upgrades.spend_vm_token(skill.vm_token, true, _vm_paid)
+	return true
 
 ## upload | upload <item> [amount] | upload -a | upload cancel <item> (unpack <item>)
 func handle_upload_commands(text: String) -> void:
@@ -2914,7 +2938,7 @@ func _offline_welcome() -> void:
 	for x in r.get("xp", []):
 		rows.append({"name": x.skill + " XP", "amount": x.amount, "xp": true})
 	for d in r.get("drivers", []): # equipped drivers rank up from offline skill XP too
-		rows.append({"name": d.name + " XP", "amount": d.xp, "xp": true})
+		rows.append({"name": "%s XP (%s Driver)" % [d.name, d.skill], "amount": d.xp, "xp": true})
 	# 2026-10-28: nothing to download (only uploads / notes): skip the bars, they ran 2.5s with nothing on screen
 	head += "connected  [color=%s]session found · %s[/color]\n\n" % [OFFLINE_DIM, "downloading offline progress" if !rows.is_empty() else "syncing"]
 	# 2026-10-25: every row downloads at the same time (one bar each), then all flip to 'downloaded'

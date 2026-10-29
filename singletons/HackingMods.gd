@@ -68,7 +68,7 @@ const EQUIP_INFO = {
 	MOD_TYPE.SQL_BOOST: ["SQL Booster", "SQL Injectors attack faster", "pct"],
 	MOD_TYPE.FW_BREAK_SLOW: ["Shatter Protocol", "Breaking the firewall slows enemy countermeasures by an extra 25% (75% total).", "pct"],
 	MOD_TYPE.BW_PCT_REGEN: ["Burst Buffer", "Regenerates an extra 20% of max bandwidth per second.", "pct"],
-	MOD_TYPE.FW_NO_REBOOT: ["Firmware Brick", "Once the firewall is broken it never reboots for the rest of the hack.", "on"],
+	MOD_TYPE.FW_NO_REBOOT: ["Breach Strike", "The first hit after the firewall breaks is a guaranteed crit.", "on"], # 2026-10-28: was "firewall never reboots"
 	MOD_TYPE.DAMAGE_PCT: ["Payload Amplifier", "SQL Injectors deal 25% more damage.", "pct"],
 	MOD_TYPE.CRIT_CHANCE_MULT: ["Vuln Scanner", "Doubles your crit chance.", "x"],
 	MOD_TYPE.CRIT_DAMAGE_MULT: ["Critical Overflow", "Crits deal double again: x4 instead of x2.", "x"],
@@ -203,7 +203,7 @@ const STAT_LABEL = {
 	MOD_TYPE.SQL_BOOST: "SQL attack speed",
 	MOD_TYPE.FW_BREAK_SLOW: "counter slow on firewall break",
 	MOD_TYPE.BW_PCT_REGEN: "bandwidth regen (of max) / s",
-	MOD_TYPE.FW_NO_REBOOT: "firewall never reboots",
+	MOD_TYPE.FW_NO_REBOOT: "crit after firewall break",
 	MOD_TYPE.DAMAGE_PCT: "SQL damage",
 	MOD_TYPE.CRIT_CHANCE_MULT: "crit chance",
 	MOD_TYPE.CRIT_DAMAGE_MULT: "crit damage",

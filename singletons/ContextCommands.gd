@@ -734,7 +734,7 @@ func ssh_commands(major_processes: Array) -> String:
 		return_text += pad_text(s_name, first_col) + pad_text(tokens, second_col) + pad_text(info_command, third_col) + "\n"
 		
 	return_text += "\nRun any process in a VM window: 'ssh' + the process command, e.g. [color=#4ec994]ssh mine -logs[/color], [color=#4ec994]ssh crack -password[/color].\n"
-	return_text += "VM Tokens run processes in a separate pop-up window. Each window consumes a VM token to run for 30 seconds.\n"
+	return_text += "VM Tokens run processes in a separate pop-up window. Each window consumes VM tokens to run for 30 seconds: 1 for tier 1 work, 2 for tier 2 (Archives, Lawfirm caches, ...) and so on. Phishing costs the highest tier you've unlocked.\n"
 	return_text += "If there are additional VM tokens they will be consumed to run for an additional 30 seconds until the window is exited out of or you run out of VM Tokens for that skill."
 	return return_text
 	
@@ -1134,7 +1134,35 @@ func get_skill_upgrades_text(group: String) -> String:
 		t += "[color=%s]Next: Tier %d · %s opens %s[/color]\n" % [APT_DIM, nt, Upgrades.tier_name(nt), opens]
 	if ready > 1:
 		t += "\n[color=%s]apt install %s[/color] installs all %d ready packages at once" % [APT_OK, group.to_lower(), ready]
-	t += "\n[color=%s]apt install <package>[/color] installs one · [color=%s]apt <package>[/color] for details" % [APT_OK, APT_OK]
+	t += "\n[color=%s]apt install <package>[/color] installs one · [color=%s]apt <package>[/color] for details · [color=%s]apt %s -installed[/color] lists everything installed" % [APT_OK, APT_OK, APT_OK, group.to_lower()]
+	return t
+
+## 'apt <skill> -installed': each package with installs across all tiers and what it gives now; majors listed
+func get_installed_upgrades_text(group: String) -> String:
+	var t = "\n[color=#%s]%s[/color]  %s  [color=%s]installed upgrades[/color]\n" % [Upgrades.group_color(group).to_html(false), group.to_upper(), Upgrades.version_text(group), APT_DIM]
+	var columns = [{"title": "PACKAGE"}, {"title": "UPGRADE"}, {"title": "INSTALLED"}, {"title": "NOW"}]
+	var rows = []
+	var colors = []
+	var majors = []
+	var any = false
+	for p in Upgrades.group_packages(group):
+		var n = int(p.installed)
+		if p.type == "capstone":
+			if n > 0:
+				majors.append([p.name, str(p.levels[n - 1].effect)])
+			continue
+		any = any or n > 0
+		rows.append([p.id, p.name, ("%d/%d" % [n, p.levels.size()]) + ("  max" if n >= p.levels.size() else ""),
+			str(p.levels[n - 1].after) if n > 0 else "-"])
+		colors.append("" if n > 0 else APT_DIM)
+	t += build_table(columns, rows, colors)
+	t += "\n[color=%s]MAJOR UPGRADES[/color]\n" % APT_GOLD
+	if majors.is_empty():
+		t += "  [color=%s]none yet[/color]\n" % APT_DIM
+	for m in majors:
+		t += "  [color=%s]%s[/color]  %s\n" % [APT_GOLD, m[0], m[1]]
+	if !any and majors.is_empty():
+		t += "[color=%s]Nothing installed yet: 'apt %s' shows what's available.[/color]\n" % [APT_DIM, group.to_lower()]
 	return t
 
 ## 'apt <package>'
@@ -1303,7 +1331,7 @@ func get_mod_command() -> String:
 	var return_text = ""
 	var id_col = 5
 	var mod_col = 27
-	var eff_col = 32
+	var eff_col = 47 # 2026-10-28: +15, long effects ran into VALUE
 	var mod_val = 8
 	
 	var active_mods_title = "\n| ACTIVE MODS " + str(HackingMods.current_mods.size()) + "/" + str(HackingMods.max_mods)  + " |\n"
@@ -1312,7 +1340,7 @@ func get_mod_command() -> String:
 	return_text += active_mods_title
 	return_text += "------------------\n\n"
 	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("EFFECT", eff_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
-	return_text += "-----------------------------------------------------------------------------------\n"
+	return_text += "-".repeat(83 + 15) + "\n"
 
 	for i in range(HackingMods.current_mods.size()):
 		var mod_type = HackingMods.current_mods.keys()[i]
@@ -1342,11 +1370,11 @@ func get_mod_command() -> String:
 	
 	var mod_id_col = 5
 	var mod_name_col = 27
-	var mod_mod_col = 32
+	var mod_mod_col = 47
 	var mod_val_col = 8
 	
 	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
-	return_text += "----------------------------------------------------------------------------------\n"
+	return_text += "-".repeat(82 + 15) + "\n"
 	if Inventory.has_mod_item():
 		var player_hacking_mods = Inventory.get_hacking_mods_items()
 		

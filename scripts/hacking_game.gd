@@ -99,7 +99,7 @@ const BASE_ATTACK_HEAT := 0.3
 const ATTACK_HEAT_PER_DAMAGE := 0.1
 var DEFEND_PCT: float = 0.05 # Packet Spoof heal as a fraction of max anonymity
 ## Capstones
-const SECOND_WIND_RESTORE := 0.25 # Second Wind (T1 capstone): max anonymity restored after each win in a multi-hack run
+const SECOND_WIND_RESTORE := 0.15 # 2026-10-28: was 25%. Second Wind (T1 capstone): max anonymity restored after each win in a multi-hack run
 const EVASION_CHANCE := 0.1       # countermeasure dodged
 const RECYCLER_CHANCE := 0.5      # SQL Injector not consumed
 const SIPHON_PCT := 0.005         # max anonymity restored per SQL hit
@@ -152,6 +152,7 @@ var start_overclock: bool = false
 var firewall_down := false
 var fw_down_left := 0.0
 var fw_start_value := 0.0   # what the firewall reboots to (after intel / mods)
+var fw_adaptive_base := 0.0 # Adaptive (trait): the hack's starting firewall; each reboot adds a share of it
 var fw_base := 0            # target's firewall before intel
 var integ_base := 0
 var _fw_tween: Tween
@@ -654,7 +655,7 @@ func attack():
 		if forced_crit and !_breach_hit:
 			line += "  " + _c("(Zero-Day, %d left)" % crits_left, C_EXP)
 		elif _breach_hit:
-			line += "  " + _c("(firewall breach)", C_FW)
+			line += "  " + _c("(MOD Breach Strike)", C_MOD)
 	if blocked > 0:
 		line += "  " + _c("firewall absorbed %d" % blocked, C_FW)
 	if fw_hit > 0:
@@ -922,7 +923,8 @@ func _break_firewall(earned: bool = true) -> void:
 		Exploits.add_charge("firewall")
 		_float(exp_row.bar, "+%d charge" % int(Exploits.CHARGE_GAIN.firewall), C_EXP, 12, 18.0)
 	firewall_down = true
-	breach_crit = true
+	# 2026-10-28: the guaranteed crit after a break is now the Breach Strike mod's effect (no longer for everyone)
+	breach_crit = HackingMods.has_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT)
 	fw_down_left = _fw_down_time() + knock_bank + Drivers.value("session_hijack") # Port Knock used while it was up; Session Hijack (driver)
 	knock_bank = 0.0
 	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_BREAK_HASTE): # Breach Momentum
@@ -946,11 +948,11 @@ func _break_firewall(earned: bool = true) -> void:
 
 func _restore_firewall() -> void:
 	firewall_down = false
-	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT): # Firmware Brick: stays at 0 for the rest of the hack
-		firewall_bar.value = 0
-		_log("FW", C_FW, "firewall bricked - it won't reboot this hack (countermeasures back to full speed)")
-		_refresh_panels()
-		return
+	if _trait("adaptive") and fw_adaptive_base > 0.0: # Adaptive (trait): every reboot adds 50% of the starting firewall
+		var grow = round(fw_adaptive_base * float(_tv("adaptive", "grow", 0.5)))
+		fw_start_value += grow
+		firewall_bar.max_value = max(firewall_bar.max_value, fw_start_value)
+		_log("FW", C_FW, "Adaptive firewall: +%d, now %d" % [int(grow), int(fw_start_value)])
 	var reboot_to = fw_start_value
 	if Drivers.value("token_replay") > 0.0: # Token Replay (driver): reboots weaker
 		reboot_to = int(round(fw_start_value * Drivers.value("token_replay")))
@@ -1309,7 +1311,7 @@ func prepare():
 	hack_index += 1
 	_update_sub_label()
 	_clear_effects()
-	Exploits.cost_mult = float(_tv("encrypted", "exploit_cost")) # Encrypted (trait)
+	Exploits.cost_mult = 1.0 # (Encrypted trait removed 2026-10-28)
 	_show_trait_chips()
 	_bw_warned = {}
 	_revealed = false
@@ -1373,6 +1375,7 @@ func prepare():
 		_float(firewall_bar, "-%d MOD" % (fw_now - after_bd), C_MOD, 15)
 		fw_now = after_bd
 	fw_start_value = fw_now
+	fw_adaptive_base = fw_now
 	firewall_bar.value = fw_now
 	_announce_mods()
 	await get_tree().create_timer(0.3).timeout
@@ -2291,9 +2294,7 @@ func _build_ui() -> void:
 	band_row = _stat_row(you_card.body, "BANDWIDTH", C_BAND, 10)
 	exp_row = _stat_row(you_card.body, "EXPLOIT", C_EXP, 6)
 	exp_row.bar.max_value = Exploits.CHARGE_MAX
-	driver_row = _rtl(11)
-	you_card.body.add_child(driver_row)
-	_refresh_driver_row()
+	# (2026-10-28: equipped drivers moved to the header's ARSENAL card)
 	Exploits.charge_changed.connect(_refresh_exploit_ui)
 	integ_row = _stat_row(target_card.body, "INTEGRITY", C_INTEG, 14)
 	fw_row = _stat_row(target_card.body, "FIREWALL", C_FW, 10)

@@ -1,7 +1,8 @@
 extends MarginContainer
 ## Hacking view header, in the same card style as the main terminal's header and side panel:
 ##   [ Hacking skill card ] [ ARSENAL ] [ PAYLOADS ] [ MODIFIERS ] [ SYSTEM temperature ]
-## ARSENAL shows the two permanent combat items (SQL Injectors, Packet Spoofs). PAYLOADS shows one count
+## ARSENAL shows the two permanent combat items (SQL Injectors, Packet Spoofs) and the equipped drivers (name in
+## its skill's color + what it does; 2026-10-28, moved from the hack's YOU card). PAYLOADS shows one count
 ## per unlocked location.
 ## API used by hacking.gd: update_hacking_header(), update_modifiers_ui().
 
@@ -48,6 +49,7 @@ class _SlotPips extends Control:
 
 var skill_card: HeaderCard
 var arsenal_grid: GridContainer
+var drivers_box: VBoxContainer
 var payload_grid: GridContainer
 var mods_title: Label
 var mods_list: VBoxContainer
@@ -66,11 +68,24 @@ func _ready() -> void:
 	skill_card.size_flags_horizontal = Control.SIZE_FILL
 	row.add_child(skill_card)
 
-	var arsenal = _panel(row, "ARSENAL", C_ARSENAL, 230.0, true)
-	arsenal_grid = _grid(arsenal.body, 2)
-	var payloads = _panel(row, "PAYLOADS", C_PAYLOAD, 250.0, true)
+	# ARSENAL (2026-10-28 layout): SQL Injectors / Packet Spoofs on the title row, the equipped drivers (up to 14)
+	# below in as many columns as fit (~190px each: 5 at 1920 wide, so 14 drivers take 3 rows)
+	var arsenal = _panel(row, "ARSENAL", C_ARSENAL, 340.0, true)
+	arsenal.panel.size_flags_stretch_ratio = 3.0 # the widest card: it holds the drivers
+	var head: HBoxContainer = arsenal.title.get_parent()
+	head.add_theme_constant_override("separation", 14)
+	arsenal_grid = GridContainer.new()
+	arsenal_grid.columns = 2
+	arsenal_grid.add_theme_constant_override("h_separation", 14)
+	head.add_child(arsenal_grid)
+	drivers_box = VBoxContainer.new()
+	drivers_box.add_theme_constant_override("separation", 0)
+	drivers_box.resized.connect(_fit_driver_columns)
+	arsenal.body.add_child(drivers_box)
+	var payloads = _panel(row, "PAYLOADS", C_PAYLOAD, 170.0) # 2 columns, more rows as locations open
 	payload_grid = _grid(payloads.body, 2)
-	var mods = _panel(row, "MODIFIERS", C_MODS, 280.0, true)
+	payload_grid.add_theme_constant_override("h_separation", 10)
+	var mods = _panel(row, "MODIFIERS", C_MODS, 240.0, true)
 	mods_title = mods.title
 	mods_pips = _SlotPips.new()
 	mods.title.get_parent().add_child(mods_pips)
@@ -86,6 +101,9 @@ func _ready() -> void:
 
 	_build_arsenal()
 	_build_payloads()
+	_build_drivers()
+	Drivers.changed.connect(_build_drivers)
+	Drivers.ranked_up.connect(func(_id, _r): _build_drivers())
 
 	Exp.gained_xp_signal.connect(func(_a): _fill_skill())
 	Hacking.xp_gained.connect(_on_hacking_xp)
@@ -173,14 +191,58 @@ func _build_arsenal() -> void:
 	for it in _combat_items():
 		var cell := HBoxContainer.new()
 		cell.add_theme_constant_override("separation", 6)
-		var n = _label(it.name, 11, C_DIM)
-		n.custom_minimum_size.x = 84
-		n.clip_text = true
+		var n = _label(it.name, 10, C_DIM)
 		cell.add_child(n)
 		var c = _label("0", 12, C_TEXT)
 		cell.add_child(c)
 		arsenal_grid.add_child(cell)
 		_arsenal_labels[it] = c
+
+## Equipped drivers under the title row: name in its skill's color + its short effect (full text on hover).
+var _driver_grid: GridContainer = null
+func _build_drivers() -> void:
+	for c in drivers_box.get_children():
+		c.queue_free()
+	_driver_grid = null
+	var ids = Drivers.all_equipped()
+	if ids.is_empty():
+		drivers_box.add_child(_label("no drivers equipped  ·  'driver' inside a skill", 10, C_ZERO))
+		return
+	_driver_grid = GridContainer.new()
+	_driver_grid.add_theme_constant_override("h_separation", 14)
+	_driver_grid.add_theme_constant_override("v_separation", 0)
+	drivers_box.add_child(_driver_grid)
+	for id in ids:
+		var d = Drivers.DEFS[id]
+		var rtl := RichTextLabel.new()
+		rtl.bbcode_enabled = true
+		rtl.fit_content = true
+		rtl.scroll_active = false
+		rtl.autowrap_mode = TextServer.AUTOWRAP_OFF
+		rtl.clip_contents = true
+		rtl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rtl.custom_minimum_size.x = DRIVER_CELL - 14
+		rtl.add_theme_font_size_override("normal_font_size", 10)
+		var col: Color = _skill_color(d.skill)
+		rtl.text = "[color=#%s]%s[/color]%s [color=#8b96a1]%s[/color]" % [col.lightened(0.2).to_html(false), d.name,
+			"" if Drivers.rank(id) <= 1 else "[color=#5c6b7a] r%d[/color]" % Drivers.rank(id), Drivers.short_text(id)]
+		rtl.tooltip_text = "%s (%s driver, rank %d): %s" % [d.name, d.skill, Drivers.rank(id), Drivers.value_text(id)]
+		rtl.mouse_filter = Control.MOUSE_FILTER_PASS
+		_driver_grid.add_child(rtl)
+	_fit_driver_columns()
+
+const DRIVER_CELL := 200.0
+func _fit_driver_columns() -> void:
+	if _driver_grid == null or !is_instance_valid(_driver_grid):
+		return
+	var w = drivers_box.size.x
+	_driver_grid.columns = clampi(int(w / DRIVER_CELL), 1, 7) if w > 0 else 2
+
+func _skill_color(skill_name: String) -> Color:
+	for m in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling, Hacking]:
+		if m.SKILL.name == skill_name:
+			return m.SKILL.color
+	return C_TEXT
 
 ## One cell per unlocked location (rebuilt when the header updates, so new unlocks appear).
 func _build_payloads() -> void:
@@ -194,11 +256,11 @@ func _build_payloads() -> void:
 			continue
 		var cell := HBoxContainer.new()
 		cell.add_theme_constant_override("separation", 5)
-		var code = _label(PAYLOAD_NAMES[i] if i < PAYLOAD_NAMES.size() else "Tier %d" % (i + 1), 11, C_DIM)
-		code.custom_minimum_size.x = 76
+		var code = _label(PAYLOAD_NAMES[i] if i < PAYLOAD_NAMES.size() else "Tier %d" % (i + 1), 10, C_DIM)
+		code.custom_minimum_size.x = 52
 		cell.add_child(code)
-		var c = _label("0", 12, C_TEXT)
-		c.custom_minimum_size.x = 30
+		var c = _label("0", 11, C_TEXT)
+		c.custom_minimum_size.x = 26
 		cell.add_child(c)
 		payload_grid.add_child(cell)
 		_payload_labels[payloads[i]] = [code, c]

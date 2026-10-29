@@ -16,6 +16,42 @@ func set_host(layer: Control) -> void:
 
 ## skill: Mining, Parsing, etc. terminal: un-added terminal instance.
 ## setup: called with the terminal once it is in the tree (set type + start it).
+## VM tokens one uptime period costs (2026-10-28): the tier of what the VM works on.
+##   Mining / Cracking / Matching / Compiling: the process's tier (Archives, Signatures, Certificates, Lawfirm payload = 2).
+##   Parsing: the highest tier among the items it parses. Decoding: the cache's tier (Student cache 1, Paralegal 2;
+##   Intel: the target's location; Salvage: the item's tier). Phishing: the highest location unlocked.
+##   Cracking -vm (token conversion) stays 1.
+func token_cost(skill: Node, minor_process: Dictionary, arg = null) -> int:
+	var t = 1
+	if skill == Phishing:
+		t = 0
+		for loc in Stats.hacking_targets:
+			if Stats.hacking_targets[loc].get("unlocked", false):
+				t += 1
+	elif skill == Decoding:
+		if arg is CacheData:
+			t = Exploits.cache_tier(arg)
+		elif arg is ItemData:
+			t = Decoding.get_resource_tier(arg)
+		elif arg is Dictionary and !arg.is_empty():
+			t = Stats.hacking_targets.keys().find(str(Stats.target_place(arg).get("location", ""))) + 1
+		elif Inventory.has_cache():
+			t = Exploits.cache_tier(Inventory.get_cache())
+	elif skill == Parsing:
+		t = 1
+		for it in (arg if arg is Array else []):
+			if it is CacheData:
+				t = max(t, Exploits.cache_tier(it))
+			elif it is ItemData:
+				t = max(t, Decoding.get_resource_tier(it))
+	elif skill == Cracking and minor_process == Cracking.VM:
+		t = 1
+	else:
+		t = int(minor_process.get("unlock tier", 1))
+		if t > 6: # retired / special processes (unlock tier 99)
+			t = 1
+	return clampi(t, 1, 6)
+
 func open(skill: Node, minor_process: Dictionary, terminal: Control, setup: Callable, repeat: bool = true) -> VMWindow:
 	var window: VMWindow = VM_WINDOW_SCENE.instantiate()
 	window.configure(_next_id, skill, minor_process, terminal, repeat)

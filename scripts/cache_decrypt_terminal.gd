@@ -210,10 +210,10 @@ func _run_intel() -> void:
 		if stop_requested:
 			return
 		if Decoding.is_intel_maxed(target):
-			cache_name.text = "Intel on %s maxed: %s" % [target.name, Decoding.intel_text(target)]
+			cache_name.text = Decoding.intel_window_text(target, true)
 			return
 		cache_decrypt.reset()
-		cache_name.text = "Intel: %s  ·  %s" % [target.name, Decoding.intel_text(target)]
+		cache_name.text = Decoding.intel_window_text(target)
 		var rows = []
 		for i in Decoding.INTEL_LINES:
 			if randf() < Decoding.get_efficiency(process_data):
@@ -234,7 +234,7 @@ func _on_text_found(event: String) -> void:
 		return
 	Decoding.add_intel_point(target_arg)
 	update_items_gained_label("Intel finds", 1)
-	cache_name.text = "Intel: %s  ·  %s" % [target_arg.name, Decoding.intel_text(target_arg)]
+	cache_name.text = Decoding.intel_window_text(target_arg)
 
 ## Session tally row without adding anything to the inventory.
 

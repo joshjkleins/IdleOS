@@ -318,12 +318,13 @@ func get_overheat_clear_temp() -> float:
 	return BASE_OVERHEAT_CLEAR # (Thermal Paste used to raise it; replaced by VM Snapshot 2026-10-21)
 
 ## Uses one VM token, unless VM Snapshot saves it. Returns true when the token was kept.
-func spend_vm_token(token: ItemData, announce: bool = true) -> bool:
+## <amount>: tokens per uptime period (VMManager.token_cost: the process's tier). VM Snapshot keeps them all.
+func spend_vm_token(token: ItemData, announce: bool = true, amount: int = 1) -> bool:
 	if randf() < cur("system.vm_snapshot"):
 		if announce:
 			Signals.system_message_signal.emit("[color=#14B8A6]VM Snapshot: %s kept[/color]" % token.name)
 		return true
-	Inventory.remove_resource(token, 1)
+	Inventory.remove_resource(token, amount)
 	return false
 
 func get_defrag_minutes() -> float:

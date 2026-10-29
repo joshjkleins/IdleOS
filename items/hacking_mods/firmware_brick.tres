@@ -5,9 +5,9 @@
 [resource]
 script = ExtResource("1_rxvwc")
 id = 342
-name = "Firmware Brick"
+name = "Breach Strike"
 shortened_name = ""
-description = "Once the firewall is broken it never reboots for the rest of the hack. Equip directly with 'mod' commands."
+description = "The first hit after the firewall breaks is a guaranteed crit. Equip directly with 'mod' commands."
 upgrade_ingredient = false
 value = 0
 parsable = false
