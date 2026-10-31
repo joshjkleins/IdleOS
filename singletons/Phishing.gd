@@ -12,7 +12,7 @@ signal phishing_level_up_signal
 var bonus_expires_at: int
 var vm_token = Items.VM_PHISHING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 60.0
+@onready var VM_UPTIME = 30.0 # 2026-10-29: was 60
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/phishing_terminal.tscn")
@@ -99,45 +99,45 @@ var SPEAR = {
 
 var WHALING = {
 	"name": "Whaling",
-	"tier name": "TIER II | WHALING",
+	"tier name": "TIER IV | WHALING",
 	"style": "whale",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 900, # per whale landed (a bundle of ~14 items)
+	"experience per level": 2700, # per whale landed (2026-10-30 big game: x3, whales land ~3x less often)
 	"command": "phish -whale",
 	"display command": "phish -whale [bait=<item>]",
 	"example commands": [
-		{ 'cmd': 'phish -whale', 'description': 'All lines on one whale: wait, bite roll, then a reel split across your lines for a bundle of 10-24 SQL / Spoofs' },
+		{ 'cmd': 'phish -whale', 'description': 'All lines on one whale: a long wait, a bite roll, then a reel split across your lines for 40-60 SQL / Spoofs and a 30% Exploit chance' },
 		{ 'cmd': 'phish -whale bait=logs', 'description': 'Each whale cast uses 10 of a basic resource: bite chance up, bundle doubled' },
 	],
-	"efficiency": 0.4,
+	"efficiency": 0.25, # 2026-10-30 big game: was 40% (fewer, bigger whales)
 	"efficiency rate": 0.003,
 	"unlocked": false,
-	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
-	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
+	"unlock tier": 4, # 2026-10-30: swapped with Trap (was 2)
+	"efficiency level": 45, # efficiency grows from this skill level
 	"cast time": 6.0,
 	"overclock cast time": 3.0,
 	"overheat cast time": 15.0,
-	"wait time min": 30.0,
-	"wait time max": 60.0,
-	"download time": 120.0, # total reel time, divided by the lines on the whale
-	"overclocked download time": 60.0,
-	"overheated download time": 300.0,
-	"heat": 4.05,
-	"overclock heat": 8.1,
-	"overheat heat": 1.35,
-	"vm token chance": 0.05, # per attempt at base speed (rolled on time spent, like every skill)
+	"wait time min": 60.0, # 2026-10-30: was 30-60
+	"wait time max": 120.0,
+	"download time": 240.0, # total reel time, divided by the lines on the whale (2026-10-30: was 120)
+	"overclocked download time": 120.0,
+	"overheated download time": 600.0,
+	"heat": 8.1, # per landed whale (2026-10-30: doubled, whales land ~3x less often)
+	"overclock heat": 16.2,
+	"overheat heat": 2.7,
+	"vm token chance": 0.095, # per attempt at base speed (rolled on time spent): 2026-10-30 was 0.05, attempts take ~1.9x longer
 	"vm token per": "per whale",
-	"bundle min": 10,
-	"bundle max": 24,
-	"exploit chance": 0.05, # per whale: also lands one of an unlocked tier's one-time items
+	"bundle min": 40, # 2026-10-30: was 10-24
+	"bundle max": 60,
+	"exploit chance": 0.3, # per landed whale (2026-10-30: was 5%): ~2.5 Exploits/h at base, under Corruption's ~4/h
 	"requirements": {},
 	"resource gained": [
 		{ "item": Items.SQL_INJECTOR, "min": 1, "max": 1, "weight": 85 },
 		{ "item": Items.PACKET_SPOOF, "min": 1, "max": 1, "weight": 15 },
 	],
 	"resource amount gained": 1,
-	"description": "Puts every line on one whale for a big bundle of SQL Injectors and Packet Spoofs, with a small chance of an Exploit. More lines reel it in faster.",
+	"description": "Puts every line on one whale. Bites are rare and slow, but a landed whale brings 40-60 SQL Injectors and Packet Spoofs and a 30% chance of an Exploit. More lines reel it in faster.",
 	"efficiency description": "Chance the whale bites",
 	"signal": whale_cycle_completed
 }
@@ -184,7 +184,7 @@ var SMISH = {
 
 var TRAP = {
 	"name": "Trap",
-	"tier name": "TIER IV | TRAP",
+	"tier name": "TIER II | TRAP",
 	"style": "trap",
 	"level": 1,
 	"experience": 0,
@@ -194,19 +194,19 @@ var TRAP = {
 	"example commands": [
 		{ 'cmd': 'phish -trap', 'description': 'Sets a watering-hole trap (1 min). Shows its status once set' },
 		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a basic resource: haul doubled, rare chance up' },
-		{ 'cmd': 'trap collect', 'description': 'Collects it from anywhere (early = partial haul, no rare rolls)' },
+		{ 'cmd': 'trap collect', 'description': 'Collects it from anywhere (early = partial haul, no Exploit or mod)' },
 	],
-	"efficiency": 0.15,
-	"efficiency rate": 0.0010204, # 25% at level 99
+	"efficiency": 0.15, # 2026-10-30: chance of a bonus Exploit (the full trap's 1 Exploit + 1 mod are guaranteed)
+	"efficiency rate": 0.0011905, # 25% at level 99 (grows from level 15)
 	"unlocked": false,
-	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
-	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
+	"unlock tier": 2, # 2026-10-30: swapped with Whaling (was 4)
+	"efficiency level": 15, # efficiency grows from this skill level
 	"cast time": 60.0, # setting the trap
 	"overclock cast time": 30.0,
 	"overheat cast time": 150.0,
 	"trap minutes": 45.0, # real time to fill; it fills while the game is closed too
-	"trap sql": 70, # full haul
-	"trap spoofs": 15,
+	"trap sql": 68, # full haul, 2026-10-30: 80/20 SQL to spoofs (was 70/15)
+	"trap spoofs": 17,
 	"heat": 1.0,
 	"overclock heat": 2.0,
 	"overheat heat": 0.3,
@@ -214,12 +214,12 @@ var TRAP = {
 	"vm token per": "on a full trap",
 	"requirements": {},
 	"resource gained": [
-		{ "item": Items.SQL_INJECTOR, "min": 70, "max": 70, "weight": 100 },
-		{ "item": Items.PACKET_SPOOF, "min": 15, "max": 15, "weight": 100 },
+		{ "item": Items.SQL_INJECTOR, "min": 68, "max": 68, "weight": 100 },
+		{ "item": Items.PACKET_SPOOF, "min": 17, "max": 17, "weight": 100 },
 	],
 	"resource amount gained": 1,
-	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 70 SQL Injectors and 15 Packet Spoofs, plus rare rolls: efficiency is the chance of an Exploit, a fifth of it the chance of a hacking mod.",
-	"efficiency description": "Rare roll chance on a full trap",
+	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 68 SQL Injectors and 17 Packet Spoofs, plus 1 Exploit and 1 hacking mod.",
+	"efficiency description": "Chance of a bonus Exploit on a full trap",
 	"signal": whale_cycle_completed
 }
 
@@ -232,9 +232,10 @@ var MOD = {
 	"experience": 0,
 	"experience per level": 1000,
 	"command": "phish -mod",
-	"display command": "phish -mod [bait=<item>]",
+	"display command": "phish -mod[=<location>] [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -mod', 'description': 'Cast every line' },
+		{ 'cmd': 'phish -mod=school', 'description': 'Only one location\'s mods (any unlocked location)' },
 		{ 'cmd': 'phish -mod bait=logs', 'description': 'Each cast uses 10 of a basic resource: bite chance up, a bite catches double' },
 	],
 	"efficiency": 0.015, # 1.5% bite chance at L1 (2026-10-23: was 1%, mods now last 5 hacks)
@@ -286,6 +287,39 @@ func bait_tier(bait: ItemData) -> int:
 
 ## "phish -smish target=student hard bait=logs" -> {command, bait, target, error}. Options can come in any order.
 func parse_bait(text: String) -> Dictionary:
+	var out = _parse_bait(text)
+	_split_mod_tier(out)
+	return out
+
+## 'phish -mod=school' (2026-10-29): only that location's mods. Sets out.mod_tier (0 = every unlocked tier)
+## and strips "=school" from out.command so it matches 'phish -mod'.
+func _split_mod_tier(out: Dictionary) -> void:
+	out["mod_tier"] = 0
+	var words = out.command.split(" ", false)
+	for k in words.size():
+		var w: String = words[k]
+		if !(w.begins_with("-mod=") or w.begins_with("mod=")):
+			continue
+		var loc = w.get_slice("=", 1)
+		for j in range(k + 1, words.size()): # 'police station'
+			loc += " " + words[j]
+		words = words.slice(0, k)
+		words.append(w.get_slice("=", 0))
+		out.command = " ".join(words)
+		var key = Compromise.location_key(loc)
+		if key == "":
+			if out.error == "":
+				out.error = "No location called '%s'. [color=#666666]ex. phish -mod=school  |  phish -mod=lawfirm[/color]" % loc
+			return
+		var tier = Compromise.tier_of(key)
+		if !Upgrades.tier_unlocked(tier):
+			if out.error == "":
+				out.error = "%s mods aren't in the pool yet: they join when %s unlocks." % [Stats.hacking_targets[key].name, Stats.hacking_targets[key].name]
+			return
+		out.mod_tier = tier
+		return
+
+func _parse_bait(text: String) -> Dictionary:
 	var out = {"command": text.strip_edges(), "bait": null, "target": {}, "error": ""}
 	var opts := {}
 	var cut := text.length()
@@ -450,12 +484,13 @@ func collect_trap() -> Array:
 	add.call(Items.PACKET_SPOOF, int(round(TRAP["trap spoofs"] * p)) * mult)
 	if p >= 1.0:
 		var eff = min(get_efficiency(TRAP) * float(trap.get("bait_mult", 1.0)), 1.0)
-		for i in mult:
+		for i in mult: # 2026-10-30: a full trap always brings 1 Exploit + 1 hacking mod (x2 baited); efficiency = a bonus Exploit
+			add.call(roll_exploit_item(), 1)
+			var pool = mod_pool()
+			if !pool.is_empty():
+				add.call(pool.pick_random().item, 1)
 			if randf() < eff:
 				add.call(roll_exploit_item(), 1)
-			var pool = mod_pool()
-			if !pool.is_empty() and randf() < eff / 5.0:
-				add.call(pool.pick_random().item, 1)
 	add.call(vm_token, roll_tokens(TRAP["vm token chance"] * p * (2.0 if Upgrades.has("phishing.tackle_box") else 1.0)))
 	for g in got:
 		Signals.phishing_item_caught_item(g.item)
@@ -475,7 +510,7 @@ func trap_status_text() -> String:
 	var baited = " (baited)" if trap.get("baited", false) else ""
 	if p >= 1.0:
 		return "Trap%s is full. Collect it with 'trap collect'." % baited
-	return "Trap%s %d%% full, %s left. 'trap collect' now gives a partial haul (no rare rolls)." % [baited, int(p * 100), format_minutes(trap_seconds_left())]
+	return "Trap%s %d%% full, %s left. 'trap collect' now gives a partial haul (no Exploit or mod)." % [baited, int(p * 100), format_minutes(trap_seconds_left())]
 
 static func format_minutes(seconds: float) -> String:
 	var m = int(ceil(seconds / 60.0))
@@ -495,11 +530,11 @@ func trap_command_text(arg: String) -> String:
 	return trap_status_text()
 #endregion
 
-var minor_processes = [
+var minor_processes = [ # unlock order (2026-10-30: Trap T2, Smish T3, Whaling T4)
 	SPEAR,
-	WHALING,
-	SMISH,
 	TRAP,
+	SMISH,
+	WHALING,
 	MOD,
 ]
 

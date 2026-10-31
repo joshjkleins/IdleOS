@@ -8,10 +8,27 @@ const HEAT_BY_TIER := [0.667, 1.067, 1.702, 2.55, 6.222, 9.375]
 const TIME_BY_TIER := [1.0, 1.4712, 2.1729, 3.4399, 6.2133, 11.3498]
 const FIND_BY_TIER := [1.0, 0.4913, 0.2989, 0.1934, 0.1368, 0.0995]
 
+## Network on Mining items (2026-10-30): its own pace by the item's tier, and Parsing Speed upgrades don't speed it
+## up (they cancel out here), so a tier's Network yields ~90 / 120 / 150 / 180 / 210 / 240 VM tokens an hour.
+## Caches aren't affected (their Network conversion keeps normal speed).
+const NETWORK_TIME_BY_TIER := [0.84, 0.89, 0.99, 1.31, 1.71, 2.15]
+
 func item_time_mult(process: Dictionary, item: ItemData) -> float:
-	if item == null or item is CacheData or !(process == FOOTPRINT or process == EXTRACTION):
+	if item == null or item is CacheData:
+		return 1.0
+	if process == NETWORK:
+		# paced by the item's tier or your Parsing Speed tier, whichever is higher (old Logs don't out-earn new items)
+		return Stats.tier_heat(NETWORK_TIME_BY_TIER, max(item.tier, _speed_tier())) * (1.0 + Upgrades.cur("parsing.speed"))
+	if !(process == FOOTPRINT or process == EXTRACTION):
 		return 1.0
 	return Stats.tier_heat(TIME_BY_TIER, item.tier)
+
+## the highest tier of Parsing Speed upgrade installed (0 = none)
+func _speed_tier() -> int:
+	var p = Upgrades.packages.get("parsing.speed")
+	if p == null or int(p.installed) <= 0:
+		return 0
+	return int(p.levels[int(p.installed) - 1].tier)
 
 func item_find_mult(process: Dictionary, item: ItemData) -> float:
 	if item == null or item is CacheData or !(process == FOOTPRINT or process == EXTRACTION):
@@ -28,7 +45,7 @@ signal parsing_level_up_signal
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_PARSING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 60.0
+@onready var VM_UPTIME = 30.0 # 2026-10-29: was 60
 
 ## Modifier commands unlocked by Parsing capstones (see Mining.MODIFIERS for how they work).
 const MODIFIERS = [
@@ -144,17 +161,17 @@ var CORRUPTION = {
 	"unlocked": false,
 	"unlock tier": 2, # 2026-10-26: opens with this tier's location (1 = from the start)
 	"efficiency level": 15, # efficiency grows from this skill level (its old unlock level)
-	"base speed": 0.6,
-	"overclock speed": 0.3,
+	"base speed": 0.18, # 2026-10-29: fast, with a flat 0.1% per line (~1 Exploit per ~100 Mining items: ~4/h at base speed, measured 2026-10-30)
+	"overclock speed": 0.09,
 	"overheat speed": 1.5,
 	"heat": 0.9,
 	"overclock heat": 1.2,
 	"overheat heat": 0.45,
 	"vm token chance": 0.015, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
-	"resource gained": "SQL Injector 60% | Packet Spoof 38% | Hacking Mod of the item's tier 2%",
-	"description": "Corrupts any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at hacking resources: SQL Injectors (60%), Packet Spoofs (38%) or a random Hacking Mod of the item's tier (2%). Higher tier Mining items give +1% chance per line per tier. If used on a Cache it will transform it to a Corruption variant, significantly increasing the chance of decoding each item but with a chance to destroy the rest of the cache after each item decoded.",
-	"efficiency description": "Chance to find a hacking resource per line.",
+	"resource gained": "Exploit of the item's tier (0.1% per line, about 1% per item)",
+	"description": "Corrupts resources gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] at high speed for a rare find: a random Exploit of the item's tier (Logs: School Exploits, Archives: Lawfirm Exploits, ...). A flat 0.1% per line, about 1% per item, so it eats Mining items quickly. If used on a Cache it will transform it to a Corruption variant, significantly increasing the chance of decoding each item but with a chance to destroy the rest of the cache after each item decoded.",
+	"efficiency description": "Corruption's Exploit chance is flat (0.1% per line); efficiency doesn't change it.",
 	"signal": basic_cycle_completed
 }
 
@@ -171,10 +188,11 @@ var NETWORK = {
 		{ 'cmd': 'parse -network=student cache', 'description': 'Cache item' },
 	],
 	"ssh command": "ssh parsing network",
-	# Network is a resource sink: ~0.5% per line at level 1, ~2.5% at 99, +1% from max upgrades, +0.3% per Mining tier
-	# (Databases +1.5%) -> about 5% at the very top. Deep Read doesn't double these finds.
-	"efficiency": 0.005,
-	"efficiency rate": 0.0002,
+	# 2026-10-30: 1.5% per line until level 35, then up to 3.5% at 99 (was 0.5% -> 2.5%), +1% from max upgrades,
+	# +0.3% per Mining tier (Databases +1.5%) -> about 6% at the very top. Deep Read doesn't double these finds.
+	# A cache's Network conversion needs all 10 lines green, so this also sets how fast caches convert.
+	"efficiency": 0.015,
+	"efficiency rate": 0.0003125,
 	"efficiency upgrade scale": 0.05, # parsing efficiency upgrades count at 5% here (+1% at max)
 	"unlocked": false,
 	"unlock tier": 3, # 2026-10-26: opens with this tier's location (1 = from the start)
@@ -188,7 +206,7 @@ var NETWORK = {
 	"vm token chance": 0.0225, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Random VM token (any skill), x Mining tier per find",
-	"description": "Sniffs any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at a random VM token. Higher tier Mining items give +0.3% chance per line per tier. If used on a Cache it will transform it to a Network variant, giving it a chance to hold a stack of VM tokens.",
+	"description": "Sniffs any resource gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] for a small chance at a random VM token. Higher tier Mining items give +0.3% chance per line per tier. If used on a Cache it will transform it to a Network variant, which always holds VM caches: more of them the higher the cache's tier.",
 	"efficiency description": "Chance to find a VM token per line.",
 	"signal": basic_cycle_completed
 }
@@ -371,13 +389,24 @@ func parse_through_parse_start_command(command: String, process: Dictionary) -> 
 	return return_dictionary
 
 #region drops
-## Corruption's finds, weights out of 100. "item": null = a random Hacking Mod.
-func get_corruption_pool() -> Array:
-	return [
-		{ "item": Items.SQL_INJECTOR, "weight": 59 },
-		{ "item": Items.PACKET_SPOOF, "weight": 38 },
-		{ "item": null, "weight": 3 }, # hacking mod (2026-10-23: was 2, mods now last 5 hacks)
-	]
+## Corruption (2026-10-29 rework): a flat chance per line at a random Exploit of the Mining item's tier.
+## Was SQL Injectors 59% / Packet Spoofs 38% / Hacking Mod 3% at efficiency (+1% per tier). Efficiency, Pattern Cache
+## and Deep Read don't change it; speed upgrades, overclock and Fast Skip still make it faster.
+const CORRUPTION_EXPLOIT_CHANCE := 0.001
+
+## Flat per-line chance for processes that ignore efficiency (Corruption on a Mining item), else -1
+func flat_line_chance(process: Dictionary, item: ItemData) -> float:
+	if process == CORRUPTION and item != null and !(item is CacheData):
+		return CORRUPTION_EXPLOIT_CHANCE
+	return -1.0
+
+## Corruption's Exploits for a Mining item of <tier> (falls back to the closest lower tier that has some)
+func corruption_exploits(tier: int) -> Array:
+	for t in range(clampi(tier, 1, 6), 0, -1):
+		var items = Exploits.tier_items(t)
+		if !items.is_empty():
+			return items
+	return []
 
 const CORRUPTION_TIER_BONUS = 0.01 # +1% chance per line for each Mining tier above Logs
 const NETWORK_TIER_BONUS = 0.003 # +0.3% chance per line for each Mining tier above Logs
@@ -400,12 +429,15 @@ func get_hacking_mod_items(tier: int = 0) -> Array:
 func _pool_tier(pool: Array, fallback: int) -> int:
 	return pool[0].tier if !pool.is_empty() else fallback
 
+## Pattern Cache (each empty line raises the next one's chance) doesn't apply to Network (2026-10-30): with it a
+## Network line found a VM token about every 6-8 lines (~1,300 tokens/h at tier 2), far past its 1.5-3.5% chance.
+func pattern_cache_applies(process: Dictionary) -> bool:
+	return process != NETWORK
+
 ## Extra chance per line from the Mining item's tier (Corruption and Network).
 func get_line_chance_bonus(process: Dictionary, item: ItemData) -> float:
 	if item is CacheData:
 		return 0.0
-	if process == CORRUPTION:
-		return CORRUPTION_TIER_BONUS * (item.tier - 1)
 	if process == NETWORK:
 		return NETWORK_TIER_BONUS * (item.tier - 1)
 	return 0.0
@@ -422,11 +454,8 @@ func get_vm_tokens() -> Array:
 func roll_find(process: Dictionary, item: ItemData, target: ItemData = null) -> ItemData:
 	match process:
 		CORRUPTION:
-			var pick = get_weighted_item(get_corruption_pool())
-			if pick.item == null:
-				var mods = get_hacking_mod_items(item.tier)
-				return mods.pick_random() if !mods.is_empty() else Items.SQL_INJECTOR
-			return pick.item
+			var ex = corruption_exploits(item.tier)
+			return ex.pick_random() if !ex.is_empty() else Items.SQL_INJECTOR
 		NETWORK:
 			return get_vm_tokens().pick_random()
 		EXTRACTION:
@@ -437,11 +466,8 @@ func roll_find(process: Dictionary, item: ItemData, target: ItemData = null) -> 
 func get_find_table(process: Dictionary, item: ItemData, target: ItemData = null) -> Array:
 	match process:
 		CORRUPTION:
-			return [
-				{ "name": Items.SQL_INJECTOR.name, "pct": 59, "items": [Items.SQL_INJECTOR] },
-				{ "name": Items.PACKET_SPOOF.name, "pct": 38, "items": [Items.PACKET_SPOOF] },
-				{ "name": "Hacking Mod (T%d)" % _pool_tier(get_hacking_mod_items(item.tier), item.tier), "pct": 3, "items": get_hacking_mod_items(item.tier) },
-			]
+			var ex = corruption_exploits(item.tier)
+			return [{ "name": "Exploit (T%d)" % (ex[0].tier if !ex.is_empty() else item.tier), "pct": 100, "items": ex }]
 		NETWORK:
 			# one row per token so the totals row shows exactly what the player has
 			var rows := []

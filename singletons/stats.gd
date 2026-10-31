@@ -217,8 +217,8 @@ var hacking_targets = {
 				"exp": 109,
 				"integrity": 160,
 				"firewall": 28,
-				"counter": 30,
-				"counter speed": 16.0,
+				"counter": 35,
+				"counter speed": 16.67,
 				"firewall reboot": 8, # seconds the firewall stays down after a break
 				"loot": Items.LEGAL_ASSISTANT_CACHE
 			},
@@ -278,11 +278,11 @@ var hacking_targets = {
 				"requirements": {"item": Items.LAWFIRM_PAYLOAD, "amount": 13},
 				"heat": 1.7,
 				"exp": 3222,
-				"integrity": 520,
-				"firewall": 34,
-				"counter": 30,
-				"counter speed": 20.0,
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"integrity": 615,
+				"firewall": 35,
+				"counter": 32,
+				"counter speed": 20.84,
+				"firewall reboot": 5.0, # seconds the firewall stays down after a break
 				"traits": ["escalator"],
 				"loot": Items.PARTNER_CACHE
 			}
@@ -303,13 +303,14 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack receptionist",
-				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 1},
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 3},
 				"heat": 0.5,
 				"exp": 155,
-				"integrity": 348,
-				"firewall": 52,
-				"counter": 40,
+				"integrity": 850,
+				"firewall": 60,
+				"counter": 35,
 				"counter speed": 16.0,
+				"traits": ["adaptive"],
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.RECEPTIONIST_CACHE
 			},
@@ -318,13 +319,14 @@ var hacking_targets = {
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack orderly",
-				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 6},
 				"heat": 0.8,
 				"exp": 1865,
-				"integrity": 834,
-				"firewall": 63,
-				"counter": 35,
-				"counter speed": 16.0,
+				"integrity": 660,
+				"firewall": 38,
+				"counter": 37,
+				"counter speed": 22.0,
+				"traits": ["heavy"],
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.ORDERLY_CACHE
 			},
@@ -333,14 +335,15 @@ var hacking_targets = {
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack nurse",
-				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 3},
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 9},
 				"heat": 1.1,
 				"exp": 2798,
-				"integrity": 1275,
-				"firewall": 143,
-				"counter": 43,
-				"counter speed": 16.0,
-				"firewall reboot": 14.0, # seconds the firewall stays down after a break
+				"integrity": 340,
+				"firewall": 60,
+				"counter": 35,
+				"counter speed": 18.0,
+				"traits": ["regenerator"],
+				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.NURSE_CACHE
 			},
 			{ # PLACEHOLDER stats (School x3.5, tier 3) - balance later
@@ -348,13 +351,14 @@ var hacking_targets = {
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack doctor",
-				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 12},
 				"heat": 1.4,
 				"exp": 3731,
-				"integrity": 1890,
-				"firewall": 91,
-				"counter": 17,
-				"counter speed": 30.0,
+				"integrity": 650,
+				"firewall": 44,
+				"counter": 38,
+				"counter speed": 20.0,
+				"traits": ["siphon"],
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.DOCTOR_CACHE
 			},
@@ -363,14 +367,15 @@ var hacking_targets = {
 				"difficulty": "Hard",
 				"unlocked": true,
 				"command": "hack chief-medicine",
-				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.HOSPITAL_PAYLOAD, "amount": 15},
 				"heat": 1.7,
 				"exp": 4661,
-				"integrity": 2193,
-				"firewall": 106,
-				"counter": 38,
-				"counter speed": 20.0,
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"integrity": 1250,
+				"firewall": 60,
+				"counter": 105,
+				"counter speed": 22.22,
+				"traits": ["swarm"],
+				"firewall reboot": 7.0, # seconds the firewall stays down after a break
 				"loot": Items.CHIEF_OF_MEDICINE_CACHE
 			}
 		],
@@ -643,7 +648,7 @@ func _ready():
 	apply_default_unlocks()
 	(func(): Uploads.tier_completed.connect(_on_tier_completed)).call_deferred() # Uploads loads after Stats
 	Upgrades.apply_effects() # cooling, VM windows, heat reduction, overheat fan, max anonymity
-	(func(): Hacking.SKILL["level up signal"].connect(func(_a = null): set_max_anon())).call_deferred()
+	# 2026-10-30: max anonymity no longer follows the Hacking level (it grows with target unlocks)
 
 ##############################
 ######## DEFRAG BONUS ########
@@ -820,7 +825,7 @@ func on_level_up(skill_data: Dictionary):
 
 ## Cooling applied each cooling tick, including the Defragging: System bonus (negative = cooling).
 func get_cooling_amount() -> float:
-	return cooling_amount - Defragging.get_bonus_cooling() * cooling_frequency
+	return cooling_amount * Defragging.get_cooling_mult() # Defragging: Cooling doubles it (2026-10-30)
 
 func update_cooling_amount(amount_to_add: float):
 	cooling_amount += amount_to_add
@@ -837,10 +842,12 @@ func update_cooling_amount(amount_to_add: float):
 func cooling_updated():
 	Signals.cooling_updated()
 
-## Max anonymity (no upgrade): 100 + 5 per Hacking level above 1 + 100 per location unlocked past the first
-## (145 at L10, ~590 at L99 with only School, 1,090 with all six). Also refreshes the auto-spoof threshold.
+## Max anonymity (2026-10-30, was 100 + 5 per Hacking level): 100 + 12 per target unlocked past the first + 100 per
+## location unlocked past the first, so it follows progress instead of the Hacking level. Close to the old curve at
+## the levels the fights were tuned on (School ends 148 ~ L12's 155, Lawfirm 308 ~ L25's 320, Hospital 420-468 ~
+## L28's 435); 948 with everything. Also refreshes the auto-spoof threshold.
 const BASE_MAX_ANON := 100
-const MAX_ANON_PER_LEVEL := 5
+const MAX_ANON_PER_TARGET := 12
 const MAX_ANON_PER_LOCATION := 100
 const BASE_SPOOF_THRESHOLD := 0.3
 
@@ -849,8 +856,27 @@ func set_max_anon():
 	for loc in hacking_targets:
 		if hacking_targets[loc].get("unlocked", false):
 			locs += 1
-	max_anon = BASE_MAX_ANON + MAX_ANON_PER_LEVEL * (int(Hacking.SKILL.level) - 1) + MAX_ANON_PER_LOCATION * max(0, locs - 1)
+	max_anon = BASE_MAX_ANON + MAX_ANON_PER_TARGET * max(0, targets_unlocked() - 1) + MAX_ANON_PER_LOCATION * max(0, locs - 1)
 	healing_threshold_auto_start = BASE_SPOOF_THRESHOLD + Upgrades.cur("hacking.spoof_threshold")
+
+## normal targets unlocked across every location (hard mode retired)
+func targets_unlocked() -> int:
+	var n = 0
+	for loc in hacking_targets:
+		for t in hacking_targets[loc].get("targets", []):
+			if t.get("unlocked", false):
+				n += 1
+	return n
+
+## what unlocking <target> adds to max anonymity (a location's first target also opens its location)
+func anon_for_unlock(target: Dictionary) -> int:
+	if target.get("unlocked", false):
+		return 0
+	var p = target_place(target)
+	if p.is_empty() or p.get("hard", false):
+		return 0
+	var opens_loc = !hacking_targets[p.location].get("unlocked", false)
+	return MAX_ANON_PER_TARGET + (MAX_ANON_PER_LOCATION if opens_loc else 0)
 
 func remove_vm_count(amount: int = 1):
 	CURRENT_ALL_VMS -= amount
@@ -880,27 +906,27 @@ const HARD_UNLOCK_WINS = 5
 ## 2026-10-27 (phase 5): target traits. A rule on top of a target's stats, shown as a tag + a short
 ## description on its card (no solution hints: players work out the answer). hacking_game applies them.
 const TRAITS = {
-	"fortress":    {"name": "FORTRESS", "text": "Huge firewall that reboots fast. Nothing gets through until it's down",
+	"fortress":    {"name": "FORTRESS", "text": "Huge firewall. Nothing gets through until it's down",
 		"firewall": 1.6, "integrity": 0.7, "reboot": 0.5, "no_leak": true}, # no damage reaches integrity while the firewall is up
-	"regenerator": {"name": "REGENERATOR", "text": "Repairs its integrity when it isn't being hit",
-		"regen": 0.02, "regen_delay": 2.0},            # share of max integrity per second, after this long unhit
+	"regenerator": {"name": "REGENERATOR", "text": "Repairs its integrity constantly. Every hit pauses the repair for a moment",
+		"regen": 0.02, "regen_delay": 0.3, "regen_fw": 0.02}, # share of max integrity per second; regen_delay: pause after each hit (2026-10-30: 0.3s, was 2s and only integrity hits); regen_fw: per second while the firewall is up
 	"swarm":       {"name": "SWARM", "text": "Constant, light countermeasures",
 		"counter_speed": 3.0, "counter": 0.2},
 	"heavy":       {"name": "HEAVY HITTER", "text": "Slow, crushing countermeasures",
 		"counter_speed": 0.3, "counter": 5.0},
-	"escalator":   {"name": "ESCALATOR", "text": "Countermeasures speed up the longer you keep hacking it",
-		"escalate": 0.04, "escalate_every": 5.0, "escalate_max": 1.5}, # over the whole run (fight time), not per hack
-	"siphon":      {"name": "SIPHON", "text": "Countermeasures drain your bandwidth",
-		"drain": 0.5},                                  # share of max bandwidth per countermeasure (2026-10-28: was 1.0)
-	"heater":      {"name": "HEATER", "text": "Runs your system hot",
-		"heat": 2.5},
-	"throttle":    {"name": "THROTTLE", "text": "SQL Injectors and Packet Spoofs cost more bandwidth",
-		"bandwidth": 2.0},
+	"escalator":   {"name": "ESCALATOR", "text": "Every countermeasure it fires makes the next ones come faster",
+		"escalate": 0.05, "escalate_max": 1.5}, # 2026-10-29: +5% countermeasure speed per countermeasure fired (was +4% per 5-10s of hacking), up to +150%; over the whole run
+	"siphon":      {"name": "SIPHON", "text": "Countermeasures drain your bandwidth and stall its regen",
+		"drain": 1.0, "jam": 1.5}, # drain: share of max bandwidth per countermeasure (2026-10-28: was 1.0, then 0.5; 2026-10-29: back to 1.0); jam: seconds of no bandwidth regen after it (2026-10-29)
+	"heater":      {"name": "HEATER", "text": "Runs your system hot. Breaking the firewall vents 20°C from your system",
+		"heat": 2.5, "vent": 20.0}, # vent: °C removed on each firewall break (2026-10-30)
+	"throttle":    {"name": "THROTTLE", "text": "SQL Injectors and Packet Spoofs wait 2s between uses", 
+		"delay": 2.0}, # 2026-10-29: was +2 bandwidth each
 	# 2026-10-28: ENCRYPTED (Exploits cost x1.5 charge) removed
-	"adaptive":    {"name": "ADAPTIVE", "text": "Small firewall that reboots fast and comes back bigger every time",
+	"adaptive":    {"name": "ADAPTIVE", "text": "Firewall comes back larger every time it regenerates",
 		"firewall": 0.5, "reboot": 0.5, "grow": 0.5},   # each reboot adds 50% of its starting firewall: hit hard and crit
-	"packet_loss": {"name": "PACKET LOSS", "text": "SQL Injectors and Packet Spoofs are used 2 at a time",
-		"items": 2},
+	"packet_loss": {"name": "PACKET LOSS", "text": "Every SQL Injector and Packet Spoof shot consumes 2 extra (no added damage or healing)",
+		"items": 3}, # 2026-10-30: was 2
 }
 
 func target_traits(target: Dictionary) -> Array:
@@ -925,7 +951,7 @@ func trait_stats(target: Dictionary) -> Dictionary:
 	return out
 ## Target access by tier (economy pass 2026-10-20): rares of the previous target, and payloads for target 2 (+ step
 ## per target after it). Tier 1 is short (~46 hacks), so its access is cheaper.
-const ACCESS_RARE_BY_TIER = [2, 3, 4, 5, 5, 5]
+const ACCESS_RARE_BY_TIER = [2, 2, 3, 3, 5, 5] # 2026-10-30: was [2, 3, 4, 5, 5, 5]
 const ACCESS_PAYLOAD_BASE_BY_TIER = [4, 10, 10, 10, 10, 10]
 const ACCESS_PAYLOAD_STEP_BY_TIER = [10, 25, 25, 25, 25, 25]
 const ACCESS_RARE_AMOUNT = 5 # (kept for old references; get_access_recipe uses the per-tier tables)
@@ -1004,15 +1030,13 @@ func get_wins(target: Dictionary) -> int:
 func record_win(target: Dictionary) -> void:
 	var key = target_key(target)
 	wins[key] = int(wins.get(key, 0)) + 1
-	var hard = get_hard_counterpart(target)
-	if !hard.is_empty() and !hard.get("unlocked", false) and wins[key] >= HARD_UNLOCK_WINS:
-		hard["unlocked"] = true
-		Signals.update_hack_console("[color=#ee4a3a]Hard mode unlocked: %s[/color]" % hard.name)
+	# (2026-10-29: hard mode retired: wins no longer unlock hard targets)
 	SaveManager.mark_dirty()
 	unlocks_changed.emit()
 
 func unlock_target(target: Dictionary) -> void:
 	target["unlocked"] = true
+	set_max_anon()
 	SaveManager.mark_dirty()
 	unlocks_changed.emit()
 

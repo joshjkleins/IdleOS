@@ -12,7 +12,7 @@ const SKILL_DIRS = ["mining", "parsing", "cracking", "matching", "phishing", "ha
 const STATIC = [
 	"-h", "help", "info", "ls", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "driver", "system", "settings", "history",
 	"tutorial", "tutorial -l", "tutorial reset", "welcome", "discord", "discord -c", "version", "ps",
-	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods",
+	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
 	"track ", "untrack ", "untrack -a", "trap", "trap collect", "panel", "cd ..", "quit", "quit -s", "wishlist",
@@ -39,13 +39,19 @@ func main_candidates() -> Array:
 	for d in SKILL_DIRS:
 		c.append("cd " + d)
 		c.append("cd ../" + d)
+	for loc in Stats.hacking_targets: # 'cd hacking/<location>' (+ ' -r' for its compromise), unlocked ones
+		if Stats.hacking_targets[loc].get("unlocked", false):
+			var ln = str(Stats.hacking_targets[loc].name).to_lower().replace(" ", "-")
+			c.append("cd hacking/" + ln)
+			if Compromise.has_lineup(loc):
+				c.append("cd hacking/" + ln + " -r")
 	for s in _skills() + [Hacking]:
 		var d = s.SKILL.name.to_lower()
 		c.append("info " + d)
 		for mp in s.minor_processes:
 			c.append("info %s %s" % [d, str(mp.name).to_lower().replace(" ", "-")])
-		if s != Hacking and s != Defragging:
-			c.append("ssh " + d) # lists the skill's VM commands; VM runs themselves mirror the main commands (below)
+		# (2026-10-29: 'ssh <skill>' no longer offered: 'ssh com' completed only to 'ssh compil' between it and
+		# 'ssh compile -...'. The command still works; VM runs mirror the main commands, below.)
 	for g in Upgrades.groups:
 		c.append("apt " + g.to_lower())
 		c.append("apt install " + g.to_lower())
@@ -68,7 +74,18 @@ func main_candidates() -> Array:
 	# drivers (2026-10-27)
 	for id in Drivers.owned:
 		c.append("driver -add " + id)
-		c.append("driver -remove " + id)
+		c.append("driver -rm " + id)
+	if Drivers.manager_unlocked(): # Driver Manager (2026-10-30)
+		# 'driver -swap <old> <new>': each equipped driver with every spare of its own skill, so both ids complete
+		for old in Drivers.all_equipped():
+			c.append("driver -swap " + old + " ")
+			for new in Drivers.skill_defs(Drivers.DEFS[old].skill):
+				if Drivers.owned.has(new) and !Drivers.is_equipped(new):
+					c.append("driver -swap %s %s" % [old, new])
+		for n in 3:
+			c.append("driver build %d" % n)
+			c.append("driver build %d -save" % n)
+			c.append("driver build %d -clear" % n)
 	# 'ls' filters (2026-10-24): types, skills, locations and t1..t6
 	for f in ["-resources", "-payloads", "-combat", "-caches", "-rares", "-mods", "-exploits", "-tokens", "-h"]:
 		c.append("ls " + f)
@@ -104,6 +121,9 @@ func main_candidates() -> Array:
 		c.append("ls " + _n(g.item))
 	for it in Uploads.staged:
 		c.append("upload cancel " + _n(it))
+	for loc in Stats.hacking_targets: # 'phish -mod=school' (2026-10-29)
+		if Stats.hacking_targets[loc].get("unlocked", false):
+			c.append("phish -mod=" + str(Stats.hacking_targets[loc].name).to_lower().replace(" ", "-"))
 	for t in _unlocked_targets():
 		c.append("decode -intel=" + t.name.to_lower())
 		c.append("intel " + t.name.to_lower())

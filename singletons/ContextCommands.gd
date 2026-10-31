@@ -1112,7 +1112,7 @@ func get_skill_upgrades_text(group: String) -> String:
 		for i in p.installed:
 			if int(p.levels[i].tier) == wt:
 				have_in_tier += 1
-		var label = p.name + (" (MAJOR)" if p.type == "capstone" else "") + ("  %d/%d" % [have_in_tier, in_tier.size()] if in_tier.size() > 1 else "")
+		var label = Upgrades.level_name(p, Upgrades.next_level(p) if have_in_tier < in_tier.size() else in_tier[-1]) + (" (MAJOR)" if p.type == "capstone" else "") + ("  %d/%d" % [have_in_tier, in_tier.size()] if in_tier.size() > 1 else "")
 		if have_in_tier >= in_tier.size():
 			rows.append([p.id, label, in_tier[-1].after, "", "installed"])
 			colors.append(APT_DIM)
@@ -1122,7 +1122,7 @@ func get_skill_upgrades_text(group: String) -> String:
 		if reason == "":
 			ready += 1
 		var status = "[color=%s]READY[/color]" % APT_OK if reason == "" else ("[color=%s]missing items[/color]" % APT_BAD if reason == "Missing requirements." else "[color=%s]-[/color]" % APT_DIM)
-		var change = ("%s -> %s" % [lvl.before, lvl.after]) if p.type != "capstone" else str(lvl.effect)
+		var change = Upgrades.level_change(p, lvl)
 		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
 		colors.append("")
 	t += build_table(columns, rows, colors)
@@ -1188,7 +1188,7 @@ func get_upgrades_package_info(package_id: String) -> String:
 	if lvl.is_empty():
 		t += "\n[color=%s]Fully upgraded.[/color]" % APT_GOLD
 		return t
-	t += "\nNext: %s -> %s\n" % [lvl.before, lvl.after] if p.type != "capstone" else "\nNext: %s\n" % lvl.effect
+	t += "\nNext: %s%s\n" % ["" if !lvl.has("name") else lvl.name + ": ", Upgrades.level_change(p, lvl)]
 	t += "Cost: %s\n" % _apt_cost_text(lvl)
 	var reason = Upgrades.install_block_reason(p)
 	t += ("[color=%s]apt install %s[/color]" % [APT_OK, p.id]) if reason == "" else "[color=%s]%s[/color]" % [APT_DIM, reason]
@@ -1329,7 +1329,11 @@ func get_mod_command() -> String:
 		#return "No active Hacking Mods. Use the Mod process in the [color=" + Compiling.SKILL.color.to_html() + "]Compiling[/color] skill to Compile items into Hacking Mods."
 
 	var return_text = ""
+	if !HackingMods.load_notice.is_empty(): # 2026-10-29: a loadout from before typed slots that didn't fit
+		return_text += "\n[color=#e0c068]Mod slots now have types (offense / defense / utility). These didn't fit and went back to your mod items: %s[/color]\n" % ", ".join(HackingMods.load_notice)
+		HackingMods.load_notice.clear()
 	var id_col = 5
+	var type_col = 6
 	var mod_col = 27
 	var eff_col = 47 # 2026-10-28: +15, long effects ran into VALUE
 	var mod_val = 8
@@ -1339,29 +1343,24 @@ func get_mod_command() -> String:
 	return_text += "\n------------------"
 	return_text += active_mods_title
 	return_text += "------------------\n\n"
-	return_text += pad_text("ID", id_col) + pad_text("MOD", mod_col) + pad_text("EFFECT", eff_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
-	return_text += "-".repeat(83 + 15) + "\n"
+	return_text += pad_text("ID", id_col) + pad_text("SLOT", type_col) + pad_text("MOD", mod_col) + pad_text("EFFECT", eff_col) + pad_text("VALUE", mod_val) + "REMAINING\n"
+	return_text += "-".repeat(83 + 15 + type_col) + "\n"
 
-	for i in range(HackingMods.current_mods.size()):
-		var mod_type = HackingMods.current_mods.keys()[i]
-		var mod = HackingMods.current_mods[mod_type]
-
-		var hmv = HackingMods.get_mod_value_text(mod_type, mod.value)
-		var hmn = HackingMods.get_mod_name(mod_type)
-		var hmd = mod.duration
-
+	# 2026-10-29: one row per slot, in slot order (ID = slot number); empty slots show "-"
+	for i in range(int(HackingMods.max_mods)):
+		var mod_type = HackingMods.mod_in_slot(i)
 		return_text += pad_text("[" + str(i) + "]", id_col, false)
-		return_text += pad_text(hmn, mod_col)
+		return_text += pad_text(HackingMods.SLOT_SHORT[HackingMods.slot_type(i)], type_col)
+		if mod_type == -1:
+			return_text += pad_text("-", mod_col) + pad_text("-", eff_col) + pad_text("-", mod_val) + "-\n"
+			continue
+		var mod = HackingMods.current_mods[mod_type]
+		return_text += pad_text(HackingMods.get_mod_name(mod_type), mod_col)
 		return_text += pad_text(HackingMods.get_mod_stat(mod_type), eff_col)
-		return_text += pad_text(hmv, mod_val)
-		return_text += str(hmd) + " hacks\n"
-	# one "-" row per empty slot (at least one row when nothing is equipped)
-	for i in range(max(1, int(HackingMods.max_mods)) - HackingMods.current_mods.size()):
-		return_text += pad_text("-", id_col)
-		return_text += pad_text("-", mod_col)
-		return_text += pad_text("-", eff_col)
-		return_text += pad_text("-", mod_val)
-		return_text += "-\n"
+		return_text += pad_text(HackingMods.get_mod_value_text(mod_type, mod.value), mod_val)
+		return_text += str(mod.duration) + " hacks\n"
+	if int(HackingMods.max_mods) < HackingMods.MAX_MOD_SLOTS: # the next slot to unlock
+		return_text += "[color=#666666]" + pad_text("", id_col) + pad_text(HackingMods.SLOT_SHORT[HackingMods.slot_type(int(HackingMods.max_mods))], type_col) + "locked (next 'apt' mod slot upgrade)[/color]\n"
 	
 	return_text += "\n\n\n-------------"
 	return_text += "\n| MOD ITEMS |\n"
@@ -1373,35 +1372,44 @@ func get_mod_command() -> String:
 	var mod_mod_col = 47
 	var mod_val_col = 8
 	
-	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
-	return_text += "-".repeat(82 + 15) + "\n"
+	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("SLOT", type_col) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
+	return_text += "-".repeat(82 + 15 + type_col) + "\n"
 	if Inventory.has_mod_item():
 		var player_hacking_mods = Inventory.get_hacking_mods_items()
 		
 		if !player_hacking_mods.is_empty():
-			for i in player_hacking_mods.size(): #loop through hacking items
+			var last_tier = -1
+			for i in player_hacking_mods.size(): #loop through hacking items (sorted by tier)
 				var mod = player_hacking_mods[i]
 				var mod_type = mod.hacking_mod_type
+				if int(mod.tier) != last_tier: # 2026-10-30: a header per tier, so players know where each one drops
+					last_tier = int(mod.tier)
+					var ln = Uploads.get_location_name(last_tier)
+					return_text += "%s[color=#e0c068]Tier %d Mods[/color]  [color=#666666](%s caches, 'phish -mod=%s')[/color]\n" % ["" if i == 0 else "\n", last_tier, ln, ln.to_lower()]
 
 				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
 				var hmd = HackingMods.mod_duration(mod) # + Kernel Modules
 
 				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
-				return_text += pad_text(mod.name, mod_name_col)
+				return_text += pad_text(HackingMods.SLOT_SHORT[HackingMods.mod_slot_type(mod_type)], type_col)
+				return_text += pad_text("%s x%d" % [mod.name, Inventory.get_amount(mod)], mod_name_col) # 2026-10-29: how many you have
 				return_text += pad_text(HackingMods.get_mod_stat(mod_type), mod_mod_col)
 				return_text += pad_text(hmv, mod_val_col)
 				return_text += str(hmd) + " hacks\n"
 		
 	else:
 		return_text += pad_text("-", mod_id_col)
+		return_text += pad_text("-", type_col)
 		return_text += pad_text("-", mod_name_col)
 		return_text += pad_text("-", mod_mod_col)
 		return_text += pad_text("-", mod_val_col)
 		return_text += "-"
 
-	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods.\n"
-	return_text += "use 'mod -rm <ID>' to remove active mod. WARNING: this mod will be deleted.\n"
-	return_text += "Mod items are found with 'phish -mod', by parsing Mining items with Corruption, and in caches. Each lasts a few hacks.\n\n"
+	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods ('mod -add 1, 3, 0' adds several).\n"
+	return_text += "use 'mod -rm <ID>' to remove the mod in that slot ('mod -rm all' for every one). WARNING: removed mods are deleted.\n"
+	return_text += "Each slot takes one kind of mod: OFF (offense), DEF (defense) or UTL (utility). A mod goes in the first open slot of its kind.\n"
+	return_text += "Mod items are found with 'phish -mod' and in caches.\n"
+	return_text += "[color=#666666]For more details on each mod use 'ls <mod name>' (ex. ls sql booster).[/color]\n\n"
 	return return_text
 
 
@@ -1443,6 +1451,8 @@ func tier_complete_text(tier: int) -> String:
 	if Compromise.has_lineup(cloc): # 2026-10-28: the finished tier's compromise opens
 		t += "  · [color=#ffc24a]%s compromise[/color]: six targets back to back for a driver  [color=#666666](in Hacking: recon %s)[/color]\n" % [done, done.to_lower()]
 	t += "  · Hacking target: %s  [color=#666666](in Hacking: view %s)[/color]\n" % [first, next.to_lower()]
+	if tier + 1 == Drivers.MANAGER_TIER: # 2026-10-30
+		t += "  · [color=#ffc24a]Driver Manager[/color] unlocked: 'driver' now manages every skill's drivers from anywhere, with saved builds  [color=#666666](driver)[/color]\n"
 	t += "  · Tier %d upgrades  [color=#666666](apt: each skill's v%d.0 installs open once v%d.0 is done)[/color]\n" % [tier + 1, tier + 1, tier]
 	t += "  · next upload goal: %s  [color=#666666]('upload')[/color]" % next
 	return t

@@ -9,7 +9,7 @@ signal changed
 signal ranked_up(id: String, rank: int)
 
 const SLOT_LEVELS = [10, 60]            # a slot at each of these skill levels (2 max)
-const RANK_XP = [0, 25000, 150000]      # skill XP earned while equipped for rank 1 / 2 / 3
+const RANK_XP = [0, 25000, 600000]      # skill XP earned while equipped for rank 1 / 2 / 3 (2026-10-30: rank 3 was 150000)
 const MAX_RANK = 3
 const DEV_GIVE := true                  # TESTING: 'driver give <id|all>' grants drivers. Turn off before release.
 
@@ -97,6 +97,15 @@ const DEFS = {
 
 var owned := {}    # id -> skill XP earned while equipped
 var equipped := {} # skill name -> [ids]
+var builds := [{}, {}, {}] # Driver Manager (2026-10-30): 3 saved loadouts, each skill name -> [ids]
+
+## Driver Manager (2026-10-30): from this tier (Hospital), 'driver' manages every skill's drivers from the main
+## terminal (any directory), with -swap and saved builds. Before it, 'driver' inside a skill is the way.
+const MANAGER_TIER := 3
+const MANAGER_SKILLS = ["Mining", "Parsing", "Cracking", "Matching", "Phishing", "Decoding", "Compiling"]
+func manager_unlocked() -> bool:
+	var keys = Stats.hacking_targets.keys()
+	return keys.size() >= MANAGER_TIER and Stats.hacking_targets[keys[MANAGER_TIER - 1]].get("unlocked", false)
 
 #region queries
 func skill_node(name: String) -> Node:
@@ -198,7 +207,7 @@ func equip(id: String) -> String:
 	if list.size() >= slots(sk):
 		if slots(sk) == 0:
 			return "No %s driver slot yet: the first opens at %s level %d." % [sk, sk, SLOT_LEVELS[0]]
-		return "Every %s driver slot is in use. Remove one first ('driver -remove <id>')." % sk
+		return "Every %s driver slot is in use. Remove one first ('driver -rm <id>')." % sk
 	list.append(id)
 	equipped[sk] = list
 	SaveManager.mark_dirty()
@@ -265,7 +274,7 @@ func skill_text(skill_name: String) -> String:
 	for id in mine:
 		t += "  %s  %s  %s  rank %d  %s\n" % [id.rpad(14), DEFS[id].name.rpad(14), ("[color=%s]EQUIPPED[/color]" % G) if is_equipped(id) else "        ", rank(id), value_text(id)]
 	t += "\n[color=%s]driver -add <id>[/color]      [color=%s]equip a driver (ex. driver -add %s)[/color]\n" % [G, D, mine[0] if !mine.is_empty() else "long_haul"]
-	t += "[color=%s]driver -remove <id>[/color]   [color=%s]unequip it (it keeps its rank)[/color]\n" % [G, D]
+	t += "[color=%s]driver -rm <id>[/color]       [color=%s]unequip it (it keeps its rank)[/color]\n" % [G, D]
 	t += "[color=%s]Drivers increase in rank with %s XP[/color]\n" % [D, skill_name]
 	t += "[color=%s]New drivers drop from compromises in Hacking (ex. 'recon school')[/color]" % D
 	return t
@@ -276,10 +285,19 @@ func summary_text() -> String:
 	for sk in ["Mining", "Parsing", "Cracking", "Matching", "Phishing", "Decoding", "Compiling"]:
 		if !has_drivers(sk):
 			continue
+		# 2026-10-29: skill + slots, then one indented line per equipped driver: name, rank, what it does
 		var list: Array = equipped.get(sk, [])
-		t += "  %s  slots %d/%d  %s  [color=#666666](cd %s -> driver)[/color]\n" % [sk.rpad(10), list.size(), slots(sk),
-			", ".join(list.map(func(id): return "%s (rank %d)" % [DEFS[id].name, rank(id)])) if !list.is_empty() else "-", sk.to_lower()]
+		var col = _skill_color(sk)
+		t += "[color=%s]%s[/color] %d/%d  [color=#666666](cd %s -> driver)[/color]\n" % [col, sk, list.size(), slots(sk), sk.to_lower()]
+		for id in list:
+			t += "    [color=#4ec994]%s[/color] [color=#888888]rank %d:[/color] %s\n" % [DEFS[id].name, rank(id), value_text(id)]
 	return t
+
+func _skill_color(sk: String) -> String:
+	for m in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]:
+		if m.SKILL.name == sk:
+			return "#" + m.SKILL.color.to_html(false)
+	return "#cccccc"
 
 func _rank_bar(id: String) -> String:
 	var r = rank(id)
@@ -304,13 +322,19 @@ static func _commas(n: int) -> String:
 func handle(text: String, skill_name: String) -> String:
 	var t = text.strip_edges().to_lower()
 	var arg = ""
-	for p in ["driver -add", "driver -remove", "driver give", "drivers", "driver"]:
+	if t.begins_with("driver -remove"): # 2026-10-30: renamed to -rm (the old spelling still works)
+		t = "driver -rm" + t.trim_prefix("driver -remove")
+	if manager_unlocked() and (t.begins_with("driver -swap") or t.begins_with("driver build")):
+		return _manager_command(t)
+	for p in ["driver -add", "driver -rm", "driver give", "drivers", "driver"]:
 		if t.begins_with(p):
 			arg = t.trim_prefix(p).strip_edges()
 			t = p
 			break
 	match t:
 		"driver", "drivers":
+			if manager_unlocked():
+				return manager_text()
 			if skill_name == "" or !has_drivers(skill_name):
 				return summary_text() if skill_name == "" else "%s has no drivers yet." % skill_name
 			return skill_text(skill_name)
@@ -320,7 +344,7 @@ func handle(text: String, skill_name: String) -> String:
 				return "No driver called '%s'. Type 'driver' to see yours." % arg
 			var r = equip(id)
 			return r if r != "" else "[color=#4ec994]%s equipped.[/color] %s" % [DEFS[id].name, value_text(id)]
-		"driver -remove":
+		"driver -rm":
 			var id = _find(arg)
 			if id == "":
 				return "No driver called '%s'." % arg
@@ -347,9 +371,105 @@ func _find(arg: String) -> String:
 	return ""
 #endregion
 
+#region driver manager (2026-10-30)
+## 'driver' once the manager is unlocked: every skill, its slots, then its owned spares; builds; commands
+func manager_text() -> String:
+	var G = "#4ec994"
+	var D = "#888888"
+	var t = "\n[color=#4ec9b0]DRIVER MANAGER[/color]   [color=%s]%d owned · %d equipped[/color]\n" % [D, owned.size(), all_equipped().size()]
+	for sk in MANAGER_SKILLS:
+		if !has_drivers(sk):
+			continue
+		var list: Array = equipped.get(sk, [])
+		var s = slots(sk)
+		t += "\n[color=%s]%s[/color]  [color=%s]slots %d/%d%s[/color]\n" % [_skill_color(sk), sk.to_upper(), D, list.size(), s, ("  · next at level %d" % next_slot_level(sk)) if next_slot_level(sk) > 0 else ""]
+		for i in SLOT_LEVELS.size():
+			if i >= s:
+				t += "  [color=%s]slot %d  locked (level %d)[/color]\n" % [D, i + 1, SLOT_LEVELS[i]]
+			elif i < list.size():
+				var id = list[i]
+				t += "  slot %d  [color=%s]%s[/color]  [color=%s]%s[/color]  %s  %s\n" % [i + 1, G, DEFS[id].name.rpad(18), D, id.rpad(18), _rank_bar(id), value_text(id)]
+			else:
+				t += "  slot %d  [color=%s]empty[/color]\n" % [i + 1, D]
+		var spare = skill_defs(sk).filter(func(id): return owned.has(id) and !list.has(id))
+		for id in spare:
+			t += "  [color=%s]spare[/color]   %s  [color=%s]%s[/color]  %s  %s\n" % [D, DEFS[id].name.rpad(18), D, id.rpad(18), _rank_bar(id), value_text(id)]
+	t += "\n[color=#4ec9b0]BUILDS[/color]  " + builds_line() + "\n"
+	t += "\n[color=%s]driver -add <id>[/color]          [color=%s]equip into its skill's free slot[/color]\n" % [G, D]
+	t += "[color=%s]driver -rm <id>[/color]           [color=%s]unequip (keeps its rank)[/color]\n" % [G, D]
+	t += "[color=%s]driver -swap <old> <new>[/color]  [color=%s]replace one with another from the same skill[/color]\n" % [G, D]
+	t += "[color=%s]driver build <0-2>[/color]        [color=%s]equip a saved build[/color]   [color=%s]driver build <0-2> -save[/color]  [color=%s]save what's equipped now[/color]   [color=%s]driver build <0-2> -clear[/color]  [color=%s]empty it[/color]\n" % [G, D, G, D, G, D]
+	t += "[color=%s]Drivers rank up with their skill's XP. New ones drop from compromises in Hacking.[/color]" % D
+	return t
+
+func builds_line() -> String:
+	var parts = []
+	for n in builds.size():
+		var c = 0
+		for sk in builds[n]:
+			c += Array(builds[n][sk]).size()
+		parts.append("[%d] %s" % [n, ("%d driver%s" % [c, "" if c == 1 else "s"]) if c > 0 else "[color=#888888]empty[/color]"])
+	return "   ".join(parts)
+
+func _manager_command(t: String) -> String:
+	if t.begins_with("driver -swap"):
+		var w = t.trim_prefix("driver -swap").strip_edges().split(" ", false)
+		if w.size() != 2:
+			return "usage: driver -swap <old id> <new id>  [color=#666666]ex. driver -swap long_haul stockpile[/color]"
+		var a = _find(w[0])
+		var b = _find(w[1])
+		if a == "" or b == "":
+			return "No driver called '%s'." % (w[0] if a == "" else w[1])
+		if !is_equipped(a):
+			return "%s isn't equipped." % DEFS[a].name
+		if !owned.has(b):
+			return "You don't have %s." % DEFS[b].name
+		if DEFS[a].skill != DEFS[b].skill:
+			return "%s is a %s driver and %s is a %s driver: a swap stays inside one skill." % [DEFS[a].name, DEFS[a].skill, DEFS[b].name, DEFS[b].skill]
+		if is_equipped(b):
+			return "%s is already equipped." % DEFS[b].name
+		unequip(a)
+		var r = equip(b)
+		return r if r != "" else "[color=#4ec994]%s -> %s[/color]  %s" % [DEFS[a].name, DEFS[b].name, value_text(b)]
+	# driver build [n] [-save]
+	var w = t.trim_prefix("driver build").strip_edges().split(" ", false)
+	if w.is_empty():
+		return "\n[color=#4ec9b0]BUILDS[/color]  " + builds_line() + "\n[color=#888888]driver build <0-2> equips one · driver build <0-2> -save saves what's equipped now · driver build <0-2> -clear empties it[/color]"
+	if !w[0].is_valid_int() or int(w[0]) < 0 or int(w[0]) >= builds.size():
+		return "Builds are 0, 1 and 2.  [color=#666666]ex. driver build 0  ·  driver build 0 -save[/color]"
+	var n = int(w[0])
+	if w.size() > 1 and w[1] == "-save":
+		var b = {}
+		for sk in equipped:
+			if !Array(equipped[sk]).is_empty():
+				b[sk] = Array(equipped[sk]).duplicate()
+		builds[n] = b
+		SaveManager.mark_dirty()
+		return "[color=#4ec994]Build %d saved[/color] (%d drivers)." % [n, all_equipped().size()]
+	if w.size() > 1 and w[1] == "-clear": # 2026-10-30: empty a build (what's equipped now stays)
+		builds[n] = {}
+		SaveManager.mark_dirty()
+		return "Build %d cleared. [color=#888888](your equipped drivers didn't change)[/color]" % n
+	if w.size() > 1:
+		return "Unknown option '%s'.  [color=#666666]ex. driver build 0  ·  driver build 0 -save  ·  driver build 0 -clear[/color]" % w[1]
+	if builds[n].is_empty():
+		return "Build %d is empty: equip drivers, then 'driver build %d -save'." % [n, n]
+	for id in all_equipped():
+		unequip(id)
+	var skipped = []
+	for sk in builds[n]:
+		for id in builds[n][sk]:
+			if !owned.has(id) or equip(id) != "":
+				skipped.append(DEFS[id].name if DEFS.has(id) else str(id))
+	var out = "[color=#4ec994]Build %d equipped[/color] (%d drivers)." % [n, all_equipped().size()]
+	if !skipped.is_empty():
+		out += "  [color=#888888]skipped (not owned or no free slot): %s[/color]" % ", ".join(skipped)
+	return out + "\n" + manager_text()
+#endregion
+
 #region save
 func save_data() -> Dictionary:
-	return {"owned": owned, "equipped": equipped}
+	return {"owned": owned, "equipped": equipped, "builds": builds}
 
 func load_data(data: Dictionary) -> void:
 	owned = {}
@@ -360,5 +480,12 @@ func load_data(data: Dictionary) -> void:
 	var eq: Dictionary = data.get("equipped", {})
 	for sk in eq:
 		equipped[sk] = Array(eq[sk]).filter(func(id): return owned.has(id))
+	builds = [{}, {}, {}]
+	var bl: Array = data.get("builds", [])
+	for n in min(bl.size(), builds.size()):
+		var b = {}
+		for sk in bl[n]:
+			b[sk] = Array(bl[n][sk]).filter(func(id): return DEFS.has(id))
+		builds[n] = b
 	changed.emit()
 #endregion

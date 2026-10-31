@@ -48,6 +48,8 @@ fit_content = true
 [node name="ActiveLinesContainer" type="VBoxContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="TotalsRow" type="HBoxContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
+[node name="TotalsRow" type="GridContainer" parent="ActiveLines/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 25
+theme_override_constants/h_separation = 25
+theme_override_constants/v_separation = 4
+columns = 5

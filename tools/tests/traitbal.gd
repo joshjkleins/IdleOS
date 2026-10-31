@@ -29,6 +29,69 @@ const BUILDS = {
 	"escalator": {"mods": ["SQL Booster", "Payload Amplifier"], "drivers": ["quick_compile", "warm_start", "read_ahead"], "auto": "Packet Flood"},
 }
 
+## tier 3 pass (2026-10-29): tier 1-3 mods, tier 1-2 drivers (one per skill below level 60), no Exploits
+const BUILDS_T3 = {
+	"base": {},
+	"wrong": {"mods": ["SQL Booster", "Payload Amplifier", "Critical Overflow"], "drivers": ["optimized_build", "brute_force"]},
+	# right = damage core + the trait's answer
+	"adaptive": {"mods": ["Payload Amplifier", "Handshake Exploit", "Breach Strike"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"]},
+	"heavy": {"mods": ["Critical Overflow", "Proxy Chain", "Hardened Shell"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+	"regenerator": {"mods": ["Critical Overflow", "Payload Amplifier", "Backdoor"], "drivers": ["optimized_build", "brute_force", "deep_reserves"]},
+	"siphon": {"mods": ["Critical Overflow", "Reset Loop", "SQL Booster"], "drivers": ["deep_reserves", "optimized_build", "burner_account"]},
+	"siphon_bb": {"mods": ["Critical Overflow", "Burst Buffer", "SQL Booster"], "drivers": ["deep_reserves", "optimized_build", "burner_account"]},
+	"heavy_def": {"mods": ["Critical Overflow", "Hardened Shell", "Fresh Start"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+	"regen_hs": {"mods": ["Critical Overflow", "Backdoor", "Handshake Exploit"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"]},
+	"swarm": {"mods": ["Critical Overflow", "SQL Booster", "Hardened Shell", "Reset Loop"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+}
+
+## 2026-10-29: typed slots (offense / defense / utility, then repeat): only builds a player could equip at that tier
+## (T1 O+D, T2 O+D+U, T3 O+D+U (+O on 4 slots)). TYPED=1 uses these.
+const BUILDS_TYPED = {
+	1: {
+		"base": {},
+		"wrong": {"mods": ["SQL Booster", "Hardened Shell"], "drivers": ["optimized_build"]},
+		"fortress": {"mods": ["Fresh Start", "Hardened Shell"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Firewall Crack"},
+		"heavy": {"mods": ["SQL Booster", "Decoy Traffic"], "drivers": ["burner_account", "read_ahead", "social_proof"], "auto": "Proxy Hop"},
+		"swarm": {"mods": ["SQL Booster", "Latency Injector"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Smoke Screen"},
+		"throttle": {"mods": ["Fresh Start", "Hardened Shell"], "drivers": ["deep_reserves", "steady_flow", "cheap_spoof"], "auto": ""},
+		"heater": {"mods": ["SQL Booster", "Latency Injector"], "drivers": ["optimized_build"], "auto": ""},
+	},
+	2: {
+		"base": {},
+		"wrong": {"mods": ["Payload Amplifier", "Hardened Shell", "Burst Buffer"], "drivers": ["optimized_build"]},
+		"fortress": {"mods": ["SQL Booster", "Hardened Shell", "Handshake Exploit"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Firewall Crack"},
+		"heavy": {"mods": ["SQL Booster", "Decoy Traffic", "Burst Buffer"], "drivers": ["burner_account", "read_ahead", "social_proof"], "auto": "Proxy Hop"},
+		"swarm": {"mods": ["SQL Booster", "Latency Injector", "Reset Loop"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Smoke Screen"},
+		"siphon": {"mods": ["SQL Booster", "Hardened Shell", "Burst Buffer"], "drivers": ["deep_reserves", "signal_boost", "cheap_spoof"], "auto": ""},
+		"throttle": {"mods": ["Payload Amplifier", "Hardened Shell", "Burst Buffer"], "drivers": ["deep_reserves", "steady_flow", "cheap_spoof"], "auto": ""},
+		"regenerator": {"mods": ["SQL Booster", "Hardened Shell", "Backdoor"], "drivers": ["optimized_build", "steady_flow", "brute_force"], "auto": "Packet Flood"},
+		"escalator": {"mods": ["Payload Amplifier", "Latency Injector", "Reset Loop"], "drivers": ["quick_compile", "warm_start", "read_ahead"], "auto": "Packet Flood"},
+		"escalator2": {"mods": ["SQL Booster", "Latency Injector", "Reset Loop"], "drivers": ["quick_compile", "warm_start", "read_ahead"], "auto": "Packet Flood"},
+	},
+	3: { # O / D / U (+O on the Chief's 4th slot)
+		"base": {},
+		"wrong": {"mods": ["Critical Overflow", "Hardened Shell", "Burst Buffer", "Payload Amplifier"], "drivers": ["optimized_build", "brute_force"]},
+		"adaptive": {"mods": ["Critical Overflow", "Hardened Shell", "Breach Strike", "Payload Amplifier"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"]},
+		"adaptive_hs": {"mods": ["Critical Overflow", "Hardened Shell", "Handshake Exploit", "Payload Amplifier"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"]},
+		"heavy": {"mods": ["Critical Overflow", "Decoy Traffic", "Burst Buffer", "SQL Booster"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+		"heavy_px": {"mods": ["Critical Overflow", "Proxy Chain", "Burst Buffer", "SQL Booster"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+		"regenerator": {"mods": ["Critical Overflow", "Hardened Shell", "Backdoor", "SQL Booster"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"]},
+		"regen_hs": {"mods": ["Critical Overflow", "Hardened Shell", "Handshake Exploit", "SQL Booster"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"]},
+		"siphon": {"mods": ["Critical Overflow", "Latency Injector", "Reset Loop", "SQL Booster"], "drivers": ["deep_reserves", "optimized_build", "burner_account"]},
+		"siphon_db": {"mods": ["Double Tap", "Latency Injector", "Burst Buffer", "SQL Booster"], "drivers": ["deep_reserves", "optimized_build", "burner_account"]},
+		"swarm": {"mods": ["Critical Overflow", "Latency Injector", "Reset Loop", "Payload Amplifier"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+		"swarm_hs": {"mods": ["Critical Overflow", "Hardened Shell", "Reset Loop", "Payload Amplifier"], "drivers": ["social_proof", "optimized_build", "deep_reserves"]},
+		"adaptive_d": {"mods": ["Critical Overflow", "Hardened Shell", "Breach Strike", "Payload Amplifier"], "drivers": ["optimized_build", "brute_force"]},
+		"wrong_d": {"mods": ["Critical Overflow", "Hardened Shell", "Burst Buffer", "Payload Amplifier"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"]},
+		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Breach Strike", "Payload Amplifier"], "drivers": ["optimized_build", "brute_force", "hash_collision"]},
+		"throttle": {"mods": ["Double Tap", "Hardened Shell", "Burst Buffer", "Critical Overflow"], "drivers": ["optimized_build", "deep_reserves", "brute_force"]},
+		"fortress": {"mods": ["Critical Overflow", "Hardened Shell", "Handshake Exploit", "SQL Booster"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"]},
+		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Handshake Exploit", "SQL Booster"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"]},
+		"escalator": {"mods": ["Critical Overflow", "Latency Injector", "Reset Loop", "SQL Booster"], "drivers": ["read_ahead", "optimized_build", "hash_collision"]},
+		"probe": {"mods": ["Opening Spoof", "Fresh Start", "Vuln Scanner", "Double Tap"], "drivers": []},
+	},
+}
+
 func _set_gear(tier: int, late: bool) -> void:
 	var upto = tier if late else tier - 1
 	for id in Upgrades.packages:
@@ -47,11 +110,21 @@ func _set_gear(tier: int, late: bool) -> void:
 
 func _equip(build: Dictionary, tier: int) -> void:
 	HackingMods.current_mods.clear()
-	var slots = HackingMods.max_mods
-	for n in build.get("mods", []).slice(0, slots):
+	var slots = int(OS.get_environment("SLOTS")) if OS.get_environment("SLOTS") != "" else HackingMods.max_mods # SLOTS=3: fewer mod slots than apt gives
+	var mods_list: Array = build.get("mods", []).duplicate()
+	if OS.get_environment("SWAP") != "": # SWAP=Old>New,Old2>New: replace mods in every build
+		for pair in OS.get_environment("SWAP").split(","):
+			var ab = pair.split(">")
+			var at = mods_list.find(ab[0])
+			if at >= 0 and !(ab[1] in mods_list): mods_list[at] = ab[1]
+	for n in mods_list.slice(0, slots):
 		var it = _item(n)
 		if it and int(it.tier) <= tier:
-			HackingMods.current_mods[it.hacking_mod_type] = {"duration": 99, "value": it.hacking_mod_value, "tier": it.tier}
+			var sl = HackingMods.free_slot_for(it.hacking_mod_type) # typed slots (2026-10-29); SLOTS caps the count
+			if sl == -1 or sl >= slots:
+				print(">>> (skipped %s: no free %s slot)" % [n, HackingMods.mod_slot_type(it.hacking_mod_type)])
+				continue
+			HackingMods.current_mods[it.hacking_mod_type] = {"duration": 99, "value": it.hacking_mod_value, "tier": it.tier, "slot": sl}
 	Drivers.equipped = {}
 	for id in build.get("drivers", []):
 		Drivers.grant(id)
@@ -134,20 +207,25 @@ func _run() -> void:
 	Inventory.add_resource(loc["required payload"], 10000)
 	Stats.set_max_anon()
 	print(">>> TIER %d %s gear · hacking L%d · mod slots %d · +%d max bandwidth · max anonymity %d" % [tier, "late" if late else "early", Hacking.SKILL.level, HackingMods.max_mods, int(Upgrades.cur("hacking.max_bandwidth")), int(Stats.max_anon)])
-	for target in loc.targets:
+	var tlist = loc.targets
+	if OS.get_environment("COMP") != "": # COMP=1: the location's compromise lineup (each fight on its own, full anonymity)
+		tlist = Compromise.lineup(Stats.hacking_targets.keys()[tier - 1])
+	for target in tlist:
 		if only.begins_with("="):
 			if target.name.to_lower() != only.substr(1): continue # ONLY==name: exact
 		elif only != "" and !(only in target.name.to_lower()): continue
-		target.unlocked = true
+		_unlock_upto(tier, target)
 		var st = OS.get_environment("SETTRAITS") # SETTRAITS=adaptive (or a,b): try traits on the tested targets
 		if st != "":
 			target["traits"] = Array(st.split(","))
 		var traits = Stats.target_traits(target)
 		var builds = ["base", "wrong"]
+		var bset = BUILDS_TYPED[tier] if OS.get_environment("TYPED") != "" else (BUILDS_T3 if tier == 3 else BUILDS)
 		for tr in traits:
-			if BUILDS.has(tr): builds.append(tr)
+			if bset.has(tr): builds.append(tr)
+		if OS.get_environment("BUILD") != "": builds = Array(OS.get_environment("BUILD").split(",")) # BUILD=wrong: only these builds
 		for b in builds:
-			_equip(BUILDS[b], tier)
+			_equip(bset[b], tier)
 			var won = 0; var tt = 0.0; var an = 0.0; var sq = 0.0; var spf = 0.0
 			for i in n:
 				var r = await _fight(target, run)
@@ -155,3 +233,18 @@ func _run() -> void:
 			var w = max(1, won)
 			print(">>> %-20s %-12s %-11s hacks %4.1f/%d  %4ds/win  sql %3d/win  spoof %3d/win  anon end %3d%%" % [target.name, ",".join(traits) if !traits.is_empty() else "-", b, float(won) / n, run, int(tt / w), int(sq / w), int(spf / w), int(100 * an / n)])
 	get_tree().quit()
+
+## 2026-10-30: max anonymity follows target unlocks: every target of the earlier locations, and this location's up to
+## the tested one (a compromise fight: all of them)
+func _unlock_upto(tier: int, target: Dictionary) -> void:
+	var li = 0
+	for l in Stats.hacking_targets.values():
+		li += 1
+		var arr = l.get("targets", [])
+		for i in arr.size():
+			var upto = arr.size() - 1
+			if li == tier and !target.has("_base"):
+				upto = Stats.target_place(target).get("index", arr.size() - 1)
+			arr[i].unlocked = li < tier or (li == tier and i <= upto)
+	target.unlocked = true
+	Stats.set_max_anon()

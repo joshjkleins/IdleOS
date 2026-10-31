@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_m12ou")
 item = ExtResource("1_qwufl")
-min_quantity = 25
-max_quantity = 50
-drop_chance = 0.6
+min_quantity = 11
+max_quantity = 45
+drop_chance = 0.45
 metadata/_custom_type_script = "uid://ct415ioicqw1p"

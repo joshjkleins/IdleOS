@@ -127,24 +127,35 @@ func update_modifiers_ui() -> void:
 	mods_pips.used = HackingMods.current_mods.size()
 	mods_pips.unlocked = HackingMods.max_mods
 	mods_pips.queue_redraw()
-	if HackingMods.current_mods.is_empty():
-		mods_list.add_child(_label("none active  ·  find mods with phish -mod or parse -corruption", 10, C_ZERO))
-		return
-	if HackingMods.current_mods.size() > 2:
-		# 3-7 mods: two compact columns so the header keeps its height
+	# 2026-10-29: typed slots, shown in slot order: a type letter (O / D / U), then the mod or "-"
+	if HackingMods.max_mods > 2:
+		# 3-6 slots: two compact columns so the header keeps its height
 		var g := GridContainer.new()
 		g.columns = 2
 		g.add_theme_constant_override("h_separation", 12)
 		g.add_theme_constant_override("v_separation", 0)
 		mods_list.add_child(g)
-		for m in HackingMods.current_mods.keys():
+		for i in int(HackingMods.max_mods):
+			var m = HackingMods.mod_in_slot(i)
+			var tl = HackingMods.SLOT_SHORT[HackingMods.slot_type(i)] # OFF / DEF / UTL (a lone "O" read as a zero)
+			if m == -1:
+				var e = _label("%s  -" % tl, 10, C_ZERO)
+				e.tooltip_text = "empty %s slot" % HackingMods.slot_type(i)
+				e.mouse_filter = Control.MOUSE_FILTER_PASS
+				g.add_child(e)
+				continue
 			var d = int(HackingMods.current_mods[m].duration)
-			var l = _label("%s %s · %d" % [SHORT_MOD_NAMES.get(m, HackingMods.get_mod_name(m)), HackingMods.get_mod_value_text(m, HackingMods.current_mods[m].value), d], 10, C_TEXT)
-			l.tooltip_text = "%s · %d hacks left" % [HackingMods.get_mod_name(m), d]
+			var l = _label("%s  %s %s · %d" % [tl, SHORT_MOD_NAMES.get(m, HackingMods.get_mod_name(m)), HackingMods.get_mod_value_text(m, HackingMods.current_mods[m].value), d], 10, C_TEXT)
+			l.tooltip_text = "%s (%s) · %d hacks left" % [HackingMods.get_mod_name(m), HackingMods.slot_type(i), d]
 			l.mouse_filter = Control.MOUSE_FILTER_PASS
 			g.add_child(l)
 		return
-	for m in HackingMods.current_mods.keys():
+	for i in int(HackingMods.max_mods):
+		var m = HackingMods.mod_in_slot(i)
+		var tl = HackingMods.SLOT_SHORT[HackingMods.slot_type(i)] # OFF / DEF / UTL (a lone "O" read as a zero)
+		if m == -1:
+			mods_list.add_child(_label("%s  -" % tl, 11, C_ZERO))
+			continue
 		var line := HBoxContainer.new()
 		mods_list.add_child(line)
 		line.add_theme_constant_override("separation", 10)
@@ -152,6 +163,9 @@ func update_modifiers_ui() -> void:
 		var dur = _label("%d hack%s" % [d, "" if d == 1 else "s"], 11, C_MODS)
 		dur.custom_minimum_size.x = 58
 		line.add_child(dur)
+		var tag = _label(tl, 11, C_ZERO)
+		tag.custom_minimum_size.x = 26
+		line.add_child(tag)
 		var name_label = _label("%s %s" % [HackingMods.get_mod_name(m), HackingMods.get_mod_value_text(m, HackingMods.current_mods[m].value)], 11, C_TEXT)
 		name_label.clip_text = true
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -214,29 +228,29 @@ func _build_drivers() -> void:
 	drivers_box.add_child(_driver_grid)
 	for id in ids:
 		var d = Drivers.DEFS[id]
-		var rtl := RichTextLabel.new()
-		rtl.bbcode_enabled = true
-		rtl.fit_content = true
-		rtl.scroll_active = false
-		rtl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		rtl.clip_contents = true
-		rtl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		rtl.custom_minimum_size.x = DRIVER_CELL - 14
-		rtl.add_theme_font_size_override("normal_font_size", 10)
+		# 2026-10-29: two Labels (name in the skill's color, effect clipped) instead of a fit-content RichTextLabel,
+		# whose minimum width was its whole text and pushed the header past the window
+		var cell := HBoxContainer.new()
+		cell.add_theme_constant_override("separation", 5)
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.custom_minimum_size.x = 90
+		cell.mouse_filter = Control.MOUSE_FILTER_PASS
+		cell.tooltip_text = "%s (%s driver, rank %d): %s" % [d.name, d.skill, Drivers.rank(id), Drivers.value_text(id)]
 		var col: Color = _skill_color(d.skill)
-		rtl.text = "[color=#%s]%s[/color]%s [color=#8b96a1]%s[/color]" % [col.lightened(0.2).to_html(false), d.name,
-			"" if Drivers.rank(id) <= 1 else "[color=#5c6b7a] r%d[/color]" % Drivers.rank(id), Drivers.short_text(id)]
-		rtl.tooltip_text = "%s (%s driver, rank %d): %s" % [d.name, d.skill, Drivers.rank(id), Drivers.value_text(id)]
-		rtl.mouse_filter = Control.MOUSE_FILTER_PASS
-		_driver_grid.add_child(rtl)
+		cell.add_child(_label(d.name + ("" if Drivers.rank(id) <= 1 else " r%d" % Drivers.rank(id)), 10, col.lightened(0.2)))
+		var eff = _label(Drivers.short_text(id), 10, Color("#8b96a1"))
+		eff.clip_text = true
+		eff.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		eff.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		eff.custom_minimum_size.x = 10
+		cell.add_child(eff)
+		_driver_grid.add_child(cell)
 	_fit_driver_columns()
 
-const DRIVER_CELL := 200.0
+const DRIVER_COLUMNS := 3 # 2026-10-29: fixed (14 drivers = 5 rows)
 func _fit_driver_columns() -> void:
-	if _driver_grid == null or !is_instance_valid(_driver_grid):
-		return
-	var w = drivers_box.size.x
-	_driver_grid.columns = clampi(int(w / DRIVER_CELL), 1, 7) if w > 0 else 2
+	if _driver_grid != null and is_instance_valid(_driver_grid):
+		_driver_grid.columns = DRIVER_COLUMNS
 
 func _skill_color(skill_name: String) -> Color:
 	for m in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling, Hacking]:

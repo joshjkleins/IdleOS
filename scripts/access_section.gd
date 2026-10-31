@@ -37,6 +37,8 @@ func _ready() -> void:
 	_rows.add_theme_constant_override("separation", 3)
 	add_child(_rows)
 	_summary = _label("", 10, DIM)
+	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # 2026-10-30: wraps instead of widening the side panel
+	_summary.custom_minimum_size.x = 60
 	_summary.visible = false
 	add_child(_summary)
 	Stats.unlocks_changed.connect(_rebuild)
@@ -84,8 +86,11 @@ func _rebuild() -> void:
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if l.get("unlocked", false):
-			parts.append("%s %d/%d" % [loc.to_lower().split(" ")[0], l.targets.filter(func(t): return t.get("unlocked", false)).size(), l.targets.size()])
-	_summary.text = "  ·  ".join(parts) + ("  ·  %d drivers" % gold if gold > 0 else "")
+			# non-breaking spaces inside an entry: lines only wrap between entries
+			parts.append("%s\u00a0%d/%d" % [loc.to_lower().split(" ")[0], l.targets.filter(func(t): return t.get("unlocked", false)).size(), l.targets.size()])
+	if gold > 0:
+		parts.append("%d\u00a0drivers" % gold)
+	_summary.text = " · ".join(parts)
 
 func set_collapsed(value: bool) -> void:
 	collapsed = value

@@ -343,6 +343,14 @@ func get_hacking_mods_items() -> Array:
 	for i in inventory:
 		if i.hacking_mod_item:
 			hacking_items.append(i)
+	# 2026-10-30: by tier (where they drop), then offense / defense / utility, then name. The 'mod' list and
+	# 'mod -add <id>' both read this order, so the IDs match.
+	var hm = get_node_or_null("/root/HackingMods")
+	var rank = func(it): return HackingMods.SLOT_PATTERN.find(hm.mod_slot_type(it.hacking_mod_type)) if hm else 0
+	hacking_items.sort_custom(func(a, b):
+		if int(a.tier) != int(b.tier): return int(a.tier) < int(b.tier)
+		if rank.call(a) != rank.call(b): return rank.call(a) < rank.call(b)
+		return a.name < b.name)
 	return hacking_items
 
 #Logs.....+5 damage.......10 hacks.......x100

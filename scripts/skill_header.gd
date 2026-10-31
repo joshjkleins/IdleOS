@@ -4,7 +4,7 @@ extends PanelContainer
 ## Views switch in one step (collapse -> rebuild -> open -> text fades in) so there's no flicker.
 ## API used by idle_os_2: update(), display_skill(skill), display_defragging(), prepare_intro(), intro(skill)
 
-const SKILLS_ORDER = ["Mining", "Parsing", "Cracking", "Matching", "Phishing", "Hacking", "Decoding", "Compiling"]
+const SKILLS_ORDER = ["Mining", "Parsing", "Cracking", "Matching", "Phishing", "Compiling", "Decoding", "Hacking"] # 2026-10-29 order
 const C_DEFRAG = Color("#cf3a3a")
 const ROOT_CARD_WIDTH = 150.0
 const FADE = 0.12
@@ -20,7 +20,7 @@ var _switch_tween: Tween
 var _view_token := 0
 
 func _skills() -> Array:
-	return [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]
+	return [Mining, Parsing, Cracking, Matching, Phishing, Compiling, Decoding, Hacking] # root header order (2026-10-29)
 
 func _ready() -> void:
 	var sb := StyleBoxEmpty.new()

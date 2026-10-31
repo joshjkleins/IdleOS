@@ -1,7 +1,8 @@
 # IdleOS — project notes for a fresh session
 
 Read this first. It covers how we work, how to test, the upgrade system, and what's left.
-Last updated: 2026-10-18, after the Phishing upgrade step.
+Last updated: 2026-10-30 (tier 3 / Hospital wrapped). The newest state is in the last section,
+"Tiers 1-3 balance (2026-10-29/30)"; older sections are history and some of their numbers are out of date.
 
 ## Demo branch: demo-nextfest (Steam Next Fest demo, live 2026-10-19)
 - The live demo is built from `demo-nextfest`. Demo hotfixes go there (export + upload to the demo app); if the
@@ -138,7 +139,7 @@ Last updated: 2026-10-18, after the Phishing upgrade step.
     target that isn't maxed; all maxed -> 1 SQL Injector. `parse_bait` now also parses `target=`.
   - Trap: 60 s setup in the terminal, then fills over 45 min of real (unix) time, also offline. State in
     `Phishing.trap` (saved). `trap` / `trap collect` work from any context (also `phish -trap collect`).
-    Full haul 70 SQL + 15 spoofs; rare rolls only when full: exploit item at eff, hacking mod at eff/5.
+    Full haul 68 SQL + 17 spoofs (80/20); only a full trap gives 1 exploit + 1 hacking mod (x2 baited), plus a bonus exploit at eff (15% -> 25% at 99).
     Early collect = proportional basics, no rares. Not allowed in a VM, excluded from contracts.
     Right panel row under PROCESS: `scripts/trap_status.gd` (code-built by system_dock).
   - Mod pool = every hacking mod item whose `tier` is unlocked (`Phishing.mod_pool()`): new mods only need
@@ -861,3 +862,99 @@ is about where the model's first hack lands. Options discussed: hack-first tutor
 - Access panel: 7-pip driver bar per tier (gold per driver owned, name gold at 7/7). Target card: drivers / recon.
 - Hard mode retired: "hard mode unlocked" forced false, hard targets never load as unlocked (data kept).
 - Test: tools/tests/comptest.gd (WIN=1 big anonymity, FORFEIT=1, SHOTS=1, TS=time scale).
+
+## Tiers 1-3 balance (2026-10-29/30, skill-revamp) - CURRENT STATE
+Tier pass order (Josh): combats / upgrades / mods / exploits / drivers > new processes > resource averages.
+Tiers 1-3 (School, Lawfirm, Hospital) are done; next is tier 4 (Bank). Josh does a full combat/progression check
+before release.
+
+### Testing (device shell, this round)
+- Test copy `$HOME/new`; sync: `rsync -a --exclude .git --exclude _to_delete --exclude .godot --exclude traitbal.gd
+  $HOME/mnt/idle-os-prototype/ $HOME/new/` (the working harness is `$HOME/new/traitbal.gd`; copy it back to
+  `tools/tests/traitbal.gd` after changing it). Clear `$HOME/.local/share/IdleOS_Demo/savegame.json` before runs.
+- Test scenes: `sed "s#res://p4test.gd#res://X.gd#" p4test.tscn > X.tscn`. Screens: `xvfb-run -a -s "-screen 0
+  1920x1080x24" ... --resolution 1920x1080`, PNG to `_to_delete/`, stage + Read.
+- `grep -v 'Game saved'`, never `grep -v saved` (it hid real lines twice). `os.lines` is trimmed: read the
+  RichTextLabel's parsed text instead. Run harness processes one at a time (parallel runs distort times).
+- traitbal.gd env: TIER, GEAR=late|early, LEVEL, N, RUN, TS (time scale), INTEL (default full, 0 = none), ONLY
+  (substring, "=" exact), SLOTS, BUILD=a,b, COMP=1 (the tier's compromise lineup), TYPED=1 (BUILDS_TYPED[tier],
+  legal typed-slot builds), DBG/DBGN. It unlocks targets like a player would (earlier tiers all, this tier up to
+  the tested target, compromise = all) so max anonymity matches. Helpers (device home, not in the project):
+  `$HOME/bal/one.sh <target> [slots]`, `$HOME/bal/comp3.sh <filter> [N]` (T3 compromise, LEVEL 28, INTEL=0).
+- Loss penalties take SQL, so the harness "sql/win" number is no longer reliable.
+
+### Max anonymity (2026-10-30)
+- `Stats.set_max_anon`: 100 + 12 per target unlocked past the first + 100 per location past the first
+  (MAX_ANON_PER_TARGET / MAX_ANON_PER_LOCATION). Hacking level no longer adds any (it only raises crit chance).
+  School 100-148, Lawfirm 260-308, Hospital 420-468, Bank 580-628, Police 740-788, Gov 900-948.
+- Recalculated on unlock_target / unlock_location / load. Locked target cards show "+N max anonymity when unlocked"
+  (`Stats.anon_for_unlock`; a location's first target shows +112).
+
+### Hacking mods: typed slots + reshuffle (2026-10-29/30)
+- `HackingMods.SLOT_PATTERN = ["offense", "defense", "utility"]` repeating, MAX_MOD_SLOTS 6. Each mod has a type
+  (SLOT_TYPE); `current_mods[mod].slot` stores its slot. `mod -rm <slot>`; a full type refuses the add (no swap).
+  load_data refits mods, refunds extras as items and refreshes equipped values. Header shows OFF/DEF/UTL tags;
+  `mod` list has a SLOT column and tier headers ("Tier N Mods (X caches, 'phish -mod=x')").
+- Tiers: T1 Booster, Fresh Start, Hardened Shell, Decoy, Latency | T2 Amp, Vuln, Backdoor, Handshake, Burst Buffer,
+  Reset Loop | T3 Overflow, Double Tap, Hot Streak, Opening Spoof, Proxy Chain, Breach Strike | T4 Bleed, Breach
+  Momentum, Jitter, Leech, Packet Shredder | T5 IP Rotator, Silent Entry, Zero Hour, Cold Boot | T6 Failsafe,
+  Mirror, Cascade, Data Hoarder.
+- Values: Critical Overflow x3 crits; Vuln Scanner +15% crit (flat); Fresh Start first 3 attacks are guaranteed crits (2026-10-30);
+  Double Tap needs 2x bandwidth; Opening Spoof's first spoof deals 2x its heal as damage; Decoy 2; Silent Entry 7s;
+  Failsafe 40%; Breach Strike +25% crit for 5s after a firewall break; Backdoor 40%; Proxy Chain -2s spoof fill.
+- Fresh Start vs SQL Booster (2026-10-30): Booster = sustained speed, Fresh Start = 3 opening crits (strong burst,
+  useless into Fortress). The doc "IdleOS Hacking Mods" (Claude Docs) has the full list.
+
+### Traits (Stats.TRAITS, current)
+- regenerator 2%/s (fw too), any SQL hit pauses it for 0.3s; siphon drains bandwidth and jams regen 1.5s per
+  countermeasure; heater heat x2.5, breaking the firewall vents 20 degrees, no heat from countermeasures while
+  overheated; fortress "Huge firewall. Nothing gets through until it's down" (reboot x0.5); adaptive firewall
+  grows 50% per reboot (reboot x0.5); packet_loss: every SQL / spoof shot consumes 3 (no extra effect).
+
+### Hacking game
+- Loss penalties (`_loss_penalties`): lose 10-20% of SQL and 5-10% of spoofs, an extra mod duration, and
+  `Decoding.intel_knock_down` (every intel stat -1 level). `kill` under 20% anonymity counts as a loss (KILL_LOSS_ANON).
+- Win streak: `hacking.win_streak` capstone (tier 2, replaced Recycler; Evasion moved to tier 3). The 5th win of a
+  run of 5+ (or -1) gives the target's rare; shown on the target card once owned.
+- SQL card DMG shows drivers that apply right now, incl. Weak Point (full intel) and Steady Flow (full bandwidth).
+- Firewall row: "down Xs once broken"; exploits list grouped by tier.
+
+### Compromise lineups
+- School tuned 2026-10-28/29; Lawfirm Partner 520 integrity / 25 counter / 33 firewall.
+- Hospital (2026-10-30, tested at 468 max anonymity, right build, no intel): Receptionist packet_loss 980/44/17.6/9s,
+  Receptionist heavy 810/32/17.6/9s, Orderly throttle 760/41/24.2/7s, Nurse fortress 390/39/19.8 (reboot kept 4s:
+  3s won 0%), Doctor regen+heater 440/29/22/5s, Chief adaptive+escalator 1100/37/17.6/fw 48 (reboot kept 3.5s).
+  Win rates ~50-100%, Chief ~70% with the Escalator build.
+- Hospital targets: Receptionist 850/60fw/35/16/10s adaptive, Orderly 660/38/37/22/8s heavy, Nurse 340/60/35/18/8s
+  regen, Doctor 650/44/38/20/6s siphon, Chief 1400/60/105/22.22/7s swarm. Payloads 3/6/9/12/15.
+
+### Economy
+- Cache basics: rolls 75/60/45%, quantities x0.6-1.2, first target x0.5, second x0.75; Hospital, School and
+  Lawfirm x0.7 on top. Decoding apt costs /4; Decoding Efficiency = flat +2.5% basics per install.
+- `decode -skim`: always drops every basic at its minimum (never the rare); efficiency = chance for +50% basics.
+- Uploads RARE_GOALS [1,3,4,5,6,7]; ACCESS_RARE_BY_TIER [2,2,3,3,5,5].
+- Network: line chance 1.5% -> 3.5% at 99, no Pattern Cache, paced by NETWORK_TIME_BY_TIER (~90/120/.../240
+  tokens/h by tier); Network caches always drop 1 to tier+1 VM caches.
+- Corruption (parsing): ~4 Exploits/h at base speed, ~100 Mining items each.
+- Phishing (unlock order Spear T1, Trap T2, Smish T3, Whaling T4, Mod T1):
+  - Trap: 45 min real-time fill; full haul 68 SQL + 17 spoofs + 1 Exploit + 1 hacking mod (x2 baited); efficiency
+    = bonus Exploit chance (15% -> 25%, grows from level 15).
+  - Whaling (big game): 25% bite, 60-120s wait, 240s reel split across lines, 40-60 bundle, 30% Exploit per landed
+    whale, 2700 XP, heat 8.1 per whale; ~8 whales / ~410 SQL+spoofs / ~2.5 Exploits per hour at base. Offline
+    rolls the Exploit chance too.
+  - Spear: ~525 SQL+spoofs/h at base, no Exploits; bait is expensive (~10k basics/h vs Whaling ~330).
+- Exploits: Throttle Patch = next 10 SQL; Booster Shot = one spoof x2; Credential Stuffing = next 2 hits +50%
+  firewall damage.
+
+### Drivers / misc
+- Driver RANK_XP [0, 25000, 600000]. Driver Manager at tier 3: `driver` (full view), `driver -add/-rm/-swap <old>
+  <new>`, `driver build N [-save|-clear]`. Deep Reserves rolls once per full bar and can fire at 0 bandwidth.
+- Offline: under 5s resumes silently, under 60s a one-line summary; partial-cycle credit. Defrag Cooling x2 cooling;
+  Defrag XP moved to tier 6 (Bank Heat and Police processes TBD).
+- Commands: `cd hacking/<loc> [-r|-recon]`, a location name -> `info hacking`, a skill name -> `info <skill>`.
+  Dev: `uploads set/complete`, `intel full/clear`, `tutorial complete`, `add/rm <item>`.
+
+### Still open
+- Tier 4+ (Bank onward) combat / mods / exploits / drivers pass; Bank+ cache and economy check.
+- Tier 6 apt: replacement for the mod-slot upgrade. Defrag processes for Bank and Police.
+- Release: `DEV_ITEM_COMMANDS`, `Drivers.DEV_GIVE` (and the other DEV flags) off.

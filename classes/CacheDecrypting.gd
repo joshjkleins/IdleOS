@@ -135,7 +135,7 @@ func get_potential_items(cache: CacheData, process: Dictionary = {}, mod: String
 		var loot = []
 		for entry in cache.entries:
 			loot.append({"item": entry.item, "amount": randi_range(entry.min_quantity, entry.max_quantity), "rare": false})
-		loot.append({"item": Items.HANDSHAKE_EXPLOIT, "amount": 1, "rare": false}) # the tutorial's mod step equips it
+		loot.append({"item": Items.SQL_BOOSTER, "amount": 1, "rare": false}) # the tutorial's mod step equips it (2026-10-29: was Handshake Exploit; the first mod slot takes offense)
 		loot.append({"item": cache.rare_pool.pick_random().item, "amount": 1, "rare": true})
 		Decoding.first_cache_decoded = true
 		Decoding.first_rare_given[Decoding.cache_family(cache)] = true

@@ -86,6 +86,16 @@ func cur(id: String) -> float:
 		return 0.0
 	return float(p.current)
 
+## SQL attack speed from the SQL Damage track's levels that give speed instead of damage ("speed": tier 3, 2026-10-29)
+func sql_speed_bonus() -> float:
+	var p = packages.get("hacking.damage")
+	if p == null:
+		return 0.0
+	var t = 0.0
+	for i in int(p.installed):
+		t += float(p.levels[i].get("speed", 0.0))
+	return t
+
 ## true once a capstone is installed
 func has(id: String) -> bool:
 	var p = packages.get(id)
@@ -291,13 +301,29 @@ func _affordable_with(level: Dictionary, spent: Dictionary) -> bool:
 			return false
 	return true
 
+## Win Streak (2026-10-30): the tier 2 Hacking capstone (replaced Recycler): the 5th win of a 5+ hack run gives the rare
+func win_streak_unlocked() -> bool:
+	return has("hacking.win_streak")
+
+## a level's own name and change line (2026-10-30): a level may rename its package ("name": SQL Damage's
+## tier 3 is "SQL Speed") and replace "before -> after" with its own line ("change")
+func level_name(p: Dictionary, lvl: Dictionary) -> String:
+	return str(lvl.get("name", p.name)) if !lvl.is_empty() else str(p.name)
+
+func level_change(p: Dictionary, lvl: Dictionary, after_color: String = "") -> String:
+	if p.type == "capstone":
+		return str(lvl.effect)
+	if lvl.has("change"):
+		return ("[color=%s]%s[/color]" % [after_color, lvl.change]) if after_color != "" else str(lvl.change)
+	return ("%s -> [color=%s]%s[/color]" % [lvl.before, after_color, lvl.after]) if after_color != "" else "%s -> %s" % [lvl.before, lvl.after]
+
 ## the tier's installs, for the MAJOR RELEASE changelog: [{name, after}]
 func changelog(group: String, tier: int) -> Array:
 	var out = []
 	for p in group_packages(group):
 		for i in p.installed:
 			if int(p.levels[i].tier) == tier:
-				out.append({"name": p.name, "after": p.levels[i].after, "type": p.type})
+				out.append({"name": level_name(p, p.levels[i]), "after": p.levels[i].get("change", p.levels[i].after), "type": p.type})
 	return out
 #endregion
 

@@ -36,6 +36,7 @@ func heat_tier_mult() -> float:
 	return Stats.tier_heat(Decoding.HEAT_BY_TIER, t if t > 0 else Upgrades.working_tier("Decoding"))
 
 func _ready():
+	add_to_group("flush_on_quit")
 	cache_decrypt.item_found.connect(update_items_gained)
 	cache_decrypt.text_found.connect(_on_text_found)
 	drop_rates = RichTextLabel.new()
@@ -46,6 +47,20 @@ func _ready():
 	drop_rates.visible = false
 	caches_display_container.get_parent().add_child(drop_rates)
 	caches_display_container.get_parent().move_child(drop_rates, caches_display_container.get_index() + 1)
+
+## Quitting / closing mid-cache (2026-10-29): the cache was already paid for when its dump started, so the rest of
+## it is revealed at once (its finds are granted) instead of being lost with the session.
+func flush_for_quit() -> void:
+	if !running or cache_decrypt.corrupted or cache_decrypt.dump_info.is_empty():
+		return
+	var rows = cache_decrypt.row_count()
+	var guard := 0
+	while cache_decrypt.current_row < rows and guard < 10000 and !cache_decrypt.corrupted:
+		guard += 1
+		if !cache_decrypt.update_dump():
+			break
+		cache_decrypt.render_dump() # finds are granted as the cursor passes them
+	running = false # the session is ending: don't start another cache
 
 ## One line: "DROPS  Logs 5-10 (100%) · ... · RARE Parents credit card x1 (19.8%)" for the current process.
 ## Two lines under the cache: DROPS (basics, VM cache, tokens) and RARE (rare items, one-time items,

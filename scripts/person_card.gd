@@ -101,6 +101,9 @@ func _add_locked(box: VBoxContainer, info) -> void:
 		var hint = _label(Stats.get_unlock_hint(info), 11, C_TEXT)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(hint)
+	var anon_gain = Stats.anon_for_unlock(info) # 2026-10-30: max anonymity grows with target unlocks
+	if anon_gain > 0:
+		box.add_child(_label("+%d max anonymity when unlocked" % anon_gain, 11, C_OK))
 	var stats_box := VBoxContainer.new()
 	stats_box.modulate = Color(1, 1, 1, 0.45)
 	box.add_child(stats_box)
@@ -196,6 +199,12 @@ func _add_reward(box: VBoxContainer, info) -> void:
 	row.add_child(_icon("reward"))
 	var qty = info.get("loot quantity", 1)
 	row.add_child(_label("%s x%d" % [info.loot.name, qty], 12, C_TEXT))
+	# 2026-10-30: the win streak reward (hacking_game._streak_rare)
+	if info.loot is CacheData and !info.loot.rare_pool.is_empty() and Upgrades.win_streak_unlocked():
+		var st = _label("streak: %d wins in one run ('hack %s=%d' or '-r') = +1 %s" % [5, str(info.name).to_lower(), 5, info.loot.rare_pool[0].item.name.to_lower()], 10, C_RARE)
+		st.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		st.custom_minimum_size.x = 60
+		box.add_child(st)
 	if info.loot is CacheData:
 		_add_loot_pool(box, info.loot)
 

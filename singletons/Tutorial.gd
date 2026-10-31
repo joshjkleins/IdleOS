@@ -240,7 +240,7 @@ var tutorial_tasks := {
 	TutorialEvent.UPLOAD_SCHOOL_PAYLOAD: "Upload 1 School Payload: 'upload school payload 1'. Keep the other 3 for hacking.",
 	TutorialEvent.VIEW_SCHOOL: "This is the hacking console. Every location has targets to breach. Look at the School's targets.",
 	TutorialEvent.RETURN_TO_ROOT: "Nice work. Head back to the main terminal so we can see what this Cache contains. Use 'cd ..' to move up directories until you're back at the root, or 'cd root' to go directly to root.",
-	TutorialEvent.EQUIP_FIRST_MOD: "The cache also held a Hacking Mod: a Handshake Exploit. Mods change how your hacks play, and each lasts a few hacks. List your mods, then equip it. Every equipped mod adds a little bandwidth to each attack, so you choose which ones are worth it.",
+	TutorialEvent.EQUIP_FIRST_MOD: "The cache also held a Hacking Mod: an SQL Booster. Mods change how your hacks play, and each lasts a few hacks. List your mods, then equip it. Every equipped mod adds a little bandwidth to each attack, so you choose which ones are worth it.",
 	TutorialEvent.HACK_STUDENT_TWICE: "Back to Hacking, and this time hack the Student twice in a row. Watch your first hit, and the first after each firewall reboot. Anonymity carries over between the hacks of a run, so keep an eye on it. (The Hacking module needs the main terminal free: 'kill' anything still running first.)",
 	TutorialEvent.DECODE_2_CACHES: "Back at the main terminal, decode both new caches. 'decode -cache' works through them one at a time.",
 	TutorialEvent.UTILITY_COMMAND: "One last thing: 'utility' lists the helper commands. Pin a process to the top of the terminal with 'pin', bring the active process back to the bottom with 'focus', keep a live count of an item with 'track', look anything up with 'info', and more. Every new location you open with the upload goal brings a batch of new processes: keep an eye out for them.",
@@ -390,7 +390,7 @@ func _token_steps() -> Dictionary:
 		TutorialEvent.CRACK_3_PASSWORDS: Items.VM_CRACKING_TOKEN,
 		TutorialEvent.PHISH_15_SQL_INJECTORS: Items.VM_PHISHING_TOKEN,
 		TutorialEvent.MINE_20_LOGS: Items.VM_MINING_TOKEN,
-		TutorialEvent.EQUIP_FIRST_MOD: Items.HANDSHAKE_EXPLOIT, # only if they have no mod (saves that decoded the first cache before mods were in it)
+		TutorialEvent.EQUIP_FIRST_MOD: Items.SQL_BOOSTER, # 2026-10-29: was Handshake Exploit (now a utility mod: no utility slot at the start). Only if they have no mod (saves that decoded the first cache before mods were in it)
 	}
 
 func _grant_step_token() -> void:

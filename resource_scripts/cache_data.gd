@@ -16,9 +16,7 @@ enum CacheVariant { BASE, FOOTPRINT, NETWORK, CORRUPTION, EXTRACTION }
 
 # --- variant tuning ---
 const FOOTPRINT_MULTIPLIER = 2          # basic resource quantities x2, no rare item
-const NETWORK_VM_CHANCE = 0.5           # chance for a bonus random VM token drop
-const NETWORK_VM_MIN = 10
-const NETWORK_VM_MAX = 20
+const NETWORK_VM_CACHE_EXTRA = 1       # 2026-10-30: always drops 1 to (tier + this) VM caches (was 50% for 10-20 tokens)
 const CORRUPTION_DROP_BONUS = 0.3       # flat bonus to every drop chance (incl. rare)
 const CORRUPTION_CHANCE = 0.2           # chance to corrupt (lose the rest) after each item found
 const EXTRACTION_EXTRA_RARE = 1         # extra copies of the rare item when it drops (2026-10-22: was 4)
@@ -43,7 +41,7 @@ func get_variant_description() -> String:
 		CacheVariant.FOOTPRINT:
 			return "Footprint: basic resources x%d, no rare item." % FOOTPRINT_MULTIPLIER
 		CacheVariant.NETWORK:
-			return "Network: %d%% chance for %d-%d of a random VM token." % [int(NETWORK_VM_CHANCE * 100), NETWORK_VM_MIN, NETWORK_VM_MAX]
+			return "Network: always drops VM caches: 1 to its tier + %d (a School cache 1-2, a Government cache 1-7)." % NETWORK_VM_CACHE_EXTRA
 		CacheVariant.CORRUPTION:
 			return "Corruption: +%d%% to all drop chances, but %d%% chance to corrupt after each item found (rest of the cache is lost). Rare item is decoded last." % [int(CORRUPTION_DROP_BONUS * 100), int(CORRUPTION_CHANCE * 100)]
 		CacheVariant.EXTRACTION:

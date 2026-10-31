@@ -103,7 +103,7 @@ SPEED_STEP = [round((1.5**t - 1.5**(t-1)) / 3, 4) for t in range(1, 7)]
 # Cooling added by each tier's install: totals 0.4 / 0.75 / 1.3 / 2.0 / 3.05 / 4.6 C/s (base 0.1)
 COOLING_STEP = [0.3, 0.35, 0.55, 0.7, 1.05, 1.55]
 # SQL damage / firewall damage added per tier: totals +5/30/68/118/180/280 and +2/5/10/16/23/35
-DAMAGE_STEP = [5, 10, 38, 50, 62, 100] # 2026-10-28: T2 was +25 (tier 2 hacking jumped from impossible to trivial)
+DAMAGE_STEP = [5, 10, 0, 50, 62, 100] # 2026-10-29: T3 is +25% SQL attack speed instead of damage (data/upgrades.json "speed", plus "name": "SQL Speed" and "change", added by hand);  2026-10-28: T2 was +25 (tier 2 hacking jumped from impossible to trivial)
 # Economy pass (2026-10-20, tools/balance/econ2.py): cost scale per tier so each tier fits Josh's active-play time
 # (T1 1-2 h ... T6 6-7 h, cache loot counted), and rare items per capstone by tier
 COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
@@ -111,7 +111,7 @@ BASIC_TIER_MULT = [3, 1, 1, 1, 1, 1]  # basic-resource costs only (2026-10-20 pl
 CAP_RARES = [1, 1, 2, 2, 2, 2]
 CAP_COST_MULT = 3.66 # capstone = ~3.6x the slot's normal cost (T1 compiling.overclock: 55 payloads + a rare -> 200 payloads)
 HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
-FIREWALL_STEP = [2, 2, 5, 6, 7, 12] # 2026-10-28: T2 was +3
+FIREWALL_STEP = [2, 2, 3, 6, 7, 12] # 2026-10-30: T3 was +5;  2026-10-28: T2 was +3
 
 GROUPS = {}
 
@@ -231,8 +231,8 @@ GROUPS["Decoding"] = [
     (TRACK,"Speed","Decode cycle speed (each install ~14.5% faster than before it)",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
     (TRACK,"Speed","Decode cycle speed",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
     (TRACK,"Speed","Decode cycle speed",[f"+{v*100:.1f}%" for v in SPEED_STEP],(1.0,SPEED_STEP,"x speed")),
-    (TRACK,"Efficiency","Each process's efficiency x(1 + bonus): Cache / Deep Scan bonus basics, Skim +50% basics, Intel finds, Salvage doubles; +20% of its own at max","+1.67% of eff",(0,20/12,"% of own efficiency")),
-    (TRACK,"Efficiency","Process efficiency, relative (+20% of its own at max)","+1.67% of eff",(0,20/12,"% of own efficiency")),
+    (TRACK,"Efficiency","Bonus basic resources from every cache (Cache and Deep Scan): +2.5% per install, +30% at max (2026-10-30: was +1.67% of each process's own efficiency)","+2.5% basics",(0,2.5,"% bonus basics")),
+    (TRACK,"Efficiency","Bonus basic resources from every cache, flat (+30% at max)","+2.5% basics",(0,2.5,"% bonus basics")),
     (TRACK,"Yield","Basic resources per decoded cache","+10%",(0,10,"% more basics")),
     (PTD,"Rare Tracker","Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection","+0.25% per miss",(0,0.25,"% added per dry cache")),
     (PTD,"Salvage Sweep","Each cache has a chance to also drop an Exploit or Hacking Mod of its tier","+2%",(0,2,"% sweep chance per cache")),
@@ -265,7 +265,7 @@ GROUPS["Compiling"] = [
 ]
 GROUPS["Hacking"] = [
     # Combat pass (2026-10-20): grow with the tier like enemies and mods do, so mods stay ~+40% at every tier
-    (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",[f"+{v} dmg, +0.1 heat" for v in DAMAGE_STEP],(20,DAMAGE_STEP,"dmg")),
+    (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",[(f"+{v} dmg, +0.1 heat" if v else "+25% attack speed, +0.1 heat") for v in DAMAGE_STEP],(20,DAMAGE_STEP,"dmg")),
     (TRACK,"Firewall Damage","Firewall damage per SQL attack",[f"+{v}" for v in FIREWALL_STEP],(1,FIREWALL_STEP,"firewall dmg")),
     (TRACK,"Bandwidth Recovery","Bandwidth regenerated per second","+0.5/s",(1,0.5,"/s bandwidth regen")),
     (TRACK,"Bandwidth Recovery","Bandwidth regenerated per second","+0.5/s",(1,0.5,"/s bandwidth regen")),
@@ -274,10 +274,11 @@ GROUPS["Hacking"] = [
     (PTD,"Mod Slot","+1 hacking mod slot","+1 slot",(1,1,"mod slots")),
     (PTD,"Spoof Threshold","Packet Spoof starts auto-healing at a higher anonymity %","+10%",(30,10,"% auto-spoof threshold")),
     (PTD,"Persistent Session","More EXPLOIT charge from every combat event","+10% charge gain",(0,10,"% charge gain")),
-    (CAP,["Second Wind","Evasion","Recycler","Siphon","Dead Man's Switch","Exploit Kit"],
+    # 2026-10-30: Win Streak replaced Recycler (50% chance an SQL Injector isn't used) and swapped tiers with Evasion
+    (CAP,["Second Wind","Win Streak","Evasion","Siphon","Dead Man's Switch","Exploit Kit"],
         ["Each win in a multi-hack run restores 15% of max anonymity (anonymity carries over between fights)",
+         "The 5th win in a row of one 'hack <target>=5' (or more) or 'hack <target> -r' run also gives the target's rare item",
          "10% chance to dodge a countermeasure completely",
-         "50% chance an SQL Injector is not consumed",
          "Each SQL hit restores 0.5% of max anonymity",
          "Once per session, a hit that would trace you leaves you at 1 and restores 25% anonymity",
          "50% chance an Exploit is not consumed"],"one-off",None),
@@ -426,7 +427,7 @@ rates=[("mining","Tier mined item",570,"Measured: mine -logs, 8s cycles"),
  ("cracking","Tier cracked item",375,"Measured: crack -password"),
  ("matching","Tier matched item",210,"Measured: match -cred"),
  ("phishing","SQL Injectors + Packet Spoofs",330,"Measured L10 spear: 217/h unbaited, 445/h baited (~6.5k Logs/h); ~330/h with bait limited to ~3k Logs/h"),
- ("decoding","Tier mined item from caches",4500,"Measured 120 caches/h x ~37.5 Logs per Student cache"),
+ ("decoding","Tier mined item from caches",1125,"2026-10-30: /4 (was 4500, priced Decoding ~8x the other skills; caches no longer guarantee basics)"),
  ("compiling","Tier payload",420,"Measured: compile -school"),
  ("hacking","Tier's first-target cache",82,"Student fights ~44s each incl. access (earlier fight logs)"),
  ("tokens","VM tokens",0,"Not time-priced: B9 x B10^(tier-1)")]
@@ -483,7 +484,7 @@ notes = [
  "  • Per tier: SQL Damage (+5 dmg, +0.1 heat), Firewall Dmg +2, BW Recovery x2 (+0.5/s), Max BW +5, Spoof Healing +1% of max anon (5% -> 11%),",
  "    Mod Slot +1 (1 -> 7), Spoof Threshold +10% (30% -> 90%), Persistent Session +10% charge gain, Capstone.",
  "  • At max: SQL attack heat 0.9 - 0.6 System heat reduction = 0.3 net, the same as an attack makes today.",
- "  • Capstones: Second Wind, Evasion, Recycler, Siphon, Dead Man's Switch, Exploit Kit (decided).",
+ "  • Capstones: Second Wind, Win Streak, Evasion, Siphon, Dead Man's Switch, Exploit Kit (2026-10-30: Win Streak replaced Recycler).",
  "  • Unused alternates: Multi-Thread, Chain Breach, Overkill Carry.",
  "  • Max anonymity is NOT an apt upgrade: hybrid (wired): 100 + 5 x (Hacking level - 1) + 100 x (locations unlocked - 1) — see 'Max Anonymity' tab.",
  "",

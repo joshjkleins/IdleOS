@@ -9,7 +9,7 @@ signal mining_level_up_signal
 var bonus_expires_at: int #defrag bonus
 var vm_token = Items.VM_MINING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 60.0
+@onready var VM_UPTIME = 30.0 # 2026-10-29: was 60
 
 ## Modifier commands unlocked by Mining capstones ('<command>' on, '<command> -kill' off while a
 ## process runs in the main terminal). One modifier at a time per process, overclock included.

@@ -89,6 +89,8 @@ func parsing_item_loop(item: ItemData):
 	for i in range(MAX_LOG_LINES + int(Upgrades.cur("parsing.rows"))):
 		var new_log_line = log_line_scene.instantiate()
 		var eff = _get_line_chance(item) + _miss_bonus * Parsing.item_find_mult(process_data, item) # harder data slows Pattern Cache too
+		if Parsing.flat_line_chance(process_data, item) >= 0.0: # Corruption: flat, no Pattern Cache
+			eff = Parsing.flat_line_chance(process_data, item)
 		var item_found = null
 		var found_amount = 0
 		
@@ -110,7 +112,8 @@ func parsing_item_loop(item: ItemData):
 			else:
 				item_found = null
 		else:
-			_miss_bonus += Upgrades.cur("parsing.pattern_cache") # Pattern Cache
+			if Parsing.pattern_cache_applies(process_data):
+				_miss_bonus += Upgrades.cur("parsing.pattern_cache") # Pattern Cache (not Network)
 		if item_found != null:
 			update_bottom_row_player_amount(item)
 			if item_found == Items.ENCRYPTED_PASSWORDS:
@@ -247,6 +250,8 @@ func _reset_logs():
 
 ## Chance per line for <item>: process efficiency (+ upgrades, defrag) + the item's tier bonus (Corruption).
 func _get_line_chance(item: ItemData) -> float:
+	if Parsing.flat_line_chance(process_data, item) >= 0.0:
+		return Parsing.flat_line_chance(process_data, item)
 	return (_get_total_effeciency() + (Parsing.get_line_chance_bonus(process_data, item) if item else 0.0)) * Parsing.item_find_mult(process_data, item)
 
 func _update_chance_label(item: ItemData) -> void:

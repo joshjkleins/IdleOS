@@ -1,8 +1,14 @@
 extends Node
 
-## Mod slots: 1 to start, +1 per tier from the 'hacking.mod_slots' upgrade (one level per tier), max 7.
+## Mod slots: 1 to start, +1 per tier from the 'hacking.mod_slots' upgrade (one level per tier), max 6.
+## 2026-10-29: capped at 6 (was 7): tier 6's slot level gets a different upgrade later.
 const BASE_MOD_SLOTS := 1
-const MAX_MOD_SLOTS := 7
+const MAX_MOD_SLOTS := 6
+
+## 2026-10-29: typed slots. Slot i takes one kind of mod, repeating offense / defense / utility
+## (School: O D, Lawfirm: + U, Hospital: + O, Bank: + D, Police Station: + U). Stops offense stacking.
+const SLOT_PATTERN = ["offense", "defense", "utility"]
+const SLOT_SHORT = {"offense": "OFF", "defense": "DEF", "utility": "UTL"}
 var max_mods: int = BASE_MOD_SLOTS
 
 ## recompute slots from the upgrade (called on load and when an upgrade is installed)
@@ -50,10 +56,10 @@ enum MOD_TYPE {
 	# 2026-10-23 mods pass (5 equippable mods per tier)
 	FW_START_PCT,         #Backdoor: firewall starts X% lower (each hack and reboot)
 	COUNTER_DMG_PCT,      #Hardened Shell: countermeasures deal X% less
-	START_ANON,           #Fresh Start: +X% max anonymity at the start of each hack
-	SPOOF_OPENER,         #Opening Spoof: a Packet Spoof engages at the start of each hack
+	START_ANON,           #Fresh Start: the first 3 attacks of each hack always crit (2026-10-30: was 100% faster; 2026-10-29: was +X% anonymity)
+	SPOOF_OPENER,         #Opening Spoof: a Packet Spoof engages at the start of each hack and deals xX its healing as damage
 	CRIT_RAMP,            #Hot Streak: +X crit chance per non-crit, reset on crit
-	DOUBLE_TAP,           #Double Tap: X slower attacks, 2 SQL per attack, double damage
+	DOUBLE_TAP,           #Double Tap: X slower attacks, 2 SQL per attack (double bandwidth), double damage
 	BLEED,                #Bleed: X of each hit again over 3s
 	FW_BREAK_HASTE,       #Breach Momentum: +X attack speed for 3 attacks after a firewall break
 	LEECH,                #Leech: X of max anonymity per SQL hit
@@ -68,38 +74,103 @@ const EQUIP_INFO = {
 	MOD_TYPE.SQL_BOOST: ["SQL Booster", "SQL Injectors attack faster", "pct"],
 	MOD_TYPE.FW_BREAK_SLOW: ["Shatter Protocol", "Breaking the firewall slows enemy countermeasures by an extra 25% (75% total).", "pct"],
 	MOD_TYPE.BW_PCT_REGEN: ["Burst Buffer", "Regenerates an extra 20% of max bandwidth per second.", "pct"],
-	MOD_TYPE.FW_NO_REBOOT: ["Breach Strike", "The first hit after the firewall breaks is a guaranteed crit.", "on"], # 2026-10-28: was "firewall never reboots"
+	MOD_TYPE.FW_NO_REBOOT: ["Breach Strike", "Breaking the firewall gives +25% crit chance for 5 seconds.", "pct"], # 2026-10-30: was a guaranteed crit on the next hit # 2026-10-28: was "firewall never reboots"
 	MOD_TYPE.DAMAGE_PCT: ["Payload Amplifier", "SQL Injectors deal 25% more damage.", "pct"],
-	MOD_TYPE.CRIT_CHANCE_MULT: ["Vuln Scanner", "Doubles your crit chance.", "x"],
-	MOD_TYPE.CRIT_DAMAGE_MULT: ["Critical Overflow", "Crits deal double again: x4 instead of x2.", "x"],
-	MOD_TYPE.SPOOF_HEAL_MULT: ["Proxy Chain", "Packet Spoofs heal double.", "x"],
+	MOD_TYPE.CRIT_CHANCE_MULT: ["Vuln Scanner", "+15% crit chance.", "pct"], # 2026-10-29: was crit chance x2
+	MOD_TYPE.CRIT_DAMAGE_MULT: ["Critical Overflow", "Crits hit harder: x3 instead of x2.", "x"], # 2026-10-29: was x4
+	MOD_TYPE.SPOOF_HEAL_MULT: ["Proxy Chain", "Packet Spoofs fill 2 seconds faster.", "s"], # 2026-10-30: was "heal double" (too strong)
 	MOD_TYPE.SPOOF_FREE: ["Ghost Packet", "Packet Spoofs cost no bandwidth.", "on"],
-	MOD_TYPE.IGNORE_COUNTERS: ["Decoy Traffic", "The first 3 countermeasures of each hack miss.", "n"],
+	MOD_TYPE.IGNORE_COUNTERS: ["Decoy Traffic", "The first 2 countermeasures of each hack miss.", "n"], # 2026-10-29: was 3
 	MOD_TYPE.FW_PCT_HIT: ["Packet Shredder", "Every hit also deals 10% of the target's max firewall.", "pct"],
 	MOD_TYPE.COUNTER_SLOW_PCT: ["Latency Injector", "Enemy countermeasures are 20% slower.", "pct"],
-	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 10 seconds of each hack go unnoticed: no countermeasures.", "s"],
+	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 7 seconds of each hack go unnoticed: no countermeasures.", "s"], # 2026-10-29: was 10
 	MOD_TYPE.SPOOF_SPEED: ["IP Rotator", "Packet Spoofs fill 80% faster.", "pct"],
 	MOD_TYPE.EXPLOIT_FULL: ["Zero Hour", "The EXPLOIT meter starts full at the start of each hack.", "on"],
 	MOD_TYPE.FW_BREAK_INTEGRITY: ["Cascade", "Breaking the firewall also deals 15% of the target's max integrity.", "pct"],
 	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
 	MOD_TYPE.COLD_BOOT: ["Cold Boot", "Overclock adds no extra heat, and overheating doesn't speed up the enemy.", "on"],
 	MOD_TYPE.COUNTER_RESET: ["Reset Loop", "Each SQL Injector hit has a 10% chance to reset the countermeasure bar.", "pct"],
-	MOD_TYPE.FW_START_PCT: ["Backdoor", "The target's firewall starts 25% lower (every hack and every reboot).", "neg"],
+	MOD_TYPE.FW_START_PCT: ["Backdoor", "The target's firewall starts 40% lower (every hack and every reboot).", "neg"], # 2026-10-30: 40% (2026-10-29: 35%, was 25%)
 	MOD_TYPE.COUNTER_DMG_PCT: ["Hardened Shell", "Countermeasures deal 15% less damage.", "neg"],
-	MOD_TYPE.START_ANON: ["Fresh Start", "Restores 15% of max anonymity at the start of each hack.", "pct"],
-	MOD_TYPE.SPOOF_OPENER: ["Opening Spoof", "A Packet Spoof engages at the start of each hack.", "on"],
+	MOD_TYPE.START_ANON: ["Fresh Start", "The first 3 attacks of each hack are guaranteed crits.", "pct"], # 2026-10-30: was 100% faster; 2026-10-29: was +15% anonymity at the start
+	MOD_TYPE.SPOOF_OPENER: ["Opening Spoof", "A Packet Spoof engages at the start of each hack, and that first spoof deals double its healing as damage.", "x"], # 2026-10-29: damage added
 	MOD_TYPE.CRIT_RAMP: ["Hot Streak", "Every non-crit hit adds +10% crit chance; resets on a crit.", "pct"],
-	MOD_TYPE.DOUBLE_TAP: ["Double Tap", "Attacks 30% slower, but each fires 2 SQL Injectors for double damage.", "on"],
+	MOD_TYPE.DOUBLE_TAP: ["Double Tap", "Attacks 30% slower, but each fires 2 SQL Injectors for double damage (and double bandwidth; with less, it fires 1).", "on"],
 	MOD_TYPE.BLEED: ["Bleed", "Every SQL hit deals another 10% of its damage over 3 seconds.", "pct"],
 	MOD_TYPE.FW_BREAK_HASTE: ["Breach Momentum", "Breaking the firewall makes your next 3 attacks 100% faster.", "pct"],
 	MOD_TYPE.LEECH: ["Leech", "Every SQL hit restores 2% of max anonymity.", "pct"],
 	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 5% (up to 50%).", "pct"],
-	MOD_TYPE.FAILSAFE: ["Failsafe", "The first time you'd be traced in a hack, restore 20% of max anonymity instead.", "pct"],
+	MOD_TYPE.FAILSAFE: ["Failsafe", "The first time you'd be traced in a hack, restore 40% of max anonymity instead.", "pct"], # 2026-10-29: was 20%
 	MOD_TYPE.EXTRA_CACHE: ["Data Hoarder", "Each breach has a 20% chance to win an extra cache.", "pct"],
-	MOD_TYPE.FW_OPENER: ["Handshake Exploit", "The first hit against a new firewall (each hack, and after every reboot) deals +10 firewall damage.", "flat"],
+	MOD_TYPE.FW_OPENER: ["Handshake Exploit", "The first hit against a new firewall (each hack, and after every reboot) deals triple firewall damage.", "x"], # 2026-10-29: was +10
 }
 
-var current_mods = {}
+var current_mods = {} # mod type -> {duration, value, tier, slot}
+
+## what kind of slot each mod goes in (2026-10-29). Retired / compiled mods are tagged too, for old saves.
+var SLOT_TYPE = {
+	MOD_TYPE.SQL_BOOST: "offense", MOD_TYPE.DAMAGE_PCT: "offense", MOD_TYPE.CRIT_CHANCE_MULT: "offense",
+	MOD_TYPE.CRIT_DAMAGE_MULT: "offense", MOD_TYPE.DOUBLE_TAP: "offense", MOD_TYPE.CRIT_RAMP: "offense",
+	MOD_TYPE.START_ANON: "offense", MOD_TYPE.SPOOF_OPENER: "offense", MOD_TYPE.BLEED: "offense",
+	MOD_TYPE.FW_BREAK_HASTE: "offense",
+	MOD_TYPE.COUNTER_DMG_PCT: "defense", MOD_TYPE.IGNORE_COUNTERS: "defense", MOD_TYPE.COUNTER_SLOW_PCT: "defense",
+	MOD_TYPE.SPOOF_HEAL_MULT: "defense", MOD_TYPE.COUNTER_STACK_SLOW: "defense", MOD_TYPE.LEECH: "defense",
+	MOD_TYPE.SPOOF_SPEED: "defense", MOD_TYPE.STEALTH_START: "defense", MOD_TYPE.FAILSAFE: "defense",
+	MOD_TYPE.COUNTER_REFLECT: "defense",
+	MOD_TYPE.FW_START_PCT: "utility", MOD_TYPE.FW_OPENER: "utility", MOD_TYPE.BW_PCT_REGEN: "utility",
+	MOD_TYPE.COUNTER_RESET: "utility", MOD_TYPE.FW_NO_REBOOT: "utility", MOD_TYPE.FW_PCT_HIT: "utility",
+	MOD_TYPE.EXPLOIT_FULL: "utility", MOD_TYPE.COLD_BOOT: "utility", MOD_TYPE.FW_BREAK_INTEGRITY: "utility",
+	MOD_TYPE.EXTRA_CACHE: "utility", MOD_TYPE.FW_BREAK_SLOW: "utility", MOD_TYPE.SPOOF_FREE: "utility",
+	# retired 'compile -mod' types (old saves only)
+	MOD_TYPE.DAMAGE: "offense", MOD_TYPE.EFFICIENCY: "offense", MOD_TYPE.ATTACK_SPEED: "offense",
+	MOD_TYPE.FIREWALL_DAMAGE: "offense", MOD_TYPE.RESTORE: "defense", MOD_TYPE.DAMAGE_REDUCTION: "defense",
+	MOD_TYPE.COUNTER_SLOW: "defense", MOD_TYPE.FIREWALL_REDUCTION: "utility", MOD_TYPE.BAND_RATE: "utility",
+}
+
+func mod_slot_type(mod) -> String:
+	return SLOT_TYPE.get(int(mod), "utility")
+
+func slot_type(i: int) -> String:
+	return SLOT_PATTERN[i % SLOT_PATTERN.size()]
+
+## the mod in slot <i> (-1 when it's empty)
+func mod_in_slot(i: int) -> int:
+	for m in current_mods:
+		if int(current_mods[m].get("slot", -1)) == i:
+			return int(m)
+	return -1
+
+## first open slot of this mod's type (-1 when every one is in use or none is unlocked yet)
+func free_slot_for(mod) -> int:
+	var t = mod_slot_type(mod)
+	for i in max_mods:
+		if slot_type(i) == t and mod_in_slot(i) == -1:
+			return i
+	return -1
+
+## unlocked slots of a type (and how many are in use)
+func slots_of(t: String) -> int:
+	var n = 0
+	for i in max_mods:
+		if slot_type(i) == t: n += 1
+	return n
+
+func used_of(t: String) -> int:
+	var n = 0
+	for m in current_mods:
+		if mod_slot_type(m) == t: n += 1
+	return n
+
+## why <item> can't be equipped right now ("" when it can)
+func add_block_reason(item) -> String:
+	var t = mod_slot_type(item.hacking_mod_type)
+	if has_mod(item.hacking_mod_type):
+		return "a mod of this type is already active (they don't stack)"
+	if slots_of(t) == 0:
+		return "no %s slot yet (it unlocks with 'apt' mod slot upgrades)" % t
+	if free_slot_for(item.hacking_mod_type) == -1:
+		return "no free %s slot (%d/%d in use). Use 'mod -rm <id>' to free one first" % [t, used_of(t), slots_of(t)]
+	return ""
 
 ## Mod items that no longer drop (2026-10-23 lineup: 5 per tier). Owned ones still equip and work.
 const RETIRED_MOD_ITEMS = [340, 347] # Shatter Protocol, Ghost Packet
@@ -203,11 +274,11 @@ const STAT_LABEL = {
 	MOD_TYPE.SQL_BOOST: "SQL attack speed",
 	MOD_TYPE.FW_BREAK_SLOW: "counter slow on firewall break",
 	MOD_TYPE.BW_PCT_REGEN: "bandwidth regen (of max) / s",
-	MOD_TYPE.FW_NO_REBOOT: "crit after firewall break",
+	MOD_TYPE.FW_NO_REBOOT: "crit chance for 5s after fw break",
 	MOD_TYPE.DAMAGE_PCT: "SQL damage",
 	MOD_TYPE.CRIT_CHANCE_MULT: "crit chance",
 	MOD_TYPE.CRIT_DAMAGE_MULT: "crit damage",
-	MOD_TYPE.SPOOF_HEAL_MULT: "spoof restore",
+	MOD_TYPE.SPOOF_HEAL_MULT: "spoof fill time",
 	MOD_TYPE.SPOOF_FREE: "spoofs cost no bandwidth",
 	MOD_TYPE.IGNORE_COUNTERS: "countermeasures that miss",
 	MOD_TYPE.FW_PCT_HIT: "max firewall dmg / hit",
@@ -218,13 +289,13 @@ const STAT_LABEL = {
 	MOD_TYPE.FW_BREAK_INTEGRITY: "max integrity on fw break",
 	MOD_TYPE.COUNTER_REFLECT: "countermeasure dmg reflected",
 	MOD_TYPE.COLD_BOOT: "overclock adds no heat",
-	MOD_TYPE.FW_OPENER: "fw dmg, 1st hit on new firewall",
+	MOD_TYPE.FW_OPENER: "fw dmg on 1st hit, new firewall",
 	MOD_TYPE.FW_START_PCT: "target firewall at start / reboot",
 	MOD_TYPE.COUNTER_DMG_PCT: "countermeasure damage",
-	MOD_TYPE.START_ANON: "anonymity at hack start",
-	MOD_TYPE.SPOOF_OPENER: "spoof engages at hack start",
+	MOD_TYPE.START_ANON: "first 3 attacks crit",
+	MOD_TYPE.SPOOF_OPENER: "opening spoof heal as damage",
 	MOD_TYPE.CRIT_RAMP: "crit chance per non-crit",
-	MOD_TYPE.DOUBLE_TAP: "2 SQL per attack, 30% slower",
+	MOD_TYPE.DOUBLE_TAP: "2 SQL per attack (2x bw), 30% slower",
 	MOD_TYPE.BLEED: "extra damage over 3s / hit",
 	MOD_TYPE.FW_BREAK_HASTE: "attack speed x3 after fw break",
 	MOD_TYPE.LEECH: "anonymity (of max) per hit",
@@ -238,8 +309,14 @@ func get_mod_stat(mod) -> String:
 
 func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 	match mod:
+		MOD_TYPE.START_ANON:
+			return "3 crits" # Fresh Start: the first 3 attacks of each hack
 		MOD_TYPE.COUNTER_SLOW_PCT:
 			return "-%.f%%" % (value * 100.0) # countermeasures slower
+		MOD_TYPE.SPOOF_HEAL_MULT:
+			return "-%ss" % str(value).trim_suffix(".0") # Proxy Chain: seconds off each spoof fill
+		MOD_TYPE.CRIT_DAMAGE_MULT:
+			return "x%s" % str(2.0 * value).trim_suffix(".0") # Critical Overflow: x1.5 on the x2 crit = x3 crits
 		MOD_TYPE.DAMAGE:
 			return "+" + str(int(value))
 		MOD_TYPE.EFFICIENCY:
@@ -281,9 +358,9 @@ func mod_duration(item) -> int: # item: ItemData (untyped: see the cycle note in
 	return int(item.hacking_mod_duration) + (int(up.cur("system.kernel_modules")) if up else 0)
 
 func add_mod(item: ItemData) -> void:
-	if at_max_mods():
+	var slot = free_slot_for(item.hacking_mod_type)
+	if slot == -1 or has_mod(item.hacking_mod_type):
 		return
-	
 	var mod = item.hacking_mod_type
 	var mod_value = item.hacking_mod_value
 	var mod_duration = mod_duration(item)
@@ -291,6 +368,7 @@ func add_mod(item: ItemData) -> void:
 		"duration": mod_duration,
 		"value": mod_value,
 		"tier": item.tier, # sets the extra SQL Injector bandwidth cost (MOD_BW_COST_BY_TIER)
+		"slot": slot,
 	}
 
 ## Compiling's Mod process: one fill adds one hack. Equips the mod on the first fill (needs a free slot),
@@ -300,9 +378,10 @@ func extend_mod(item, value_mult: float, cap: int) -> int: # item: ItemData (unt
 	var mod = item.hacking_mod_type
 	var value = item.hacking_mod_value * value_mult
 	if !current_mods.has(mod):
-		if at_max_mods():
+		var slot = free_slot_for(mod)
+		if slot == -1:
 			return 0
-		current_mods[mod] = {"duration": 1, "value": value, "tier": item.tier}
+		current_mods[mod] = {"duration": 1, "value": value, "tier": item.tier, "slot": slot}
 	else:
 		var m = current_mods[mod]
 		m.duration = min(max(int(m.duration), cap), int(m.duration) + 1)
@@ -310,7 +389,9 @@ func extend_mod(item, value_mult: float, cap: int) -> int: # item: ItemData (unt
 	return int(current_mods[mod].duration) # (the caller marks the save dirty: SaveManager here would be a cyclic reference)
 
 func remove_duration() -> void:
-	for mod in current_mods:
+	# 2026-10-30: loop over a copy of the keys: erasing from the dictionary while looping over it skipped the next
+	# mod, so with several at 1 hack left only one came off (and the skipped one kept a hack)
+	for mod in current_mods.keys():
 		current_mods[mod].duration -= 1
 		if current_mods[mod].duration <= 0:
 			remove_mod(mod)
@@ -341,6 +422,9 @@ func save_data() -> Dictionary:
 		"max_mods": max_mods
 	}
 
+## mods taken off when a save's loadout didn't fit the typed slots (shown once by the 'mod' command)
+var load_notice: Array = []
+
 func load_data(data: Dictionary) -> void:
 	var loaded_mods: Dictionary = data.get("current_mods", {})
 
@@ -351,7 +435,46 @@ func load_data(data: Dictionary) -> void:
 
 		mod["duration"] = int(mod.get("duration", 0))
 		mod["tier"] = int(mod.get("tier", 1))
+		mod["slot"] = int(mod.get("slot", -1))
 
 		current_mods[int(mod_type)] = mod
-
-	refresh_slots() # slots come from upgrades, not the save (mods already equipped are kept)
+	refresh_slots() # slots come from upgrades, not the save
+	var items = get_node_or_null("/root/Items") # runtime lookup (script cycle, see refresh_slots)
+	# 2026-10-29: several mods changed what their value means (Vuln Scanner x2 -> +15%, Fresh Start, Opening Spoof,
+	# Decoy Traffic, Silent Entry, Failsafe, Critical Overflow; earlier Backdoor and Handshake Exploit):
+	# equipped copies from older saves take the item's current value
+	var by_type = {}
+	if items:
+		for it in items.ITEM_MAP.values():
+			if it and it.hacking_mod_item:
+				by_type[int(it.hacking_mod_type)] = it
+	for m in current_mods:
+		if by_type.has(int(m)) and EQUIP_INFO.has(int(m)):
+			current_mods[m]["value"] = float(by_type[int(m)].hacking_mod_value)
+	# 2026-10-29: typed slots. Keep each mod in its saved slot when that still fits, else the first open slot of
+	# its type; a mod with no slot left goes back to the inventory (1 item) instead of being lost
+	var order = current_mods.keys()
+	var placed = {}
+	for m in order:
+		var sl = int(current_mods[m].slot)
+		if sl >= 0 and sl < max_mods and slot_type(sl) == mod_slot_type(m) and !placed.has(sl):
+			placed[sl] = m
+		else:
+			current_mods[m].slot = -1
+	for m in order:
+		if int(current_mods[m].slot) >= 0 and placed.get(int(current_mods[m].slot)) == m:
+			continue
+		var free = -1
+		for i in max_mods:
+			if slot_type(i) == mod_slot_type(m) and !placed.has(i):
+				free = i
+				break
+		if free >= 0:
+			current_mods[m].slot = free
+			placed[free] = m
+		else:
+			var inv = get_node_or_null("/root/Inventory")
+			if inv and by_type.has(int(m)):
+				inv.add_resource(by_type[int(m)], 1)
+			load_notice.append(get_mod_name(m))
+			current_mods.erase(m)

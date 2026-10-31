@@ -130,6 +130,8 @@ func _migrate_if_needed(data: Dictionary) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
+		if what == NOTIFICATION_WM_CLOSE_REQUEST:
+			get_tree().call_group("flush_on_quit", "flush_for_quit") # finish a cache being decoded (2026-10-29)
 		save_game()
 		#if dirty:
 			#save_game()

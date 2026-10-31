@@ -20,10 +20,10 @@ var COOLING = {
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#4ec9b0"),
 	"bonus time": 10,
-	"bonus cooling": 0.5, # extra °C cooled per second
-	"bonus label": "+0.5°C/s",
-	"bonus text": "Cooling increased by 0.5°C per second",
-	"description": "System cooling increased by 0.5°C/s.",
+	"bonus cooling mult": 2.0, # 2026-10-30: system cooling x2 (was +0.5°C/s)
+	"bonus label": "x2 cooling",
+	"bonus text": "System cooling doubled",
+	"description": "System cooling is doubled (every cooling source, upgrades included).",
 	"command": "defrag -cooling",
 	"expires_at": 0,
 }
@@ -73,11 +73,11 @@ var HEAT = {
 	"expires_at": 0,
 }
 
-## 2026-10-26: Police's Defrag process
+## 2026-10-26: Police's Defrag process; 2026-10-30: moved to Government (Police Station gets a new one)
 var XP = {
 	"name": "XP",
 	"unlocked": false,
-	"unlock tier": 5,
+	"unlock tier": 6,
 	"requirements": {},
 	"color": Color("#c084fc"),
 	"bonus time": 10,
@@ -97,8 +97,9 @@ func is_active(process: Dictionary) -> bool:
 func get_active() -> Array:
 	return minor_processes.filter(func(p): return is_active(p))
 
-func get_bonus_cooling() -> float:
-	return COOLING["bonus cooling"] if is_active(COOLING) else 0.0
+## system cooling multiplier while Cooling runs (2026-10-30: x2, was a flat +0.5°C/s)
+func get_cooling_mult() -> float:
+	return float(COOLING["bonus cooling mult"]) if is_active(COOLING) else 1.0
 
 func get_vm_uptime_bonus() -> float:
 	return VM["bonus vm uptime"] if is_active(VM) else 0.0

@@ -30,6 +30,7 @@ const C_OC = Color("#f59e0b")
 const C_HEAT = Color("#ff5a3c")
 const C_WIN = Color("#4ec994")
 const C_DRV = Color("#ffc24a") # drivers
+const C_SPECIAL = Color("#d29922") # target traits (as on the target cards)
 const C_EXP = Color("#c084fc") # one-time items / EXPLOIT charge
 
 const FW_BREAK_SLOW := 0.5   # enemy countermeasure speed multiplier while the firewall is down
@@ -101,8 +102,10 @@ var DEFEND_PCT: float = 0.05 # Packet Spoof heal as a fraction of max anonymity
 ## Capstones
 const SECOND_WIND_RESTORE := 0.15 # 2026-10-28: was 25%. Second Wind (T1 capstone): max anonymity restored after each win in a multi-hack run
 const EVASION_CHANCE := 0.1       # countermeasure dodged
-const RECYCLER_CHANCE := 0.5      # SQL Injector not consumed
+# (2026-10-30: the Recycler capstone, 50% chance an SQL Injector isn't used, was replaced by Win Streak)
 const SIPHON_PCT := 0.005         # max anonymity restored per SQL hit
+const FRESH_START_ATTACKS := 3    # Fresh Start (mod): how many attacks at the start of each hack always crit
+const BREACH_STRIKE_TIME := 5.0   # Breach Strike (mod): seconds of extra crit chance after a firewall break
 const DEAD_MANS_RESTORE := 0.25   # once per session: survive a trace at 1, then restore this much
 const EXPLOIT_KIT_CHANCE := 0.5   # one-time item not consumed
 var dead_mans_used := false
@@ -156,8 +159,13 @@ var fw_adaptive_base := 0.0 # Adaptive (trait): the hack's starting firewall; ea
 var fw_base := 0            # target's firewall before intel
 var integ_base := 0
 var _fw_tween: Tween
+var _fw_refill_to := -1.0 # the firewall's real value while the reboot animation plays (2026-10-29)
 
 var fight_time := 0.0
+var trait_row: RichTextLabel = null # TARGET card: the current target's traits spelled out
+var throttle_sql_wait := 0.0   # Throttle (trait): seconds before the SQL bar charges again
+var throttle_spoof_wait := 0.0 # ... and the Packet Spoof bar
+var esc_counters := 0 # countermeasures fired this run (Escalator trait)
 var hack_time := 0.0          # this hack only (Silent Entry)
 var decoys_left := 0          # Decoy Traffic misses left this hack
 var active_intel: Dictionary = {} # this attempt's intel {pct, hacks_left, integrity/firewall/counter/counter speed: [before, after]}
@@ -168,28 +176,30 @@ var _revealed := false            # target stats are shown once access is grante
 # one-time item effects (Exploits); cleared at the start of each hack attempt
 var stun_left := 0.0          # countermeasures paused
 var poison_left := 0.0        # Slow Drip ticking
-var throttle_left := 0.0      # SQL bandwidth cost halved
-var spoof_boost_left := 0.0   # Packet Spoof x2
+var throttle_left := 0.0      # Throttle Patch: SQL Injectors left at half bandwidth (2026-10-30: was seconds)
+var spoof_boost_left := 0.0   # Booster Shot: 1 = the next Packet Spoof heals x2 (2026-10-30: was seconds)
 var bw_freeze_left := 0.0     # bandwidth held at max, actions free
 var crits_left := 0           # guaranteed crits
 var _breach_hit := false
-var breach_crit := false
+var breach_crit_left := 0.0   # Breach Strike (mod, 2026-10-30): seconds of extra crit chance left after a firewall break
 var stop_after_win := false
 var compromise_fights: Array = [] # Compromise run: the six fights (Compromise.lineup), [] for a normal hack
 var compromise_xp := 0             # Hacking XP banked during a compromise (paid on the final breach)
 var fw_fresh := false        # Handshake Exploit: the next hit is the first against this firewall
 var _hack_sql := 0           # SQL Injectors / Packet Spoofs used this hack (Stats.record_usage on a win)
-var _hack_spoof := 0   # 'kill -s': finish the current hack, then end the run      # the first SQL hit after the firewall goes down is a guaranteed crit
+var _hack_spoof := 0   # 'kill -s': finish the current hack, then end the run
 var ghost_left := 0           # countermeasures that miss
 # 2026-10-23 one-time items / mods pass
 var flood_left := 0.0         # Packet Flood: SQL x2 speed
-var overcharge_dmg := 0.0     # Overcharge: added to the next SQL hit (before the crit multiplier)
-var knock_bank := 0.0         # Port Knock used while the firewall was up: added to the next firewall-down time
+var overcharge_dmg := 0.0     # Overcharge: extra multiples of the next SQL hit's base damage (1 = double; before the crit)
+var knock_down_used := false # Port Knock already used during this firewall-down window (no stacking)
+var knock_bank := 0.0         # Port Knock used while the firewall was up: extra multiples of the next firewall-down time (1 = twice as long)
 var scramble_left := 0        # Trace Scrambler: countermeasures left at half charge speed
-var stuff_left := 0           # Credential Stuffing: hits left at x2 firewall damage
+var stuff_left := 0           # Credential Stuffing: hits left at +50% firewall damage
 var rootkit_left := 0.0       # Rootkit: +25% damage
 var mirror_next := 0          # Mirror Image: countermeasures reflected in full
 var drain_left := 0.0         # Firewall Drain
+var siphon_jam_left := 0.0    # Siphon (trait): bandwidth regen paused after each countermeasure (2026-10-29)
 var ghost_time_left := 0.0    # Ghost Mode: countermeasures can't hit you
 var chain_left := 0           # Chain Reaction: crits left at x2 again
 var freeze_left := 0.0        # Freeze: SQL / countermeasures / firewall reboot stopped
@@ -197,6 +207,9 @@ var exfil_left := 0.0         # Exfil Window: breach in time for an extra cache
 var crit_ramp := 0.0          # Hot Streak (mod): extra crit chance built by non-crits
 var bleeds: Array = []        # Bleed (mod): [damage per second, seconds left]
 var haste_attacks := 0        # Breach Momentum (mod): fast attacks left after a firewall break
+var _dr_roll := 0             # Deep Reserves (driver): 0 = not rolled for this bar yet, 1 = free attack, -1 = pays
+var fresh_attacks := 0        # Fresh Start (mod, 2026-10-30): guaranteed crits left at the start of a hack
+var opening_spoof_hit := false # Opening Spoof (mod, 2026-10-29): the next spoof also deals damage
 var jitter_stacks := 0        # Jitter (mod): countermeasures fired this hack
 var failsafe_used := false    # Failsafe (mod): once per hack
 var _exploit_lock := 0.0      # Exploits.LOCKOUT between uses
@@ -209,7 +222,8 @@ var drv_attacks := 0          # Hash Collision: attacks this run (a short hack w
 var drv_counters := 0         # Read Ahead / Countermeasure Log: countermeasures taken this hack
 var master_key_ready := false # Master Key: armed by a firewall reboot
 var _lure_chain := false      # Lure: the extra spoof doesn't chain again
-var _last_hit_time := 0.0     # Regenerator (trait): hack_time of the last hit that did integrity damage
+var _last_hit_time := 0.0     # Regenerator (trait): hack_time of the last SQL hit (integrity or firewall)
+var _regen_on := false        # Regenerator (trait): repairing right now (shown on the INTEGRITY row)
 var driver_row: RichTextLabel # YOU card: equipped drivers
 var exp_row: Dictionary
 var _effect_chips := {}
@@ -254,22 +268,38 @@ func _process(delta):
 	# bandwidth regenerates continuously (float); Overdraft holds it at max
 	if bw_freeze_left > 0.0:
 		Hacking.current_bandwidth = float(MAX_BANDWIDTH)
+	elif siphon_jam_left > 0.0: # Siphon (trait): no regen for a moment after each countermeasure
+		siphon_jam_left -= delta
 	else:
 		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + _bw_rate() * delta)
 	band_bar.value = Hacking.current_bandwidth
 
 	hack_time += delta
+	breach_crit_left = max(0.0, breach_crit_left - delta) # Breach Strike (mod)
 	var mod_atk_spd = _attack_speed_mult()
-	if attacking and freeze_left <= 0.0:
+	# Throttle (trait, 2026-10-29): SQL Injectors and Packet Spoofs wait a moment after each use before charging again
+	throttle_sql_wait = max(0.0, throttle_sql_wait - delta)
+	throttle_spoof_wait = max(0.0, throttle_spoof_wait - delta)
+	if attacking and freeze_left <= 0.0 and throttle_sql_wait <= 0.0:
 		attack_bar.value += ATTACK_SPEED * delta * mod_atk_spd
-	if defending:
-		defense_bar.value += DEFEND_SPEED * delta * (1.0 + _mod(HackingMods.MOD_TYPE.SPOOF_SPEED))
+	if defending and throttle_spoof_wait <= 0.0:
+		defense_bar.value += _spoof_fill_rate() * delta
 	# Silent Entry: the first seconds of each hack go unnoticed
 	if Stats.current_anon > 0 and stun_left <= 0.0 and freeze_left <= 0.0 and hack_time >= _mod(HackingMods.MOD_TYPE.STEALTH_START):
 		counter_bar.value += _counter_rate() * delta
-	# Regenerator (trait): repairs while it isn't being hit (Freeze pauses it)
-	if _trait("regenerator") and _revealed and freeze_left <= 0.0 and integ_bar.value < integ_bar.max_value and hack_time - _last_hit_time >= float(_tv("regenerator", "regen_delay", 2.0)):
-		integ_bar.value = min(integ_bar.max_value, integ_bar.value + integ_bar.max_value * float(_tv("regenerator", "regen", 0.0)) * delta)
+	# Regenerator (trait): repairs all the time, except for a moment after each hit (Freeze pauses it)
+	# 2026-10-30: any SQL hit (integrity or firewall) pauses it for regen_delay (0.3s; was 2s, and the firewall-up
+	# repair ignored hits) so damage visibly stops the healing; the INTEGRITY row says when it's repairing
+	var regen_now = false
+	if _trait("regenerator") and _revealed and freeze_left <= 0.0 and integ_bar.value < integ_bar.max_value:
+		var fw_up = !firewall_down and firewall_bar.value > 0.0
+		if hack_time - _last_hit_time >= float(_tv("regenerator", "regen_delay", 0.3)):
+			regen_now = true
+			var rate = float(_tv("regenerator", "regen_fw", _tv("regenerator", "regen", 0.0))) if fw_up else float(_tv("regenerator", "regen", 0.0))
+			integ_bar.value = min(integ_bar.max_value, integ_bar.value + integ_bar.max_value * rate * delta)
+	if regen_now != _regen_on:
+		_regen_on = regen_now
+		_refresh_integ_tag()
 
 	if firewall_down and freeze_left <= 0.0: # Freeze also holds the reboot timer
 		fw_down_left -= delta
@@ -286,7 +316,10 @@ func _process(delta):
 			_warn_bandwidth("Packet Spoof", _spoof_cost())
 	_atk_waiting = false
 	if attack_bar.value >= attack_bar.max_value and attacking and !_def_waiting:
-		if has_bandwidth(_sql_cost()):
+		# Deep Reserves (driver): rolled once per full bar, and a success fires even with no bandwidth (2026-10-30)
+		if _dr_roll == 0:
+			_dr_roll = 1 if (Drivers.value("deep_reserves") > 0.0 and randf() < Drivers.value("deep_reserves")) else -1
+		if _dr_roll == 1 or has_bandwidth(_sql_cost()):
 			attack()
 		else:
 			_atk_waiting = true
@@ -313,8 +346,8 @@ func _counter_rate() -> float:
 	var scramble = float(Exploits.DEFS.trace_scrambler.mult) if scramble_left > 0 else 1.0 # Trace Scrambler
 	var jitter = 1.0 - min(0.5, jitter_stacks * _mod(HackingMods.MOD_TYPE.COUNTER_STACK_SLOW)) # Jitter
 	var read_ahead = 1.0 / (1.0 + Drivers.value("read_ahead")) if drv_counters == 0 else 1.0 # Read Ahead (driver): the first one only
-	if _trait("escalator"): # Escalator (trait): +5% every 5 s, up to +100%
-		read_ahead *= 1.0 + min(float(_tv("escalator", "escalate_max", 1.0)), float(_tv("escalator", "escalate", 0.0)) * floor(fight_time / float(_tv("escalator", "escalate_every", 5.0))))
+	if _trait("escalator"): # Escalator (trait): +5% per countermeasure fired this run, up to +150% (Stats.TRAITS)
+		read_ahead *= 1.0 + min(float(_tv("escalator", "escalate_max", 1.0)), float(_tv("escalator", "escalate", 0.0)) * esc_counters)
 	return COUNTER_SPEED * OVERHEAT_VALUE * fw_slow * scramble * jitter * read_ahead / (1.0 + _mod(HackingMods.MOD_TYPE.COUNTER_SLOW)) * (1.0 - _mod(HackingMods.MOD_TYPE.COUNTER_SLOW_PCT))
 
 ## SQL bar speed multiplier: mods (attack speed, SQL Booster, Double Tap -30%, Breach Momentum) and Packet Flood
@@ -327,11 +360,19 @@ func _attack_speed_mult() -> float:
 		m *= 1.0 + _mod(M.FW_BREAK_HASTE)
 	if flood_left > 0.0:
 		m *= float(Exploits.DEFS.packet_flood.mult)
-	return m * (1.0 + Drivers.value("quick_compile")) # Quick Compile (driver)
+	return m * (1.0 + Drivers.value("quick_compile")) * (1.0 + Upgrades.sql_speed_bonus()) # Quick Compile (driver); SQL Damage T3 (apt)
+
+## Packet Spoof bar fill per second: IP Rotator speeds it up; Proxy Chain takes seconds off each fill
+## (2026-10-30: Proxy Chain was "spoofs heal double")
+func _spoof_fill_rate() -> float:
+	var secs = 100.0 / max(0.001, DEFEND_SPEED * (1.0 + _mod(HackingMods.MOD_TYPE.SPOOF_SPEED)))
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT):
+		secs = max(1.0, secs - _mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT))
+	return 100.0 / secs
 
 ## Packet Spoof bandwidth (Ghost Packet: free)
 func _spoof_cost() -> float:
-	return 0.0 if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_FREE) else float(DEFEND_BW_COST) + float(_tv("throttle", "bandwidth", 0.0)) # Throttle (trait)
+	return 0.0 if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_FREE) else float(DEFEND_BW_COST)
 
 func has_bandwidth(cost: float) -> bool:
 	return bw_freeze_left > 0.0 or Hacking.current_bandwidth >= cost
@@ -339,7 +380,7 @@ func has_bandwidth(cost: float) -> bool:
 ## SQL Injector bandwidth per attack: item + equipped mods (by tier), halved by Throttle Patch.
 ## Capped at max bandwidth so an attack can always eventually fire.
 func _sql_cost() -> float:
-	var c = float(ATTACK_BW_COST + HackingMods.get_bandwidth_cost()) + float(_tv("throttle", "bandwidth", 0.0)) # Throttle (trait)
+	var c = float(ATTACK_BW_COST + HackingMods.get_bandwidth_cost())
 	if throttle_left > 0.0:
 		c *= float(Exploits.DEFS.throttle_patch.mult)
 	if c > MAX_BANDWIDTH and MAX_BANDWIDTH > 0:
@@ -384,13 +425,14 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	hack_index = 0
 	drv_attacks = 0
 	fight_time = 0.0
+	esc_counters = 0
 	_state = ""
 	_bw_cap_warned = false
 	_clear_effects()
 	Exploits.reset_charge() # charge belongs to one hack session
 	active_intel = {}
 	firewall_down = false
-	breach_crit = false
+	breach_crit_left = 0.0
 	stop_after_win = false
 	_revealed = false
 
@@ -514,10 +556,24 @@ func _update_sub_label() -> void:
 #endregion
 
 #region actions
+## The reboot refill is animation only (2026-10-29): the firewall is back at full the moment it reboots. Anything
+## that hits or reads it mid-animation finishes the animation first, so a hit can't land on a half-drawn firewall.
+func _finish_fw_refill() -> void:
+	if _fw_tween and _fw_tween.is_running() and _fw_refill_to >= 0.0:
+		_fw_tween.kill()
+		firewall_bar.value = _fw_refill_to
+	_fw_refill_to = -1.0
+
+## the firewall's real value (the reboot target while the refill animation plays)
+func _fw_value() -> float:
+	return _fw_refill_to if (_fw_refill_to >= 0.0 and _fw_tween and _fw_tween.is_running()) else firewall_bar.value
+
 func attack():
+	_finish_fw_refill()
 	var M = HackingMods.MOD_TYPE
 	var crit = 1.0
 	var forced_crit = false
+	var fresh_crit = false
 	_breach_hit = false
 	var hash_hit = Drivers.value("hash_collision") > 0.0 and (drv_attacks + 1) % int(max(1.0, Drivers.value("hash_collision"))) == 0
 	drv_attacks += 1
@@ -525,28 +581,31 @@ func attack():
 		crits_left -= 1
 		crit = 2.0
 		forced_crit = true
-	elif breach_crit:
-		breach_crit = false
-		crit = 2.0
+	elif fresh_attacks > 0:
+		crit = 2.0 # Fresh Start (mod): the first attacks of each hack always crit
 		forced_crit = true
-		_breach_hit = true
+		fresh_crit = true
 	elif hash_hit:
 		crit = 2.0 # Hash Collision (driver): every Nth attack
-	elif randf() <= (_get_total_efficiency() + crit_ramp) * (_mod(M.CRIT_CHANCE_MULT) if HackingMods.has_mod(M.CRIT_CHANCE_MULT) else 1.0):
+	elif randf() <= _crit_chance():
 		crit = 2.0
+		_breach_hit = breach_crit_left > 0.0 # Breach Strike's window was open (log tag)
 	# Hot Streak: non-crits build crit chance, a crit resets it
 	if HackingMods.has_mod(M.CRIT_RAMP):
 		crit_ramp = 0.0 if crit > 1.0 else crit_ramp + _mod(M.CRIT_RAMP)
 	if crit > 1.0 and HackingMods.has_mod(M.CRIT_DAMAGE_MULT):
-		crit *= _mod(M.CRIT_DAMAGE_MULT) # Critical Overflow: 10 -> 20 -> 40
+		crit *= _mod(M.CRIT_DAMAGE_MULT) # Critical Overflow: 10 -> 20 -> 30 (x1.5; 2026-10-29: was x2)
 	var chained = false
 	if crit > 1.0 and chain_left > 0: # Chain Reaction
 		chain_left -= 1
 		crit *= 2.0
 		chained = true
-	# Double Tap: 2 SQL Injectors per attack (when you have them) for double damage
-	var double_tap = HackingMods.has_mod(M.DOUBLE_TAP) and Inventory.get_amount(offensive_item) >= 2
+	# Double Tap: 2 SQL Injectors per attack (when you have them) for double damage; both need bandwidth (2026-10-29),
+	# otherwise it fires one
 	var bw_cost = _sql_cost()
+	var double_tap = HackingMods.has_mod(M.DOUBLE_TAP) and Inventory.get_amount(offensive_item) >= 2 and has_bandwidth(bw_cost * 2.0)
+	if double_tap:
+		bw_cost *= 2.0
 	# drivers (2026-10-27, Mining): Steady Flow at max bandwidth, Long Haul per breach this run, Stockpile fires 2,
 	# Deep Reserves skips the bandwidth
 	var drv_tags = []
@@ -561,7 +620,8 @@ func attack():
 	var stockpile = !double_tap and Drivers.value("stockpile") > 0.0 and Inventory.get_amount(offensive_item) >= 2 and randf() < Drivers.value("stockpile")
 	if stockpile:
 		drv_tags.append("Stockpile x2")
-	var free_bw = Drivers.value("deep_reserves") > 0.0 and randf() < Drivers.value("deep_reserves")
+	var free_bw = _dr_roll == 1 # Deep Reserves: rolled when the bar filled (see _process)
+	_dr_roll = 0
 	if free_bw:
 		drv_tags.append("Deep Reserves: no bandwidth")
 	var fw_up = !firewall_down and firewall_bar.value > 0.0
@@ -580,7 +640,7 @@ func attack():
 	if master:
 		drv_mult += Drivers.value("master_key")
 		drv_tags.append("Master Key: ignores firewall +%d%%" % roundi(Drivers.value("master_key") * 100))
-	var base_dmg = (ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) + overcharge_dmg) * drv_mult # Overcharge adds before the crit
+	var base_dmg = ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) * (1.0 + overcharge_dmg) * drv_mult # Overcharge multiplies before the crit (2026-10-29)
 	var used_overcharge = overcharge_dmg
 	overcharge_dmg = 0.0
 	var raw_dmg = int(round(base_dmg * crit * (float(Exploits.DEFS.rootkit.mult) if rootkit_left > 0.0 else 1.0) * (2.0 if double_tap or stockpile else 1.0)))
@@ -594,11 +654,13 @@ func attack():
 	var fw_hit = 0
 	var opener = 0.0
 	if fw_before > 0 and fw_fresh and _mod(M.FW_OPENER) > 0:
-		opener = _mod(M.FW_OPENER) # Handshake Exploit: first hit on a new firewall
+		opener = _mod(M.FW_OPENER) # Handshake Exploit: first hit on a new firewall does x3 firewall damage (2026-10-29: was +10)
 	var stuffed = false
 	if fw_before > 0:
 		fw_fresh = false
-		var fw_dmg = FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE) + _mod(M.FW_PCT_HIT) * fw_base + opener # Packet Shredder: % of max firewall
+		var fw_dmg = FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE) + _mod(M.FW_PCT_HIT) * fw_base # Packet Shredder: % of max firewall
+		if opener > 0.0:
+			fw_dmg *= opener
 		fw_dmg *= 1.0 + Drivers.value("credential_reuse") # Credential Reuse (driver)
 		if crit > 1.0 and Drivers.value("cracked_wide") > 0.0: # Cracked Wide (driver)
 			fw_dmg *= Drivers.value("cracked_wide")
@@ -612,27 +674,33 @@ func attack():
 
 	if !free_bw:
 		_spend_bandwidth(bw_cost)
+	if throttle_left > 0.0: # Throttle Patch: counts the SQL Injectors fired
+		throttle_left = max(0.0, throttle_left - (2.0 if double_tap or stockpile else 1.0))
+		if throttle_left <= 0.0:
+			_log("RUN", C_DIM, "Throttle Patch ended - SQL Injector costs %s bandwidth again" % _fmt(_sql_cost()))
 	if crit > 1.0 and Drivers.value("salted_hash") > 0.0: # Salted Hash (driver): crits refund bandwidth
 		var back = MAX_BANDWIDTH * Drivers.value("salted_hash")
 		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + back)
 		drv_tags.append("Salted Hash +%s bw" % _fmt_bw(back))
 	band_bar.value = Hacking.current_bandwidth
 	integ_bar.value -= actual_dmg
-	if actual_dmg > 0:
-		_last_hit_time = hack_time # Regenerator (trait)
+	if actual_dmg > 0 or fw_hit > 0:
+		_last_hit_time = hack_time # Regenerator (trait): any hit pauses its repair
 	Exploits.add_charge("crit" if crit > 1 else "attack")
 	add_heat(ATTACK_HEAT)
-	var recycled = Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE
+	var recycled = false # Recycler capstone retired (2026-10-30)
 	if !recycled:
-		var n_sql = int(_tv("packet_loss", "items", 1)) # Packet Loss (trait): used 2 at a time
+		var n_sql = int(_tv("packet_loss", "items", 1)) # Packet Loss (trait): 3 per shot
 		var used = min(n_sql, Inventory.get_amount(offensive_item))
 		Inventory.remove_resource(offensive_item, used)
 		_hack_sql += used
-	if (double_tap or stockpile) and !(Upgrades.has("hacking.recycler") and randf() < RECYCLER_CHANCE):
+	if double_tap or stockpile:
 		Inventory.remove_resource(offensive_item, 1)
 		_hack_sql += 1
 	if haste_attacks > 0:
 		haste_attacks -= 1
+	if fresh_attacks > 0:
+		fresh_attacks -= 1
 	# Leech: anonymity per hit
 	if _mod(M.LEECH) > 0.0:
 		Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * _mod(M.LEECH)))
@@ -652,10 +720,12 @@ func attack():
 	var line = "SQL Injector -> %s  %s" % [target_name, _c("-%d integrity" % actual_dmg, C_INTEG)]
 	if crit > 1:
 		line = _c("CRIT x%d " % int(crit), C_CRIT) + line
-		if forced_crit and !_breach_hit:
+		if fresh_crit:
+			line += "  " + _c("(MOD Fresh Start, %d left)" % fresh_attacks, C_MOD)
+		elif forced_crit:
 			line += "  " + _c("(Zero-Day, %d left)" % crits_left, C_EXP)
 		elif _breach_hit:
-			line += "  " + _c("(MOD Breach Strike)", C_MOD)
+			line += "  " + _c("(MOD Breach Strike +%d%% crit)" % roundi(_mod(M.FW_NO_REBOOT) * 100), C_MOD)
 	if blocked > 0:
 		line += "  " + _c("firewall absorbed %d" % blocked, C_FW)
 	if fw_hit > 0:
@@ -666,14 +736,14 @@ func attack():
 	if _mod(M.FIREWALL_DAMAGE) > 0 and fw_hit > 0:
 		tags.append("+%d firewall dmg" % int(_mod(M.FIREWALL_DAMAGE)))
 	if opener > 0:
-		tags.append("handshake +%d firewall dmg" % int(opener))
+		tags.append("handshake x%s firewall dmg" % _fmt(opener))
 	if crit > 1 and _mod(M.EFFICIENCY) > 0:
 		tags.append("+%d%% crit" % roundi(_mod(M.EFFICIENCY) * 100))
 	if double_tap:
 		tags.append("double tap x2")
 	var run_tags = []
 	if used_overcharge > 0:
-		run_tags.append("Overcharge +%d" % int(used_overcharge))
+		run_tags.append("Overcharge x%s" % _fmt(1.0 + used_overcharge))
 	if chained:
 		run_tags.append("Chain Reaction x2")
 	if stuffed:
@@ -694,7 +764,7 @@ func attack():
 		_float(ctr_card.panel, "RESET", C_MOD, 14)
 	if siphoned > 0:
 		line += "  " + _c("+%d anonymity (siphon)" % siphoned, C_YOU)
-	line += "  " + _c("bw -%s" % _fmt(bw_cost) if bw_freeze_left <= 0.0 else "bw frozen", C_DIM)
+	line += "  " + _c(("bw 0" if free_bw else "bw -%s" % _fmt(bw_cost)) if bw_freeze_left <= 0.0 else "bw frozen", C_DIM)
 	_log("ATK", C_SQL, line)
 
 	# impact
@@ -715,6 +785,7 @@ func attack():
 		_log("SYS", C_INTEG, "out of SQL Injectors - use 'kill' to abort")
 		Signals.update_hack_console("\n\n[color=#e24b4a]OUT OF SQL INJECTORS - ABORT HACKING WITH 'KILL'[/color]\n")
 	attack_bar.value = 0.0
+	throttle_sql_wait = float(_tv("throttle", "delay", 0.0)) # Throttle (trait)
 	if integ_bar.value <= 0.0:
 		win()
 		return
@@ -726,9 +797,8 @@ func defense():
 	# Restore mods add percentage points of max anonymity (+5 = +5%)
 	var mod_restore = int(ceil(Stats.max_anon * _mod(HackingMods.MOD_TYPE.RESTORE) / 100.0))
 	var amount = int(ceil(Stats.max_anon * DEFEND_PCT)) + mod_restore
-	if HackingMods.has_mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT):
-		amount = int(amount * _mod(HackingMods.MOD_TYPE.SPOOF_HEAL_MULT)) # Proxy Chain
 	var boosted = spoof_boost_left > 0.0
+	spoof_boost_left = 0.0 # Booster Shot: this one spoof
 	if boosted:
 		amount = int(amount * float(Exploits.DEFS.booster_shot.mult))
 	var d_tags = []
@@ -757,6 +827,13 @@ func defense():
 	Signals.update_hacking_header()
 
 	var line = "Packet Spoof -> you  %s  (%d/%d)" % [_c("+%d anonymity" % healed, C_YOU), Stats.current_anon, Stats.max_anon]
+	var spoof_dmg = 0
+	if opening_spoof_hit: # Opening Spoof: double the spoof's healing (before the max-anonymity cap) straight to integrity
+		opening_spoof_hit = false
+		spoof_dmg = int(amount * _mod(HackingMods.MOD_TYPE.SPOOF_OPENER))
+		integ_bar.value -= spoof_dmg
+		_last_hit_time = hack_time # Regenerator (trait)
+		line += "  " + _c("(MOD Opening Spoof: -%d integrity)" % spoof_dmg, C_MOD)
 	if mod_restore > 0:
 		line += "  " + _c("(MOD +%d restore)" % mod_restore, C_MOD)
 	if boosted:
@@ -772,6 +849,13 @@ func defense():
 	_float(anon_bar, "+%d" % healed, C_MOD if mod_restore > 0 else C_YOU, 15)
 	_flash(anon_bar, Color(1.6, 2.0, 1.6), 0.3)
 	_flash(spoof_card.panel, Color(1.25, 1.35, 1.6), 0.2)
+	if spoof_dmg > 0:
+		_float(integ_bar, "-%d" % spoof_dmg, C_MOD, 15)
+		if integ_bar.value <= 0.0:
+			defending = false
+			defense_bar.value = 0.0
+			win()
+			return
 
 	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
 		defending = true
@@ -782,6 +866,7 @@ func defense():
 		else:
 			_log("DEF", C_INTEG, "out of Packet Spoofs")
 	defense_bar.value = 0.0
+	throttle_spoof_wait = float(_tv("throttle", "delay", 0.0)) # Throttle (trait)
 	_refresh_panels()
 	# Lure (driver): sometimes a second spoof goes out right away (free bandwidth, it doesn't chain again)
 	if !_lure_chain and Drivers.value("lure") > 0.0 and randf() < Drivers.value("lure") and Inventory.get_amount(defensive_item) > 0 and Stats.current_anon < Stats.max_anon:
@@ -791,6 +876,7 @@ func defense():
 
 func counter():
 	var M = HackingMods.MOD_TYPE
+	esc_counters += 1 # Escalator (trait): every countermeasure fired, hit or miss
 	if scramble_left > 0:
 		scramble_left -= 1
 	if HackingMods.has_mod(M.COUNTER_STACK_SLOW):
@@ -843,15 +929,16 @@ func counter():
 		Stats.current_anon = 1.0 + ceil(Stats.max_anon * DEAD_MANS_RESTORE)
 	if Stats.overclocked and current_target.has("overclock heat") and !HackingMods.has_mod(HackingMods.MOD_TYPE.COLD_BOOT): # per-target heat per counter while overclocked (Cold Boot: no overclock heat)
 		NEXT_HEAT_APPLICATION = 0 # replaces overclock's usual +2 (Superintendent: many small counters)
-		add_heat(float(current_target["overclock heat"]))
+		add_heat(float(current_target["overclock heat"]), true)
 	else:
-		add_heat(COUNTER_HEAT)
+		add_heat(COUNTER_HEAT, true)
 	anon_bar.value = Stats.current_anon
 	Exploits.add_charge("hit_taken")
 	var drained = MAX_BANDWIDTH * float(_tv("siphon", "drain", 0.0)) # Siphon (trait)
 	if drained > 0.0:
 		Hacking.current_bandwidth = max(0.0, Hacking.current_bandwidth - drained)
 		band_bar.value = Hacking.current_bandwidth
+		siphon_jam_left = float(_tv("siphon", "jam", 0.0))
 	var sig = MAX_BANDWIDTH * Drivers.value("signal_boost") # Signal Boost (driver)
 	if sig > 0.0:
 		Hacking.current_bandwidth = min(float(MAX_BANDWIDTH), Hacking.current_bandwidth + sig)
@@ -866,7 +953,7 @@ func counter():
 
 	var line = "%s countermeasures -> you  %s  (%d/%d)" % [target_name, _c("-%d anonymity" % dmg, C_INTEG), Stats.current_anon, Stats.max_anon]
 	if drained > 0.0:
-		line += "  " + _c("(SIPHON -%s bw)" % _fmt_bw(drained), C_CTR)
+		line += "  " + _c("(SIPHON -%s bw, regen paused %ss)" % [_fmt_bw(drained), _fmt(float(_tv("siphon", "jam", 0.0)))], C_CTR)
 	if reduce > 0:
 		line += "  " + _c("(MOD -%d dmg)" % reduce, C_MOD)
 	var c_tags = []
@@ -923,14 +1010,22 @@ func _break_firewall(earned: bool = true) -> void:
 		Exploits.add_charge("firewall")
 		_float(exp_row.bar, "+%d charge" % int(Exploits.CHARGE_GAIN.firewall), C_EXP, 12, 18.0)
 	firewall_down = true
-	# 2026-10-28: the guaranteed crit after a break is now the Breach Strike mod's effect (no longer for everyone)
-	breach_crit = HackingMods.has_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT)
-	fw_down_left = _fw_down_time() + knock_bank + Drivers.value("session_hijack") # Port Knock used while it was up; Session Hijack (driver)
+	# Breach Strike (mod, 2026-10-30: was a guaranteed crit on the next hit): +crit chance for a few seconds
+	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT):
+		breach_crit_left = BREACH_STRIKE_TIME
+		_log("MOD", C_MOD, "Breach Strike: +%d%% crit chance for %ds" % [roundi(_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT) * 100), int(BREACH_STRIKE_TIME)])
+	fw_down_left = _fw_down_time() * (1.0 + knock_bank) + Drivers.value("session_hijack") # Port Knock used while it was up; Session Hijack (driver)
 	knock_bank = 0.0
+	if _trait("heater"): # Heater (trait, 2026-10-30): breaking the firewall vents heat (and can clear an overheat)
+		var vent = float(_tv("heater", "vent", 0.0))
+		Stats.update_tempature(-vent)
+		_log("HEAT", C_HEAT, "firewall down - Heater vents %d°C (%d°C)" % [int(vent), int(Stats.system_tempature)])
+		_update_state()
 	if HackingMods.has_mod(HackingMods.MOD_TYPE.FW_BREAK_HASTE): # Breach Momentum
 		haste_attacks = 3
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
+	_fw_refill_to = -1.0
 	firewall_bar.value = 0
 	_log("FW", C_FW, "%s firewall DESTROYED - countermeasures slowed %d%% for %ss" % [target_name, roundi((1.0 - max(0.05, FW_BREAK_SLOW - _mod(HackingMods.MOD_TYPE.FW_BREAK_SLOW))) * 100), _fmt(snappedf(_fw_down_time(), 0.1))])
 	var cascade = int(round(integ_base * _mod(HackingMods.MOD_TYPE.FW_BREAK_INTEGRITY))) # Cascade
@@ -948,6 +1043,7 @@ func _break_firewall(earned: bool = true) -> void:
 
 func _restore_firewall() -> void:
 	firewall_down = false
+	knock_down_used = false
 	if _trait("adaptive") and fw_adaptive_base > 0.0: # Adaptive (trait): every reboot adds 50% of the starting firewall
 		var grow = round(fw_adaptive_base * float(_tv("adaptive", "grow", 0.5)))
 		fw_start_value += grow
@@ -959,6 +1055,7 @@ func _restore_firewall() -> void:
 	_log("FW", C_FW, "firewall rebooting to %d - countermeasures back to full speed%s" % [int(reboot_to), ("  " + _c("(DRV Token Replay %d%%)" % roundi(Drivers.value("token_replay") * 100), C_DRV)) if reboot_to != fw_start_value else ""])
 	fw_fresh = true # a new firewall: Handshake Exploit hits it again
 	master_key_ready = true # Master Key (driver)
+	_fw_refill_to = reboot_to
 	_fw_tween = create_tween()
 	_fw_tween.tween_property(firewall_bar, "value", reboot_to, FW_REFILL_TIME).set_ease(Tween.EASE_OUT)
 	_flash(firewall_bar, Color(1.8, 1.6, 1.3), FW_REFILL_TIME)
@@ -974,10 +1071,13 @@ func _heat_mult() -> float:
 	var t = Stats.hacking_targets.keys().find(p.location) + 1 if !p.is_empty() else 1
 	return Stats.tier_heat(HEAT_BY_TIER, t)
 
-func add_heat(amount: float):
+## from_counter: the enemy's countermeasure. 2026-10-30: those add no heat while you're overheated (with Swarm + Heater
+## they outran cooling, so an overheat could never clear); your own SQL and spoofs still do.
+func add_heat(amount: float, from_counter: bool = false):
 	var hm = _heat_mult() * float(_tv("heater", "heat")) # Heater (trait)
 	if Stats.overheated:
-		Stats.update_tempature(0.3 * hm)
+		if !from_counter:
+			Stats.update_tempature(0.3 * hm)
 		return
 	if NEXT_HEAT_APPLICATION > 0:
 		amount += NEXT_HEAT_APPLICATION
@@ -1014,24 +1114,66 @@ func _update_state() -> void:
 #endregion
 
 #region win / lose
-func lose():
+## 2026-10-30: losing a hack costs a share of the SQL Injectors / Packet Spoofs you carry, an extra hack off every
+## mod and one level of the target's intel. 'kill' below KILL_LOSS_ANON anonymity counts as a loss.
+const LOSS_SQL_PCT := Vector2(0.10, 0.20)
+const LOSS_SPOOF_PCT := Vector2(0.05, 0.10)
+const KILL_LOSS_ANON := 0.2
+const STREAK_RARE_AT := 5 # the 5th win in a row of one 'hack <target>=N' / '-r' run also gives the target's rare item
+
+## applies the loss penalties; returns the lines for the loss screen
+func _loss_penalties() -> String:
+	var t = ""
+	var lines = []
+	var sql = int(round(Inventory.get_amount(offensive_item) * randf_range(LOSS_SQL_PCT.x, LOSS_SQL_PCT.y)))
+	if sql > 0:
+		Inventory.remove_resource(offensive_item, sql)
+		lines.append("-%s %s" % [_fmt_int(sql), offensive_item.name])
+	var sp = int(round(Inventory.get_amount(defensive_item) * randf_range(LOSS_SPOOF_PCT.x, LOSS_SPOOF_PCT.y)))
+	if sp > 0:
+		Inventory.remove_resource(defensive_item, sp)
+		lines.append("-%s %s" % [_fmt_int(sp), defensive_item.name])
+	if !HackingMods.current_mods.is_empty():
+		var names = HackingMods.current_mods.keys().map(func(m): return HackingMods.get_mod_name(m))
+		remove_mod_duration() # the extra hack (the normal one is taken below with every hack)
+		lines.append("an extra hack off every mod (%s)" % ", ".join(names))
+	if Decoding.intel_knock_down(current_target):
+		lines.append("%s intel down one level (%s)" % [str(current_target.get("name", "")), Decoding.intel_text(current_target)])
+	for l in lines:
+		t += "[color=#e24b4a]  %s[/color]\n" % l
+	return t
+
+static func _fmt_int(n: int) -> String:
+	var s = str(n)
+	var out = ""
+	while s.length() > 3:
+		out = "," + s.right(3) + out
+		s = s.left(s.length() - 3)
+	return s + out
+
+func lose(killed: bool = false):
 	bandwidth_timer.stop()
 	is_hacking = false
 	attacking = false
 	defending = false
 	firewall_down = false
-	_log("LOSE", C_INTEG, "anonymity lost - you were traced, hack aborted")
-	_banner("TRACED", "anonymity lost  ·  hack aborted", C_INTEG, 1.2)
+	if killed:
+		_log("LOSE", C_INTEG, "killed below %d%% anonymity - counts as being traced" % roundi(KILL_LOSS_ANON * 100))
+		_banner("TRACED", "killed while being traced  ·  counts as a loss", C_INTEG, 1.2)
+	else:
+		_log("LOSE", C_INTEG, "anonymity lost - you were traced, hack aborted")
+		_banner("TRACED", "anonymity lost  ·  hack aborted", C_INTEG, 1.2)
 	_flash(self, Color(1.7, 0.7, 0.7), 0.8)
 	_shake(you_card.panel, 9.0, 0.45)
 	update_status_label_badge("traced", C_INTEG)
-	var messages = "[color=#e24b4a]ANONYMITY LOST - ABORTING HACK[/color]\n"
+	var messages = "[color=#e24b4a]%s[/color]\n" % ("KILLED BELOW %d%% ANONYMITY - COUNTS AS A LOSS" % roundi(KILL_LOSS_ANON * 100) if killed else "ANONYMITY LOST - ABORTING HACK")
 	if !compromise_fights.is_empty():
 		messages += _compromise_forfeit_text("traced")
 		compromise_xp = 0
+	messages += "[color=#e24b4a]Lost:[/color]\n"
 	if caches_gained > 0:
-		messages += "[color=#e24b4a]Items lost[/color]\n"
-		messages += "[color=#e24b4a]" + target_reward.name + " x" + str(caches_gained) + "[/color]"
+		messages += "[color=#e24b4a]  %s x%d (this run's caches)[/color]\n" % [target_reward.name, caches_gained]
+	messages += _loss_penalties()
 	caches_gained = 0
 	vm_caches_gained = 0
 	remove_mod_duration()
@@ -1046,6 +1188,7 @@ func win():
 	firewall_down = false
 	if _fw_tween and _fw_tween.is_valid():
 		_fw_tween.kill()
+	_fw_refill_to = -1.0
 	firewall_bar.value = 0
 	if !compromise_fights.is_empty():
 		_compromise_win()
@@ -1074,6 +1217,7 @@ func win():
 	exfil_left = 0.0
 	Stats.record_win(current_target)
 	Stats.record_usage(current_target, _hack_sql, _hack_spoof)
+	_streak_rare()
 	remove_mod_duration()
 	update_bottom_row()
 	Exp.add_xp(Hacking, null, EXP_AMOUNT)
@@ -1104,6 +1248,23 @@ func win():
 		reset()
 	else:
 		_finish_hack()
+
+## Win streak (2026-10-30): the 5th win in a row of one multi-hack run ('hack <target>=5' or more, or '-r') also gives
+## the target's rare item straight away (on top of the caches' own rare chance). Once per run.
+func _streak_rare() -> void:
+	if !Upgrades.win_streak_unlocked(): # 2026-10-30: the tier 2 'apt hacking' capstone, Win Streak
+		return
+	if hack_index != STREAK_RARE_AT or !(hack_total == -1 or hack_total >= STREAK_RARE_AT):
+		return
+	var cache = target_reward
+	if !(cache is CacheData) or cache.rare_pool.is_empty():
+		return
+	var rare = cache.rare_pool.pick_random().item
+	Inventory.add_resource(rare, 1)
+	Decoding.rare_tracker.erase(Decoding.cache_family(cache)) # a rare drop resets the Rare Tracker
+	_log("WIN", C_DRV, "WIN STREAK x%d: %s  %s" % [STREAK_RARE_AT, _c("+1 " + rare.name, C_DRV), _c("(added now, kept even if the run is traced later)", C_DIM)])
+	Signals.update_hack_console("[color=#ffc24a]WIN STREAK x%d: +1 %s[/color]" % [STREAK_RARE_AT, rare.name])
+	_float(target_card.panel, "STREAK +1 " + rare.name, C_DRV, 13, 20.0)
 
 #region compromise
 ## One compromise fight won: bank its XP, then the next target (everything else carries over) or the prize.
@@ -1211,6 +1372,7 @@ func start_hack():
 	drv_counters = 0
 	master_key_ready = false
 	_last_hit_time = 0.0
+	siphon_jam_left = 0.0
 	if Drivers.value("head_start") > 0.0 and Exploits.charge < Drivers.value("head_start"): # Head Start
 		Exploits.set_charge(Drivers.value("head_start"))
 		_log("DRV", C_DRV, "Head Start: Exploit charge %d" % int(Exploits.charge))
@@ -1222,11 +1384,13 @@ func start_hack():
 	haste_attacks = 0
 	bleeds.clear()
 	var M = HackingMods.MOD_TYPE
-	if _mod(M.START_ANON) > 0.0 and Stats.current_anon < Stats.max_anon: # Fresh Start
-		var before = Stats.current_anon
-		Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * _mod(M.START_ANON)))
-		anon_bar.value = Stats.current_anon
-		_log("MOD", C_MOD, "Fresh Start: +%d anonymity (%d/%d)" % [int(Stats.current_anon - before), Stats.current_anon, Stats.max_anon])
+	fresh_attacks = 0
+	opening_spoof_hit = false
+	_kill_warned = false
+	_dr_roll = 0
+	if _mod(M.START_ANON) > 0.0: # Fresh Start (2026-10-29: was +15% anonymity at the start)
+		fresh_attacks = FRESH_START_ATTACKS
+		_log("MOD", C_MOD, "Fresh Start: first %d attacks are guaranteed crits" % FRESH_START_ATTACKS)
 	_hack_sql = 0
 	_hack_spoof = 0
 	hack_time = 0.0
@@ -1237,13 +1401,18 @@ func start_hack():
 		_log("MOD", C_MOD, "Silent Entry: unnoticed for %ds" % int(_mod(HackingMods.MOD_TYPE.STEALTH_START)))
 	if Inventory.get_amount(offensive_item) > 0:
 		attacking = true
-	if Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
+	if HackingMods.has_mod(M.SPOOF_OPENER) and Inventory.get_amount(defensive_item) > 0:
+		opening_spoof_hit = true # Opening Spoof (2026-10-29): this spoof also deals double its healing as damage
+		_engage_spoof("Opening Spoof")
+	elif Inventory.get_amount(defensive_item) > 0 and is_anon_below_healing_threshold():
 		_engage_spoof("anonymity below %d%%" % roundi(Stats.healing_threshold_auto_start * 100))
-	elif HackingMods.has_mod(M.SPOOF_OPENER) and Inventory.get_amount(defensive_item) > 0:
-		_engage_spoof("Opening Spoof") # like typing 'spoof' at the start of the hack
 	_update_state()
 
 func kill_hack():
+	# 2026-10-30: walking away while being traced counts as a loss
+	if is_hacking and Stats.current_anon < Stats.max_anon * KILL_LOSS_ANON:
+		lose(true)
+		return
 	var kept = caches_gained
 	if !compromise_fights.is_empty():
 		Signals.update_hack_console(_compromise_forfeit_text("killed"))
@@ -1310,7 +1479,7 @@ func prepare():
 
 	hack_index += 1
 	_update_sub_label()
-	_clear_effects()
+	_clear_fight_effects() # 2026-10-29: Exploit effects still pending carry over to the next fight of a run
 	Exploits.cost_mult = 1.0 # (Encrypted trait removed 2026-10-28)
 	_show_trait_chips()
 	_bw_warned = {}
@@ -1467,9 +1636,9 @@ func _announce_mods() -> void:
 func _mod_card(t) -> Control:
 	var M = HackingMods.MOD_TYPE
 	match t:
-		M.DAMAGE, M.DAMAGE_PCT, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST, M.EFFICIENCY, M.FW_OPENER, M.DOUBLE_TAP, M.CRIT_RAMP, M.BLEED, M.FW_BREAK_HASTE, M.LEECH, M.CRIT_CHANCE_MULT, M.CRIT_DAMAGE_MULT, M.FW_PCT_HIT:
+		M.DAMAGE, M.DAMAGE_PCT, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST, M.EFFICIENCY, M.FW_OPENER, M.DOUBLE_TAP, M.CRIT_RAMP, M.BLEED, M.FW_BREAK_HASTE, M.LEECH, M.CRIT_CHANCE_MULT, M.CRIT_DAMAGE_MULT, M.FW_PCT_HIT, M.START_ANON:
 			return sql_card.panel
-		M.RESTORE, M.SPOOF_HEAL_MULT, M.SPOOF_FREE, M.SPOOF_SPEED, M.SPOOF_OPENER, M.START_ANON, M.FAILSAFE:
+		M.RESTORE, M.SPOOF_HEAL_MULT, M.SPOOF_FREE, M.SPOOF_SPEED, M.SPOOF_OPENER, M.FAILSAFE:
 			return spoof_card.panel
 		M.BAND_RATE:
 			return you_card.panel
@@ -1487,8 +1656,17 @@ func _refresh_labels() -> void:
 	_on_integ_bar_value_changed(integ_bar.value)
 	_on_firewall_bar_value_changed(firewall_bar.value)
 
+var _kill_warned := false # the "'kill' now counts as a loss" log line, once per hack
 func _on_anon_bar_value_changed(value):
 	anon_row.value.text = "%d/%d" % [value, Stats.max_anon]
+	var low = is_hacking and value < Stats.max_anon * KILL_LOSS_ANON
+	if low and !_kill_warned:
+		_kill_warned = true
+		_log("SYS", C_INTEG, "anonymity below %d%%: 'kill' now counts as a loss" % roundi(KILL_LOSS_ANON * 100))
+		_refresh_panels()
+	elif !low and _kill_warned and value >= Stats.max_anon * KILL_LOSS_ANON:
+		_kill_warned = false
+		_refresh_panels()
 
 func _on_band_bar_value_changed(value):
 	band_row.value.text = "%d/%d" % [value, band_bar.max_value]
@@ -1504,6 +1682,63 @@ func _on_firewall_bar_value_changed(value):
 	else:
 		fw_row.value.text = "%d/%d" % [value, fw_base]
 
+## The SQL card's DMG (2026-10-29): what a normal hit does right now, before the target's firewall. Base + apt
+## upgrades + mods, x the drivers that apply at the moment (Optimized Build always; Overclocked Build, Brute Match,
+## Weak Point and Long Haul while their condition holds) and Rootkit while it runs. Left out: per-hit chances and
+## one-shots (crits, Overcharge, Stockpile / Double Tap, Master Key, Rainbow Table).
+func _shown_drv_mult() -> float:
+	var m = 1.0 + Drivers.value("optimized_build")
+	if Stats.overclocked:
+		m += Drivers.value("overclocked_build")
+	if !firewall_down and _fw_value() > 0.0:
+		m += Drivers.value("brute_match")
+	if _full_intel():
+		m += Drivers.value("weak_point")
+	if Hacking.current_bandwidth >= float(MAX_BANDWIDTH) - 0.01: # 2026-10-30: Steady Flow shows while bandwidth is full
+		m += Drivers.value("steady_flow")
+	m += Drivers.value("long_haul") * mini(int(Drivers.DEFS.long_haul.max_stacks), max(0, hack_index - 1))
+	return m
+
+func _shown_damage() -> float:
+	var M = HackingMods.MOD_TYPE
+	return ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT)) * _shown_drv_mult() * (float(Exploits.DEFS.rootkit.mult) if rootkit_left > 0.0 else 1.0)
+
+## FW: firewall damage of a normal hit (as in attack(): + Packet Shredder's % of max, x Credential Reuse, x2 while
+## Credential Stuffing lasts). Handshake Exploit's first hit and Cracked Wide crits are left out.
+func _shown_fw_damage() -> float:
+	var M = HackingMods.MOD_TYPE
+	var f = (FIREWALL_DAMAGE + _mod(M.FIREWALL_DAMAGE) + _mod(M.FW_PCT_HIT) * fw_base) * (1.0 + Drivers.value("credential_reuse"))
+	return f * (float(Exploits.DEFS.credential_stuffing.mult) if stuff_left > 0 else 1.0)
+
+## CRIT: the chance attack() rolls (efficiency + mods + Brute Force + Hot Streak's ramp, x Crit Chance mods)
+func _shown_crit_chance() -> float:
+	if crits_left > 0 or fresh_attacks > 0: # guaranteed crits (exploit / Fresh Start)
+		return 1.0
+	return min(1.0, _crit_chance())
+
+## crit chance now: efficiency + Hot Streak + Vuln Scanner + Breach Strike (while its window is open)
+func _crit_chance() -> float:
+	var M = HackingMods.MOD_TYPE
+	return _get_total_efficiency() + crit_ramp + _mod(M.CRIT_CHANCE_MULT) + (_mod(M.FW_NO_REBOOT) if breach_crit_left > 0.0 else 0.0)
+
+## RESTORE: one Packet Spoof, as defend() heals (+ Restore mods, x Proxy Chain, x Booster Shot, + Social Proof)
+func _shown_restore() -> int:
+	var M = HackingMods.MOD_TYPE
+	var amount = int(ceil(Stats.max_anon * DEFEND_PCT)) + int(ceil(Stats.max_anon * _mod(M.RESTORE) / 100.0))
+	if spoof_boost_left > 0.0:
+		amount = int(amount * float(Exploits.DEFS.booster_shot.mult))
+	if Drivers.value("social_proof") > 0.0:
+		amount = int(round(amount * (1.0 + Drivers.value("social_proof"))))
+	return amount
+
+func _shown_damage_color() -> Color:
+	var M = HackingMods.MOD_TYPE
+	if rootkit_left > 0.0:
+		return C_EXP
+	if _shown_drv_mult() > 1.0:
+		return C_DRV
+	return C_MOD if (_mod(M.DAMAGE) > 0 or _mod(M.DAMAGE_PCT) > 0) else C_TEXT
+
 func _refresh_panels() -> void:
 	if offensive_item == null or sql_card.is_empty():
 		return
@@ -1512,12 +1747,12 @@ func _refresh_panels() -> void:
 	# SQL Injector
 	sql_card.count.text = "x" + _short(Inventory.get_amount(offensive_item))
 	sql_card.stats.text = "   ".join([
-		_stat("DMG", str(int(round(ATTACK_AMOUNT * (1.0 + _mod(M.DAMAGE_PCT))))), C_MOD if (_mod(M.DAMAGE) > 0 or _mod(M.DAMAGE_PCT) > 0) else C_TEXT),
-		_stat("FW", str(FIREWALL_DAMAGE + int(_mod(M.FIREWALL_DAMAGE))), C_MOD if _mod(M.FIREWALL_DAMAGE) > 0 else C_TEXT),
-		_stat("CRIT", "%d%%" % roundi(_get_total_efficiency() * 100.0), C_MOD if _mod(M.EFFICIENCY) > 0 else C_TEXT),
+		_stat("DMG", str(int(round(_shown_damage()))), _shown_damage_color()),
+		_stat("FW", _fmt(snappedf(_shown_fw_damage(), 0.1)), C_EXP if stuff_left > 0 else (C_DRV if Drivers.value("credential_reuse") > 0.0 else (C_MOD if (_mod(M.FIREWALL_DAMAGE) > 0 or _mod(M.FW_PCT_HIT) > 0) else C_TEXT))),
+		_stat("CRIT", "%d%%" % roundi(_shown_crit_chance() * 100.0), C_DRV if Drivers.value("brute_force") > 0.0 else (C_MOD if (_mod(M.EFFICIENCY) > 0 or HackingMods.has_mod(M.CRIT_CHANCE_MULT) or crit_ramp > 0.0) else C_TEXT)),
 		_stat("BW", "0" if bw_freeze_left > 0.0 else _fmt(_sql_cost()), C_EXP if (throttle_left > 0.0 or bw_freeze_left > 0.0) else (C_MOD if HackingMods.get_bandwidth_cost() > 0 else C_TEXT)),
-		_stat("EVERY", _secs(100.0 / max(0.001, ATTACK_SPEED * _attack_speed_mult())), C_MOD if !is_equal_approx(_attack_speed_mult(), 1.0) else C_TEXT)])
-	var sql_mods = _mods_text([M.DAMAGE, M.DAMAGE_PCT, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST, M.EFFICIENCY, M.FW_OPENER, M.DOUBLE_TAP, M.CRIT_RAMP, M.BLEED, M.FW_BREAK_HASTE, M.LEECH, M.CRIT_CHANCE_MULT, M.CRIT_DAMAGE_MULT, M.FW_PCT_HIT])
+		_stat("EVERY", _secs(100.0 / max(0.001, ATTACK_SPEED * _attack_speed_mult()) + float(_tv("throttle", "delay", 0.0))), C_INTEG if _trait("throttle") else C_EXP if flood_left > 0.0 else (C_DRV if Drivers.value("quick_compile") > 0.0 else (C_MOD if !is_equal_approx(_attack_speed_mult(), 1.0) else C_TEXT)))])
+	var sql_mods = _mods_text([M.DAMAGE, M.DAMAGE_PCT, M.FIREWALL_DAMAGE, M.ATTACK_SPEED, M.SQL_BOOST, M.EFFICIENCY, M.FW_OPENER, M.DOUBLE_TAP, M.CRIT_RAMP, M.BLEED, M.FW_BREAK_HASTE, M.LEECH, M.CRIT_CHANCE_MULT, M.CRIT_DAMAGE_MULT, M.FW_PCT_HIT, M.START_ANON])
 	if HackingMods.get_bandwidth_cost() > 0:
 		sql_mods += ("\n" if sql_mods != "" else "") + _c("MOD bandwidth +%d per attack" % HackingMods.get_bandwidth_cost(), C_MOD) + _c("  · %d mod%s equipped" % [HackingMods.current_mods.size(), "" if HackingMods.current_mods.size() == 1 else "s"], C_DIM)
 	_set_rtl(sql_card.mods, sql_mods)
@@ -1533,10 +1768,10 @@ func _refresh_panels() -> void:
 	# Packet Spoof
 	spoof_card.count.text = "x" + _short(Inventory.get_amount(defensive_item))
 	spoof_card.stats.text = "   ".join([
-		_stat("RESTORE", str(int((DEFEND_AMOUNT + int(ceil(Stats.max_anon * _mod(M.RESTORE) / 100.0))) * (float(Exploits.DEFS.booster_shot.mult) if spoof_boost_left > 0.0 else 1.0))), C_EXP if spoof_boost_left > 0.0 else (C_MOD if _mod(M.RESTORE) > 0 else C_TEXT)),
+		_stat("RESTORE", str(_shown_restore()), C_EXP if spoof_boost_left > 0.0 else (C_DRV if Drivers.value("social_proof") > 0.0 else (C_MOD if _mod(M.RESTORE) > 0 else C_TEXT))),
 		_stat("BW", str(DEFEND_BW_COST), C_TEXT),
-		_stat("EVERY", _secs(100.0 / max(0.001, DEFEND_SPEED)), C_TEXT)])
-	_set_rtl(spoof_card.mods, _mods_text([M.RESTORE, M.SPOOF_HEAL_MULT, M.SPOOF_FREE, M.SPOOF_SPEED, M.SPOOF_OPENER, M.START_ANON, M.FAILSAFE]))
+		_stat("EVERY", _secs(100.0 / _spoof_fill_rate() + float(_tv("throttle", "delay", 0.0))), C_INTEG if _trait("throttle") else (C_MOD if (_mod(M.SPOOF_SPEED) > 0 or HackingMods.has_mod(M.SPOOF_HEAL_MULT)) else C_TEXT))])
+	_set_rtl(spoof_card.mods, _mods_text([M.RESTORE, M.SPOOF_HEAL_MULT, M.SPOOF_FREE, M.SPOOF_SPEED, M.SPOOF_OPENER, M.FAILSAFE]))
 	var th = roundi(Stats.healing_threshold_auto_start * 100)
 	if Inventory.get_amount(defensive_item) <= 0:
 		_set_state(spoof_card, "none left", C_INTEG)
@@ -1597,14 +1832,19 @@ func _refresh_panels() -> void:
 		regen_col = C_MOD
 	band_tags.append(_c("regen " + regen, regen_col))
 	_set_tag(band_row, "  ".join(band_tags))
-	_set_tag(anon_row, _c("spoofing", C_SPOOF) if defending else _c("auto-spoof below %d%%" % th, C_DIM))
-	_set_tag(integ_row, _c("INTEL -%d%%" % _ipct("integrity"), C_INTEL) if _ipct("integrity") > 0 else "")
+	var anon_tags = [_c("spoofing", C_SPOOF) if defending else _c("auto-spoof below %d%%" % th, C_DIM)]
+	if is_hacking and Stats.current_anon < Stats.max_anon * KILL_LOSS_ANON: # 2026-10-30: say it where they look
+		anon_tags.push_front(_c("'kill' now counts as a loss", C_INTEG))
+	_set_tag(anon_row, "  ".join(anon_tags))
+	_refresh_integ_tag()
 	var fw_tags = []
 	if firewall_down:
 		fw_tags.append(_c("DOWN - reboot in %.1fs" % fw_down_left, C_FW))
 		if _ipct("firewall reboot") > 0:
 			fw_tags.append(_c("INTEL +%d%%" % _ipct("firewall reboot"), C_INTEL))
 	else:
+		if _revealed and !current_target.is_empty(): # 2026-10-30: how long it stays down once broken, shown before the break
+			fw_tags.append(_c("down %ss once broken" % _fmt(snappedf(_fw_down_time() + Drivers.value("session_hijack"), 0.1)), C_DIM))
 		if _ipct("firewall") > 0:
 			fw_tags.append(_c("INTEL -%d%%" % _ipct("firewall"), C_INTEL))
 		if _mod(M.FIREWALL_REDUCTION) > 0:
@@ -1710,6 +1950,9 @@ func use_exploit(item: ItemData, auto: bool = false) -> String:
 
 ## "" if it would do something right now, otherwise why not (nothing is spent)
 func _exploit_blocked(id: String) -> String:
+	if _exploit_active(id):
+		var it = Exploits.get_item(id)
+		return "Exploits can't stack: %s is still active." % (it.name if it else id)
 	match id:
 		"proxy_hop":
 			if Stats.current_anon >= Stats.max_anon:
@@ -1729,6 +1972,7 @@ func _exploit_blocked(id: String) -> String:
 	return ""
 
 func _apply_exploit(id: String, d: Dictionary) -> String:
+	_finish_fw_refill()
 	match id:
 		"proxy_hop":
 			var heal = int(ceil(Stats.max_anon * float(d.amount)))
@@ -1739,8 +1983,8 @@ func _apply_exploit(id: String, d: Dictionary) -> String:
 			_float(anon_bar, "+%d" % got, C_EXP, 16)
 			_flash(anon_bar, Color(1.8, 1.5, 2.0), 0.4)
 			return "+%d anonymity (%d/%d)" % [got, Stats.current_anon, Stats.max_anon]
-		"lag_spike": # Firewall Crack: 30% of the firewall that's left
-			var cut = max(1.0, ceil(firewall_bar.value * float(d.amount)))
+		"lag_spike": # Firewall Crack: 30% of the firewall's max (2026-10-29: was 30% of what was left)
+			var cut = max(1.0, ceil(max(fw_start_value, firewall_bar.value) * float(d.amount)))
 			if _fw_tween and _fw_tween.is_valid():
 				_fw_tween.kill()
 			firewall_bar.value = max(0.0, firewall_bar.value - cut)
@@ -1755,16 +1999,16 @@ func _apply_exploit(id: String, d: Dictionary) -> String:
 			_float(counter_bar, "STUNNED", C_EXP, 14)
 			return "countermeasures stopped for %ss" % _fmt(d.time)
 		"throttle_patch":
-			throttle_left = float(d.time)
-			return "SQL Injector bandwidth %s -> %s for %ss" % [_fmt(ATTACK_BW_COST + HackingMods.get_bandwidth_cost()), _fmt(_sql_cost()), _fmt(d.time)]
+			throttle_left = float(d.hits)
+			return "SQL Injector bandwidth %s -> %s for the next %d SQL Injectors" % [_fmt(ATTACK_BW_COST + HackingMods.get_bandwidth_cost()), _fmt(_sql_cost()), int(d.hits)]
 		"slow_drip":
 			poison_left = float(d.time)
 			_poison_tick = 0.0
-			return "-%s integrity/s and -%s firewall/s for %ss" % [_fmt(d.integrity), _fmt(d.firewall), _fmt(d.time)]
+			return "-%s integrity/s (%s%% of max) for %ss" % [_fmt(snappedf(integ_bar.max_value * float(d.pct), 0.1)), _fmt(float(d.pct) * 100.0), _fmt(d.time)]
 		"booster_shot":
-			spoof_boost_left = float(d.time)
+			spoof_boost_left = 1.0
 			_engage_spoof("Booster Shot")
-			return "Packet Spoof x%s for %ss" % [_fmt(d.mult), _fmt(d.time)]
+			return "a stronger Packet Spoof is on its way: heals x%s" % _fmt(d.mult)
 		"overdraft":
 			bw_freeze_left = float(d.time)
 			Hacking.current_bandwidth = float(MAX_BANDWIDTH)
@@ -1797,14 +2041,17 @@ func _apply_exploit(id: String, d: Dictionary) -> String:
 			ghost_left += int(d.count)
 			return "next %d countermeasures miss" % ghost_left
 		"overcharge":
-			overcharge_dmg += float(d.amount)
-			return "next SQL hit +%d damage" % int(overcharge_dmg)
+			overcharge_dmg += float(d.get("mult", 2.0)) - 1.0
+			return "next SQL hit deals x%s base damage" % _fmt(1.0 + overcharge_dmg)
 		"port_knock":
+			# 2026-10-29: twice as long (was +15s): another full down time now, or x2 on the next break
 			if firewall_down:
-				fw_down_left += float(d.time)
-				return "firewall stays down %ss longer (%ds left)" % [_fmt(d.time), ceili(fw_down_left)]
-			knock_bank += float(d.time)
-			return "the next firewall break lasts %ss longer" % _fmt(knock_bank)
+				knock_down_used = true
+				var extra = _fw_down_time() * (float(d.get("mult", 2.0)) - 1.0)
+				fw_down_left += extra
+				return "firewall stays down twice as long: +%ss (%ds left)" % [_fmt(snappedf(extra, 0.1)), ceili(fw_down_left)]
+			knock_bank += float(d.get("mult", 2.0)) - 1.0
+			return "the next firewall break lasts x%s as long" % _fmt(1.0 + knock_bank)
 		"quick_patch":
 			var heal = int(ceil(Stats.max_anon * DEFEND_PCT)) + int(ceil(Stats.max_anon * float(d.amount)))
 			var before = Stats.current_anon
@@ -1817,7 +2064,7 @@ func _apply_exploit(id: String, d: Dictionary) -> String:
 			return "next %d countermeasures charge at half speed" % scramble_left
 		"credential_stuffing":
 			stuff_left += int(d.count)
-			return "next %d hits deal x2 firewall damage" % stuff_left
+			return "next %d hits deal +%d%% firewall damage" % [stuff_left, roundi((float(d.mult) - 1.0) * 100.0)]
 		"heat_sink":
 			var t0 = Stats.system_tempature
 			Stats.update_tempature(-float(d.amount))
@@ -1896,29 +2143,19 @@ func _tick_effects(delta: float) -> void:
 			_log("RUN", C_DIM, "countermeasures back online")
 	if poison_left > 0.0:
 		var d = Exploits.DEFS.slow_drip
+		var per_s = integ_bar.max_value * float(d.pct) # 2026-10-29: % of max integrity, scales with the tier
 		poison_left -= delta
-		integ_bar.value -= float(d.integrity) * delta
-		if !firewall_down and firewall_bar.value > 0.0 and !(_fw_tween and _fw_tween.is_running()):
-			firewall_bar.value -= float(d.firewall) * delta
-			if firewall_bar.value <= 0.0:
-				_break_firewall(true)
+		integ_bar.value -= per_s * delta
+		_last_hit_time = hack_time # it keeps "hitting": Regenerator's repair stays paused
 		_poison_tick += delta
 		if _poison_tick >= 1.0:
 			_poison_tick -= 1.0
-			_float(integ_bar, "-%s" % _fmt(d.integrity), C_EXP, 12, 16.0)
+			_float(integ_bar, "-%s" % _fmt(snappedf(per_s, 0.1)), C_EXP, 12, 16.0)
 		if poison_left <= 0.0:
 			_log("RUN", C_DIM, "Slow Drip ended")
 		if integ_bar.value <= 0.0:
 			win()
 			return
-	if throttle_left > 0.0:
-		throttle_left -= delta
-		if throttle_left <= 0.0:
-			_log("RUN", C_DIM, "Throttle Patch ended - SQL Injector costs %s bandwidth again" % _fmt(_sql_cost()))
-	if spoof_boost_left > 0.0:
-		spoof_boost_left -= delta
-		if spoof_boost_left <= 0.0:
-			_log("RUN", C_DIM, "Booster Shot ended")
 	if bw_freeze_left > 0.0:
 		bw_freeze_left -= delta
 		if bw_freeze_left <= 0.0:
@@ -1936,6 +2173,7 @@ func _clear_effects() -> void:
 	flood_left = 0.0
 	overcharge_dmg = 0.0
 	knock_bank = 0.0
+	knock_down_used = false
 	scramble_left = 0
 	stuff_left = 0
 	rootkit_left = 0.0
@@ -1948,6 +2186,43 @@ func _clear_effects() -> void:
 	bleeds.clear()
 	haste_attacks = 0
 	cool_head_used = false
+
+## Between the fights of a run (hack x=N, -r, compromise): only what belongs to one fight. Exploit effects that
+## haven't run out yet (Overcharge, Port Knock, Zero-Day, timers ...) carry over; a new run (setup) and end() clear all.
+func _clear_fight_effects() -> void:
+	_dr_roll = 0
+	breach_crit_left = 0.0
+	siphon_jam_left = 0.0
+	_exploit_lock = 0.0
+	exfil_left = 0.0 # "breach this target within 5s"
+	knock_down_used = false
+	bleeds.clear()
+	haste_attacks = 0
+	cool_head_used = false
+
+## Exploits don't stack (2026-10-29): the same Exploit can't be used again while its effect is still pending/running
+func _exploit_active(id: String) -> bool:
+	match id:
+		"packet_flood": return flood_left > 0.0
+		"smoke_screen": return ghost_left > 0
+		"overcharge": return overcharge_dmg > 0.0
+		"cease_desist", "blackout": return stun_left > 0.0
+		"throttle_patch": return throttle_left > 0.0
+		"port_knock": return knock_bank > 0.0 or (firewall_down and knock_down_used)
+		"trace_scrambler": return scramble_left > 0
+		"slow_drip": return poison_left > 0.0
+		"booster_shot": return spoof_boost_left > 0.0
+		"credential_stuffing": return stuff_left > 0
+		"rootkit": return rootkit_left > 0.0
+		"overdraft": return bw_freeze_left > 0.0
+		"mirror_image": return mirror_next > 0
+		"firewall_drain": return drain_left > 0.0
+		"zero_day": return crits_left > 0
+		"ghost_mode": return ghost_time_left > 0.0
+		"chain_reaction": return chain_left > 0
+		"freeze": return freeze_left > 0.0
+		"exfil_window": return exfil_left > 0.0
+	return false
 
 ## 'run auto <item>': fire it when it's affordable and would actually help
 func _try_auto_exploit() -> void:
@@ -1964,7 +2239,7 @@ func _auto_wants(id: String) -> bool:
 		"proxy_hop":
 			return Stats.current_anon <= Stats.max_anon * 0.5
 		"lag_spike": # Firewall Crack: while most of the firewall is still up
-			return !firewall_down and firewall_bar.value >= firewall_bar.max_value * 0.5
+			return !firewall_down and _fw_value() >= firewall_bar.max_value * 0.5
 		"cease_desist", "blackout":
 			return counter_bar.value >= 60.0 and stun_left <= 0.0
 		"ghost_mode":
@@ -1980,19 +2255,19 @@ func _auto_wants(id: String) -> bool:
 		"zero_day":
 			return crits_left == 0
 		"redaction":
-			return !firewall_down and firewall_bar.value > 0.0
+			return !firewall_down and _fw_value() > 0.0
 		"ghost_mode", "smoke_screen", "mirror_image", "trace_scrambler":
 			return counter_bar.value >= 50.0 and ghost_time_left <= 0.0 and ghost_left == 0 and mirror_next == 0
 		"packet_flood":
 			return flood_left <= 0.0 and attacking
 		"overcharge":
-			return overcharge_dmg <= 0.0 and (breach_crit or crits_left > 0 or firewall_down)
+			return overcharge_dmg <= 0.0 and (breach_crit_left > 0.0 or crits_left > 0 or firewall_down)
 		"port_knock":
 			return firewall_down
 		"quick_patch", "total_recall":
 			return Stats.current_anon <= Stats.max_anon * 0.5
 		"credential_stuffing", "firewall_drain":
-			return !firewall_down and firewall_bar.value > 0.0
+			return !firewall_down and _fw_value() > 0.0
 		"heat_sink", "system_purge":
 			return Stats.system_tempature >= 75.0
 		"rootkit":
@@ -2016,11 +2291,18 @@ func _show_trait_chips() -> void:
 	for c in _trait_chips:
 		c.queue_free()
 	_trait_chips.clear()
+	var lines = []
 	for tr in Stats.target_traits(current_target):
-		var c = _chip(header_card.head, Stats.TRAITS[tr].name, C_CTR)
+		var c = _chip(header_card.head, Stats.TRAITS[tr].name, C_SPECIAL)
 		c.tooltip_text = Stats.TRAITS[tr].text
-		header_card.head.move_child(c, 2)
+		c.visible = true # 2026-10-29: _chip() starts hidden, so these never showed
+		header_card.head.move_child(c, 1 + _trait_chips.size()) # right after the name (before the compromise "next:" line)
 		_trait_chips.append(c)
+		lines.append("%s  %s" % [_c(Stats.TRAITS[tr].name, C_SPECIAL), _c(Stats.TRAITS[tr].text, C_TEXT)])
+	# the target card spells them out too (2026-10-29: during a compromise you only saw the next target's)
+	if trait_row != null:
+		trait_row.visible = !lines.is_empty()
+		trait_row.text = "\n".join(lines)
 
 ## target traits (Stats.TRAITS, 2026-10-27)
 func _trait(id: String) -> bool:
@@ -2073,15 +2355,24 @@ func _refresh_exploit_list() -> void:
 		exp_list.visible = false
 		return
 	exp_hint.text = "[right]%s %s  %s %s[/right]" % [_c("use", C_DIM), _c("<name> -force", C_EXP), _c("auto", C_DIM), _c("run auto <name>", C_EXP)]
-	var t = "[table=2]"
+	# 2026-10-30: grouped by tier (where they drop), a small header per tier, then 2 columns
+	owned.sort_custom(func(a, b): return a.tier < b.tier if a.tier != b.tier else a.id < b.id)
+	var t = ""
+	var tiers = []
 	for i in owned:
-		var ready = Exploits.charge >= Exploits.cost(i)
-		var auto = Exploits.auto_id == str(i.exploit_id)
-		t += "[cell]%s %s %s%s  %s[/cell]" % [_c(i.name.to_lower(), C_EXP if ready else C_TEXT), _c("x%d" % Inventory.get_amount(i), C_DIM),
-			_c("%d" % int(Exploits.cost(i)), C_EXP if ready else C_DIM), (" " + _c("AUTO", C_EXP)) if auto else "", _c(Exploits.get_def(i).effect, C_DIM)]
-	if owned.size() % 2 == 1:
-		t += "[cell][/cell]"
-	exp_list.text = t + "[/table]"
+		if !(int(i.tier) in tiers): tiers.append(int(i.tier))
+	for tr in tiers:
+		var group = owned.filter(func(x): return int(x.tier) == tr)
+		t += ("\n" if t != "" else "") + _c("TIER %d · %s" % [tr, Exploits.tier_name(tr)], C_DIM) + "\n[table=2]"
+		for i in group:
+			var ready = Exploits.charge >= Exploits.cost(i)
+			var auto = Exploits.auto_id == str(i.exploit_id)
+			t += "[cell]%s %s %s%s  %s[/cell]" % [_c(i.name.to_lower(), C_EXP if ready else C_TEXT), _c("x%d" % Inventory.get_amount(i), C_DIM),
+				_c("%d" % int(Exploits.cost(i)), C_EXP if ready else C_DIM), (" " + _c("AUTO", C_EXP)) if auto else "", _c(Exploits.get_def(i).effect, C_DIM)]
+		if group.size() % 2 == 1:
+			t += "[cell][/cell]"
+		t += "[/table]"
+	exp_list.text = t
 	exp_list.visible = true
 
 func _refresh_exploit_ui() -> void:
@@ -2108,19 +2399,20 @@ func _refresh_exploit_ui() -> void:
 	_exp_ready = ready
 	_effect_chip("stun", "STUNNED %ds" % ceili(stun_left), stun_left > 0.0)
 	_effect_chip("poison", "SLOW DRIP %ds" % ceili(poison_left), poison_left > 0.0)
-	_effect_chip("throttle", "THROTTLE %ds" % ceili(throttle_left), throttle_left > 0.0)
-	_effect_chip("boost", "SPOOF x2 %ds" % ceili(spoof_boost_left), spoof_boost_left > 0.0)
+	_effect_chip("throttle", "THROTTLE x%d" % ceili(throttle_left), throttle_left > 0.0)
+	_effect_chip("boost", "NEXT SPOOF x2", spoof_boost_left > 0.0)
 	_effect_chip("freeze", "BW FROZEN %ds" % ceili(bw_freeze_left), bw_freeze_left > 0.0)
 	_effect_chip("crit", "CRIT x%d" % crits_left, crits_left > 0)
 	_effect_chip("ghost", "MISS x%d" % ghost_left, ghost_left > 0)
 	_effect_chip("flood", "FLOOD %ds" % ceili(flood_left), flood_left > 0.0)
-	_effect_chip("overcharge", "OVERCHARGE +%d" % int(overcharge_dmg), overcharge_dmg > 0.0)
-	_effect_chip("knock", "KNOCK +%ds" % int(knock_bank), knock_bank > 0.0)
+	_effect_chip("overcharge", "OVERCHARGE x%s" % _fmt(1.0 + overcharge_dmg), overcharge_dmg > 0.0)
+	_effect_chip("knock", "KNOCK x%s" % _fmt(1.0 + knock_bank), knock_bank > 0.0)
 	_effect_chip("scramble", "SCRAMBLED x%d" % scramble_left, scramble_left > 0)
 	_effect_chip("stuff", "STUFFING x%d" % stuff_left, stuff_left > 0)
 	_effect_chip("rootkit", "ROOTKIT %ds" % ceili(rootkit_left), rootkit_left > 0.0)
 	_effect_chip("mirror", "MIRROR x%d" % mirror_next, mirror_next > 0)
 	_effect_chip("drain", "DRAIN %ds" % ceili(drain_left), drain_left > 0.0)
+	_effect_chip("breach", "BREACH +%d%% CRIT %ds" % [roundi(_mod(HackingMods.MOD_TYPE.FW_NO_REBOOT) * 100), ceili(breach_crit_left)], breach_crit_left > 0.0)
 	_effect_chip("ghostt", "GHOST %ds" % ceili(ghost_time_left), ghost_time_left > 0.0)
 	_effect_chip("chain", "CHAIN x%d" % chain_left, chain_left > 0)
 	_effect_chip("freezeall", "FROZEN %ds" % ceili(freeze_left), freeze_left > 0.0)
@@ -2298,6 +2590,9 @@ func _build_ui() -> void:
 	Exploits.charge_changed.connect(_refresh_exploit_ui)
 	integ_row = _stat_row(target_card.body, "INTEGRITY", C_INTEG, 14)
 	fw_row = _stat_row(target_card.body, "FIREWALL", C_FW, 10)
+	trait_row = _rtl(11) # TRAITS: name + what it does (_show_trait_chips)
+	trait_row.visible = false
+	target_card.body.add_child(trait_row)
 	anon_bar = anon_row.bar
 	band_bar = band_row.bar
 	integ_bar = integ_row.bar
@@ -2475,6 +2770,18 @@ func _rtl(size: int) -> RichTextLabel:
 func _set_rtl(r: RichTextLabel, text: String) -> void:
 	r.text = text
 	r.visible = text != ""
+
+## INTEGRITY row tag: intel, and Regenerator's state (repairing / paused by a hit)
+func _refresh_integ_tag() -> void:
+	var tags = []
+	if _trait("regenerator") and _revealed and is_hacking:
+		if _regen_on:
+			tags.append(_c("REGENERATING +%s%%/s" % _fmt(float(_tv("regenerator", "regen", 0.0)) * 100.0), C_WIN))
+		elif integ_bar.value < integ_bar.max_value:
+			tags.append(_c("regen paused (hit)", C_DIM))
+	if _ipct("integrity") > 0:
+		tags.append(_c("INTEL -%d%%" % _ipct("integrity"), C_INTEL))
+	_set_tag(integ_row, "  ".join(tags))
 
 func _set_tag(row: Dictionary, bb: String) -> void:
 	row.tag.text = "[right]" + bb + "[/right]" if bb != "" else ""

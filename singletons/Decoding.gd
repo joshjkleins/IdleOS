@@ -12,7 +12,7 @@ signal decoding_level_up_signal
 var bonus_expires_at: int
 var vm_token = Items.VM_DECODING_TOKEN
 @onready var MAX_VMS = 7
-@onready var VM_UPTIME = 60.0
+@onready var VM_UPTIME = 30.0 # 2026-10-29: was 60
 var CURRENT_VMS = 0
 
 var terminal_scene = preload("res://scenes/cache_decrypt_terminal.tscn")
@@ -39,7 +39,7 @@ const FORENSICS_EXPLOIT_MULT := 2.0
 func get_efficiency(process: Dictionary = {}) -> float:
 	if process.is_empty():
 		process = CACHE
-	return min(1.0, float(process["efficiency"]) * (1.0 + Upgrades.cur("decoding.efficiency")))
+	return min(1.0, float(process["efficiency"])) # 2026-10-30: the Efficiency upgrade is flat bonus basics now (efficiency_basic_mult), not x(1 + bonus)
 
 ## Chance for a cache's rare item when decoded by <process>: RARE_CHANCE (+ Deep Scan's "rare bonus", + the Rare
 ## Tracker for <cache>); Skim never finds it. Not tied to efficiency or level (2026-10-22).
@@ -52,8 +52,9 @@ func get_rare_chance(process: Dictionary = {}, cache: CacheData = null) -> float
 	return min(1.0, RARE_CHANCE * process.get("rare multiplier", 1.0) + process.get("rare bonus", 0.0) + tracker_bonus(cache))
 
 ## Cache / Deep Scan efficiency: basic resources x (1 + efficiency)
+## Cache / Deep Scan: 1 + the process's efficiency + the Efficiency upgrade's flat bonus (2026-10-30: +2.5% per install)
 func efficiency_basic_mult(process: Dictionary) -> float:
-	return 1.0 + get_efficiency(process) if process == CACHE or process == DEEP else 1.0
+	return 1.0 + get_efficiency(process) + Upgrades.cur("decoding.efficiency") if process == CACHE or process == DEEP else 1.0
 
 #region rare tracker
 ## Rare Tracker: every cache of a type that decodes without its rare adds the installed bonus to that type's
@@ -214,7 +215,7 @@ var SKIM = {
 	"overheat heat": 0.15,
 	"vm token chance": 0.005,
 	"requirements": "Cache x1",
-	"description": "Skims caches twice as fast as a full decode, but never finds the rare item.",
+	"description": "Skims caches twice as fast. Always finds every basic resource, but at the low end, and never the rare item.",
 	"efficiency description": "Chance for +50% basic resources from a cache.",
 	"signal": cache_decode_cycle_completed
 }
@@ -516,6 +517,21 @@ static func _lv5(lv) -> Array:
 	return out
 
 ## stat -> share removed (0.0 .. 0.10)
+## A lost hack (2026-10-30): every intel stat drops one level (-2%); hacks left stay. False when there was none.
+func intel_knock_down(target: Dictionary) -> bool:
+	var i = get_intel(target)
+	if int(i.hacks) <= 0 or Array(i.lv).max() <= 0:
+		return false
+	var lv = []
+	for v in i.lv:
+		lv.append(max(0, int(v) - 1))
+	if lv.max() <= 0:
+		intel.erase(intel_key(target))
+	else:
+		intel[intel_key(target)] = {"lv": lv, "dur": int(i.dur), "hacks": int(i.hacks)}
+	SaveManager.mark_dirty()
+	return true
+
 func intel_pcts(target: Dictionary) -> Dictionary:
 	var i = get_intel(target)
 	var out = {}
@@ -700,9 +716,10 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 		rows.append({"name": e.item.name, "min": int(ceil(r.x * y)), "max": int(ceil(r.y * y)), "chance": _entry_chance(cache, e), "rare": false})
 	if cache == Items.VM_CACHE:
 		return [{"name": "Random VM token (per line, %d lines)" % VM_CACHE_LINES, "min": VM_CACHE_MIN, "max": VM_CACHE_MAX, "chance": VM_CACHE_LINE_CHANCE, "rare": false}]
-	rows.append({"name": Items.VM_CACHE.name, "min": 1, "max": 1, "chance": VM_CACHE_CHANCE, "rare": false})
-	if cache.get_variant() == CacheData.CacheVariant.NETWORK:
-		rows.append({"name": "Random VM token", "min": CacheData.NETWORK_VM_MIN, "max": CacheData.NETWORK_VM_MAX, "chance": CacheData.NETWORK_VM_CHANCE, "rare": false})
+	if cache.get_variant() == CacheData.CacheVariant.NETWORK: # always drops VM caches, 1 to tier + 1 (2026-10-30)
+		rows.append({"name": Items.VM_CACHE.name, "min": 1, "max": vm_cache_max(cache) + CacheData.NETWORK_VM_CACHE_EXTRA, "chance": 1.0, "rare": false})
+	else:
+		rows.append({"name": Items.VM_CACHE.name, "min": 1, "max": vm_cache_max(cache), "chance": VM_CACHE_CHANCE, "rare": false})
 	var rare_chance = get_cache_rare_chance(cache, get_rare_chance(process, cache))
 	if rare_chance > 0.0:
 		for e in cache.rare_pool:
@@ -711,7 +728,8 @@ func get_drop_table(cache: CacheData, process: Dictionary = {}, exploit_mult: fl
 	return rows
 
 ## Rolls one decode: [{item, amount, rare}] with the rare item (if any) last.
-## <process> decides the rare chance (Skim: none, Deep Scan: +15%); Skim's efficiency can add +50% basics.
+## <process> decides the rare chance (Skim: none, Deep Scan: +15%). Skim always drops every basic at its minimum;
+## its efficiency can add +50% basics.
 ## Yield multiplies basics, the Rare Tracker adds to the rare chance, <mod> is the terminal's modifier
 ## command (forensics: one-time item chance x2, survey: half loot).
 ## VM cache: every other cache has VM_CACHE_CHANCE to drop one (the tutorial's first Student cache always
@@ -722,6 +740,11 @@ const VM_CACHE_LINES := 5
 const VM_CACHE_LINE_CHANCE := 0.5
 const VM_CACHE_MIN := 1
 const VM_CACHE_MAX := 3
+## VM caches per drop (2026-10-29): 1 to the cache's tier (School 1, Lawfirm 1-2 ... Government 1-6), so VM
+## tokens keep up with the higher tiers' VM costs
+func vm_cache_max(cache: CacheData) -> int:
+	return max(1, Exploits.cache_tier(cache))
+
 func roll_vm_cache() -> Array:
 	var loot = []
 	for i in VM_CACHE_LINES:
@@ -737,16 +760,20 @@ func roll_loot(cache: CacheData, process: Dictionary = {}, mod: String = "") -> 
 	var basic_mult = (1.5 if (process == SKIM and randf() < get_efficiency(SKIM)) else 1.0) * yield_multiplier() * efficiency_basic_mult(process)
 	var loot = []
 	for e in cache.entries:
-		if randf() <= _entry_chance(cache, e):
+		# 2026-10-30: Skim always finds every basic resource, at the low end of its range
+		var skim_basic = process == SKIM and is_basic_item(e.item)
+		if skim_basic or randf() <= _entry_chance(cache, e):
 			var r = _entry_range(cache, e)
-			var amount = randi_range(r.x, r.y)
+			var amount = r.x if skim_basic else randi_range(r.x, r.y)
 			if is_basic_item(e.item):
 				amount = int(ceil(amount * basic_mult))
 			loot.append({"item": e.item, "amount": amount, "rare": false})
-	if randf() < VM_CACHE_CHANCE:
-		loot.append({"item": Items.VM_CACHE, "amount": 1, "rare": false})
-	if cache.get_variant() == CacheData.CacheVariant.NETWORK and randf() <= CacheData.NETWORK_VM_CHANCE:
-		loot.append({"item": vm_tokens().pick_random(), "amount": randi_range(CacheData.NETWORK_VM_MIN, CacheData.NETWORK_VM_MAX), "rare": false})
+	# 2026-10-30: a Network cache always drops VM caches (1 to tier + 1) instead of a flat 10-20 tokens, so its
+	# reward grows with the cache's tier (a 3s Student no longer pays like a Government cache)
+	if cache.get_variant() == CacheData.CacheVariant.NETWORK:
+		loot.append({"item": Items.VM_CACHE, "amount": randi_range(1, vm_cache_max(cache) + CacheData.NETWORK_VM_CACHE_EXTRA), "rare": false})
+	elif randf() < VM_CACHE_CHANCE:
+		loot.append({"item": Items.VM_CACHE, "amount": randi_range(1, vm_cache_max(cache)), "rare": false})
 	var rare_chance = get_cache_rare_chance(cache, get_rare_chance(process, cache)) if !cache.rare_pool.is_empty() else 0.0
 	if rare_chance > 0.0:
 		var got = randf() < rare_chance

@@ -43,7 +43,7 @@ func _run() -> void:
 					CacheData.CacheVariant.CORRUPTION:
 						d = "Cache variant. +%d%% chance on every drop (rare included), but each find has a %d%% chance to corrupt the rest of the cache." % [roundi(CacheData.CORRUPTION_DROP_BONUS * 100), roundi(CacheData.CORRUPTION_CHANCE * 100)]
 					CacheData.CacheVariant.NETWORK:
-						d = "Cache variant. %d%% chance to also drop %d-%d random VM tokens." % [roundi(CacheData.NETWORK_VM_CHANCE * 100), CacheData.NETWORK_VM_MIN, CacheData.NETWORK_VM_MAX]
+						d = "Cache variant. Always drops VM caches: 1 to its tier + %d." % CacheData.NETWORK_VM_CACHE_EXTRA
 					CacheData.CacheVariant.EXTRACTION:
 						d = "Cache variant. When its rare item drops, you get %d instead of 1." % (1 + CacheData.EXTRACTION_EXTRA_RARE)
 			"rare":

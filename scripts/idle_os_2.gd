@@ -117,7 +117,7 @@ var skill_xp_nums_index: int
 var skill_specific_info_index: int
 #END SKILL HEADER VARIABLES#
 
-var major_processes = [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling, Defragging]
+var major_processes = [Mining, Parsing, Cracking, Matching, Phishing, Compiling, Decoding, Hacking, Defragging] # header order (2026-10-29)
 
 var output_queue: Array[String] = []
 var processing_queue = false
@@ -350,6 +350,10 @@ func _on_input_line_text_submitted(new_text):
 ## was a skill command typed outside its own directory (it runs there without changing directory).
 const SKILL_BINARIES = {"mine": "MINING", "parse": "PARSING", "crack": "CRACKING", "match": "MATCHING",
 	"phish": "PHISHING", "decode": "DECODING", "compile": "COMPILING", "defrag": "DEFRAGGING"}
+const SKILL_INFO_ALIASES = {"mine": "mining", "mining": "mining", "parse": "parsing", "parsing": "parsing",
+	"crack": "cracking", "cracking": "cracking", "match": "matching", "matching": "matching", "phish": "phishing",
+	"phishing": "phishing", "decode": "decoding", "decoding": "decoding", "compile": "compiling", "compiling": "compiling",
+	"defrag": "defragging", "defragging": "defragging", "hacking": "hacking"}
 func _run_skill_from_anywhere(text: String) -> bool:
 	var t = text.to_lower().strip_edges()
 	var verb = t.split(" ", false)[0] if t != "" else ""
@@ -519,7 +523,7 @@ func universal_commands(text):
 		# 2026-10-27: drivers live inside each skill ('cd mining' -> 'driver'); root shows a summary
 		var sk = get_context_name_string(current_context) if current_context in [Context.MINING, Context.PARSING, Context.CRACKING, Context.MATCHING, Context.PHISHING, Context.DECODING, Context.COMPILING] else ""
 		var out = Drivers.handle(text, sk)
-		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -remove <id>")
+		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -rm <id>")
 		return true
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
@@ -539,6 +543,29 @@ func universal_commands(text):
 	if text == "trap" or text.begins_with("trap "):
 		add_line(Phishing.trap_command_text(text.trim_prefix("trap")))
 		return true
+	# TESTING (2026-10-30): 'intel full <target>' = max intel (10% off every stat, max hacks); 'intel clear <target>'
+	# (any target, locked or not; add ' hard' for the hard version)
+	if DEV_ITEM_COMMANDS and (text.begins_with("intel full ") or text.begins_with("intel clear ")):
+		var full = text.begins_with("intel full ")
+		var tname = text.trim_prefix("intel full ").trim_prefix("intel clear ").strip_edges().to_lower()
+		var tgt = {}
+		for loc in Stats.hacking_targets:
+			for t in Stats.hacking_targets[loc].get("targets", []):
+				if t.name.to_lower() == tname:
+					tgt = t
+		if tgt.is_empty():
+			add_line("No target called '%s'. [color=#666666]ex. intel full nurse[/color]" % tname)
+			return true
+		if full:
+			var lv = []
+			for k in Decoding.INTEL_STATS.size():
+				lv.append(Decoding.INTEL_MAX_STEPS)
+			Decoding.intel[Decoding.intel_key(tgt)] = {"lv": lv, "dur": Decoding.intel_max_hacks(), "hacks": Decoding.intel_max_hacks()}
+		else:
+			Decoding.intel.erase(Decoding.intel_key(tgt))
+		add_line("[color=#888888](dev) %s intel %s[/color]" % [tgt.name, "maxed" if full else "cleared"])
+		SaveManager.mark_dirty()
+		return true
 	if text == "intel" or text.begins_with("intel "):
 		add_line(Decoding.intel_command_text(text.trim_prefix("intel")))
 		return true
@@ -547,6 +574,14 @@ func universal_commands(text):
 		return true
 	if text.begins_with("info"):
 		handle_info_commands(text)
+		return true
+	# 2026-10-30: a skill's name or verb on its own ('mining', 'mine') = 'info <skill>' (processes keep 'info mining logs')
+	if SKILL_INFO_ALIASES.has(text.to_lower().strip_edges()):
+		handle_info_commands("info " + SKILL_INFO_ALIASES[text.to_lower().strip_edges()])
+		return true
+	# 2026-10-30: a location's name on its own ('school', 'police station') = 'info hacking <location>'
+	if Compromise.location_key(text) != "":
+		add_line(ContextCommands.get_hack_target_info(Stats.hacking_targets[Compromise.location_key(text)]))
 		return true
 	if text == "flow":
 		post_flow_chart(func(c): return c.show_loop())
@@ -639,6 +674,16 @@ func universal_commands(text):
 		return true
 	
 	if DEV_ITEM_COMMANDS and text.begins_with("add"):
+		# 'add mods t2' / 'add exploits t2' [amount]: one (or <amount>) of every mod / Exploit of that tier (2026-10-29)
+		var bulk = text.trim_prefix("add").strip_edges().split(" ", false)
+		if bulk.size() >= 2 and bulk[0] in ["mods", "exploits"] and bulk[1].begins_with("t") and bulk[1].substr(1).is_valid_int():
+			var tier = int(bulk[1].substr(1))
+			var n = int(bulk[2]) if bulk.size() > 2 and bulk[2].is_valid_int() else 1
+			var items = HackingMods.pool_items(tier) if bulk[0] == "mods" else Exploits.tier_items(tier)
+			for it in items:
+				Inventory.add_resource(it, n)
+			add_line("[color=#888888](dev) added %d of each: %s[/color]" % [n, ", ".join(items.map(func(i): return i.name))] if !items.is_empty() else "[color=#888888](dev) no %s in tier %d[/color]" % [bulk[0], tier])
+			return true
 		# 'add <item>' = 100, 'add <item> <amount>' (ex. add admin cache 1)
 		var item_name = text.trim_prefix("add").strip_edges()
 		var amount = 100
@@ -651,6 +696,42 @@ func universal_commands(text):
 			Inventory.add_resource(item, amount)
 			return true
 	#
+	# TESTING (2026-10-30): 'tutorial complete' checks off every tutorial step at once (no step rewards, no messages)
+	if DEV_ITEM_COMMANDS and text == "tutorial complete":
+		for e in Tutorial.steps():
+			if !Tutorial.completed_events.has(e):
+				Tutorial.completed_events.append(e)
+		Tutorial.step_completed.emit(Tutorial.steps()[-1]) # closes the tutorial window
+		SaveManager.mark_dirty()
+		add_line("[color=#888888](dev) tutorial complete[/color]")
+		return true
+	# TESTING (2026-10-30): 'uploads set <item> <n>' sets an item's uploaded count (completes the tier when every
+	# goal is met); 'uploads complete' meets every goal of the current tier
+	if DEV_ITEM_COMMANDS and (text.begins_with("uploads set ") or text == "uploads complete"):
+		if text == "uploads complete":
+			var t = Uploads.current_tier()
+			for g in Uploads.get_goals(t):
+				Uploads.uploaded[g.item] = max(Uploads.get_uploaded(g.item), int(g.amount))
+			Uploads.complete_met_tiers()
+			add_line("[color=#888888](dev) %s upload goals met[/color]" % Uploads.get_location_name(t))
+			SaveManager.mark_dirty()
+			return true
+		var w = text.trim_prefix("uploads set ").strip_edges().split(" ", false)
+		var it = Inventory.get_item_by_name(" ".join(w.slice(0, w.size() - 1))) if w.size() >= 2 and w[-1].is_valid_int() else null
+		if it == null:
+			add_line("usage: uploads set <item> <amount>  [color=#666666]ex. uploads set logs 99[/color]")
+			return true
+		Uploads.uploaded[it] = max(0, int(w[-1]))
+		Uploads.complete_met_tiers()
+		add_line("[color=#888888](dev) %s uploaded: %d[/color]" % [it.name, int(Uploads.uploaded[it])])
+		SaveManager.mark_dirty()
+		return true
+	# TESTING: 'timeskip [minutes]' (default 60): as if you quit and came back that much later (2026-10-29)
+	if DEV_ITEM_COMMANDS and (text == "timeskip" or text.begins_with("timeskip ")):
+		var arg = text.trim_prefix("timeskip").strip_edges()
+		var mins = float(arg) if arg.is_valid_float() else 60.0
+		_dev_timeskip(int(mins * 60.0))
+		return true
 	# TESTING: 'setlevel <skill> <level>' (raising it runs the normal level ups: tokens, driver slot notices)
 	if DEV_ITEM_COMMANDS and text.begins_with("setlevel"):
 		var parts = text.trim_prefix("setlevel").strip_edges().split(" ", false)
@@ -693,18 +774,25 @@ func universal_commands(text):
 				add_line("No mods available to remove.")
 				return true
 			
+			# 'mod -rm all' (2026-10-29): every active mod
+			if text.trim_prefix("mod -rm").strip_edges() == "all":
+				var names = HackingMods.current_mods.keys().map(func(m): return HackingMods.get_mod_name(m))
+				for m in HackingMods.current_mods.keys():
+					HackingMods.remove_mod(m)
+				add_line("%s deleted." % ", ".join(names))
+				add_line(ContextCommands.get_mod_command())
+				return true
 			#CONFIRM ID IS AN INT
 			var id_to_remove = text.trim_prefix("mod -rm").strip_edges()
 			if !id_to_remove.is_valid_int():
 				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
 				return true
 			
-			#CONFIRM ID IS IN RANGE OF CURRENT ACTIVE MODS SIZE
-			if HackingMods.current_mods.size() < int(id_to_remove) + 1 or int(id_to_remove) < 0:
-				add_line("Mod ID not recognized. [color=#666666]ex. mod -rm 0[/color]")
+			# 2026-10-29: the ID is the slot number (typed slots)
+			var mod_to_remove = HackingMods.mod_in_slot(int(id_to_remove)) if int(id_to_remove) >= 0 and int(id_to_remove) < int(HackingMods.max_mods) else -1
+			if mod_to_remove == -1:
+				add_line("No mod in slot '%s'. [color=#666666]ex. mod -rm 0[/color]" % id_to_remove)
 				return true
-			
-			var mod_to_remove = HackingMods.current_mods.keys()[int(id_to_remove)]
 			HackingMods.remove_mod(mod_to_remove)
 			add_line(HackingMods.get_mod_name(mod_to_remove) + " mod deleted.")
 			add_line(ContextCommands.get_mod_command())
@@ -717,33 +805,36 @@ func universal_commands(text):
 				return true
 			
 			if HackingMods.at_max_mods():
-				add_line("Error: maximum active Hacking Mods reached. Use the 'mod -rm <id>' command to remove active Hacking Mods.")
+				add_line("Error: every mod slot is in use. Use the 'mod -rm <id>' command to remove active Hacking Mods.")
 				return true
 			
-			#verify number after -add
-			var id_to_add = text.trim_prefix("mod -add").strip_edges()
-			if !id_to_add.is_valid_int():
-				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
-				return true
-			
-			#Confirm number is usable 
+			# 'mod -add 1' or several at once: 'mod -add 1, 3, 0' (2026-10-29). IDs are read from the list as shown,
+			# before anything is equipped (equipping a last copy shifts the IDs after it).
+			var raw = text.trim_prefix("mod -add").strip_edges().replace(",", " ").split(" ", false)
 			var mod_items = Inventory.get_hacking_mods_items()
-			var valid_id = mod_items.size()
-			
-			if int(id_to_add) < 0 or int(id_to_add) >= valid_id:
-				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0[/color]")
+			var picks = []
+			for r in raw:
+				if !r.is_valid_int() or int(r) < 0 or int(r) >= mod_items.size():
+					add_line("Mod ID '%s' not recognized. [color=#666666]ex. mod -add 0  |  mod -add 1, 3, 0[/color]" % r)
+					return true
+				picks.append(mod_items[int(r)])
+			if picks.is_empty():
+				add_line("Mod ID not recognized. [color=#666666]ex. mod -add 0  |  mod -add 1, 3, 0[/color]")
 				return true
-			
-			var item_mod_to_add = mod_items[int(id_to_add)]
-			
-			if HackingMods.has_mod(item_mod_to_add.hacking_mod_type):
-				add_line("Error: Hacking Mod of this type already active. Mods of similar type cannot stack. Use 'mod -rm <id>' to remove first to replace.")
-				return true
-				
-			HackingMods.add_mod(item_mod_to_add)
-			Inventory.remove_resource(item_mod_to_add, 1)
-			add_line(item_mod_to_add.name + " added.")
-			Tutorial.complete_event(Tutorial.TutorialEvent.EQUIP_FIRST_MOD)
+			var added = 0
+			for item_mod_to_add in picks:
+				var why = HackingMods.add_block_reason(item_mod_to_add) # 2026-10-29: typed slots; a full type refuses (no swap)
+				if why != "":
+					add_line("[color=#e26d5a]%s not added: %s.[/color]" % [item_mod_to_add.name, why])
+					continue
+				if Inventory.get_amount(item_mod_to_add) <= 0:
+					continue
+				HackingMods.add_mod(item_mod_to_add)
+				Inventory.remove_resource(item_mod_to_add, 1)
+				add_line(item_mod_to_add.name + " added.")
+				added += 1
+			if added > 0:
+				Tutorial.complete_event(Tutorial.TutorialEvent.EQUIP_FIRST_MOD)
 			add_line(ContextCommands.get_mod_command()) # IDs shift once an item is used: show the fresh list
 			return true
 			
@@ -880,6 +971,28 @@ func handle_cd_commands(text):
 		text = text.trim_prefix("../")
 
 	var goal_destination = text.strip_edges()
+	# 2026-10-30: 'cd hacking/<location>' opens that location's targets; add -r / -recon for its compromise lineup
+	var hack_dest = {}
+	if goal_destination.to_lower().begins_with("hacking/"):
+		var rest = goal_destination.substr(8).strip_edges()
+		var recon = false
+		for fl in [" -recon", " -r"]:
+			if rest.to_lower().ends_with(fl):
+				recon = true
+				rest = rest.substr(0, rest.length() - fl.length()).strip_edges()
+				break
+		var key = Compromise.location_key(rest)
+		if key == "":
+			add_line("No location called '%s'. [color=#666666]ex. cd hacking/school  ·  cd hacking/school -r[/color]" % rest)
+			return
+		if !Stats.hacking_targets[key].get("unlocked", false):
+			add_line("%s is not unlocked yet." % Stats.hacking_targets[key].name)
+			return
+		if recon and !Compromise.has_lineup(key):
+			add_line("No compromise at %s yet." % Stats.hacking_targets[key].name)
+			return
+		hack_dest = {"loc": key, "recon": recon}
+		goal_destination = "hacking"
 	
 	if goal_destination == get_context_name_string(current_context).to_lower():
 		add_line("Already in %s skill." % goal_destination)
@@ -934,6 +1047,10 @@ func handle_cd_commands(text):
 			await loading.show_loading()
 			hacking.module_loaded()
 			current_context = Context.HACKING
+			if !hack_dest.is_empty(): # 'cd hacking/<location> [-r]': straight to its targets / recon lineup
+				while !hacking.is_in_hacking_context:
+					await get_tree().process_frame
+				hacking.open_location(hack_dest.loc, hack_dest.recon)
 		"decoding":
 			add_line("[ .. ] loading decoding module")
 			#header.update_header(Decoding)
@@ -1061,11 +1178,11 @@ func handle_apt_commands(text):
 			add_line(reason)
 			return
 		var lvl = Upgrades.next_level(package)
-		add_line("Preparing to install %s (%s, Tier %d)" % [id, package.name, int(lvl.tier)])
+		add_line("Preparing to install %s (%s, Tier %d)" % [id, Upgrades.level_name(package, lvl), int(lvl.tier)])
 		if package.type == "capstone":
 			add_line("  [color=#ffc24a]%s[/color]" % lvl.effect)
 		else:
-			add_line("  %s -> [color=#4ec994]%s[/color]" % [lvl.before, lvl.after])
+			add_line("  " + Upgrades.level_change(package, lvl, "#4ec994"))
 		add_line("This upgrade will consume:")
 		for r in Upgrades.cost_rows(lvl):
 			add_line("  %s x%d" % [r.name, r.need])
@@ -1110,7 +1227,7 @@ func apply_apt_package_upgrade():
 	var bar_index = await _add_live_line(_apt_progress_text(0))
 	for step in range(1, 11):
 		await bro_wait(0.09)
-		set_line(bar_index, _apt_progress_text(step * 10))
+		set_line(bar_index, _apt_progress_text(step * 10), true)
 	add_line("Setting up %s (%.1f) ..." % [pkg_name, new_version])
 	await bro_wait(0.3)
 	var result = Upgrades.install(package)
@@ -1122,7 +1239,7 @@ func apply_apt_package_upgrade():
 	if package.type == "capstone":
 		box += " [color=#ffc24a]%s[/color]  %s\n" % [package.name, lvl.effect]
 	else:
-		box += " %s  %s -> [color=#4ec994]%s[/color]\n" % [package.name, lvl.before, lvl.after]
+		box += " %s  %s\n" % [Upgrades.level_name(package, lvl), Upgrades.level_change(package, lvl, "#4ec994")]
 	add_line(box)
 	if result.major:
 		await _wait_for_output()
@@ -1147,8 +1264,8 @@ func _apt_prepare_bulk(bulk_groups: Array) -> void:
 	for e in plan:
 		var p = e.package
 		var lvl = e.level
-		var change = ("%s -> %s" % [lvl.before, lvl.after]) if p.type != "capstone" else str(lvl.effect)
-		add_line("  [color=#%s]%s[/color]  %s  [color=#888888]%s[/color]" % [Upgrades.group_color(p.group).to_html(false), p.group, p.name, change])
+		var change = Upgrades.level_change(p, lvl)
+		add_line("  [color=#%s]%s[/color]  %s  [color=#888888]%s[/color]" % [Upgrades.group_color(p.group).to_html(false), p.group, Upgrades.level_name(p, lvl), change])
 		for c in lvl.costs:
 			if !totals.has(c.item):
 				order.append(c.item)
@@ -1207,7 +1324,7 @@ func apply_apt_bulk_upgrade():
 						majors.append([p.group, r.tier])
 			var c = Upgrades.group_color(plan[i].package.group).to_html(false)
 			rows.append("[color=#%s]%s[/color] %s" % [c, names[i].rpad(w), _apt_progress_text(int(f * 100))])
-		set_line(bar_index, "\n".join(rows))
+		set_line(bar_index, "\n".join(rows), true) # 2026-10-30: follow the growing list (it only snapped down at the end)
 		if t >= total:
 			break
 		await bro_wait(0.03)
@@ -1224,7 +1341,7 @@ func apply_apt_bulk_upgrade():
 		if e.package.type == "capstone":
 			box += "  [color=#ffc24a]%s[/color]  %s\n" % [e.package.name, lvl.effect]
 		else:
-			box += "  %s  %s -> [color=#4ec994]%s[/color]\n" % [e.package.name, lvl.before, lvl.after]
+			box += "  %s  %s\n" % [Upgrades.level_name(e.package, lvl), Upgrades.level_change(e.package, lvl, "#4ec994")]
 	add_line(box)
 	for m in majors:
 		await _wait_for_output()
@@ -1544,7 +1661,7 @@ func handle_vm_token_commands(text):
 			add_line("Traps don't need a VM: set one with 'phish -trap', it fills on its own.")
 			return
 		if !_vm_pay(target_process, target_minor_process, null): return
-		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait, parsed_bait.target)
+		new_window = target_process.create_vm_window(target_minor_process, true, parsed_bait.bait, {"_mod_tier": parsed_bait.mod_tier} if parsed_bait.mod_tier > 0 else parsed_bait.target)
 	else:
 		if !_vm_pay(target_process, target_minor_process, null): return
 		new_window = target_process.create_vm_window(target_minor_process, true)
@@ -1556,6 +1673,34 @@ func handle_vm_token_commands(text):
 			("  [color=#888888](%d tokens per %ds, tier %d)[/color]" % [_vm_paid, int(target_process.VM_UPTIME), _vm_paid]) if _vm_paid > 1 else ""])
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
+
+## 'timeskip': everything that runs on the real clock moves back <secs> (Defrag boosts and cooldown, the Phishing
+## Trap, skill bonuses), then the main process is stopped and offline progress runs for that long, as on a real
+## restart: the download screen, then the process resumes. VM windows keep running.
+func _dev_timeskip(secs: int) -> void:
+	if secs <= 0:
+		return
+	for p in Defragging.minor_processes:
+		if int(p.get("expires_at", 0)) > 0:
+			p["expires_at"] = int(p.expires_at) - secs
+	Defragging.SKILL["cooldown"] = int(Defragging.SKILL.get("cooldown", 0)) - secs
+	if !Phishing.trap.is_empty():
+		Phishing.trap["set_at"] = int(Phishing.trap.set_at) - secs
+	for sk in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
+		if int(sk.bonus_expires_at) > 0:
+			sk.bonus_expires_at = int(sk.bonus_expires_at) - secs
+	var snap = Offline.snapshot()
+	if process_running and current_process:
+		get_tree().call_group("flush_on_quit", "flush_for_quit")
+		unstick_current_process()
+		current_process.stop()
+		current_process = null
+		current_process_info = {}
+		process_running = false
+	Offline.session = {"saved_at": int(Time.get_unix_time_from_system()) - secs, "process": snap}
+	Offline.compute()
+	add_line("[color=#888888](dev) skipped %s%s[/color]" % [Offline.format_time(secs), "" if !Offline.report.is_empty() else "  (nothing was running)"])
+	_offline_welcome()
 
 ## Pays a new VM's first uptime period: VMManager.token_cost tokens (2026-10-28: tier 2 work costs 2, ...).
 var _vm_paid := 1
@@ -1712,6 +1857,7 @@ func quit_game() -> void:
 	await get_tree().create_timer(0.8).timeout
 	add_line("GOODBYE")
 	await get_tree().create_timer(1.2).timeout
+	get_tree().call_group("flush_on_quit", "flush_for_quit") # a cache mid-decode finishes instead of being lost
 	SaveManager.save_game()
 	get_tree().quit()
 
@@ -2163,7 +2309,7 @@ func phishing_commands(text):
 				return
 			if parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.bait_cost(parsed_bait.bait):
 				add_line("[color=#d29922]Only %d %s: bait needs %d per cast, so casts go out unbaited until you have more.[/color]" % [Inventory.get_amount(parsed_bait.bait), parsed_bait.bait.name, Phishing.bait_cost(parsed_bait.bait)])
-			cast_line(ms, -1, parsed_bait.bait, parsed_bait.target)
+			cast_line(ms, -1, parsed_bait.bait, {"_mod_tier": parsed_bait.mod_tier} if parsed_bait.mod_tier > 0 else parsed_bait.target)
 			return
 	_handle_process_commands(text, "Finishing current phishing attempt...")
 
@@ -2921,6 +3067,10 @@ func _offline_welcome() -> void:
 		return
 	Offline.report = {}
 	await _wait_for_output()
+	# 2026-10-30: a short absence (under a minute) is one quiet line, then the process resumes
+	if r.get("resume_only", false) or r.get("short", false):
+		await _offline_short(r)
+		return
 	accepting_player_inputs = false
 	add_new_scrollback() # its own block below the welcome text (writing into current_scrollback replaced it)
 	var block = current_scrollback
@@ -3009,6 +3159,35 @@ func _offline_welcome() -> void:
 		add_line("[color=%s]resuming '%s'[/color]" % [OFFLINE_DIM, r.resume.command])
 		update_context(int(r.resume.context))
 		_sync_header_to_context() # 2026-10-27: the header stayed on root after coming back into a skill
+		_on_input_line_text_submitted(r.resume.command)
+
+## under a minute away: "away 42s · Parsing Network: +1 Student cache network · resuming '...'", no download screen
+func _offline_short(r: Dictionary) -> void:
+	var parts = []
+	if !r.get("resume_only", false):
+		parts.append("away %s" % Offline.format_time(r.away))
+		if r.get("process", "") != "" and !r.gains.is_empty():
+			parts.append("%s: %s" % [r.process, ", ".join(r.gains.slice(0, 3).map(func(g): return "+%s %s" % [_commas(g.amount), g.item.name]))])
+		for l in r.get("levels", []):
+			parts.append("%s level %d -> %d" % [l.skill, l.from, l.to])
+	var resume = !r.resume.is_empty() and !process_running
+	if resume:
+		parts.append("resuming '%s'" % r.resume.command)
+	# a plain restart (under 5s) resumes silently; a short away with nothing running and nothing gained says nothing
+	var worth = !r.get("resume_only", false) and (resume or !r.gains.is_empty() or !r.get("levels", []).is_empty())
+	if worth:
+		add_line("[color=%s]%s[/color]" % [OFFLINE_DIM, "  ·  ".join(parts)])
+	for t in r.get("tiers", []):
+		add_line(ContextCommands.tier_complete_text(t))
+		await _wait_for_output()
+	_hold_unlocks = false
+	_flush_unlocks()
+	await _wait_for_output()
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	if resume:
+		update_context(int(r.resume.context))
+		_sync_header_to_context()
 		_on_input_line_text_submitted(r.resume.command)
 
 static func _plain_bb(t: String) -> String:

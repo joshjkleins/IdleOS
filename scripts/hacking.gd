@@ -371,6 +371,14 @@ func handle_view_command(text):
 		await enemy_hacking_box.select_target(location_name, targets)
 
 
+## 'cd hacking/<location> [-r]' from the main terminal (2026-10-30): that location's targets, or its recon lineup
+func open_location(loc: String, recon: bool) -> void:
+	if recon:
+		await handle_recon_command(loc)
+	else:
+		player_hacking_box.add_line("> view " + str(Stats.hacking_targets[loc].name).to_lower())
+		await handle_view_command(Stats.hacking_targets[loc]["command"])
+
 ## 'recon <location>': the compromise lineup (numbered target cards with their compromise traits) + cost and rules
 func handle_recon_command(arg: String) -> void:
 	var loc = Compromise.location_key(arg)
@@ -506,7 +514,7 @@ func hacking_help_commands():
 
 			var commands = [
 				["hack [target]", "Hack target once", "e.g. hack student"],
-				["hack [target]=[amount]", "Hack target a set number of times", "e.g. hack student=20"],
+				["hack [target]=[amount]", "Hack target a set number of times (with the Win Streak upgrade: 5 wins in one run = +1 of its rare item)", "e.g. hack student=20"],
 				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
 				["unlock [target]", "Unlock a target ('unlock' lists them)", "e.g. unlock administrator"],
 				["cd ..", "Return to locations directory", "e.g. 'cd ..'"],
@@ -522,7 +530,7 @@ func hacking_help_commands():
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["[item name] -force", "Use an Exploit ('run' lists yours)."],
-					["kill", "Ends the run now (caches already breached are kept; a compromise is forfeited)."],
+					["kill", "Ends the run now (caches already breached are kept; a compromise is forfeited). Below 20% anonymity it counts as a loss."],
 					["kill -s", "Finish the current hack, then end the run (for -r / =N runs)."],
 					["overclock", "Doubles bandwidth regen (more heat per action)"],
 					["overclock -kill", "Stops overclocking ('overclock kill' works too)"],
@@ -531,7 +539,7 @@ func hacking_help_commands():
 				player_hacking_box.add_line(format_command_list("COMMANDS", [
 					["spoof", "Start packet spoof to restore anonymity."],
 					["[item name] -force", "Use an Exploit ('run' lists yours)."],
-					["kill", "Ends the run now (caches already breached are kept)."],
+					["kill", "Ends the run now (caches already breached are kept). Below 20% anonymity it counts as a loss."],
 				]))
 
 
@@ -550,5 +558,6 @@ func quit_game() -> void:
 	await get_tree().create_timer(0.6).timeout
 	player_hacking_box.add_line("GOODBYE")
 	await get_tree().create_timer(0.8).timeout
+	get_tree().call_group("flush_on_quit", "flush_for_quit") # VM decoding a cache: finish it (2026-10-29)
 	SaveManager.save_game()
 	get_tree().quit()

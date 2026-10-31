@@ -125,9 +125,27 @@ func _apply(key: String) -> void:
 			match v:
 				"windowed":
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+					_fit_window.call_deferred()
 				"full_screen":
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
+
+## Windowed mode (2026-10-29): Godot fell back to the project's base size (1920x720, an 8:3 strip) or the
+## last tiny size. Size the window to 16:9 at 85% of the screen's usable area, centered, and keep a minimum
+## size so the layout can't be squashed (still resizable above that).
+func _fit_window() -> void:
+	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+		return
+	var screen = DisplayServer.window_get_current_screen()
+	var area: Rect2i = DisplayServer.screen_get_usable_rect(screen)
+	var w = int(area.size.x * 0.85)
+	var h = int(w * 9.0 / 16.0)
+	if h > area.size.y * 0.85:
+		h = int(area.size.y * 0.85)
+		w = int(h * 16.0 / 9.0)
+	DisplayServer.window_set_min_size(Vector2i(mini(1280, area.size.x), mini(720, area.size.y)))
+	DisplayServer.window_set_size(Vector2i(w, h))
+	DisplayServer.window_set_position(area.position + (area.size - Vector2i(w, h)) / 2)
 
 const COL_WIDTH := 28  # width of the "key=value" column before the description
 const BOX_INNER := 68   # characters between the two | borders

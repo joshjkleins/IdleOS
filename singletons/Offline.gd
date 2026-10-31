@@ -9,7 +9,8 @@ extends Node
 
 const BASE_CAP_HOURS := 1.0
 const MAX_CAP_HOURS := 24.0
-const MIN_AWAY_SECONDS := 60.0
+const MIN_AWAY_SECONDS := 60.0  # below this the welcome is one quiet line instead of the download screen (2026-10-30)
+const RESUME_ONLY_SECONDS := 5.0 # below this nothing is computed: the process just resumes (a plain restart)
 const UPLOAD_SPEED := 0.5        # uploads run at half speed offline
 const OVERHEAT_PENALTY := 0.10   # outputs lost when the process runs hotter than the system cools
 const SAMPLES := 300             # virtual cycles averaged per model (random processes)
@@ -51,6 +52,8 @@ func snapshot() -> Dictionary:
 		Parsing:
 			snap.items = t.items_to_parse.map(func(i): return i.id)
 			snap.target = t.extraction_target.id if t.extraction_target else -1
+			# 2026-10-30: time already spent on the item in progress (a cache's green lines), credited offline
+			snap.item_seconds = float(t._item_seconds) if "_item_seconds" in t else 0.0
 		Cracking:
 			if p == Cracking.VM:
 				return {} # token conversion is online only
@@ -59,6 +62,7 @@ func snapshot() -> Dictionary:
 				return {} # the Trap already fills on real time
 			snap.bait = t.bait.id if t.bait else -1
 			snap.target = Stats.target_key(t.smish_target) if !t.smish_target.is_empty() else ""
+			snap.mod_tier = t.mod_tier # 'phish -mod=school
 		Decoding:
 			var kind = p.get("decode kind", "cache")
 			if kind in ["salvage", "deep"]:
@@ -80,7 +84,12 @@ func compute() -> void:
 	var snap: Dictionary = session.get("process", {})
 	session = {}
 	var away = Time.get_unix_time_from_system() - saved_at
-	if saved_at <= 0 or away < MIN_AWAY_SECONDS:
+	if saved_at <= 0:
+		return
+	# 2026-10-30: short absences still resume the process (before, under a minute it stayed stopped)
+	if away < RESUME_ONLY_SECONDS:
+		if !snap.is_empty():
+			report = {"resume_only": true, "away": away, "resume": {"context": int(snap.context), "command": str(snap.command)}}
 		return
 	var secs = min(away, cap_seconds())
 	var inv_before = Inventory.inventory.duplicate()
@@ -93,7 +102,7 @@ func compute() -> void:
 	for s in _skills():
 		levels_before[s.SKILL.name] = int(s.SKILL.level)
 		xp_before[s.SKILL.name] = int(s.SKILL.experience)
-	report = {"away": away, "secs": secs, "capped": away > cap_seconds(), "process": "", "resume": {},
+	report = {"away": away, "secs": secs, "capped": away > cap_seconds(), "process": "", "resume": {}, "short": away < MIN_AWAY_SECONDS,
 		"overheat": false, "notes": [], "gains": [], "spent": [], "uploaded": [], "staged": [], "levels": [], "ran": 0.0,
 		"tiers": [], "trap": -1.0, "xp": [], "lost": {}, "drivers": []}
 	if !snap.is_empty():
@@ -155,8 +164,12 @@ func compute() -> void:
 
 ## Runs the process for up to <secs>; returns the seconds it actually ran. A job tied to one input
 ## ("repeat") moves on to the next input (next cache, next item to parse, bait -> no bait) when it runs out.
+## 2026-10-30: long cycles (a cache's Network conversion takes minutes) no longer lose the part-done item: the time
+## already spent on it before quitting counts, and a last partial cycle completes with the chance of how far along it is.
+const LONG_CYCLE_SECONDS := 20.0
 func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
-	var left = secs
+	var credit = float(snap.get("item_seconds", 0.0))
+	var left = secs + credit
 	for guard in 64:
 		if left <= 0.5:
 			break
@@ -168,6 +181,8 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 			report.overheat = true
 		var mult = 1.0 - (OVERHEAT_PENALTY if hot else 0.0)
 		var time_cycles = int(floor(left / job.seconds))
+		if float(job.seconds) >= LONG_CYCLE_SECONDS and randf() < (left - time_cycles * float(job.seconds)) / float(job.seconds):
+			time_cycles += 1 # the part-done last cycle, by how far along it got
 		var cycles = time_cycles
 		for item in job.get("inp", {}):
 			var per = float(job.inp[item])
@@ -196,7 +211,7 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 		left -= cycles * float(job.seconds)
 		if cycles >= time_cycles or !job.get("repeat", false):
 			break
-	return secs - left
+	return clamp(secs + credit - left, 0.0, secs)
 
 ## Hotter than the system cools over one cycle?
 func _runs_hot(job: Dictionary) -> bool:
@@ -285,11 +300,12 @@ func _parsing(p: Dictionary, snap: Dictionary) -> Dictionary:
 		var lines = PARSE_LINES + int(Upgrades.cur("parsing.rows"))
 		var bonus = Parsing.get_line_chance_bonus(p, item)
 		var fm = Parsing.item_find_mult(p, item)
-		var pc = Upgrades.cur("parsing.pattern_cache")
+		var pc = Upgrades.cur("parsing.pattern_cache") if Parsing.pattern_cache_applies(p) else 0.0 # not Network
 		var miss = 0.0
 		for k in SAMPLES:
 			for i in lines:
-				if randf() < (base_eff + bonus + miss) * fm:
+				var flat = Parsing.flat_line_chance(p, item) # Corruption: flat chance (2026-10-29)
+				if randf() < (flat if flat >= 0.0 else (base_eff + bonus + miss) * fm):
 					miss = 0.0
 					t += step
 					var f = Parsing.roll_find(p, item, target)
@@ -388,6 +404,24 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 			job.out = {}
 			for item in per:
 				job.out[item] = per[item] * units
+			# 2026-10-30: landed whales also roll their Exploit chance (30% since big-game whaling)
+			var whales = chance
+			var ex_chance = float(p.get("exploit chance", 0.0))
+			var whale_out = job.out
+			job.apply = func(cycles: int, m: float) -> int:
+				for item in whale_out:
+					var n = int(round(float(whale_out[item]) * cycles * m))
+					if n > 0:
+						Inventory.add_resource(item, n)
+				var total = whales * ex_chance * cycles * m
+				var ne = int(floor(total)) + (1 if randf() < total - floor(total) else 0)
+				for i in ne:
+					var ex = Phishing.roll_exploit_item()
+					if ex:
+						Inventory.add_resource(ex, 1)
+				for it in inp:
+					Inventory.remove_resource(it, int(round(inp[it] * cycles)))
+				return cycles
 			job.xp = chance * float(p["experience per level"]) * mult
 			job.heat = h * (1.0 + chance)
 		"smish":
@@ -416,7 +450,8 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 			var dl = float(p["download time"]) / s * qh
 			var attempt = cast + wait + chance * (dl + 1.0) + (1.0 - chance) * 1.5
 			job.seconds = attempt
-			var list = (Phishing.tier_mod_pool(Inventory.item_tier(bait)) if rare_bait else Phishing.mod_pool()) if p == Phishing.MOD else (p["resource gained"] if p["resource gained"] is Array else [])
+			var mt = int(snap.get("mod_tier", 0))
+			var list = (Phishing.tier_mod_pool(Inventory.item_tier(bait)) if rare_bait else (Phishing.tier_mod_pool(mt) if mt > 0 else Phishing.mod_pool())) if p == Phishing.MOD else (p["resource gained"] if p["resource gained"] is Array else [])
 			var per = _expected_roll(list)
 			job.out = {}
 			for item in per:
@@ -587,5 +622,7 @@ static func format_time(s: float) -> String:
 	var m = (int(s) % 3600) / 60
 	if h > 0:
 		return "%dh %02dm" % [h, m]
-	return "%dm" % max(1, m)
+	if s < 60.0: # 2026-10-30: short absences show seconds ("away 42s")
+		return "%ds" % max(1, int(s))
+	return "%dm" % m
 #endregion

@@ -28,7 +28,24 @@ const LINEUPS := {
 		[2, ["fortress"], {"integrity": 214.3, "firewall": 28.13, "counter": 10, "firewall reboot": 14.0}],  # Vice Principal: 150 int, 45 fw, reboot 7s
 		[3, ["heavy", "throttle"], {"counter": 10, "counter speed": 18.52, "firewall reboot": 12.0}],  # Principal: 50 dmg every 18s
 		[4, ["swarm", "heater"], {"counter": 20, "firewall reboot": 15.0}],  # Superintendent: 4 dmg
-	],}
+	],
+	"Lawfirm": [ # 2026-10-29: first pass, no overrides yet (tune from the recon cards)
+		[0, ["throttle"], {"integrity": 240}],  # Legal Assistant
+		[0, ["heavy"], {"integrity": 240}],     # Legal Assistant
+		[1, ["siphon"], {"counter speed": 23.26}],  # Paralegal: every 4.3s
+		[2, ["fortress"], {}],            # Associate Attorney
+		[3, ["regenerator", "swarm"], {}],  # Lawyer
+		[4, ["escalator", "throttle"], {"integrity": 520, "counter": 25, "firewall": 33}], # 2026-10-30: integrity 600 -> 520, counter 30 -> 25 # Partner (Heater swapped for Throttle: overheat made it unbeatable)
+	],
+	"Hospital": [ # 2026-10-30: second pass, +10% counter / counter speed, ~+15% integrity, 1s less reboot (shown); tested at 468 max anonymity
+		[0, ["packet_loss"], {"integrity": 980, "counter": 44, "counter speed": 17.6, "firewall reboot": 9.0}],  # Receptionist
+		[0, ["heavy"], {"integrity": 810, "counter": 32, "counter speed": 17.6, "firewall reboot": 9.0}],        # Receptionist
+		[1, ["throttle"], {"integrity": 760, "counter": 41, "counter speed": 24.2, "firewall reboot": 7.0}],     # Orderly
+		[2, ["fortress"], {"firewall": 38, "integrity": 390, "counter": 39, "counter speed": 19.8}], # Nurse (reboot kept at 4s: 3s with +10% stats won ~0/4 with the right build)
+		[3, ["regenerator", "heater"], {"integrity": 440, "counter": 29, "counter speed": 22.0, "firewall reboot": 5.0}], # Doctor
+		[4, ["adaptive", "escalator"], {"integrity": 1100, "counter": 37, "counter speed": 17.6, "firewall": 48}], # Chief of Medicine (reboot kept at 3.5s: +10% alone drops the right build to ~50%)
+	],
+}
 
 ## location key from 'school' / '-school' / 'School' ("" when unknown)
 func location_key(text: String) -> String:

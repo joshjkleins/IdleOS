@@ -11,7 +11,7 @@ script = ExtResource("1_lkc2j")
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="MarginContainer"]
-custom_minimum_size = Vector2(0, 23)
+custom_minimum_size = Vector2(760, 23)
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/Panel"]
@@ -41,6 +41,8 @@ text = "metrics.agent"
 [node name="MessageLabel" type="Label" parent="MarginContainer/Panel/HBoxContainer"]
 custom_minimum_size = Vector2(270, 0)
 layout_mode = 2
+clip_text = true
+text_overrun_behavior = 3
 theme_override_font_sizes/font_size = 12
 text = "Port scan suspected from 185.22.91.7"
 

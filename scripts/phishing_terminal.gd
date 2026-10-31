@@ -18,6 +18,7 @@ func heat_tier_mult() -> float:
 	return Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing"))
 
 var smish_target: Dictionary = {} # Smish: chosen target ({} = random unlocked target that isn't maxed)
+var mod_tier := 0 # Mod: 'phish -mod=school' catches only that tier's mods (0 = every unlocked tier)
 
 ## Main terminal lines live in Phishing.current_lines; a VM keeps its own.
 func _my_lines() -> Array:
@@ -29,14 +30,19 @@ func style() -> String:
 ## Main terminal entry point (idle_os_2.cast_line). Always casts every available line.
 func cast_lines(p_type: Dictionary, _lines: int = -1, p_bait: ItemData = null, p_target: Dictionary = {}):
 	bait = p_bait
-	smish_target = p_target
+	_set_target(p_target)
 	_start(p_type, false)
 
 ## VM window entry point.
 func vm_cast_all_lines(p_type: Dictionary, window: bool = false, p_bait: ItemData = null, p_target: Dictionary = {}):
 	bait = p_bait
-	smish_target = p_target
+	_set_target(p_target)
 	_start(p_type, window)
+
+## Smish target, or {"_mod_tier": N} from 'phish -mod=<location>'
+func _set_target(p_target: Dictionary) -> void:
+	mod_tier = int(p_target.get("_mod_tier", 0))
+	smish_target = {} if p_target.has("_mod_tier") else p_target
 
 func _start(p_type: Dictionary, window: bool) -> void:
 	setup_process(Phishing, p_type, window)
@@ -63,6 +69,8 @@ func reward_list() -> Array:
 	if process_data == Phishing.MOD:
 		if Phishing.is_rare_bait(bait): # rare bait: one of the rare's tier mods
 			return Phishing.tier_mod_pool(Inventory.item_tier(bait))
+		if mod_tier > 0: # 'phish -mod=school'
+			return Phishing.tier_mod_pool(mod_tier)
 		return Phishing.mod_pool()
 	return process_data["resource gained"] if process_data["resource gained"] is Array else []
 
@@ -98,13 +106,13 @@ func update_eff_label(_p_type = null):
 		"whale":
 			var reel: float = step_seconds(get_mode(), "download time", "overclocked download time", "overheated download time", true)
 			slots_label.text = "%d lines on one whale: reeling takes %ds (%ds split across %d lines)\n" % [lines, roundi(reel / lines), roundi(reel), lines]
-			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "%% chance the whale bites  ·  a landed whale: %d-%d SQL Injectors / Packet Spoofs (bait doubles it)" % [int(Phishing.WHALING["bundle min"]), int(Phishing.WHALING["bundle max"])]
+			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "%% chance the whale bites  ·  a landed whale: %d-%d SQL Injectors / Packet Spoofs (bait doubles it), %d%% Exploit chance" % [int(Phishing.WHALING["bundle min"]), int(Phishing.WHALING["bundle max"]), roundi(float(Phishing.WHALING["exploit chance"]) * 100.0)]
 		"smish":
 			slots_label.text = "%d texts per blast (%d per line)  ·  intel on %s\n" % [Phishing.SMISH["texts per line"] * lines, Phishing.SMISH["texts per line"], smish_target.name if !smish_target.is_empty() else "random targets"]
 			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% reply chance per text."
 		"trap":
 			slots_label.text = "Trap fills over %s of real time (even offline)\n" % Phishing.format_minutes(Phishing.trap_seconds_total())
-			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% rare roll chance on a full trap."
+			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance of a bonus Exploit on a full trap (1 Exploit + 1 hacking mod always)."
 		_:
 			slots_label.text = str(_my_lines().size()) + "/" + str(lines) + " lines in use\n"
 			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite."
