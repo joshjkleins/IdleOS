@@ -210,6 +210,7 @@ var crit_ramp := 0.0          # Hot Streak (mod): extra crit chance built by non
 var bleeds: Array = []        # Bleed (mod): [damage per second, seconds left]
 var haste_attacks := 0        # Breach Momentum (mod): fast attacks left after a firewall break
 var _dr_roll := 0             # Deep Reserves (driver): 0 = not rolled for this bar yet, 1 = free attack, -1 = pays
+var warm_left := 0            # Warm Start (driver, 2026-10-31): instant attacks left this hack
 var fresh_attacks := 0        # Fresh Start (mod, 2026-10-30): guaranteed crits left at the start of a hack
 var opening_spoof_hit := false # Opening Spoof (mod, 2026-10-29): the next spoof also deals damage
 var jitter_stacks := 0        # Jitter (mod): countermeasures fired this hack
@@ -794,6 +795,10 @@ func attack():
 		_log("SYS", C_INTEG, "out of SQL Injectors - use 'kill' to abort")
 		Signals.update_hack_console("\n\n[color=#e24b4a]OUT OF SQL INJECTORS - ABORT HACKING WITH 'KILL'[/color]\n")
 	attack_bar.value = 0.0
+	if warm_left > 0: # Warm Start (driver): this one was instant; the next is too while some are left
+		warm_left -= 1
+		if warm_left > 0:
+			attack_bar.value = attack_bar.max_value
 	throttle_sql_wait = float(_tv("throttle", "delay", 0.0)) # Throttle (trait)
 	if integ_bar.value <= 0.0:
 		win()
@@ -1388,7 +1393,8 @@ func start_hack():
 	if Drivers.value("head_start") > 0.0 and Exploits.charge < Drivers.value("head_start"): # Head Start
 		Exploits.set_charge(Drivers.value("head_start"))
 		_log("DRV", C_DRV, "Head Start: Exploit charge %d" % int(Exploits.charge))
-	if Drivers.value("warm_start") > 0.0: # Warm Start: first attack fires right away
+	warm_left = int(Drivers.value("warm_start")) # Warm Start: the first 1 / 2 / 3 attacks fire right away (by rank)
+	if warm_left > 0:
 		attack_bar.value = attack_bar.max_value
 	crit_ramp = 0.0
 	jitter_stacks = 0

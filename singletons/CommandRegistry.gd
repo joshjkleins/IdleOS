@@ -100,6 +100,8 @@ func main_candidates() -> Array:
 	for it in Items.ITEM_MAP.values():
 		if it is ItemData and it.name != "":
 			c.append("ls " + _n(it))
+	for id in Drivers.DEFS: # 'ls <driver>' (2026-10-31), by name
+		c.append("ls " + str(Drivers.DEFS[id].name).to_lower())
 	for it in owned:
 		var n = _n(it)
 		c.append("track " + n)

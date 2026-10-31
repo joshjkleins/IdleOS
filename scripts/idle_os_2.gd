@@ -687,6 +687,9 @@ func universal_commands(text):
 		
 		# "ls <item>" (exact name), else filters / name search ("ls -caches school", "ls cred")
 		var item = Inventory.get_item_by_name(item_name)
+		if item == null and Drivers._find(item_name) != "": # 2026-10-31: 'ls <driver>' (name or id)
+			add_line(Drivers.ls_text(Drivers._find(item_name)))
+			return true
 		if item == null:
 			var res = Inventory.list_filtered(item_name)
 			if res.single == null:

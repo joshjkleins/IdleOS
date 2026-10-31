@@ -304,6 +304,7 @@ func _refresh_rows() -> void:
 			continue
 		var row = _rows[vm]
 		var minimized: bool = !vm.visible
+		var sync_tag = "SYNC " if vm.terminal and vm.terminal.has_method("is_synced") and vm.terminal.is_synced() else ""
 		if vm.stopping:
 			row.status.text = "stopping"
 		elif !vm.repeat or vm.periods_left == 0:
@@ -312,6 +313,8 @@ func _refresh_rows() -> void:
 			row.status.text = "%ds +%d" % [vm.get_seconds_left(), vm.periods_left]
 		else:
 			row.status.text = "%ds%s" % [vm.get_seconds_left(), "" if vm.tokens_used <= 1 else " x%d" % vm.tokens_used]
+		if sync_tag != "" and !vm.stopping:
+			row.status.text = sync_tag + row.status.text
 		row.button.tooltip_text = ("Minimized - click to restore" if minimized else "Click to minimize") + "\nTokens used: %d" % vm.tokens_used
 		row.name.add_theme_color_override("font_color", DIM if minimized else TEXT)
 		row.bar.value = vm.get_progress()

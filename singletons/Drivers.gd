@@ -34,7 +34,7 @@ const DEFS = {
 		"text": "every %s attack is a guaranteed crit", "format": "nth"},
 	"rainbow_table": {"skill": "Cracking", "name": "Rainbow Table", "short": "%s crit dmg, FW down", "values": [0.20, 0.30, 0.50],
 		"text": "%s crit damage while the firewall is down"},
-	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits refund %s BW", "values": [0.10, 0.15, 0.25],
+	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits refund %s BW", "values": [0.20, 0.40, 0.60], # 2026-10-31: was 10/15/25%
 		"text": "crits refund %s of your max bandwidth", "format": "pct_plain"},
 	"cracked_wide": {"skill": "Cracking", "name": "Cracked Wide", "short": "crits %s FW dmg", "values": [1.5, 1.75, 2.0],
 		"text": "crits that hit the firewall deal %s firewall damage", "format": "x"},
@@ -89,8 +89,8 @@ const DEFS = {
 		"text": "SQL Injectors attack %s faster", "format": "pct_plain"},
 	"payload_recycler": {"skill": "Compiling", "name": "Payload Recycler", "short": "%s payload refund", "values": [0.10, 0.20, 0.40], # 2026-10-31: was 10/15/25%
 		"text": "%s chance a hack doesn't spend its payload"},
-	"warm_start": {"skill": "Compiling", "name": "Warm Start", "short": "instant 1st attack", "values": [1.0, 1.0, 1.0],
-		"text": "each hack's first attack fires instantly", "format": "none"},
+	"warm_start": {"skill": "Compiling", "name": "Warm Start", "short": "%s instant", "values": [1.0, 2.0, 3.0], # 2026-10-31: was 1 at every rank
+		"text": "each hack's first %s instantly", "format": "attacks"},
 	"overclocked_build": {"skill": "Compiling", "name": "Overclocked Build", "short": "%s dmg overclocked", "values": [0.10, 0.15, 0.25],
 		"text": "%s damage while overclocked"},
 }
@@ -175,6 +175,7 @@ func value_text(id: String, r: int = -1, short: bool = false) -> String:
 		"x": vt = "x%s" % str(v).trim_suffix(".0")
 		"s": vt = "%ds" % int(v)
 		"num": vt = str(int(v))
+		"attacks": vt = ("attack fires" if int(v) == 1 else "%d attacks fire" % int(v)) if !short else ("1st attack" if int(v) == 1 else "%d attacks" % int(v))
 		"none": return tpl
 		"pct_plain": vt = "%d%%" % roundi(v * 100.0)
 		_: vt = ("%d%%" % roundi(v * 100.0)) if d.text.begins_with("%s chance") else ("+%d%%" % roundi(v * 100.0))
@@ -371,6 +372,29 @@ func _find(arg: String) -> String:
 	return ""
 #endregion
 
+## 'ls <driver>' (2026-10-31): everything about one driver - skill, owned / equipped, rank and XP progress, and what
+## each rank does
+func ls_text(id: String) -> String:
+	var d = DEFS[id]
+	var D = "#888888"
+	var sk = str(d.skill)
+	var tier = skill_defs(sk).find(id) + 1
+	var loc = Uploads.get_location_name(tier) if tier > 0 else "?"
+	var t = "\n[color=#4ec9b0]%s[/color]  [color=%s]driver · %s · id %s[/color]\n" % [str(d.name).to_upper(), D, sk, id]
+	var state = "not owned  ·  drops from the %s compromise ('recon %s')" % [loc, loc.to_lower()]
+	if is_owned(id):
+		state = ("equipped in %s" % sk) if is_equipped(id) else "owned, not equipped ('driver -add %s')" % id
+	t += "├─ [color=%s]Status[/color]    %s\n" % [D, state]
+	if is_owned(id):
+		t += "├─ [color=%s]Rank[/color]      %s  %s\n" % [D, _rank_bar(id), _rank_progress(id)]
+	for r in range(1, MAX_RANK + 1):
+		var cur = is_owned(id) and rank(id) == r
+		var need = "starts here" if r == 1 else "%s %s xp" % [_commas(RANK_XP[r - 1]), sk]
+		t += "%s [color=%s]Rank %d[/color]    %s  [color=%s](%s)[/color]%s\n" % ["└─" if r == MAX_RANK else "├─", D, r,
+			("[color=#4ec994]%s[/color]" % value_text(id, r)) if cur else value_text(id, r), D, need, "  [color=#ffc24a]◂ now[/color]" if cur else ""]
+	t += "[color=%s]Drivers earn XP from their skill only while equipped. Manage them with 'driver'.[/color]" % D
+	return t
+
 #region driver manager (2026-10-30)
 ## 'driver' once the manager is unlocked: every skill, its slots, then its owned spares; builds; commands
 func manager_text() -> String:
@@ -399,7 +423,7 @@ func manager_text() -> String:
 	t += "[color=%s]driver -rm <id>[/color]           [color=%s]unequip (keeps its rank)[/color]\n" % [G, D]
 	t += "[color=%s]driver -swap <old> <new>[/color]  [color=%s]replace one with another from the same skill[/color]\n" % [G, D]
 	t += "[color=%s]driver build <0-2>[/color]        [color=%s]equip a saved build[/color]   [color=%s]driver build <0-2> -save[/color]  [color=%s]save what's equipped now[/color]   [color=%s]driver build <0-2> -clear[/color]  [color=%s]empty it[/color]\n" % [G, D, G, D, G, D]
-	t += "[color=%s]Drivers rank up with their skill's XP. New ones drop from compromises in Hacking.[/color]" % D
+	t += "[color=%s]Drivers rank up with their skill's XP. New ones drop from compromises in Hacking. 'ls <driver>' for its ranks and XP.[/color]" % D
 	return t
 
 func builds_line() -> String:

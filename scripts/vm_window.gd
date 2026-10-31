@@ -79,6 +79,10 @@ func get_progress() -> float: # 1.0 = full uptime remaining
 func get_status_text() -> String:
 	if stopping:
 		return "stopping"
+	var sync = "SYNC  " if terminal and terminal.has_method("is_synced") and terminal.is_synced() else ""
+	return sync + _status_core()
+
+func _status_core() -> String:
 	if !repeat or periods_left == 0:
 		return "%ds  last" % get_seconds_left() # ends when this token runs out
 	if periods_left > 0:

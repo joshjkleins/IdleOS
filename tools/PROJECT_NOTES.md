@@ -1014,3 +1014,20 @@ before release.
 - Escalator resets every fight (start_hack): it used to count every countermeasure since setup, so a multi-hack run or
   a compromise reached its later Escalator fights already at +150%. CFO compromise retuned (650 / 40 fw / 110 /
   26 speed / 16s reboot -> card 455 / 64 / 8s / every 3.8s): Escalator build ~80%, 95s, 28% left.
+
+## Tier 5 (Police Station) first pass (2026-10-31)
+- Salted Hash driver 20/40/60% of max bandwidth per crit (was 10/15/25).
+- Targets (card = after traits; GEAR=prog, TYPED 6-slot builds, LEVEL 36, no intel; `$HOME/bal/t5.sh`, `comp5.sh`):
+  Secretary 1100/60/125/16/10 throttle; Cop 900/65/300/20/8 swarm; Detective 1300/90/115/20/14 adaptive;
+  Sergeant 1000/70/66/30/6 heavy+escalator; Captain 1000/80/140/20/12 fortress+heater. Payloads 5/10/15/20/25.
+  Right builds ~65-125s, 40-70% anonymity left.
+- Compromise: Secretary heavy, Secretary swarm+throttle, Cop adaptive, Detective siphon+fortress, Sergeant
+  packet_loss+escalator, Captain heavy+adaptive (overrides in Compromise.gd); Captain ~70% with the right build.
+- Economy: Police cache entries match Bank's; upload goal 1200 each (was 1600). Private Keys (crack 214/h) is the slow chain:
+  ~5.6 h idle for 1200 (Bank PINs ~3.1 h after their +20%).
+- Overclock is main-terminal only (BaseTerminal.get_mode): VMs used to run overclocked whenever the system was.
+- Defrag Heat -> Sync (tier 4, 'defrag -sync', var HEAT kept, old "heat" save key read): for its 10 min, a VM running
+  the exact process of the main terminal (same skill + process dict) inherits overclock; its overclocked heat is
+  half the normal per-cycle heat (same heat/s as not overclocked). VM window + side panel show "SYNC".
+  get_heat_reduction() returns 0. Test: tools/tests/synctest.gd.
+- Defrag unlock order (2026-10-31): VM T1, Sync T2, none at Hospital, Upload T4, Cooling T5 (now x3 cooling), XP T6.

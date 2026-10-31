@@ -16,14 +16,14 @@ var SKILL = {
 var COOLING = {
 	"name": "Cooling",
 	"unlocked": false,
-	"unlock tier": 3, # 2026-10-26: one Defrag process per tier
+	"unlock tier": 5, # 2026-10-31: was 3
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#4ec9b0"),
 	"bonus time": 10,
-	"bonus cooling mult": 2.0, # 2026-10-30: system cooling x2 (was +0.5°C/s)
-	"bonus label": "x2 cooling",
-	"bonus text": "System cooling doubled",
-	"description": "System cooling is doubled (every cooling source, upgrades included).",
+	"bonus cooling mult": 3.0, # 2026-10-31: x3 (was x2; 2026-10-30: was +0.5°C/s)
+	"bonus label": "x3 cooling",
+	"bonus text": "System cooling tripled",
+	"description": "System cooling is tripled (every cooling source, upgrades included).",
 	"command": "defrag -cooling",
 	"expires_at": 0,
 }
@@ -31,7 +31,7 @@ var COOLING = {
 var VM = {
 	"name": "VM",
 	"unlocked": true,
-	"unlock tier": 1, # 2026-10-26: one Defrag process per tier
+	"unlock tier": 1, # 2026-10-31: order VM T1, Sync T2, (none at Hospital), Upload T4, Cooling T5, XP T6
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#7aa2f7"),
 	"bonus time": 10,
@@ -46,7 +46,7 @@ var VM = {
 var UPLOAD = {
 	"name": "Upload",
 	"unlocked": false,
-	"unlock tier": 2, # 2026-10-26: one Defrag process per tier
+	"unlock tier": 4, # 2026-10-31: was 2
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#e0c068"),
 	"bonus time": 10,
@@ -58,20 +58,20 @@ var UPLOAD = {
 	"expires_at": 0,
 }
 
-var HEAT = {
-	"name": "Heat",
+var HEAT = { # 2026-10-31: Sync (was Heat, -20% heat - far weaker than Cooling's x2). The var keeps its name.
+	"name": "Sync",
 	"unlocked": false,
-	"unlock tier": 4, # 2026-10-26: one Defrag process per tier
+	"unlock tier": 2, # 2026-10-31: was 4 (as Heat)
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
-	"bonus heat reduction": 0.2, # percent removed from every heat gain (20%)
-	"bonus label": "-20% heat",
-	"bonus text": "All heat applications reduced by 20%",
-	"description": "Every time heat is added to the system, it's reduced by 20%.",
-	"command": "defrag -heat",
+	"bonus label": "sync",
+	"bonus text": "VMs running your main process share its overclock, without extra heat",
+	"description": "VMs running the same process as your main terminal inherit its overclock status while producing no extra heat.",
+	"command": "defrag -sync",
 	"expires_at": 0,
 }
+
 
 ## 2026-10-26: Police's Defrag process; 2026-10-30: moved to Government (Police Station gets a new one)
 var XP = {
@@ -89,7 +89,7 @@ var XP = {
 	"expires_at": 0,
 }
 
-var minor_processes = [VM, UPLOAD, COOLING, HEAT, XP] # in unlock order
+var minor_processes = [VM, HEAT, UPLOAD, COOLING, XP] # in unlock order (HEAT = Sync)
 
 func is_active(process: Dictionary) -> bool:
 	return Time.get_unix_time_from_system() < process.get("expires_at", 0)
@@ -116,7 +116,10 @@ func refresh_unlocks() -> void:
 		p["unlocked"] = Upgrades.tier_unlocked(int(p.get("unlock tier", 1)))
 
 func get_heat_reduction() -> float:
-	return HEAT["bonus heat reduction"] if is_active(HEAT) else 0.0
+	return 0.0 # Heat's -20% retired (2026-10-31, now Sync)
+
+func sync_active() -> bool:
+	return is_active(HEAT)
 
 func add_xp(amount: int, _type: Dictionary):
 	SKILL["experience"] += amount
@@ -186,5 +189,5 @@ func load_data(data: Dictionary):
 		SKILL["on cooldown"] = skill_data.get("on cooldown", false)
 	var boosts: Dictionary = data.get("boosts", {})
 	for p in minor_processes:
-		var b: Dictionary = boosts.get(p.name.to_lower(), {})
+		var b: Dictionary = boosts.get(p.name.to_lower(), boosts.get("heat", {}) if p == HEAT else {}) # Sync was saved as "heat"
 		p["expires_at"] = int(b.get("expires_at", 0))

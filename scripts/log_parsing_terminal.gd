@@ -216,13 +216,21 @@ func is_log_finished() -> bool:
 ## One log line's wait at the current speed. Returns the mode it ran in (decides heat).
 ## <empty>: a line without a find, which Fast Skip speeds up.
 func _wait_step(empty: bool = false) -> Mode:
-	var mode := get_mode()
-	var t = get_step_time(mode) * Parsing.item_time_mult(process_data, get_current_item_to_parse())
-	if empty:
-		t *= 1.0 - Upgrades.cur("parsing.fast_skip")
-	_item_seconds += t
-	await get_tree().create_timer(t).timeout
-	return mode
+	# 2026-10-31: the speed follows the system every frame (a line started while overheated kept the overheat speed)
+	var worst := get_mode()
+	var done := 0.0
+	while done < 1.0 and running:
+		var mode := get_mode()
+		worst = worst_mode(worst, mode)
+		var t = get_step_time(mode) * Parsing.item_time_mult(process_data, get_current_item_to_parse())
+		if empty:
+			t *= 1.0 - Upgrades.cur("parsing.fast_skip")
+		t = max(0.01, t)
+		await get_tree().process_frame
+		var dt = get_process_delta_time()
+		done += dt / t
+		_item_seconds += min(dt, t)
+	return worst
 
 func _finished_log(heat_mode: Mode):
 	process_data.signal.emit(1)

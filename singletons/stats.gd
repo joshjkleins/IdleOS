@@ -482,79 +482,84 @@ var hacking_targets = {
 		"required payload": Items.POLICE_PAYLOAD,
 		"hard mode targets": [], # none built yet
 		"targets": [
-			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
+			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Secretary",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack secretary",
-				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 1},
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 5}, # 2026-10-31: was 1
 				"heat": 0.5,
 				"exp": 225,
-				"integrity": 1163,
-				"firewall": 135,
-				"counter": 79,
+				"integrity": 1100,
+				"firewall": 60,
+				"counter": 125,
 				"counter speed": 16.0,
+				"traits": ["throttle"],
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.SECRETARY_CACHE
 			},
-			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
+			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Cop",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack cop",
-				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 10}, # 2026-10-31: was 2
 				"heat": 0.8,
 				"exp": 2692,
-				"integrity": 2340,
-				"firewall": 155,
-				"counter": 77,
-				"counter speed": 16.0,
+				"integrity": 900,
+				"firewall": 65,
+				"counter": 300,
+				"counter speed": 20.0,
+				"traits": ["swarm"],
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.COP_CACHE
 			},
-			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
+			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Detective",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack detective",
-				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 3},
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 15}, # 2026-10-31: was 3
 				"heat": 1.1,
 				"exp": 4036,
-				"integrity": 3246,
-				"firewall": 349,
-				"counter": 101,
-				"counter speed": 16.0,
+				"integrity": 1300,
+				"firewall": 90,
+				"counter": 115,
+				"counter speed": 20.0,
+				"traits": ["adaptive"],
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.DETECTIVE_CACHE
 			},
-			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
+			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Sergeant",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack sergeant",
-				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 20}, # 2026-10-31: was 4
 				"heat": 1.4,
 				"exp": 5383,
-				"integrity": 4156,
-				"firewall": 354,
-				"counter": 118,
+				"integrity": 1000,
+				"firewall": 70,
+				"counter": 66,
 				"counter speed": 30.0,
+				"traits": ["heavy", "escalator"],
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SERGEANT_CACHE
 			},
-			{ # PLACEHOLDER stats (School x8.0, tier 5) - balance later
+			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Captain",
 				"difficulty": "Hard",
 				"unlocked": true,
 				"command": "hack captain",
-				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 25}, # 2026-10-31: was 5
 				"heat": 1.7,
 				"exp": 6728,
-				"integrity": 5502,
-				"firewall": 346,
-				"counter": 162,
+				"integrity": 1000,
+				"firewall": 80,
+				"counter": 140,
 				"counter speed": 20.0,
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"traits": ["fortress", "heater"],
+				"firewall reboot": 12.0, # seconds the firewall stays down after a break
 				"loot": Items.CAPTAIN_CACHE
 			}
 		],
@@ -830,7 +835,7 @@ func on_level_up(skill_data: Dictionary):
 
 ## Cooling applied each cooling tick, including the Defragging: System bonus (negative = cooling).
 func get_cooling_amount() -> float:
-	return cooling_amount * Defragging.get_cooling_mult() # Defragging: Cooling doubles it (2026-10-30)
+	return cooling_amount * Defragging.get_cooling_mult() # Defragging: Cooling triples it (2026-10-31; was x2)
 
 func update_cooling_amount(amount_to_add: float):
 	cooling_amount += amount_to_add

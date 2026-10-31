@@ -92,11 +92,17 @@ func start_data_mining():
 		first = false
 		for i in range(start, SEGMENTS):
 			_set_progress(i)
-			var mode := get_mode()
-			cycle_mode = worst_mode(cycle_mode, mode)
-			var step = get_step_time(mode)
-			_cycle_seconds += step
-			await get_tree().create_timer(step).timeout
+			# 2026-10-31: the speed follows the system every frame (a segment started while overheated used to keep
+			# the overheat speed until it filled, even after the system cooled)
+			var done := 0.0
+			while done < 1.0 and running:
+				var mode := get_mode()
+				cycle_mode = worst_mode(cycle_mode, mode)
+				var step: float = max(0.01, get_step_time(mode))
+				await get_tree().process_frame
+				var dt = get_process_delta_time()
+				done += dt / step
+				_cycle_seconds += min(dt, step)
 			if !running:
 				break
 		if running:

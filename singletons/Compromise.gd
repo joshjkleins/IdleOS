@@ -52,7 +52,15 @@ const LINEUPS := {
 		[2, ["heater", "fortress"], {"integrity": 900, "firewall": 70, "counter": 130}],  # Branch Manager (kept at its tested stats when the normal one went up, 2026-10-31)
 		[3, ["heavy"], {"integrity": 1400, "counter": 100, "counter speed": 36.0}],  # Security
 		[4, ["fortress", "escalator"], {"integrity": 650, "firewall": 46.875, "counter": 110, "counter speed": 26.0, "firewall reboot": 16.0}],  # Chief Financial Officer (2026-10-31 retune after the Escalator reset: card 455 / 75 fw / 8s down / 110 every 3.8s)
+	],	"Police Station": [ # 2026-10-31: first pass
+		[0, ["heavy"], {"integrity": 1100, "counter": 100, "counter speed": 30.0}],  # Secretary
+		[0, ["swarm", "throttle"], {"integrity": 1300, "counter": 300}],  # Secretary
+		[1, ["adaptive"], {"integrity": 1300, "counter": 140}],  # Cop (its own counter is sized for Swarm)
+		[2, ["siphon", "fortress"], {"integrity": 900, "firewall": 50, "counter": 140}],  # Detective
+		[3, ["packet_loss", "escalator"], {"integrity": 1300, "counter": 90}],  # Sergeant
+		[4, ["heavy", "adaptive"], {"integrity": 1300, "counter": 110, "counter speed": 26.0}],  # Captain
 	],
+
 }
 
 ## location key from 'school' / '-school' / 'School' ("" when unknown)

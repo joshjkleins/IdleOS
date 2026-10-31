@@ -56,9 +56,21 @@ func _process(delta: float) -> void:
 func get_mode() -> Mode:
 	if Stats.overheated:
 		return Mode.OVERHEATED
-	if Stats.overclocked and Upgrades.can_overclock(skill):
+	# 2026-10-31: overclock is the main terminal's (VMs ran overclocked too); a VM shares it only while Sync runs
+	# and it works the same process
+	if Stats.overclocked and Upgrades.can_overclock(skill) and (!in_vm or is_synced()):
 		return Mode.OVERCLOCKED
 	return Mode.NORMAL
+
+## Defrag Sync: this VM runs the exact process the main terminal runs
+func is_synced() -> bool:
+	if !in_vm or !Defragging.sync_active():
+		return false
+	var os = get_tree().get_first_node_in_group("main_os") if is_inside_tree() else null
+	if os == null or !os.process_running or os.current_process == null or !is_instance_valid(os.current_process):
+		return false
+	var main = os.current_process
+	return "skill" in main and main.skill == skill and main.process_data == process_data
 
 ## Of two modes seen during one cycle, the one that decides its heat (overheat wins, then overclock).
 static func worst_mode(a: Mode, b: Mode) -> Mode:
@@ -114,7 +126,10 @@ func get_heat(mode: Mode) -> float:
 		Mode.OVERHEATED:
 			h = process_data["overheat heat"]
 		Mode.OVERCLOCKED:
-			h = process_data["heat"] if is_cooled() else process_data["overclock heat"]
+			if in_vm: # Sync: twice the cycles at half the heat each - the same heat per second as not overclocked
+				h = process_data["heat"] * 0.5
+			else:
+				h = process_data["heat"] if is_cooled() else process_data["overclock heat"]
 		_:
 			h = process_data["heat"]
 	if mode != Mode.OVERHEATED:

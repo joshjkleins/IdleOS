@@ -165,9 +165,9 @@ var REPOSITORIES = {
 	"unlocked": false,
 	"unlock tier": 5, # 2026-10-26: opens with this tier's location (1 = from the start)
 	"efficiency level": 60, # efficiency grows from this skill level (its old unlock level)
-	"base speed": 8.9642,
-	"overclock speed": 4.4821,
-	"overheat speed": 22.4105,
+	"base speed": 7.1714, # 2026-10-31: 25% faster (was 8.9642)
+	"overclock speed": 3.5857,
+	"overheat speed": 17.9284,
 	"heat": 82.1448,
 	"overclock heat": 154.0211,
 	"overheat heat": 30.8041,

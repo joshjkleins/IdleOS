@@ -103,7 +103,20 @@ const BUILDS_TYPED = {
 		"swarm": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Latency Injector"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Smoke Screen"},
 		"throttle": {"mods": ["Double Tap", "Hardened Shell", "Burst Buffer", "Critical Overflow", "Leech"], "drivers": ["optimized_build", "deep_reserves", "brute_force"], "auto": "Hedge"},
 		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"], "auto": "Heat Sink"},
+	},	5: { # O / D / U / O / D / U (2026-10-31 first pass)
+		"base": {},
+		"wrong": {"mods": ["Payload Amplifier", "Decoy Traffic", "Burst Buffer", "SQL Booster", "Hardened Shell", "Backdoor"], "drivers": ["optimized_build", "brute_force"]},
+		"throttle": {"mods": ["Double Tap", "Hardened Shell", "Burst Buffer", "Critical Overflow", "Leech", "Zero Hour"], "drivers": ["optimized_build", "deep_reserves", "brute_force"], "auto": "Zero-Day"},
+		"swarm": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Hardened Shell", "Zero Hour"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Ghost Mode"},
+		"adaptive": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Breach Momentum", "Leech", "Backdoor"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"], "auto": "Chain Reaction"},
+		"heavy": {"mods": ["Critical Overflow", "Decoy Traffic", "Backdoor", "SQL Booster", "Hardened Shell", "Burst Buffer"], "drivers": ["social_proof", "optimized_build", "deep_reserves"], "auto": "Ghost Mode"},
+		"escalator": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Silent Entry", "Zero Hour"], "drivers": ["quick_compile", "read_ahead", "countermeasure_log"], "auto": "Freeze"},
+		"fortress": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Breach Momentum", "Leech", "Backdoor"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Freeze"},
+		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Cold Boot", "SQL Booster", "Leech", "Packet Shredder"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"], "auto": "Heat Sink"},
+		"siphon": {"mods": ["Critical Overflow", "Latency Injector", "Burst Buffer", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["deep_reserves", "optimized_build", "burner_account"], "auto": "Overdraft"},
+		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Hedge"},
 	},
+
 
 }
 
