@@ -84,7 +84,7 @@ func start():
 	cracked_label.text = str(amount_cracked)
 	_update_title()
 	set_player_amount_labels()
-	efficiency.text = str(_get_total_efficiency() * 100.0) + "%"
+	efficiency.text = "%.1f%%" % (_get_total_efficiency() * 100.0)
 
 	if !has_requirements():
 		finish_safely() # nothing to crack (previously a VM window would stay open forever)
@@ -111,7 +111,7 @@ func start():
 
 			var max_heat_used: float = 0.0 # instant cracks add no heat
 			var eff = _get_total_efficiency()
-			efficiency.text = str(eff * 100) + "%"
+			efficiency.text = "%.1f%%" % (eff * 100.0)
 			var instant: bool = randf() < eff
 			_crack_seconds = 0.0
 			if instant:
@@ -127,16 +127,25 @@ func start():
 				var head_start = _head_start
 				_head_start = 0.0
 				for i in range(PW_LENGTH): # one character per speed step
-					# Dictionary: a box can start already solved
+					# Dictionary: a box can start already solved (the bar jumps past it)
 					if process_data != Cracking.VM and randf() < Upgrades.cur("cracking.dictionary"):
 						_reveal_letter(i, current_word[i])
+						if prog_bar_tween: prog_bar_tween.kill()
+						progress_bar.value = (i + 1) * 25
 						continue
-					var mode := get_mode()
-					max_heat_used = max(max_heat_used, get_heat(mode))
-					var step_time: float = get_step_time(mode) * (1.0 - head_start)
-					_crack_seconds += step_time
-					_update_progress_bar(i, step_time)
-					await get_tree().create_timer(step_time).timeout
+					# 2026-10-31: the speed follows the system every frame (it used to keep the overheat speed for the
+					# whole character once it started, so a cooled system kept cracking at the slow speed)
+					var done := 0.0
+					while done < 1.0 and running:
+						var mode := get_mode()
+						max_heat_used = max(max_heat_used, get_heat(mode))
+						var step_time: float = max(0.01, get_step_time(mode) * (1.0 - head_start))
+						await get_tree().process_frame
+						var dt = get_process_delta_time()
+						done += dt / step_time
+						_crack_seconds += min(dt, step_time)
+						if prog_bar_tween: prog_bar_tween.kill()
+						progress_bar.value = (i + min(done, 1.0)) * 25
 					if !running:
 						break
 					_reveal_letter(i, current_word[i])
@@ -234,7 +243,7 @@ func _successful_crack(heat: float):
 	record_cycle(1)
 	Stats.update_tempature(scaled_heat(heat))
 	Exp.add_xp(Cracking, process_data, process_data["experience per level"] * (2 if has_modifier("survey") else 1))
-	efficiency.text = str(_get_total_efficiency() * 100) + "%"
+	efficiency.text = "%.1f%%" % (_get_total_efficiency() * 100.0)
 
 	if randf() <= _token_chance():
 		Inventory.add_resource(Items.VM_CRACKING_TOKEN, 1)

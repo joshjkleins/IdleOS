@@ -15,14 +15,14 @@ var vm_token = Items.VM_MINING_TOKEN
 ## process runs in the main terminal). One modifier at a time per process, overclock included.
 ## speed: multiplies speed (0.5 = half speed). heat: multiplies heat (removed by COOL_PACKAGE).
 const MODIFIERS = [
-	{"command": "sift", "name": "Sift", "package": "mining.sift", "speed": 0.5, "heat": 1.5,
-		"effect": "-50% speed, heat x1.5. Each cycle has a 15% chance to also find one of the tier's Parsing items."},
+	{"command": "sift", "name": "Sift", "package": "mining.sift", "speed": 0.8, "heat": 1.5, # 2026-10-31: was -50% speed, 15%
+		"effect": "-20% speed, heat x1.5. Each cycle has a 25% chance to also find one of the tier's Parsing items."},
 	{"command": "prospect", "name": "Prospect", "package": "mining.prospect", "speed": 0.6, "heat": 2.0,
 		"effect": "-40% speed, heat x2. Efficiency x2 and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "mining.survey", "speed": 1.0, "heat": 1.0,
 		"effect": "Half resources, +100% Mining XP."},
 ]
-const SIFT_CHANCE := 0.15
+const SIFT_CHANCE := 0.25 # 2026-10-31: was 0.15
 ## Cool Bits: overclock and the modifiers add no extra heat
 const COOL_PACKAGE := "mining.cool_bits"
 var CURRENT_VMS = 0

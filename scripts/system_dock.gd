@@ -37,6 +37,9 @@ var upload_section: UploadSection
 var vm_toggle: SectionToggle
 var vm_summary: HBoxContainer # collapsed VM view: one light per running VM
 var vm_collapsed := false
+var vm_tokens_grid: GridContainer # 2026-10-31: VM token counts per skill (was only in 'ssh')
+var _token_labels := {} # skill -> Label
+const TOKEN_ABBR = {"Mining": "MIN", "Parsing": "PAR", "Cracking": "CRK", "Matching": "MAT", "Phishing": "PHI", "Decoding": "DEC", "Compiling": "CMP"}
 
 func _ready() -> void:
 	# line tracked rows up with the section headers
@@ -122,6 +125,38 @@ func _add_vm_toggle() -> void:
 	vm_summary.visible = false
 	vm_section.add_child(vm_summary)
 	vm_section.move_child(vm_summary, 1)
+	_add_vm_tokens()
+
+## One small grid of "MIN 12  PAR 3 ..." under the VM header, in each skill's color (dim at 0), always visible
+func _add_vm_tokens() -> void:
+	vm_tokens_grid = GridContainer.new()
+	vm_tokens_grid.columns = 4
+	vm_tokens_grid.add_theme_constant_override("h_separation", 10)
+	vm_tokens_grid.add_theme_constant_override("v_separation", 1)
+	vm_tokens_grid.tooltip_text = "VM tokens you have, per skill ('ssh' for the full list)"
+	vm_section.add_child(vm_tokens_grid)
+	vm_section.move_child(vm_tokens_grid, 1)
+	for sk in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]:
+		var l := _label("")
+		l.custom_minimum_size.x = 54
+		vm_tokens_grid.add_child(l)
+		_token_labels[sk] = l
+	_refresh_vm_tokens()
+
+static func _short_count(n: int) -> String:
+	if n >= 10000:
+		return "%dk" % (n / 1000)
+	if n >= 1000:
+		return "%.1fk" % (n / 1000.0)
+	return str(n)
+
+func _refresh_vm_tokens() -> void:
+	for sk in _token_labels:
+		var n = Inventory.get_amount(sk.vm_token)
+		var l: Label = _token_labels[sk]
+		l.text = "%s %s" % [TOKEN_ABBR.get(sk.SKILL.name, sk.SKILL.name.substr(0, 3).to_upper()), _short_count(n)]
+		l.add_theme_color_override("font_color", sk.SKILL.color if n > 0 else Color(DIM, 0.55))
+		l.tooltip_text = "%s: %d" % [sk.vm_token.name, n]
 
 func set_vm_collapsed(value: bool) -> void:
 	vm_collapsed = value
@@ -200,6 +235,7 @@ func _update_visibility() -> void:
 	separator.visible = has_tracked and vms_unlocked
 	system_separator.visible = has_tracked or vms_unlocked
 	vm_count_label.text = "%d/%d" % [VMManager.vms.size(), Stats.MAX_ALL_VMS]
+	_refresh_vm_tokens()
 	vm_empty_label.visible = VMManager.vms.is_empty() and !vm_collapsed
 	if vm_collapsed:
 		_refresh_vm_summary()
@@ -270,6 +306,10 @@ func _refresh_rows() -> void:
 		var minimized: bool = !vm.visible
 		if vm.stopping:
 			row.status.text = "stopping"
+		elif !vm.repeat or vm.periods_left == 0:
+			row.status.text = "%ds last" % vm.get_seconds_left()
+		elif vm.periods_left > 0:
+			row.status.text = "%ds +%d" % [vm.get_seconds_left(), vm.periods_left]
 		else:
 			row.status.text = "%ds%s" % [vm.get_seconds_left(), "" if vm.tokens_used <= 1 else " x%d" % vm.tokens_used]
 		row.button.tooltip_text = ("Minimized - click to restore" if minimized else "Click to minimize") + "\nTokens used: %d" % vm.tokens_used

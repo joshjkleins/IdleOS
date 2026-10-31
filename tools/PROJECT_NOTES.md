@@ -955,6 +955,62 @@ before release.
   Dev: `uploads set/complete`, `intel full/clear`, `tutorial complete`, `add/rm <item>`.
 
 ### Still open
+- Re-check the Hospital Chief of Medicine compromise fight (Adaptive + Escalator) after the 2026-10-31 Escalator
+  reset: Josh tuned it by feel while Escalator carried over from the earlier fights (it started at max), so it's
+  easier now. Josh will set up a save with that point's gear / mods / exploits / drivers to replay it.
 - Tier 4+ (Bank onward) combat / mods / exploits / drivers pass; Bank+ cache and economy check.
 - Tier 6 apt: replacement for the mod-slot upgrade. Defrag processes for Bank and Police.
 - Release: `DEV_ITEM_COMMANDS`, `Drivers.DEV_GIVE` (and the other DEV flags) off.
+
+## Tier 4 (Bank) first pass (2026-10-31)
+- apt nerf (Josh): SQL Damage +5 per tier from T4 (35 -> 40 -> 45 -> 50; was +50/+62/+100) and Firewall Damage
+  8 -> 10 -> 12 -> 15 (was +6/+7/+12). gen_upgrades.py DAMAGE_STEP / FIREWALL_STEP + xlsx regenerated.
+- Harness GEAR=prog: earlier tiers' apt + this tier's System, and this tier's Hacking levels only once their cost
+  caches come from targets before the tested one (Teller fights on T3 Hacking gear). BUILDS_TYPED[4] (5 slots
+  O/D/U/O/D). `$HOME/bal/comp4.sh <filter> [N]` (T=timeout).
+- Targets (integrity / fw / counter / speed / reboot, traits), right build ~70-105s, 25-50% anonymity left, no intel:
+  Teller 1000/60/60/16/10 packet_loss; Loan Officer 1900/60/66/30/8 heavy; Branch Manager 900/70/72/16/14 fortress;
+  Security 1000/65/72/30/6 escalator; CFO 850/60/100/20/10 siphon+adaptive. Payloads 4/8/12/16/20.
+- Regenerator doesn't scale to big integrity (2%/s of max), so no Bank target has it.
+- Compromise (full Bank gear): Teller swarm, Teller throttle, Loan Officer siphon, Branch Manager heater+fortress,
+  Security heavy, CFO fortress+escalator (overrides in Compromise.gd); right builds win, ~35-70% anonymity left.
+- Economy: Bank caches already match the Hospital ratio (no change). Upload goal 1000 each; PINS (crack 268/h) is
+  the slow chain (~3.7 h idle, minus cache drops). Parsing's Extraction says "TIER IV" but unlocks at tier 5.
+
+## 2026-10-31: driver nerfs, sift, cycle limits
+- Drivers: Session Hijack 1/2/3s (was 2/3/5); Token Replay 90/80/67% (was 70% at max); Social Proof 5/7/10% (was
+  10/15/25); Cover Story 4/7/10% (was 5/8/12; with Evasion 10% the dodge tops out at 19%); Payload Recycler 10/20/40%.
+  Backdoor mod 25% (was 40%): with Token Replay rank 3 a rebooted firewall is 50% of normal.
+- Overdraft blocks Siphon's drain and regen jam (before, the drain was refilled each frame but the jam could linger).
+- Mining 'sift': -20% speed (was -50%), heat x1.5, 25% (was 15%) chance per cycle for a tier Parsing item.
+- '<skill command> N' (main terminal, e.g. 'parse -footprint=logs 20'): BaseTerminal.cycle_limit, stop_safely after
+  N cycles (Parsing: per item; Phishing: per cast, claimed before casting so it's exact). Offline runs only the cycles
+  left and resumes with the rest ('mine -logs 43'), or not at all when it finished.
+- 'ssh <command> N': VMWindow.periods_left (N tokens' worth in all). 'vm kill <id|-a> -s': finish_after_token().
+  Window status shows "+N" / "last"; 'vm ls' STATE column too. Test: cyctest.gd ($HOME/new).
+- Cracking: each character's progress follows the system mode every frame (an overheat no longer keeps a character
+  at the overheat speed after cooling); Dictionary-solved boxes jump the bar. PIN 20% faster (29.5s/char base).
+  Cross-Reference -20% speed, heat x2. Efficiency labels (mining / cracking / info table) show 1 decimal.
+- Matching Auto-Correlate now shows as a head start: the bar starts at the upgrade's % and fills the rest (same time).
+  Test: tools/tests/cracktest2.gd.
+- Modifiers (sift, crossref, ...) end on an overheat like overclock, and can't start while overheated
+  (idle_os_2.overheat_terminal_notice / _handle_modifier_command). Overclock text = ContextCommands.overclock_effect_text:
+  "x2 speed, heat x<overclock heat / heat> per cycle" (Mining 1.9, Parsing 1.3, Cracking 1.2, Matching 1.1,
+  Phishing 2, Decoding 1.1, Compiling 1.3); apt overclock texts match. Phishing Mod's overclock is only ~x1.25
+  overall (cast 4 -> 1.5s, download 35 -> 27.5s). Test: tools/tests/ocratio.gd lists the ratios.
+- Phishing Mod heat: "flat heat" - casts add none, each mod caught adds a flat 20°C (30 overclocked, 5 overheated),
+  not scaled by tier or divided by speed upgrades (System heat reduction still applies). Phishing's overclock text
+  adds "(Mod ~x1.25 speed, x1.5 heat)". Test: tools/tests/modheat.gd.
+- Exploit Supply Drop -> Hedge (id stays "supply_drop" for saves; aliases hedge/supply): for 10s, 50% of every
+  countermeasure that lands is banked and paid back as anonymity when it ends (hedge_left / hedge_bank / _hedge_payout,
+  chip "HEDGE 7s +26"). Auto fires when the counter bar is 80% full. Cost 30.
+- Jitter 3% per countermeasure, max 30% (JITTER_MAX). Branch Manager card 700 / 125 fw (base 1000 / 78.125); its
+  compromise keeps 900 / 70 overrides. Side panel temp widget: "stable" instead of "overclock available".
+- 'decode -intel=<location>' (main terminal and ssh): arg {"_intel_location": key}; the terminal works the hardest
+  unlocked target that isn't maxed (Decoding.next_intel_target), moves down the list as each maxes, ends when all are.
+  Offline follows the same order (snap.intel_location, job repeat). Test: tools/tests/inteltest.gd.
+- A hack wins as soon as integrity drops below 1 (fractional Bleed damage left "0/850" targets alive).
+- Tier 4 (Bank) signed off 2026-10-31. CFO compromise firewall 46.875 (card 75).
+- Escalator resets every fight (start_hack): it used to count every countermeasure since setup, so a multi-hack run or
+  a compromise reached its later Escalator fights already at +150%. CFO compromise retuned (650 / 40 fw / 110 /
+  26 speed / 16s reboot -> card 455 / 64 / 8s / every 3.8s): Escalator build ~80%, 95s, 28% left.

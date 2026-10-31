@@ -233,6 +233,8 @@ func _finished_log(heat_mode: Mode):
 
 	_update_chance_label(get_current_item_to_parse())
 	apply_heat(heat_mode)
+	session_cycles += 1 # 2026-10-31: one parsed item = one cycle ('parse -footprint=logs 20')
+	check_cycle_limit()
 	#if !stop_requested:
 		#_reset_logs()
 

@@ -390,78 +390,83 @@ var hacking_targets = {
 		"required payload": Items.BANK_PAYLOAD,
 		"hard mode targets": [], # none built yet
 		"targets": [
-			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
+			{ # 2026-10-31: tier 4 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Teller",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack teller",
-				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 1},
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 4}, # 2026-10-31: was 1
 				"heat": 0.5,
 				"exp": 193,
-				"integrity": 672,
-				"firewall": 93,
-				"counter": 64,
+				"integrity": 1000,
+				"firewall": 60,
+				"counter": 60,
 				"counter speed": 16.0,
+				"traits": ["packet_loss"], # 2026-10-31: tier 4 first pass
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.TELLER_CACHE
 			},
-			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
+			{ # 2026-10-31: tier 4 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Loan Officer",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack loan-officer",
-				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 8}, # 2026-10-31: was 2
 				"heat": 0.8,
 				"exp": 2317,
-				"integrity": 1475,
-				"firewall": 106,
-				"counter": 58,
-				"counter speed": 16.0,
+				"integrity": 1700,
+				"firewall": 60,
+				"counter": 54,
+				"counter speed": 28.99,
+				"traits": ["heavy"], # 2026-10-31: tier 4 first pass
 				"firewall reboot": 8.0, # seconds the firewall stays down after a break
 				"loot": Items.LOAN_OFFICER_CACHE
 			},
-			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
+			{ # 2026-10-31: tier 4 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Branch Manager",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack branch-manager",
-				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 3},
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 12}, # 2026-10-31: was 3
 				"heat": 1.1,
 				"exp": 3475,
-				"integrity": 2138,
-				"firewall": 230,
-				"counter": 67,
+				"integrity": 1000,
+				"firewall": 78.125,
+				"counter": 72,
 				"counter speed": 16.0,
+				"traits": ["fortress"], # 2026-10-31: tier 4 first pass
 				"firewall reboot": 14.0, # seconds the firewall stays down after a break
 				"loot": Items.BRANCH_MANAGER_CACHE
 			},
-			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
+			{ # 2026-10-31: tier 4 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Security",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack security",
-				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 16}, # 2026-10-31: was 4
 				"heat": 1.4,
 				"exp": 4634,
-				"integrity": 3340,
-				"firewall": 169,
-				"counter": 34,
-				"counter speed": 30.0,
+				"integrity": 920,
+				"firewall": 65,
+				"counter": 63,
+				"counter speed": 26.32,
+				"traits": ["escalator"], # 2026-10-31: tier 4 first pass
 				"firewall reboot": 6.0, # seconds the firewall stays down after a break
 				"loot": Items.SECURITY_CACHE
 			},
-			{ # PLACEHOLDER stats (School x5.5, tier 4) - balance later
+			{ # 2026-10-31: tier 4 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Chief Financial Officer",
 				"difficulty": "Hard",
 				"unlocked": true,
 				"command": "hack cfo",
-				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.BANK_PAYLOAD, "amount": 20}, # 2026-10-31: was 5
 				"heat": 1.7,
 				"exp": 5792,
-				"integrity": 3876,
-				"firewall": 188,
-				"counter": 68,
+				"integrity": 850,
+				"firewall": 60,
+				"counter": 100,
 				"counter speed": 20.0,
+				"traits": ["siphon", "adaptive"], # 2026-10-31: tier 4 first pass
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CFO_CACHE
 			}
@@ -915,7 +920,7 @@ const TRAITS = {
 	"heavy":       {"name": "HEAVY HITTER", "text": "Slow, crushing countermeasures",
 		"counter_speed": 0.3, "counter": 5.0},
 	"escalator":   {"name": "ESCALATOR", "text": "Every countermeasure it fires makes the next ones come faster",
-		"escalate": 0.05, "escalate_max": 1.5}, # 2026-10-29: +5% countermeasure speed per countermeasure fired (was +4% per 5-10s of hacking), up to +150%; over the whole run
+		"escalate": 0.05, "escalate_max": 1.5}, # 2026-10-29: +5% countermeasure speed per countermeasure fired (was +4% per 5-10s of hacking), up to +150%; per fight (2026-10-31: was over the whole run / compromise)
 	"siphon":      {"name": "SIPHON", "text": "Countermeasures drain your bandwidth and stall its regen",
 		"drain": 1.0, "jam": 1.5}, # drain: share of max bandwidth per countermeasure (2026-10-28: was 1.0, then 0.5; 2026-10-29: back to 1.0); jam: seconds of no bandwidth regen after it (2026-10-29)
 	"heater":      {"name": "HEATER", "text": "Runs your system hot. Breaking the firewall vents 20°C from your system",

@@ -103,7 +103,7 @@ SPEED_STEP = [round((1.5**t - 1.5**(t-1)) / 3, 4) for t in range(1, 7)]
 # Cooling added by each tier's install: totals 0.4 / 0.75 / 1.3 / 2.0 / 3.05 / 4.6 C/s (base 0.1)
 COOLING_STEP = [0.3, 0.35, 0.55, 0.7, 1.05, 1.55]
 # SQL damage / firewall damage added per tier: totals +5/30/68/118/180/280 and +2/5/10/16/23/35
-DAMAGE_STEP = [5, 10, 0, 50, 62, 100] # 2026-10-29: T3 is +25% SQL attack speed instead of damage (data/upgrades.json "speed", plus "name": "SQL Speed" and "change", added by hand);  2026-10-28: T2 was +25 (tier 2 hacking jumped from impossible to trivial)
+DAMAGE_STEP = [5, 10, 0, 5, 5, 5] # 2026-10-31: T4-T6 were +50/+62/+100 (Josh: +5 per tier, 35 -> 40 -> 45 -> 50); 2026-10-29: T3 is +25% SQL attack speed instead of damage (data/upgrades.json "speed", plus "name": "SQL Speed" and "change", added by hand);  2026-10-28: T2 was +25 (tier 2 hacking jumped from impossible to trivial)
 # Economy pass (2026-10-20, tools/balance/econ2.py): cost scale per tier so each tier fits Josh's active-play time
 # (T1 1-2 h ... T6 6-7 h, cache loot counted), and rare items per capstone by tier
 COST_SCALE = [0.1, 0.7, 0.85, 0.75, 0.75, 1.0]
@@ -111,7 +111,7 @@ BASIC_TIER_MULT = [3, 1, 1, 1, 1, 1]  # basic-resource costs only (2026-10-20 pl
 CAP_RARES = [1, 1, 2, 2, 2, 2]
 CAP_COST_MULT = 3.66 # capstone = ~3.6x the slot's normal cost (T1 compiling.overclock: 55 payloads + a rare -> 200 payloads)
 HACK_CACHE_TOTAL = [10, 15, 22, 28, 34, 40]  # Hacking upgrades' cache cost per tier (all 10 installs)
-FIREWALL_STEP = [2, 2, 3, 6, 7, 12] # 2026-10-30: T3 was +5;  2026-10-28: T2 was +3
+FIREWALL_STEP = [2, 2, 3, 2, 2, 3] # 2026-10-31: T4-T6 were +6/+7/+12 (Josh: 8 -> 10 -> 12 -> 15); 2026-10-30: T3 was +5;  2026-10-28: T2 was +3
 
 GROUPS = {}
 
@@ -148,9 +148,9 @@ GROUPS["Mining"] = [
     (PTD,"Vein Detection","Every Nth cycle yields double; N shrinks each tier","every 10th -> 5th",(11,-1,"= double every Nth cycle")),
     (PTD,"Pipelining","A finished cycle starts the next one partly filled","+10% head start",(0,10,"% head start")),
     (CAP,["Overclock","Deep Core","Sift","Prospect","Survey","Cool Bits"],
-        ["MODIFIER 'overclock': faster, more heat (existing; tutorial step depends on it, so keep it cheap)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.9 per cycle; stops on overheat",
          "Passive: VM Mining token chance x2",
-         "MODIFIER 'sift': -50% speed, heat x1.5; each cycle 15% chance to also find one of the tier's Parsing items",
+         "MODIFIER 'sift': -20% speed, heat x1.5; each cycle 25% chance to also find one of the tier's Parsing items",
          "MODIFIER 'prospect': -40% speed; efficiency x2, VM token chance x2, heat x2",
          "MODIFIER 'survey': half resources, +100% Mining XP (for grinding levels)",
          "Passive: Overclock, Sift and Prospect produce no extra heat"],"one-off",None),
@@ -166,7 +166,7 @@ GROUPS["Parsing"] = [
     (PTD,"Pattern Cache","Each empty row raises the next row's find chance until a hit (bad-luck protection)","+1% per miss",(0,1,"% added per empty row")),
     (PTD,"Fast Skip","Empty rows are processed faster (works on every Parsing process from Tier 1)","+10%",(0,10,"% faster empty rows")),
     (CAP,["Overclock","Token Sniffer","Plaintext","Deep Read","Survey","Cold Cache"],
-        ["MODIFIER 'overclock': faster, more heat (existing)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat",
          "Passive: VM Parsing token chance x2",
          "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 10% chance to come out already cracked (skips Cracking)",
          "MODIFIER 'deep-read': -40% speed; row find chance x2 (not Network finds), VM token chance x2, heat x2",
@@ -184,9 +184,9 @@ GROUPS["Cracking"] = [
     (PTD,"Dictionary","Each box has a chance to start already solved","+8%",(0,8,"% box pre-solved")),
     (PTD,"Rainbow Tables","An instant crack gives the next cycle a head start","+10%",(0,10,"% head start after instant crack")),
     (CAP,["Overclock","Keyring","Cross-Reference","Analyze","Survey","Cryo Rig"],
-        ["MODIFIER 'overclock': faster, more heat (existing)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.2 per cycle; stops on overheat",
          "Passive: VM Cracking token chance x2",
-         "MODIFIER 'crossref': -50% speed, heat x1.5; each crack 10% chance to also produce the tier's matched item (skips Matching)",
+         "MODIFIER 'crossref': -20% speed, heat x2; each crack 10% chance to also produce the tier's matched item (skips Matching)",
          "MODIFIER 'analyze': -40% speed; instant-crack chance x2, VM token chance x2, heat x2",
          "MODIFIER 'survey': half output, +100% Cracking XP",
          "Passive: Overclock, Cross-Reference and Analyze produce no extra heat"],"one-off",None),
@@ -202,7 +202,7 @@ GROUPS["Matching"] = [
     (PTD,"Auto-Correlate","Each match starts with a head start","+10%",(0,10,"% head start")),
     (PTD,"Hot Cache","+1% speed per consecutive match up to the cap (cap +5% per tier); resets when stopped","+5% cap",(0,5,"% max momentum speed")),
     (CAP,["Overclock","Rolodex","Prebuild","Correlate","Survey","Cold Storage"],
-        ["MODIFIER 'overclock': faster, more heat (existing)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
          "Passive: VM Matching token chance x2",
          "MODIFIER 'prebuild': -50% speed, heat x1.5; each match 5% chance to also produce the tier's payload (skips Compiling)",
          "MODIFIER 'correlate': -40% speed; efficiency x2, VM token chance x2, heat x2",
@@ -220,7 +220,7 @@ GROUPS["Phishing"] = [
     (PTD,"Bait Recycling","Chance a cast's 10 bait are not used up","+5%",(0,5,"% bait kept")),
     (PTD,"Quick Hook","Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)","-5% reel time",(0,5,"% faster reel")),
     (CAP,["Overclock","Tackle Box","Lure","Chum","Survey","Deep Water"],
-        ["MODIFIER 'overclock': faster, more heat (existing)",
+        ["MODIFIER 'overclock': x2 speed, heat x2 per cycle; stops on overheat",
          "Passive: VM Phishing token chance x2",
          "MODIFIER 'lure': -50% speed, heat x1.5; each catch 3% chance to also hook a hacking mod item (not Trap)",
          "MODIFIER 'chum': -40% speed; every catch doubled, VM token chance x2, heat x2 (not Trap)",
@@ -238,7 +238,7 @@ GROUPS["Decoding"] = [
     (PTD,"Salvage Sweep","Each cache has a chance to also drop an Exploit or Hacking Mod of its tier","+2%",(0,2,"% sweep chance per cache")),
     (PTD,"Field Notes","Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack","+1 hack",(0,1,"extra intel hacks")),
     (CAP,["Overclock","Token Vault","Index","Forensics","Survey","Clean Room"],
-        ["MODIFIER 'overclock': faster, more heat (existing)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
          "Passive: VM Decoding token chance x2",
          "MODIFIER 'index': -50% speed, heat x1.5; each decoded cache adds 1 intel point on the target it came from",
          "MODIFIER 'forensics': -40% speed; Exploit find chance x2, VM token chance x2, heat x2",
@@ -256,7 +256,7 @@ GROUPS["Compiling"] = [
     (PTD,"Linker","Chance to build two payloads at once","+2.5%",(0,2.5,"% double payload")),
     (PTD,"Code Signing","Chance each payload also gives 1 intel find on a target of its location (Debug's 10% stacks)","+2.5%",(0,2.5,"% payload intel")),
     (CAP,["Overclock","Build Cache","Debug Build","Optimize","Survey","Cold Build"],
-        ["MODIFIER 'overclock': faster, more heat (not on Access)",
+        ["MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat (not on Access)",
          "Passive: VM Compiling token chance x2",
          "MODIFIER 'debug': -50% speed, heat x1.5; each payload has a 10% chance to also give 1 intel find on a target of its location",
          "MODIFIER 'optimize': -40% speed; burst chance x2, VM token chance x2, heat x2",

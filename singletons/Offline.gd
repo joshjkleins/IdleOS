@@ -48,6 +48,8 @@ func snapshot() -> Dictionary:
 	if skill == Hacking or skill == Defragging:
 		return {}
 	var snap = {"skill": skill.SKILL.name, "process": p.name, "context": int(os.main_command.context), "command": str(os.main_command.text)}
+	if int(t.get("cycle_limit")) > 0: # 2026-10-31: '<command> N': only the cycles left run offline
+		snap.cycles_left = max(0, int(t.cycle_limit) - int(t.session_cycles))
 	match skill:
 		Parsing:
 			snap.items = t.items_to_parse.map(func(i): return i.id)
@@ -69,6 +71,8 @@ func snapshot() -> Dictionary:
 				return {} # VM token processes are online only
 			snap.item = t.target_cache.id if t.target_cache else -1
 			snap.target = Stats.target_key(t.target_arg) if t.target_arg is Dictionary else ""
+			if str(t.get("intel_location")) != "" and t.get("intel_location") != null:
+				snap.intel_location = str(t.intel_location)
 		Compiling:
 			snap.item = t.hacking_mod_item.id if t.hacking_mod_item else -1
 	return snap
@@ -89,7 +93,11 @@ func compute() -> void:
 	# 2026-10-30: short absences still resume the process (before, under a minute it stayed stopped)
 	if away < RESUME_ONLY_SECONDS:
 		if !snap.is_empty():
-			report = {"resume_only": true, "away": away, "resume": {"context": int(snap.context), "command": str(snap.command)}}
+			var cmd = str(snap.command)
+			if snap.has("cycles_left"):
+				cmd = "%s %d" % [cmd, int(snap.cycles_left)] if int(snap.cycles_left) > 0 else ""
+			if cmd != "":
+				report = {"resume_only": true, "away": away, "resume": {"context": int(snap.context), "command": cmd}}
 		return
 	var secs = min(away, cap_seconds())
 	var inv_before = Inventory.inventory.duplicate()
@@ -114,6 +122,12 @@ func compute() -> void:
 			computing = true
 			report.ran = _run(skill, p, snap, secs)
 			computing = false
+			if snap.has("cycles_left"): # a limited run resumes with what's left of it, or not at all
+				if int(snap.cycles_left) > 0:
+					report.resume.command = "%s %d" % [str(snap.command), int(snap.cycles_left)]
+				else:
+					report.resume = {}
+					report.notes.append("your limited run finished while you were away")
 	_run_uploads(secs)
 	Stats.system_tempature = Stats.MIN_TEMP # it cooled down while you were away
 	Stats.overheated = false
@@ -190,6 +204,8 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 				cycles = min(cycles, int(floor(Inventory.get_amount(item) / per)))
 		if job.has("limit"):
 			cycles = min(cycles, int(job.limit))
+		if snap.has("cycles_left"):
+			cycles = min(cycles, int(snap.cycles_left))
 		if cycles <= 0:
 			break
 		if job.has("apply"):
@@ -209,6 +225,10 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 		if float(job.get("xp", 0.0)) > 0.0:
 			Exp.add_xp(skill, p, int(round(float(job.xp) * cycles)))
 		left -= cycles * float(job.seconds)
+		if snap.has("cycles_left"):
+			snap.cycles_left = max(0, int(snap.cycles_left) - cycles)
+			if int(snap.cycles_left) <= 0:
+				break
 		if cycles >= time_cycles or !job.get("repeat", false):
 			break
 	return clamp(secs + credit - left, 0.0, secs)
@@ -388,7 +408,7 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var cast = float(p["cast time"]) / s
 	var wait = (float(p["wait time min"]) + float(p["wait time max"])) / 2.0 / s
 	var mult = 2.0 if baited and !rare_bait else 1.0
-	var h = _hc(Phishing, float(p.heat), Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing")))
+	var h = _hc(Phishing, float(p.heat), 1.0 if p.get("flat heat", false) else Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing")))
 	var inp := {}
 	var style = p.get("style", "lines")
 	var casts = lines if style == "lines" else 1
@@ -477,7 +497,7 @@ func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 						Inventory.remove_resource(it, int(round(inp[it] * cycles)))
 					return cycles
 			job.xp = chance * lines * float(p["experience per level"])
-			job.heat = h * lines * (1.0 + chance)
+			job.heat = h * lines * (chance if p.get("flat heat", false) else 1.0 + chance) # Mod: only catches heat
 	return job
 
 func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
@@ -487,11 +507,11 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var h = _hc(Decoding, float(p.heat)) # x the tier of what's decoded (_dec_heat)
 	match kind:
 		"intel":
-			var tg = _target(str(snap.get("target", "")))
+			var tg = Decoding.next_intel_target(str(snap.intel_location)) if snap.has("intel_location") else _target(str(snap.get("target", "")))
 			if tg.is_empty() or Decoding.is_intel_maxed(tg):
 				return {}
 			var finds = Decoding.INTEL_LINES * Decoding.get_efficiency(p)
-			var job = {"seconds": Decoding.INTEL_LINES * bytes_row * step, "xp": float(p["experience per level"]), "heat": h * _dec_heat(null)}
+			var job = {"seconds": Decoding.INTEL_LINES * bytes_row * step, "xp": float(p["experience per level"]), "heat": h * _dec_heat(null), "repeat": snap.has("intel_location")}
 			job.apply = func(cycles: int, m: float) -> int:
 				var n = int(round(cycles * finds * m))
 				var done = 0

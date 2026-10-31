@@ -24,12 +24,20 @@ var _stopped: bool = false       # stop() may be called twice (safe stop + "stop
 # session stats, reset by begin_run()
 var session_time: float = 0.0
 var session_cycles: int = 0
+var cycle_limit: int = 0 # 2026-10-31: '<command> N' in the main terminal: stop safely after N cycles (0 = no limit)
 var session_yield: int = 0
+
+## '<command> N' in the main terminal: idle_os_2 sets this just before starting the process; the next
+## main-terminal process takes it (so Phishing's lines see the limit from their first cast)
+static var next_cycle_limit: int = 0
 
 func setup_process(p_skill: Node, data: Dictionary, p_in_vm: bool = false) -> void:
 	skill = p_skill
 	process_data = data
 	in_vm = p_in_vm
+	if !in_vm and next_cycle_limit > 0:
+		cycle_limit = next_cycle_limit
+		next_cycle_limit = 0
 
 func begin_run() -> void:
 	running = true
@@ -113,7 +121,8 @@ func get_heat(mode: Mode) -> float:
 		h *= modifier_heat()
 		# speed upgrades don't add heat: cycles run faster, so each one makes proportionally less
 		# (heat per second stays the same; overclock and modifiers still add theirs)
-		h /= 1.0 + get_speed_upgrade()
+		if !process_data.get("flat heat", false): # a flat jolt per catch (Phishing Mod) isn't spread over time
+			h /= 1.0 + get_speed_upgrade()
 	# Heat Sink track (Mining): less heat from this skill
 	h *= 1.0 - Upgrades.cur(skill.SKILL.name.to_lower() + ".heat_sink")
 	return h * heat_tier_mult()
@@ -178,6 +187,12 @@ func _on_stopped() -> void:
 func record_cycle(amount_gained: int) -> void:
 	session_cycles += 1
 	session_yield += amount_gained
+	check_cycle_limit()
+
+## Stops safely once the cycle limit is reached (terminals that don't use record_cycle call this per cycle)
+func check_cycle_limit() -> void:
+	if cycle_limit > 0 and session_cycles >= cycle_limit and !stop_requested:
+		stop_safely()
 
 static func format_time(total_seconds: float) -> String:
 	var seconds: int = int(total_seconds) % 60

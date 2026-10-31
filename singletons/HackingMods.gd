@@ -90,7 +90,7 @@ const EQUIP_INFO = {
 	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
 	MOD_TYPE.COLD_BOOT: ["Cold Boot", "Overclock adds no extra heat, and overheating doesn't speed up the enemy.", "on"],
 	MOD_TYPE.COUNTER_RESET: ["Reset Loop", "Each SQL Injector hit has a 10% chance to reset the countermeasure bar.", "pct"],
-	MOD_TYPE.FW_START_PCT: ["Backdoor", "The target's firewall starts 40% lower (every hack and every reboot).", "neg"], # 2026-10-30: 40% (2026-10-29: 35%, was 25%)
+	MOD_TYPE.FW_START_PCT: ["Backdoor", "The target's firewall starts 25% lower (every hack and every reboot).", "neg"], # 2026-10-31: 25% (with Token Replay max: 50%); 2026-10-30: 40%
 	MOD_TYPE.COUNTER_DMG_PCT: ["Hardened Shell", "Countermeasures deal 15% less damage.", "neg"],
 	MOD_TYPE.START_ANON: ["Fresh Start", "The first 3 attacks of each hack are guaranteed crits.", "pct"], # 2026-10-30: was 100% faster; 2026-10-29: was +15% anonymity at the start
 	MOD_TYPE.SPOOF_OPENER: ["Opening Spoof", "A Packet Spoof engages at the start of each hack, and that first spoof deals double its healing as damage.", "x"], # 2026-10-29: damage added
@@ -99,7 +99,7 @@ const EQUIP_INFO = {
 	MOD_TYPE.BLEED: ["Bleed", "Every SQL hit deals another 10% of its damage over 3 seconds.", "pct"],
 	MOD_TYPE.FW_BREAK_HASTE: ["Breach Momentum", "Breaking the firewall makes your next 3 attacks 100% faster.", "pct"],
 	MOD_TYPE.LEECH: ["Leech", "Every SQL hit restores 2% of max anonymity.", "pct"],
-	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 5% (up to 50%).", "pct"],
+	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 3% (up to 30%).", "pct"], # 2026-10-31: was 5% / 50%
 	MOD_TYPE.FAILSAFE: ["Failsafe", "The first time you'd be traced in a hack, restore 40% of max anonymity instead.", "pct"], # 2026-10-29: was 20%
 	MOD_TYPE.EXTRA_CACHE: ["Data Hoarder", "Each breach has a 20% chance to win an extra cache.", "pct"],
 	MOD_TYPE.FW_OPENER: ["Handshake Exploit", "The first hit against a new firewall (each hack, and after every reboot) deals triple firewall damage.", "x"], # 2026-10-29: was +10

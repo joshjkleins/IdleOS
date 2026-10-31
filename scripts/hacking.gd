@@ -199,7 +199,7 @@ func handle_run_command(text: String) -> void:
 			return
 		Exploits.auto_id = auto_item.exploit_id
 		SaveManager.mark_dirty()
-		player_hacking_box.add_line_success("Auto: %s is used whenever it's useful and you have %d charge. Stop with 'run auto off'." % [auto_item.name, int(Exploits.cost(auto_item))])
+		player_hacking_box.add_line_success("Auto: %s is used whenever it's useful and you have %d charge, until this hack, run or compromise ends. Stop with 'run auto off'." % [auto_item.name, int(Exploits.cost(auto_item))])
 		if Inventory.get_amount(auto_item) <= 0:
 			player_hacking_box.add_line_warning("You don't have any %s yet." % auto_item.name)
 		return
@@ -295,6 +295,18 @@ func handle_hack_command(text):
 		player_hacking_box.add_line_error("Missing: " + target.requirements.item.name + " x" + str(target.requirements.amount))
 		return
 	
+	# 2026-10-31: 'hack x=N' needs payloads for all N hacks up front (a run that runs dry early would miss the
+	# 5th-win streak rare and leave you locked out halfway)
+	if hack_count > 1:
+		var need = int(target.requirements.amount) * hack_count
+		var have = Inventory.get_amount(target.requirements.item)
+		if have < need:
+			await enemy_hacking_box.target_select_error(target)
+			player_hacking_box.add_line_error("Not enough payloads for %d hacks: %d %s needed, you have %d." % [hack_count, need, target.requirements.item.name, have])
+			var can = have / max(1, int(target.requirements.amount))
+			var tn = str(target.name).to_lower()
+			player_hacking_box.add_line_system(("You can run 'hack %s=%d', or 'hack %s -r' to go until they run out." % [tn, can, tn]) if can >= 1 else "Compile more %s first." % target.requirements.item.name)
+			return
 	if Inventory.get_amount(Items.SQL_INJECTOR) <= 0:
 		player_hacking_box.add_line_error("Missing SQL Injectors.")
 		player_hacking_box.add_line_system("Can be found Phishing.")
@@ -455,6 +467,10 @@ func handle_compromise_command(arg: String) -> void:
 
 func hacking_ended():
 	Stats.overclocked = false # 2026-10-24: a hack's overclock ends with the hack (it stayed on in the main terminal after a win)
+	if Exploits.auto_id != "": # 2026-10-31: 'run auto' lasts one hack / run / compromise
+		player_hacking_box.add_line_system("Auto Exploit (%s) switched off. Set it again with 'run auto <item>'." % Exploits.get_item(Exploits.auto_id).name)
+		Exploits.auto_id = ""
+		SaveManager.mark_dirty()
 	#enemy_hacking_box.end_hack()
 	header_hacking_box.update_hacking_header()
 	header_hacking_box.update_modifiers_ui()

@@ -62,7 +62,7 @@ func get_modifier_info_text(skill: Node) -> String:
 	# overclock first, then the skill's capstone modifiers (one at a time per process)
 	var group = skill.SKILL.name
 	var entries = [{"name": "Overclock", "unlocked": Upgrades.can_overclock(skill), "package": group.to_lower() + ".overclock",
-		"command": "overclock", "effect": "Increase speed & heat output."}]
+		"command": "overclock", "effect": overclock_effect_text(skill)}]
 	for m in skill.get("MODIFIERS") if skill.get("MODIFIERS") else []:
 		entries.append({"name": m.name, "unlocked": Upgrades.has(m.package), "package": m.package, "command": m.command, "effect": m.effect})
 	# only modifiers you've unlocked; nothing at all until the first one
@@ -418,8 +418,8 @@ func _build_process_row(p: Dictionary, skill: Node, unlocked: bool) -> String:
 		var frag_bonus = 1.0 # defrag no longer boosts skills
 		#var frag_bonus = Defragging.skill["bonus efficiency"] if Stats.has_bonus(skill) else 1.0
 		var base_eff = p["efficiency"]
-		var effr = str(p["efficiency rate"] * 100.0) + "%"
-		var eff = str(base_eff * frag_bonus * 100.0) + "%"
+		var effr = str(snappedf(p["efficiency rate"] * 100.0, 0.01)) + "%"
+		var eff = "%.1f%%" % (base_eff * frag_bonus * 100.0)
 		var info_text_mp = p["name"].to_lower().replace(" ", "-")
 		var info_text = "info %s %s" % [skill.SKILL.name.to_lower(), info_text_mp]
 		if !unlocked:
@@ -636,6 +636,17 @@ func info_command_text():
 
 
 
+## Overclock's effect for a skill, in the modifiers' style (2026-10-31): every process runs x2 speed; heat per
+## cycle is the skill's "overclock heat" / "heat" (Mining ~1.9 ... Decoding ~1.1). Ends on an overheat.
+static func overclock_effect_text(skill: Node) -> String:
+	var r = 0.0
+	for p in skill.minor_processes:
+		if float(p.get("heat", 0.0)) > 0.0 and p.has("overclock heat"):
+			r = float(p["overclock heat"]) / float(p.heat)
+			break
+	var extra = " (Mod ~x1.25 speed, x1.5 heat)" if skill == Phishing else ""
+	return "x2 speed, heat x%s per cycle%s. Stops on overheat." % [str(snappedf(r, 0.1)) if r > 0.0 else "2", extra]
+
 ## 'info hacking <location>': every target with its stats after traits (and after intel, when it has some),
 ## in the tree style of the other info blocks. Rewritten 2026-10-28 (was raw stats before traits).
 func get_hack_target_info(location: Dictionary) -> String:
@@ -663,7 +674,18 @@ func _target_info(tar: Dictionary) -> String:
 	var ip = Decoding.intel_pcts(tar) if int(intel.hacks) > 0 else {}
 	var lines = []
 	var req = tar.get("requirements", {})
-	if req.has("item"):
+	if locked: # 2026-10-31: a locked target shows what unlocking it takes, not its per-hack payload cost
+		var r = Stats.get_access_recipe(tar)
+		var loc_open = Stats.hacking_targets[Stats.target_place(tar).get("location", "School")].get("unlocked", false) if !Stats.target_place(tar).is_empty() else false
+		if loc_open and !r.is_empty() and r.rare != null:
+			var parts = []
+			for pair in [[r.rare, int(r.rare_amount)], [r.payload, int(r.payload_amount)]]:
+				var h = Inventory.get_amount(pair[0])
+				parts.append("%d %s [color=%s](%d/%d)[/color]" % [pair[1], pair[0].name, "#4ec994" if h >= pair[1] else "#e26d5a", h, pair[1]])
+			lines.append(["Unlock", " + ".join(parts)])
+		else:
+			lines.append(["Unlock", Stats.get_unlock_hint(tar)])
+	elif req.has("item"):
 		var have = Inventory.get_amount(req.item)
 		lines.append(["Needs", "%d %s  [color=%s](you have %d)[/color]" % [int(req.amount), req.item.name, D if have >= int(req.amount) else "#e26d5a", have]])
 	lines.append(["Integrity", _ti_val(ts.integrity, ip.get("integrity", 0.0), -1, "%d")])
@@ -792,6 +814,7 @@ func process_commands() -> String:
 |                                                                    |
 | STARTING / STOPPING                                                |
 |   <skill> -<process>           Run a process                       |
+|   <skill> -<process> <N>       Run N cycles, then stop             |
 |   kill                         Stop currently running process      |
 |   kill -s                      Stop it after the current cycle     |
 |   stop                         Stop currently running process      |
@@ -886,6 +909,7 @@ func utility_commands() -> String:
 		["focus", "Bring the running process to the bottom of the terminal"],
 		["pin / unpin", "Pin the running process to the top of the terminal / unpin it"],
 		["kill / kill -s", "Stop the running process (-s: finish its current cycle first)"],
+		["<command> N", "Run a process for N cycles, then stop (ex. parse -footprint=logs 20)"],
 		["", ""],
 		["", "ITEMS"],
 		["track <item>, <item>", "Keep a live count of items in the side panel"],
@@ -1324,7 +1348,7 @@ To copy the discord link to your clipboard use 'discord -c'
 func get_build_version() -> String:
 	return "IdleOS v" + str(ProjectSettings.get_setting("application/config/version", "dev"))
 
-func get_mod_command() -> String:
+func get_mod_command(by_slot: bool = false) -> String:
 	#if HackingMods.current_mods.is_empty():
 		#return "No active Hacking Mods. Use the Mod process in the [color=" + Compiling.SKILL.color.to_html() + "]Compiling[/color] skill to Compile items into Hacking Mods."
 
@@ -1362,54 +1386,63 @@ func get_mod_command() -> String:
 	if int(HackingMods.max_mods) < HackingMods.MAX_MOD_SLOTS: # the next slot to unlock
 		return_text += "[color=#666666]" + pad_text("", id_col) + pad_text(HackingMods.SLOT_SHORT[HackingMods.slot_type(int(HackingMods.max_mods))], type_col) + "locked (next 'apt' mod slot upgrade)[/color]\n"
 	
-	return_text += "\n\n\n-------------"
-	return_text += "\n| MOD ITEMS |\n"
-	return_text += "-------------\n"
-	
-	
-	var mod_id_col = 5
-	var mod_name_col = 27
-	var mod_mod_col = 47
-	var mod_val_col = 8
-	
-	return_text += "\n" + pad_text("ID", mod_id_col) + pad_text("SLOT", type_col) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
-	return_text += "-".repeat(82 + 15 + type_col) + "\n"
-	if Inventory.has_mod_item():
-		var player_hacking_mods = Inventory.get_hacking_mods_items()
-		
-		if !player_hacking_mods.is_empty():
-			var last_tier = -1
-			for i in player_hacking_mods.size(): #loop through hacking items (sorted by tier)
-				var mod = player_hacking_mods[i]
-				var mod_type = mod.hacking_mod_type
-				if int(mod.tier) != last_tier: # 2026-10-30: a header per tier, so players know where each one drops
-					last_tier = int(mod.tier)
-					var ln = Uploads.get_location_name(last_tier)
-					return_text += "%s[color=#e0c068]Tier %d Mods[/color]  [color=#666666](%s caches, 'phish -mod=%s')[/color]\n" % ["" if i == 0 else "\n", last_tier, ln, ln.to_lower()]
-
-				var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
-				var hmd = HackingMods.mod_duration(mod) # + Kernel Modules
-
-				return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
-				return_text += pad_text(HackingMods.SLOT_SHORT[HackingMods.mod_slot_type(mod_type)], type_col)
-				return_text += pad_text("%s x%d" % [mod.name, Inventory.get_amount(mod)], mod_name_col) # 2026-10-29: how many you have
-				return_text += pad_text(HackingMods.get_mod_stat(mod_type), mod_mod_col)
-				return_text += pad_text(hmv, mod_val_col)
-				return_text += str(hmd) + " hacks\n"
-		
-	else:
-		return_text += pad_text("-", mod_id_col)
-		return_text += pad_text("-", type_col)
-		return_text += pad_text("-", mod_name_col)
-		return_text += pad_text("-", mod_mod_col)
-		return_text += pad_text("-", mod_val_col)
-		return_text += "-"
-
+	return_text += _mod_items_text(by_slot)
 	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods ('mod -add 1, 3, 0' adds several).\n"
 	return_text += "use 'mod -rm <ID>' to remove the mod in that slot ('mod -rm all' for every one). WARNING: removed mods are deleted.\n"
 	return_text += "Each slot takes one kind of mod: OFF (offense), DEF (defense) or UTL (utility). A mod goes in the first open slot of its kind.\n"
 	return_text += "Mod items are found with 'phish -mod' and in caches.\n"
-	return_text += "[color=#666666]For more details on each mod use 'ls <mod name>' (ex. ls sql booster).[/color]\n\n"
+	return_text += "[color=#666666]For more details on each mod use 'ls <mod name>' (ex. ls sql booster).[/color]\n"
+	return_text += ("[color=#666666]'mod' lists mod items by tier.[/color]\n\n" if by_slot else "[color=#666666]'mod -slots' lists mod items by slot type (offense / defense / utility).[/color]\n\n")
+	return return_text
+
+## The MOD ITEMS table. IDs always follow Inventory.get_hacking_mods_items (tier order), so 'mod -add <ID>' works
+## from either view; <by_slot> (2026-10-31, 'mod -slots') groups the rows by offense / defense / utility instead.
+func _mod_items_text(by_slot: bool) -> String:
+	var type_col = 6
+	var mod_id_col = 5
+	var mod_name_col = 27
+	var mod_mod_col = 47
+	var mod_val_col = 8
+	var tier_col = 5
+	var return_text = "\n\n\n-------------"
+	return_text += "\n| MOD ITEMS |\n"
+	return_text += "-------------\n"
+	return_text += "\n" + pad_text("ID", mod_id_col) + (pad_text("TIER", tier_col) if by_slot else pad_text("SLOT", type_col)) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + "REMAINING\n"
+	return_text += "-".repeat(82 + 15 + type_col) + "\n"
+	if !Inventory.has_mod_item() or Inventory.get_hacking_mods_items().is_empty():
+		return return_text + pad_text("-", mod_id_col) + pad_text("-", type_col) + pad_text("-", mod_name_col) + pad_text("-", mod_mod_col) + pad_text("-", mod_val_col) + "-"
+	var items = Inventory.get_hacking_mods_items()
+	var order = range(items.size())
+	if by_slot:
+		order.sort_custom(func(a, b):
+			var ra = HackingMods.SLOT_PATTERN.find(HackingMods.mod_slot_type(items[a].hacking_mod_type))
+			var rb = HackingMods.SLOT_PATTERN.find(HackingMods.mod_slot_type(items[b].hacking_mod_type))
+			if ra != rb: return ra < rb
+			if int(items[a].tier) != int(items[b].tier): return int(items[a].tier) < int(items[b].tier)
+			return items[a].name < items[b].name)
+	var last_group = ""
+	var first = true
+	for i in order:
+		var mod = items[i]
+		var mod_type = mod.hacking_mod_type
+		var st = HackingMods.mod_slot_type(mod_type)
+		var group = st if by_slot else str(int(mod.tier))
+		if group != last_group:
+			last_group = group
+			if by_slot:
+				return_text += "%s[color=#e0c068]%s Mods[/color]  [color=#666666](%s slots)[/color]\n" % ["" if first else "\n", st.capitalize(), HackingMods.SLOT_SHORT[st]]
+			else: # 2026-10-30: a header per tier, so players know where each one drops
+				var ln = Uploads.get_location_name(int(mod.tier))
+				return_text += "%s[color=#e0c068]Tier %d Mods[/color]  [color=#666666](%s caches, 'phish -mod=%s')[/color]\n" % ["" if first else "\n", int(mod.tier), ln, ln.to_lower()]
+		first = false
+		var hmv = HackingMods.get_mod_value_text(mod_type, mod.hacking_mod_value)
+		var hmd = HackingMods.mod_duration(mod) # + Kernel Modules
+		return_text += pad_text("[" + str(i) + "]", mod_id_col, false)
+		return_text += pad_text("T%d" % int(mod.tier), tier_col) if by_slot else pad_text(HackingMods.SLOT_SHORT[st], type_col)
+		return_text += pad_text("%s x%d" % [mod.name, Inventory.get_amount(mod)], mod_name_col) # 2026-10-29: how many you have
+		return_text += pad_text(HackingMods.get_mod_stat(mod_type), mod_mod_col)
+		return_text += pad_text(hmv, mod_val_col)
+		return_text += str(hmd) + " hacks\n"
 	return return_text
 
 

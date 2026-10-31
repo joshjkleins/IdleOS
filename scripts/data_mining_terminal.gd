@@ -174,7 +174,7 @@ func _reset_info():
 	level_label.text = str(Mining.SKILL["level"])
 
 func _update_efficiency_label():
-	efficiency_label.text = str(_get_mining_efficiency_total() * 100.0) + "%"
+	efficiency_label.text = "%.1f%%" % (_get_mining_efficiency_total() * 100.0)
 
 func _on_blinking_timer_timeout():
 	pass

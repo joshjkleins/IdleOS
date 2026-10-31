@@ -16,6 +16,7 @@ var items_from_session = {} #reference for labels
 var item_label = preload("res://scenes/cache_item_label.tscn")
 var target_cache: ItemData = null # Cache / Skim / Deep: only this cache (null = any). Salvage: the item.
 var target_arg = null # Intel: the target dictionary
+var intel_location := "" # 'decode -intel=<location>': moves to the next target when one is maxed (2026-10-31)
 var current_cache: CacheData = null
 
 ## p_type picks what gets decoded ("decode kind"): cache, skim, deep (caches), salvage (an item),
@@ -25,6 +26,9 @@ func set_cache_type(p_type: Dictionary, window: bool = false, arg = null):
 	setup_process(Decoding, p_type, window)
 	if arg is ItemData:
 		target_cache = arg
+	elif arg is Dictionary and arg.has("_intel_location"):
+		intel_location = str(arg._intel_location)
+		target_arg = Decoding.next_intel_target(intel_location)
 	else:
 		target_arg = arg
 
@@ -225,6 +229,14 @@ func _run_intel() -> void:
 		if stop_requested:
 			return
 		if Decoding.is_intel_maxed(target):
+			if intel_location != "": # a location: on to the next target
+				var nxt = Decoding.next_intel_target(intel_location)
+				if !nxt.is_empty():
+					target_arg = nxt
+					target = nxt
+					continue
+				cache_name.text = "Intel maxed on every unlocked %s target." % Stats.hacking_targets[intel_location].name
+				return
 			cache_name.text = Decoding.intel_window_text(target, true)
 			return
 		cache_decrypt.reset()

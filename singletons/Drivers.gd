@@ -9,7 +9,7 @@ signal changed
 signal ranked_up(id: String, rank: int)
 
 const SLOT_LEVELS = [10, 60]            # a slot at each of these skill levels (2 max)
-const RANK_XP = [0, 25000, 600000]      # skill XP earned while equipped for rank 1 / 2 / 3 (2026-10-30: rank 3 was 150000)
+const RANK_XP = [0, 25000, 1500000]     # skill XP earned while equipped for rank 1 / 2 / 3 (2026-10-31: rank 3 1.5M, was 600k; 2026-10-30: was 150000)
 const MAX_RANK = 3
 const DEV_GIVE := true                  # TESTING: 'driver give <id|all>' grants drivers. Turn off before release.
 
@@ -41,20 +41,20 @@ const DEFS = {
 	# Matching: firewall
 	"credential_reuse": {"skill": "Matching", "name": "Credential Reuse", "short": "%s FW damage", "values": [0.10, 0.15, 0.25],
 		"text": "%s firewall damage per hit"},
-	"session_hijack": {"skill": "Matching", "name": "Session Hijack", "short": "FW down %s longer", "values": [2.0, 3.0, 5.0],
+	"session_hijack": {"skill": "Matching", "name": "Session Hijack", "short": "FW down %s longer", "values": [1.0, 2.0, 3.0], # 2026-10-31: was 2/3/5
 		"text": "the firewall stays down %s longer after a break", "format": "s"},
-	"token_replay": {"skill": "Matching", "name": "Token Replay", "short": "FW reboots at %s", "values": [0.90, 0.80, 0.70],
+	"token_replay": {"skill": "Matching", "name": "Token Replay", "short": "FW reboots at %s", "values": [0.90, 0.80, 0.67], # 2026-10-31: was 0.70 (with Backdoor 25%: 50% firewall at max rank)
 		"text": "the firewall reboots at %s strength", "format": "pct_plain"},
 	"master_key": {"skill": "Matching", "name": "Master Key", "short": "%s 1st hit past FW", "values": [0.20, 0.30, 0.50],
 		"text": "the first hit after each reboot ignores the firewall and deals %s damage"},
 	"brute_match": {"skill": "Matching", "name": "Brute Match", "short": "%s dmg while FW up", "values": [0.10, 0.15, 0.25],
 		"text": "%s damage while the firewall is up"},
 	# Phishing: anonymity and spoofs
-	"social_proof": {"skill": "Phishing", "name": "Social Proof", "short": "%s spoof healing", "values": [0.10, 0.15, 0.25],
+	"social_proof": {"skill": "Phishing", "name": "Social Proof", "short": "%s spoof healing", "values": [0.05, 0.07, 0.10], # 2026-10-31: was 10/15/25%
 		"text": "Packet Spoofs restore %s more"},
 	"burner_account": {"skill": "Phishing", "name": "Burner Account", "short": "%s free spoofs", "values": [0.10, 0.15, 0.25],
 		"text": "%s chance a Packet Spoof isn't used up"},
-	"cover_story": {"skill": "Phishing", "name": "Cover Story", "short": "%s counters miss", "values": [0.05, 0.08, 0.12],
+	"cover_story": {"skill": "Phishing", "name": "Cover Story", "short": "%s counters miss", "values": [0.04, 0.07, 0.10], # 2026-10-31: was 5/8/12% (with Evasion 10%: 19% total)
 		"text": "%s chance a countermeasure misses"},
 	"lure": {"skill": "Phishing", "name": "Lure", "short": "%s spoof chains", "values": [0.10, 0.12, 0.15],
 		"text": "%s chance a Packet Spoof instantly uses another one"},
@@ -87,7 +87,7 @@ const DEFS = {
 		"text": "%s SQL damage"},
 	"quick_compile": {"skill": "Compiling", "name": "Quick Compile", "short": "%s attack speed", "values": [0.05, 0.08, 0.12],
 		"text": "SQL Injectors attack %s faster", "format": "pct_plain"},
-	"payload_recycler": {"skill": "Compiling", "name": "Payload Recycler", "short": "%s payload refund", "values": [0.10, 0.15, 0.25],
+	"payload_recycler": {"skill": "Compiling", "name": "Payload Recycler", "short": "%s payload refund", "values": [0.10, 0.20, 0.40], # 2026-10-31: was 10/15/25%
 		"text": "%s chance a hack doesn't spend its payload"},
 	"warm_start": {"skill": "Compiling", "name": "Warm Start", "short": "instant 1st attack", "values": [1.0, 1.0, 1.0],
 		"text": "each hack's first attack fires instantly", "format": "none"},

@@ -13,8 +13,8 @@ var vm_token = Items.VM_CRACKING_TOKEN
 
 ## Modifier commands unlocked by Cracking capstones (see Mining.MODIFIERS for how they work).
 const MODIFIERS = [
-	{"command": "crossref", "name": "Cross-Reference", "package": "cracking.cross_reference", "speed": 0.5, "heat": 1.5,
-		"effect": "-50% speed, heat x1.5. Each crack has a 10% chance to also produce the tier's matched item."},
+	{"command": "crossref", "name": "Cross-Reference", "package": "cracking.cross_reference", "speed": 0.8, "heat": 2.0, # 2026-10-31: was -50% speed, heat x1.5
+		"effect": "-20% speed, heat x2. Each crack has a 10% chance to also produce the tier's matched item."},
 	{"command": "analyze", "name": "Analyze", "package": "cracking.analyze", "speed": 0.6, "heat": 2.0,
 		"effect": "-40% speed, heat x2. Instant-crack chance x2 and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "cracking.survey", "speed": 1.0, "heat": 1.0,
@@ -138,9 +138,9 @@ var PIN = {
 	"unlocked": false,
 	"unlock tier": 4, # 2026-10-26: opens with this tier's location (1 = from the start)
 	"efficiency level": 45, # efficiency grows from this skill level (its old unlock level)
-	"base speed": 35.3957, # seconds per character (4 per crack)
-	"overclock speed": 17.6978,
-	"overheat speed": 88.4892,
+	"base speed": 29.4964, # seconds per character (4 per crack); 2026-10-31: 20% faster (was 35.3957)
+	"overclock speed": 14.7482,
+	"overheat speed": 73.7410,
 	"heat": 34.5777,
 	"overclock heat": 41.065,
 	"overheat heat": 6.4873,

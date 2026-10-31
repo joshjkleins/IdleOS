@@ -309,6 +309,13 @@ func _on_input_line_text_submitted(new_text):
 		SaveManager.save_game()
 		get_tree().quit()
 	
+	# 2026-10-31: '<skill command> N' (parse -footprint=logs 20) runs N cycles, then stops
+	var cycle_limit = 0
+	var cw = new_text.strip_edges().split(" ", false)
+	if cw.size() >= 3 and SKILL_BINARIES.has(cw[0].to_lower()) and cw[0].to_lower() != "defrag" and cw[-1].is_valid_int() and int(cw[-1]) > 0:
+		cycle_limit = int(cw[-1])
+		new_text = " ".join(cw.slice(0, cw.size() - 1))
+	BaseTerminal.next_cycle_limit = cycle_limit if !process_running else 0
 	var was_running = process_running
 	_cmd_unknown = false
 	if !universal_commands(new_text) and !_run_skill_from_anywhere(new_text):
@@ -333,8 +340,12 @@ func _on_input_line_text_submitted(new_text):
 				defragging_commands(new_text)
 			Context.COMPILING:
 				compiling_commands(new_text)
+	BaseTerminal.next_cycle_limit = 0 # unused (the command didn't start a process)
 	if !was_running and process_running and current_process != null:
 		main_command = {"context": int(current_context), "text": new_text} # what Offline resumes
+		if cycle_limit > 0 and "cycle_limit" in current_process:
+			current_process.cycle_limit = cycle_limit
+			add_line("[color=#888888]Runs %d cycle%s, then stops.[/color]" % [cycle_limit, "" if cycle_limit == 1 else "s"])
 	if _cmd_unknown:
 		_unknown_streak += 1
 		if _unknown_streak == 2:
@@ -343,6 +354,27 @@ func _on_input_line_text_submitted(new_text):
 		_unknown_streak = 0
 
 	history_index = -1
+
+## 'government' (or any location) before it's unlocked: a red ACCESS DENIED banner, a jolt and a red flash
+func _access_denied(location_key: String) -> void:
+	var loc_name = str(Stats.hacking_targets[location_key].name).to_upper()
+	add_line("""[color=#e24b4a]
+ █████╗  ██████╗ ██████╗███████╗███████╗███████╗    ██████╗ ███████╗███╗   ██╗██╗███████╗██████╗
+██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝    ██╔══██╗██╔════╝████╗  ██║██║██╔════╝██╔══██╗
+███████║██║     ██║     █████╗  ███████╗███████╗    ██║  ██║█████╗  ██╔██╗ ██║██║█████╗  ██║  ██║
+██╔══██║██║     ██║     ██╔══╝  ╚════██║╚════██║    ██║  ██║██╔══╝  ██║╚██╗██║██║██╔══╝  ██║  ██║
+██║  ██║╚██████╗╚██████╗███████╗███████║███████║    ██████╔╝███████╗██║ ╚████║██║███████╗██████╔╝
+╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝    ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚══════╝╚═════╝[/color]
+[color=#e24b4a]%s[/color] [color=#888888]· connection refused · %s to open it[/color]""" % [loc_name, Stats.get_location_unlock_hint(location_key)])
+	var panel: Control = $Panel
+	if !panel.has_meta("shaking"):
+		panel.set_meta("shaking", true)
+		var base = panel.position
+		var tw = create_tween()
+		tw.tween_method(func(t: float): panel.position = base + Vector2(randf_range(-1, 1), randf_range(-1, 1)) * 7.0 * (1.0 - t), 0.0, 1.0, 0.35)
+		tw.tween_callback(func(): panel.position = base; panel.remove_meta("shaking"))
+	terminal_root.modulate = Color(1.6, 0.6, 0.6)
+	create_tween().tween_property(terminal_root, "modulate", Color(1, 1, 1, terminal_root.modulate.a), 0.5)
 
 ## Skills are "installed system-wide" (like binaries on $PATH): 'mine -logs', 'parse -footprint=logs',
 ## 'crack -password', 'match -credential', 'phish -spear', 'decode -cache', 'compile -school' run from any
@@ -581,7 +613,11 @@ func universal_commands(text):
 		return true
 	# 2026-10-30: a location's name on its own ('school', 'police station') = 'info hacking <location>'
 	if Compromise.location_key(text) != "":
-		add_line(ContextCommands.get_hack_target_info(Stats.hacking_targets[Compromise.location_key(text)]))
+		var lk = Compromise.location_key(text)
+		if !Stats.hacking_targets[lk].get("unlocked", false): # 2026-10-31: a locked location = ACCESS DENIED
+			_access_denied(lk)
+			return true
+		add_line(ContextCommands.get_hack_target_info(Stats.hacking_targets[lk]))
 		return true
 	if text == "flow":
 		post_flow_chart(func(c): return c.show_loop())
@@ -766,6 +802,9 @@ func universal_commands(text):
 	if text.begins_with("mod"):
 		if text == "mod" or text == "mods":
 			add_line(ContextCommands.get_mod_command())
+			return true
+		if text in ["mod -slot", "mod -slots", "mods -slot", "mods -slots"]: # 2026-10-31: mod items by slot type
+			add_line(ContextCommands.get_mod_command(true))
 			return true
 		
 		if text.begins_with("mod -rm"):
@@ -1467,6 +1506,12 @@ func handle_vm_token_commands(text):
 		
 	var processes = [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling]
 	var target_process = null
+	# 2026-10-31: 'ssh <command> N' runs the VM for N token periods, then it stops
+	var periods = 0
+	var words = text.split(" ", false)
+	if words.size() >= 4 and words[-1].is_valid_int() and int(words[-1]) > 0:
+		periods = int(words[-1])
+		text = " ".join(words.slice(0, words.size() - 1))
 	if text == "ssh":
 		add_line(ContextCommands.ssh_commands(processes))
 		return
@@ -1669,8 +1714,13 @@ func handle_vm_token_commands(text):
 	if new_window:
 		new_window.token_cost = _vm_paid
 		new_window.tokens_used = _vm_paid
+		if periods > 0:
+			new_window.periods_left = periods - 1
+			new_window._update_status()
 		add_line("Started [color=#%s]vm-%02d[/color] %s / %s%s. Use 'vm -h' to manage VM windows." % [target_process.SKILL.color.to_html(false), new_window.vm_id, target_process.SKILL.name, target_minor_process.name,
 			("  [color=#888888](%d tokens per %ds, tier %d)[/color]" % [_vm_paid, int(target_process.VM_UPTIME), _vm_paid]) if _vm_paid > 1 else ""])
+		if periods > 0:
+			add_line("[color=#888888]vm-%02d runs for %d token%s, then stops.[/color]" % [new_window.vm_id, periods, "" if periods == 1 else "s"])
 	grab_all_focus()
 	Tutorial.complete_event(Tutorial.TutorialEvent.RUN_VM_WITH_SSH)
 
@@ -1778,6 +1828,7 @@ func handle_vm_commands(text: String) -> void:
 	if parts.size() < 3:
 		add_line("Missing VM id. [color=#666666]example: vm %s 1  |  vm %s -a[/color]" % [action, action])
 		return
+	var safe = action == "kill" and (parts.has("-s") or parts.has("-safe")) # 2026-10-31: stop after the current token
 	var targets: Array[VMWindow] = []
 	if parts[2] in ["all", "-a", "a", "-all"]:
 		targets.assign(VMManager.vms)
@@ -1795,8 +1846,12 @@ func handle_vm_commands(text: String) -> void:
 			"hide":
 				VMManager.set_minimized(vm, true)
 			"kill":
-				add_line("Killed vm-%02d (%s / %s)." % [vm.vm_id, vm.skill.SKILL.name, vm.minor_process.name])
-				VMManager.release(vm)
+				if safe:
+					vm.finish_after_token()
+					add_line("vm-%02d (%s / %s) stops when its current token runs out (%ds)." % [vm.vm_id, vm.skill.SKILL.name, vm.minor_process.name, vm.get_seconds_left()])
+				else:
+					add_line("Killed vm-%02d (%s / %s)." % [vm.vm_id, vm.skill.SKILL.name, vm.minor_process.name])
+					VMManager.release(vm)
 	if action != "kill":
 		add_line("%s %d VM window%s." % ["Restored" if action == "show" else "Minimized", targets.size(), "" if targets.size() == 1 else "s"])
 
@@ -1805,7 +1860,8 @@ func vm_list_text() -> String:
 		return "No VMs running. Start one with 'ssh' + a process command, e.g. 'ssh mine -logs' ('ssh' lists your tokens)."
 	var text = "ID      SKILL        PROCESS          TIME   TOKENS  STATE\n"
 	for vm in VMManager.vms:
-		text += "%-8s%-13s%-17s%-7s%-8s%s\n" % ["vm-%02d" % vm.vm_id, vm.skill.SKILL.name, str(vm.minor_process.name), str(vm.get_seconds_left()) + "s", str(vm.tokens_used), "minimized" if !vm.visible else ("stopping" if vm.stopping else "running")]
+		var state = "stopping" if vm.stopping else ("last token" if (!vm.repeat or vm.periods_left == 0) else ("%d more" % vm.periods_left if vm.periods_left > 0 else "running"))
+		text += "%-8s%-13s%-17s%-7s%-8s%s\n" % ["vm-%02d" % vm.vm_id, vm.skill.SKILL.name, str(vm.minor_process.name), str(vm.get_seconds_left()) + "s", str(vm.tokens_used), (state + ", minimized") if !vm.visible else state]
 	text += "%d/%d VMs running" % [VMManager.vms.size(), Stats.MAX_ALL_VMS]
 	return text
 
@@ -1816,6 +1872,8 @@ func vm_help_text() -> String:
    vm hide <id|all|-a>      Minimize VM window(s) to the dock
    vm show <id|all|-a>      Restore VM window(s)
    vm kill <id|all|-a>      Stop VM(s) immediately (no token refund)
+   vm kill <id|all|-a> -s   Stop VM(s) once the current token runs out
+   ssh <command> <N>        Run a VM for N tokens' worth, then stop  [color=#666666]ex. ssh mine -logs 5[/color]
    Tip: click a VM in the dock to minimize/restore it.
 """
 
@@ -2245,6 +2303,8 @@ func _handle_modifier_command(text: String) -> bool:
 	else:
 		if current_process.has_modifier(cmd):
 			add_line("%s is already active." % mod.name)
+		elif Stats.overheated:
+			add_line("System is overheated: modifiers can't start until it cools below %d°C." % int(Upgrades.get_overheat_clear_temp()))
 		elif Stats.overclocked:
 			add_line("Overclock is active. One modifier at a time: use 'overclock -kill' first.")
 		elif !current_process.modifier.is_empty():
@@ -2280,6 +2340,9 @@ func overclock_logic():
 		add_line("System tempature needs to cool to below %d°C before overclocking" % limit)
 		return
 	Stats.overclocked = true
+	var oc_skill = _get_major_from_minor(current_process_info)
+	if oc_skill:
+		add_line("[color=#4ec994]Overclock on.[/color] %s Stop with 'overclock -kill'." % ContextCommands.overclock_effect_text(oc_skill))
 
 ###################################################
 ################### PHISHING ######################
@@ -2807,6 +2870,12 @@ func system_cooled_out_of_overheat_range():
 	add_line("[color=#5599FF]System no longer overheated.[/color]")
 
 func overheat_terminal_notice():
+	# 2026-10-31: an overheat ends the running modifier too (sift, crossref, ...), like it ends overclock
+	if Stats.overheated and current_process and is_instance_valid(current_process) and "modifier" in current_process and !current_process.modifier.is_empty():
+		add_line("[color=#ef9f27]%s stopped: system overheated.[/color]" % current_process.modifier.name)
+		current_process.modifier = {}
+		if current_process.has_method("_update_title"):
+			current_process._update_title()
 	if NOTIFY_OF_OVERHEAT:
 		return
 	if Stats.overheated:

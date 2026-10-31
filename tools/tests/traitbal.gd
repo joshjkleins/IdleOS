@@ -90,6 +90,21 @@ const BUILDS_TYPED = {
 		"escalator": {"mods": ["Critical Overflow", "Latency Injector", "Reset Loop", "SQL Booster"], "drivers": ["read_ahead", "optimized_build", "hash_collision"]},
 		"probe": {"mods": ["Opening Spoof", "Fresh Start", "Vuln Scanner", "Double Tap"], "drivers": []},
 	},
+	4: { # O / D / U / O / D (2026-10-31 first pass)
+		"base": {},
+		"wrong": {"mods": ["Payload Amplifier", "Decoy Traffic", "Burst Buffer", "SQL Booster", "Hardened Shell"], "drivers": ["optimized_build", "brute_force"]},
+		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Hedge"},
+		"heavy": {"mods": ["Critical Overflow", "Decoy Traffic", "Burst Buffer", "SQL Booster", "Leech"], "drivers": ["social_proof", "optimized_build", "deep_reserves"], "auto": "Mirror Image"},
+		"fortress": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Breach Momentum", "Leech"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Firewall Drain"},
+		"escalator": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Latency Injector"], "drivers": ["quick_compile", "read_ahead", "countermeasure_log"], "auto": "Smoke Screen"},
+		"regenerator": {"mods": ["Bleed", "Hardened Shell", "Burst Buffer", "Critical Overflow", "Leech"], "drivers": ["optimized_build", "deep_reserves", "brute_force"], "auto": "Overdraft"},
+		"siphon": {"mods": ["Critical Overflow", "Latency Injector", "Burst Buffer", "SQL Booster", "Leech"], "drivers": ["deep_reserves", "optimized_build", "burner_account"], "auto": "Overdraft"},
+		"adaptive": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Breach Momentum", "Leech"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"], "auto": "Firewall Drain"},
+		"swarm": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Latency Injector"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Smoke Screen"},
+		"throttle": {"mods": ["Double Tap", "Hardened Shell", "Burst Buffer", "Critical Overflow", "Leech"], "drivers": ["optimized_build", "deep_reserves", "brute_force"], "auto": "Hedge"},
+		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"], "auto": "Heat Sink"},
+	},
+
 }
 
 func _set_gear(tier: int, late: bool) -> void:
@@ -163,6 +178,8 @@ func _fight(target: Dictionary, run: int) -> Dictionary:
 		t += get_process_delta_time()
 		if !game.is_hacking: continue
 		fight += get_process_delta_time()
+		if OS.get_environment("CARD") != "" and fight > 2.0 and fight - get_process_delta_time() <= 2.0: # CARD=1: the counter card's stats 2s in
+			print(">>> CTR CARD ", game.ctr_card.stats.get_parsed_text())
 		if Upgrades.can_overclock(Hacking):
 			if Stats.overclocked and Stats.system_tempature > 90.0: Stats.overclocked = false
 			elif !Stats.overclocked and Stats.system_tempature < 60.0 and !Stats.overheated: Stats.overclocked = true
@@ -193,7 +210,7 @@ func _run() -> void:
 	Engine.time_scale = float(OS.get_environment("TS")) if OS.get_environment("TS") != "" else 30.0
 	Signals.hacking_ended_signal.connect(func(): ended = true)
 	var tier = int(OS.get_environment("TIER")) if OS.get_environment("TIER") != "" else 1
-	var late = OS.get_environment("GEAR") != "early"
+	var late = OS.get_environment("GEAR") != "early" # (prog: set per target in _unlock_upto)
 	var n = int(OS.get_environment("N")) if OS.get_environment("N") != "" else 3
 	var only = OS.get_environment("ONLY").to_lower()
 	var run = int(OS.get_environment("RUN")) if OS.get_environment("RUN") != "" else 5
@@ -247,4 +264,32 @@ func _unlock_upto(tier: int, target: Dictionary) -> void:
 				upto = Stats.target_place(target).get("index", arr.size() - 1)
 			arr[i].unlocked = li < tier or (li == tier and i <= upto)
 	target.unlocked = true
+	if OS.get_environment("GEAR") == "prog": # GEAR=prog (2026-10-31): this tier's hacking upgrades only if their cost is a cache of an earlier target
+		_prog_gear(tier, target)
 	Stats.set_max_anon()
+
+func _prog_gear(tier: int, target: Dictionary) -> void:
+	var loc = Stats.hacking_targets.values()[tier - 1]
+	var idx = loc.targets.size() if target.has("_base") else int(Stats.target_place(target).get("index", 0))
+	var have := []
+	for i in idx:
+		var c = loc.targets[i].get("loot")
+		if c: have.append(c.name.to_lower())
+	for id in Upgrades.packages:
+		var p = Upgrades.packages[id]
+		if !(id.begins_with("hacking.") or id.begins_with("system.")): continue
+		var n = 0
+		for l in p.levels:
+			var t = int(l.tier)
+			var ok = t < tier or (t == tier and id.begins_with("system."))
+			if t == tier and id.begins_with("hacking."):
+				ok = true
+				for c in l.get("costs", []):
+					var cn = str(c.get("item", c.get("name", ""))).to_lower()
+					if !(cn in have): ok = false
+			if ok: n += 1
+			else: break
+		p.installed = n
+		Upgrades._recompute(p)
+	Upgrades.apply_effects()
+	HackingMods.refresh_slots()

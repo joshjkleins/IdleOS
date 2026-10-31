@@ -251,9 +251,10 @@ var MOD = {
 	"download time": 35.0,
 	"overclocked download time": 27.5,
 	"overheated download time": 75.5,
-	"heat": 0.45,
-	"overclock heat": 0.9,
-	"overheat heat": 0.15,
+	"heat": 20.0, # 2026-10-31: was 0.45. Per mod caught (rare), a flat jolt: not scaled by tier ("flat heat")
+	"overclock heat": 30.0,
+	"overheat heat": 5.0,
+	"flat heat": true,
 	"vm token chance": 0.009, # per attempt at base speed (rolled on time spent, like every skill)
 	"vm token per": "per cast",
 	"requirements": {},

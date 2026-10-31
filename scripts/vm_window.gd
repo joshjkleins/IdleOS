@@ -23,6 +23,7 @@ var repeat: bool = true
 var tokens_used: int = 1
 var token_cost: int = 1 # tokens per uptime period (VMManager.token_cost; set by the ssh command)
 var stopping: bool = false
+var periods_left: int = -1 # 2026-10-31: renewals left ('ssh <cmd> N' = N token periods in all; -1 = no limit)
 
 var _dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
@@ -78,7 +79,16 @@ func get_progress() -> float: # 1.0 = full uptime remaining
 func get_status_text() -> String:
 	if stopping:
 		return "stopping"
+	if !repeat or periods_left == 0:
+		return "%ds  last" % get_seconds_left() # ends when this token runs out
+	if periods_left > 0:
+		return "%ds  +%d" % [get_seconds_left(), periods_left]
 	return "%ds  tok:%d" % [get_seconds_left(), tokens_used]
+
+## 'vm kill <id> -s': no more tokens, the VM ends when the current one runs out
+func finish_after_token() -> void:
+	repeat = false
+	_update_status()
 
 func _process(_delta: float) -> void:
 	var s = get_seconds_left()
@@ -100,7 +110,9 @@ func _renew_cost() -> int:
 
 func _on_run_timer_timeout() -> void:
 	var cost = _renew_cost()
-	if repeat and Inventory.get_amount(token) >= cost:
+	if repeat and periods_left != 0 and Inventory.get_amount(token) >= cost:
+		if periods_left > 0:
+			periods_left -= 1
 		if !Upgrades.spend_vm_token(token, false, cost): # VM Snapshot can keep them (silent on renewals)
 			tokens_used += cost
 		run_timer.start(_token_duration())

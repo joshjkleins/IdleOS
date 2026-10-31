@@ -45,6 +45,14 @@ const LINEUPS := {
 		[3, ["regenerator", "heater"], {"integrity": 440, "counter": 29, "counter speed": 22.0, "firewall reboot": 5.0}], # Doctor
 		[4, ["adaptive", "escalator"], {"integrity": 1100, "counter": 37, "counter speed": 17.6, "firewall": 48}], # Chief of Medicine (reboot kept at 3.5s: +10% alone drops the right build to ~50%)
 	],
+	"Bank": [ # 2026-10-31: first pass
+		[0, ["swarm"], {"integrity": 750, "counter": 250, "counter speed": 22.0}],  # Teller
+		[0, ["throttle"], {"integrity": 900, "counter": 120}],  # Teller
+		[1, ["siphon"], {"integrity": 950, "counter": 85}],  # Loan Officer
+		[2, ["heater", "fortress"], {"integrity": 900, "firewall": 70, "counter": 130}],  # Branch Manager (kept at its tested stats when the normal one went up, 2026-10-31)
+		[3, ["heavy"], {"integrity": 1400, "counter": 100, "counter speed": 36.0}],  # Security
+		[4, ["fortress", "escalator"], {"integrity": 650, "firewall": 46.875, "counter": 110, "counter speed": 26.0, "firewall reboot": 16.0}],  # Chief Financial Officer (2026-10-31 retune after the Escalator reset: card 455 / 75 fw / 8s down / 110 every 3.8s)
+	],
 }
 
 ## location key from 'school' / '-school' / 'School' ("" when unknown)

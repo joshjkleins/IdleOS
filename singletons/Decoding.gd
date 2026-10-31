@@ -164,11 +164,12 @@ var INTEL = {
 	"experience": 0,
 	"experience per level": 50,
 	"command": "decode -intel",
-	"display command": "decode -intel=<target>",
+	"display command": "decode -intel=<target|location>",
 	"example commands": [
 		{'cmd': 'decode -intel', 'description': 'Lists targets and the intel you have on each'},
 		{'cmd': 'decode -intel=student', 'description': 'Gathers intel on the Student until stopped or maxed'},
-		{'cmd': 'decode -intel=student hard', 'description': 'Hard mode targets keep their own intel'}
+		{'cmd': 'decode -intel=student hard', 'description': 'Hard mode targets keep their own intel'},
+		{'cmd': 'decode -intel=bank', 'description': "A location: the hardest unlocked target first, then the next, until all are maxed"}
 	],
 	"efficiency": 0.15,
 	"efficiency rate": 0.002,
@@ -472,6 +473,18 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 			if arg_text == "":
 				out.message = intel_list_text()
 				return out
+			# 2026-10-31: a location works too: hardest unlocked target first, then down the list until all are maxed
+			var lk = Compromise.location_key(arg_text)
+			if lk != "" and find_target(arg_text).is_empty():
+				if !Stats.hacking_targets[lk].get("unlocked", false):
+					out.message = "%s is locked: %s." % [Stats.hacking_targets[lk].name, Stats.get_location_unlock_hint(lk)]
+					return out
+				if next_intel_target(lk).is_empty():
+					out.message = "Intel is maxed on every unlocked %s target." % Stats.hacking_targets[lk].name
+					return out
+				out.arg = {"_intel_location": lk}
+				out.ok = true
+				return out
 			var target = find_target(arg_text)
 			if target.is_empty():
 				out.message = "Target not found or not unlocked: %s  [color=#666666]ex. decode -intel=student  |  decode -intel=student hard[/color]" % arg_text
@@ -610,6 +623,17 @@ func intel_window_text(target: Dictionary, maxed: bool = false) -> String:
 	var parts = INTEL_STATS.map(func(s): return ("+%d%% %s" if s == "firewall reboot" else "-%d%% %s") % [roundi(p[s] * 100), short[s]])
 	return "%s  ·  %d hack%s\n%s" % [head, i.hacks, "" if i.hacks == 1 else "s", " · ".join(parts)]
 
+## 'decode -intel=<location>': the hardest unlocked target there that isn't maxed yet ({} when they all are)
+func next_intel_target(location_key: String) -> Dictionary:
+	var l: Dictionary = Stats.hacking_targets.get(location_key, {})
+	if l.is_empty() or !l.get("unlocked", false):
+		return {}
+	var ts: Array = l.get("targets", [])
+	for i in range(ts.size() - 1, -1, -1):
+		if ts[i].get("unlocked", false) and !is_intel_maxed(ts[i]):
+			return ts[i]
+	return {}
+
 ## "student", "student hard", "legal-assistant", "student (hard)" -> the unlocked target, or {}.
 func find_target(text: String) -> Dictionary:
 	var name = text.to_lower().replace("-", " ").strip_edges()
@@ -661,7 +685,7 @@ func intel_detail_text(target: Dictionary) -> String:
 	return out
 
 func intel_list_text(location_filter: String = "") -> String:
-	var out = "INTEL  [color=#666666]·  intel <location>  ·  intel <target>  ·  gather with decode -intel=<target>  ·  intel -h for help[/color]\n"
+	var out = "INTEL  [color=#666666]·  intel <location>  ·  intel <target>  ·  gather with decode -intel=<target|location>  ·  intel -h for help[/color]\n"
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if !l.get("unlocked", true) or (location_filter != "" and loc != location_filter):

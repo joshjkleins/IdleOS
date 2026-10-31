@@ -53,7 +53,7 @@ var UPLOAD = {
 	"bonus upload speed": 1.0, # +100% upload speed: each item takes half the time (2026-10-26: was 20%)
 	"bonus label": "x2 speed",
 	"bonus text": "Uploads 100% faster",
-	"description": "Uploads are 100% faster (each item takes half the time).",
+	"description": "Uploads are 100% faster.",
 	"command": "defrag -upload",
 	"expires_at": 0,
 }

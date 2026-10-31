@@ -1907,7 +1907,7 @@
    "group": "Mining",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.9 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -1916,7 +1916,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.9 per cycle; stops on overheat",
      "costs": [
       {
        "item": "Logs",
@@ -1955,7 +1955,7 @@
    "group": "Mining",
    "name": "Sift",
    "type": "capstone",
-   "effect": "MODIFIER 'sift': -50% speed, heat x1.5; each cycle 15% chance to also find one of the tier's Parsing items",
+   "effect": "MODIFIER 'sift': -20% speed, heat x1.5; each cycle 25% chance to also find one of the tier's Parsing items",
    "levels": [
     {
      "tier": 3,
@@ -1964,7 +1964,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'sift': -50% speed, heat x1.5; each cycle 15% chance to also find one of the tier's Parsing items",
+     "effect": "MODIFIER 'sift': -20% speed, heat x1.5; each cycle 25% chance to also find one of the tier's Parsing items",
      "costs": [
       {
        "item": "Metadata",
@@ -3338,7 +3338,7 @@
    "group": "Parsing",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -3347,7 +3347,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat",
      "costs": [
       {
        "item": "IP address",
@@ -4385,7 +4385,7 @@
    "group": "Cracking",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.2 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -4394,7 +4394,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.2 per cycle; stops on overheat",
      "costs": [
       {
        "item": "Passwords",
@@ -4433,7 +4433,7 @@
    "group": "Cracking",
    "name": "Cross-Reference",
    "type": "capstone",
-   "effect": "MODIFIER 'crossref': -50% speed, heat x1.5; each crack 10% chance to also produce the tier's matched item (skips Matching)",
+   "effect": "MODIFIER 'crossref': -20% speed, heat x2; each crack 10% chance to also produce the tier's matched item (skips Matching)",
    "levels": [
     {
      "tier": 3,
@@ -4442,7 +4442,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'crossref': -50% speed, heat x1.5; each crack 10% chance to also produce the tier's matched item (skips Matching)",
+     "effect": "MODIFIER 'crossref': -20% speed, heat x2; each crack 10% chance to also produce the tier's matched item (skips Matching)",
      "costs": [
       {
        "item": "Badge Hash",
@@ -5384,7 +5384,7 @@
    "group": "Matching",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -5393,7 +5393,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
      "costs": [
       {
        "item": "Credentials",
@@ -6392,7 +6392,7 @@
    "group": "Phishing",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x2 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -6401,7 +6401,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x2 per cycle; stops on overheat",
      "costs": [
       {
        "item": "SQL Injector",
@@ -7400,7 +7400,7 @@
    "group": "Decoding",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
    "levels": [
     {
      "tier": 1,
@@ -7409,7 +7409,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.1 per cycle; stops on overheat",
      "costs": [
       {
        "item": "Logs",
@@ -8399,7 +8399,7 @@
    "group": "Compiling",
    "name": "Overclock",
    "type": "capstone",
-   "effect": "MODIFIER 'overclock': faster, more heat (not on Access)",
+   "effect": "MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat (not on Access)",
    "levels": [
     {
      "tier": 1,
@@ -8408,7 +8408,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'overclock': faster, more heat (not on Access)",
+     "effect": "MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat (not on Access)",
      "costs": [
       {
        "item": "School payload",
@@ -8596,10 +8596,10 @@
     {
      "tier": 4,
      "slot": 1,
-     "value": 50.0,
-     "label": "+50 dmg, +0.1 heat",
+     "value": 5.0,
+     "label": "+5 dmg, +0.1 heat",
      "before": "35 dmg",
-     "after": "85 dmg",
+     "after": "40 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8611,10 +8611,10 @@
     {
      "tier": 5,
      "slot": 1,
-     "value": 62.0,
-     "label": "+62 dmg, +0.1 heat",
-     "before": "85 dmg",
-     "after": "147 dmg",
+     "value": 5.0,
+     "label": "+5 dmg, +0.1 heat",
+     "before": "40 dmg",
+     "after": "45 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8626,10 +8626,10 @@
     {
      "tier": 6,
      "slot": 1,
-     "value": 100.0,
-     "label": "+100 dmg, +0.1 heat",
-     "before": "147 dmg",
-     "after": "247 dmg",
+     "value": 5.0,
+     "label": "+5 dmg, +0.1 heat",
+     "before": "45 dmg",
+     "after": "50 dmg",
      "effect": "Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",
      "costs": [
       {
@@ -8695,10 +8695,10 @@
     {
      "tier": 4,
      "slot": 2,
-     "value": 6.0,
-     "label": "+6",
+     "value": 2.0,
+     "label": "+2",
      "before": "8 firewall dmg",
-     "after": "14 firewall dmg",
+     "after": "10 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8710,10 +8710,10 @@
     {
      "tier": 5,
      "slot": 2,
-     "value": 7.0,
-     "label": "+7",
-     "before": "14 firewall dmg",
-     "after": "21 firewall dmg",
+     "value": 2.0,
+     "label": "+2",
+     "before": "10 firewall dmg",
+     "after": "12 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -8725,10 +8725,10 @@
     {
      "tier": 6,
      "slot": 2,
-     "value": 12.0,
-     "label": "+12",
-     "before": "21 firewall dmg",
-     "after": "33 firewall dmg",
+     "value": 3.0,
+     "label": "+3",
+     "before": "12 firewall dmg",
+     "after": "15 firewall dmg",
      "effect": "Firewall damage per SQL attack",
      "costs": [
       {
@@ -9387,7 +9387,7 @@
      "costs": [
       {
        "item": "Chief Financial Officer Cache",
-       "amount": 4
+       "amount": 2
       }
      ]
     },
@@ -9513,7 +9513,7 @@
      "costs": [
       {
        "item": "Chief Financial Officer Cache",
-       "amount": 18
+       "amount": 8
       }
      ]
     }

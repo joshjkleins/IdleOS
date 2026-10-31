@@ -107,7 +107,7 @@ func _update_state() -> void:
 		hint = "overclock locked until < %d°C" % int(overclock_limit())
 	else:
 		text = "NOMINAL"; color = C_COOL
-		hint = "overclock available" if _any_overclock_unlocked() else "stable"
+		hint = "" # 2026-10-31: no label when nothing is wrong (was "overclock available", then "stable")
 	if status_label.text != text:
 		status_label.text = text
 		status_label.add_theme_color_override("font_color", color)

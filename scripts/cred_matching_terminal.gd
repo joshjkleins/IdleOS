@@ -208,7 +208,7 @@ func _begin_matching():
 	_head_start = Upgrades.cur("matching.auto_correlate")
 	#get current_row
 	third_col.add_theme_stylebox_override("panel", sb)
-	main_bar.value = 0.0
+	main_bar.value = main_bar.max_value * clampf(_head_start, 0.0, 0.95) # 2026-10-31: Auto-Correlate shows as a head start on the bar
 	#loop through tags
 	var tags_size = $MarginContainer/VBoxContainer/TopRow/SecondCol/MarginContainer/VBoxContainer/MarginContainer/TagContainer.get_children().size()
 	terminal_label.text = ""
@@ -253,7 +253,7 @@ func _update_matching_terminal(message):
 	_cycle_mode = worst_mode(_cycle_mode, mode)
 	var step: float = get_step_time(mode) * (1.0 - _head_start) / (1.0 + _hot_cache_bonus())
 	_match_seconds += step
-	tween.tween_property(main_bar, "value", main_bar.value + intervals, step)
+	tween.tween_property(main_bar, "value", main_bar.value + intervals * (1.0 - clampf(_head_start, 0.0, 0.95)), step) # the rest of the bar
 	await tween.finished
 
 func _update_tag_color(index: int):

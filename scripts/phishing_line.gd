@@ -33,6 +33,9 @@ func begin(p_type, p_terminal = null):
 		terminal = p_terminal
 	setup()
 	_attempt_seconds = 0.0
+	if terminal.has_method("claim_attempt") and !terminal.claim_attempt(): # cycle limit: no casts left to start
+		stop()
+		return
 	match type.get("style", "lines"):
 		"whale":
 			_run_whale()
@@ -57,7 +60,8 @@ func _cast(status: String) -> int:
 	await pb_fill_tween.finished
 	if !active:
 		return -1
-	terminal.apply_heat(cast_mode)
+	if !type.get("flat heat", false): # Mod: only a catch heats (2026-10-31)
+		terminal.apply_heat(cast_mode)
 	return cast_mode
 
 func _wait(status: String, seconds: float) -> bool:
@@ -92,6 +96,8 @@ func _add(item: ItemData, amount: int) -> void:
 ## After an attempt (caught or not): token roll, short pause, then recast unless stopping.
 func _end_attempt(pause: float) -> void:
 	terminal.roll_tokens(_attempt_seconds + pause)
+	if terminal.has_method("count_attempt"):
+		terminal.count_attempt() # 2026-10-31: 'phish -spear N' stops after N attempts
 	if !safe_stop:
 		await get_tree().create_timer(pause).timeout
 	if !active:

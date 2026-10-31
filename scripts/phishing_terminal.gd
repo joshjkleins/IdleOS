@@ -15,6 +15,8 @@ extends BaseTerminal
 var vm_lines = []
 var bait: ItemData = null       # basic resource, Phishing.BAIT_PER_CAST used per cast: bite chance up, catch doubled
 func heat_tier_mult() -> float:
+	if process_data.get("flat heat", false): # Mod: a fixed jolt per catch (2026-10-31)
+		return 1.0
 	return Stats.tier_heat(Phishing.HEAT_BY_TIER, Phishing.bait_tier(bait) if bait else Upgrades.working_tier("Phishing"))
 
 var smish_target: Dictionary = {} # Smish: chosen target ({} = random unlocked target that isn't maxed)
@@ -132,6 +134,19 @@ func line_ended():
 		if line.active:
 			return
 	finish_safely()
+
+## Cycle limit: every line claims its cast before starting, so N casts run in all (not N + the lines mid-cast)
+var _casts_claimed := 0
+func claim_attempt() -> bool:
+	if cycle_limit > 0 and _casts_claimed >= cycle_limit:
+		return false
+	_casts_claimed += 1
+	return true
+
+## One attempt (a cast that came back, landed or not) toward a cycle limit
+func count_attempt() -> void:
+	session_cycles += 1
+	check_cycle_limit()
 
 ## Each line finishes its current attempt, then ends.
 func stop_safely():
