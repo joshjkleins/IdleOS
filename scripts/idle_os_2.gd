@@ -28,11 +28,11 @@ extends Control
 @onready var header = $Panel/MarginContainer/TerminalRoot/Header/HEADER
 #@onready var contracts_container = $Panel/ContractsContainer
 @onready var terminal_grandparent = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent
-@onready var hud_process_running = $Panel/SystemDock/VBox/HUDProcessRunning
+@onready var hud_process_running = $Panel/SystemDock.process_section
 @onready var system_dock = $Panel/SystemDock
-@onready var hud_monitor = $Panel/SystemDock/VBox/TrackedSection/HUDMonitor
+@onready var hud_monitor = $Panel/SystemDock.hud_monitor
 @onready var vm_layer = $VMLayer
-@onready var overclock = $Panel/SystemDock/VBox/SystemTemp #temperature widget (lives in the side panel)
+@onready var overclock = $Panel/SystemDock.system_temp #temperature widget (lives in the side panel)
 @onready var input_line_container = $Panel/MarginContainer/TerminalRoot/MarginContainer/TerminalGrandparent/InputLineContainer
 
 @onready var scrollback = preload("res://scenes/scrollback.tscn")

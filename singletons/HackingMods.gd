@@ -60,7 +60,7 @@ enum MOD_TYPE {
 	SPOOF_OPENER,         #Opening Spoof: a Packet Spoof engages at the start of each hack and deals xX its healing as damage
 	CRIT_RAMP,            #Hot Streak: +X crit chance per non-crit, reset on crit
 	DOUBLE_TAP,           #Double Tap: X slower attacks, 2 SQL per attack (double bandwidth), double damage
-	BLEED,                #Bleed: X of each hit again over 3s
+	BLEED,                #Bleed: X of each hit again over 1s (3 ticks)
 	FW_BREAK_HASTE,       #Breach Momentum: +X attack speed for 3 attacks after a firewall break
 	LEECH,                #Leech: X of max anonymity per SQL hit
 	COUNTER_STACK_SLOW,   #Jitter: each countermeasure slows the next by X (max 50%)
@@ -96,7 +96,7 @@ const EQUIP_INFO = {
 	MOD_TYPE.SPOOF_OPENER: ["Opening Spoof", "A Packet Spoof engages at the start of each hack, and that first spoof deals double its healing as damage.", "x"], # 2026-10-29: damage added
 	MOD_TYPE.CRIT_RAMP: ["Hot Streak", "Every non-crit hit adds +10% crit chance; resets on a crit.", "pct"],
 	MOD_TYPE.DOUBLE_TAP: ["Double Tap", "Attacks 30% slower, but each fires 2 SQL Injectors for double damage (and double bandwidth; with less, it fires 1).", "on"],
-	MOD_TYPE.BLEED: ["Bleed", "Every SQL hit deals another 10% of its damage over 3 seconds.", "pct"],
+	MOD_TYPE.BLEED: ["Bleed", "Every SQL hit deals another 10% of its damage over the next second (3 ticks). Each tick counts as a hit.", "pct"],
 	MOD_TYPE.FW_BREAK_HASTE: ["Breach Momentum", "Breaking the firewall makes your next 3 attacks 100% faster.", "pct"],
 	MOD_TYPE.LEECH: ["Leech", "Every SQL hit restores 2% of max anonymity.", "pct"],
 	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 3% (up to 30%).", "pct"], # 2026-10-31: was 5% / 50%
@@ -299,7 +299,7 @@ const STAT_LABEL = {
 	MOD_TYPE.SPOOF_OPENER: "opening spoof heal as damage",
 	MOD_TYPE.CRIT_RAMP: "crit chance per non-crit",
 	MOD_TYPE.DOUBLE_TAP: "2 SQL per attack (2x bw), 30% slower",
-	MOD_TYPE.BLEED: "extra damage over 3s / hit",
+	MOD_TYPE.BLEED: "extra damage over 1s / hit",
 	MOD_TYPE.FW_BREAK_HASTE: "attack speed x3 after fw break",
 	MOD_TYPE.LEECH: "anonymity (of max) per hit",
 	MOD_TYPE.COUNTER_STACK_SLOW: "counter slow per counter",

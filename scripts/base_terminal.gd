@@ -16,7 +16,14 @@ enum Mode { NORMAL, OVERCLOCKED, OVERHEATED }
 var skill: Node                  # Mining, Parsing, ...
 var process_data: Dictionary     # the minor process dict (Mining.LOGS, ...)
 var in_vm: bool = false
-var modifier: Dictionary = {}    # active modifier command (from skill.MODIFIERS), {} = none
+# active modifier command (from skill.MODIFIERS), {} = none. A VM under Defrag Sync shares the main terminal's.
+var modifier: Dictionary = {}:
+	get:
+		if in_vm:
+			var main = _synced_main()
+			if main:
+				return main.modifier
+		return modifier
 var running: bool = false
 var stop_requested: bool = false
 var _stopped: bool = false       # stop() may be called twice (safe stop + "stop" command)
@@ -64,13 +71,19 @@ func get_mode() -> Mode:
 
 ## Defrag Sync: this VM runs the exact process the main terminal runs
 func is_synced() -> bool:
+	return _synced_main() != null
+
+## The main terminal this VM is synced to (same process, Sync running), or null.
+func _synced_main():
 	if !in_vm or !Defragging.sync_active():
-		return false
+		return null
 	var os = get_tree().get_first_node_in_group("main_os") if is_inside_tree() else null
 	if os == null or !os.process_running or os.current_process == null or !is_instance_valid(os.current_process):
-		return false
+		return null
 	var main = os.current_process
-	return "skill" in main and main.skill == skill and main.process_data == process_data
+	if main == self or !("skill" in main) or main.skill != skill or main.process_data != process_data:
+		return null
+	return main
 
 ## Of two modes seen during one cycle, the one that decides its heat (overheat wins, then overclock).
 static func worst_mode(a: Mode, b: Mode) -> Mode:
@@ -155,6 +168,8 @@ func modifier_speed() -> float:
 func modifier_heat() -> float:
 	if modifier.is_empty() or is_cooled():
 		return 1.0
+	if in_vm and is_synced(): # Sync: the shared modifier adds no heat (same heat per second as without it)
+		return 1.0 / max(0.001, modifier_speed())
 	return float(modifier.get("heat", 1.0))
 
 ## true once the skill's cool capstone is installed (no extra heat from overclock or modifiers)

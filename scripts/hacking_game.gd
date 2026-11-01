@@ -55,6 +55,7 @@ var header_card: Dictionary
 var target_name_label: Label
 var sub_label: Label
 var status_label_box: PanelContainer
+var header_chips: HFlowContainer # 2026-11-01: header state / effect chips (wraps)
 var status_label: Label
 var chip_overclock: PanelContainer
 var chip_overheat: PanelContainer
@@ -98,6 +99,7 @@ var ATTACK_BW_COST = 0
 var ATTACK_HEAT: float = 0.3
 const BASE_ATTACK_HEAT := 0.3
 const ATTACK_HEAT_PER_DAMAGE := 0.1
+var spoof_bank: float = 0.0 # Kickback (driver, was Cheap Spoof, 2026-11-01): spoof healing banked as damage for the next SQL attack
 var DEFEND_PCT: float = 0.05 # Packet Spoof heal as a fraction of max anonymity
 ## Capstones
 const SECOND_WIND_RESTORE := 0.15 # 2026-10-28: was 25%. Second Wind (T1 capstone): max anonymity restored after each win in a multi-hack run
@@ -209,7 +211,9 @@ var chain_left := 0           # Chain Reaction: crits left at x2 again
 var freeze_left := 0.0        # Freeze: SQL / countermeasures / firewall reboot stopped
 var exfil_left := 0.0         # Exfil Window: breach in time for an extra cache
 var crit_ramp := 0.0          # Hot Streak (mod): extra crit chance built by non-crits
-var bleeds: Array = []        # Bleed (mod): [damage per second, seconds left]
+var bleeds: Array = []        # Bleed (mod): [damage per tick, ticks left, seconds to next tick]
+const BLEED_TICKS := 3        # 2026-11-01: 3 ticks, 0.33s apart (was a smooth 3s); each tick pauses Regenerator
+const BLEED_TICK_TIME := 0.33
 var haste_attacks := 0        # Breach Momentum (mod): fast attacks left after a firewall break
 var _dr_roll := 0             # Deep Reserves (driver): 0 = not rolled for this bar yet, 1 = free attack, -1 = pays
 var warm_left := 0            # Warm Start (driver, 2026-10-31): instant attacks left this hack
@@ -662,6 +666,10 @@ func attack():
 	var used_overcharge = overcharge_dmg
 	overcharge_dmg = 0.0
 	var raw_dmg = int(round(base_dmg * crit * (float(Exploits.DEFS.rootkit.mult) if rootkit_left > 0.0 else 1.0) * (2.0 if double_tap or stockpile else 1.0)))
+	if spoof_bank > 0.0: # Kickback (driver, was Cheap Spoof): banked spoof healing hits as extra damage (flat, after crits)
+		raw_dmg += int(round(spoof_bank))
+		drv_tags.append("Kickback +%d dmg" % int(round(spoof_bank)))
+		spoof_bank = 0.0
 	var fw_before = firewall_bar.value if !firewall_down and !master else 0.0
 	var blocked = min(fw_before, raw_dmg) # only the part the firewall actually absorbed
 	var actual_dmg = max(raw_dmg - fw_before, 0)
@@ -727,9 +735,9 @@ func attack():
 	if _mod(M.LEECH) > 0.0:
 		Stats.current_anon = min(Stats.max_anon, Stats.current_anon + ceil(Stats.max_anon * _mod(M.LEECH)))
 		anon_bar.value = Stats.current_anon
-	# Bleed: another 10% of the hit over 3 seconds
+	# Bleed: another 10% of the hit over 1s, 3 ticks (each pauses Regenerator)
 	if _mod(M.BLEED) > 0.0 and actual_dmg > 0:
-		bleeds.append([actual_dmg * _mod(M.BLEED) / 3.0, 3.0])
+		bleeds.append([actual_dmg * _mod(M.BLEED) / float(BLEED_TICKS), BLEED_TICKS, BLEED_TICK_TIME])
 	var siphoned = 0
 	if Upgrades.has("hacking.siphon"):
 		var before_anon = Stats.current_anon
@@ -831,9 +839,11 @@ func defense():
 	if Drivers.value("social_proof") > 0.0: # Social Proof (driver)
 		amount = int(round(amount * (1.0 + Drivers.value("social_proof"))))
 		d_tags.append("Social Proof +%d%%" % roundi(Drivers.value("social_proof") * 100))
-	var free_spoof = _lure_chain or (Drivers.value("cheap_spoof") > 0.0 and randf() < Drivers.value("cheap_spoof"))
-	if free_spoof and !_lure_chain:
-		d_tags.append("Cheap Spoof: no bandwidth")
+	var free_spoof = _lure_chain # (Cheap Spoof no longer frees spoofs, 2026-11-01: it banks damage, below)
+	if Drivers.value("cheap_spoof") > 0.0: # Kickback (driver, was Cheap Spoof): part of this spoof's healing goes into the next SQL attack
+		var banked = amount * Drivers.value("cheap_spoof")
+		spoof_bank += banked
+		d_tags.append("Kickback: next attack +%d dmg" % int(round(spoof_bank)))
 	var kept_spoof = false # Burner Account no longer keeps spoofs (2026-11-01)
 	var before = Stats.current_anon
 	Stats.current_anon = min(Stats.max_anon, Stats.current_anon + amount)
@@ -1036,7 +1046,8 @@ func manual_defense():
 ## seconds the target's firewall stays down after a break (per target, "firewall reboot")
 ## seconds the firewall stays down after a break: the target's (after traits), + intel's share (2026-10-28)
 func _fw_down_time() -> float:
-	return float(Stats.trait_stats(current_target)["firewall reboot"]) * (1.0 + float(active_intel.get("pcts", {}).get("firewall reboot", 0.0)))
+	return float(Stats.trait_stats(current_target)["firewall reboot"]) * (1.0 + float(active_intel.get("pcts", {}).get("firewall reboot", 0.0))) \
+		+ Upgrades.cur("hacking.long_breach") # Long Breach (T6 upgrade, 2026-11-01): +1.5s
 
 func _break_firewall(earned: bool = true) -> void:
 	if earned:
@@ -1251,9 +1262,6 @@ func win():
 	if Drivers.value("bonus_cache") > 0.0 and randf() < Drivers.value("bonus_cache"): # Bonus Cache (driver)
 		extra += 1
 		_log("DRV", C_DRV, "Bonus Cache: +1 %s" % target_reward.name)
-	if Drivers.value("salvage_rights") > 0.0 and randf() < Drivers.value("salvage_rights"): # Salvage Rights (driver)
-		vm_caches_gained += 1 # banked with the target caches (lost with them if the run is traced)
-		_log("DRV", C_DRV, "Salvage Rights: +1 %s" % Items.VM_CACHE.name)
 	caches_gained += extra
 	reward_amount += extra
 	exfil_left = 0.0
@@ -1411,6 +1419,7 @@ func reset():
 func start_hack():
 	is_hacking = true
 	salted_stacks = 0
+	spoof_bank = 0.0
 	esc_counters = 0 # 2026-10-31: Escalator ramps within one fight (it carried over a whole run / compromise)
 	fw_fresh = true
 	drv_counters = 0
@@ -1420,6 +1429,9 @@ func start_hack():
 	if Drivers.value("head_start") > 0.0 and Exploits.charge < Drivers.value("head_start"): # Head Start
 		Exploits.set_charge(Drivers.value("head_start"))
 		_log("DRV", C_DRV, "Head Start: Exploit charge %d" % int(Exploits.charge))
+	if Upgrades.cur("hacking.opening_charge") > 0.0: # Opening Charge (T6 upgrade, 2026-11-01): +25 charge every hack
+		Exploits.set_charge(Exploits.charge + Upgrades.cur("hacking.opening_charge"))
+		_log("RUN", C_EXP, "Opening Charge: +%d Exploit charge (%d)" % [int(Upgrades.cur("hacking.opening_charge")), int(Exploits.charge)])
 	warm_left = int(Drivers.value("warm_start")) # Warm Start: the first 1 / 2 / 3 attacks fire right away (by rank)
 	if warm_left > 0:
 		attack_bar.value = attack_bar.max_value
@@ -2177,10 +2189,14 @@ func _tick_effects(delta: float) -> void:
 	if !bleeds.is_empty(): # Bleed (mod)
 		var keep = []
 		for b in bleeds:
-			var dt = min(delta, float(b[1]))
-			integ_bar.value -= float(b[0]) * dt
-			b[1] = float(b[1]) - delta
-			if b[1] > 0.0:
+			b[2] = float(b[2]) - delta
+			if b[2] <= 0.0: # a tick: damage, and it counts as a hit (Regenerator's repair pauses for its regen_delay)
+				integ_bar.value -= float(b[0])
+				_last_hit_time = hack_time
+				_float(integ_bar, "-%s" % _fmt(snappedf(float(b[0]), 0.1)), C_MOD, 11, 14.0)
+				b[1] = int(b[1]) - 1
+				b[2] = float(b[2]) + BLEED_TICK_TIME
+			if int(b[1]) > 0:
 				keep.append(b)
 		bleeds = keep
 		if integ_bar.value <= 0.0:
@@ -2503,8 +2519,8 @@ func _effect_chip(key: String, text: String, on: bool) -> void:
 	if !_effect_chips.has(key):
 		if !on:
 			return
-		var c = _chip(header_card.head, text, C_EXP)
-		header_card.head.move_child(c, status_label_box.get_index())
+		var c = _chip(header_chips, text, C_EXP)
+		header_chips.move_child(c, status_label_box.get_index())
 		_effect_chips[key] = c
 	var chip: PanelContainer = _effect_chips[key]
 	if on and !chip.visible:
@@ -2648,11 +2664,22 @@ func _build_ui() -> void:
 	header_card.head.add_child(sub_label)
 	header_card.head.move_child(sub_label, 1)
 	header_card.head.add_theme_constant_override("separation", 10)
-	chip_intel = _chip(header_card.head, "INTEL", C_INTEL)
-	chip_firewall = _chip(header_card.head, "FIREWALL DOWN", C_FW)
-	chip_overclock = _chip(header_card.head, "OVERCLOCK x2 BW", C_OC)
-	chip_overheat = _chip(header_card.head, "OVERHEATED", C_HEAT)
-	status_label_box = _chip(header_card.head, "", C_OC)
+	# 2026-11-01: the state / effect chips wrap onto more lines (right-aligned) instead of pushing the header past the
+	# game's border when many are on at once; the flow takes the spacer's room
+	for ch in header_card.head.get_children():
+		if ch.get_class() == "Control":
+			ch.visible = false # _card's spacer
+	header_chips = HFlowContainer.new()
+	header_chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_chips.alignment = FlowContainer.ALIGNMENT_END
+	header_chips.add_theme_constant_override("h_separation", 8)
+	header_chips.add_theme_constant_override("v_separation", 4)
+	header_card.head.add_child(header_chips)
+	chip_intel = _chip(header_chips, "INTEL", C_INTEL)
+	chip_firewall = _chip(header_chips, "FIREWALL DOWN", C_FW)
+	chip_overclock = _chip(header_chips, "OVERCLOCK x2 BW", C_OC)
+	chip_overheat = _chip(header_chips, "OVERHEATED", C_HEAT)
+	status_label_box = _chip(header_chips, "", C_OC)
 	status_label_box.visible = true
 	status_label = status_label_box.get_meta("label")
 	status_label.add_theme_font_size_override("font_size", 12)

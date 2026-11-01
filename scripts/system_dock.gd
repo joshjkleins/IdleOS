@@ -24,6 +24,7 @@ const EXPANDED_WIDTH = 284.0
 const COLLAPSED_WIDTH = 56.0
 
 var collapsed: bool = false
+var scroll: ScrollContainer # 2026-11-01: the full view scrolls when it's taller than the screen (7 VMs + uploads...)
 
 const ROW_FONT_SIZE = 11
 const DIM = Color(0.45, 0.5, 0.55, 1)
@@ -42,6 +43,7 @@ var _token_labels := {} # skill -> Label
 const TOKEN_ABBR = {"Mining": "MIN", "Parsing": "PAR", "Cracking": "CRK", "Matching": "MAT", "Phishing": "PHI", "Decoding": "DEC", "Compiling": "CMP"}
 
 func _ready() -> void:
+	_wrap_in_scroll()
 	# line tracked rows up with the section headers
 	var monitor_margin: MarginContainer = hud_monitor.get_node("MarginContainer")
 	for side in ["left", "top", "right", "bottom"]:
@@ -56,6 +58,24 @@ func _ready() -> void:
 	collapse_button.pressed.connect(func(): set_collapsed(true); Signals.vm_window_focused())
 	compact_view.expand_requested.connect(func(): set_collapsed(false); Signals.vm_window_focused())
 	_apply_collapsed()
+
+## The full view goes inside a vertical ScrollContainer, so a crowded panel scrolls instead of spilling
+## past the top and bottom of the screen. Sections that expand (Uploads) still take the free space when it fits.
+func _wrap_in_scroll() -> void:
+	scroll = ScrollContainer.new()
+	scroll.name = "Scroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var idx = full_view.get_index()
+	add_child(scroll)
+	move_child(scroll, idx)
+	full_view.reparent(scroll, false)
+	full_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	full_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var bar := scroll.get_v_scroll_bar() # thin, dim bar
+	bar.custom_minimum_size.x = 4
+	bar.modulate = Color(1, 1, 1, 0.5)
 
 ## UPLOADS sits under the VM list (built in code; see upload_section.gd).
 func _add_upload_section() -> void:
@@ -196,6 +216,8 @@ func toggle() -> void:
 
 func _apply_collapsed() -> void:
 	full_view.visible = !collapsed
+	if scroll:
+		scroll.visible = !collapsed
 	compact_view.visible = collapsed
 	custom_minimum_size.x = get_panel_width()
 	offset_left = -get_panel_width()

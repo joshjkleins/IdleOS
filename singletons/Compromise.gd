@@ -61,6 +61,14 @@ const LINEUPS := {
 		[3, ["packet_loss", "escalator"], {"integrity": 1560, "firewall": 78.75, "counter": 90}],  # Sergeant
 		[4, ["heavy", "adaptive"], {"integrity": 1560, "firewall": 118.13, "counter": 110, "counter speed": 26.0}],  # Captain
 	],
+	"Government": [ # 2026-11-01: first pass
+		[0, ["heavy"], {"integrity": 1300, "firewall": 70, "counter": 95, "counter speed": 30.0}],  # Clerk
+		[0, ["packet_loss", "throttle"], {"integrity": 1500, "firewall": 70, "counter": 150}],  # Clerk
+		[1, ["fortress", "swarm"], {"integrity": 1700, "firewall": 70, "counter": 400}],  # Analyst
+		[2, ["regenerator", "heater"], {"integrity": 650, "firewall": 80, "counter": 150}],  # Ambassador
+		[3, ["siphon", "escalator"], {"integrity": 1300, "firewall": 90, "counter": 130}],  # Vice President
+		[4, ["heavy", "escalator", "heater"], {"integrity": 1200, "firewall": 110, "counter": 90, "counter speed": 26.0}],  # President
+	],
 
 
 }

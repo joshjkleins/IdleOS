@@ -574,78 +574,83 @@ var hacking_targets = {
 		"required payload": Items.GOVERNMENT_PAYLOAD,
 		"hard mode targets": [], # none built yet
 		"targets": [
-			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
+			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Clerk",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack clerk",
-				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 1},
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 6}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 0.5,
 				"exp": 252,
-				"integrity": 1862,
-				"firewall": 198,
-				"counter": 106,
+				"integrity": 700,
+				"firewall": 60,
+				"counter": 150,
 				"counter speed": 16.0,
+				"traits": ["regenerator"],
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.CLERK_CACHE
 			},
-			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
+			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Analyst",
 				"difficulty": "Easy",
 				"unlocked": true,
 				"command": "hack analyst",
-				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 2},
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 12}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 0.8,
 				"exp": 3013,
-				"integrity": 3510,
-				"firewall": 233,
-				"counter": 115,
-				"counter speed": 16.0,
-				"firewall reboot": 8.0, # seconds the firewall stays down after a break
+				"integrity": 1000,
+				"firewall": 80,
+				"counter": 170,
+				"counter speed": 20.0,
+				"traits": ["siphon"],
+				"firewall reboot": 9.0, # seconds the firewall stays down after a break
 				"loot": Items.ANALYST_CACHE
 			},
-			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
+			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Ambassador",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack ambassador",
-				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 3},
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 18}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.1,
 				"exp": 4521,
-				"integrity": 5200,
-				"firewall": 491,
-				"counter": 125,
-				"counter speed": 16.0,
-				"firewall reboot": 14.0, # seconds the firewall stays down after a break
+				"integrity": 1300,
+				"firewall": 100,
+				"counter": 350,
+				"counter speed": 18.0,
+				"traits": ["swarm", "heater"],
+				"firewall reboot": 12.0, # seconds the firewall stays down after a break
 				"loot": Items.AMBASSADOR_CACHE
 			},
-			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
+			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "Vice President",
 				"difficulty": "Medium",
 				"unlocked": true,
 				"command": "hack vice-president",
-				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 4},
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 24}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.4,
 				"exp": 6027,
-				"integrity": 8341,
-				"firewall": 598,
-				"counter": 168,
-				"counter speed": 30.0,
-				"firewall reboot": 6.0, # seconds the firewall stays down after a break
+				"integrity": 1500,
+				"firewall": 120,
+				"counter": 140,
+				"counter speed": 22.0,
+				"traits": ["adaptive", "throttle"],
+				"firewall reboot": 12.0, # seconds the firewall stays down after a break
 				"loot": Items.VICE_PRESIDENT_CACHE
 			},
-			{ # PLACEHOLDER stats (School x12.0, tier 6) - balance later
+			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
 				"name": "President",
 				"difficulty": "Hard",
 				"unlocked": true,
 				"command": "hack president",
-				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 5},
+				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 30}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.7,
 				"exp": 7534,
-				"integrity": 10693,
-				"firewall": 566,
-				"counter": 223,
+				"integrity": 1150,
+				"firewall": 120,
+				"counter": 150,
 				"counter speed": 20.0,
+				"traits": ["adaptive", "escalator", "siphon"],
 				"firewall reboot": 10.0, # seconds the firewall stays down after a break
 				"loot": Items.PRESIDENT_CACHE
 			}

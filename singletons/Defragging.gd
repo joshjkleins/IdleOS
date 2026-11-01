@@ -66,8 +66,8 @@ var HEAT = { # 2026-10-31: Sync (was Heat, -20% heat - far weaker than Cooling's
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
 	"bonus label": "sync",
-	"bonus text": "VMs running your main process share its overclock, without extra heat",
-	"description": "VMs running the same process as your main terminal inherit its overclock status while producing no extra heat.",
+	"bonus text": "Matching VMs share modifiers",
+	"description": "VMs on your main process share its overclock or modifier, no extra heat.",
 	"command": "defrag -sync",
 	"expires_at": 0,
 }

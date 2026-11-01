@@ -117,6 +117,27 @@ const BUILDS_TYPED = {
 		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Hedge"},
 		"josh": {"mods": ["SQL Booster", "Silent Entry", "Packet Shredder", "Payload Amplifier", "Leech", "Backdoor"], "drivers": ["credential_reuse", "session_hijack"], "auto": ""},
 	},
+	6: { # O / D / U / O / D / U (2026-11-01 first pass): tier 5 builds + the tier 6 mods (Cascade, Mirror, Failsafe)
+		"base": {},
+		"wrong": {"mods": ["Payload Amplifier", "Decoy Traffic", "Burst Buffer", "SQL Booster", "Hardened Shell", "Backdoor"], "drivers": ["optimized_build", "brute_force"]},
+		"regenerator": {"mods": ["Critical Overflow", "Hardened Shell", "Burst Buffer", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["optimized_build", "deep_reserves", "hash_collision"], "auto": "Root Access"},
+		"siphon": {"mods": ["Critical Overflow", "Latency Injector", "Burst Buffer", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["deep_reserves", "optimized_build", "burner_account"], "auto": "Overdraft"},
+		"swarm": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Hardened Shell", "Zero Hour"], "drivers": ["cover_story", "countermeasure_log", "social_proof"], "auto": "Ghost Mode"},
+		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Cold Boot", "SQL Booster", "Leech", "Packet Shredder"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"], "auto": "Heat Sink"},
+		"adaptive": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Cascade", "Leech", "Backdoor"], "drivers": ["credential_reuse", "hash_collision", "optimized_build"], "auto": "Redaction"},
+		"throttle": {"mods": ["Double Tap", "Hardened Shell", "Burst Buffer", "Critical Overflow", "Leech", "Zero Hour"], "drivers": ["optimized_build", "deep_reserves", "brute_force"], "auto": "Zero-Day"},
+		"fortress": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "Cascade", "Leech", "Backdoor"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Redaction"},
+		"escalator": {"mods": ["Critical Overflow", "Jitter", "Reset Loop", "SQL Booster", "Silent Entry", "Zero Hour"], "drivers": ["quick_compile", "read_ahead", "countermeasure_log"], "auto": "Blackout"},
+		"heavy": {"mods": ["Critical Overflow", "Decoy Traffic", "Backdoor", "SQL Booster", "Hardened Shell", "Burst Buffer"], "drivers": ["social_proof", "optimized_build", "deep_reserves"], "auto": "Ghost Mode"},
+		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Hedge"},
+		# President (fortress + heater + escalator): fortress core, Cold Boot for the heat, Silent Entry delays the ramp
+		"pres": {"mods": ["Critical Overflow", "Silent Entry", "Cold Boot", "Cascade", "Hardened Shell", "Packet Shredder"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Redaction"},
+		# President (adaptive + escalator + siphon)
+		"regbleed": {"mods": ["Critical Overflow", "Hardened Shell", "Burst Buffer", "Bleed", "Leech", "Zero Hour"], "drivers": ["optimized_build", "deep_reserves", "hash_collision"], "auto": "Root Access"},
+		"pres3": {"mods": ["Critical Overflow", "Hardened Shell", "Burst Buffer", "Cascade", "Leech", "Zero Hour"], "drivers": ["credential_reuse", "deep_reserves", "hash_collision"], "auto": "Blackout"},
+		"pres4": {"mods": ["Critical Overflow", "Silent Entry", "Packet Shredder", "Cascade", "Leech", "Backdoor"], "drivers": ["credential_reuse", "hash_collision", "deep_reserves"], "auto": "Redaction"},
+		"pres2": {"mods": ["Critical Overflow", "Hardened Shell", "Cold Boot", "Cascade", "Leech", "Packet Shredder"], "drivers": ["credential_reuse", "cracked_wide", "session_hijack"], "auto": "Blackout"},
+	},
 
 
 }

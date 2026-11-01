@@ -110,6 +110,11 @@ func main_candidates() -> Array:
 		if it.parsable:
 			for mp in Parsing.minor_processes:
 				c.append("%s=%s" % [mp.command, n])
+			# Extraction's target= (2026-11-01): whatever this item holds ('parse -extraction=databases target=...')
+			if !(it is CacheData) and it.get("contained_items"):
+				for ci in it.contained_items:
+					if ci is ItemData and ci.name != "":
+						c.append("%s=%s target=%s" % [Parsing.EXTRACTION.command, n, _n(ci)])
 		if it is CacheData:
 			for p in ["decode -cache=", "decode -skim=", "decode -deep="]:
 				c.append(p + n)

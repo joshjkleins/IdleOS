@@ -50,13 +50,13 @@ var vm_token = Items.VM_PARSING_TOKEN
 ## Modifier commands unlocked by Parsing capstones (see Mining.MODIFIERS for how they work).
 const MODIFIERS = [
 	{"command": "plaintext", "name": "Plaintext", "package": "parsing.plaintext", "speed": 0.5, "heat": 1.5,
-		"effect": "-50% speed, heat x1.5. Each encrypted find has a 10% chance to come out already cracked."},
+		"effect": "-50% speed, heat x1.5. Each encrypted find has a 25% chance to come out already cracked."},
 	{"command": "deep-read", "name": "Deep Read", "package": "parsing.deep_read", "speed": 0.6, "heat": 2.0,
 		"effect": "-40% speed, heat x2. Line find chance x2 (not Network finds) and VM token chance x2."},
 	{"command": "survey", "name": "Survey", "package": "parsing.survey", "speed": 1.0, "heat": 1.0,
 		"effect": "Half finds, +100% Parsing XP."},
 ]
-const PLAINTEXT_CHANCE := 0.10
+const PLAINTEXT_CHANCE := 0.25 # 2026-11-01: was 0.10
 ## Cold Cache: overclock and the modifiers add no extra heat
 const COOL_PACKAGE := "parsing.cold_cache"
 

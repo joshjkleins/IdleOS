@@ -58,8 +58,9 @@ const DEFS = {
 		"text": "%s chance a countermeasure misses"},
 	"lure": {"skill": "Phishing", "name": "Lure", "short": "%s spoof chains", "values": [0.10, 0.12, 0.15],
 		"text": "%s chance a Packet Spoof instantly uses another one"},
-	"cheap_spoof": {"skill": "Phishing", "name": "Cheap Spoof", "short": "%s no-BW spoofs", "values": [0.15, 0.25, 0.40],
-		"text": "%s chance a Packet Spoof costs no bandwidth"},
+	"cheap_spoof": {"skill": "Phishing", "name": "Kickback", "short": "%s spoof heal as dmg", "values": [0.05, 0.10, 0.20], "format": "pct_plain",
+		# 2026-11-01: was Cheap Spoof, 15/25/40% chance a spoof costs no bandwidth (id kept for saves)
+		"text": "%s of each Packet Spoof's healing is added to your next SQL attack's damage"},
 	# Parsing: intel and countermeasures
 	"intel_reserve": {"skill": "Parsing", "name": "Intel Reserve", "short": "%s intel kept", "values": [0.20, 0.30, 0.50],
 		"text": "%s chance a hack doesn't use up intel"},
@@ -80,8 +81,9 @@ const DEFS = {
 		"text": "each hack starts with %s Exploit charge", "format": "num"},
 	"refund": {"skill": "Decoding", "name": "Refund", "short": "%s charge refund", "values": [0.10, 0.15, 0.25], # 2026-11-01: was a chance the Exploit item isn't used up
 		"text": "%s chance using an Exploit costs no charge"},
-	"salvage_rights": {"skill": "Decoding", "name": "Salvage Rights", "short": "%s VM cache drop", "values": [0.10, 0.12, 0.15],
-		"text": "%s chance a breach also drops a VM cache"}, # 2026-10-27: was a payload refund (same as Payload Recycler)
+	"salvage_rights": {"skill": "Decoding", "name": "Salvage Rights", "short": "-%s Exploit charge", "values": [0.15, 0.30, 0.50], "format": "pct_plain",
+		# 2026-11-01: was a 10/12/15% chance a breach also drops a VM cache (2026-10-27: before that a payload refund)
+		"text": "Exploits cost %s less charge"},
 	# Compiling: SQL damage and speed
 	"optimized_build": {"skill": "Compiling", "name": "Optimized Build", "short": "%s SQL damage", "values": [0.05, 0.08, 0.12],
 		"text": "%s SQL damage"},

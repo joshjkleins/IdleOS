@@ -168,7 +168,7 @@ GROUPS["Parsing"] = [
     (CAP,["Overclock","Token Sniffer","Plaintext","Deep Read","Survey","Cold Cache"],
         ["MODIFIER 'overclock': x2 speed, heat x1.3 per cycle; stops on overheat",
          "Passive: VM Parsing token chance x2",
-         "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 10% chance to come out already cracked (skips Cracking)",
+         "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 25% chance to come out already cracked (skips Cracking)",
          "MODIFIER 'deep-read': -40% speed; row find chance x2 (not Network finds), VM token chance x2, heat x2",
          "MODIFIER 'survey': half resources, +100% Parsing XP (same command name in every skill)",
          "Passive: Overclock, Plaintext and Deep Read produce no extra heat"],"one-off",None),
@@ -264,6 +264,9 @@ GROUPS["Compiling"] = [
          "Passive: Overclock, Debug Build and Optimize produce no extra heat"],"one-off",None),
 ]
 GROUPS["Hacking"] = [
+    # 2026-11-01: data/upgrades.json (edited by hand) drops the T6 levels of Packet Spoof Healing and Mod Slot and adds two
+    # T6-only packages in their slots: Opening Charge (+25 Exploit charge per hack, 4 Ambassador) and Long Breach
+    # (+1.5s firewall down time, 5 VP). Exploit Kit costs 20 President caches. Not modelled here yet.
     # Combat pass (2026-10-20): grow with the tier like enemies and mods do, so mods stay ~+40% at every tier
     (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",[(f"+{v} dmg, +0.1 heat" if v else "+25% attack speed, +0.1 heat") for v in DAMAGE_STEP],(20,DAMAGE_STEP,"dmg")),
     (TRACK,"Firewall Damage","Firewall damage per SQL attack",[f"+{v}" for v in FIREWALL_STEP],(1,FIREWALL_STEP,"firewall dmg")),

@@ -1043,3 +1043,70 @@ before release.
   firewall downtime, 2 stacks), Hash Collision 7/6/5, Refund = no charge spent, Warm Start 1/2/3 instant attacks.
   IP Rotator: each spoof knocks the countermeasure bar back 35%. Silent Entry 5s (+ greyed counter card, SILENT chip).
 - Defrag: VM T1, Sync T2, Upload T4, Cooling T5 (x3), XP T6. Upload goals 150/300/600/1000/1200/2000.
+
+## Tier 6 (Government) first pass (2026-11-01)
+- T6 Hacking apt: SQL 50 / firewall 15 kept. Packet Spoof Healing and Mod Slot lose their T6 level (max 10% / 6 slots);
+  new T6-only packages in their slots: Opening Charge (hacking.opening_charge, +25 Exploit charge every hack, on top of
+  Head Start, 4 Ambassador) and Long Breach (hacking.long_breach, +1.5s firewall down in _fw_down_time, 5 VP).
+  Exploit Kit 20 President caches. gen_upgrades.py doesn't model these yet (note in its Hacking group).
+- Drivers: Cheap Spoof -> Kickback (id cheap_spoof): 5/10/20% of each spoof's heal banked as flat damage on the next
+  SQL attack (spoof_bank). Salvage Rights: Exploits cost 15/30/50% less charge (Exploits.cost).
+- Targets (base stats; GEAR=prog, TYPED 6-slot builds, LEVEL 42, no intel; tools/tests t6.sh / comp6.sh, BUILDS_TYPED[6]):
+  Clerk 700/60/150/16/10 regenerator; Analyst 1000/80/170/20/9 siphon; Ambassador 1300/100/350/18/12 swarm+heater;
+  Vice President 1500/120/140/22/12 adaptive+throttle; President 1150/120/150/20/10 adaptive+escalator+siphon.
+  Payloads 6/12/18/24/30. Right builds ~60-120s; President ~80-100% with the right build, ~20-35% anonymity left.
+  Regenerator needs low integrity (2%/s of max); fortress+regenerator was unwinnable (firewall regen too).
+- Compromise: Clerk heavy, Clerk packet_loss+throttle, Analyst fortress+swarm, Ambassador regenerator+heater,
+  VP siphon+escalator, President heavy+escalator+heater (overrides in Compromise.gd).
+- Open: no tier 6 drivers exist (5 per skill), so the Government compromise prize is only XP + "fully compromised".
+
+## HANDOFF - where we left off (2026-11-01, end of session)
+Read this block first in a new conversation.
+
+### Working rules (Josh)
+- Josh commits himself; branch `skill-revamp` (Claude can't switch branches). Never delete files: move them to `_to_delete/`.
+- Leave `classes/` alone (except `CacheDecrypting.gd`). Plan big changes with Josh before building them.
+- Never `pkill -f Godot_v4`. Don't request %APPDATA% access. Filter logs with `grep -v 'Game saved'` (not `grep -v saved`).
+- Before release: turn off `DEV_ITEM_COMMANDS`, `Drivers.DEV_GIVE` and the other DEV flags.
+
+### Setup (Claude, via the device shell)
+- Project: `$HOME/mnt/idle-os-prototype`. Test copy: `$HOME/new`, synced with
+  `rsync -a --exclude .git --exclude _to_delete --exclude .godot --exclude traitbal.gd $HOME/mnt/idle-os-prototype/ $HOME/new/`
+  (traitbal.gd lives in $HOME/new; a copy is kept in tools/tests/traitbal.gd - copy it back if $HOME/new is fresh).
+- Godot: `$HOME/Godot_v4.4.1-stable_linux.x86_64 --headless --path .`; import check: `--import`, grep "script error|parse error".
+- One-off test scenes: `sed "s#res://p4test.gd#res://tools/tests/X.gd#" p4test.tscn > X.tscn`, run headless.
+- Screenshots: `xvfb-run -a -s "-screen 0 1920x1080x24" <godot> --path . X.tscn --resolution 1920x1080`, save PNGs to
+  `_to_delete/screens/`, crop with PIL, stage the file to view it.
+- Balance harness `traitbal.gd` (res://traitbal.tscn) env: TIER, GEAR=late|early|prog, LEVEL, N, RUN, TS, INTEL (0 = none),
+  ONLY (`=name` exact), SLOTS, BUILD (comma list), COMP=1 (compromise fights), TYPED=1 (BUILDS_TYPED[tier]),
+  SETTRAITS=a,b, NOOC=1, SWAP=Old>New, DBG=ATK,DEF,CTR,FW,RUN + DBGN=lines. Builds per tier in BUILDS_TYPED (tier 6 added).
+- Helper scripts (copies in tools/tests/, originals in $HOME/bal/): t5.sh / t6.sh `"=name" N` (normal targets, GEAR=prog,
+  B=builds, T=timeout), comp5.sh / comp6.sh (compromise fights), setloc.py `<stats.gd> <Location> "Name:key=val,key=val;Name2:..."`
+  (traits=a|b). Runs take ~1-3 min; run several in parallel in the background and `sleep` for them.
+- Upgrades: `data/upgrades.json` is edited directly (python json, indent 1). `tools/upgrades/gen_upgrades.py` builds
+  the spreadsheet (`soffice --headless --convert-to xlsx` to recalc, copy to tools/upgrades/idleos_upgrades.xlsx).
+
+### Open items
+1. Government (tier 6) first pass is in (section above); Josh hasn't played it yet - expect tuning from play.
+2. No tier 6 drivers (5 per skill): the Government compromise has no driver prize, but its rules text still promises
+   "a random Government driver". Decide: add 6th drivers or another final prize.
+3. Bleed (2026-11-01): 10% of each integrity hit in 3 ticks 0.33s apart; each tick counts as a hit (pauses Regenerator).
+   Vs the T6 Clerk it beats an empty slot but SQL Booster is still faster. Option if it should be the clear Regenerator
+   pick: a 4th tick (1.33s) or 15%.
+4. Mirror (T6 mod, reflects 25% of countermeasure damage) tested weaker than Decoy Traffic / Hardened Shell in the
+   Heavy and Swarm builds - maybe undertuned.
+5. gen_upgrades.py / the upgrades spreadsheet don't have the T6 Hacking changes (Opening Charge, Long Breach, healing /
+   mod slot T6 levels removed, Exploit Kit 20). data/upgrades.json is the source of truth.
+6. Hospital Chief compromise re-check after the Escalator per-fight fix (Josh will set up a save).
+7. Watch the small Bank/Police dips from the mod bandwidth change (ceil(tier/2) per mod): Branch Manager, Security,
+   Loan Officer compromise, Police Cop compromise.
+8. Government still uses the university ASCII art; Government target heat / exp values are the old placeholders.
+
+### Done this session (after the tier 5 sign-off), for reference
+- Defrag Sync: side panel description shortened; Sync now shares the main terminal's modifier (sift, prospect, survey...)
+  as well as overclock, with no extra heat (BaseTerminal.modifier getter + _synced_main; test tools/tests/syncmod.gd).
+- Side panel scrolls when taller than the screen (SystemDock._wrap_in_scroll; idle_os_2 reaches its widgets through the
+  dock's vars now, not $Panel/SystemDock/VBox/...). Test: tools/tests/dockscroll.gd.
+- Parsing Plaintext 25% (was 10%). Tab completes `parse -extraction=<item> target=<contained item>` (extcomp.gd).
+- Kickback (was Cheap Spoof), Salvage Rights 15/30/50% Exploit cost, T6 Hacking apt changes, Government first pass,
+  Bleed rework - all described above.

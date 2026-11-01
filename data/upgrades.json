@@ -3402,7 +3402,7 @@
    "group": "Parsing",
    "name": "Plaintext",
    "type": "capstone",
-   "effect": "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 10% chance to come out already cracked (skips Cracking)",
+   "effect": "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 25% chance to come out already cracked (skips Cracking)",
    "levels": [
     {
      "tier": 3,
@@ -3411,7 +3411,7 @@
      "label": "one-off",
      "before": "not installed",
      "after": "installed",
-     "effect": "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 10% chance to come out already cracked (skips Cracking)",
+     "effect": "MODIFIER 'plaintext': -50% speed, heat x1.5; each find 25% chance to come out already cracked (skips Cracking)",
      "costs": [
       {
        "item": "Mac Address",
@@ -9108,21 +9108,6 @@
        "amount": 3
       }
      ]
-    },
-    {
-     "tier": 6,
-     "slot": 6,
-     "value": 0.01,
-     "label": "+1% of max anon",
-     "before": "10 % of max anonymity per spoof",
-     "after": "11 % of max anonymity per spoof",
-     "effect": "Packet Spoof restores a % of max anonymity (base 5% = today's 5 of 100); Restore mods add % points (+5 = +5%)",
-     "costs": [
-      {
-       "item": "Ambassador Cache",
-       "amount": 4
-      }
-     ]
     }
    ]
   },
@@ -9205,21 +9190,6 @@
       {
        "item": "Sergeant cache",
        "amount": 4
-      }
-     ]
-    },
-    {
-     "tier": 6,
-     "slot": 7,
-     "value": 1.0,
-     "label": "+1 slot",
-     "before": "6 mod slots",
-     "after": "7 mod slots",
-     "effect": "+1 hacking mod slot",
-     "costs": [
-      {
-       "item": "Vice President Cache",
-       "amount": 5
       }
      ]
     }
@@ -9424,6 +9394,54 @@
    ]
   },
   {
+   "id": "hacking.opening_charge",
+   "group": "Hacking",
+   "name": "Opening Charge",
+   "type": "pointed",
+   "effect": "Every hack starts with +25 Exploit charge (on top of Head Start and charge carried over in a run)",
+   "levels": [
+    {
+     "tier": 6,
+     "slot": 6,
+     "value": 25.0,
+     "label": "+25 charge",
+     "before": "0 starting charge",
+     "after": "+25 starting charge",
+     "effect": "Every hack starts with +25 Exploit charge (on top of Head Start and charge carried over in a run)",
+     "costs": [
+      {
+       "item": "Ambassador Cache",
+       "amount": 4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hacking.long_breach",
+   "group": "Hacking",
+   "name": "Long Breach",
+   "type": "pointed",
+   "effect": "The firewall stays down 1.5s longer every time it breaks",
+   "levels": [
+    {
+     "tier": 6,
+     "slot": 7,
+     "value": 1.5,
+     "label": "+1.5s",
+     "before": "+0s firewall down time",
+     "after": "+1.5s firewall down time",
+     "effect": "The firewall stays down 1.5s longer every time it breaks",
+     "costs": [
+      {
+       "item": "Vice President Cache",
+       "amount": 5
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": "hacking.second_wind",
    "group": "Hacking",
    "name": "Second Wind",
@@ -9561,7 +9579,7 @@
      "costs": [
       {
        "item": "President Cache",
-       "amount": 25
+       "amount": 20
       }
      ]
     }
