@@ -712,8 +712,7 @@ func _entry_range(cache: CacheData, entry: CacheEntry) -> Vector2i:
 	return Vector2i(entry.min_quantity * mult, entry.max_quantity * mult)
 
 func _entry_chance(cache: CacheData, entry: CacheEntry) -> float:
-	var bonus = CacheData.CORRUPTION_DROP_BONUS if cache.get_variant() == CacheData.CacheVariant.CORRUPTION else 0.0
-	return min(1.0, entry.drop_chance + bonus)
+	return min(1.0, entry.drop_chance) # 2026-11-01: Corruption no longer adds +30% here (it doubles Exploit / mod chances instead)
 
 func get_cache_rare_chance(cache: CacheData, base_rare_chance: float) -> float:
 	if base_rare_chance <= 0.0:
@@ -721,8 +720,6 @@ func get_cache_rare_chance(cache: CacheData, base_rare_chance: float) -> float:
 	match cache.get_variant():
 		CacheData.CacheVariant.FOOTPRINT:
 			return 0.0
-		CacheData.CacheVariant.CORRUPTION:
-			return min(1.0, base_rare_chance + CacheData.CORRUPTION_DROP_BONUS)
 	return base_rare_chance
 
 func _rare_amount(cache: CacheData) -> int:

@@ -115,6 +115,7 @@ const BUILDS_TYPED = {
 		"heater": {"mods": ["Critical Overflow", "Hardened Shell", "Cold Boot", "SQL Booster", "Leech", "Packet Shredder"], "drivers": ["optimized_build", "credential_reuse", "hash_collision"], "auto": "Heat Sink"},
 		"siphon": {"mods": ["Critical Overflow", "Latency Injector", "Burst Buffer", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["deep_reserves", "optimized_build", "burner_account"], "auto": "Overdraft"},
 		"packet_loss": {"mods": ["Critical Overflow", "Hardened Shell", "Packet Shredder", "SQL Booster", "Leech", "Zero Hour"], "drivers": ["optimized_build", "brute_force", "hash_collision"], "auto": "Hedge"},
+		"josh": {"mods": ["SQL Booster", "Silent Entry", "Packet Shredder", "Payload Amplifier", "Leech", "Backdoor"], "drivers": ["credential_reuse", "session_hijack"], "auto": ""},
 	},
 
 
@@ -193,7 +194,8 @@ func _fight(target: Dictionary, run: int) -> Dictionary:
 		fight += get_process_delta_time()
 		if OS.get_environment("CARD") != "" and fight > 2.0 and fight - get_process_delta_time() <= 2.0: # CARD=1: the counter card's stats 2s in
 			print(">>> CTR CARD ", game.ctr_card.stats.get_parsed_text())
-		if Upgrades.can_overclock(Hacking):
+		if OS.get_environment("NOOC") != "": Stats.overclocked = false # NOOC=1: never overclock
+		elif Upgrades.can_overclock(Hacking):
 			if Stats.overclocked and Stats.system_tempature > 90.0: Stats.overclocked = false
 			elif !Stats.overclocked and Stats.system_tempature < 60.0 and !Stats.overheated: Stats.overclocked = true
 	if OS.get_environment("DBG") != "": # DBG=ATK,FW: print the first log lines with these tags

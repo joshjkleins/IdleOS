@@ -711,6 +711,10 @@ func universal_commands(text):
 	if text.begins_with("cd"):
 		handle_cd_commands(text)
 		return true
+
+	if text == "exploits" or text == "exploit" or text == "exploits -h": # 2026-10-31: what you have + where they come from
+		add_line(ContextCommands.exploits_text())
+		return true
 	
 	if DEV_ITEM_COMMANDS and text.begins_with("add"):
 		# 'add mods t2' / 'add exploits t2' [amount]: one (or <amount>) of every mod / Exploit of that tier (2026-10-29)
@@ -806,8 +810,8 @@ func universal_commands(text):
 		if text == "mod" or text == "mods":
 			add_line(ContextCommands.get_mod_command())
 			return true
-		if text in ["mod -slot", "mod -slots", "mods -slot", "mods -slots"]: # 2026-10-31: mod items by slot type
-			add_line(ContextCommands.get_mod_command(true))
+		if text in ["mod -tier", "mod -t", "mods -tier", "mods -t", "mod -tiers"]: # 2026-11-01: by tier ('mod' is by slot)
+			add_line(ContextCommands.get_mod_command(false))
 			return true
 		
 		if text.begins_with("mod -rm"):

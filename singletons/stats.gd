@@ -538,12 +538,12 @@ var hacking_targets = {
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 20}, # 2026-10-31: was 4
 				"heat": 1.4,
 				"exp": 5383,
-				"integrity": 1000,
-				"firewall": 70,
+				"integrity": 1100,
+				"firewall": 75,
 				"counter": 66,
 				"counter speed": 30.0,
 				"traits": ["heavy", "escalator"],
-				"firewall reboot": 6.0, # seconds the firewall stays down after a break
+				"firewall reboot": 5.8, # seconds the firewall stays down after a break
 				"loot": Items.SERGEANT_CACHE
 			},
 			{ # 2026-10-31: tier 5 first pass (GEAR=prog, TYPED builds, no intel)
@@ -554,12 +554,12 @@ var hacking_targets = {
 				"requirements": {"item": Items.POLICE_PAYLOAD, "amount": 25}, # 2026-10-31: was 5
 				"heat": 1.7,
 				"exp": 6728,
-				"integrity": 1000,
-				"firewall": 80,
-				"counter": 140,
-				"counter speed": 20.0,
+				"integrity": 1428.58,
+				"firewall": 112.5,
+				"counter": 130,
+				"counter speed": 23.26,
 				"traits": ["fortress", "heater"],
-				"firewall reboot": 12.0, # seconds the firewall stays down after a break
+				"firewall reboot": 9.4, # seconds the firewall stays down after a break
 				"loot": Items.CAPTAIN_CACHE
 			}
 		],

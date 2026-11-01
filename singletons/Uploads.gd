@@ -193,6 +193,7 @@ func _upload_one(item: ItemData) -> void:
 	if not tier in completed_tiers and is_tier_complete(tier):
 		completed_tiers.append(tier)
 		tier_completed.emit(tier) # hook for unlock progression later
+		return_leftovers()
 
 ## A save whose uploads already meet a goal that has since been lowered completes that tier on load
 func complete_met_tiers() -> void:
@@ -206,6 +207,18 @@ func complete_met_tiers() -> void:
 	for item in active.keys(): # items whose goal is now met stop uploading (the rest stays queued)
 		if get_uploaded(item) >= get_goal_amount(item):
 			active.erase(item)
+	return_leftovers()
+
+## 2026-11-01: once a tier is done, anything still queued or uploading that the new goal doesn't need (or that's
+## already met) goes back to the inventory - before, finished tiers left their items showing in UPLOADS
+func return_leftovers() -> void:
+	for item in staged.keys():
+		if !is_goal_item(item) or get_uploaded(item) >= get_goal_amount(item):
+			unpack(item)
+	for item in active.keys():
+		if !is_goal_item(item) or get_uploaded(item) >= get_goal_amount(item):
+			active.erase(item)
+	changed.emit()
 #endregion
 
 #region save

@@ -10,9 +10,9 @@ const SKILL_DIRS = ["mining", "parsing", "cracking", "matching", "phishing", "ha
 
 ## Commands that don't depend on the save
 const STATIC = [
-	"-h", "help", "info", "ls", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "driver", "system", "settings", "history",
+	"-h", "help", "info", "ls", "exploits", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "driver", "system", "settings", "history",
 	"tutorial", "tutorial -l", "tutorial reset", "welcome", "discord", "discord -c", "version", "ps",
-	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods", "mod -slots", "mod -rm all",
+	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
 	"track ", "untrack ", "untrack -a", "trap", "trap collect", "panel", "cd ..", "quit", "quit -s", "wishlist",
@@ -91,15 +91,16 @@ func main_candidates() -> Array:
 		c.append("ls " + f)
 	for sk in ["mining", "parsing", "cracking", "matching", "phishing", "hacking", "decoding", "compiling"]:
 		c.append("ls -" + sk)
-	for loc in Stats.hacking_targets:
-		if !(" " in str(loc)): # 'ls police station' would be read as a search
-			c.append("ls " + str(loc).to_lower())
+	for loc in Stats.hacking_targets: # 'ls police station' works since 2026-11-01
+		c.append("ls " + str(loc).to_lower())
 	for t in range(1, 7):
 		c.append("ls t%d" % t)
 	# 'ls <item>' works for any item, owned or not (caches you haven't found yet, rares, tokens ...)
 	for it in Items.ITEM_MAP.values():
 		if it is ItemData and it.name != "":
 			c.append("ls " + _n(it))
+	for loc in Stats.hacking_targets: # 2026-11-01: a location's name on its own lists its targets ('po' -> 'police station')
+		c.append(str(Stats.hacking_targets[loc].name).to_lower())
 	for id in Drivers.DEFS: # 'ls <driver>' (2026-10-31), by name
 		c.append("ls " + str(Drivers.DEFS[id].name).to_lower())
 	for it in owned:
@@ -115,6 +116,8 @@ func main_candidates() -> Array:
 		if Decoding.is_salvageable(it):
 			c.append("decode -salvage=" + n)
 
+		if Phishing.is_rare_bait(it): # 2026-11-01: a rare item whose upload goal is done baits 'phish -mod' for that tier's mods
+			c.append("phish -mod bait=" + n)
 		if Phishing.is_bait(it): # bait: any basic resource
 			for mp in Phishing.minor_processes:
 				c.append("%s bait=%s" % [mp.command, n])

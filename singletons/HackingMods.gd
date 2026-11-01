@@ -83,8 +83,8 @@ const EQUIP_INFO = {
 	MOD_TYPE.IGNORE_COUNTERS: ["Decoy Traffic", "The first 2 countermeasures of each hack miss.", "n"], # 2026-10-29: was 3
 	MOD_TYPE.FW_PCT_HIT: ["Packet Shredder", "Every hit also deals 10% of the target's max firewall.", "pct"],
 	MOD_TYPE.COUNTER_SLOW_PCT: ["Latency Injector", "Enemy countermeasures are 20% slower.", "pct"],
-	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 7 seconds of each hack go unnoticed: no countermeasures.", "s"], # 2026-10-29: was 10
-	MOD_TYPE.SPOOF_SPEED: ["IP Rotator", "Packet Spoofs fill 80% faster.", "pct"],
+	MOD_TYPE.STEALTH_START: ["Silent Entry", "The first 5 seconds of each hack go unnoticed: no countermeasures.", "s"], # 2026-11-01: 5 (2026-10-29: 7, was 10)
+	MOD_TYPE.SPOOF_SPEED: ["IP Rotator", "Every Packet Spoof also knocks the countermeasure bar back by 35%.", "pct"], # 2026-11-01: was spoofs fill 80% faster (Proxy Chain's job)
 	MOD_TYPE.EXPLOIT_FULL: ["Zero Hour", "The EXPLOIT meter starts full at the start of each hack.", "on"],
 	MOD_TYPE.FW_BREAK_INTEGRITY: ["Cascade", "Breaking the firewall also deals 15% of the target's max integrity.", "pct"],
 	MOD_TYPE.COUNTER_REFLECT: ["Mirror", "25% of every countermeasure's damage is reflected to the target's integrity.", "pct"],
@@ -193,14 +193,17 @@ func pool_items(tier: int = 0) -> Array:
 const MOD_BW_COST_BY_TIER = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7}
 const EQUIP_BW_COST := 1 # 2026-10-23: was 2 (bandwidth-bound early fights made non-damage mods a net loss)
 
+## 2026-11-01: every equipped mod adds half its tier, rounded up, to each SQL Injector's bandwidth cost
+## (tier 1-2 +1, 3-4 +2, 5-6 +3), SQL Booster included (was +1 per mod, Booster free). Full tier cost was tried and
+## made Hospital+ bandwidth-bound (Police Captain unwinnable), so it's softened to matter a little more, no re-tune.
 func get_mod_bandwidth_cost(mod) -> int:
 	if !current_mods.has(mod):
 		return 0
-	if mod == MOD_TYPE.SQL_BOOST:
-		return 0 # 2026-10-23: its faster attacks already spend bandwidth faster
-	if EQUIP_INFO.has(mod):
-		return EQUIP_BW_COST
-	return int(MOD_BW_COST_BY_TIER.get(int(current_mods[mod].get("tier", 1)), 2))
+	return bw_cost_for_tier(int(current_mods[mod].get("tier", 1)))
+
+## a tier's mod bandwidth cost per SQL Injector (the 'mod' list's BW column too)
+static func bw_cost_for_tier(tier: int) -> int:
+	return int(ceil(max(1, tier) / 2.0))
 
 ## total extra SQL Injector bandwidth cost from all equipped mods
 func get_bandwidth_cost() -> int:
@@ -284,7 +287,7 @@ const STAT_LABEL = {
 	MOD_TYPE.FW_PCT_HIT: "max firewall dmg / hit",
 	MOD_TYPE.COUNTER_SLOW_PCT: "countermeasure speed",
 	MOD_TYPE.STEALTH_START: "undetected at hack start",
-	MOD_TYPE.SPOOF_SPEED: "spoof fill speed",
+	MOD_TYPE.SPOOF_SPEED: "countermeasure bar per spoof",
 	MOD_TYPE.EXPLOIT_FULL: "EXPLOIT meter starts full",
 	MOD_TYPE.FW_BREAK_INTEGRITY: "max integrity on fw break",
 	MOD_TYPE.COUNTER_REFLECT: "countermeasure dmg reflected",
@@ -309,6 +312,8 @@ func get_mod_stat(mod) -> String:
 
 func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 	match mod:
+		MOD_TYPE.SPOOF_SPEED:
+			return "-%d%%" % roundi(value * 100.0) # IP Rotator: countermeasure bar knocked back
 		MOD_TYPE.START_ANON:
 			return "3 crits" # Fresh Start: the first 3 attacks of each hack
 		MOD_TYPE.COUNTER_SLOW_PCT:

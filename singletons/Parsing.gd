@@ -170,7 +170,7 @@ var CORRUPTION = {
 	"vm token chance": 0.015, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Exploit of the item's tier (0.1% per line, about 1% per item)",
-	"description": "Corrupts resources gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] at high speed for a rare find: a random Exploit of the item's tier (Logs: School Exploits, Archives: Lawfirm Exploits, ...). A flat 0.1% per line, about 1% per item, so it eats Mining items quickly. If used on a Cache it will transform it to a Corruption variant, significantly increasing the chance of decoding each item but with a chance to destroy the rest of the cache after each item decoded.",
+	"description": "Corrupts resources gained from [color="+Mining.SKILL.color.to_html()+"]Mining[/color] at high speed for a rare find: a random Exploit of the item's tier (Logs: School Exploits, Archives: Lawfirm Exploits, ...). A flat 0.1% per line, about 1% per item, so it eats Mining items quickly. If used on a Cache it will transform it to a Corruption variant: double the chance at its Exploits and hacking mods, but a chance to destroy the rest of the cache after each item decoded.",
 	"efficiency description": "Corruption's Exploit chance is flat (0.1% per line); efficiency doesn't change it.",
 	"signal": basic_cycle_completed
 }

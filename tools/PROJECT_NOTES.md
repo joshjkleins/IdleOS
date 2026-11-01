@@ -1031,3 +1031,15 @@ before release.
   half the normal per-cycle heat (same heat/s as not overclocked). VM window + side panel show "SYNC".
   get_heat_reduction() returns 0. Test: tools/tests/synctest.gd.
 - Defrag unlock order (2026-10-31): VM T1, Sync T2, none at Hospital, Upload T4, Cooling T5 (now x3 cooling), XP T6.
+- 2026-11-01: Corruption caches: x2 Exploit / mod chance (CacheData.CORRUPTION_FIND_MULT in Exploits.drop_chance),
+  no more +30% to every drop / rare; 20% corrupt chance kept. 'mod' lists by slot type; 'mod -tier' / 'mod -t' by tier
+  ('mod -slots' retired). Tab completes 'phish -mod bait=<rare>' for rares whose upload goal is done. 'exploits'
+  shows full descriptions (Inventory.desc_width). Exfil Window costs 100. Heat Sink: 15s, countermeasure heat cools
+  instead. Smoke Screen / Ghost Mode descriptions clarified.
+- Tier 5 (Police) signed off 2026-11-01. Final Captain card: 1000 integrity / 180 fw / 4.7s down / 130 every 4.3s
+  (fortress + heater). Sergeant 1100 / 75 / 5.8s. Police compromise +20% integrity, +5% firewall on every fight.
+- Mod bandwidth: each equipped mod adds ceil(tier / 2) to every SQL Injector (SQL Booster included); 'mod' BW column.
+- Drivers 2026-11-01: Burner Account (attacks can push a charging spoof +30%), Salted Hash (crits bank +1/2/3s
+  firewall downtime, 2 stacks), Hash Collision 7/6/5, Refund = no charge spent, Warm Start 1/2/3 instant attacks.
+  IP Rotator: each spoof knocks the countermeasure bar back 35%. Silent Entry 5s (+ greyed counter card, SILENT chip).
+- Defrag: VM T1, Sync T2, Upload T4, Cooling T5 (x3), XP T6. Upload goals 150/300/600/1000/1200/2000.

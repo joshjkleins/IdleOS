@@ -30,12 +30,12 @@ const DEFS = {
 	# Cracking: crits
 	"brute_force": {"skill": "Cracking", "name": "Brute Force", "short": "%s crit chance", "values": [0.03, 0.05, 0.08],
 		"text": "%s crit chance"},
-	"hash_collision": {"skill": "Cracking", "name": "Hash Collision", "short": "every %s hit crits", "values": [10, 8, 6],
+	"hash_collision": {"skill": "Cracking", "name": "Hash Collision", "short": "every %s hit crits", "values": [7, 6, 5], # 2026-11-01: was 10/8/6
 		"text": "every %s attack is a guaranteed crit", "format": "nth"},
 	"rainbow_table": {"skill": "Cracking", "name": "Rainbow Table", "short": "%s crit dmg, FW down", "values": [0.20, 0.30, 0.50],
 		"text": "%s crit damage while the firewall is down"},
-	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits refund %s BW", "values": [0.20, 0.40, 0.60], # 2026-10-31: was 10/15/25%
-		"text": "crits refund %s of your max bandwidth", "format": "pct_plain"},
+	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits +%s FW down", "values": [1.0, 2.0, 3.0], # 2026-11-01: was a bandwidth refund on crits
+		"text": "critical hits extend the next firewall reboot time by %s (stacking 2 times)", "format": "s", "max_stacks": 2},
 	"cracked_wide": {"skill": "Cracking", "name": "Cracked Wide", "short": "crits %s FW dmg", "values": [1.5, 1.75, 2.0],
 		"text": "crits that hit the firewall deal %s firewall damage", "format": "x"},
 	# Matching: firewall
@@ -52,8 +52,8 @@ const DEFS = {
 	# Phishing: anonymity and spoofs
 	"social_proof": {"skill": "Phishing", "name": "Social Proof", "short": "%s spoof healing", "values": [0.05, 0.07, 0.10], # 2026-10-31: was 10/15/25%
 		"text": "Packet Spoofs restore %s more"},
-	"burner_account": {"skill": "Phishing", "name": "Burner Account", "short": "%s free spoofs", "values": [0.10, 0.15, 0.25],
-		"text": "%s chance a Packet Spoof isn't used up"},
+	"burner_account": {"skill": "Phishing", "name": "Burner Account", "short": "%s spoof boost", "values": [0.10, 0.15, 0.25], # 2026-11-01: was a chance a spoof isn't used up
+		"text": "%s chance an attack fills a charging Packet Spoof by 30%% (finishes it above 70%%)"},
 	"cover_story": {"skill": "Phishing", "name": "Cover Story", "short": "%s counters miss", "values": [0.04, 0.07, 0.10], # 2026-10-31: was 5/8/12% (with Evasion 10%: 19% total)
 		"text": "%s chance a countermeasure misses"},
 	"lure": {"skill": "Phishing", "name": "Lure", "short": "%s spoof chains", "values": [0.10, 0.12, 0.15],
@@ -78,8 +78,8 @@ const DEFS = {
 		"text": "%s Exploit charge gain"},
 	"head_start": {"skill": "Decoding", "name": "Head Start", "short": "starts at %s charge", "values": [40.0, 60.0, 80.0],
 		"text": "each hack starts with %s Exploit charge", "format": "num"},
-	"refund": {"skill": "Decoding", "name": "Refund", "short": "%s Exploit refund", "values": [0.10, 0.15, 0.25],
-		"text": "%s chance an Exploit isn't used up"},
+	"refund": {"skill": "Decoding", "name": "Refund", "short": "%s charge refund", "values": [0.10, 0.15, 0.25], # 2026-11-01: was a chance the Exploit item isn't used up
+		"text": "%s chance using an Exploit costs no charge"},
 	"salvage_rights": {"skill": "Decoding", "name": "Salvage Rights", "short": "%s VM cache drop", "values": [0.10, 0.12, 0.15],
 		"text": "%s chance a breach also drops a VM cache"}, # 2026-10-27: was a payload refund (same as Payload Recycler)
 	# Compiling: SQL damage and speed

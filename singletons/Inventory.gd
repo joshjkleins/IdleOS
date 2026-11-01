@@ -461,15 +461,25 @@ func list_filtered(args: String) -> Dictionary:
 	var skill_names = {}
 	for i in ItemData.ItemColor.keys().size():
 		skill_names[ItemData.ItemColor.keys()[i].to_lower()] = i
-	var locs = Stats.hacking_targets.keys().map(func(k): return k.to_lower())
-	for w in args.to_lower().split(" ", false):
+	# 2026-11-01: two-word locations ('police station') are one filter; their first word works too ('ls police')
+	var locs = Stats.hacking_targets.keys().map(func(k): return k.to_lower().replace(" ", "_"))
+	var a_low = args.to_lower()
+	for k in Stats.hacking_targets.keys():
+		if " " in k:
+			a_low = a_low.replace(k.to_lower(), k.to_lower().replace(" ", "_"))
+	for w in a_low.split(" ", false):
 		var bare = w.trim_prefix("-")
+		var loc_i = locs.find(bare)
+		if loc_i == -1:
+			for i in locs.size():
+				if "_" in locs[i] and locs[i].get_slice("_", 0) == bare:
+					loc_i = i
 		if w.begins_with("-") and TYPE_FLAGS.has(bare):
 			types.append(TYPE_FLAGS[bare])
 		elif w.begins_with("-") and skill_names.has(bare) and bare not in ["default", "upgrade", "consumable"]:
 			skills.append(skill_names[bare])
-		elif bare in locs:
-			tiers.append(locs.find(bare) + 1)
+		elif loc_i != -1:
+			tiers.append(loc_i + 1)
 		elif bare.length() == 2 and bare.begins_with("t") and bare[1].is_valid_int():
 			tiers.append(int(bare[1]))
 		elif w.begins_with("-"):
@@ -548,11 +558,12 @@ func _section(title: String, list: Array, name_w: int) -> String:
 		out += _row(it, name_w)
 	return out
 
+var desc_width := LS_DESC_WIDTH # 'exploits' widens it for its list (2026-11-01)
 func _row(it: ItemData, name_w: int) -> String:
 	var hex = Palette.get_color(it.color_type).to_html(false)
 	var desc: String = it.description
-	if desc.length() > LS_DESC_WIDTH:
-		desc = desc.left(LS_DESC_WIDTH - 1) + "…"
+	if desc.length() > desc_width:
+		desc = desc.left(desc_width - 1) + "…"
 	return "[color=%s]▍[/color]%s%s%s[color=#888888]%s[/color]\n" % [hex, pad_text(it.name, name_w), pad_text(_ls_amount(int(inventory.get(it, 0))), 12),
 		pad_text(tier_tag(item_tier(it)), 11), desc]
 
@@ -652,8 +663,8 @@ func _grouped_text(items: Array, filtered: bool) -> String:
 		for it in list:
 			var hex = Palette.get_color(it.color_type).to_html(false)
 			var desc: String = it.description
-			if desc.length() > LS_DESC_WIDTH:
-				desc = desc.left(LS_DESC_WIDTH - 1) + "…"
+			if desc.length() > desc_width:
+				desc = desc.left(desc_width - 1) + "…"
 			out += "[color=%s]▍[/color]%s%s%s[color=#888888]%s[/color]\n" % [hex, pad_text(it.name, name_w), pad_text(_ls_amount(int(inventory[it])), 12),
 				pad_text(tier_tag(item_tier(it)), 11), desc]
 	if filtered:
