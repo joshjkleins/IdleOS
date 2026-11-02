@@ -192,6 +192,7 @@ func _equip(build: Dictionary, tier: int) -> void:
 			Exploits.auto_id = str(it.exploit_id)
 
 var wins_seen := 0
+var _esc_set := false
 func _fight(target: Dictionary, run: int) -> Dictionary:
 	Decoding.intel.erase(Decoding.intel_key(target))
 	if OS.get_environment("INTEL") != "0": # INTEL=0: no intel; default: full intel (-10% on every stat) for the run
@@ -206,12 +207,16 @@ func _fight(target: Dictionary, run: int) -> Dictionary:
 	var sql0 = Inventory.get_amount(Items.SQL_INJECTOR); var sp0 = Inventory.get_amount(Items.PACKET_SPOOF)
 	game.setup(target, {"offensive": Items.SQL_INJECTOR, "defensive": Items.PACKET_SPOOF}, run, Upgrades.can_overclock(Hacking))
 	await game.prepare()
+	_esc_set = false
 	var t = 0.0
 	var fight = 0.0
 	while !ended and t < 600.0 * run:
 		await get_tree().process_frame
 		t += get_process_delta_time()
 		if !game.is_hacking: continue
+		if OS.get_environment("ESC0") != "" and !_esc_set: # ESC0=30 (2026-11-02): start Escalator at N countermeasures (30 = +150%, the old carry-over)
+			_esc_set = true
+			game.esc_counters = int(OS.get_environment("ESC0"))
 		fight += get_process_delta_time()
 		if OS.get_environment("CARD") != "" and fight > 2.0 and fight - get_process_delta_time() <= 2.0: # CARD=1: the counter card's stats 2s in
 			print(">>> CTR CARD ", game.ctr_card.stats.get_parsed_text())

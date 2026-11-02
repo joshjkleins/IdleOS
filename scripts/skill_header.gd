@@ -35,6 +35,8 @@ func _ready() -> void:
 	SaveManager.save_loaded.connect(func(): _rebuild())
 	Upgrades.installed.connect(_on_upgrade_installed)
 	Drivers.changed.connect(_on_drivers_changed)
+	Firmware.changed.connect(_refresh_firmware)
+	Flush.drained.connect(_on_flush_drained)
 	var tick := Timer.new()
 	tick.wait_time = 1.0
 	tick.autostart = true
@@ -138,6 +140,7 @@ func _fill_root_card(card: HeaderCard) -> void:
 	if card.celebrating:
 		return
 	var skill = card.skill
+	_apply_firmware(card)
 	if skill == Defragging:
 		card.title_label.text = "Defragging"
 		card.level_label.text = ""
@@ -189,6 +192,19 @@ func _fill_main_card() -> void:
 	main_card.bar.value = xp.progress
 	main_card.left_label.text = ("MAX LEVEL" if xp.display == "MAX" else "%s xp" % xp.display.replace("/", " / "))
 	main_card.set_footer(main_card.right_label, Upgrades.get_skill_version(skill))
+	_apply_firmware(main_card)
+
+## 2026-11-02: FW tag + the maxed shader (Firmware.maxed: level 99, every apt tier, Firmware installed)
+func _apply_firmware(card: HeaderCard) -> void:
+	if card == null or !is_instance_valid(card) or card.skill == null:
+		return
+	var n = str(card.skill.SKILL.name)
+	card.set_firmware(Firmware.active(n), Firmware.maxed(n))
+
+func _refresh_firmware() -> void:
+	for skill in root_cards:
+		_apply_firmware(root_cards[skill])
+	_apply_firmware(main_card)
 
 ## "▮▯": one per open driver slot (filled = equipped); "" when the skill has no slot open yet
 func _driver_pips(skill: Node) -> String:
@@ -247,8 +263,12 @@ func _fill_process_card(card: HeaderCard) -> void:
 		card.set_locked(true, "LOCKED · " + Upgrades.tier_name(int(p.get("unlock tier", 1))).to_upper())
 		return
 	card.set_locked(false)
-	card.level_label.text = ""
-	card.bar.value = 0.0
+	# 2026-11-02: the bar is this process's flush buffer (Flush: fills while it runs in the main terminal)
+	var bp = Flush.progress(str(skill.SKILL.name), str(p.name)) if skill != Defragging else 0.0
+	if !card.has_meta("draining"):
+		card.bar.value = bp
+	card.level_label.text = "FLUSH" if bp >= 1.0 and !card.has_meta("draining") else ""
+	card.level_label.add_theme_color_override("font_color", Color("#4ec994"))
 	card.left_label.text = "+%s xp" % _fmt_xp(float(p.get("experience per level", 0)))
 	card.right_label.text = _eff_text(_process_efficiency(skill, p))
 	card.set_active(_is_running(skill, p))
@@ -370,6 +390,8 @@ func _refresh_footers() -> void:
 		_fill_main_card()
 		for card in detail_cards:
 			card.set_active(_is_running(current_skill, card.process))
+			if !card.celebrating and !card.is_locked():
+				_fill_process_card(card) # flush buffers (2026-11-02)
 #endregion
 
 func _skill_of(process: Dictionary) -> Node:
@@ -380,6 +402,37 @@ func _skill_of(process: Dictionary) -> Node:
 	return null
 
 ## Process dicts change as they gain xp, so match by identity, not as dictionary keys.
+## 2026-11-02: a flushed buffer drains on its card (when that skill's header is showing): the bar flashes, pours down
+## to empty in ticks like a draining tank, the card blinks, "FLUSHED" floats off
+func _on_flush_drained(skill_name: String, process_name: String) -> void:
+	if current_skill == null or str(current_skill.SKILL.name) != skill_name:
+		return
+	var card: HeaderCard = null
+	for c in detail_cards:
+		if str(c.process.get("name", "")) == process_name:
+			card = c
+	if card == null or !is_instance_valid(card):
+		return
+	card.set_meta("draining", true)
+	card.level_label.text = ""
+	card.show_note("FLUSHED")
+	var bar = card.bar
+	var base_col = bar.color
+	var tw = card.create_tween()
+	tw.tween_property(card, "modulate", Color(1.6, 1.9, 1.6), 0.08)
+	tw.tween_property(bar, "color", Color("#4ec994"), 0.08)
+	for k in 8: # pour out in uneven steps
+		var v = 1.0 - float(k + 1) / 8.0
+		tw.tween_property(bar, "value", v, 0.09 + 0.03 * (k % 3)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(card, "modulate", Color(1.0 + 0.5 * v, 1.0 + 0.6 * v, 1.0 + 0.5 * v), 0.09)
+	tw.tween_property(card, "modulate", Color(1.3, 1.5, 1.3), 0.06)
+	tw.tween_property(card, "modulate", Color.WHITE, 0.25)
+	tw.parallel().tween_property(bar, "color", base_col, 0.4)
+	tw.tween_callback(func():
+		if is_instance_valid(card):
+			card.remove_meta("draining")
+			_fill_process_card(card))
+
 func _card_for(process: Dictionary) -> HeaderCard:
 	for card in detail_cards:
 		if is_same(card.process, process):

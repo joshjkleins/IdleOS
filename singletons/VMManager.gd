@@ -22,6 +22,8 @@ func set_host(layer: Control) -> void:
 ##   Intel: the target's location; Salvage: the item's tier). Phishing: the highest location unlocked.
 ##   Cracking -vm (token conversion) stays 1.
 func token_cost(skill: Node, minor_process: Dictionary, arg = null) -> int:
+	if Firmware.active(skill): # Firmware (2026-11-02): this skill's VMs cost no VM tokens
+		return 0
 	var t = 1
 	if skill == Phishing:
 		t = 0

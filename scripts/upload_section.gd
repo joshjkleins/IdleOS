@@ -28,6 +28,12 @@ var _summary_label: Label
 var toggle: SectionToggle
 var collapsed := false
 var _just_completed := {} # ItemData -> true: reached its goal this session (flash once when its row shows it)
+# 2026-11-02: one full "complete" bar per finished location at the bottom of the list; once every location is done
+# the list is only these (the game's final state)
+const LOC_COLOR = Color("#e0c068")
+var _loc_rows := {} # tier -> {name, count, bar}
+var _loc_sig := ""
+var _fresh_tiers := {} # tier -> true: completed this session (flash once)
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 4)
@@ -62,7 +68,9 @@ func _ready() -> void:
 	scroll.add_child(_list)
 	_empty = _label("all uploads complete  ·  upload", FONT, EMPTY)
 	add_child(_empty)
-	Uploads.tier_completed.connect(func(_t): _rebuild())
+	Uploads.tier_completed.connect(func(t):
+		_fresh_tiers[t] = true
+		_rebuild())
 	Uploads.item_uploaded.connect(func(item):
 		var g = Uploads.get_goal_amount(item)
 		if g > 0 and Uploads.get_uploaded(item) == g:
@@ -74,7 +82,7 @@ func _process(delta: float) -> void:
 	if _accum < 0.1:
 		return
 	_accum = 0.0
-	if _wanted_items() != _rows.keys():
+	if _wanted_items() != _rows.keys() or _loc_sig != str(Uploads.completed_tiers):
 		_rebuild()
 	_refresh()
 
@@ -82,6 +90,8 @@ func _process(delta: float) -> void:
 ## then anything else queued,
 ## then the finished goals at the bottom (the list re-sorts itself when one completes).
 func _wanted_items() -> Array:
+	if all_done():
+		return []
 	var items := []
 	var finished := []
 	for g in Uploads.get_goals():
@@ -103,7 +113,46 @@ func _rebuild() -> void:
 	_rows.clear()
 	for item in _wanted_items():
 		_rows[item] = _make_row(item)
+	_loc_rows.clear()
+	_loc_sig = str(Uploads.completed_tiers)
+	var done_tiers = Uploads.completed_tiers.duplicate()
+	done_tiers.sort()
+	if !done_tiers.is_empty() and !_rows.is_empty():
+		var gap := Control.new()
+		gap.custom_minimum_size.y = 4
+		_list.add_child(gap)
+	for t in done_tiers:
+		_loc_rows[t] = _make_loc_row(t)
 	_refresh()
+
+func all_done() -> bool:
+	return Uploads.completed_tiers.size() >= Uploads.MAX_TIER
+
+## a finished location: its name, "complete", and a full bar with the complete shader (gold)
+func _make_loc_row(tier: int) -> Dictionary:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	_list.add_child(box)
+	var line := HBoxContainer.new()
+	box.add_child(line)
+	var name_label := _label(Uploads.get_location_name(tier).to_lower(), ROW_FONT, LOC_COLOR)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line.add_child(name_label)
+	var count := _label("T%d  complete" % tier, ROW_FONT, LOC_COLOR)
+	line.add_child(count)
+	var bar := _bar(5, LOC_COLOR)
+	bar.value = 1.0
+	box.add_child(bar)
+	var m := ShaderMaterial.new()
+	m.shader = COMPLETE_SHADER
+	m.set_shader_parameter("offset", tier * 0.17)
+	bar.material = m
+	if _fresh_tiers.has(tier):
+		_fresh_tiers.erase(tier)
+		m.set_shader_parameter("flash", 1.0)
+		var tw = bar.create_tween()
+		tw.tween_method(func(v): m.set_shader_parameter("flash", v), 1.0, 0.0, 1.0).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	return {"name": name_label, "count": count, "bar": bar}
 
 func _make_row(item: ItemData) -> Dictionary:
 	var box := VBoxContainer.new()
@@ -133,7 +182,13 @@ func _refresh() -> void:
 			done += 1
 	_title.text = "UPLOADS  ·  T%d %s" % [tier, Uploads.get_location_name(tier).to_upper()]
 	_count.text = "%d/%d" % [done, goals.size()]
-	_empty.visible = _rows.is_empty() and !collapsed
+	_empty.visible = _rows.is_empty() and _loc_rows.is_empty() and !collapsed
+	if all_done(): # the final state: every location's goal uploaded
+		_title.text = "UPLOADS  ·  ALL LOCATIONS"
+		_count.text = "%d/%d" % [Uploads.MAX_TIER, Uploads.MAX_TIER]
+		_summary_bar.value = 1.0
+		_summary_label.text = "every location's upload goal is complete"
+		return
 	var got = 0
 	var need = 0
 	for g in goals:

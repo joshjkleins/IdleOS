@@ -182,7 +182,12 @@ func all_colored(sorted: Array):
 
 func finished():
 	update_mini_terminal("Defragging " + type.name + " complete: " + type.description)
-	Stats.grant_bonus(type)
+	if type.get("_all", false): # Defragging Firmware: every unlocked bonus at once
+		for p in Defragging.minor_processes:
+			if p.unlocked:
+				Stats.grant_bonus(p)
+	else:
+		Stats.grant_bonus(type)
 	Defragging.activate_cooldown()
 	active = false
 	Signals.defrag_finished()

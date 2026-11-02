@@ -395,7 +395,7 @@ func save_data() -> Dictionary:
 	for id in packages:
 		if packages[id].installed > 0:
 			installed_counts[id] = packages[id].installed
-	return {"format": 3, "installed": installed_counts}
+	return {"format": 4, "installed": installed_counts} # 4: 2026-11-02 Quick Hook lost its T3 / T5 levels to Extra Trap
 
 ## Packages that were replaced: an old save's install carries over to the new one
 const RENAMED = {"hacking.clean_exit": "hacking.second_wind", "system.thermal_paste": "system.vm_snapshot",
@@ -421,6 +421,17 @@ func load_data(data: Dictionary) -> void:
 					n = int(ceil(n / 2.0))
 				p.installed = clamp(n, 0, p.levels.size())
 				_recompute(p)
+		# format <= 3 -> 4 (2026-11-02): Quick Hook's tier 3 and 5 levels became Extra Trap (same slot). An old count of
+		# Quick Hook installs (tiers 1..n) becomes the count of its remaining tiers 1, 2, 4, 6, and Extra Trap gets the
+		# tier 3 / 5 installs, so every tier keeps its 10 installs
+		if fmt <= 3 and saved.has("phishing.quick_hook") and packages.has("phishing.extra_trap"):
+			var old_n = int(saved["phishing.quick_hook"])
+			var qh = packages["phishing.quick_hook"]
+			qh.installed = [1, 2, 4, 6].filter(func(t): return t <= old_n).size()
+			_recompute(qh)
+			var et = packages["phishing.extra_trap"]
+			et.installed = [3, 5].filter(func(t): return t <= old_n).size()
+			_recompute(et)
 	apply_effects()
 
 func installed_package_ids() -> Array:

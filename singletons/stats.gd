@@ -581,13 +581,13 @@ var hacking_targets = {
 				"command": "hack clerk",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 6}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 0.5,
-				"exp": 252,
-				"integrity": 700,
-				"firewall": 60,
-				"counter": 150,
-				"counter speed": 16.0,
+				"exp": 630, # 2026-11-02: was 252 (Government XP pass: ~x2.5, President x5.3 - the final boss)
+				"integrity": 1450, # 2026-11-01: was 700 (Josh, playtest)
+				"firewall": 125, # 2026-11-01: was 60 (Josh, playtest)
+				"counter": 165, # 2026-11-01: was 150 (Josh, playtest)
+				"counter speed": 100.0 / 5.3, # 2026-11-01: card "every 5.3s" (was 16 = 6.25s; Josh, playtest)
 				"traits": ["regenerator"],
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"firewall reboot": 5.5, # seconds the firewall stays down after a break (2026-11-01: was 10, Josh)
 				"loot": Items.CLERK_CACHE
 			},
 			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
@@ -597,13 +597,13 @@ var hacking_targets = {
 				"command": "hack analyst",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 12}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 0.8,
-				"exp": 3013,
-				"integrity": 1000,
-				"firewall": 80,
-				"counter": 170,
+				"exp": 7500, # 2026-11-02: was 3013 (Government XP pass: ~x2.5, President x5.3 - the final boss)
+				"integrity": 1400, # 2026-11-01: was 1000 (Josh, playtest)
+				"firewall": 140, # 2026-11-01: was 80 (Josh)
+				"counter": 180, # 2026-11-01: was 170 (Josh)
 				"counter speed": 20.0,
 				"traits": ["siphon"],
-				"firewall reboot": 9.0, # seconds the firewall stays down after a break
+				"firewall reboot": 7.5, # seconds the firewall stays down after a break (2026-11-01: was 9, Josh)
 				"loot": Items.ANALYST_CACHE
 			},
 			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
@@ -613,7 +613,7 @@ var hacking_targets = {
 				"command": "hack ambassador",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 18}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.1,
-				"exp": 4521,
+				"exp": 11300, # 2026-11-02: was 4521 (Government XP pass: ~x2.5, President x5.3 - the final boss)
 				"integrity": 1300,
 				"firewall": 100,
 				"counter": 350,
@@ -629,13 +629,13 @@ var hacking_targets = {
 				"command": "hack vice-president",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 24}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.4,
-				"exp": 6027,
+				"exp": 15000, # 2026-11-02: was 6027 (Government XP pass: ~x2.5, President x5.3 - the final boss)
 				"integrity": 1500,
 				"firewall": 120,
-				"counter": 140,
+				"counter": 160, # 2026-11-01: was 140 (Josh, playtest)
 				"counter speed": 22.0,
 				"traits": ["adaptive", "throttle"],
-				"firewall reboot": 12.0, # seconds the firewall stays down after a break
+				"firewall reboot": 6.0, # seconds the firewall stays down after a break (2026-11-01: was 12; adaptive x0.5 -> card 3.0s, Josh)
 				"loot": Items.VICE_PRESIDENT_CACHE
 			},
 			{ # 2026-11-01: tier 6 first pass (GEAR=prog, TYPED builds, no intel)
@@ -645,13 +645,13 @@ var hacking_targets = {
 				"command": "hack president",
 				"requirements": {"item": Items.GOVERNMENT_PAYLOAD, "amount": 30}, # 2026-11-01: was 1-5 (placeholder)
 				"heat": 1.7,
-				"exp": 7534,
-				"integrity": 1150,
-				"firewall": 120,
-				"counter": 150,
+				"exp": 40000, # 2026-11-02: was 7534 (Government XP pass: ~x2.5, President x5.3 - the final boss)
+				"integrity": 2800, # 2026-11-02: 1150 -> 2500 -> 2800 (Josh, playtest: last boss)
+				"firewall": 430, # 2026-11-02: 120 -> 400 -> 430; adaptive x0.5 -> card 215 (Josh)
+				"counter": 210, # 2026-11-02: 150 -> 200 -> 210 (Josh)
 				"counter speed": 20.0,
 				"traits": ["adaptive", "escalator", "siphon"],
-				"firewall reboot": 10.0, # seconds the firewall stays down after a break
+				"firewall reboot": 4.0, # seconds the firewall stays down after a break (2026-11-01: was 10; adaptive x0.5 -> card 2.0s, Josh)
 				"loot": Items.PRESIDENT_CACHE
 			}
 		],
@@ -923,7 +923,7 @@ const HARD_UNLOCK_WINS = 5
 const TRAITS = {
 	"fortress":    {"name": "FORTRESS", "text": "Huge firewall. Nothing gets through until it's down",
 		"firewall": 1.6, "integrity": 0.7, "reboot": 0.5, "no_leak": true}, # no damage reaches integrity while the firewall is up
-	"regenerator": {"name": "REGENERATOR", "text": "Repairs its integrity constantly. Every hit pauses the repair for a moment",
+	"regenerator": {"name": "REGENERATOR", "text": "Repairs its integrity constantly. Every hit that gets through pauses the repair for a moment",
 		"regen": 0.02, "regen_delay": 0.3, "regen_fw": 0.02}, # share of max integrity per second; regen_delay: pause after each hit (2026-10-30: 0.3s, was 2s and only integrity hits); regen_fw: per second while the firewall is up
 	"swarm":       {"name": "SWARM", "text": "Constant, light countermeasures",
 		"counter_speed": 3.0, "counter": 0.2},

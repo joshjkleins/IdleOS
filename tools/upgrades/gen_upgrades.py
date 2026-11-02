@@ -264,9 +264,8 @@ GROUPS["Compiling"] = [
          "Passive: Overclock, Debug Build and Optimize produce no extra heat"],"one-off",None),
 ]
 GROUPS["Hacking"] = [
-    # 2026-11-01: data/upgrades.json (edited by hand) drops the T6 levels of Packet Spoof Healing and Mod Slot and adds two
-    # T6-only packages in their slots: Opening Charge (+25 Exploit charge per hack, 4 Ambassador) and Long Breach
-    # (+1.5s firewall down time, 5 VP). Exploit Kit costs 20 President caches. Not modelled here yet.
+    # 2026-11-01: T6 drops the T6 levels of Packet Spoof Healing and Mod Slot; their slots hold the T6-only packages
+    # Opening Charge and Long Breach (SLOT_REPLACE below). Exploit Kit costs 14 President caches (AMOUNT_OVERRIDE).
     # Combat pass (2026-10-20): grow with the tier like enemies and mods do, so mods stay ~+40% at every tier
     (TRACK,"SQL Damage","Integrity damage per SQL attack; each level also adds attack heat (balances System cooling)",[(f"+{v} dmg, +0.1 heat" if v else "+25% attack speed, +0.1 heat") for v in DAMAGE_STEP],(20,DAMAGE_STEP,"dmg")),
     (TRACK,"Firewall Damage","Firewall damage per SQL attack",[f"+{v}" for v in FIREWALL_STEP],(1,FIREWALL_STEP,"firewall dmg")),
@@ -286,6 +285,23 @@ GROUPS["Hacking"] = [
          "Once per session, a hit that would trace you leaves you at 1 and restores 25% anonymity",
          "50% chance an Exploit is not consumed"],"one-off",None),
 ]
+
+# 2026-11-02: one tier's slot holds a different package (group, tier, slot #) - modelled from data/upgrades.json
+SLOT_REPLACE = {
+    ("Hacking", 6, 6): dict(stype=PTD, name="Opening Charge", pid="hacking.opening_charge", val="+25",
+        effect="+25 Exploit charge at the start of every hack (on top of Head Start)",
+        before="0 starting charge", total="+25 starting charge", gval=25),
+    ("Hacking", 6, 7): dict(stype=PTD, name="Long Breach", pid="hacking.long_breach", val="+1.5s",
+        effect="The firewall stays down 1.5s longer after every break",
+        before="+0s firewall down time", total="+1.5s firewall down time", gval=1.5),
+    # 2026-11-02 (Josh): Quick Hook's T3 / T5 slots hold Extra Trap (one more Phishing trap at a time)
+    ("Phishing", 3, 9): dict(stype=PTD, name="Extra Trap", pid="phishing.extra_trap", val="+1 trap",
+        effect="One more Phishing trap can be set at a time", before="1 trap", total="2 traps", gval=1),
+    ("Phishing", 5, 9): dict(stype=PTD, name="Extra Trap", pid="phishing.extra_trap", val="+1 trap",
+        effect="One more Phishing trap can be set at a time", before="2 traps", total="3 traps", gval=1),
+}
+# fixed amounts instead of the cost formula (group, tier, slot #)
+AMOUNT_OVERRIDE = {("Hacking", 6, 10): 14} # Exploit Kit: 14 President caches (2026-11-02, Josh: was 20)
 
 # capstone flavor per tier (used in notes), can be renamed freely
 CAPSTONE_NOTES = {
@@ -326,6 +342,9 @@ for group, slots in GROUPS.items():
         for i,slot in enumerate(slots, start=1):
             stype,name,effect,val = slot[:4]
             running = slot[4] if len(slot) > 4 else None
+            repl = SLOT_REPLACE.get((group, tier, i))
+            if repl: # a different package in this slot for this tier (no running total of the usual one)
+                stype, name, effect, val, running = repl["stype"], repl["name"], repl["effect"], repl["val"], None
             if isinstance(val, list):
                 val = val[tier-1]
             if isinstance(name, list):
@@ -375,10 +394,12 @@ for group, slots in GROUPS.items():
                        f"*Inputs!$B$6^(D{r_next}-1)/Inputs!$B$12,0))")
             if stype == CAP and rkey != "tokens" and amt.endswith(",0))"):
                 amt = amt[:-4] + f"*{CAP_COST_MULT},0))"
+            if (group, tier, i) in AMOUNT_OVERRIDE:
+                amt = AMOUNT_OVERRIDE[(group, tier, i)]
             rare_amt = CAP_RARES[tier-1] if rare else ""
             base_n = slot[1] if not isinstance(slot[1], list) else slot[1][tier-1]
-            pid = package_id(group, base_n)
-            gval = game_value(running, tier)
+            pid = package_id(group, base_n) if not repl else repl["pid"]
+            gval = game_value(running, tier) if not repl else repl["gval"]
             if running:
                 prev_key = (group, slot[1] if not isinstance(slot[1], list) else i)
                 done = counts[prev_key] - 1
@@ -393,6 +414,8 @@ for group, slots in GROUPS.items():
                 if un.startswith("= double") and done == 0: before = "off"
             else:
                 before = "not installed"
+            if repl:
+                before, total = repl["before"], repl["total"]
             row=[group,tier,TIER_NAMES[tier-1],i,f"v{gver:.1f}",stype,name,effect,val,total,cost_item,amt,rare,rare_amt,rkey,note,pid,gval,before]
             ws.append(row)
             r=ws.max_row

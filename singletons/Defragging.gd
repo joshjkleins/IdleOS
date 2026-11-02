@@ -65,7 +65,7 @@ var HEAT = { # 2026-10-31: Sync (was Heat, -20% heat - far weaker than Cooling's
 	"requirements": {}, # free (2026-10-22: no item cost)
 	"color": Color("#ef8a5a"),
 	"bonus time": 10,
-	"bonus label": "sync",
+	"bonus label": "VMs share mods", # 2026-11-02: was "sync" (the side panel read "sync  sync")
 	"bonus text": "Matching VMs share modifiers",
 	"description": "VMs on your main process share its overclock or modifier, no extra heat.",
 	"command": "defrag -sync",
@@ -90,6 +90,22 @@ var XP = {
 }
 
 var minor_processes = [VM, HEAT, UPLOAD, COOLING, XP] # in unlock order (HEAT = Sync)
+
+## 2026-11-02: 'defrag -all' (Defragging Firmware): a normal defrag that grants every unlocked bonus when it finishes.
+## Not in minor_processes (its own command, no bonus of its own).
+var ALL = {
+	"name": "All",
+	"unlocked": true,
+	"requirements": {},
+	"color": Color("#c084fc"),
+	"bonus time": 10,
+	"bonus label": "every bonus",
+	"bonus text": "Every unlocked defrag bonus",
+	"description": "every unlocked defrag bonus is active.",
+	"command": "defrag -all",
+	"expires_at": 0,
+	"_all": true,
+}
 
 func is_active(process: Dictionary) -> bool:
 	return Time.get_unix_time_from_system() < process.get("expires_at", 0)

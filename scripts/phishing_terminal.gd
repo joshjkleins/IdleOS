@@ -120,7 +120,9 @@ func update_eff_label(_p_type = null):
 			slots_label.text += "[color=#888888][font_size=12]EFF: " + eff_text + "% chance for bite."
 	if bait:
 		var baited = str(get_bite_chance(true) * 100.0).pad_decimals(1)
-		if Phishing.is_rare_bait(bait):
+		if style() == "trap":
+			slots_label.text += "  BAIT: %s x%d (-%d, %s bait: %s)" % [bait.name, Inventory.get_amount(bait), Phishing.TRAP_BAIT, Phishing.bait_kind(bait), Phishing.TRAP_BAIT_TEXT.get(Phishing.bait_kind(bait), "")]
+		elif Phishing.is_rare_bait(bait):
 			slots_label.text += "  BAIT: %s x%d (-1/cast, every cast lands a Tier %d mod)" % [bait.name, Inventory.get_amount(bait), Inventory.item_tier(bait)]
 		else:
 			slots_label.text += "  BAIT: %s x%d (-%d/cast, %s%%, catch x2)" % [bait.name, Inventory.get_amount(bait), Phishing.BAIT_PER_CAST, baited]
@@ -181,9 +183,10 @@ func get_bite_chance(baited: bool) -> float:
 ## Called as a line casts: uses Phishing.BAIT_PER_CAST bait if there's that much left.
 ## Bait Recycling: a chance the cast is baited without using any.
 func take_bait() -> bool:
-	if bait and Inventory.get_amount(bait) >= Phishing.bait_cost(bait):
+	var cost = Phishing.TRAP_BAIT if style() == "trap" else Phishing.bait_cost(bait) # 2026-11-02: a trap takes 100
+	if bait and Inventory.get_amount(bait) >= cost:
 		if randf() >= Upgrades.cur("phishing.bait_recycling"):
-			Inventory.remove_resource(bait, Phishing.bait_cost(bait))
+			Inventory.remove_resource(bait, cost)
 		update_eff_label()
 		return true
 	return false

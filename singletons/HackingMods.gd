@@ -7,6 +7,7 @@ const MAX_MOD_SLOTS := 6
 
 ## 2026-10-29: typed slots. Slot i takes one kind of mod, repeating offense / defense / utility
 ## (School: O D, Lawfirm: + U, Hospital: + O, Bank: + D, Police Station: + U). Stops offense stacking.
+const FAILSAFE_THRESHOLD = 0.25 # Failsafe (mod, 2026-11-01): works while anonymity is below this share of max
 const SLOT_PATTERN = ["offense", "defense", "utility"]
 const SLOT_SHORT = {"offense": "OFF", "defense": "DEF", "utility": "UTL"}
 var max_mods: int = BASE_MOD_SLOTS
@@ -64,8 +65,8 @@ enum MOD_TYPE {
 	FW_BREAK_HASTE,       #Breach Momentum: +X attack speed for 3 attacks after a firewall break
 	LEECH,                #Leech: X of max anonymity per SQL hit
 	COUNTER_STACK_SLOW,   #Jitter: each countermeasure slows the next by X (max 50%)
-	FAILSAFE,             #Failsafe: the first trace of a hack restores X instead
-	EXTRA_CACHE,          #Data Hoarder: X chance of an extra cache per breach
+	FAILSAFE,             #Failsafe: under FAILSAFE_THRESHOLD anonymity, countermeasures deal X less (2026-11-01)
+	EXTRA_CACHE,          #Data Hoarder: with full intel, spoofs deal X of their healing to the firewall (2026-11-01; was an extra-cache chance)
 }
 
 
@@ -100,8 +101,8 @@ const EQUIP_INFO = {
 	MOD_TYPE.FW_BREAK_HASTE: ["Breach Momentum", "Breaking the firewall makes your next 3 attacks 100% faster.", "pct"],
 	MOD_TYPE.LEECH: ["Leech", "Every SQL hit restores 2% of max anonymity.", "pct"],
 	MOD_TYPE.COUNTER_STACK_SLOW: ["Jitter", "Every countermeasure slows the next ones by 3% (up to 30%).", "pct"], # 2026-10-31: was 5% / 50%
-	MOD_TYPE.FAILSAFE: ["Failsafe", "The first time you'd be traced in a hack, restore 40% of max anonymity instead.", "pct"], # 2026-10-29: was 20%
-	MOD_TYPE.EXTRA_CACHE: ["Data Hoarder", "Each breach has a 20% chance to win an extra cache.", "pct"],
+	MOD_TYPE.FAILSAFE: ["Failsafe", "While below 25% anonymity, countermeasures deal 30% less damage.", "pct"], # 2026-11-01 (Josh): was "first trace restores 40% anonymity"
+	MOD_TYPE.EXTRA_CACHE: ["Data Hoarder", "With full intel on the target, Packet Spoofs deal 10% of their healing to its firewall.", "pct"], # 2026-11-01 (Josh): was a 20% extra-cache chance per breach
 	MOD_TYPE.FW_OPENER: ["Handshake Exploit", "The first hit against a new firewall (each hack, and after every reboot) deals triple firewall damage.", "x"], # 2026-10-29: was +10
 }
 
@@ -303,8 +304,8 @@ const STAT_LABEL = {
 	MOD_TYPE.FW_BREAK_HASTE: "attack speed x3 after fw break",
 	MOD_TYPE.LEECH: "anonymity (of max) per hit",
 	MOD_TYPE.COUNTER_STACK_SLOW: "counter slow per counter",
-	MOD_TYPE.FAILSAFE: "anonymity on first trace",
-	MOD_TYPE.EXTRA_CACHE: "extra cache chance / breach",
+	MOD_TYPE.FAILSAFE: "countermeasure dmg below 25% anonymity",
+	MOD_TYPE.EXTRA_CACHE: "spoof healing to firewall (full intel)",
 }
 
 func get_mod_stat(mod) -> String:
@@ -316,6 +317,10 @@ func get_mod_value_text(mod: MOD_TYPE, value: float) -> String:
 			return "-%d%%" % roundi(value * 100.0) # IP Rotator: countermeasure bar knocked back
 		MOD_TYPE.START_ANON:
 			return "3 crits" # Fresh Start: the first 3 attacks of each hack
+		MOD_TYPE.EXTRA_CACHE:
+			return "%d%%" % roundi(value * 100.0) # Data Hoarder: share of spoof healing dealt to the firewall
+		MOD_TYPE.FAILSAFE:
+			return "-%d%%" % roundi(value * 100.0) # countermeasure damage while below FAILSAFE_THRESHOLD anonymity
 		MOD_TYPE.COUNTER_SLOW_PCT:
 			return "-%.f%%" % (value * 100.0) # countermeasures slower
 		MOD_TYPE.SPOOF_HEAL_MULT:

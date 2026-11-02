@@ -71,7 +71,7 @@ func update_info(info) -> void:
 	elif Compromise.is_unlocked(loc):
 		var tier = Compromise.tier_of(loc)
 		var n = Compromise.tier_drivers(tier).size()
-		row.add_child(_label("drivers %d/%d" % [n - Compromise.drivers_left(tier).size(), n], 11, C_DRV))
+		row.add_child(_label("%s %d/%d" % [Compromise.prize_word(tier).to_lower(), n - Compromise.drivers_left(tier).size(), n], 11, C_DRV))
 	else:
 		row.add_child(_label("compromise: locked", 11, C_LOCKED))
 

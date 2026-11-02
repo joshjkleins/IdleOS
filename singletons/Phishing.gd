@@ -193,8 +193,8 @@ var TRAP = {
 	"display command": "phish -trap [bait=<item>]",
 	"example commands": [
 		{ 'cmd': 'phish -trap', 'description': 'Sets a watering-hole trap (1 min). Shows its status once set' },
-		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 10 of a basic resource: haul doubled, rare chance up' },
-		{ 'cmd': 'trap collect', 'description': 'Collects it from anywhere (early = partial haul, no Exploit or mod)' },
+		{ 'cmd': 'phish -trap bait=logs', 'description': 'Uses 100 of a basic resource: Mining x2 SQL, Parsing x2 spoofs, Cracking +1 Exploit, Matching +1 mod' },
+		{ 'cmd': 'trap collect', 'description': 'Collects every full trap from anywhere (trap collect <n>: that one early, partial haul)' },
 	],
 	"efficiency": 0.15, # 2026-10-30: chance of a bonus Exploit (the full trap's 1 Exploit + 1 mod are guaranteed)
 	"efficiency rate": 0.0011905, # 25% at level 99 (grows from level 15)
@@ -218,7 +218,7 @@ var TRAP = {
 		{ "item": Items.PACKET_SPOOF, "min": 17, "max": 17, "weight": 100 },
 	],
 	"resource amount gained": 1,
-	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 68 SQL Injectors and 17 Packet Spoofs, plus 1 Exploit and 1 hacking mod.",
+	"description": "Plants a watering-hole trap that fills over 45 minutes of real time, even offline. A full trap hauls 68 SQL Injectors and 17 Packet Spoofs, plus 1 Exploit and 1 hacking mod. Bait (100 of a basic resource) adds by kind: Mining x2 SQL, Parsing x2 spoofs, Cracking +1 Exploit, Matching +1 mod. Extra Trap (apt) sets up to 3 at once.",
 	"efficiency description": "Chance of a bonus Exploit on a full trap",
 	"signal": whale_cycle_completed
 }
@@ -444,90 +444,172 @@ func roll_tokens(expected: float) -> int:
 	return n
 
 #region trap
-## The trap fills on real time (unix seconds), so it keeps filling while the game is closed.
-var trap: Dictionary = {} # {} = no trap set; else {"set_at": int, "baited": bool}
+## The traps fill on real time (unix seconds), so they keep filling while the game is closed.
+## 2026-11-02 (Josh): more than one trap (1, +1 at Hospital and +1 at Police: apt 'Extra Trap', phishing.extra_trap),
+## and bait is TRAP_BAIT of a basic resource whose kind picks the bonus: Mining items x2 SQL Injectors, Parsing items
+## x2 Packet Spoofs, Cracking items +1 Exploit, Matching items +1 hacking mod (compiled payloads can't be trap bait).
+const TRAP_BAIT := 100
+const TRAP_BAIT_TEXT := {"mining": "x2 SQL Injectors", "parsing": "x2 Packet Spoofs", "cracking": "+1 Exploit", "matching": "+1 hacking mod"}
+var traps: Array = [] # each {"set_at": int, "bait_kind": "" | "mining" | "parsing" | "cracking" | "matching", "bait_mult": float}
 signal trap_changed
 
+func max_traps() -> int:
+	return 1 + int(round(Upgrades.cur("phishing.extra_trap")))
+
 func has_trap() -> bool:
-	return !trap.is_empty()
+	return !traps.is_empty()
+
+func can_set_trap() -> bool:
+	return traps.size() < max_traps()
 
 func trap_seconds_total() -> float:
 	return float(TRAP["trap minutes"]) * 60.0
 
-func trap_progress() -> float:
-	if !has_trap():
-		return 0.0
-	var elapsed = Time.get_unix_time_from_system() - float(trap.set_at)
+func trap_progress_of(t: Dictionary) -> float:
+	var elapsed = Time.get_unix_time_from_system() - float(t.get("set_at", 0))
 	return clamp(elapsed / trap_seconds_total(), 0.0, 1.0)
 
-func trap_seconds_left() -> float:
-	return max(0.0, trap_seconds_total() * (1.0 - trap_progress()))
+## the fullest trap (0 with none): side panel / offline report
+func trap_progress() -> float:
+	var best = 0.0
+	for t in traps:
+		best = max(best, trap_progress_of(t))
+	return best
+
+func trap_seconds_left_of(t: Dictionary) -> float:
+	return max(0.0, trap_seconds_total() * (1.0 - trap_progress_of(t)))
+
+func full_traps() -> int:
+	return traps.filter(func(t): return trap_progress_of(t) >= 1.0).size()
+
+## which bonus a trap bait gives: "mining" / "parsing" / "cracking" / "matching", "compiling" (not allowed), "" (not bait)
+func bait_kind(item: ItemData) -> String:
+	if item == null:
+		return ""
+	var tier = Decoding.get_resource_tier(item)
+	if tier <= 0:
+		return ""
+	match Decoding.get_tier_resources(tier).find(item): # mined, address, encrypted, identifier, cracked, matched, payload
+		0: return "mining"
+		1, 2, 3: return "parsing"
+		4: return "cracking"
+		5: return "matching"
+		6: return "compiling"
+	return ""
+
+## "" when <bait> can bait a trap (null = no bait), otherwise why not
+func trap_bait_problem(bait: ItemData) -> String:
+	if bait == null:
+		return ""
+	var k = bait_kind(bait)
+	if k == "compiling":
+		return "Payloads can't bait a trap. Use a Mining, Parsing, Cracking or Matching resource."
+	if k == "":
+		return "%s can't bait a trap: use a basic resource." % bait.name
+	if Inventory.get_amount(bait) < TRAP_BAIT:
+		return "A trap's bait is %d %s (you have %d)." % [TRAP_BAIT, bait.name, Inventory.get_amount(bait)]
+	return ""
 
 ## bait: the basic resource used (already taken), or null
 func set_trap(bait: ItemData) -> void:
-	trap = {"set_at": int(Time.get_unix_time_from_system()), "baited": bait != null, "bait_mult": get_bait_multiplier(bait)}
+	traps.append({"set_at": int(Time.get_unix_time_from_system()), "bait_kind": bait_kind(bait) if bait else "", "bait_mult": get_bait_multiplier(bait)})
 	SaveManager.mark_dirty()
 	trap_changed.emit()
 
-## Collects the trap: basics scale with how full it is; rare rolls and full XP only when full.
+## Collects trap <i>: basics scale with how full it is; the Exploit / mod rolls and full XP only when full.
 ## Returns [{item, amount}] that were added (tokens included).
-func collect_trap() -> Array:
-	if !has_trap():
+func collect_trap_at(i: int) -> Array:
+	if i < 0 or i >= traps.size():
 		return []
-	var p = trap_progress()
-	var mult = 2 if trap.get("baited", false) else 1
+	var t: Dictionary = traps[i]
+	var p = trap_progress_of(t)
+	var kind = str(t.get("bait_kind", ""))
 	var got = []
 	var add = func(item: ItemData, amount: int):
 		if item and amount > 0:
 			Inventory.add_resource(item, amount)
 			got.append({"item": item, "amount": amount})
-	add.call(Items.SQL_INJECTOR, int(round(TRAP["trap sql"] * p)) * mult)
-	add.call(Items.PACKET_SPOOF, int(round(TRAP["trap spoofs"] * p)) * mult)
+	add.call(Items.SQL_INJECTOR, int(round(TRAP["trap sql"] * p)) * (2 if kind == "mining" else 1))
+	add.call(Items.PACKET_SPOOF, int(round(TRAP["trap spoofs"] * p)) * (2 if kind == "parsing" else 1))
 	if p >= 1.0:
-		var eff = min(get_efficiency(TRAP) * float(trap.get("bait_mult", 1.0)), 1.0)
-		for i in mult: # 2026-10-30: a full trap always brings 1 Exploit + 1 hacking mod (x2 baited); efficiency = a bonus Exploit
+		# a full trap always brings 1 Exploit + 1 hacking mod (+1 of either with Cracking / Matching bait); efficiency =
+		# a bonus Exploit (any bait raises that chance)
+		for k in 2 if kind == "cracking" else 1:
 			add.call(roll_exploit_item(), 1)
-			var pool = mod_pool()
-			if !pool.is_empty():
+		var pool = mod_pool()
+		if !pool.is_empty():
+			for k in 2 if kind == "matching" else 1:
 				add.call(pool.pick_random().item, 1)
-			if randf() < eff:
-				add.call(roll_exploit_item(), 1)
+		if randf() < min(get_efficiency(TRAP) * float(t.get("bait_mult", 1.0)), 1.0):
+			add.call(roll_exploit_item(), 1)
 	add.call(vm_token, roll_tokens(TRAP["vm token chance"] * p * (2.0 if Upgrades.has("phishing.tackle_box") else 1.0)))
 	for g in got:
 		Signals.phishing_item_caught_item(g.item)
 	TRAP.signal.emit(1)
 	Exp.add_xp(self, TRAP, int(TRAP["experience per level"] * p))
 	Signals.update_hud(self)
-	trap = {}
+	traps.remove_at(i)
 	SaveManager.mark_dirty()
 	trap_changed.emit()
 	return got
 
-## One line for the terminal: "Trap 62% full · 17m left" / "Trap full: 'trap collect'"
+func _trap_label(t: Dictionary) -> String:
+	var kind = str(t.get("bait_kind", ""))
+	return (" (%s bait: %s)" % [kind, TRAP_BAIT_TEXT.get(kind, "")]) if kind != "" else ""
+
+## The terminal's trap lines: one per trap, plus free slots
 func trap_status_text() -> String:
+	if !TRAP.unlocked and !has_trap():
+		return "Trap opens with %s access." % Upgrades.tier_name(int(TRAP.get("unlock tier", 1)))
 	if !has_trap():
-		return "No trap set. Use 'phish -trap' in Phishing to set one." if TRAP.unlocked else "Trap opens with %s access." % Upgrades.tier_name(int(TRAP.get("unlock tier", 1)))
-	var p = trap_progress()
-	var baited = " (baited)" if trap.get("baited", false) else ""
-	if p >= 1.0:
-		return "Trap%s is full. Collect it with 'trap collect'." % baited
-	return "Trap%s %d%% full, %s left. 'trap collect' now gives a partial haul (no Exploit or mod)." % [baited, int(p * 100), format_minutes(trap_seconds_left())]
+		return "No trap set. Use 'phish -trap' in Phishing to set one (%d slot%s)." % [max_traps(), "" if max_traps() == 1 else "s"]
+	var lines = []
+	for i in traps.size():
+		var t = traps[i]
+		var p = trap_progress_of(t)
+		if p >= 1.0:
+			lines.append("Trap %d%s is full." % [i + 1, _trap_label(t)])
+		else:
+			lines.append("Trap %d%s %d%% full, %s left." % [i + 1, _trap_label(t), int(p * 100), format_minutes(trap_seconds_left_of(t))])
+	if can_set_trap():
+		lines.append("[color=#888888]%d free trap slot%s: 'phish -trap [bait=<item>]'[/color]" % [max_traps() - traps.size(), "" if max_traps() - traps.size() == 1 else "s"])
+	if full_traps() > 0:
+		lines.append("'trap collect' collects the full one%s." % ("" if full_traps() == 1 else "s"))
+	elif has_trap():
+		lines.append("[color=#888888]'trap collect <n>' takes trap n early: a partial haul, no Exploit or mod.[/color]")
+	return "\n".join(lines)
 
 static func format_minutes(seconds: float) -> String:
 	var m = int(ceil(seconds / 60.0))
 	return "%dh %02dm" % [m / 60, m % 60] if m >= 60 else "%dm" % m
 
-## 'trap' / 'trap collect' (works from any context)
+## 'trap' / 'trap collect' (every full trap) / 'trap collect <n>' (that one, even early). Works from any context.
 func trap_command_text(arg: String) -> String:
 	arg = arg.strip_edges()
-	if arg == "collect":
+	if arg.begins_with("collect"):
+		var which = arg.trim_prefix("collect").strip_edges()
 		if !has_trap():
 			return trap_status_text()
-		var p = trap_progress()
-		var got = collect_trap()
-		var parts = got.map(func(g): return "%s x%d" % [g.item.name, g.amount])
-		var head = "Trap collected (%d%% full)" % int(p * 100)
-		return head + (": " + ", ".join(parts) if !parts.is_empty() else ": nothing yet.")
+		var picks = []
+		if which.is_valid_int():
+			var n = int(which)
+			if n < 1 or n > traps.size():
+				return "No trap %d. You have %d set." % [n, traps.size()]
+			picks = [n - 1]
+		else:
+			for i in traps.size():
+				if trap_progress_of(traps[i]) >= 1.0:
+					picks.append(i)
+			if picks.is_empty():
+				return trap_status_text()
+		var out = []
+		picks.reverse() # remove from the back so the indexes stay valid
+		for i in picks:
+			var p = trap_progress_of(traps[i])
+			var got = collect_trap_at(i)
+			var parts = got.map(func(g): return "%s x%d" % [g.item.name, g.amount])
+			out.push_front("Trap %d collected (%d%% full)" % [i + 1, int(p * 100)] + (": " + ", ".join(parts) if !parts.is_empty() else ": nothing yet."))
+		return "\n".join(out)
 	return trap_status_text()
 #endregion
 
@@ -594,7 +676,7 @@ func save_data() -> Dictionary:
 		"skill_experience": SKILL["experience"],
 		"spear_level": SPEAR["level"],
 		"spear_experience": SPEAR["experience"],
-		"trap": trap,
+		"traps": traps,
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -605,6 +687,11 @@ func load_data(data: Dictionary) -> void:
 	SPEAR["experience"] = int(data.get("spear_experience", SPEAR["experience"]))
 	# (legacy "<process>_efficiency" is ignored: efficiency is rebuilt from level in Exp.processes_load_data)
 	Exp.processes_load_data(self, data.get("processes", {})) # all processes (legacy keys above cover old saves)
-	var t = data.get("trap", {})
-	trap = {"set_at": int(t.set_at), "baited": bool(t.get("baited", false)), "bait_mult": float(t.get("bait_mult", 1.0))} if t is Dictionary and t.has("set_at") else {}
+	traps.clear()
+	for t in data.get("traps", []):
+		if t is Dictionary and t.has("set_at"):
+			traps.append({"set_at": int(t.set_at), "bait_kind": str(t.get("bait_kind", "")), "bait_mult": float(t.get("bait_mult", 1.0))})
+	var old = data.get("trap", {}) # 2026-11-02: saves before multiple traps had one "trap" (a baited one doubled everything)
+	if traps.is_empty() and old is Dictionary and old.has("set_at"):
+		traps.append({"set_at": int(old.set_at), "bait_kind": "mining" if bool(old.get("baited", false)) else "", "bait_mult": float(old.get("bait_mult", 1.0))})
 	trap_changed.emit()

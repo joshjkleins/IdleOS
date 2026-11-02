@@ -42,6 +42,12 @@ func _ready() -> void:
 	_on_temp_updated(Stats.system_tempature)
 	_update_rate()
 	_update_version()
+	var header = get_node_or_null("Header") # 2026-11-02: the ending's hat (white / black) before the SYSTEM title
+	if header:
+		var hat = HatIcon.new()
+		header.add_child(hat)
+		header.move_child(hat, 0)
+		header.add_theme_constant_override("separation", 6)
 	Upgrades.installed.connect(func(_p, _l): _update_version())
 	SaveManager.save_loaded.connect(_update_version) # the panel is built before the save loads
 

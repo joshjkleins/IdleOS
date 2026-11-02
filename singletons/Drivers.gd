@@ -34,14 +34,15 @@ const DEFS = {
 		"text": "every %s attack is a guaranteed crit", "format": "nth"},
 	"rainbow_table": {"skill": "Cracking", "name": "Rainbow Table", "short": "%s crit dmg, FW down", "values": [0.20, 0.30, 0.50],
 		"text": "%s crit damage while the firewall is down"},
-	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits +%s FW down", "values": [1.0, 2.0, 3.0], # 2026-11-01: was a bandwidth refund on crits
-		"text": "critical hits extend the next firewall reboot time by %s (stacking 2 times)", "format": "s", "max_stacks": 2},
+	"salted_hash": {"skill": "Cracking", "name": "Salted Hash", "short": "crits +1s FW down (max %s)", "values": [1.0, 2.0, 3.0], # 2026-11-01: was a bandwidth refund on crits
+		# 2026-11-01 (Josh): the value is the stack cap; each banked crit is always +1s (was 1/2/3s per crit, 2 stacks = up to 6s)
+		"text": "critical hits extend the next firewall reboot time by 1s each (up to %s)", "format": "s", "per_stack": 1.0},
 	"cracked_wide": {"skill": "Cracking", "name": "Cracked Wide", "short": "crits %s FW dmg", "values": [1.5, 1.75, 2.0],
 		"text": "crits that hit the firewall deal %s firewall damage", "format": "x"},
 	# Matching: firewall
 	"credential_reuse": {"skill": "Matching", "name": "Credential Reuse", "short": "%s FW damage", "values": [0.10, 0.15, 0.25],
 		"text": "%s firewall damage per hit"},
-	"session_hijack": {"skill": "Matching", "name": "Session Hijack", "short": "FW down %s longer", "values": [1.0, 2.0, 3.0], # 2026-10-31: was 2/3/5
+	"session_hijack": {"skill": "Matching", "name": "Session Hijack", "short": "FW down %s longer", "values": [0.5, 1.0, 2.0], # 2026-11-01 (Josh): was 1/2/3 (2026-10-31: was 2/3/5)
 		"text": "the firewall stays down %s longer after a break", "format": "s"},
 	"token_replay": {"skill": "Matching", "name": "Token Replay", "short": "FW reboots at %s", "values": [0.90, 0.80, 0.67], # 2026-10-31: was 0.70 (with Backdoor 25%: 50% firewall at max rank)
 		"text": "the firewall reboots at %s strength", "format": "pct_plain"},
@@ -175,7 +176,7 @@ func value_text(id: String, r: int = -1, short: bool = false) -> String:
 		"temp": vt = "%d°C" % int(v)
 		"nth": vt = "%dth" % int(v)
 		"x": vt = "x%s" % str(v).trim_suffix(".0")
-		"s": vt = "%ds" % int(v)
+		"s": vt = "%ss" % str(snappedf(v, 0.01)).trim_suffix(".0") # 2026-11-01: decimals show (Session Hijack 0.5s)
 		"num": vt = str(int(v))
 		"attacks": vt = ("attack fires" if int(v) == 1 else "%d attacks fire" % int(v)) if !short else ("1st attack" if int(v) == 1 else "%d attacks" % int(v))
 		"none": return tpl
@@ -234,6 +235,11 @@ func add_skill_xp(skill_name: String, amount: int) -> void:
 			ranked_up.emit(id, rank(id))
 			if !Offline.computing:
 				Signals.system_message_signal.emit("[color=#ffc24a]%s driver %s reached rank %d:[/color] %s" % [skill_name, DEFS[id].name, rank(id), value_text(id)])
+
+## 2026-11-02: repeat compromise rewards - XP to every equipped driver (all skills)
+func add_xp_all_equipped(amount: int) -> void:
+	for sk in equipped:
+		add_skill_xp(sk, amount)
 
 ## Exp.add_xp: a level that opens a slot
 func on_level_up(skill_name: String, level: int) -> void:

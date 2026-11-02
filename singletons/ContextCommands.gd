@@ -253,7 +253,7 @@ func get_help_text(skill: Node) -> String:
 		text += "\nEFFICIENCY (EFF) BY PROCESS\n"
 		for line in eff_lines:
 			text += "  %-12s %s\n" % line
-	return text + Exp.level_bonus_text(skill) + Drivers.info_text(str(skill.SKILL.name)) + "\n\n" + get_modifier_info_text(skill)
+	return text + Exp.level_bonus_text(skill) + Drivers.info_text(str(skill.SKILL.name)) + "\n\n" + get_modifier_info_text(skill) + Firmware.info_block(str(skill.SKILL.name))
 
 
 
@@ -293,7 +293,9 @@ func get_help_text_defragging(skill: Node) -> String:
 		colors.append("#ffc24a" if active else ("" if p.unlocked else "#666666"))
 	text += build_table(columns, rows, colors)
 	text += "\n[color=#666666]One boost at a time: defragging shares a %d minute cooldown.[/color]" % int(Defragging.get_cooldown_minutes())
-	return text + "\n\n" + get_modifier_info_text(skill)
+	if Firmware.active("Defragging"): # 2026-11-02: Defragging Firmware
+		text += "\n[color=#c084fc]defrag -all[/color]  [color=#888888]every unlocked bonus in one defrag (Firmware)[/color]"
+	return text + "\n\n" + get_modifier_info_text(skill) + Firmware.info_block("Defragging")
 
 func get_help_text_hacking(skill: Node) -> String:
 	var text = get_ascii_text(skill)
@@ -311,7 +313,7 @@ func get_help_text_hacking(skill: Node) -> String:
 			info_text
 		]
 	text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
-	var final_text = text + "\n\n" + get_modifier_info_text(skill)
+	var final_text = text + "\n\n" + get_modifier_info_text(skill) + (Firmware.info_block("Hacking") if skill == Hacking else "")
 	return final_text
 
 func get_help_text_2(skill: Node) -> String:
@@ -653,15 +655,30 @@ func exploits_text() -> String:
 	var G = "#4ec994"
 	var D = "#888888"
 	var Y = "#e0c068"
-	Inventory.desc_width = 130
-	var t = Inventory.list_filtered("-exploits").text
-	Inventory.desc_width = Inventory.LS_DESC_WIDTH
-	t += "\n\n[color=%s]WHERE TO FIND[/color]\n" % Y
+	# 2026-11-02: every Exploit (owned or not) with its charge cost, by tier (balance by effect, not tier)
+	var t = "\n[color=%s]EXPLOITS[/color]  [color=%s]charge cost to use · max charge %d%s[/color]\n" % [Y, D, int(Exploits.CHARGE_MAX), ("  · Salvage Rights: -%d%%" % roundi(Drivers.value("salvage_rights") * 100)) if Drivers.value("salvage_rights") > 0.0 else ""]
+	var items = Exploits.get_items().duplicate()
+	items.sort_custom(func(x, y): return x.tier < y.tier if x.tier != y.tier else x.id < y.id)
+	var cur_tier = -1
+	var w_name = 4
+	for i in items:
+		w_name = max(w_name, i.name.length())
+	for i in items:
+		if int(i.tier) != cur_tier:
+			cur_tier = int(i.tier)
+			t += "\n[color=%s]TIER %d · %s[/color]\n" % [D, cur_tier, Exploits.tier_name(cur_tier)]
+		var have = Inventory.get_amount(i)
+		var base = int(Exploits.get_def(i).get("cost", 0))
+		var c = int(Exploits.cost(i))
+		var cost_txt = ("%d" % c) + ((" (%d)" % base) if c != base else "")
+		t += "  [color=%s]%s[/color]  [color=%s]%s[/color]  [color=%s]%s[/color]  [color=#cccccc]%s[/color]\n" % [
+			"#e6e8eb" if have > 0 else D, pad_text(i.name, w_name), "#c084fc", pad_text(cost_txt, 9), G if have > 0 else D, pad_text(("x%d" % have) if have > 0 else "-", 5), Exploits.get_def(i).effect]
+	t += "\n[color=%s]WHERE TO FIND[/color]\n" % Y
 	var rows = [
 		[true, "", "Caches", "decode -cache", "Every cache can contain an Exploit. Using Deep Scan or the Forensics modifier makes this x2."],
 		[Upgrades.cur("decoding.salvage_sweep") > 0.0, "not installed", "Salvage Sweep", "apt decoding", "+2%% per install: a cache can drop an additional Exploit or hacking mod (%d%% now)" % roundi(Upgrades.cur("decoding.salvage_sweep") * 100)],
 		[Parsing.CORRUPTION.unlocked, _opens_with(Parsing.CORRUPTION), "Corruption", "parse -corruption=<mining item>", "Use parse -corruption=<mining item> to find Exploits of that Mining item's tier."],
-		[Phishing.TRAP.unlocked, _opens_with(Phishing.TRAP), "Trap", "phish -trap", "A full trap (45 min, even offline) always brings 1 Exploit + 1 hacking mod, plus a chance at a bonus Exploit."],
+		[Phishing.TRAP.unlocked, _opens_with(Phishing.TRAP), "Trap", "phish -trap", "A full trap (45 min, even offline) always brings 1 Exploit + 1 hacking mod, plus a chance at a bonus Exploit. Cracking bait: +1 Exploit."],
 		[Phishing.WHALING.unlocked, _opens_with(Phishing.WHALING), "Whaling", "phish -whale", "%d%% chance of an Exploit with every whale landed." % roundi(float(Phishing.WHALING.get("exploit chance", 0.0)) * 100)],
 	]
 	for r in rows:
@@ -1165,7 +1182,16 @@ func get_skill_upgrades_text(group: String) -> String:
 	var rows = []
 	var colors = []
 	var ready = 0
-	for p in Upgrades.group_packages(group):
+	# 2026-11-01: rows in slot order (the package list order put the T6-only packages in the wrong place)
+	var tier_pkgs = Upgrades.group_packages(group).filter(func(pk): return pk.levels.any(func(l): return int(l.tier) == wt))
+	var first_slot = func(pk) -> int:
+		var sl = 99
+		for l in pk.levels:
+			if int(l.tier) == wt:
+				sl = mini(sl, int(l.get("slot", 99)))
+		return sl
+	tier_pkgs.sort_custom(func(a, b): return first_slot.call(a) < first_slot.call(b))
+	for p in tier_pkgs:
 		var in_tier = p.levels.filter(func(l): return int(l.tier) == wt)
 		if in_tier.is_empty():
 			continue
@@ -1524,6 +1550,10 @@ func tier_complete_text(tier: int) -> String:
 	if Compromise.has_lineup(cloc): # 2026-10-28: the finished tier's compromise opens
 		t += "  · [color=#ffc24a]%s compromise[/color]: six targets back to back for a driver  [color=#666666](in Hacking: recon %s)[/color]\n" % [done, done.to_lower()]
 	t += "  · Hacking target: %s  [color=#666666](in Hacking: view %s)[/color]\n" % [first, next.to_lower()]
+	if tier == 1: # 2026-11-02: the command queue opens with the Lawfirm
+		t += "  · [color=#ffc24a]Command queue[/color]: line up 2 commands that run one after another in the main terminal, on repeat ('queue -add mine -logs 25', 'queue -add parse -footprint=logs 25', 'queue -run'). +1 slot with every new location  [color=#666666](queue -h)[/color]\n"
+	elif tier >= 2 and tier < Uploads.MAX_TIER:
+		t += "  · +1 command queue slot (%d)  [color=#666666](queue)[/color]\n" % (tier + 1)
 	if tier + 1 == Drivers.MANAGER_TIER: # 2026-10-30
 		t += "  · [color=#ffc24a]Driver Manager[/color] unlocked: 'driver' now manages every skill's drivers from anywhere, with saved builds  [color=#666666](driver)[/color]\n"
 	t += "  · Tier %d upgrades  [color=#666666](apt: each skill's v%d.0 installs open once v%d.0 is done)[/color]\n" % [tier + 1, tier + 1, tier]

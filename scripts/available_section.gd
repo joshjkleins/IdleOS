@@ -43,6 +43,8 @@ func _ready() -> void:
 	_rows.add_theme_constant_override("separation", 2)
 	add_child(_rows)
 	_summary = _label("", FONT, DIM)
+	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # 2026-11-02: one long line made the side panel wider (over the header)
+	_summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_summary.visible = false
 	add_child(_summary)
 	_refresh()

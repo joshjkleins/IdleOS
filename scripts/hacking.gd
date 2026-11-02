@@ -84,6 +84,9 @@ func _on_player_hacking_box_command_entered(text):
 	if low == "run" or low.begins_with("run "):
 		handle_run_command(low)
 		return
+	if low == "firmware" or low.begins_with("firmware "): # 2026-11-02: the Hacking Firmware is installed here
+		player_hacking_box.add_line(Firmware.handle(low, "Hacking"))
+		return
 	if (low == "unlock" or low.begins_with("unlock ")) and current_context != HackingContext.HACKING:
 		handle_unlock_command(low.trim_prefix("unlock").strip_edges())
 		return
@@ -139,6 +142,16 @@ func _on_player_hacking_box_command_entered(text):
 					_:
 						player_hacking_box.add_line("Command not found.")
 			HackingContext.HACKING:
+				if Ending.DEV and text == "finish": # dev (2026-11-02): the target's integrity to 1, the next hit wins
+					var g = enemy_hacking_box.hacking_game
+					if g and g.is_hacking:
+						g.integ_bar.value = 1
+						player_hacking_box.add_line_success("DEV: target integrity set to 1.")
+					return
+				if Ending.DEV and text == "ending reset":
+					Ending.dev_reset()
+					player_hacking_box.add_line_success("DEV: ending reset (plays again on the next President breach).")
+					return
 				match text:
 					"kill":
 						if Stats.overclocked:
@@ -425,10 +438,10 @@ func _recon_text(loc: String) -> String:
 	if !Compromise.is_unlocked(loc):
 		t += "[color=%s]LOCKED[/color]  [color=%s]complete the %s upload goals to unlock it[/color]\n" % [R, D, name]
 	t += "[color=%s]cost[/color]  %d %s  [color=%s](you have %d)[/color]      " % [D, Compromise.cost(loc), pay.name, G if have >= Compromise.cost(loc) else R, have]
-	t += "[color=%s]prize[/color]  [color=%s]a random %s driver[/color]  [color=%s](%d of %d left)[/color]      " % [D, Y, name, D, left, total]
+	t += "[color=%s]prize[/color]  [color=%s]%s%s[/color]  [color=%s](%d of %d left)[/color]      " % [D, Y, Compromise.prize_text(loc), (" + %dk Hacking XP" % (Compromise.complete_xp(loc) / 1000)) if Compromise.complete_xp(loc) > 0 else "", D, left, total]
 	t += "[color=%s]start[/color]  [color=%s]compromise -%s[/color]\n\n" % [D, G, name.to_lower().replace(" ", "-")]
 	for k in Compromise.RULES.size():
-		var line = Compromise.RULES[k] % name if Compromise.RULES[k].contains("%s") else Compromise.RULES[k]
+		var line = Compromise.RULES[k] % Compromise.prize_rule(loc) if Compromise.RULES[k].contains("%s") else Compromise.RULES[k]
 		t += "[color=%s]·[/color] [color=#cccccc]%s[/color]\n" % [D, line]
 	t += "\n[color=%s]%s[/color]" % [Y, Compromise.RECOMMEND]
 	return t
@@ -510,7 +523,7 @@ func hacking_help_commands():
 		HackingContext.TARGETS:
 			player_hacking_box.add_line(format_command_list("[HACKING COMMANDS]", [
 				["view [location]", "List targets at location", "e.g. view school"],
-				["recon [location]", "A location's compromise: six targets back to back for a driver", "e.g. recon school"],
+				["recon [location]", "A location's compromise: six targets back to back for a driver (Government: Firmware)", "e.g. recon school"],
 				["unlock", "List locked targets and what they cost"],
 				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
 				["cd ..",            "Return to terminal root"],

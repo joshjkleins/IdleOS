@@ -185,6 +185,8 @@ func apply_heat(mode: Mode) -> void:
 
 ## heat after System's VM capstones (Load Balancer halves VM heat, Server Rack removes it)
 func scaled_heat(heat: float) -> float:
+	if Firmware.active(skill): # Firmware (2026-11-02): this skill makes no heat (main terminal and VMs)
+		return 0.0
 	return heat * (Upgrades.vm_heat_multiplier() if in_vm else 1.0)
 #endregion
 

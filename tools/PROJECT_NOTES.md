@@ -958,8 +958,8 @@ before release.
 - Re-check the Hospital Chief of Medicine compromise fight (Adaptive + Escalator) after the 2026-10-31 Escalator
   reset: Josh tuned it by feel while Escalator carried over from the earlier fights (it started at max), so it's
   easier now. Josh will set up a save with that point's gear / mods / exploits / drivers to replay it.
-- Tier 4+ (Bank onward) combat / mods / exploits / drivers pass; Bank+ cache and economy check.
-- Tier 6 apt: replacement for the mod-slot upgrade. Defrag processes for Bank and Police.
+- (done: tiers 4-6 combat passes, T6 apt replacements Opening Charge / Long Breach.) Hospital has no Defrag process:
+  fine (Josh: defrag doesn't need one per tier). Unique combat interactions: covered by traits (Josh), dropped.
 - Release: `DEV_ITEM_COMMANDS`, `Drivers.DEV_GIVE` (and the other DEV flags) off.
 
 ## Tier 4 (Bank) first pass (2026-10-31)
@@ -1087,20 +1087,63 @@ Read this block first in a new conversation.
   the spreadsheet (`soffice --headless --convert-to xlsx` to recalc, copy to tools/upgrades/idleos_upgrades.xlsx).
 
 ### Open items
-1. Government (tier 6) first pass is in (section above); Josh hasn't played it yet - expect tuning from play.
-2. No tier 6 drivers (5 per skill): the Government compromise has no driver prize, but its rules text still promises
-   "a random Government driver". Decide: add 6th drivers or another final prize.
+1. Government (tier 6) signed off 2026-11-02 (targets + compromise). Ending + Firmware built (sections at the end).
+2. No tier 6 drivers by design: the Government compromise gives FIRMWARE (built 2026-11-02, see "Firmware" below).
 3. Bleed (2026-11-01): 10% of each integrity hit in 3 ticks 0.33s apart; each tick counts as a hit (pauses Regenerator).
-   Vs the T6 Clerk it beats an empty slot but SQL Booster is still faster. Option if it should be the clear Regenerator
-   pick: a 4th tick (1.33s) or 15%.
-4. Mirror (T6 mod, reflects 25% of countermeasure damage) tested weaker than Decoy Traffic / Hardened Shell in the
-   Heavy and Swarm builds - maybe undertuned.
-5. gen_upgrades.py / the upgrades spreadsheet don't have the T6 Hacking changes (Opening Charge, Long Breach, healing /
-   mod slot T6 levels removed, Exploit Kit 20). data/upgrades.json is the source of truth.
+   Josh: fine as is. Clerk (Josh, playtest 2026-11-01): integrity 700 -> 1450, firewall 60 -> 125,
+   counter 150 -> 165 every 5.3s (speed 16 -> 100/5.3), reboot 10 -> 5.5s. Clerk signed off by Josh (2026-11-01).
+   Analyst (Josh, playtest): integrity 1000 -> 1400, firewall 80 -> 140, counter 170 -> 180, reboot 9 -> 7.5s. Analyst signed off by Josh.
+   Regenerator: only hits that reach integrity pause it now; a hit the firewall fully absorbs doesn't (Josh).
+   Salted Hash: each banked crit is +1s on the next firewall break, stack cap 1/2/3 by rank (was 1/2/3s per crit,
+   2 stacks). Drivers.DEFS value = cap, "per_stack" = 1.0; hacking_game._salted_time().
+   Session Hijack 0.5/1/2s (was 1/2/3). Driver format "s" shows decimals now.
+   Failsafe (mod): below 25% anonymity (HackingMods.FAILSAFE_THRESHOLD, checked before the hit) countermeasures deal
+   30% less (item value 0.3; was "first trace restores 40%"). Shows on the countermeasure card now, log tag
+   "(MOD Failsafe -30%)". Still a defense-slot mod.
+   Data Hoarder (mod, id EXTRA_CACHE kept): with full intel (_full_intel), each Packet Spoof deals 10% of its healing (Josh: 20% -> 10%)
+   (before the max-anonymity cap) to the firewall; nothing while it's down, no overflow into integrity; can break it.
+   The extra-cache chance is gone. Utility slot; shows on the Packet Spoof card.
+   Analyst signed off. Hack screen: COMBAT LOG + EXPLOITS share a VSplitContainer (exp_split) with a visible drag
+   handle (v_grabber icon, autohide 0). The exploit list scrolls (exp_scroll); auto size = list height up to ~8 lines
+   (EXP_AUTO_PX 150, _fit_exp_split nudges split_offset until the scroll is that tall); a drag is kept for the session
+   (static _exp_split_saved, not saved to disk). Log never below 4 lines (LOG_MIN_LINES). Test: tools/tests/expshot.gd
+   (all Exploits, hacks a Student, screenshots auto + dragged-up).
+   T6 Exploits (Josh): Redaction cost 45 -> 100, text "Destroy the firewall now.". Root Access (cost 50): 10s window
+   (root_left) - every integrity drop is also stored (root_bank, via _on_integ_bar_value_changed / _integ_prev);
+   when it ends (_root_payout) the total x2 hits like an SQL attack: a standing firewall absorbs up to its value
+   (Fortress: all) but takes no damage. Bank clears between fights. System Purge cost 40 -> 100: 50% of max firewall
+   off (can break it), then 20% of max integrity past the firewall, then 10s (purge_left) SQL +20% speed and
+   countermeasures 20% slower. Chips ROOT / PURGE. Test: tools/tests/exp6test.gd.
+   'apt <skill>' tier table rows are sorted by slot (ContextCommands.get_skill_upgrades_text), not package-list order
+   (Opening Charge / Long Breach showed out of place). Test: tools/tests/apt6.gd.
+   Vice President (Josh, playtest): counter 140 -> 160, reboot base 12 -> 6 (card 3.0s with Adaptive).
+   President (Josh, playtest): integrity 1150 -> 2500, firewall base 120 -> 400 (card 200), counter 150 -> 200,
+   reboot base 10 -> 4 (card 2.0s). President signed off (Josh, 2026-11-02): very hard, needs Exploit spam - intended for the final boss.
+   Government compromise second pass (2026-11-02, Compromise.gd): same trait combos, stats scaled up to the new
+   targets. Harness (COMP=1 TYPED=1 GEAR=late LEVEL=60, full intel, N=2, each fight alone at full anonymity):
+   Clerk heavy 50-100%, Clerk packet_loss+throttle 100%, Analyst fortress+swarm 100% (fortress/heater builds),
+   Ambassador regen+heater ~50% (slow, ~600s), VP siphon+escalator ~50%, President heavy+escalator+heater ~50%
+   (heavy / escalator builds; the old "pres" build 0%). Needs Josh's playtest. Prize text still says "driver":
+   Government's prize becomes Firmware (not built).
+   Then +30% integrity / +20% firewall on every Government compromise fight (Josh, 2026-11-02): Clerk heavy 2080/132,
+   Clerk pl+throttle 2210/132, Analyst 2990/108 (card 2093/173), Ambassador 1430/132, VP 2340/156, President 3120/216.
+   Then another +25% integrity / +30% firewall: Clerk heavy 2600/171.6, Clerk pl+throttle 2762.5/171.6, Analyst
+   3737.5/140.4 (card 2616/225), Ambassador 1787.5/171.6, VP 2925/202.8, President 3900/280.8.
+   Then +20% on everything (integrity, firewall, counter, counter speed; reboot x0.8), all written out in Compromise.gd.
+   Government compromise signed off by Josh (2026-11-02). Tier 6 (Government) balance pass done.
+4. Mirror (T6 mod, 25% countermeasure reflect): Josh - fine as is, a strong answer in specific fights.
+5. gen_upgrades.py models the T6 Hacking changes (SLOT_REPLACE: Opening Charge / Long Breach in slots 6-7 at T6;
+   AMOUNT_OVERRIDE: Exploit Kit 14), spreadsheet regenerated 2026-11-02 and matches data/upgrades.json (don't export
+   the xlsx over the json: the json has hand edits, e.g. the T3 SQL Speed level).
 6. Hospital Chief compromise re-check after the Escalator per-fight fix (Josh will set up a save).
 7. Watch the small Bank/Police dips from the mod bandwidth change (ceil(tier/2) per mod): Branch Manager, Security,
    Loan Officer compromise, Police Cop compromise.
-8. Government still uses the university ASCII art; Government target heat / exp values are the old placeholders.
+8. Government uses the old university ASCII art - Josh: fine (reads as a gov building). Heat kept (same 0.5-1.7
+   pattern as every location). XP (2026-11-02): Clerk 630, Analyst 7500, Ambassador 11300, VP 15000, President 40000;
+   Compromise.COMPLETE_XP Government +100k per completed run (~175k per run with the banked fights). Aim: arrive ~Hacking
+   50-55 (~0.7M), nine compromises (~1.6M) + normal Government hacking (~0.7M) -> near 99 (3.08M) by the 9th Firmware.
+9. 'exploits' lists all 30 Exploits by tier with charge cost (Salvage Rights shown as "now (base)"), owned count and
+   effect (ContextCommands.exploits_text). Josh will rebalance costs by effect, not tier.
 
 ### Done this session (after the tier 5 sign-off), for reference
 - Defrag Sync: side panel description shortened; Sync now shares the main terminal's modifier (sift, prospect, survey...)
@@ -1110,3 +1153,140 @@ Read this block first in a new conversation.
 - Parsing Plaintext 25% (was 10%). Tab completes `parse -extraction=<item> target=<contained item>` (extcomp.gd).
 - Kickback (was Cheap Spoof), Salvage Rights 15/30/50% Exploit cost, T6 Hacking apt changes, Government first pass,
   Bleed rework - all described above.
+
+## The ending (2026-11-02, in progress)
+Josh's spec: on the FIRST breach of the normal President only (never again, no replay, no skip): the UI glitches out,
+the screen becomes a terminal grabbing everything, ACCESS GRANTED, the nuclear launch codes download, then a white hat
+and a black hat (ASCII) with a prompt each: 'lock' (white hat) or 'steal' (black hat). Then the HUD comes back.
+The next return to root plays an outro text (like the welcome) about completing the mission; then the normal root
+terminal loads and a notice (like a major release / upload complete) says congrats and to finish by maxing every skill
+and compromising the Government for Firmware (the end-game "capes", not designed yet).
+- Stage 1 BUILT: singletons/Ending.gd (autoload, saved as "ending": state NONE/CINEMATIC/OUTRO/CONGRATS/DONE + choice
+  white/black; CINEMATIC on load = quit mid-way, it plays again 3s after the save loads). hacking_game.win(): if
+  Ending.should_trigger(current_target) (normal President = last target of the last location, compromise never) the
+  run stops and Ending.start() fires 1.6s later. scripts/ending_cinematic.gd: CanvasLayer 100, pauses the tree, glitch
+  shader on the screen texture (row tearing, block jumps, RGB split, scanlines, green static, cells dissolve to black),
+  data-grab lines, ACCESS GRANTED + download bar, hats + LineEdit (lock/white, steal/black), the answer, then the glitch
+  runs backwards over the HUD. Dev (Ending.DEV): 'finish' in a hack sets the target's integrity to 1; 'ending reset'
+  (root or hacking console) lets it play again. Test: tools/tests/endshot.gd (CHOICE=lock|steal, xvfb, ~70s).
+- White hat = the black hat's ASCII mirrored (ending_cinematic.mirror_art). HatIcon (scripts/hat_icon.gd): small vector
+  witch hat (white, or red for black) before the SYSTEM title in SystemTemp = root side panel + hacking header; hidden
+  until a choice exists (Ending.choice_changed). Fixed a race: an answer typed as the prompt appeared was lost.
+- Stage 2 BUILT: idle_os_2._on_hacking_start_loading -> _ending_outro() while state is OUTRO/CONGRATS (also 2s after a
+  load with it pending, Ending.outro_requested). HUD fades out, Ending.outro_text() types at INTRO_CPS*0.5 (no skip:
+  _ending_playing eats keys), "press enter", HUD back, Ascii.root + Ending.congrats_text() (MISSION COMPLETE, hat line,
+  victory lap: max skills + Government compromise for Firmware), state DONE. Texts are drafts in Ending.gd.
+  Test: endshot.gd OUTRO=white|black.
+- Firmware BUILT (2026-11-02), see the section below.
+
+## Firmware (2026-11-02) - the end-game "capes"
+- singletons/Firmware.gd (autoload, saved as "firmware": owned / installed ids). 9: the 7 process skills (their VMs
+  cost 0 VM tokens: VMManager.token_cost; no heat: BaseTerminal.scaled_heat -> 0, main terminal and VMs), Hacking
+  (hacking_game._crit_chance 1.0, add_heat returns before adding; Heat Sink still cools), Defragging ('defrag -all':
+  Defragging.ALL, defrag_terminal.finished grants every unlocked bonus).
+- Won from the Government compromise (Firmware.TIER 6): Compromise.tier_drivers / drivers_left / roll_driver return
+  Firmware ids for tier 6; prize_text / prize_word for the recon, rules, yield, target card and banner texts.
+- Install inside the skill: 'firmware -install' (universal_commands; Hacking: the hacking console; 'firmware' alone
+  = this skill's block, at root = the overview). Needs: owned + level 99 + every apt tier of DEFS.apt (Defragging:
+  System's apt, no level - Defragging never gains XP). Firmware.info_block() ends 'info <skill>' / the 'cd' text.
+- Header: HeaderCard.set_firmware(installed, maxed): "FW" tag before the level; maxed (Firmware.maxed: 99 + apt +
+  installed) puts shaders/skill_maxed.gdshader on the card panel (prismatic drift, sheen, glowing purple border).
+- Uploads side panel: one full gold "complete" bar per finished location under the list (upload_complete shader,
+  flash when it completes); with all 6 done the list is only the locations ("UPLOADS · ALL LOCATIONS 6/6").
+- Test: tools/tests/fwshot.gd.
+
+## 2026-11-02 fixes (playthrough)
+- '<skill command> <modifier>' starts the process with that modifier (or overclock) on: 'mine -databases survey',
+  'decode -cache=x forensics', works with a cycle count too ('mine -logs 5 sift'). idle_os_2._on_input_line_text_submitted
+  strips the word, then calls _handle_modifier_command / overclock_logic once the process started.
+- Tab-complete: hacking console 'hack ...' only completes the targets of the location on screen (CommandRegistry
+  .hacking_candidates(shown)); 'decode -intel=<location>' completes location names.
+- Exploit Kit 14 President caches (json + gen_upgrades AMOUNT_OVERRIDE + xlsx regenerated).
+- Defrag Sync side panel label "sync  sync" -> "sync  VMs share mods". VM section idle text: "use 'ssh' to activate".
+- Offline: Decoding Salvage (100 items/run -> sampled VM tokens) and Deep (+1 VM Decoding token per cache, stops
+  when they run out) now progress offline / with timeskip (were online only). Cache / Skim / Intel already did.
+  Test: tools/tests/dectest.gd.
+- Side panel: the collapsed 'available to run' summary wraps (it made the panel ~1000px wide over the header).
+- Test: tools/tests/misc1102.gd.
+- Exploit costs by effect, not tier (Josh, 2026-11-02; Exploits.DEFS, old values in comments): Proxy Hop 80, Packet
+  Flood 55, Smoke Screen 85, Overcharge 35, Cease & Desist 80, Slow Drip 80, Port Knock 45, Quick Patch 35, Trace
+  Scrambler 60, Throttle Patch 35, Credential Stuffing 50, Heat Sink 35, Rootkit 70, Mirror Image 100, Zero-Day 55,
+  Ghost Mode 90, Chain Reaction 65, Blackout 80, Total Recall 100 (unchanged: Firewall Crack 50, Booster Shot 25,
+  Overdraft 30, Margin Call 100, Firewall Drain 35, Hedge 30, Freeze 40, Exfil Window 100, Redaction 100, Root Access
+  50, System Purge 100). The compromise/T6 balance was tuned with the old costs.
+- President (normal) final buff (Josh, 2026-11-02, after a retest with full intel + all rank 3 drivers): integrity 2800,
+  firewall base 430 (card 215), counter 210. Signed off.
+- Repeat compromises (Josh, 2026-11-02): once every prize of a location is owned (Compromise.is_repeat), the compromise
+  still starts and pays repeat rewards: the run's XP (banked fights + COMPLETE_XP) to Hacking AND to every equipped
+  driver (Drivers.add_xp_all_equipped), + 1 of each of the location's target caches + <tier> VM caches
+  (Compromise.repeat_items). Texts: prize_text "repeat rewards", prize_rule (RULES[2]). Test: tools/tests/repeatcomp.gd.
+- Stale item descriptions fixed: Corruption variants (x2 Exploit / mod chance, not +30% every drop), Extraction variants
+  (2 rares, not 5), the last target's rare per location (needed for the upload goal), mod texts end "Equip with 'mod'."
+  Legacy items (library / small business / university valuables, refresh token): "Legacy item ... no use any more."
+- Re-check 2026-11-02 (harness A/B; traitbal ESC0=N starts Escalator at N countermeasures):
+  Hospital Chief compromise (escalator build, LEVEL 28, no intel): Escalator from 0 (now) 100% / 94s / 33% left;
+  pre-maxed (+150%, how Josh tuned it) 0%; +50% start 20%. Applied (Josh): integrity 1300 / counter 44 -> 80% / 12% left.
+  Mod bandwidth ceil(tier/2) vs the old costs (SQL Booster 0, equip mods 1): Branch Manager (fortress, prog, L30)
+  100% / 111s / 23% -> 80% / 161s / 15% (dip; base integrity 900 -> 100% / 93s / 33%); Security, Loan Officer
+  compromise, Police Cop compromise: no real change. Josh: Branch Manager within noise, left as is.
+- Phishing traps (Josh, 2026-11-02): several at once - 1, +1 at Hospital, +1 at Police via the new apt package
+  'Extra Trap' (phishing.extra_trap, Phishing slot 9 at T3 / T5, which Quick Hook gave up: Quick Hook max 30% -> 20%).
+  Upgrades save format 4 migrates old Quick Hook counts (tiers 1..n -> its tiers 1,2,4,6 + Extra Trap for 3,5).
+  Bait = Phishing.TRAP_BAIT (100) of a basic resource; its kind (Phishing.bait_kind, by position in
+  Decoding.get_tier_resources) picks the bonus: Mining x2 SQL, Parsing x2 spoofs, Cracking +1 Exploit, Matching +1 mod;
+  payloads refused. (Before: 10 bait doubled everything.) Phishing.traps (array; old "trap" saves load as one trap).
+  'trap collect' = every full trap; 'trap collect <n>' = that one early (partial). Side panel "TRAPS n/max".
+  gen_upgrades SLOT_REPLACE has the two Extra Trap slots; xlsx regenerated. Test: tools/tests/traptest.gd.
+- Burst -> renamed FLUSH the same day (singletons/Flush.gd, 'flush' / 'flush -h', "buffers"; saves keyed "flush", old "burst" read).
+  Was: Burst (Josh, 2026-11-02): singletons/Burst.gd (autoload, saved as "burst": charge per "Skill/Process"). The process
+  cards' bars in a skill's header = that process's charge: fills 1s per second it runs in the MAIN terminal
+  (FILL_SECONDS 3600; never VMs, Hacking or Defragging), offline too (Offline.compute -> Burst.add(report.ran)).
+  'burst' (anywhere) spends one full bar of the running process's skill (its own first, else any other process of
+  that skill) and runs BURST_SECONDS (300) of the main process at once via Offline.burst() (same simulation as
+  offline: inputs used, XP, tokens). Card shows "BURST" when full; a system message when a bar fills.
+  Test: tools/tests/bursttest.gd.
+- Firmware.info_block shows nothing before the first President breach (Ending.state NONE, no Firmware owned).
+  'burst' with nothing to burst / nothing ready, and 'burst -h': Burst.help_text() - what it does, how bars fill, how
+  to use it, and READY NOW per skill (ready bars + the next fullest). Test: tools/tests/bursthelp.gd.
+- Flush check against every process (tools/tests/flushall.gd, SKILLS=<list>): all Mining / Parsing / Cracking /
+  Matching / Phishing / Decoding / Compiling processes flush (Intel adds intel points). Not flushable (live only):
+  Cracking VM conversion and setting a Trap - 'flush' says so. Slow tier 6 cycles at low level (Crack Biometric,
+  Match Clearance) may finish 0 cycles in 5 min (the offline long-cycle chance). Hot payload compiles lose 10% (offline
+  overheat rule). Fixes: Offline.flush gives _run a scratch report (crashed on overheat losses); offline outputs use
+  stochastic rounding (Offline._stochastic; round() turned 0.3 Exploits into 0 every time - offline too).
+  Drain animation: Flush.drained -> skill_header._on_flush_drained (bar turns green, pours down in steps, card blinks,
+  "FLUSHED"). Test: tools/tests/drainshot.gd.
+- Command queue (Josh, 2026-11-02), stage 1 BUILT: singletons/Queue.gd (autoload, saved as "queue": steps, running,
+  index). Opens with the Lawfirm (School upload done): slots 2, +1 per location, 6 at Government (Queue.slots).
+  Steps = skill commands (mine/parse/crack/match/phish/decode/compile; no hack / defrag / ssh), optional count and
+  modifier. Runs through idle_os_2.run_queued -> _on_input_line_text_submitted(cmd, from_queue) -> _execute_command
+  (the handler's body after the echo). A step ends when its process ends (count done / out of inputs); a step that
+  can't start is skipped; a whole pass of skips stops the queue. Count-less 'mine -logs' never ends (by design).
+  While running: manual process commands refused, 'cd hacking' refused. 'queue -kill' (and 'stop') stops the queue
+  and kills the step at once (os.kill_main_process); 'queue pause' / 'stop -s' stop after the current cycle.
+  Commands (dash flags, Josh): queue (-h), queue -add <cmd>, queue -rm <n> / -rm -a, queue -run [n], queue -kill,
+  queue -pause, queue -ls (bare words still accepted). Steps count from 0 (Josh): queue -rm 0, queue -run 1, queue[0] >.
+  Side panel: the step it's on is a lit row (green running, amber paused), collapsible (saved in the dock's sections). Side panel QUEUE section above the VMs (queue_section.gd). Unlock text in ContextCommands.tier_complete_text.
+  Test: tools/tests/queuetest.gd. Stage 2 TODO: offline (nerfed: Josh wants half the offline time or half the output).
+- Queue tab-complete (CommandRegistry._complete_queue): 'queue -add <command>' completes like the terminal (process
+  commands + their =<item> args), then a modifier after it ('... 10 ov' -> overclock; a trailing space lists them).
+  'queue -rm' / '-run' complete step numbers. Test: tools/tests/qtab.gd.
+- Queue + load fix (2026-11-02): a running queue waits for the boot / welcome back (idle_os_2._hold_unlocks) before
+  doing anything (it used to start a step over the welcome text and skip ahead). The welcome's resume of the step goes
+  through the queue path (_on_input_line_text_submitted(cmd, Queue.running)). If the step's count finished offline
+  (Offline.limited_run_done) the queue moves on to the next step; otherwise it carries on with the step it was on.
+  Test: tools/tests/queueload.gd (STEP=1 then STEP=2, keep the save between).
+- Queue editing (2026-11-02): 'queue -set <n> <command>' replaces step n (a running step changes from its next run),
+  'queue -ins <n> <command>' inserts at n (0..size; keeps the index on the running step). No holes in the list.
+  Tab-completes step numbers, then the command and modifiers like -add.
+- Queue offline, stage 2 (2026-11-02, Josh picked option 1): when the save was made with the queue running,
+  Offline.compute() calls _run_queue(snap, secs) instead of the single-process run. The queue cycles its steps for
+  QUEUE_SPEED (0.5) of the capped away time, so items, XP and tokens all halve together. The step that was running goes on
+  from the session snapshot (cycles left included); each next step is built from its text by snap_from_command()
+  (the same parsing as the terminal's handlers; {} for a VM, a Trap, a locked process or a bad item, which gets skipped).
+  A step ends when its count is done or _can_cycle() says it can't do another cycle (out of inputs). If a whole pass of
+  steps does nothing, the queue stops and a note says so. Resume = the step it reached ("<cmd> <left> <modifier>"
+  mid-step, the full step text between steps). limited_run_done is cleared, since the index is already moved. Uploads still
+  use the full secs. Welcome note: "the queue ran at half speed while you were away".
+  Test: tools/tests/queueoff.gd (STEP=1, shift offline.saved_at back in the save, STEP=2; LOGS env = starting logs).
+  Checked: 1h away gives 1800s across both steps and resumes mid-step 0; out of inputs stops the queue.

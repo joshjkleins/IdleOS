@@ -6326,7 +6326,7 @@
      ]
     },
     {
-     "tier": 3,
+     "tier": 4,
      "slot": 9,
      "value": 0.05,
      "label": "-5% reel time",
@@ -6336,12 +6336,12 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 128
+       "amount": 124
       }
      ]
     },
     {
-     "tier": 4,
+     "tier": 6,
      "slot": 9,
      "value": 0.05,
      "label": "-5% reel time",
@@ -6351,37 +6351,46 @@
      "costs": [
       {
        "item": "SQL Injector",
-       "amount": 124
+       "amount": 200
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phishing.extra_trap",
+   "group": "Phishing",
+   "name": "Extra Trap",
+   "type": "pointed",
+   "effect": "One more Phishing trap can be set at a time (they fill on real time, even offline)",
+   "levels": [
+    {
+     "tier": 3,
+     "slot": 9,
+     "value": 1.0,
+     "label": "+1 trap",
+     "before": "1 trap",
+     "after": "2 traps",
+     "effect": "One more Phishing trap can be set at a time (they fill on real time, even offline)",
+     "costs": [
+      {
+       "item": "SQL Injector",
+       "amount": 128
       }
      ]
     },
     {
      "tier": 5,
      "slot": 9,
-     "value": 0.05,
-     "label": "-5% reel time",
-     "before": "20 % faster reel",
-     "after": "25 % faster reel",
-     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
+     "value": 1.0,
+     "label": "+1 trap",
+     "before": "2 traps",
+     "after": "3 traps",
+     "effect": "One more Phishing trap can be set at a time (they fill on real time, even offline)",
      "costs": [
       {
        "item": "SQL Injector",
        "amount": 136
-      }
-     ]
-    },
-    {
-     "tier": 6,
-     "slot": 9,
-     "value": 0.05,
-     "label": "-5% reel time",
-     "before": "25 % faster reel",
-     "after": "30 % faster reel",
-     "effect": "Faster reel-in after a bite (Spear/Mod download, Whaling reel, Smish reply window)",
-     "costs": [
-      {
-       "item": "SQL Injector",
-       "amount": 200
       }
      ]
     }
@@ -9579,7 +9588,7 @@
      "costs": [
       {
        "item": "President Cache",
-       "amount": 20
+       "amount": 14
       }
      ]
     }

@@ -15,7 +15,7 @@ const STATIC = [
 	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
-	"track ", "untrack ", "untrack -a", "trap", "trap collect", "panel", "cd ..", "quit", "quit -s", "wishlist",
+	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "wishlist",
 ]
 
 func _skills() -> Array:
@@ -134,6 +134,9 @@ func main_candidates() -> Array:
 	for loc in Stats.hacking_targets: # 'phish -mod=school' (2026-10-29)
 		if Stats.hacking_targets[loc].get("unlocked", false):
 			c.append("phish -mod=" + str(Stats.hacking_targets[loc].name).to_lower().replace(" ", "-"))
+	for loc in Stats.hacking_targets: # 'decode -intel=<location>' (2026-11-02: tab didn't finish 'gov')
+		if Stats.hacking_targets[loc].get("unlocked", false):
+			c.append("decode -intel=" + str(Stats.hacking_targets[loc].name).to_lower().replace(" ", "-"))
 	for t in _unlocked_targets():
 		c.append("decode -intel=" + t.name.to_lower())
 		c.append("intel " + t.name.to_lower())
@@ -151,10 +154,19 @@ func main_candidates() -> Array:
 	for vm in VMManager.vms:
 		for a in ["show", "hide", "kill"]:
 			c.append("vm %s %d" % [a, vm.vm_id])
+	for i in Queue.steps.size(): # 'queue -rm 0', 'queue -run 1', 'queue -set 2 ', 'queue -ins 0 ' (2026-11-02)
+		c.append("queue -rm %d" % i)
+		c.append("queue -run %d" % i)
+		c.append("queue -set %d " % i)
+		c.append("queue -ins %d " % i)
+	if Queue.unlocked():
+		c.append("queue -ins %d " % Queue.steps.size())
 	return c
 
-## Hacking console: locations, targets, unlocks, one-time items
-func hacking_candidates() -> Array:
+## Hacking console: locations, targets, unlocks, one-time items. <shown>: the location on screen (its key, "" for the
+## locations view): 'hack' / 'unlock' only complete that location's targets (2026-11-02: 'hack vic' at Government
+## offered the School's Vice Principal)
+func hacking_candidates(shown: String = "") -> Array:
 	var c: Array = ["-h", "cd ..", "cd ~", "cd root", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
@@ -163,6 +175,8 @@ func hacking_candidates() -> Array:
 			if Compromise.has_lineup(loc): # 2026-10-28: compromises replaced hard mode
 				c.append("recon " + str(l.name).to_lower().replace(" ", "-"))
 				c.append("compromise -" + str(l.name).to_lower().replace(" ", "-"))
+		if shown != "" and loc != shown:
+			continue
 		for t in l.get("targets", []):
 			if t.get("unlocked", false):
 				for suf in ["", " -r", " -overclock", "="]:
@@ -184,12 +198,66 @@ func _unlocked_targets() -> Array:
 					out.append(t)
 	return out
 
+## 2026-11-02: 'queue -add <command>' completes the command like the terminal does (process commands, with their
+## '=<item>' arguments), then a modifier after it ('... 10 ov' -> overclock). 'queue -rm' / '-run' complete step numbers.
+func _complete_queue(text: String) -> Dictionary:
+	var low = text.to_lower()
+	var pre = ""
+	for p in ["queue -add ", "queue add "]:
+		if low.begins_with(p):
+			pre = text.substr(0, p.length())
+	for p in ["queue -set ", "queue -ins "]: # '<n> ' then the command (2026-11-02)
+		if low.begins_with(p):
+			var after = low.substr(p.length())
+			var num = after.get_slice(" ", 0)
+			if num.is_valid_int() and after.contains(" "):
+				pre = text.substr(0, p.length() + num.length() + 1)
+	if pre == "":
+		return {}
+	var rest = text.substr(pre.length())
+	var words = rest.to_lower().split(" ", false)
+	var verb = words[0] if !words.is_empty() else ""
+	# the command itself
+	var cands = main_candidates().filter(func(c): return str(c).get_slice(" ", 0) in Queue.VERBS and str(c).contains(" -"))
+	var r = _complete_from(rest, cands)
+	if r.text != rest or !r.options.is_empty():
+		return {"text": pre + r.text, "options": r.options}
+	# then a modifier: '<command> [N] <modifier>'
+	if words.size() < 2 or !(verb in Queue.VERBS):
+		return {"text": text, "options": []}
+	var skill_name = {"mine": "Mining", "parse": "Parsing", "crack": "Cracking", "match": "Matching", "phish": "Phishing", "decode": "Decoding", "compile": "Compiling"}[verb]
+	var skill = get_node_or_null("/root/" + skill_name)
+	var mods = ["overclock"]
+	for m in (skill.get("MODIFIERS") if skill and skill.get("MODIFIERS") else []):
+		mods.append(str(m.command))
+	var last = "" if rest.ends_with(" ") else words[-1]
+	if last != "" and (last.is_valid_int() or last.begins_with("-") or last.contains("=")):
+		return {"text": text, "options": []}
+	var hits = mods.filter(func(m): return m.begins_with(last))
+	if hits.is_empty():
+		return {"text": text, "options": []}
+	var head = text.substr(0, text.length() - last.length())
+	if hits.size() == 1:
+		return {"text": head + hits[0], "options": []}
+	var cp = _common_prefix(hits)
+	if cp.length() > last.length():
+		return {"text": head + cp, "options": []}
+	hits.sort()
+	return {"text": text, "options": hits}
+
 ## {"text": the new input, "options": [what to list] (empty unless the input couldn't grow)}
-func complete(text: String, hacking: bool = false) -> Dictionary:
+func complete(text: String, hacking: bool = false, shown_loc: String = "") -> Dictionary:
+	if !hacking:
+		var q = _complete_queue(text)
+		if !q.is_empty():
+			return q
+	return _complete_from(text, hacking_candidates(shown_loc) if hacking else main_candidates())
+
+func _complete_from(text: String, cands: Array) -> Dictionary:
 	var typed = text.to_lower()
 	var seen = {}
 	var matches: Array = []
-	for cand in (hacking_candidates() if hacking else main_candidates()):
+	for cand in cands:
 		var low = str(cand).to_lower()
 		if low != "" and low.begins_with(typed) and !seen.has(low):
 			seen[low] = true
@@ -211,7 +279,7 @@ func complete(text: String, hacking: bool = false) -> Dictionary:
 	# yet, or after a command whose arguments are single words (cd, info, ssh, apt, vm ...), also at the next space.
 	# Item names (ls / track / upload ...) keep their spaces.
 	var head = typed.split(" ", false)[0] if typed.contains(" ") else ""
-	var word_args = head == "" or head in ["cd", "info", "ssh", "apt", "vm", "tutorial", "discord", "quit", "trap", "kill", "stop", "overclock", "view", "hack", "run", "recon", "compromise"]
+	var word_args = head == "" or head in ["cd", "info", "ssh", "apt", "vm", "tutorial", "discord", "quit", "trap", "kill", "stop", "overclock", "view", "hack", "run", "recon", "compromise", "queue"]
 	var opts = []
 	for m in matches:
 		var rest = m.substr(start)

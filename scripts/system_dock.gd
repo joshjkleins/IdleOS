@@ -52,6 +52,7 @@ func _ready() -> void:
 	_add_defrag_boost()
 	_add_vm_toggle()
 	_add_trap_status()
+	_add_queue_section()
 	VMManager.vms_changed.connect(_rebuild_rows)
 	_rebuild_rows()
 	add_to_group("system_dock")
@@ -76,6 +77,20 @@ func _wrap_in_scroll() -> void:
 	var bar := scroll.get_v_scroll_bar() # thin, dim bar
 	bar.custom_minimum_size.x = 4
 	bar.modulate = Color(1, 1, 1, 0.5)
+
+## 2026-11-02: the command queue, right above the VMs (queue_section.gd)
+var queue_section: QueueSection
+func _add_queue_section() -> void:
+	var q := QueueSection.new()
+	queue_section = q
+	full_view.add_child(q)
+	full_view.move_child(q, vm_section.get_index())
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.35)
+	full_view.add_child(sep)
+	full_view.move_child(sep, q.get_index() + 1)
+	q.sep = sep
+	q._refresh()
 
 ## UPLOADS sits under the VM list (built in code; see upload_section.gd).
 func _add_upload_section() -> void:
@@ -226,7 +241,7 @@ func _apply_collapsed() -> void:
 func save_data() -> Dictionary:
 	return {
 		"collapsed": collapsed,
-		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "available": available_section.collapsed, "uploads": upload_section.collapsed},
+		"sections": {"vm": vm_collapsed, "access": access_section.collapsed, "available": available_section.collapsed, "uploads": upload_section.collapsed, "queue": queue_section.collapsed},
 	}
 
 func load_data(data: Dictionary) -> void:
@@ -236,6 +251,7 @@ func load_data(data: Dictionary) -> void:
 	access_section.set_collapsed(bool(sections.get("access", false)))
 	available_section.set_collapsed(bool(sections.get("available", false)))
 	upload_section.set_collapsed(bool(sections.get("uploads", false)))
+	queue_section.set_collapsed(bool(sections.get("queue", false)))
 
 func _process(delta: float) -> void:
 	_refresh_accum += delta

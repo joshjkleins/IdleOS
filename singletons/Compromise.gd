@@ -7,10 +7,16 @@ extends Node
 ## upload goals are complete. 'recon <location>' shows the lineup, 'compromise -<location>' starts it.
 
 const PAYLOAD_PER_TIER := 20
+## 2026-11-02: extra Hacking XP for finishing a compromise, on top of the fights' banked XP (Government: ~75k banked +
+## 100k = ~175k per run; nine runs for the nine Firmware carry a player from ~level 50 to near 99 with normal hacking)
+const COMPLETE_XP := {"Government": 100000}
+
+func complete_xp(loc: String) -> int:
+	return int(COMPLETE_XP.get(loc, 0))
 const RULES := [
 	"Six targets, fought back to back in this order. Each one uses its own intel.",
 	"Anonymity, heat, bandwidth and Exploit charge carry over from one fight to the next.",
-	"No rewards until the final breach: Hacking XP is banked, and the prize is a random %s driver you don't have yet.",
+	"No rewards until the final breach: Hacking XP is banked, and the prize is %s.",
 	"Getting traced, 'kill' or quitting ends the run and the payloads are lost. Start again from the first target.",
 	"Each fight uses 1 hack of your equipped Hacking Mods.",
 ]
@@ -43,7 +49,7 @@ const LINEUPS := {
 		[1, ["throttle"], {"integrity": 760, "counter": 41, "counter speed": 24.2, "firewall reboot": 7.0}],     # Orderly
 		[2, ["fortress"], {"firewall": 38, "integrity": 390, "counter": 39, "counter speed": 19.8}], # Nurse (reboot kept at 4s: 3s with +10% stats won ~0/4 with the right build)
 		[3, ["regenerator", "heater"], {"integrity": 440, "counter": 29, "counter speed": 22.0, "firewall reboot": 5.0}], # Doctor
-		[4, ["adaptive", "escalator"], {"integrity": 1100, "counter": 37, "counter speed": 17.6, "firewall": 48}], # Chief of Medicine (reboot kept at 3.5s: +10% alone drops the right build to ~50%)
+		[4, ["adaptive", "escalator"], {"integrity": 1300, "counter": 44, "counter speed": 17.6, "firewall": 48}], # Chief of Medicine (2026-11-02: 1100 / 37 -> 1300 / 44: tuned while Escalator carried over from earlier fights; harness 80%, 12% left)
 	],
 	"Bank": [ # 2026-10-31: first pass
 		[0, ["swarm"], {"integrity": 750, "counter": 250, "counter speed": 22.0}],  # Teller
@@ -61,13 +67,14 @@ const LINEUPS := {
 		[3, ["packet_loss", "escalator"], {"integrity": 1560, "firewall": 78.75, "counter": 90}],  # Sergeant
 		[4, ["heavy", "adaptive"], {"integrity": 1560, "firewall": 118.13, "counter": 110, "counter speed": 26.0}],  # Captain
 	],
-	"Government": [ # 2026-11-01: first pass
-		[0, ["heavy"], {"integrity": 1300, "firewall": 70, "counter": 95, "counter speed": 30.0}],  # Clerk
-		[0, ["packet_loss", "throttle"], {"integrity": 1500, "firewall": 70, "counter": 150}],  # Clerk
-		[1, ["fortress", "swarm"], {"integrity": 1700, "firewall": 70, "counter": 400}],  # Analyst
-		[2, ["regenerator", "heater"], {"integrity": 650, "firewall": 80, "counter": 150}],  # Ambassador
-		[3, ["siphon", "escalator"], {"integrity": 1300, "firewall": 90, "counter": 130}],  # Vice President
-		[4, ["heavy", "escalator", "heater"], {"integrity": 1200, "firewall": 110, "counter": 90, "counter speed": 26.0}],  # President
+	"Government": [ # 2026-11-02: second pass (scaled to the playtested targets), +30%/+20% then +25%/+30% integrity/firewall,
+		# then +20% on everything (Josh): integrity, firewall, counter damage, counter speed; reboot 20% shorter. Cards in comments.
+		[0, ["heavy"], {"integrity": 3120, "firewall": 205.92, "counter": 144, "counter speed": 36.0, "firewall reboot": 5.6}],  # Clerk: 720 dmg every 9.3s, 5.6s down
+		[0, ["packet_loss", "throttle"], {"integrity": 3315, "firewall": 205.92, "counter": 198, "counter speed": 22.64, "firewall reboot": 4.4}],  # Clerk: 198 every 4.4s, 4.4s down
+		[1, ["fortress", "swarm"], {"integrity": 4485, "firewall": 168.48, "counter": 480, "counter speed": 24.0, "firewall reboot": 8.0}],  # Analyst: 3140 int, 270 fw, 96 every 1.4s, 4s down
+		[2, ["regenerator", "heater"], {"integrity": 2145, "firewall": 205.92, "counter": 180, "counter speed": 21.6, "firewall reboot": 5.6}],  # Ambassador: 180 every 4.6s, 5.6s down
+		[3, ["siphon", "escalator"], {"integrity": 3510, "firewall": 243.36, "counter": 192, "counter speed": 26.4, "firewall reboot": 4.8}],  # Vice President: 192 every 3.8s (ramps), 4.8s down
+		[4, ["heavy", "escalator", "heater"], {"integrity": 4680, "firewall": 336.96, "counter": 144, "counter speed": 31.2, "firewall reboot": 3.2}],  # President: 720 every 10.7s (ramps to ~4.3s), 3.2s down
 	],
 
 
@@ -128,14 +135,56 @@ func driver_tier(id: String) -> int:
 				return n
 	return 0
 
+## the prizes of a tier's compromise: its drivers, or (Government, 2026-11-02) the Firmware
 func tier_drivers(tier: int) -> Array:
+	if tier == Firmware.TIER:
+		return Firmware.ids()
 	return Drivers.DEFS.keys().filter(func(d): return driver_tier(d) == tier)
 
 func drivers_left(tier: int) -> Array:
+	if tier == Firmware.TIER:
+		return Firmware.left()
 	return tier_drivers(tier).filter(func(d): return !Drivers.is_owned(d))
 
-## grants a random driver of <tier> the player doesn't own; "" when none are left
+## "a random School driver" / "a random Firmware" / "repeat rewards" (recon, yield)
+func prize_text(loc: String) -> String:
+	if is_repeat(loc):
+		return "repeat rewards"
+	if tier_of(loc) == Firmware.TIER:
+		return "a random Firmware"
+	return "a random %s driver" % (Stats.hacking_targets[loc].name if Stats.hacking_targets.has(loc) else loc)
+
+## the rules line's prize (Compromise.RULES[2])
+func prize_rule(loc: String) -> String:
+	if is_repeat(loc):
+		var n = tier_of(loc)
+		return "the banked XP again for every equipped driver, 1 of each %s cache and %d VM cache%s (all %d %s %s owned)" % [
+			Stats.hacking_targets[loc].name, n, "" if n == 1 else "s", tier_drivers(tier_of(loc)).size(), Stats.hacking_targets[loc].name, prize_word(tier_of(loc))]
+	return prize_text(loc) + " you don't have yet"
+
+## 2026-11-02: every prize of this compromise is owned -> repeat rewards: the run's XP (fights + completion bonus) also
+## goes to every equipped driver, plus 1 of each of the location's target caches and <tier> VM caches
+func is_repeat(loc: String) -> bool:
+	return has_lineup(loc) and drivers_left(tier_of(loc)).is_empty()
+
+## the repeat rewards' items: {item: amount}
+func repeat_items(loc: String) -> Dictionary:
+	var out = {}
+	for t in Stats.hacking_targets[loc].get("targets", []):
+		var c = t.get("loot")
+		if c is ItemData:
+			out[c] = int(out.get(c, 0)) + 1
+	out[Items.VM_CACHE] = int(out.get(Items.VM_CACHE, 0)) + tier_of(loc)
+	return out
+
+## "drivers" / "Firmware"
+func prize_word(tier: int) -> String:
+	return "Firmware" if tier == Firmware.TIER else "drivers"
+
+## grants a random driver of <tier> the player doesn't own; "" when none are left (Government: a Firmware)
 func roll_driver(tier: int) -> String:
+	if tier == Firmware.TIER:
+		return Firmware.roll()
 	var left = drivers_left(tier)
 	if left.is_empty():
 		return ""
@@ -151,8 +200,6 @@ func start_problem(loc: String) -> String:
 	var name = Stats.hacking_targets[loc].name
 	if !is_unlocked(loc):
 		return "%s compromise is locked: complete the %s upload goals first." % [name, name]
-	if drivers_left(tier_of(loc)).is_empty():
-		return "You have all %d %s drivers. Rewards for repeat compromises are coming later." % [tier_drivers(tier_of(loc)).size(), name]
 	if Inventory.get_amount(payload(loc)) < cost(loc):
 		return "A %s compromise costs %d %s (you have %d)." % [name, cost(loc), payload(loc).name, Inventory.get_amount(payload(loc))]
 	if Inventory.get_amount(Items.SQL_INJECTOR) <= 0:

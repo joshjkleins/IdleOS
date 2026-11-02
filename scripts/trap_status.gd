@@ -54,19 +54,25 @@ func refresh() -> void:
 	visible = Phishing.TRAP.unlocked or Phishing.has_trap()
 	if !visible:
 		return
-	var p = Phishing.trap_progress()
+	var p = Phishing.trap_progress() # the fullest trap (2026-11-02: several traps)
 	_bar_fill.size = Vector2(BAR_WIDTH * p, 6)
+	var many = Phishing.max_traps() > 1
+	_title.text = ("TRAPS %d/%d" % [Phishing.traps.size(), Phishing.max_traps()]) if many else "TRAP"
+	_title.custom_minimum_size.x = 0 if many else 34
 	if !Phishing.has_trap():
 		_status.text = "not set"
 		_status.add_theme_color_override("font_color", DIM)
 		tooltip_text = "Set one in Phishing with 'phish -trap'."
 	elif p >= 1.0:
-		_status.text = "READY"
+		_status.text = ("%d READY" % Phishing.full_traps()) if many else "READY"
 		_status.add_theme_color_override("font_color", READY)
 		_bar_fill.color = READY
-		tooltip_text = "Trap is full: 'trap collect'"
+		tooltip_text = "%d full: 'trap collect'" % Phishing.full_traps()
 	else:
-		_status.text = "%d%% · %s" % [int(p * 100), Phishing.format_minutes(Phishing.trap_seconds_left())]
+		var soonest = 1e9
+		for t in Phishing.traps:
+			soonest = min(soonest, Phishing.trap_seconds_left_of(t))
+		_status.text = "%d%% · %s" % [int(p * 100), Phishing.format_minutes(soonest)]
 		_status.add_theme_color_override("font_color", TEXT)
 		_bar_fill.color = Phishing.SKILL.color
 		tooltip_text = "Trap filling. 'trap' for status, 'trap collect' to take a partial haul."

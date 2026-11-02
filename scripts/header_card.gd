@@ -79,6 +79,46 @@ func build(p_accent: Color, big: bool = false, min_width: float = 0.0) -> void:
 
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+#region firmware (2026-11-02)
+const C_FW = Color("#c084fc")
+const MAXED_SHADER = preload("res://shaders/skill_maxed.gdshader")
+var _fw_label: Label
+var _maxed := false
+
+## Firmware installed: a small "FW" tag before the level. maxed (level 99 + every apt tier + Firmware): the card's
+## panel gets the animated skill_maxed shader (shimmer, sheen, glowing purple border).
+func set_firmware(installed: bool, maxed: bool) -> void:
+	if installed and _fw_label == null:
+		_fw_label = Label.new()
+		_fw_label.text = "FW"
+		_fw_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_fw_label.add_theme_font_size_override("font_size", 10)
+		_fw_label.add_theme_color_override("font_color", C_FW)
+		var top = level_label.get_parent()
+		top.add_child(_fw_label)
+		top.move_child(_fw_label, level_label.get_index())
+		top.add_theme_constant_override("separation", 6)
+	if _fw_label:
+		_fw_label.visible = installed
+	if maxed == _maxed:
+		return
+	_maxed = maxed
+	if maxed:
+		var m := ShaderMaterial.new()
+		m.shader = MAXED_SHADER
+		m.set_shader_parameter("offset", randf())
+		m.set_shader_parameter("size", size)
+		material = m
+		if !resized.is_connected(_on_maxed_resized):
+			resized.connect(_on_maxed_resized)
+	else:
+		material = null
+
+func _on_maxed_resized() -> void:
+	if material is ShaderMaterial:
+		material.set_shader_parameter("size", size)
+#endregion
+
 func set_accent(c: Color) -> void:
 	accent = c
 	queue_redraw() # accent line is drawn in _draw()

@@ -162,6 +162,7 @@ func _ready():
 			add_line(Tutorial.old_save_notice())
 		_offline_welcome.call_deferred()
 	Exp.process_unlocked_signal.connect(_flush_unlocks)
+	Ending.outro_requested.connect(func(): if current_context != Context.HACKING: _ending_outro()) # loaded before the outro was seen
 	Signals.process_ended_safely_signal.connect(_on_skill_process_ended)
 	Signals.defrag_finished_signal.connect(_on_process_ended.bind("Defragging process ended."))
 	Signals.vm_window_focused_signal.connect(grab_all_focus)
@@ -266,10 +267,32 @@ func add_new_scrollback():
 		label_to_remove.queue_free()
 
 #player submits text
-func _on_input_line_text_submitted(new_text):
+## 2026-11-02: 'queue -kill' - the main terminal's process stops now (as 'stop')
+func kill_main_process() -> void:
+	if !process_running and current_process == null:
+		return
+	unstick_current_process()
+	process_running = false
+	if current_process:
+		current_process.stop()
+	current_process = null
+	current_process_info = {}
+	Stats.overclocked = false
+	hud_process_running.process_killed()
+
+## 2026-11-02: the command queue starts its steps through here (no echo / history: run_queued prints its own line)
+func run_queued(cmd: String, n: int, total: int) -> void:
+	add_line("[color=#4ec994]queue[%d] >[/color] %s" % [n, cmd]) # steps count from 0
+	_on_input_line_text_submitted(cmd, true)
+
+func _on_input_line_text_submitted(new_text, from_queue := false):
 	PLAYER_TABBED = 0
 	if !accepting_player_inputs:
-		input_line.clear()
+		if !from_queue:
+			input_line.clear()
+		return
+	if from_queue:
+		_execute_command(new_text, true)
 		return
 	if awaiting_player_input:
 		if new_text.to_lower().strip_edges() == "y" or new_text.to_lower().strip_edges() == "n":
@@ -285,7 +308,21 @@ func _on_input_line_text_submitted(new_text):
 	input_line.clear()
 	add_line(text_with_lead)
 	command_history.append(new_text)
+	# 2026-11-02: while the queue runs it owns the main terminal: no manual processes; stop pauses it
+	if Queue.running:
+		var qlow = new_text.to_lower().strip_edges()
+		var qverb = qlow.split(" ", false)[0] if qlow != "" else ""
+		if qverb in Queue.VERBS and qlow.split(" ", false).size() > 1:
+			add_line("[color=#d29922]The queue is running the main terminal. 'queue -kill' first, or 'queue -add %s' to queue it.[/color]" % qlow)
+			return
+		if qlow in ["stop", "stop -s", "kill -s"]: # stop = 'queue -kill'; stop -s pauses after the current cycle
+			add_line(Queue.kill() if qlow == "stop" else Queue.pause())
+			return
 	
+	_execute_command(new_text, false)
+
+## everything after the echo: typed commands and queue steps (from_queue)
+func _execute_command(new_text: String, from_queue: bool) -> void:
 	if new_text == "sudo rm -rf":
 		add_line("UNINSTALLING PROCESSES")
 		for process in major_processes:
@@ -309,6 +346,21 @@ func _on_input_line_text_submitted(new_text):
 		SaveManager.save_game()
 		get_tree().quit()
 	
+	# 2026-11-02: '<skill command> <modifier>' (mine -databases survey, decode -cache=x forensics) starts the process with
+	# that modifier (or overclock) on. Any word after the command that is one of the skill's modifiers, count or not.
+	var start_modifier = ""
+	var mw = new_text.strip_edges().split(" ", false)
+	if mw.size() >= 3 and SKILL_BINARIES.has(mw[0].to_lower()) and mw[0].to_lower() != "defrag":
+		var msk = get_node_or_null("/root/" + str(SKILL_BINARIES[mw[0].to_lower()]).capitalize())
+		var mods = ["overclock"]
+		for m in (msk.get("MODIFIERS") if msk and msk.get("MODIFIERS") else []):
+			mods.append(str(m.command))
+		for k in range(mw.size() - 1, 1, -1):
+			if mw[k].to_lower() in mods:
+				start_modifier = mw[k].to_lower()
+				mw.remove_at(k)
+				new_text = " ".join(mw)
+				break
 	# 2026-10-31: '<skill command> N' (parse -footprint=logs 20) runs N cycles, then stops
 	var cycle_limit = 0
 	var cw = new_text.strip_edges().split(" ", false)
@@ -346,6 +398,13 @@ func _on_input_line_text_submitted(new_text):
 		if cycle_limit > 0 and "cycle_limit" in current_process:
 			current_process.cycle_limit = cycle_limit
 			add_line("[color=#888888]Runs %d cycle%s, then stops.[/color]" % [cycle_limit, "" if cycle_limit == 1 else "s"])
+		if start_modifier != "": # 2026-11-02: started with a modifier
+			if start_modifier == "overclock":
+				overclock_logic()
+			elif !_handle_modifier_command(start_modifier):
+				add_line("'%s' isn't a modifier of this skill." % start_modifier)
+	elif start_modifier != "" and was_running:
+		add_line("[color=#888888]A process is already running: start the modifier on it with '%s'.[/color]" % start_modifier)
 	if _cmd_unknown:
 		_unknown_streak += 1
 		if _unknown_streak == 2:
@@ -557,6 +616,20 @@ func universal_commands(text):
 		var out = Drivers.handle(text, sk)
 		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -rm <id>")
 		return true
+	if text == "queue" or text.begins_with("queue "): # 2026-11-02: the command queue
+		add_line(Queue.handle(text))
+		return true
+	if text == "flush": # 2026-11-02 (was 'burst'): a full process buffer -> 5 minutes of the main terminal's process now
+		add_line(Flush.use())
+		return true
+	if text in ["flush -h", "flush help", "flush -info"]:
+		add_line(Flush.help_text())
+		return true
+	if text == "firmware" or text.begins_with("firmware "):
+		# 2026-11-02: install inside the skill ('cd mining' -> 'firmware -install'); root shows the overview
+		var fsk = get_context_name_string(current_context) if current_context in [Context.MINING, Context.PARSING, Context.CRACKING, Context.MATCHING, Context.PHISHING, Context.DECODING, Context.COMPILING, Context.DEFRAGGING] else ""
+		add_line(Firmware.handle(text, fsk))
+		return true
 	if text.begins_with("ssh"):
 		handle_vm_token_commands(text)
 		return true
@@ -740,6 +813,10 @@ func universal_commands(text):
 			return true
 	#
 	# TESTING (2026-10-30): 'tutorial complete' checks off every tutorial step at once (no step rewards, no messages)
+	if Ending.DEV and text == "ending reset": # dev (2026-11-02): the ending plays again on the next President breach
+		Ending.dev_reset()
+		add_line("DEV: ending reset.")
+		return
 	if DEV_ITEM_COMMANDS and text == "tutorial complete":
 		for e in Tutorial.steps():
 			if !Tutorial.completed_events.has(e):
@@ -1080,6 +1157,9 @@ func handle_cd_commands(text):
 			update_context(Context.MATCHING)
 			add_line(ContextCommands.get_help_text(Matching))
 		"hacking":
+			if Queue.running: # 2026-11-02: the queue owns the main terminal (idling and hacking don't run at once)
+				add_line("[color=red]The queue is running. Stop it first with 'queue -kill'.[/color]")
+				return
 			if process_running:
 				add_line("[color=red]Process currently running. Must kill current process to navigate to Hacking module.[/color]")
 				return
@@ -1741,8 +1821,8 @@ func _dev_timeskip(secs: int) -> void:
 		if int(p.get("expires_at", 0)) > 0:
 			p["expires_at"] = int(p.expires_at) - secs
 	Defragging.SKILL["cooldown"] = int(Defragging.SKILL.get("cooldown", 0)) - secs
-	if !Phishing.trap.is_empty():
-		Phishing.trap["set_at"] = int(Phishing.trap.set_at) - secs
+	for t in Phishing.traps:
+		t["set_at"] = int(t.set_at) - secs
 	for sk in [Mining, Parsing, Cracking, Matching, Phishing, Hacking, Decoding, Compiling]:
 		if int(sk.bonus_expires_at) > 0:
 			sk.bonus_expires_at = int(sk.bonus_expires_at) - secs
@@ -2368,8 +2448,11 @@ func phishing_commands(text):
 			if !ms.unlocked:
 				add_line(_locked_text(ms))
 				return
-			if ms == Phishing.TRAP and Phishing.has_trap():
-				add_line(Phishing.trap_status_text())
+			if ms == Phishing.TRAP and !Phishing.can_set_trap(): # 2026-11-02: up to max_traps() at once
+				add_line("All %d trap slot%s are in use.\n%s" % [Phishing.max_traps(), "" if Phishing.max_traps() == 1 else "s", Phishing.trap_status_text()])
+				return
+			if ms == Phishing.TRAP and Phishing.trap_bait_problem(parsed_bait.bait) != "":
+				add_line(Phishing.trap_bait_problem(parsed_bait.bait))
 				return
 			if !parsed_bait.target.is_empty() and ms != Phishing.SMISH:
 				add_line("target= only works with Smish ('phish -smish target=<target>').")
@@ -2377,7 +2460,7 @@ func phishing_commands(text):
 			if process_running:
 				add_line(ContextCommands.process_already_running_text())
 				return
-			if parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.bait_cost(parsed_bait.bait):
+			if ms != Phishing.TRAP and parsed_bait.bait and Inventory.get_amount(parsed_bait.bait) < Phishing.bait_cost(parsed_bait.bait):
 				add_line("[color=#d29922]Only %d %s: bait needs %d per cast, so casts go out unbaited until you have more.[/color]" % [Inventory.get_amount(parsed_bait.bait), parsed_bait.bait.name, Phishing.bait_cost(parsed_bait.bait)])
 			cast_line(ms, -1, parsed_bait.bait, {"_mod_tier": parsed_bait.mod_tier} if parsed_bait.mod_tier > 0 else parsed_bait.target)
 			return
@@ -2452,6 +2535,18 @@ func start_compiling(minor_process: Dictionary, item = null):
 ###################################################
 func defragging_commands(text):
 	text = text.to_lower().strip_edges()
+	if text == "defrag -all": # 2026-11-02: Defragging Firmware - one defrag, every unlocked bonus
+		if !Firmware.active("Defragging"):
+			add_line("'defrag -all' needs the Defragging Firmware installed.")
+			return
+		if process_running:
+			add_line("Process already running.")
+			return
+		if Defragging.on_cooldown():
+			add_line("Defragging is currently cooling down.")
+			return
+		start_defragging(Defragging.ALL)
+		return
 	
 	for ms in Defragging.minor_processes:
 		if text == ms["command"]:
@@ -2762,6 +2857,12 @@ func _input(event):
 		else:
 			input_line.grab_focus()
 	if event is InputEventKey and event.pressed:
+		if _ending_playing: # the ending outro: no skipping; Enter continues at its prompt
+			if _ending_wait_enter and event.keycode == KEY_ENTER:
+				_ending_wait_enter = false
+				ending_enter_pressed.emit()
+			get_viewport().set_input_as_handled()
+			return
 		if _typing or _booting:
 			_skip_requested = true # any key: finish the typing / boot sequence now
 			get_viewport().set_input_as_handled()
@@ -2789,7 +2890,13 @@ func _tab_complete() -> void:
 	var line: LineEdit = hacking.player_hacking_box.input_line if in_hack else input_line
 	if line == null or !accepting_player_inputs and !in_hack:
 		return
-	var r = CommandRegistry.complete(line.text, in_hack)
+	var shown_loc = ""
+	if in_hack: # the location whose targets are on screen (2026-11-02): 'hack' completes only those
+		for p in hacking.enemy_hacking_box.persons_container.get_children():
+			if p.get("target") is Dictionary and !p.target.is_empty() and !p.is_queued_for_deletion():
+				shown_loc = str(Stats.target_place(p.target).get("location", ""))
+				break
+	var r = CommandRegistry.complete(line.text, in_hack, shown_loc)
 	if r.text != line.text:
 		line.text = r.text
 		line.caret_column = line.text.length()
@@ -2818,6 +2925,10 @@ func _on_hacking_start_loading() -> void:
 	header.update()
 	update_context(Context.ROOT)
 	await loading.show_loading()
+	if Ending.state == Ending.OUTRO or Ending.state == Ending.CONGRATS: # 2026-11-02: the ending's outro replaces the root load once
+		terminal_root.visible = true
+		_ending_outro()
+		return
 	terminal_root.modulate.a = 0.0
 	terminal_root.visible = true
 	if tutorial_window:
@@ -3099,6 +3210,54 @@ func _start_music() -> void:
 	if Settings.get_value("music_player") == "on":
 		Audiomanager.start_playlist()
 
+#region ending outro (2026-11-02)
+signal ending_enter_pressed
+var _ending_playing := false
+var _ending_wait_enter := false
+
+## The ending's outro (Ending.state OUTRO): the HUD steps away and the outro types out like the intro (no skip),
+## "press enter", then the root terminal comes back with the congrats notice (CONGRATS -> DONE). Once.
+func _ending_outro() -> void:
+	if _ending_playing:
+		return
+	_ending_playing = true
+	accepting_player_inputs = false
+	var fade = create_tween()
+	fade.tween_property(header, "modulate:a", 0.0, 0.6)
+	fade.parallel().tween_property(system_dock, "modulate:a", 0.0, 0.6)
+	fade.parallel().tween_property(input_line_container, "modulate:a", 0.0, 0.6)
+	await fade.finished
+	input_line_container.visible = false
+	if tutorial_window:
+		tutorial_window.set_context_hidden(true)
+	_clear_terminal()
+	terminal_root.modulate.a = 1.0
+	terminal_root.visible = true
+	if Ending.state == Ending.OUTRO:
+		await get_tree().create_timer(1.0).timeout
+		await type_text(Ending.outro_text(), INTRO_CPS * 0.5)
+		await get_tree().create_timer(1.2).timeout
+		current_scrollback.append_text("\n\n\n[color=#888888]press [color=#ffffff]enter[/color] to continue[/color]")
+		_ending_wait_enter = true
+		await ending_enter_pressed
+		Ending.finish_outro()
+	# back to the normal root terminal, then the notice
+	_clear_terminal()
+	input_line_container.visible = true
+	var back = create_tween()
+	back.tween_property(header, "modulate:a", 1.0, 0.8)
+	back.parallel().tween_property(system_dock, "modulate:a", 1.0, 0.8)
+	back.parallel().tween_property(input_line_container, "modulate:a", 1.0, 0.8)
+	await back.finished
+	if tutorial_window:
+		tutorial_window.set_context_hidden(false)
+	_ending_playing = false
+	accepting_player_inputs = true
+	input_line.grab_focus()
+	add_line(Ascii.root)
+	add_line(Ending.congrats_text())
+	Ending.finish_congrats()
+
 func _finish_boot() -> void:
 	_start_music()
 	header.modulate.a = 1.0
@@ -3210,7 +3369,9 @@ func _offline_welcome() -> void:
 			if l.from < sl and l.to >= sl and Drivers.has_drivers(l.skill):
 				tail += "[color=#ffc24a]%s Driver slot unlocked.[/color] cd into %s to view more details.\n" % [l.skill, l.skill.to_lower()]
 	if r.trap >= 0.0:
-		tail += ("[color=%s]trap full: 'trap collect'[/color]\n" % OFFLINE_C) if r.trap >= 1.0 else ("trap: %d%% full  [color=%s](fills on real time)[/color]\n" % [int(r.trap * 100), OFFLINE_DIM])
+		var tf = int(r.get("traps_full", 1 if r.trap >= 1.0 else 0)) # 2026-11-02: several traps
+		var ts = int(r.get("traps_set", 1))
+		tail += ("[color=%s]%d of %d trap%s full: 'trap collect'[/color]\n" % [OFFLINE_C, tf, ts, "" if ts == 1 else "s"]) if tf > 0 else ("trap: %d%% full  [color=%s](fills on real time)[/color]\n" % [int(r.trap * 100), OFFLINE_DIM])
 	for n in r.notes:
 		tail += "[color=%s]%s[/color]\n" % [OFFLINE_DIM, n]
 	if r.overheat:
@@ -3235,7 +3396,7 @@ func _offline_welcome() -> void:
 		add_line("[color=%s]resuming '%s'[/color]" % [OFFLINE_DIM, r.resume.command])
 		update_context(int(r.resume.context))
 		_sync_header_to_context() # 2026-10-27: the header stayed on root after coming back into a skill
-		_on_input_line_text_submitted(r.resume.command)
+		_on_input_line_text_submitted(r.resume.command, Queue.running) # a running queue's step resumes through the queue path
 
 ## under a minute away: "away 42s · Parsing Network: +1 Student cache network · resuming '...'", no download screen
 func _offline_short(r: Dictionary) -> void:
@@ -3264,7 +3425,7 @@ func _offline_short(r: Dictionary) -> void:
 	if resume:
 		update_context(int(r.resume.context))
 		_sync_header_to_context()
-		_on_input_line_text_submitted(r.resume.command)
+		_on_input_line_text_submitted(r.resume.command, Queue.running) # a running queue's step resumes through the queue path
 
 static func _plain_bb(t: String) -> String:
 	var re = RegEx.new()

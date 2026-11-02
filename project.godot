@@ -60,6 +60,10 @@ Exploits="*res://singletons/Exploits.gd"
 Drivers="*res://singletons/Drivers.gd"
 Offline="*res://singletons/Offline.gd"
 Compromise="*res://singletons/Compromise.gd"
+Ending="*res://singletons/Ending.gd"
+Firmware="*res://singletons/Firmware.gd"
+Flush="*res://singletons/Flush.gd"
+Queue="*res://singletons/Queue.gd"
 
 [display]
 

@@ -12,6 +12,8 @@ const MAX_CAP_HOURS := 24.0
 const MIN_AWAY_SECONDS := 60.0  # below this the welcome is one quiet line instead of the download screen (2026-10-30)
 const RESUME_ONLY_SECONDS := 5.0 # below this nothing is computed: the process just resumes (a plain restart)
 const UPLOAD_SPEED := 0.5        # uploads run at half speed offline
+const QUEUE_SPEED := 0.5         # 2026-11-02 (Josh): a running queue cycles its steps for half the (capped) away time
+const QUEUE_VERBS := {"mine": "Mining", "parse": "Parsing", "crack": "Cracking", "match": "Matching", "phish": "Phishing", "decode": "Decoding", "compile": "Compiling"}
 const OVERHEAT_PENALTY := 0.10   # outputs lost when the process runs hotter than the system cools
 const SAMPLES := 300             # virtual cycles averaged per model (random processes)
 
@@ -22,7 +24,8 @@ const MATCH_PAUSE := 0.3         # cred_matching_terminal: pause between matches
 
 var session := {}   # from the save: {"saved_at": unix, "process": snapshot}
 var report := {}    # what compute() did ({} = nothing to show)
-var computing := false # true while compute() runs: level / rank notices stay out of the terminal (the download shows them)
+var computing := false
+var limited_run_done := false # 2026-11-02: the last compute() finished a '<command> N' run (the queue moves on) # true while compute() runs: level / rank notices stay out of the terminal (the download shows them)
 var _match_steps := -1
 
 func cap_seconds() -> float:
@@ -66,9 +69,7 @@ func snapshot() -> Dictionary:
 			snap.target = Stats.target_key(t.smish_target) if !t.smish_target.is_empty() else ""
 			snap.mod_tier = t.mod_tier # 'phish -mod=school
 		Decoding:
-			var kind = p.get("decode kind", "cache")
-			if kind in ["salvage", "deep"]:
-				return {} # VM token processes are online only
+			# 2026-11-02: Salvage and Deep run offline too (they were online only: Josh, timeskip test)
 			snap.item = t.target_cache.id if t.target_cache else -1
 			snap.target = Stats.target_key(t.target_arg) if t.target_arg is Dictionary else ""
 			if str(t.get("intel_location")) != "" and t.get("intel_location") != null:
@@ -76,6 +77,237 @@ func snapshot() -> Dictionary:
 		Compiling:
 			snap.item = t.hacking_mod_item.id if t.hacking_mod_item else -1
 	return snap
+#endregion
+
+#region queue
+## 2026-11-02 (Josh, queue stage 2): a running queue keeps cycling its steps offline, for QUEUE_SPEED of the away time
+## (items, XP and tokens all halve together). The step that was running carries on from the session snapshot; each
+## next step is built from its command text (snap_from_command). A step ends when its count is done or it can't do
+## another cycle; a whole pass of steps doing nothing stops the queue, like online.
+func _run_queue(snap: Dictionary, secs: float) -> void:
+	var left = secs * QUEUE_SPEED
+	var cur = snap.duplicate(true)
+	var size = Queue.steps.size()
+	Queue.index = clampi(Queue.index, 0, size - 1)
+	var idle = 0
+	var ran_steps := {}
+	var stopped = false
+	computing = true
+	for guard in 256:
+		if cur.is_empty():
+			cur = snap_from_command(Queue.steps[Queue.index])
+		var progressed = false
+		var done = true
+		if !cur.is_empty():
+			var skill = _skill(cur.skill)
+			var p = _find_process(skill, cur.process)
+			if skill and !p.is_empty() and _can_cycle(skill, p, cur):
+				var ran = _run(skill, p, cur, left)
+				Flush.add(skill.SKILL.name, str(p.name), float(ran))
+				left -= ran
+				report.ran = float(report.ran) + ran
+				progressed = ran > 0.0
+				if progressed:
+					ran_steps[Queue.index] = true
+				done = (cur.has("cycles_left") and int(cur.cycles_left) <= 0) or !_can_cycle(skill, p, cur)
+		if !done:
+			break # time ran out part way through this step: it resumes from here
+		cur = {}
+		Queue.index = (Queue.index + 1) % size
+		idle = 0 if progressed else idle + 1
+		if idle >= size:
+			stopped = true
+			break
+		if left <= 0.5:
+			break
+	computing = false
+	limited_run_done = false # the queue's index is already where it should be
+	report.process = "Queue (%d step%s ran, half speed)" % [ran_steps.size(), "" if ran_steps.size() == 1 else "s"]
+	report.notes.append("the queue ran at half speed while you were away")
+	if stopped:
+		Queue.running = false
+		Queue.changed.emit()
+		report.resume = {}
+		report.notes.append("the queue stopped: none of its steps could run (out of inputs?)")
+		return
+	var os = get_tree().get_first_node_in_group("main_os") if get_tree() else null
+	var ctx = int(snap.context) if snap.has("context") else (int(os.current_context) if os else 0)
+	var full = str(Queue.steps[Queue.index])
+	if cur.is_empty(): # between steps: the next one starts fresh
+		report.resume = {"context": ctx, "command": full}
+	else:
+		var cmd = str(cur.command)
+		if cur.has("cycles_left"):
+			cmd += " %d" % int(cur.cycles_left)
+		var mod = _queue_modifier(full)
+		if mod != "":
+			cmd += " " + mod
+		report.resume = {"context": int(cur.get("context", ctx)), "command": cmd}
+	Queue.changed.emit()
+
+## Could <p> do one more cycle now (inputs in stock, limits left)?
+func _can_cycle(skill: Node, p: Dictionary, snap: Dictionary) -> bool:
+	if snap.has("cycles_left") and int(snap.cycles_left) <= 0:
+		return false
+	var job = _job(skill, p, snap)
+	if job.is_empty() or float(job.get("seconds", 0.0)) <= 0.0:
+		return false
+	if job.has("limit") and int(job.limit) <= 0:
+		return false
+	for item in job.get("inp", {}):
+		if float(job.inp[item]) > 0.0 and Inventory.get_amount(item) < float(job.inp[item]):
+			return false
+	return true
+
+## The modifier word in a step ('mine -logs 10 survey' -> "survey"), "" if none
+func _queue_modifier(cmd: String) -> String:
+	var w = cmd.strip_edges().to_lower().split(" ", false)
+	if w.size() < 3 or !QUEUE_VERBS.has(w[0]):
+		return ""
+	var skill = _skill(QUEUE_VERBS[w[0]])
+	var mods = ["overclock"]
+	for m in (skill.get("MODIFIERS") if skill and skill.get("MODIFIERS") else []):
+		mods.append(str(m.command))
+	for k in range(w.size() - 1, 1, -1):
+		if w[k] in mods:
+			return w[k]
+	return ""
+
+## A snapshot like snapshot() makes, from a queue step's command text ({} if it couldn't start: locked, no such
+## item, a VM or a Trap...). Same parsing as the main terminal's handlers.
+func snap_from_command(cmd: String) -> Dictionary:
+	var w = Array(cmd.strip_edges().to_lower().split(" ", false))
+	if w.size() < 2 or !QUEUE_VERBS.has(w[0]):
+		return {}
+	var skill = _skill(QUEUE_VERBS[w[0]])
+	if skill == null:
+		return {}
+	var mod = _queue_modifier(cmd)
+	if mod != "":
+		for k in range(w.size() - 1, 1, -1):
+			if w[k] == mod:
+				w.remove_at(k)
+				break
+	var count = 0
+	if w.size() >= 3 and str(w[-1]).is_valid_int() and int(w[-1]) > 0:
+		count = int(w[-1])
+		w.pop_back()
+	var text = " ".join(w)
+	var p := {}
+	var extra := {}
+	match skill:
+		Mining, Matching:
+			for ms in skill.minor_processes:
+				if text == ms.command:
+					p = ms
+					break
+		Cracking:
+			for ms in skill.minor_processes:
+				if text.begins_with(ms.command):
+					p = ms
+					break
+			if p == Cracking.VM:
+				return {}
+		Parsing:
+			for ms in skill.minor_processes:
+				if text.begins_with(ms.command):
+					p = ms
+					break
+			if !p.is_empty():
+				var r = Parsing.parse_through_parse_start_command(text, p)
+				if !r.valid:
+					return {}
+				extra.items = Array(r.items_to_parse).map(func(i): return i.id)
+				extra.target = r.target.id if r.target else -1
+				extra.item_seconds = 0.0
+		Phishing:
+			var pb = Phishing.parse_bait(text)
+			if str(pb.error) != "":
+				return {}
+			for ms in skill.minor_processes:
+				if pb.command == ms.command:
+					p = ms
+					break
+			if p.is_empty() or p.get("style", "lines") == "trap":
+				return {}
+			extra.bait = pb.bait.id if pb.bait else -1
+			extra.target = Stats.target_key(pb.target) if pb.target is Dictionary and !pb.target.is_empty() else ""
+			extra.mod_tier = pb.get("mod_tier", 0)
+		Decoding:
+			if text.begins_with("decode -package"):
+				return {}
+			for ms in skill.minor_processes:
+				if text == ms.command or text.begins_with(ms.command + "="):
+					p = ms
+					break
+			if !p.is_empty():
+				var check = Decoding.validate_start(p, text.trim_prefix(p.command).trim_prefix("="))
+				if !check.ok:
+					return {}
+				var arg = check.arg
+				extra.item = -1
+				extra.target = ""
+				if arg is ItemData:
+					extra.item = arg.id
+				elif arg is Dictionary and arg.has("_intel_location"):
+					extra.intel_location = str(arg._intel_location)
+					var nt = Decoding.next_intel_target(extra.intel_location)
+					extra.target = Stats.target_key(nt) if !nt.is_empty() else ""
+				elif arg is Dictionary and !arg.is_empty():
+					extra.target = Stats.target_key(arg)
+		Compiling:
+			for ms in skill.minor_processes:
+				if text.begins_with(ms.command):
+					p = ms
+					break
+			if !p.is_empty():
+				extra.item = -1
+				if p == Compiling.MOD:
+					var check = Compiling.check_mod(text.substr(text.find("=") + 1) if text.contains("=") else "")
+					if !check.ok:
+						return {}
+					extra.item = check.item.id
+	if p.is_empty() or !p.get("unlocked", true):
+		return {}
+	var os = get_tree().get_first_node_in_group("main_os") if get_tree() else null
+	var snap = {"skill": skill.SKILL.name, "process": p.name, "context": int(os.current_context) if os else 0, "command": text}
+	if count > 0:
+		snap.cycles_left = count
+	snap.merge(extra)
+	return snap
+#endregion
+
+#region flush
+## 2026-11-02: 'flush' (Flush.use): <secs> of the main terminal's process right now, the offline way. The process keeps
+## running. Returns {"ran", "gains": [{item, amount}], "spent": [...]} or {"error"}.
+func flush(secs: float) -> Dictionary:
+	var snap = snapshot()
+	if snap.is_empty():
+		return {"error": "Nothing in the main terminal can flush."}
+	var skill = _skill(snap.skill)
+	var p = _find_process(skill, snap.process)
+	if skill == null or p.is_empty():
+		return {"error": "Nothing in the main terminal can flush."}
+	snap.erase("item_seconds") # (only for a resumed save)
+	var before = Inventory.inventory.duplicate()
+	var keep_report = report # _run notes overheat losses in `report`: give it a scratch one
+	report = {"lost": {}, "overheat": false, "notes": []}
+	computing = true
+	var ran = _run(skill, p, snap, secs)
+	computing = false
+	report = keep_report
+	var gains = []
+	var spent = []
+	for item in Inventory.inventory:
+		var d = int(Inventory.inventory[item]) - int(before.get(item, 0))
+		if d > 0:
+			gains.append({"item": item, "amount": d})
+	for item in before:
+		var d = int(before[item]) - Inventory.get_amount(item)
+		if d > 0:
+			spent.append({"item": item, "amount": d})
+	gains.sort_custom(func(a, b): return a.amount > b.amount)
+	return {"ran": ran, "gains": gains, "spent": spent}
 #endregion
 
 #region compute
@@ -113,7 +345,9 @@ func compute() -> void:
 	report = {"away": away, "secs": secs, "capped": away > cap_seconds(), "process": "", "resume": {}, "short": away < MIN_AWAY_SECONDS,
 		"overheat": false, "notes": [], "gains": [], "spent": [], "uploaded": [], "staged": [], "levels": [], "ran": 0.0,
 		"tiers": [], "trap": -1.0, "xp": [], "lost": {}, "drivers": []}
-	if !snap.is_empty():
+	if Queue.running and !Queue.steps.is_empty():
+		_run_queue(snap, secs)
+	elif !snap.is_empty():
 		var skill = _skill(snap.skill)
 		var p = _find_process(skill, snap.process)
 		if skill and !p.is_empty():
@@ -122,12 +356,14 @@ func compute() -> void:
 			computing = true
 			report.ran = _run(skill, p, snap, secs)
 			computing = false
+			Flush.add(skill.SKILL.name, str(p.name), float(report.ran)) # 2026-11-02: flush buffers fill offline too
 			if snap.has("cycles_left"): # a limited run resumes with what's left of it, or not at all
 				if int(snap.cycles_left) > 0:
 					report.resume.command = "%s %d" % [str(snap.command), int(snap.cycles_left)]
 				else:
 					report.resume = {}
 					report.notes.append("your limited run finished while you were away")
+					limited_run_done = true
 	_run_uploads(secs)
 	Stats.system_tempature = Stats.MIN_TEMP # it cooled down while you were away
 	Stats.overheated = false
@@ -170,7 +406,9 @@ func compute() -> void:
 		if not t in tiers_before:
 			report.tiers.append(int(t))
 	if Phishing.has_trap():
-		report.trap = Phishing.trap_progress() # the Trap fills on real time (offline too); collecting stays manual
+		report.trap = Phishing.trap_progress() # the fullest trap (they fill on real time, offline too); collecting stays manual
+		report["traps_full"] = Phishing.full_traps()
+		report["traps_set"] = Phishing.traps.size()
 	report.gains.sort_custom(func(a, b): return a.amount > b.amount)
 	if report.gains.is_empty() and report.drivers.is_empty() and report.uploaded.is_empty() and report.staged.is_empty() and report.notes.is_empty() and report.trap < 0.0:
 		report.notes.append("nothing was running in the main terminal")
@@ -215,7 +453,7 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 				Inventory.remove_resource(item, int(round(float(job.inp[item]) * cycles)))
 			for item in job.get("out", {}):
 				var full = float(job.out[item]) * cycles
-				var n = int(round(full * mult))
+				var n = _stochastic(full * mult) # 2026-11-02: was round(): rare outputs (0.3 Exploits) always came out 0
 				if n > 0:
 					Inventory.add_resource(item, n)
 				if hot and int(round(full)) - n > 0: # what overheating cost (shown in the download)
@@ -232,6 +470,11 @@ func _run(skill: Node, p: Dictionary, snap: Dictionary, secs: float) -> float:
 		if cycles >= time_cycles or !job.get("repeat", false):
 			break
 	return clamp(secs + credit - left, 0.0, secs)
+
+## x.3 -> x, plus 1 with a 30% chance (expected value kept for rare / slow outputs; round() lost anything under 0.5)
+static func _stochastic(v: float) -> int:
+	var whole = floor(v)
+	return int(whole) + (1 if randf() < v - whole else 0)
 
 ## Hotter than the system cools over one cycle?
 func _runs_hot(job: Dictionary) -> bool:
@@ -524,6 +767,17 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 					report["intel"] = {"target": str(tg.name), "points": int(report.get("intel", {}).get("points", 0)) + done, "text": Decoding.intel_text(tg)}
 				return int(ceil(done / max(0.01, finds))) if done < n else cycles
 			return job
+		"salvage": # 2026-11-02: 100 of the item per run, its lines' VM tokens (sampled)
+			var item: ItemData = Items.ITEM_MAP.get(int(snap.get("item", -1)))
+			if item == null or Inventory.get_amount(item) < Decoding.SALVAGE_COST:
+				return {}
+			var outs := {}
+			for k in SAMPLES:
+				for row in Decoding.roll_salvage(item, ""):
+					if row != null:
+						outs[row.item] = outs.get(row.item, 0.0) + float(row.amount) / SAMPLES
+			return {"seconds": bytes_row * max(CacheDecrypting.DUMP_SIZE, Decoding.SALVAGE_LINES) * step, "inp": {item: float(Decoding.SALVAGE_COST)}, "out": outs,
+				"xp": float(p["experience per level"]), "heat": h * _dec_heat(item), "repeat": true}
 		_:
 			var cache: CacheData = null
 			var only = Items.ITEM_MAP.get(int(snap.get("item", -1)))
@@ -547,7 +801,12 @@ func _decoding(p: Dictionary, snap: Dictionary) -> Dictionary:
 					out[d.item] = out.get(d.item, 0.0) + float(d.amount) / SAMPLES
 			Decoding.rare_tracker = keep_tracker
 			Decoding.first_cache_decoded = keep_first
-			return {"seconds": bytes / SAMPLES * step, "inp": {cache: 1.0}, "out": out, "xp": float(p["experience per level"]), "heat": h * _dec_heat(cache), "repeat": true}
+			var inp := {cache: 1.0}
+			if int(p.get("token cost", 0)) > 0: # Deep Scan: VM Decoding tokens per cache (2026-11-02: offline too)
+				if Inventory.get_amount(Items.VM_DECODING_TOKEN) < int(p.get("token cost", 0)):
+					return {}
+				inp[Items.VM_DECODING_TOKEN] = float(p.get("token cost", 0))
+			return {"seconds": bytes / SAMPLES * step, "inp": inp, "out": out, "xp": float(p["experience per level"]), "heat": h * _dec_heat(cache), "repeat": true}
 	return {}
 
 ## Decoding heat x the tier of <item> (as cache_decrypt_terminal.heat_tier_mult)
