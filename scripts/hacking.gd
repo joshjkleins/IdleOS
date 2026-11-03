@@ -97,6 +97,9 @@ func _on_player_hacking_box_command_entered(text):
 	if current_context != HackingContext.HACKING and (low == "compromise" or low.begins_with("compromise ")):
 		handle_compromise_command(low.trim_prefix("compromise").strip_edges())
 		return
+	if low in ["alert", "alerts", "alert -h"]: # 2026-11-02: target alert list
+		player_hacking_box.add_line(Alert.list_text())
+		return
 	if text.to_lower() == "tutorial":
 		player_hacking_box.add_line(ContextCommands.get_hacking_tutorial())
 	else:
@@ -526,6 +529,7 @@ func hacking_help_commands():
 				["recon [location]", "A location's compromise: six targets back to back for a driver (Government: Firmware)", "e.g. recon school"],
 				["unlock", "List locked targets and what they cost"],
 				["unlock [target]", "Unlock a target", "e.g. unlock administrator"],
+				["alert",            "Targets on alert: cache chance + the process work that lowers it"],
 				["cd ..",            "Return to terminal root"],
 				["cd root",          "Return to terminal root from anywhere in hacking (or cd ~)"]
 			]))
@@ -546,6 +550,7 @@ func hacking_help_commands():
 				["hack [target]=[amount]", "Hack target a set number of times (with the Win Streak upgrade: 5 wins in one run = +1 of its rare item)", "e.g. hack student=20"],
 				["hack [target] -overclock", "Hack target with overclock (x2 bandwidth regen)", "e.g. hack student -overclock"],
 				["unlock [target]", "Unlock a target ('unlock' lists them)", "e.g. unlock administrator"],
+				["alert", "Target alert: each cache lowers a target's next cache chance 10%; the card shows the process work that lowers it"],
 				["cd ..", "Return to locations directory", "e.g. 'cd ..'"],
 				["cd root", "Return to terminal root (or cd ~)"]
 			]

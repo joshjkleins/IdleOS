@@ -64,6 +64,7 @@ Ending="*res://singletons/Ending.gd"
 Firmware="*res://singletons/Firmware.gd"
 Flush="*res://singletons/Flush.gd"
 Queue="*res://singletons/Queue.gd"
+Alert="*res://singletons/Alert.gd"
 
 [display]
 

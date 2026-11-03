@@ -1375,3 +1375,19 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
 - Farming vs idle (open, discussing with Josh): caches drop the tier's payload (e.g. a Footprinted VP cache ~215 =
   ~9 VP hacks), so farming pays for itself. what-if NO_CACHE_PAYLOAD=1 (tier_time2.py): farming player 34 h -> 118 h,
   farming mostly stops being worth it.
+
+## Target alert (2026-11-02, Josh; branch alert-mechanic)
+- singletons/Alert.gd (autoload, saved as "alert"). A won hack's cache drops with chance 100% - 10% x stacks
+  (Alert.roll_cache in hacking_game.win; a lost roll = no cache and no Exfil Window / Bonus Cache extras, logged as
+  "ALRT No cache: ... · <chore>", WIN line says "no cache (alert)"). Only a drop raises the alert (Josh). 10 stacks = 0%.
+  Exempt: compromise fights (they don't go through that path) and hacks before the tutorial is complete.
+- First alert on a target rolls one of Mining/Parsing/Cracking/Matching/Compiling/Phishing; kept until it's back to 0.
+  Each stack clears with STEP_SECONDS (240 s) of that process at the target's tier arrival speed (SEC_PER_UNIT table
+  from econdump3), shown as units: "crack -password x22", "parse -footprint=logs x60", "land 490 phishing catches".
+  Progress = the skill's XP (Exp.add_xp -> Alert.on_xp): any process of the skill, main / VMs / queue / offline,
+  so upgrades and VM windows clear it faster; Survey (x2 XP) counts double. XP goes to that skill's alerted targets in
+  location order, overflow moves on (a cleared target prints a message).
+- UI: target card ALERT row (10 pips, cache %) + "lower: <chore>" + a progress bar in the skill's color; 'alert'
+  (main terminal + hacking console, tab, -h rows) lists every alerted target.
+- tier_time2.py ALERT_STEP=240: heavy farmer ~34 -> ~40 h total.
+- Test: tools/tests/alerttest.gd (rolls, XP steps + overflow, save/load, real hacks, alert_cards.png).

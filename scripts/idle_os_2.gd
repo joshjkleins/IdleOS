@@ -790,6 +790,9 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 
+	if text in ["alert", "alerts", "alert -h"]: # 2026-11-02: target alert list (Alert.gd)
+		add_line(Alert.list_text())
+		return true
 	if text == "exploits" or text == "exploit" or text == "exploits -h": # 2026-10-31: what you have + where they come from
 		add_line(ContextCommands.exploits_text())
 		return true

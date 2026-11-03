@@ -157,6 +157,7 @@ func save_game() -> void:
 		"firmware": Firmware.save_data(),
 		"flush": Flush.save_data(),
 		"queue": Queue.save_data(),
+		"alert": Alert.save_data(),
 	}
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
@@ -229,6 +230,7 @@ func load_game() -> bool:
 	Firmware.load_data(data.get("firmware", {}))
 	Flush.load_data(data.get("flush", data.get("burst", {}))) # (saved as "burst" until 2026-11-02)
 	Queue.load_data(data.get("queue", {}))
+	Alert.load_data(data.get("alert", {}))
 	Exp.refresh_all_process_unlocks() # 2026-10-26: unlocks follow the tiers, so after Stats (locations) has loaded
 	
 	print(data.get("mods"))

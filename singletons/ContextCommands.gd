@@ -923,6 +923,7 @@ func get_help() -> String:
 | PROGRESS                                                            |
 |   upload                       Upload goal + what's uploading       |
 |   intel                        Intel on hacking targets (intel -h)  |
+|   alert                        Target alert: cache chance + chores  |
 |                                                                     |
 | DOCUMENTATION                                                       |
 |   tutorial                     Show tutorial checklist              |

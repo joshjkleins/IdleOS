@@ -1281,17 +1281,26 @@ func win():
 	if hack_total >= 2 and hack_index >= 2:
 		Tutorial.complete_event(Tutorial.TutorialEvent.HACK_STUDENT_TWICE) # a run of 2+, second win
 
-	caches_gained += target_reward_amount
-	reward_amount += target_reward_amount
+	# 2026-11-02 (Josh): target alert - the cache drops with the target's alert chance (Alert.gd); a drop raises the
+	# alert a stack, a lost roll doesn't. No cache = no Exfil Window / Bonus Cache extras either.
+	var alert_chance = Alert.chance(current_target)
+	var dropped = Alert.roll_cache(current_target)
 	var extra = 0
-	if exfil_left > 0.0: # Exfil Window
-		extra += 1
-		_log("RUN", C_EXP, "Exfil Window: +1 %s" % target_reward.name)
-	if Drivers.value("bonus_cache") > 0.0 and randf() < Drivers.value("bonus_cache"): # Bonus Cache (driver)
-		extra += 1
-		_log("DRV", C_DRV, "Bonus Cache: +1 %s" % target_reward.name)
-	caches_gained += extra
-	reward_amount += extra
+	if dropped:
+		caches_gained += target_reward_amount
+		reward_amount += target_reward_amount
+		if exfil_left > 0.0: # Exfil Window
+			extra += 1
+			_log("RUN", C_EXP, "Exfil Window: +1 %s" % target_reward.name)
+		if Drivers.value("bonus_cache") > 0.0 and randf() < Drivers.value("bonus_cache"): # Bonus Cache (driver)
+			extra += 1
+			_log("DRV", C_DRV, "Bonus Cache: +1 %s" % target_reward.name)
+		caches_gained += extra
+		reward_amount += extra
+		if !Alert.exempt():
+			_log("ALRT", C_SPECIAL, "%s alert %d%%  ·  next cache chance %d%%" % [target_name, Alert.stacks(current_target) * 10, int(round(Alert.chance(current_target) * 100))])
+	else:
+		_log("ALRT", C_INTEG, "No cache: %s is on alert (%d%% cache chance)  ·  %s" % [target_name, int(round(alert_chance * 100)), Alert.goal_text(current_target)])
 	exfil_left = 0.0
 	Stats.record_win(current_target)
 	Stats.record_usage(current_target, _hack_sql, _hack_spoof)
@@ -1307,8 +1316,8 @@ func win():
 	var ending = Ending.should_trigger(current_target) # 2026-11-02: first normal President breach -> the ending
 	if ending:
 		more = false
-	_log("WIN", C_WIN, "%s breached  %s  %s" % [target_name, _c("+%d %s" % [target_reward_amount, target_reward.name], C_WIN), _c("+%d xp" % EXP_AMOUNT, C_DIM)])
-	var sub = "+%d %s" % [target_reward_amount, target_reward.name]
+	_log("WIN", C_WIN, "%s breached  %s  %s" % [target_name, _c("+%d %s" % [target_reward_amount, target_reward.name], C_WIN) if dropped else _c("no cache (alert)", C_INTEG), _c("+%d xp" % EXP_AMOUNT, C_DIM)])
+	var sub = ("+%d %s" % [target_reward_amount, target_reward.name]) if dropped else "no cache: target on alert"
 	if hack_total > 1:
 		sub += "  ·  hack %d of %d done" % [hack_index, hack_total]
 	elif hack_total == -1:

@@ -79,6 +79,7 @@ func update_info(info) -> void:
 	_add_traits(right, info, true)
 	if step == 0:
 		_add_reward(box, info)
+		_add_alert(box, info)
 		_add_special(box, info)
 	_add_intel(box, info)
 
@@ -207,6 +208,39 @@ func _add_reward(box: VBoxContainer, info) -> void:
 		box.add_child(st)
 	if info.loot is CacheData:
 		_add_loot_pool(box, info.loot)
+
+## 2026-11-02 (Josh): target alert (Alert.gd): cache chance + the step that lowers it
+func _add_alert(box: VBoxContainer, info) -> void:
+	if Alert.exempt():
+		return
+	var s = Alert.stacks(info)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	box.add_child(row)
+	row.add_child(_label("ALERT", 9, C_BAD if s > 0 else C_SECTION))
+	var pips = ""
+	for i in Alert.MAX_STACKS:
+		pips += "▮" if i < s else "▯"
+	row.add_child(_label(pips, 10, C_BAD if s > 0 else C_SECTION))
+	row.add_child(_label("cache %d%%" % int(round(Alert.chance(info) * 100)), 11, C_OK if s == 0 else (C_BAD if s >= Alert.MAX_STACKS else C_SPECIAL)))
+	if s <= 0:
+		return
+	var goal = _label("lower: %s" % Alert.goal_text(info), 11, C_TEXT)
+	goal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	goal.custom_minimum_size.x = 60
+	box.add_child(goal)
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 4)
+	bar.max_value = 1.0
+	bar.value = Alert.step_progress(info)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(1, 1, 1, 0.08)
+	var fg := StyleBoxFlat.new()
+	fg.bg_color = Color(Alert.SKILL_COLORS.get(Alert.skill_of(info), "#888888"))
+	bar.add_theme_stylebox_override("background", bg)
+	bar.add_theme_stylebox_override("fill", fg)
+	box.add_child(bar)
 
 ## What one decoded cache of this target holds (Decoding's drop table for the Cache process): name, amount, chance
 func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:

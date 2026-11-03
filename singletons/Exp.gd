@@ -68,6 +68,7 @@ func add_xp(major, minor, amount: int = 0): #singleton as param
 		major.SKILL["experience"] += amount
 		gained_xp_signal.emit(amount)
 		Drivers.add_skill_xp(str(major.SKILL.name), amount) # equipped drivers rank up from their skill's XP
+		Alert.on_xp(major, amount) # 2026-11-02: a skill's XP clears target alert steps
 		
 	var major_new_level = get_level_from_xp(major.SKILL["experience"])
 	#MAJOR LEVEL UPDATES
