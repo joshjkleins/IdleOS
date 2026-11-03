@@ -11,6 +11,7 @@ const DIM := "#888888"
 const GOLD := "#ffc24a"
 const MAX_HINTS := 3
 const SQL_SAFETY := 1.25 # recommended SQL = expected use x this
+const ALERT_HINT_CHANCE := 0.70 # 2026-11-03: hint to clear the best target's alert at this cache chance or lower
 
 const VERB_SKILL = {"mine": "mining", "parse": "parsing", "crack": "cracking", "match": "matching",
 	"phish": "phishing", "decode": "decoding", "compile": "compiling"}
@@ -63,12 +64,20 @@ static func build(os) -> Array:
 		var n = 0
 		for c in caches: n += Inventory.get_amount(c)
 		add.call("decode -cache=" + caches[0].name.to_lower(), "%d cache%s waiting: they hold most of your resources" % [n, "" if n == 1 else "s"])
-	# 4 ready to hack
+	# 3b target alert (2026-11-03, Josh): the strongest target's cache chance is 70% or lower: clear it first
 	var best = best_target()
+	if !best.is_empty() and !Alert.exempt() and Alert.chance(best) <= ALERT_HINT_CHANCE:
+		var sk = Alert.skill_node(best)
+		if sk and running.has(sk):
+			add.call("alert", "%s is on alert (%d%% cache chance): your %s is already lowering it (%s left)" % [best.name, int(round(Alert.chance(best) * 100)), sk.SKILL.name, Alert.goal_text(best)])
+		else:
+			add.call(Alert.goal_command(best), "%s is on alert (%d%% cache chance): %s work clears it" % [best.name, int(round(Alert.chance(best) * 100)), Alert.skill_of(best)])
+	# 4 ready to hack
 	if !best.is_empty():
 		var need = hack_needs(best)
 		if need.ready:
-			add.call(str(best.command), "you have what %s needs (%s): each hack drops a cache" % [best.name, need.summary])
+			var cache_txt = "each hack drops a cache" if Alert.exempt() or Alert.chance(best) >= 1.0 else "%d%% cache chance right now (alert)" % int(round(Alert.chance(best) * 100))
+			add.call(str(best.command), "you have what %s needs (%s): %s" % [best.name, need.summary, cache_txt])
 	# 5 target access
 	for t in _locked_targets():
 		var r = Stats.get_access_recipe(t)

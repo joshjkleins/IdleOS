@@ -23,8 +23,9 @@ const DEFS = {
 		"text": "%s damage on attacks made at max bandwidth"},
 	"stockpile": {"skill": "Mining", "name": "Stockpile", "short": "%s double shots", "values": [0.10, 0.15, 0.25],
 		"text": "%s chance an attack fires 2 SQL Injectors at once"},
-	"cool_head": {"skill": "Mining", "name": "Cool Head", "short": "1st overheat: %s", "values": [80.0, 70.0, 50.0],
-		"text": "the first overheat of a hack resets your temperature to %s", "format": "temp"},
+	"cool_head": {"skill": "Mining", "name": "Clean Exit", "short": "run alert +%s", "values": [0.03, 0.025, 0.02], "format": "pct_dec",
+		# 2026-11-03 (Josh): was Cool Head (first overheat of a hack reset the temperature); id kept for saves
+		"text": "in a run, each cache after the first raises the target's alert by %s (instead of 4%%)"},
 	"long_haul": {"skill": "Mining", "name": "Long Haul", "short": "%s dmg per breach", "values": [0.02, 0.03, 0.05],
 		"text": "%s damage for every target breached consecutively (stacks 5 times)", "max_stacks": 5},
 	# Cracking: crits
@@ -90,8 +91,9 @@ const DEFS = {
 		"text": "%s SQL damage"},
 	"quick_compile": {"skill": "Compiling", "name": "Quick Compile", "short": "%s attack speed", "values": [0.05, 0.08, 0.12],
 		"text": "SQL Injectors attack %s faster", "format": "pct_plain"},
-	"payload_recycler": {"skill": "Compiling", "name": "Payload Recycler", "short": "%s payload refund", "values": [0.10, 0.20, 0.40], # 2026-10-31: was 10/15/25%
-		"text": "%s chance a hack doesn't spend its payload"},
+	"payload_recycler": {"skill": "Compiling", "name": "Ghost Protocol", "short": "%s no-alert caches", "values": [0.10, 0.15, 0.25],
+		# 2026-11-03 (Josh): was Payload Recycler (chance a hack didn't spend its payload); id kept for saves
+		"text": "%s chance a dropped cache doesn't raise the target's alert"},
 	"warm_start": {"skill": "Compiling", "name": "Warm Start", "short": "%s instant", "values": [1.0, 2.0, 3.0], # 2026-10-31: was 1 at every rank
 		"text": "each hack's first %s instantly", "format": "attacks"},
 	"overclocked_build": {"skill": "Compiling", "name": "Overclocked Build", "short": "%s dmg overclocked", "values": [0.10, 0.15, 0.25],
@@ -181,6 +183,7 @@ func value_text(id: String, r: int = -1, short: bool = false) -> String:
 		"attacks": vt = ("attack fires" if int(v) == 1 else "%d attacks fire" % int(v)) if !short else ("1st attack" if int(v) == 1 else "%d attacks" % int(v))
 		"none": return tpl
 		"pct_plain": vt = "%d%%" % roundi(v * 100.0)
+		"pct_dec": vt = "%s%%" % str(snappedf(v * 100.0, 0.1)).trim_suffix(".0") # 2.5%
 		_: vt = ("%d%%" % roundi(v * 100.0)) if d.text.begins_with("%s chance") else ("+%d%%" % roundi(v * 100.0))
 	return tpl % vt
 

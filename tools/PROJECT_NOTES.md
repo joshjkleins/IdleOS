@@ -1391,3 +1391,29 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
   (main terminal + hacking console, tab, -h rows) lists every alerted target.
 - tier_time2.py ALERT_STEP=240: heavy farmer ~34 -> ~40 h total.
 - Test: tools/tests/alerttest.gd (rolls, XP steps + overflow, save/load, real hacks, alert_cards.png).
+- 2026-11-03 (Josh): alert is a % now (data: {"alert": 0-100, "skill"}; old {"stacks"} saves load as stacks x 10).
+  Run discount: the first cache of a run +10% (Alert.FIRST), each further cache in that run +4% (Alert.MORE); the chance
+  updates live, so long runs taper (~31 caches in one run to 100%). hacking_game.setup -> Alert.begin_run(),
+  _grant_rewards -> end_run() (kept), lose() -> refund_run() (traced: the run's caches and the alert they added are
+  both gone, the loss text says "-N%"). Cleanup is smooth: one step (STEP_SECONDS[tier] of work) = -10%; the card shows
+  the units to the next 10% mark ("lower 10%: parse -footprint=logs x10") and a bar within that 10%.
+  STEP_SECONDS = [80, 240, 240, 240, 240, 240] (T1 a third: parse 20 logs, was 60).
+- Help card (2026-11-03, Josh): person_card.update_help() ("Field notes", HELP pill) in the slot after a location's last
+  target (hacking_box._update_persons, normal view only, not recon). Rows: SQL Injector (+count), Packet Spoof (+count),
+  Mods (slots), Drivers (once one is owned), Exploits (once one is held), Alert (after the tutorial), Runs, Kill, Kill -s.
+  Redrawn with the target cards after a hack; skipped by get_hacking_target / tab's shown-location lookup.
+- Side effect (Josh, 2026-11-03, fine as is): compromise fights skip alert, so repeat compromises (all drivers owned) are a no-alert cache source late in a tier, once upload goals are done and only apt is left.
+- 2026-11-03: the card / 'alert' show the units to clear the WHOLE alert ('clear: parse -footprint=logs x22' at 11%), not to the next 10% mark (that went x2 -> x20 at 10% and read as a rounding bug). The step bar is gone; the chore line is tinted in its skill's colour. Test: tools/tests/alertparse.gd (11% + a real 20-log parse -> 1%).
+- 2026-11-03 (Josh): T1 STEP_SECONDS 80 -> 40 (per 10%: parse 10 logs, mine 5, crack 4, match 4, compile 5, phish 5).
+- 2026-11-03 (Josh): target breakdown ('school' etc., ContextCommands target info) has a line under Reward: use 'ls <cache name>' to see the cache's contents.
+- 2026-11-03 (Josh): hack screen YIELD bar, right side: 'ALERT 30% · next cache 70% · +4% if it drops' (orange; green at 0, red at 100% with the clear chore). hacking_game._refresh_alert_label (via update_bottom_row), Alert.next_add(). Hidden in compromises and before the tutorial.
+- Alert drivers (2026-11-03, Josh; ids kept for saves, like Kickback): Mining T4 cool_head = CLEAN EXIT (was Cool Head):
+  a run's caches after the first add 3 / 2.5 / 2% alert instead of 4% (Alert.more(); format "pct_dec" shows 2.5%).
+  Compiling T3 payload_recycler = GHOST PROTOCOL (was Payload Recycler): 10 / 15 / 25% chance a dropped cache adds no
+  alert (Alert._raise, Alert.last_ghost -> hack log "DRV Ghost Protocol: ..."). The old effects are gone
+  (hacking_game._on_overheated is a no-op; payloads are always spent). Backup: _to_delete/backup/Drivers.gd.prealertdrv.
+  Test: tools/tests/alertdrv.gd.
+- 'hint' (2026-11-03, Josh): HintEngine rule 3b, before 'ready to hack': the best target at <= 70% cache chance (ALERT_HINT_CHANCE) -> Alert.goal_command (e.g. 'parse -footprint=logs 22', 'phish -spear'), or 'your X is already lowering it' when that skill is running; the hack hint says the current cache chance instead of 'each hack drops a cache'. Test: tools/tests/hintalert.gd.
+- 'exploits' / 'mod -tier' (2026-11-03, Josh): only tiers whose location is unlocked (ContextCommands.tier_open), every item of those tiers listed, greyed when you have none (mod -tier: owned rows keep their 'mod -add' ID, others show '-'); a dim line counts the hidden tiers. An item you own from a later tier still shows. 'mod' (by slot) still lists owned mods only. Test: tools/tests/tierlists.gd.
+- 'upload -a <amount>' (2026-11-03, Josh): up to <amount> of every goal item (Uploads.queue caps it to what you have and what the goal still needs); in 'upload' help + tab. Test: tools/tests/uploada.gd.
+- 2026-11-03 (Josh): STEP_SECONDS = [40, 46, 53, 61, 70, 80] (T1's 40 s per 10%, +15%/tier); step units rounded to the nearest (was ceil: long cycles overshot, T6 crack 114 s). Units per 10%: Mining 5/4/4/4/4/4, Parsing 10/11/12/13/12/12, Cracking 4/3/3/3/2/2, Matching 3/3/3/3/3/2, Compiling 4/5/6/6/7/8, Phishing 5/10/23/46/90/163. Test: tools/tests/alertsteps.gd.

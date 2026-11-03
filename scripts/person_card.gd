@@ -83,6 +83,45 @@ func update_info(info) -> void:
 		_add_special(box, info)
 	_add_intel(box, info)
 
+## 2026-11-03 (Josh): the help card in the last slot of a location's targets: a short field guide. Parts show once
+## they apply (drivers once you own one, exploits once you have one, alert once the tutorial is done).
+func update_help() -> void:
+	target = {}
+	for c in get_children():
+		c.queue_free()
+	_accent = C_SECTION
+	_style()
+	modulate = Color.WHITE
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 5)
+	add_child(box)
+	var head := HBoxContainer.new()
+	box.add_child(head)
+	var title = _label("Field notes", 14, C_TEXT)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	head.add_child(_pill("HELP", C_SECTION.lightened(0.3)))
+	var rows: Array = [ # 2026-11-03: Josh's wording
+		["SQL INJECTOR", C_OK, "Attacking requires SQL Injectors. If you run out you will have to abort the hack."],
+		["PACKET SPOOF", Color("#60a5fa"), "The enemy will drop your Anonymity with countermeasures. Use Packet Spoofs to restore anonymity."],
+		["MODS", C_RARE, "Passive bonuses for hacking. Use the 'mod' command to manage these in the main terminal."],
+	]
+	if !Drivers.owned.is_empty():
+		rows.append(["DRIVERS", C_DRV, "Equipped per skill, always on. Use 'driver' in the main terminal to manage."])
+	if Exploits.get_items().any(func(i): return Inventory.get_amount(i) > 0):
+		rows.append(["EXPLOITS", Color("#c084fc"), "Used to give you the edge during any hack. Requires EXPLOIT charge earned during the hack. Use 'exploits' in the main terminal for more info."])
+	if !Alert.exempt():
+		rows.append(["ALERT", C_BAD, "As you hack targets, their alertness level raises, lowering the chance to find their cache. Each hack raises alert level by 10%. Hacking consecutively (hack student=3) raises alert level by 4% per hack after the first. Alertness level can be reduced by running processes (main terminal, VMs, queue or offline)."])
+	rows.append(["RUNS", C_TEXT, "'hack student=10' chains hacks, which causes Alert level to raise slower."])
+	rows.append(["KILL", C_BAD, "Using the 'kill' command ends the current hack. If you're below %d%% anonymity it will count as a loss, so use with caution." % roundi(0.2 * 100)])
+	rows.append(["KILL -S", C_OK, "This will discontinue the current consecutive hack run you're on. Once the current hack ends, you will abort successfully."])
+	for r in rows:
+		box.add_child(_label(r[0], 9, r[1]))
+		var t = _label(r[2], 10, C_TEXT)
+		t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		t.custom_minimum_size.x = 60
+		box.add_child(t)
+
 #region sections
 ## Locked: how to unlock it (access recipe with what you have, or hard-mode wins), then the stats dimmed.
 func _add_locked(box: VBoxContainer, info) -> void:
@@ -213,34 +252,23 @@ func _add_reward(box: VBoxContainer, info) -> void:
 func _add_alert(box: VBoxContainer, info) -> void:
 	if Alert.exempt():
 		return
-	var s = Alert.stacks(info)
+	var s = Alert.pips(info)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	box.add_child(row)
 	row.add_child(_label("ALERT", 9, C_BAD if s > 0 else C_SECTION))
 	var pips = ""
-	for i in Alert.MAX_STACKS:
+	for i in Alert.PIPS:
 		pips += "▮" if i < s else "▯"
 	row.add_child(_label(pips, 10, C_BAD if s > 0 else C_SECTION))
-	row.add_child(_label("cache %d%%" % int(round(Alert.chance(info) * 100)), 11, C_OK if s == 0 else (C_BAD if s >= Alert.MAX_STACKS else C_SPECIAL)))
+	row.add_child(_label("cache %d%%" % int(round(Alert.chance(info) * 100)), 11, C_OK if s == 0 else (C_BAD if Alert.chance(info) <= 0.0 else C_SPECIAL)))
 	if s <= 0:
 		return
-	var goal = _label("lower: %s" % Alert.goal_text(info), 11, C_TEXT)
+	var goal = _label("clear: %s" % Alert.goal_text(info), 11, C_TEXT)
 	goal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal.custom_minimum_size.x = 60
 	box.add_child(goal)
-	var bar := ProgressBar.new()
-	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(0, 4)
-	bar.max_value = 1.0
-	bar.value = Alert.step_progress(info)
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(1, 1, 1, 0.08)
-	var fg := StyleBoxFlat.new()
-	fg.bg_color = Color(Alert.SKILL_COLORS.get(Alert.skill_of(info), "#888888"))
-	bar.add_theme_stylebox_override("background", bg)
-	bar.add_theme_stylebox_override("fill", fg)
-	box.add_child(bar)
+	goal.add_theme_color_override("font_color", Color(Alert.SKILL_COLORS.get(Alert.skill_of(info), "#cccccc")).lightened(0.35))
 
 ## What one decoded cache of this target holds (Decoding's drop table for the Cache process): name, amount, chance
 func _add_loot_pool(box: VBoxContainer, cache: CacheData) -> void:

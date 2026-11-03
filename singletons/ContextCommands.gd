@@ -651,13 +651,20 @@ static func overclock_effect_text(skill: Node) -> String:
 
 ## 'exploits' (2026-10-31): 'ls -exploits' plus where Exploits come from and how they're used. Sources you haven't
 ## unlocked yet are dimmed with what opens them.
+## 2026-11-03 (Josh): a tier's location is unlocked (exploits / mod -tier only list those tiers)
+func tier_open(t: int) -> bool:
+	var keys = Stats.hacking_targets.keys()
+	return t >= 1 and t <= keys.size() and Stats.hacking_targets[keys[t - 1]].get("unlocked", false)
+
 func exploits_text() -> String:
 	var G = "#4ec994"
 	var D = "#888888"
 	var Y = "#e0c068"
 	# 2026-11-02: every Exploit (owned or not) with its charge cost, by tier (balance by effect, not tier)
 	var t = "\n[color=%s]EXPLOITS[/color]  [color=%s]charge cost to use · max charge %d%s[/color]\n" % [Y, D, int(Exploits.CHARGE_MAX), ("  · Salvage Rights: -%d%%" % roundi(Drivers.value("salvage_rights") * 100)) if Drivers.value("salvage_rights") > 0.0 else ""]
-	var items = Exploits.get_items().duplicate()
+	# 2026-11-03 (Josh): only unlocked tiers (greyed rows for what you don't have yet); later tiers stay hidden
+	var items = Exploits.get_items().filter(func(i): return tier_open(int(i.tier)) or Inventory.get_amount(i) > 0)
+	var hidden = Exploits.get_items().filter(func(i): return !items.has(i)).map(func(i): return int(i.tier))
 	items.sort_custom(func(x, y): return x.tier < y.tier if x.tier != y.tier else x.id < y.id)
 	var cur_tier = -1
 	var w_name = 4
@@ -673,6 +680,11 @@ func exploits_text() -> String:
 		var cost_txt = ("%d" % c) + ((" (%d)" % base) if c != base else "")
 		t += "  [color=%s]%s[/color]  [color=%s]%s[/color]  [color=%s]%s[/color]  [color=#cccccc]%s[/color]\n" % [
 			"#e6e8eb" if have > 0 else D, pad_text(i.name, w_name), "#c084fc", pad_text(cost_txt, 9), G if have > 0 else D, pad_text(("x%d" % have) if have > 0 else "-", 5), Exploits.get_def(i).effect]
+	var hidden_tiers = []
+	for ht in hidden:
+		if !(ht in hidden_tiers): hidden_tiers.append(ht)
+	if !hidden_tiers.is_empty():
+		t += "\n[color=#666666]  %d more tier%s of Exploits open with new locations.[/color]\n" % [hidden_tiers.size(), "" if hidden_tiers.size() == 1 else "s"]
 	t += "\n[color=%s]WHERE TO FIND[/color]\n" % Y
 	var rows = [
 		[true, "", "Caches", "decode -cache", "Every cache can contain an Exploit. Using Deep Scan or the Forensics modifier makes this x2."],
@@ -751,6 +763,8 @@ func _target_info(tar: Dictionary) -> String:
 	lines.append(["Counter", _ti_val(ts.counter, ip.get("counter", 0.0), -1, "%d") + " dmg " + every])
 	var loot = tar.get("loot")
 	lines.append(["Reward", "%d xp" % int(tar.get("exp", 0)) + ("  ·  %s" % loot.name if loot else "") + "  [color=%s]· breached %dx[/color]" % [D, Stats.get_wins(tar)]])
+	if loot: # 2026-11-03 (Josh): where to see what the cache holds
+		lines.append(["", "[color=%s]use[/color] 'ls %s' [color=%s]to see the cache's contents[/color]" % [D, str(loot.name).to_lower(), D]])
 	for tr in Stats.target_traits(tar):
 		lines.append(["Trait", "[color=%s]%s[/color]  %s" % [_TI_TRAIT, Stats.TRAITS[tr].name, Stats.TRAITS[tr].text]])
 	if str(tar.get("special", "")) != "":
@@ -1474,6 +1488,8 @@ func _mod_items_text(by_slot: bool) -> String:
 	return_text += "-------------\n"
 	return_text += "\n" + pad_text("ID", mod_id_col) + (pad_text("TIER", tier_col) if by_slot else pad_text("SLOT", type_col)) + pad_text("NAME", mod_name_col) + pad_text("EFFECT", mod_mod_col) + pad_text("VALUE", mod_val_col) + pad_text("BW", 5) + "REMAINING\n"
 	return_text += "-".repeat(82 + 15 + type_col + 5) + "\n"
+	if !by_slot:
+		return return_text + _mod_tier_rows(mod_id_col, type_col, mod_name_col, mod_mod_col, mod_val_col)
 	if !Inventory.has_mod_item() or Inventory.get_hacking_mods_items().is_empty():
 		return return_text + pad_text("-", mod_id_col) + pad_text("-", type_col) + pad_text("-", mod_name_col) + pad_text("-", mod_mod_col) + pad_text("-", mod_val_col) + "-"
 	var items = Inventory.get_hacking_mods_items()
@@ -1511,6 +1527,43 @@ func _mod_items_text(by_slot: bool) -> String:
 		return_text += str(hmd) + " hacks\n"
 	return return_text
 
+
+## 'mod -tier' rows (2026-11-03, Josh): every mod of each unlocked tier; owned ones keep their 'mod -add' ID,
+## the rest are greyed with "-". Later tiers are hidden until their location opens.
+func _mod_tier_rows(mod_id_col: int, type_col: int, mod_name_col: int, mod_mod_col: int, mod_val_col: int) -> String:
+	var owned = Inventory.get_hacking_mods_items()
+	var t = ""
+	var hidden = 0
+	for tier in range(1, 7):
+		if !tier_open(tier):
+			hidden += 1
+			continue
+		var pool = Phishing.tier_mod_pool(tier).map(func(e): return e.item)
+		var seen = []
+		for m in pool:
+			if !(m in seen): seen.append(m)
+		for m in owned:
+			if int(m.tier) == tier and !(m in seen): seen.append(m)
+		seen.sort_custom(func(a, b):
+			var ra = HackingMods.SLOT_PATTERN.find(HackingMods.mod_slot_type(a.hacking_mod_type))
+			var rb = HackingMods.SLOT_PATTERN.find(HackingMods.mod_slot_type(b.hacking_mod_type))
+			return ra < rb if ra != rb else a.name < b.name)
+		var ln = Uploads.get_location_name(tier)
+		t += "%s[color=#e0c068]Tier %d Mods[/color]  [color=#666666](%s caches, 'phish -mod=%s')[/color]\n" % ["" if t == "" else "\n", tier, ln, ln.to_lower()]
+		for m in seen:
+			var have = Inventory.get_amount(m)
+			var st = HackingMods.mod_slot_type(m.hacking_mod_type)
+			var row = pad_text("[" + str(owned.find(m)) + "]" if have > 0 else "-", mod_id_col, false)
+			row += pad_text(HackingMods.SLOT_SHORT[st], type_col)
+			row += pad_text("%s x%d" % [m.name, have], mod_name_col)
+			row += pad_text(HackingMods.get_mod_stat(m.hacking_mod_type), mod_mod_col)
+			row += pad_text(HackingMods.get_mod_value_text(m.hacking_mod_type, m.hacking_mod_value), mod_val_col)
+			row += pad_text("+%d" % HackingMods.bw_cost_for_tier(tier), 5)
+			row += str(HackingMods.mod_duration(m)) + " hacks"
+			t += (row if have > 0 else "[color=#666666]%s[/color]" % row) + "\n"
+	if hidden > 0:
+		t += "\n[color=#666666]%d more tier%s of mods open with new locations.[/color]" % [hidden, "" if hidden == 1 else "s"]
+	return t
 
 func upload_info():
 	var return_text = "\n\nAquire and upload the Parents Credit Card item. Obtain from Hacking the Student and Decoding the Student Cache.\n\nUse 'upload parents credit card' to upload once aquired."
@@ -1583,6 +1636,7 @@ func upload_goal_text() -> String:
 	var hints = [
 		["upload <item> [amount]", "upload from your inventory; no amount = all the goal still needs  (ex. upload logs 5)"],
 		["upload -a", "upload every goal item you have"],
+		["upload -a <amount>", "up to <amount> of every goal item (what you have, if less)  (ex. upload -a 10)"],
 		["upload cancel <item>", "return queued items to your inventory"],
 	]
 	var footer = "\n"

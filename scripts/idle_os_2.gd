@@ -1876,13 +1876,19 @@ func handle_upload_commands(text: String) -> void:
 	if arg == "":
 		add_line("Name an item. [color=#666666]ex. upload logs 5  |  upload -a  |  upload cancel logs[/color]")
 		return
+	# 'upload -a' (all the goal still needs) / 'upload -a 10' (2026-11-03, Josh: up to 10 of every goal item you have)
+	var all_words = arg.split(" ", false)
+	var all_n = 0
+	if !is_cancel and all_words.size() == 2 and all_words[0] in ["a", "all"] and all_words[1].is_valid_int() and int(all_words[1]) > 0:
+		all_n = int(all_words[1])
+		arg = all_words[0]
 	if !is_cancel and (arg == "all" or arg == "a"):
 		if !Tutorial.is_tutorial_complete():
 			add_line("'upload -a' opens after the tutorial. For now, upload exact amounts, e.g. 'upload logs 5'.")
 			return
 		var started = []
 		for g in Uploads.get_goals():
-			var q = Uploads.queue(g.item)
+			var q = Uploads.queue(g.item, all_n)
 			if q.ok:
 				started.append("%d %s" % [q.amount, g.item.name])
 		add_line("Queued for upload: " + ", ".join(started) if !started.is_empty() else "Nothing in your inventory that the current goal still needs.")

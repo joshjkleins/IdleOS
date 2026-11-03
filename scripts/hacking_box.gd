@@ -80,7 +80,9 @@ func hacking_to_persons():
 	var was_compromise = !hacking_game.compromise_fights.is_empty()
 	# the cards were drawn before the hack: redraw them so requirements (payloads 0/1) are current
 	for card in persons_container.get_children():
-		if card.has_method("update_info") and card.get("target") != null:
+		if card.has_method("update_info") and card.get("target") is Dictionary and card.target.is_empty():
+			card.update_help() # the help card (counts change after a hack)
+		elif card.has_method("update_info") and card.get("target") != null:
 			card.update_info(card.target)
 	await _hide_container(hacking_game)
 	if !was_compromise:
@@ -166,6 +168,11 @@ func _update_persons(targets: Array):
 		new_card.update_info(target)
 		
 		persons_container.add_child(new_card)
+	# 2026-11-03 (Josh): a help card in the slot after the last target (normal view only, not a compromise lineup)
+	if !targets.is_empty() and !targets[0].has("_step"):
+		var help = person_card.instantiate()
+		persons_container.add_child(help)
+		help.update_help()
 
 func remove_last_title_update():
 	var split_text = rtl.text.split(">")
@@ -180,7 +187,7 @@ func update_box_title(text: String):
 
 func get_hacking_target(target_name: String) -> Dictionary:
 	for person in persons_container.get_children():
-		if person.target == null or person.is_queued_for_deletion():
+		if person.target == null or person.is_queued_for_deletion() or (person.target is Dictionary and person.target.is_empty()):
 			continue
 		if target_name == person.target.command:
 			return person.target

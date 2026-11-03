@@ -246,7 +246,8 @@ func status_text(help: bool = true) -> String:
 	if !help:
 		return t
 	t += "\n[color=%s]Steps run one after another in the main terminal, then the queue starts over. A step ends when its count is done ('mine -logs 25') or its process runs out of inputs; without a count, a step runs as long as its process would ('mine -logs' never ends). A step that can't start is skipped; if none can, the queue stops.[/color]\n" % D
-	t += "[color=%s]While it runs, the queue owns the main terminal: no other process, and no Hacking until 'queue -kill'.[/color]\n\n" % D
+	t += "[color=%s]While it runs, the queue owns the main terminal: no other process, and no Hacking until 'queue -kill'.[/color]\n" % D
+	t += "[color=%s]Offline it keeps cycling its steps at half speed (half your offline time). A step without a count never ends, so the queue stays on it, offline too.[/color]\n\n" % D
 	for row in [["queue -add <command>", "add a step: 'queue -add mine -logs 25', 'queue -add parse -footprint=logs 25 survey'"],
 			["queue -set <n> <command>", "replace step n"], ["queue -ins <n> <command>", "insert at step n (the rest move down)"],
 			["queue -rm <n>", "remove step n  ·  'queue -rm -a' clears it"], ["queue -run", "start (or resume) at the step it's on"], ["queue -run <n>", "start at step n"],

@@ -92,6 +92,7 @@ const LOG_LINE_PX = 19.0           # combat log line height (font 12 + 3 separat
 const EXP_MIN_PX = 36.0            # smallest exploit list (2 lines)
 const EXP_AUTO_PX = 150.0          # auto size cap for the exploit list (~8 lines); drag the split for more
 var yield_hint: Label
+var alert_label: Label # 2026-11-03 (Josh): target alert / cache chance in the YIELD bar
 var _banner_node: Control
 var _log_empty := true
 #endregion
@@ -458,6 +459,7 @@ func setup(target: Dictionary, loadout: Dictionary = {}, hack_count: int = 1, ov
 	vm_caches_gained = 0
 	stop_hacking = false
 	hacks_remaining = hack_count
+	Alert.begin_run() # 2026-11-03: a run's first cache +10% alert, each after +4%; refunded if the run is traced
 	hack_total = hack_count
 	hack_index = 0
 	drv_attacks = 0
@@ -1257,6 +1259,10 @@ func lose(killed: bool = false):
 	messages += "[color=#e24b4a]Lost:[/color]\n"
 	if caches_gained > 0:
 		messages += "[color=#e24b4a]  %s x%d (this run's caches)[/color]\n" % [target_reward.name, caches_gained]
+	if compromise_fights.is_empty():
+		var back = Alert.refund_run()
+		if back > 0.0:
+			messages += "[color=#888888]  (the alert those caches added is gone too: -%d%%)[/color]\n" % int(round(back))
 	messages += _loss_penalties()
 	caches_gained = 0
 	vm_caches_gained = 0
@@ -1297,8 +1303,10 @@ func win():
 			_log("DRV", C_DRV, "Bonus Cache: +1 %s" % target_reward.name)
 		caches_gained += extra
 		reward_amount += extra
+		if !Alert.exempt() and Alert.last_ghost:
+			_log("DRV", C_DRV, "Ghost Protocol: the cache didn't raise %s's alert" % target_name)
 		if !Alert.exempt():
-			_log("ALRT", C_SPECIAL, "%s alert %d%%  ·  next cache chance %d%%" % [target_name, Alert.stacks(current_target) * 10, int(round(Alert.chance(current_target) * 100))])
+			_log("ALRT", C_SPECIAL, "%s alert %d%%  ·  next cache chance %d%%" % [target_name, int(round(Alert.alert_pct(current_target))), int(round(Alert.chance(current_target) * 100))])
 	else:
 		_log("ALRT", C_INTEG, "No cache: %s is on alert (%d%% cache chance)  ·  %s" % [target_name, int(round(alert_chance * 100)), Alert.goal_text(current_target)])
 	exfil_left = 0.0
@@ -1465,6 +1473,7 @@ func _notification(what: int) -> void:
 		SaveManager.save_game()
 
 func _grant_rewards():
+	Alert.end_run() # the run's caches are kept: so is its alert
 	if caches_gained > 0:
 		Inventory.add_resource(target_reward, caches_gained)
 		caches_gained = 0
@@ -1575,9 +1584,6 @@ func end():
 
 #region prepare (access, intel, mods)
 func _remove_required_resources():
-	if Drivers.value("payload_recycler") > 0.0 and randf() < Drivers.value("payload_recycler"): # Payload Recycler (driver)
-		_log("DRV", C_DRV, "Payload Recycler: %s x%d not spent" % [requirements.item.name, requirements.amount])
-		return
 	Inventory.remove_resource(requirements.item, requirements.amount)
 	SaveManager.save_game() # spent payloads are saved right away: quitting mid-hack can't undo them
 	_log("PAY", Compiling.SKILL.color, "%s x%d spent to gain access" % [requirements.item.name, requirements.amount])
@@ -1992,6 +1998,7 @@ func _refresh_panels() -> void:
 		chip_firewall.get_meta("label").text = "FIREWALL DOWN %ds" % ceili(fw_down_left)
 
 func update_bottom_row():
+	_refresh_alert_label()
 	if !compromise_fights.is_empty():
 		var loc = str(Stats.target_place(current_target).get("location", ""))
 		yield_label.text = Compromise.prize_text(loc).trim_prefix("a ")
@@ -2003,6 +2010,18 @@ func update_bottom_row():
 	else:
 		yield_label.text = "nothing yet"
 		yield_hint.text = "breach the target to bank its reward"
+
+## "ALERT 30%  ·  next cache 70%  ·  +4% if it drops" (hidden in a compromise and before the tutorial is done)
+func _refresh_alert_label() -> void:
+	if alert_label == null:
+		return
+	alert_label.visible = compromise_fights.is_empty() and !Alert.exempt() and !current_target.is_empty()
+	if !alert_label.visible:
+		return
+	var a = Alert.alert_pct(current_target)
+	var c = Alert.chance(current_target)
+	alert_label.text = "ALERT %d%%  ·  next cache %d%%  ·  +%d%% if it drops" % [int(round(a)), int(round(c * 100)), int(Alert.next_add())] if c > 0.0 else "ALERT 100%  ·  no caches: lower it with '%s'" % Alert.goal_text(current_target)
+	alert_label.add_theme_color_override("font_color", C_WIN if a <= 0.0 else (C_INTEG if c <= 0.0 else C_SPECIAL))
 
 func _on_safe_exit_timer_timeout():
 	end()
@@ -2544,6 +2563,7 @@ func _refresh_driver_row() -> void:
 
 ## Cool Head (driver): the first overheat of a hack resets the temperature instead
 func _on_overheated() -> void:
+	return # 2026-11-03: Cool Head became Clean Exit (an alert driver, Alert.more()); kept as a no-op
 	if !is_hacking or cool_head_used or Drivers.value("cool_head") <= 0.0:
 		return
 	cool_head_used = true
@@ -2930,6 +2950,11 @@ func _build_ui() -> void:
 	y.head.add_theme_constant_override("separation", 12)
 	yield_hint = _label("", 11, C_DIM)
 	y.head.add_child(yield_hint)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	y.head.add_child(gap)
+	alert_label = _label("", 11, C_DIM)
+	y.head.add_child(alert_label)
 
 func _card(parent: Control, title: String, accent: Color) -> Dictionary:
 	var p := PanelContainer.new()
