@@ -185,23 +185,23 @@ var DATABASES = {
 	"tier name": "TIER VI | DATABASES",
 	"level": 1,
 	"experience": 0,
-	"experience per level": 4635,
+	"experience per level": 3236, # 2026-11-02: x0.698 with the speed (XP/h unchanged; was 4635)
 	"command": "mine -databases",
 	"efficiency": 0.0,
 	"efficiency rate": 0.035, # 343% at L99, +100% from upgrades = ~443% at max
 	"unlocked": false,
 	"unlock tier": 6, # 2026-10-26: opens with this tier's location (1 = from the start)
 	"efficiency level": 75, # efficiency grows from this skill level (its old unlock level)
-	"base speed": 20.9114,
-	"overclock speed": 10.4557,
-	"overheat speed": 52.2784,
-	"heat": 235.253,
-	"overclock heat": 441.0996,
-	"overheat heat": 88.2202,
+	"base speed": 14.6, # 2026-11-02: 43% faster (was 20.9114 = 2.9x Repositories; every other tier steps ~2.1-2.3x)
+	"overclock speed": 7.3000,
+	"overheat speed": 36.4999,
+	"heat": 164.2498, # x0.698 with the speed: heat/s unchanged (was 235.253)
+	"overclock heat": 307.9686,
+	"overheat heat": 61.5939,
 	"requirements": {},
 	"resource gained": Items.DATABASES,
 	"resource amount gained": 1,
-	"vm token chance": 0.075, # per cycle; scales with cycle length so tokens/hour stay level
+	"vm token chance": 0.0524, # x0.698 with the speed (was 0.075) # per cycle; scales with cycle length so tokens/hour stay level
 	"description": "Finds databases that can be Parsed through for resources or used as bait for Phishing.",
 	"efficiency description": "Chance to receive multiple databases.",
 	"signal": log_cycle_completed

@@ -1345,3 +1345,33 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
   1.5 -> 11.4x; T6 isn't a spike, those two just have no slower per-tier processes; trim option if needed: T6 speed
   values = T5's -> ~10x). Flat cooling extras not scaling: fine. Network vs VM cache: closed. Demo-branch port parked
   until after the Friday launch. Dev flags: Josh will say when to turn them off.
+
+## Tier length model (2026-11-02)
+- tools/tests/econdump3.gd dumps per tier (arrive: previous tiers' apt + skill L1/15/30/45/60/75; done: + this tier's apt,
+  L15..90) every chain process's rates via Offline._job, cache loot per target, Spear SQL, goals, targets/access ->
+  ~/econ/dump.json. tools/balance/tier_time.py models a tier: hacks from rares (upload + access, win streak +0.1/hack
+  T2+, the top target's cache holding the others) and Hacking apt cache costs, x1.15 farming, x1.25 losses, +12
+  compromise fights at ~115 s; cache loot pays demand first; the chain (mine/parse/crack/match/compile) makes the rest;
+  x1.35 crafting waste; VMs at 45% use; idle "sessions" = 2 h active + an offline stretch at the cap (queue half speed).
+  Env: APT (share of apt bought), APT_T / MINE_MULT (what-ifs per tier), SHORT=1.
+- Result (all apt): active h 8 / 19 / 17 / 18 / 13 / 22; single-terminal work 12 / 39 / 41 / 51 / 42 / 83.
+  Required path alone (no apt) is ~3-4 h every tier (fights + upload floor). apt costs in the raw Mining item are most
+  of every tier's crafting (Decoding 52%, Mining 26%, System 22% of those costs).
+- Outliers: T6 Databases mines ~30% slower than every other tier (base speed 20.91 = 2.9x Repositories; others step
+  2.1-2.3x; Repositories got +25% on 10-31 and Databases didn't) while T6 apt costs 12.8k Databases (1.47x T5).
+  T2 is the biggest jump (apt mining-item costs x2.6 from T1, offline cap 2-4 h): most sessions of any tier.
+  T5 is the lightest of T2-T6. Proposed to Josh (not applied): Databases base speed ~14.6 (heat / XP per cycle scaled
+  the same), T2 apt x0.75, T6 apt x0.85 -> active 8 / 14 / 17 / 18 / 13 / 16.
+- v2 (Josh: the auto-battler is the draw, assume lots of caches): econdump3 also dumps Footprint parse + variant decode
+  per cache (x2 basics, no rare). tools/balance/tier_time2.py adds farm hacks (Footprinted) in batches of 5 while they
+  lower active time. Farming player: active h 5.4 / 7.1 / 6.5 / 4.4 / 4.3 / 5.6 (total ~33 h, ~9 sessions), fight-bound
+  from T4; caches cover every chain item except the tier's Mining item, which is all the crafting left. Crafting-heavy
+  player (no farming): ~89 h. Decoding -> Matching input swap with farming: ~26 h and T1 crafting ~0.3 h (would hollow
+  out the idle side). Databases speed fix: T6 5.6 -> 5.0 h. FP env = share of spare caches Footprinted (default 0.7).
+- APPLIED 2026-11-02 (Josh): Databases base speed 20.9114 -> 14.6 (x0.698); overclock / overheat speeds, heat (all three),
+  vm token chance (0.075 -> 0.0524) and XP per cycle (4635 -> 3236) scaled the same, so heat/s, tokens/h and XP/h are
+  unchanged. T6 mining now ~401/h arrive, ~1064/h done (T5 403 / 1049). Backup: _to_delete/backup/Mining.gd.predbspeed.
+  (Repositories' 10-31 speed-up didn't scale its heat / XP; left as is.)
+- Farming vs idle (open, discussing with Josh): caches drop the tier's payload (e.g. a Footprinted VP cache ~215 =
+  ~9 VP hacks), so farming pays for itself. what-if NO_CACHE_PAYLOAD=1 (tier_time2.py): farming player 34 h -> 118 h,
+  farming mostly stops being worth it.
