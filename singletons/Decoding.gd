@@ -168,7 +168,6 @@ var INTEL = {
 	"example commands": [
 		{'cmd': 'decode -intel', 'description': 'Lists targets and the intel you have on each'},
 		{'cmd': 'decode -intel=student', 'description': 'Gathers intel on the Student until stopped or maxed'},
-		{'cmd': 'decode -intel=student hard', 'description': 'Hard mode targets keep their own intel'},
 		{'cmd': 'decode -intel=bank', 'description': "A location: the hardest unlocked target first, then the next, until all are maxed"}
 	],
 	"efficiency": 0.15,
@@ -487,7 +486,7 @@ func validate_start(process: Dictionary, arg_text: String) -> Dictionary:
 				return out
 			var target = find_target(arg_text)
 			if target.is_empty():
-				out.message = "Target not found or not unlocked: %s  [color=#666666]ex. decode -intel=student  |  decode -intel=student hard[/color]" % arg_text
+				out.message = "Target not found or not unlocked: %s  [color=#666666]ex. decode -intel=student  |  decode -intel=school[/color]" % arg_text
 				return out
 			if is_intel_maxed(target):
 				out.message = "Intel on %s is maxed: %s" % [target.name, intel_text(target)]
@@ -663,7 +662,7 @@ func intel_command_text(arg: String) -> String:
 			return intel_list_text(loc)
 	var target = find_target(arg)
 	if target.is_empty():
-		return "No unlocked location or target named '%s'. [color=#666666]ex. intel  |  intel school  |  intel student  |  intel student hard[/color]" % arg
+		return "No unlocked location or target named '%s'. [color=#666666]ex. intel  |  intel school  |  intel student[/color]" % arg
 	return intel_detail_text(target)
 
 func intel_detail_text(target: Dictionary) -> String:

@@ -15,16 +15,21 @@ func _ready() -> void:
 	SaveManager.save_loaded.connect(_refresh)
 	_refresh()
 
+var fixed := "" # 2026-11-02: set to "white" / "black" to draw that hat instead of this game's (launcher cards)
+
+func _choice() -> String:
+	return fixed if fixed != "" else Ending.choice
+
 func _refresh() -> void:
-	visible = Ending.choice != ""
-	tooltip_text = "White hat: you locked the launch codes away." if Ending.choice == "white" else "Black hat: you stole the launch codes."
+	visible = _choice() != ""
+	tooltip_text = "White hat: you locked the launch codes away." if _choice() == "white" else "Black hat: you stole the launch codes."
 	queue_redraw()
 
 func _draw() -> void:
-	if Ending.choice == "":
+	if _choice() == "":
 		return
-	var col = C_WHITE if Ending.choice == "white" else C_BLACK
-	var mirror = Ending.choice == "white"
+	var col = C_WHITE if _choice() == "white" else C_BLACK
+	var mirror = _choice() == "white"
 	var w = size.x
 	var h = size.y
 	var pt = func(x: float, y: float) -> Vector2: # x, y in 0..1 of the box; mirrored for the white hat

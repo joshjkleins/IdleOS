@@ -401,6 +401,8 @@ func compute() -> void:
 			Drivers.owned[id] = int(drivers_before.get(id, 0))
 			var r_from = Drivers.rank(id)
 			Drivers.owned[id] = was
+			if r_from >= Drivers.MAX_RANK:
+				continue # 2026-11-02 (Josh): a maxed driver's XP isn't news
 			report.drivers.append({"name": Drivers.DEFS[id].name, "skill": Drivers.DEFS[id].skill, "xp": gained, "from": r_from, "to": Drivers.rank(id)})
 	for t in Uploads.completed_tiers:
 		if not t in tiers_before:

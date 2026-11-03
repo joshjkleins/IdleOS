@@ -598,7 +598,7 @@ Last updated: 2026-10-30 (tier 3 / Hospital wrapped). The newest state is in the
 - Side panel: finished uploads sort to the bottom; the running Defrag boost shows at the very top (DefragBoostSection,
   shares the collapse-button row); the header Defragging card only shows the cooldown. Defragging costs no items.
 - Tools: econ2 / econ_plan / xp_plan use RARE_P 0.25, extraction x2, efficiency as a basics multiplier.
-- Open: Network cache variant (still 50% x 10-20 VM tokens) vs VM Caches; XP pacing together with the minor-process-levels idea.
+- (Closed: Network caches drop 1 to tier+1 VM caches, see Economy.) Open: XP pacing together with the minor-process-levels idea.
 - Tests: tools/tests/p4test.gd (headless checks), p4shot.gd (side panel screenshot).
 
 ## Playthrough pass 5 (2026-10-22, cdd)
@@ -1290,3 +1290,58 @@ and compromising the Government for Firmware (the end-game "capes", not designed
   use the full secs. Welcome note: "the queue ran at half speed while you were away".
   Test: tools/tests/queueoff.gd (STEP=1, shift offline.saved_at back in the save, STEP=2; LOGS env = starting logs).
   Checked: 1h away gives 1800s across both steps and resumes mid-step 0; out of inputs stops the queue.
+
+## Save slots + launch screen (2026-11-02, Josh) - plan
+3 slots, launcher scene before idle_os_2 (terminal look, clickable AND typed commands: 'boot 1', 'rm 2'...), cards show
+profile name, location/tier, upload progress, last played, play time, skill levels (+firmware), offline process / queue,
+hat. Delete/rename with a confirm popup. Settings popup (launcher + in-game). In-game 'logout' = save, then
+OS.set_restart_on_exit -> the game relaunches into the launcher (singletons hold all state; no per-singleton reset).
+Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4 settings popup · 5 logout.
+- Step 1 (done): SaveManager.slot (1-3), SAVE_PATH is now a getter -> user://saves/slot_<n>.json. The old
+  user://savegame.json is copied into slot 1 once (_migrate_legacy) and renamed savegame.json.migrated (never removed).
+  session_active: save_game() does nothing until idle_os_2 has loaded/started a game (so the launcher can't write a slot).
+  play_seconds (counted while a session is active) and profile_name live in the save's "meta" block; build_meta() writes
+  {name, saved_at, play_seconds, tier, location, tiers_done, all_done, upload_done/goal (current tier), skills[{name,
+  level, color, firmware}], offline (command text + count left, "" if none), offline_cap, queue{running, steps, index},
+  hat}. read_meta(n) reads it ({} empty slot, {"legacy": true} for a save from before meta, {"corrupt": true}).
+  Tests: save is now ~/.local/share/IdleOS_Demo/saves/slot_1.json (queueoff/queueload python shift must use that path).
+- Step 2 (done): scenes/launcher.tscn + scripts/launcher.gd is the main scene now (project.godot run/main_scene; old
+  value backed up in _to_delete/backup/project.godot.prelauncher). UI built in code: bootloader lines, 3 slot cards
+  (click = boot, hover/arrow keys select), 'boot>' line: boot <n> / <n> / ls / help / quit, Enter on an empty line boots
+  the highlighted card. Boot sets SaveManager.slot then change_scene_to_file(idle_os_2) (an empty slot = new game).
+  HatIcon.fixed draws a given hat (cards). Tests: tools/tests/launchshot.gd (OUT png, CMD, SEL), launchboot.gd (SLOT;
+  the runner makes a dummy the current scene so the scene changes don't free it).
+- Launcher fixes (2026-11-02): the input keeps focus after Enter (keep_editing_on_text_submit + deferred grab_focus),
+  12px left padding in the field (_style_field), 'boot>' is a Label centered vertically.
+- Step 3 (done): cards have [rename] [delete] [boot] buttons. Popups (_popup: shade + centered box, Esc/cancel close):
+  New profile (clicking an empty slot or 'new <n>'/'boot <n>' on one asks for a name, default user_<n>), Rename,
+  Delete (confirm by typing "sudo rm -rf <name>"). Names: 1-16 chars, letters/digits/_/- 
+  (SaveManager.name_problem). SaveManager.rename_slot(n, name) rewrites only the meta block; delete_slot(n) MOVES the
+  file to user://saves/deleted/slot_<n>_<unix>.json (a safety net, never removed). Commands: rename <n> [name],
+  rm <n> / delete <n> (opens the confirm), new <n>. A new profile's name goes in SaveManager.profile_name before the
+  game scene loads. Test: tools/tests/launchpop.gd (SHOTS env = png folder).
+- Launcher help (2026-11-02, Josh): no arrow-key line (the input holds focus), "boot <n> load profile n (1-3)",
+  "rm <n> delete profile n".
+- Step 4 (done): scripts/settings_popup.gd (class SettingsPopup, SettingsPopup.open(parent) puts it on its own
+  CanvasLayer 120). Built from Settings.DEFS: sliders for ranges, [on]/[off]-style toggles for enums, reset defaults,
+  close/Esc. Changes go through Settings.set_value (applied + saved live). Launcher: [ Settings ] button + 'settings'.
+  In-game: 'settings' opens it (input focus comes back on close); 'settings -h' prints the old typed help;
+  'settings key=value' unchanged. Test: tools/tests/settingsshot.gd (OUT png).
+- Step 5 (done): 'logout' (and 'logout -s') = quit_game(true): SAVING / LOGGING OUT, save, then
+  OS.set_restart_on_exit(true, args) and quit, so the game relaunches into the launcher with every singleton clean.
+  OS.get_cmdline_args() leaves out engine flags, so outside an exported build (!OS.has_feature("template")) the args get
+  "--path <project>" (plus --headless in tests); a scene path argument is dropped so it opens on the main scene.
+  Help table row + tab completion. Test: tools/tests/logouttest.gd (the relaunched copy shows up as a second engine start).
+- Launcher queue line: the meta's queue now carries "current" (the step's text); card shows "queue step N: <command>"
+  and "<steps> steps · half speed offline". Cards show the state at the last save (the launcher isn't live, and offline
+  progress is only worked out when the profile boots).
+- Launcher (2026-11-02, Josh): the help list shows under the cards from the start (_help_text()); placeholder "type a command, e.g. 'boot 1'".
+- Fixes (2026-11-02, Josh): 'ls -<location>' tab-completes (ls -gov -> ls -government); offline download skips XP for
+  drivers already at max rank; '-h' lists 'vm -h' once (VIRTUAL MACHINES); hard-mode intel text removed (intel -h row,
+  'decode -intel=student hard' example, error hints). Logout from the editor: set_restart_on_exit does nothing in an
+  editor-started run (Godot docs), so outside exported builds quit_game(true) starts the new copy with
+  OS.create_process(executable, ["--path", project]); exported builds use set_restart_on_exit.
+- Settled (2026-11-02, Josh): Decoding / Phishing speed curve stays (apt Speed is x1.5 per tier for every skill,
+  1.5 -> 11.4x; T6 isn't a spike, those two just have no slower per-tier processes; trim option if needed: T6 speed
+  values = T5's -> ~10x). Flat cooling extras not scaling: fine. Network vs VM cache: closed. Demo-branch port parked
+  until after the Friday launch. Dev flags: Josh will say when to turn them off.

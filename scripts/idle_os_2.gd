@@ -148,6 +148,7 @@ func _ready():
 	
 	if not SaveManager.load_game():
 		Signals.system_temp_updated(30)
+	SaveManager.session_active = true # 2026-11-02: saving starts once a game is loaded / started (slots)
 	Offline.compute() # offline gains are applied right away (booting saves); shown after the boot
 	Uploads.tier_completed.connect(func(t): add_line(ContextCommands.tier_complete_text(t))) # (after compute: offline ones are in the download)
 	Uploads.complete_met_tiers() # goals lowered since the save was made (2026-10-24: School 300 -> 150)
@@ -604,7 +605,11 @@ const DEV_ITEM_COMMANDS := true
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
 	if text.begins_with("settings"):
-		if text == "settings":
+		if text == "settings": # 2026-11-02: opens the settings box ('settings -h' lists the typed settings)
+			var sp = SettingsPopup.open(self)
+			sp.closed.connect(func(): input_line.grab_focus.call_deferred())
+			return true
+		if text in ["settings -h", "settings help"]:
 			add_line(Settings.settings_help())
 			return true
 		add_line(Settings.handle_settings_command(text))
@@ -1061,6 +1066,9 @@ func universal_commands(text):
 			return true
 		"quit -s", "quit", "exit", "exit -s":
 			quit_game()
+			return true
+		"logout", "logout -s": # 2026-11-02: save, then the game relaunches into the profile screen
+			quit_game(true)
 			return true
 		#"cmds":
 			#add_line(ContextCommands.all_commands())
@@ -1996,14 +2004,29 @@ func _update_line_capacity() -> void:
 	ContextCommands.max_line_chars = max(40, int(usable / char_width))
 
 ## 'quit' / 'exit': save, say goodbye, close (same sign-off as the hacking console).
-func quit_game() -> void:
+func quit_game(logout := false) -> void:
 	accepting_player_inputs = false
 	add_line("SAVING")
 	await get_tree().create_timer(0.8).timeout
-	add_line("GOODBYE")
+	add_line("LOGGING OUT" if logout else "GOODBYE")
 	await get_tree().create_timer(1.2).timeout
 	get_tree().call_group("flush_on_quit", "flush_for_quit") # a cache mid-decode finishes instead of being lost
 	SaveManager.save_game()
+	if logout:
+		# a fresh launch: every singleton starts clean, then the launcher (main scene) shows. Same arguments as this
+		# run (--path etc. when run from the editor), minus a scene path, so it opens on the launcher.
+		# (get_cmdline_args leaves out the engine's own flags: outside an exported build, say which project to open)
+		var args = Array(OS.get_cmdline_args()).filter(func(a): return !(str(a).ends_with(".tscn") or str(a).ends_with(".scn")))
+		if !OS.has_feature("template"):
+			args = ["--path", ProjectSettings.globalize_path("res://")] + args
+		if DisplayServer.get_name() == "headless":
+			args.push_front("--headless") # (tests)
+		if OS.has_feature("template"):
+			OS.set_restart_on_exit(true, PackedStringArray(args))
+		else:
+			# restart-on-exit does nothing when the game was started from the editor (Godot docs), so start the new
+			# copy here. It runs on its own (not attached to the editor's debugger / Game tab).
+			OS.create_process(OS.get_executable_path(), PackedStringArray(args))
 	get_tree().quit()
 
 func grab_all_focus():

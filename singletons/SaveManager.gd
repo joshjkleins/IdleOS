@@ -2,7 +2,16 @@ extends Node
 
 signal save_loaded
 
-const SAVE_PATH = "user://savegame.json"
+## 2026-11-02 (Josh): 3 save slots, picked on the launch screen. The old single save moves into slot 1 once.
+const LEGACY_PATH = "user://savegame.json"
+const SAVE_DIR = "user://saves"
+const SLOTS = 3
+var slot: int = 1                # the slot this session plays (set by the launcher before the game scene loads)
+var session_active := false      # a game is loaded / started: nothing is saved before that (the launcher can't overwrite a slot)
+var play_seconds: float = 0.0    # total time played on this slot
+var profile_name: String = ""    # shown on the launcher card ("" = "user_<slot>")
+var SAVE_PATH: String:
+	get: return slot_path(slot)
 ## 2 = Oct 18 2026 demo (uploads woven into the tutorial). Older saves get the 'tutorial reset' notice.
 const SAVE_VERSION = 2
 ## Version of the save that was loaded this session (0 = no save / fresh game)
@@ -12,7 +21,103 @@ var dirty: bool = false
 var auto_save_interval: float = 15.0
 var _timer: float = 0.0
 
+func _ready() -> void:
+	_migrate_legacy()
+
+func slot_path(n: int) -> String:
+	return "%s/slot_%d.json" % [SAVE_DIR, n]
+
+func slot_exists(n: int) -> bool:
+	return FileAccess.file_exists(slot_path(n))
+
+## The old user://savegame.json becomes slot 1 (kept as savegame.json.migrated, never removed)
+func _migrate_legacy() -> void:
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	if FileAccess.file_exists(LEGACY_PATH) and !slot_exists(1):
+		if DirAccess.copy_absolute(LEGACY_PATH, slot_path(1)) == OK:
+			DirAccess.rename_absolute(LEGACY_PATH, LEGACY_PATH + ".migrated")
+			print("SaveManager: moved the old save into slot 1")
+
+## The snapshot a slot's card shows ({} = empty slot). Saves from before the meta block get {"legacy": true}.
+func read_meta(n: int) -> Dictionary:
+	if !slot_exists(n):
+		return {}
+	var f = FileAccess.open(slot_path(n), FileAccess.READ)
+	if f == null:
+		return {"corrupt": true}
+	var parsed = JSON.parse_string(f.get_as_text())
+	f.close()
+	if !(parsed is Dictionary):
+		return {"corrupt": true}
+	return parsed.get("meta", {"legacy": true})
+
+## Profile names: letters, digits, '_' and '-', 1-16 long. "" when <nm> is fine, otherwise why not.
+func name_problem(nm: String) -> String:
+	if nm.length() < 1 or nm.length() > 16:
+		return "Names are 1-16 characters."
+	var re = RegEx.create_from_string("^[A-Za-z0-9_-]+$")
+	if re.search(nm) == null:
+		return "Letters, numbers, '_' and '-' only."
+	return ""
+
+## Renames a saved slot in place (only its meta block changes)
+func rename_slot(n: int, nm: String) -> bool:
+	var f = FileAccess.open(slot_path(n), FileAccess.READ)
+	if f == null:
+		return false
+	var data = JSON.parse_string(f.get_as_text())
+	f.close()
+	if !(data is Dictionary):
+		return false
+	var meta: Dictionary = data.get("meta", {})
+	meta["name"] = nm
+	data["meta"] = meta
+	f = FileAccess.open(slot_path(n), FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(data))
+	f.close()
+	return true
+
+## 'Deletes' a slot: the file moves to user://saves/deleted/ (a safety net; the launcher shows the slot empty)
+func delete_slot(n: int) -> bool:
+	if !slot_exists(n):
+		return false
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR + "/deleted")
+	var to = "%s/deleted/slot_%d_%d.json" % [SAVE_DIR, n, int(Time.get_unix_time_from_system())]
+	return DirAccess.rename_absolute(slot_path(n), to) == OK
+
+func display_name(n: int, meta: Dictionary = {}) -> String:
+	var nm = str(meta.get("name", ""))
+	return nm if nm != "" else "user_%d" % n
+
+## What the launcher shows for this game, written with every save
+func build_meta() -> Dictionary:
+	var skills := []
+	for sk in [Mining, Parsing, Cracking, Matching, Phishing, Decoding, Compiling, Hacking]:
+		skills.append({"name": sk.SKILL.name, "level": int(sk.SKILL.level), "color": sk.SKILL.color.to_html(false),
+			"firmware": Firmware.active(sk)})
+	var tier = Uploads.current_tier()
+	var done := 0
+	var goal := 0
+	for g in Uploads.get_goals(tier):
+		goal += int(g.amount)
+		done += min(int(g.amount), Uploads.get_uploaded(g.item))
+	var off = Offline.snapshot()
+	var off_cmd = ""
+	if !off.is_empty():
+		off_cmd = str(off.command) + ((" %d" % int(off.cycles_left)) if off.has("cycles_left") else "")
+	return {"name": profile_name, "saved_at": int(Time.get_unix_time_from_system()), "play_seconds": int(play_seconds),
+		"tier": tier, "location": Uploads.get_location_name(tier), "tiers_done": Uploads.completed_tiers.size(),
+		"all_done": Uploads.completed_tiers.size() >= Uploads.MAX_TIER, "upload_done": done, "upload_goal": goal,
+		"skills": skills, "offline": off_cmd, "offline_cap": int(Offline.cap_seconds()),
+		"queue": {"running": Queue.running, "steps": Queue.steps.size(), "index": Queue.index,
+			"current": str(Queue.steps[Queue.index]) if Queue.index < Queue.steps.size() else ""},
+		"hat": Ending.choice}
+
 func _process(delta: float) -> void:
+	if session_active:
+		play_seconds += delta
 	if not dirty:
 		return
 	_timer += delta
@@ -24,9 +129,12 @@ func mark_dirty() -> void:
 	dirty = true
 
 func save_game() -> void:
+	if !session_active:
+		return # the launcher (or a boot that never got going): nothing to save
 	#save TEMPATURE
 	var data = {
 		"version": SAVE_VERSION,
+		"meta": build_meta(),
 		"inventory": Inventory.save_data(),
 		"upgrades": Upgrades.save_data(),
 		"mining": Mining.save_data(),
@@ -58,6 +166,7 @@ func save_game() -> void:
 	if dock:
 		data["system_dock"] = dock.save_data()
 	
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		push_error("SaveManager: failed to open save file for writing")
@@ -93,6 +202,9 @@ func load_game() -> bool:
 	
 	var data: Dictionary = parsed
 	loaded_version = int(data.get("version", 0))
+	var meta: Dictionary = data.get("meta", {})
+	play_seconds = float(meta.get("play_seconds", 0))
+	profile_name = str(meta.get("name", ""))
 	_migrate_if_needed(data)
 	
 	Inventory.load_data(data.get("inventory", {}))

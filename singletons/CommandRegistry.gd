@@ -15,7 +15,7 @@ const STATIC = [
 	"upload", "upload -a", "upload cancel ", "intel", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
-	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "wishlist",
+	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
 ]
 
 func _skills() -> Array:
@@ -93,6 +93,7 @@ func main_candidates() -> Array:
 		c.append("ls -" + sk)
 	for loc in Stats.hacking_targets: # 'ls police station' works since 2026-11-01
 		c.append("ls " + str(loc).to_lower())
+		c.append("ls -" + str(loc).to_lower()) # 2026-11-02 (Josh): 'ls -gov' tabs to 'ls -government' (the dash form filters too)
 	for t in range(1, 7):
 		c.append("ls t%d" % t)
 	# 'ls <item>' works for any item, owned or not (caches you haven't found yet, rares, tokens ...)

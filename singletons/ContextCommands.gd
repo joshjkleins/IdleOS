@@ -852,7 +852,6 @@ func intel_help_commands() -> String:
 |                                e.g. intel school                   |
 |   intel <target>               One target's intel in detail        |
 |                                e.g. intel student                  |
-|   intel <target> hard          The hard-mode version               |
 |   decode -intel=<target>       Gather intel on a target            |
 |                                e.g. decode -intel=student          |
 |   intel -h                     Show this list of commands          |
@@ -941,8 +940,8 @@ func get_help() -> String:
 |   clear                        Clear terminal                       |
 |   system                       Show system information              |
 |   panel                        Collapse / expand the side panel     |
-|   vm -h                        List VM window commands              |
 |   quit -s                      Save and quit                        |
+|   logout                       Save and switch profile              |
 |_____________________________________________________________________|
 """
 	return text
