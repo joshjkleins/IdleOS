@@ -1,0 +1,67 @@
+api_name (required; must match an api_name from the definitions CSV),field (name or description),english
+FIRST_BREACH,name,First Breach
+FIRST_BREACH,description,Win your first hack.
+TIER_1,name,School's Out
+TIER_1,description,Complete the School upload goal.
+TIER_2,name,Objection
+TIER_2,description,Complete the Lawfirm upload goal.
+TIER_3,name,Code Blue
+TIER_3,description,Complete the Hospital upload goal.
+TIER_4,name,Insider Trading
+TIER_4,description,Complete the Bank upload goal.
+TIER_5,name,Off the Record
+TIER_5,description,Complete the Police Station upload goal.
+TIER_6,name,Classified
+TIER_6,description,Complete the Government upload goal.
+COMPROMISE_1,name,Expelled
+COMPROMISE_1,description,Fully compromise the School: own all of its drivers.
+COMPROMISE_2,name,Disbarred
+COMPROMISE_2,description,Fully compromise the Lawfirm: own all of its drivers.
+COMPROMISE_3,name,Malpractice
+COMPROMISE_3,description,Fully compromise the Hospital: own all of its drivers.
+COMPROMISE_4,name,Bank Run
+COMPROMISE_4,description,Fully compromise the Bank: own all of its drivers.
+COMPROMISE_5,name,Internal Affairs
+COMPROMISE_5,description,Fully compromise the Police Station: own all of its drivers.
+COMPROMISE_6,name,Regime Change
+COMPROMISE_6,description,Fully compromise the Government: own every Firmware.
+WHITE_HAT,name,White Hat
+WHITE_HAT,description,Lock the launch codes away.
+BLACK_HAT,name,Black Hat
+BLACK_HAT,description,Steal the launch codes.
+SKILL_50,name,Halfway There
+SKILL_50,description,Get any skill to level 50.
+SKILL_99,name,Maxed Out
+SKILL_99,description,Get any skill to level 99.
+ALL_99,name,Full Stack
+ALL_99,description,Get every skill to level 99.
+FIRMWARE_1,name,Flashed
+FIRMWARE_1,description,Install your first Firmware.
+FIRMWARE_ALL,name,Bare Metal
+FIRMWARE_ALL,description,Install every Firmware.
+HACKS_100,name,Script Kiddie No More
+HACKS_100,description,Win 100 hacks.
+FIRST_EXPLOIT,name,Zero Day
+FIRST_EXPLOIT,description,Use an Exploit during a hack.
+FULL_MODS,name,Fully Modded
+FULL_MODS,description,Fill every hacking mod slot.
+DRIVER_R3,name,Driver Update
+DRIVER_R3,description,Get a driver to rank 3.
+FIRST_VM,name,Virtualized
+FIRST_VM,description,Run a process in a virtual machine.
+QUEUE_6,name,Job Scheduler
+QUEUE_6,description,Queue 6 steps.
+OFFLINE_24,name,Away From Keyboard
+OFFLINE_24,description,Come back from a full 24 hour offline session.
+ALERT_CLEARED,name,Lay Low
+ALERT_CLEARED,description,Clear a target's alert after it reached 100%.
+OVERHEAT,name,Thermal Throttling
+OVERHEAT,description,Overheat your system.
+SUDO_RM,name,sudo rm -rf
+SUDO_RM,description,Try to delete everything.
+STUDENT_100,name,Detention
+STUDENT_100,description,Hack the Student 100 times.
+FULLY_AUTOMATED,name,Fully Automated
+FULLY_AUTOMATED,description,"Run Mining, Parsing, Cracking, Matching and Compiling at the same time."
+HACKERMAN,name,Hackerman
+HACKERMAN,description,Unlock every other achievement.

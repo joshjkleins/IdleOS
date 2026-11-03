@@ -99,6 +99,8 @@ func _raise(target: Dictionary) -> void:
 		add = 0.0
 	add = min(add, 100.0 - float(d.alert))
 	d.alert = float(d.alert) + add
+	if float(d.alert) >= 100.0 - 0.001:
+		d["maxed"] = true # (ALERT_CLEARED achievement once it's cleared)
 	if float(d.alert) <= 0.0:
 		_run["_n"] = int(_run.get("_n", 0)) + 1 # (Ghost Protocol on a clean target: still counts as the run's cache)
 		return
@@ -156,6 +158,8 @@ func on_xp(major, amount: int) -> void:
 		var drop = STEP * left / need
 		if drop >= float(d.alert) - 0.001:
 			left -= float(d.alert) / STEP * need
+			if d.get("maxed", false):
+				Achievements.event("ALERT_CLEARED")
 			data.erase(key)
 			if !Offline.computing:
 				Signals.system_message_signal.emit("[color=#4ec994]%s's alert is cleared: caches drop every time again.[/color]" % (t.name if !t.is_empty() else key))
@@ -269,5 +273,5 @@ func load_data(d: Dictionary) -> void:
 			continue
 		var a = float(e.get("alert", float(e.get("stacks", 0)) * STEP)) # (saved as stacks on 2026-11-02)
 		if a > 0.0:
-			data[str(k)] = {"alert": clampf(a, 0.0, 100.0), "skill": str(e.skill)}
+			data[str(k)] = {"alert": clampf(a, 0.0, 100.0), "skill": str(e.skill), "maxed": bool(e.get("maxed", false))}
 	changed.emit()

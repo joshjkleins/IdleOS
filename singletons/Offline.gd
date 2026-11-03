@@ -332,6 +332,8 @@ func compute() -> void:
 				report = {"resume_only": true, "away": away, "resume": {"context": int(snap.context), "command": cmd}}
 		return
 	var secs = min(away, cap_seconds())
+	if secs >= MAX_CAP_HOURS * 3600.0 - 1.0: # 2026-11-03: a full 24 h offline session
+		Achievements.event("OFFLINE_24")
 	var inv_before = Inventory.inventory.duplicate()
 	var up_before = Uploads.uploaded.duplicate()
 	var staged_before = Uploads.staged.duplicate()

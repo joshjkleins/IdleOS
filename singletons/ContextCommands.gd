@@ -938,6 +938,7 @@ func get_help() -> String:
 |   upload                       Upload goal + what's uploading       |
 |   intel                        Intel on hacking targets (intel -h)  |
 |   alert                        Target alert: cache chance + chores  |
+|   achievements                 Your achievements                    |
 |                                                                     |
 | DOCUMENTATION                                                       |
 |   tutorial                     Show tutorial checklist              |

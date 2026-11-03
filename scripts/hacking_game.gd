@@ -2086,6 +2086,7 @@ func use_exploit(item: ItemData, auto: bool = false) -> String:
 	var refunded = Drivers.value("refund") > 0.0 and randf() < Drivers.value("refund") # Refund (driver, 2026-11-01): no charge spent
 	if !refunded:
 		Exploits.set_charge(Exploits.charge - Exploits.cost(item))
+	Achievements.event("FIRST_EXPLOIT") # 2026-11-03
 	var kit_saved = Upgrades.has("hacking.exploit_kit") and randf() < EXPLOIT_KIT_CHANCE
 	if !kit_saved:
 		Inventory.remove_resource(item, 1)

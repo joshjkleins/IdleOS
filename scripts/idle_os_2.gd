@@ -325,6 +325,7 @@ func _on_input_line_text_submitted(new_text, from_queue := false):
 ## everything after the echo: typed commands and queue steps (from_queue)
 func _execute_command(new_text: String, from_queue: bool) -> void:
 	if new_text == "sudo rm -rf":
+		Achievements.event("SUDO_RM") # 2026-11-03 (hidden achievement)
 		add_line("UNINSTALLING PROCESSES")
 		for process in major_processes:
 			add_line(process.SKILL.name + ".....removed")
@@ -790,6 +791,9 @@ func universal_commands(text):
 		handle_cd_commands(text)
 		return true
 
+	if text == "achievements" or text == "achievement" or text.begins_with("achievements ") or text.begins_with("achievement "): # 2026-11-03
+		add_line(Achievements.handle(text))
+		return true
 	if text in ["alert", "alerts", "alert -h"]: # 2026-11-02: target alert list (Alert.gd)
 		add_line(Alert.list_text())
 		return true

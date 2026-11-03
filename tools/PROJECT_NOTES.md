@@ -1417,3 +1417,21 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
 - 'exploits' / 'mod -tier' (2026-11-03, Josh): only tiers whose location is unlocked (ContextCommands.tier_open), every item of those tiers listed, greyed when you have none (mod -tier: owned rows keep their 'mod -add' ID, others show '-'); a dim line counts the hidden tiers. An item you own from a later tier still shows. 'mod' (by slot) still lists owned mods only. Test: tools/tests/tierlists.gd.
 - 'upload -a <amount>' (2026-11-03, Josh): up to <amount> of every goal item (Uploads.queue caps it to what you have and what the goal still needs); in 'upload' help + tab. Test: tools/tests/uploada.gd.
 - 2026-11-03 (Josh): STEP_SECONDS = [40, 46, 53, 61, 70, 80] (T1's 40 s per 10%, +15%/tier); step units rounded to the nearest (was ceil: long cycles overshot, T6 crack 114 s). Units per 10%: Mining 5/4/4/4/4/4, Parsing 10/11/12/13/12/12, Cracking 4/3/3/3/2/2, Matching 3/3/3/3/3/2, Compiling 4/5/6/6/7/8, Phishing 5/10/23/46/90/163. Test: tools/tests/alertsteps.gd.
+
+## Steam achievements (2026-11-03, Josh; app 3884530, GodotSteam GDExtension in addons/godotsteam)
+- singletons/SteamManager.gd: looks the Steam singleton up at runtime (Engine.get_singleton), steamInitEx(), run_callbacks
+  every frame (PROCESS_MODE_ALWAYS), unlock = setAchievement + storeStats, set_stat (int), reset_all. No plugin / no
+  Steam client = available false, every call a no-op (the game runs as before).
+- singletons/Achievements.gd: 33 DEFS [API, name, description, hidden]; unlocks kept account-wide in
+  user://achievements.cfg (not per save slot) and pushed to Steam; ones made while Steam was away sync on the next
+  start. check_all() every 2 s while a profile is loaded + right after a load (old saves unlock what they qualify for):
+  wins / HACKS_WON stat, tiers, compromises (Compromise.is_repeat = all its drivers / Firmware owned), hats, levels,
+  Firmware, full mod slots, driver rank 3, VMs, 6 queue steps, Student wins, FULLY_AUTOMATED (Mining+Parsing+Cracking+
+  Matching+Compiling running at once, main terminal + VMs, HintEngine._running). Events: FIRST_EXPLOIT (use_exploit),
+  SUDO_RM, OFFLINE_24 (Offline.compute, a full 24 h), ALERT_CLEARED (Alert: a target that reached 100%, "maxed", cleared
+  by work), OVERHEAT (Signals.system_overheated_signal). HACKERMAN once all others are unlocked.
+  'achievements' lists them (hidden ones show ???); DEV ('achievements reset', 'achievement unlock <id>'): turn
+  Achievements.DEV off before release.
+- tools/steam/make_icons.py -> tools/steam/achievements/<API>_ACHIEVED.png + <API>_UNACHIEVED.png (256x256, Steamworks bulk-upload names; old 64px ones in _to_delete/old_icons) and tools/steam/achievements.csv
+  (Steamworks entry sheet). Steamworks also needs the int stat HACKS_WON (HACKS_100's progress stat, 0-100).
+- steam_appid.txt (project root) is for editor testing only: don't ship it. Test: tools/tests/achtest.gd.

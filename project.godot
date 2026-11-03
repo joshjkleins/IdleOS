@@ -65,6 +65,8 @@ Firmware="*res://singletons/Firmware.gd"
 Flush="*res://singletons/Flush.gd"
 Queue="*res://singletons/Queue.gd"
 Alert="*res://singletons/Alert.gd"
+SteamManager="*res://singletons/SteamManager.gd"
+Achievements="*res://singletons/Achievements.gd"
 
 [display]
 
