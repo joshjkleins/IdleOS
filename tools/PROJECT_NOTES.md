@@ -1435,3 +1435,16 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
 - tools/steam/make_icons.py -> tools/steam/achievements/<API>_ACHIEVED.png + <API>_UNACHIEVED.png (256x256, Steamworks bulk-upload names; old 64px ones in _to_delete/old_icons) and tools/steam/achievements.csv
   (Steamworks entry sheet). Steamworks also needs the int stat HACKS_WON (HACKS_100's progress stat, 0-100).
 - steam_appid.txt (project root) is for editor testing only: don't ship it. Test: tools/tests/achtest.gd.
+
+## User folder rename + demo veteran (2026-11-03, Josh)
+- project.godot custom_user_dir_name IdleOS_Demo -> IdleOS (Windows %APPDATA%\IdleOS). SaveManager._migrate_from_demo_dir:
+  first launch with no profiles here copies the old folder's saves/slot_*.json, settings.cfg and achievements.cfg
+  (copied, the old folder is left as is). Steam Auto-Cloud: WinAppDataRoaming / IdleOS/saves / *.json, not recursive,
+  [Cross-Platform] + overrides MacAppSupport, LinuxXdgDataHome.
+- singletons/DemoVeteran.gd: reads the old folder's savegame.json (a demo / pre-profile save: no "meta" block) until one
+  is found; account-wide state in user://demo_veteran.cfg (found, claimed_slot). The first NEW profile claims it
+  (launcher _boot -> claim(slot); the launcher intro and the new-profile popup mention it). Per profile state
+  ("pending" / "given", saved as "veteran"); delivered once the tutorial is complete: each skill to its demo level
+  (cap 10, never lowered) + that many of its VM token (not Hacking), +100 of each School resource if the demo's
+  School goal was done, and every demo rare it had uploaded (same amounts). Card tag DEMO VETERAN (meta "veteran").
+  Test: tools/tests/veteran.gd (PHASE=1 writes a fake demo save, PHASE=2 with an empty IdleOS folder).

@@ -22,7 +22,34 @@ var auto_save_interval: float = 15.0
 var _timer: float = 0.0
 
 func _ready() -> void:
+	_migrate_from_demo_dir()
 	_migrate_legacy()
+
+## 2026-11-03 (Josh): the user folder was renamed IdleOS_Demo -> IdleOS. On the first launch with no profiles here,
+## the full game's profile saves (saves/slot_*.json: testers, Josh), settings and achievements are copied over from
+## the old folder (copied, never moved: the old folder stays as it was). A demo's savegame.json is read by DemoVeteran.
+const OLD_DIR_NAME := "IdleOS_Demo"
+func old_user_dir() -> String:
+	return OS.get_user_data_dir().get_base_dir().path_join(OLD_DIR_NAME)
+
+func _migrate_from_demo_dir() -> void:
+	var old = old_user_dir()
+	if old == OS.get_user_data_dir() or !DirAccess.dir_exists_absolute(old):
+		return
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var have_any = false
+	for n in range(1, SLOTS + 1):
+		have_any = have_any or slot_exists(n)
+	if !have_any and DirAccess.dir_exists_absolute(old.path_join("saves")):
+		for n in range(1, SLOTS + 1):
+			var src = old.path_join("saves/slot_%d.json" % n)
+			if FileAccess.file_exists(src):
+				DirAccess.copy_absolute(src, ProjectSettings.globalize_path(slot_path(n)))
+				print("SaveManager: copied slot %d from %s" % [n, OLD_DIR_NAME])
+	for f in ["settings.cfg", "achievements.cfg"]:
+		var src = old.path_join(f)
+		if FileAccess.file_exists(src) and !FileAccess.file_exists("user://" + f):
+			DirAccess.copy_absolute(src, ProjectSettings.globalize_path("user://" + f))
 
 func slot_path(n: int) -> String:
 	return "%s/slot_%d.json" % [SAVE_DIR, n]
@@ -113,7 +140,7 @@ func build_meta() -> Dictionary:
 		"skills": skills, "offline": off_cmd, "offline_cap": int(Offline.cap_seconds()),
 		"queue": {"running": Queue.running, "steps": Queue.steps.size(), "index": Queue.index,
 			"current": str(Queue.steps[Queue.index]) if Queue.index < Queue.steps.size() else ""},
-		"hat": Ending.choice}
+		"hat": Ending.choice, "veteran": DemoVeteran.state != ""}
 
 func _process(delta: float) -> void:
 	if session_active:
@@ -158,6 +185,7 @@ func save_game() -> void:
 		"flush": Flush.save_data(),
 		"queue": Queue.save_data(),
 		"alert": Alert.save_data(),
+		"veteran": DemoVeteran.save_data(),
 	}
 	
 	var tracked_panel = get_tree().get_first_node_in_group("tracked_items_panel")
@@ -231,6 +259,7 @@ func load_game() -> bool:
 	Flush.load_data(data.get("flush", data.get("burst", {}))) # (saved as "burst" until 2026-11-02)
 	Queue.load_data(data.get("queue", {}))
 	Alert.load_data(data.get("alert", {}))
+	DemoVeteran.load_data(data.get("veteran", {}))
 	Exp.refresh_all_process_unlocks() # 2026-10-26: unlocks follow the tiers, so after Stats (locations) has loaded
 	
 	print(data.get("mods"))

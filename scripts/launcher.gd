@@ -138,6 +138,8 @@ func _intro() -> void:
 		"[color=%s][  OK  ][/color] Mounting /home" % GREEN,
 		"[color=%s][  OK  ][/color] Found %d user profile%s" % [GREEN, _filled(), "" if _filled() == 1 else "s"], "",
 		"Select a user profile."]
+	if DemoVeteran.pending_for_new_profile(): # 2026-11-03: a demo save was found
+		lines.insert(lines.size() - 2, "[color=%s][  OK  ][/color] Demo save found: your next new profile gets the [color=#ffc24a]demo veteran[/color] bonus" % GREEN)
 	_log.text = ""
 	for l in lines:
 		_log.text += ("\n" if _log.text != "" else "") + l
@@ -200,6 +202,8 @@ func _build_card(n: int) -> void:
 		v.add_child(body)
 		return
 	title.text = "[color=%s]%d[/color]  [color=%s]%s[/color]" % [FAINT, n + 1, TEXT, SaveManager.display_name(n + 1, meta)]
+	if meta.get("veteran", false): # 2026-11-03
+		title.text += "  [color=#ffc24a][font_size=13]DEMO VETERAN[/font_size][/color]"
 	if str(meta.get("hat", "")) != "":
 		var hat = HatIcon.new()
 		hat.fixed = str(meta.hat)
@@ -398,6 +402,7 @@ func _boot(n: int, new_name: String = "") -> void:
 	_select(n - 1)
 	if empty:
 		SaveManager.profile_name = new_name
+		DemoVeteran.claim(n) # the first new profile after a demo save gets the veteran bonus
 	SaveManager.slot = n
 	var name = new_name if empty else SaveManager.display_name(n, _metas[n - 1])
 	_say("[color=%s][  ..  ][/color] %s %s" % [DIM, "Creating profile" if empty else "Mounting", name])
@@ -495,7 +500,8 @@ func _open_settings() -> void:
 
 func _open_new(n: int) -> void:
 	_select(n - 1)
-	_popup("New profile", "Slot %d. Name it (letters, numbers, '_' and '-').\n[color=%s]It starts a fresh IdleOS install.[/color]" % [n, FAINT],
+	_popup("New profile", "Slot %d. Name it (letters, numbers, '_' and '-').\n[color=%s]It starts a fresh IdleOS install.[/color]%s" % [n, FAINT,
+		("\n[color=#ffc24a]Demo veteran:[/color] [color=%s]your demo progress is restored once the tutorial is done.[/color]" % FAINT) if DemoVeteran.pending_for_new_profile() else ""],
 		"user_%d" % n, "create", GREEN, func(nm):
 			var why = SaveManager.name_problem(nm)
 			if why != "":
