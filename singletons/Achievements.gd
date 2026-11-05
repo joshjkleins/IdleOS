@@ -5,7 +5,7 @@ extends Node
 ## (SteamManager); unlocks made while Steam was unavailable are pushed the next time it is. HACKERMAN unlocks once
 ## every other one is unlocked. 'achievements' lists them; DEV adds 'achievements reset' / 'achievement unlock <id>'.
 
-const DEV := true # TESTING: 'achievements reset' and 'achievement unlock <id>'. Turn off before release.
+const DEV := false # TESTING: 'achievements reset' and 'achievement unlock <id>'. Turn off before release.
 const PATH := "user://achievements.cfg"
 const STAT_HACKS := "HACKS_WON" # Steam stat (int) that HACKS_100 is linked to in Steamworks
 const CHECK_SECONDS := 2.0

@@ -15,7 +15,7 @@ const STATIC = [
 	"upload", "upload -a", "upload -a 10", "upload cancel ", "intel", "alert", "achievements", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
-	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
+	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -clear", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
 ]
 
 func _skills() -> Array:
@@ -168,7 +168,7 @@ func main_candidates() -> Array:
 ## locations view): 'hack' / 'unlock' only complete that location's targets (2026-11-02: 'hack vic' at Government
 ## offered the School's Vice Principal)
 func hacking_candidates(shown: String = "") -> Array:
-	var c: Array = ["-h", "alert", "cd ..", "cd ~", "cd root", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run auto ", "run auto off", "quit", "quit -s"]
+	var c: Array = ["-h", "alert", "cd ..", "cd ~", "cd root", "tutorial", "kill", "kill -s", "spoof", "overclock", "overclock -kill", "unlock", "run", "run queue", "run auto ", "run auto off", "quit", "quit -s"]
 	for loc in Stats.hacking_targets:
 		var l = Stats.hacking_targets[loc]
 		if l.get("unlocked", false):

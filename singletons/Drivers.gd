@@ -11,7 +11,7 @@ signal ranked_up(id: String, rank: int)
 const SLOT_LEVELS = [10, 60]            # a slot at each of these skill levels (2 max)
 const RANK_XP = [0, 25000, 1500000]     # skill XP earned while equipped for rank 1 / 2 / 3 (2026-10-31: rank 3 1.5M, was 600k; 2026-10-30: was 150000)
 const MAX_RANK = 3
-const DEV_GIVE := true                  # TESTING: 'driver give <id|all>' grants drivers. Turn off before release.
+const DEV_GIVE := false                 # TESTING: 'driver give <id|all>' grants drivers. Turn off before release.
 
 ## id -> {skill, name, values per rank, text with %s for the value, format}
 ## format: "pct" (+10%; "%s chance ..." texts drop the +), "temp" (80°C), "nth" (10th), "x" (×1.5), "s" (2s), "num" (40)

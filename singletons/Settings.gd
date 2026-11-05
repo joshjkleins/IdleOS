@@ -127,7 +127,11 @@ func _apply(key: String) -> void:
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 					_fit_window.call_deferred()
 				"full_screen":
-					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+					# 2026-11-05: the game already starts full screen (project setting); setting it again at startup
+					# re-created the window: a black frame and the splash flashed again before the launcher
+					var m = DisplayServer.window_get_mode()
+					if m != DisplayServer.WINDOW_MODE_FULLSCREEN and m != DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+						DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 
 ## Windowed mode (2026-10-29): Godot fell back to the project's base size (1920x720, an 8:3 strip) or the

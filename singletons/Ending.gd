@@ -4,7 +4,7 @@ extends Node
 ## download, then the white hat / black hat choice. No skip, no replay. Then the outro (idle_os_2._ending_outro) on the
 ## next return to root (or the next load), typed like the intro with no skip, and the congrats notice in the terminal.
 
-const DEV := true # dev commands: 'finish' (hacking: target integrity to 1) and 'ending reset'. Turn off before release.
+const DEV := false # dev commands: 'finish' (hacking: target integrity to 1) and 'ending reset'. Turn off before release.
 
 enum {NONE, CINEMATIC, OUTRO, CONGRATS, DONE}
 var state := NONE    # CINEMATIC = started but not finished (a quit mid-way replays it on the next load)

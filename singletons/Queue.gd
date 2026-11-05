@@ -54,6 +54,8 @@ func handle(text: String) -> String:
 		if t.to_lower().begins_with("queue -" + w):
 			t = "queue " + t.substr(7)
 			break
+	if t.to_lower() in ["queue -clear", "queue clear"]: # 2026-11-05: same as queue -rm -a
+		t = "queue rm -a"
 	var low = t.to_lower()
 	if !unlocked():
 		return "The queue opens with Lawfirm access (complete the School upload goal)."
@@ -65,7 +67,7 @@ func handle(text: String) -> String:
 		if why != "":
 			return "[color=#e26d5a]%s[/color]" % why
 		if steps.size() >= slots():
-			return "[color=#e26d5a]All %d queue slots are used. 'queue -rm <n>' or 'queue -rm -a' to make room.[/color]" % slots()
+			return "[color=#e26d5a]All %d queue slots are used. 'queue -rm <n>' or 'queue -clear' to make room.[/color]" % slots()
 		steps.append(cmd)
 		_changed()
 		return "Queued [color=#4ec994]%s[/color] as step %d (%d of %d slots)." % [cmd, steps.size() - 1, steps.size(), slots()]
@@ -106,7 +108,7 @@ func handle(text: String) -> String:
 			_changed()
 			return "Queue cleared."
 		if !arg.is_valid_int() or int(arg) < 0 or int(arg) >= steps.size(): # steps count from 0 (2026-11-02, Josh)
-			return "usage: queue -rm <n> (0-%d)  ·  queue -rm -a" % max(0, steps.size() - 1)
+			return "usage: queue -rm <n> (0-%d)  ·  queue -clear" % max(0, steps.size() - 1)
 		if running and int(arg) == index:
 			return "Step %d is running. Stop the queue first ('queue -kill')." % int(arg)
 		var n = int(arg)
@@ -250,7 +252,7 @@ func status_text(help: bool = true) -> String:
 	t += "[color=%s]Offline it keeps cycling its steps at half speed (half your offline time). A step without a count never ends, so the queue stays on it, offline too.[/color]\n\n" % D
 	for row in [["queue -add <command>", "add a step: 'queue -add mine -logs 25', 'queue -add parse -footprint=logs 25 survey'"],
 			["queue -set <n> <command>", "replace step n"], ["queue -ins <n> <command>", "insert at step n (the rest move down)"],
-			["queue -rm <n>", "remove step n  ·  'queue -rm -a' clears it"], ["queue -run", "start (or resume) at the step it's on"], ["queue -run <n>", "start at step n"],
+			["queue -rm <n>", "remove step n"], ["queue -clear", "remove every step (same as 'queue -rm -a')"], ["queue -run", "start (or resume) at the step it's on"], ["queue -run <n>", "start at step n"],
 			["queue -kill", "stop now: the running step is killed ('stop' does the same)"], ["queue -pause", "stop after the current cycle"], ["queue -ls", "the steps"]]:
 		t += "  [color=%s]%s[/color]  [color=%s]%s[/color]\n" % [G, row[0].rpad(25), D, row[1]]
 	return t

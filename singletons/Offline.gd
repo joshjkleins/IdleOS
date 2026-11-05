@@ -647,7 +647,11 @@ func _expected_roll(list: Array) -> Dictionary:
 func _phishing(p: Dictionary, snap: Dictionary) -> Dictionary:
 	var lines = Phishing.max_lines + int(Upgrades.cur("phishing.lines"))
 	var bait = Items.ITEM_MAP.get(int(snap.get("bait", -1)))
-	var baited = bait != null and Inventory.get_amount(bait) >= Phishing.bait_cost(bait)
+	# 2026-11-05: baited only while a whole cycle's bait is left (every line's cast). Was 'one cast's worth', so 25 bait
+	# on 5 Spear lines (50 a cycle) stayed "baited", afforded 0 cycles and stopped the whole offline run (nothing gained).
+	var bait_casts = (Phishing.max_lines + int(Upgrades.cur("phishing.lines"))) if p.get("style", "lines") == "lines" else 1
+	var bait_per = Phishing.bait_cost(bait) * bait_casts * (1.0 - Upgrades.cur("phishing.bait_recycling")) if bait != null else 0.0
+	var baited = bait != null and Inventory.get_amount(bait) >= max(1.0, bait_per)
 	var rare_bait = baited and Phishing.is_rare_bait(bait) # 'phish -mod' with a rare: every cast lands a mod
 	var s = _speed(Phishing)
 	var qh = 1.0 - Upgrades.cur("phishing.quick_hook")

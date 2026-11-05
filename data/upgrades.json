@@ -326,8 +326,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 32
+       "item": "IP address",
+       "amount": 25
       }
      ]
     },
@@ -341,8 +341,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 82
+       "item": "Email Header",
+       "amount": 63
       }
      ]
     },
@@ -356,8 +356,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 110
+       "item": "Mac Address",
+       "amount": 90
       }
      ]
     },
@@ -371,8 +371,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 107
+       "item": "Routing Number",
+       "amount": 80
       }
      ]
     },
@@ -386,8 +386,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 117
+       "item": "Subnet Map",
+       "amount": 84
       }
      ]
     },
@@ -401,8 +401,8 @@
      "effect": "How long offline progression runs while you're away",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 172
+       "item": "Gateway Address",
+       "amount": 123
       }
      ]
     }
@@ -425,8 +425,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 37
+       "item": "Usernames",
+       "amount": 29
       }
      ]
     },
@@ -440,8 +440,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 95
+       "item": "Case Number",
+       "amount": 73
       }
      ]
     },
@@ -455,8 +455,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 126
+       "item": "Staff IDs",
+       "amount": 103
       }
      ]
     },
@@ -470,8 +470,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 123
+       "item": "Account Numbers",
+       "amount": 91
       }
      ]
     },
@@ -485,8 +485,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 135
+       "item": "Badge Number",
+       "amount": 97
       }
      ]
     },
@@ -500,8 +500,8 @@
      "effect": "Equipped hacking mods last longer",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 198
+       "item": "Clearance ID",
+       "amount": 142
       }
      ]
     }
@@ -524,8 +524,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 42
+       "item": "Encrypted passwords",
+       "amount": 33
       }
      ]
     },
@@ -539,8 +539,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 109
+       "item": "Encrypted Signature",
+       "amount": 83
       }
      ]
     },
@@ -554,8 +554,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 145
+       "item": "Encrypted Badge Hash",
+       "amount": 119
       }
      ]
     },
@@ -569,8 +569,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 141
+       "item": "Encrypted PINS",
+       "amount": 105
       }
      ]
     },
@@ -584,8 +584,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 155
+       "item": "Encrypted SSH Key",
+       "amount": 111
       }
      ]
     },
@@ -599,8 +599,8 @@
      "effect": "Defrag boosts last longer",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 227
+       "item": "Encrypted Bio Hash",
+       "amount": 163
       }
      ]
     }
@@ -623,8 +623,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 49
+       "item": "Passwords",
+       "amount": 16
       }
      ]
     },
@@ -638,8 +638,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 125
+       "item": "Digital Signature",
+       "amount": 35
       }
      ]
     },
@@ -653,8 +653,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 167
+       "item": "Badge Hash",
+       "amount": 41
       }
      ]
     },
@@ -668,8 +668,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 162
+       "item": "PINS",
+       "amount": 37
       }
      ]
     },
@@ -683,8 +683,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 178
+       "item": "Private Keys",
+       "amount": 31
       }
      ]
     },
@@ -698,8 +698,8 @@
      "effect": "Shared defrag cooldown shorter (meets duration at max)",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 261
+       "item": "Bio Template",
+       "amount": 38
       }
      ]
     }
@@ -722,8 +722,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 56
+       "item": "Credentials",
+       "amount": 9
       }
      ]
     },
@@ -737,8 +737,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 144
+       "item": "Signed Certificate",
+       "amount": 25
       }
      ]
     },
@@ -752,8 +752,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 192
+       "item": "Access Badge",
+       "amount": 35
       }
      ]
     },
@@ -767,8 +767,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 186
+       "item": "Account access tokens",
+       "amount": 37
       }
      ]
     },
@@ -782,8 +782,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 205
+       "item": "Officer Auth Key",
+       "amount": 37
       }
      ]
     },
@@ -797,8 +797,8 @@
      "effect": "Chance a VM token isn't used up when a VM starts or renews (5% at Tier 1, +3% per tier)",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 301
+       "item": "Security Clearance",
+       "amount": 54
       }
      ]
     }
@@ -921,7 +921,19 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 271
+       "amount": 51
+      },
+      {
+       "item": "IP address",
+       "amount": 53
+      },
+      {
+       "item": "Passwords",
+       "amount": 21
+      },
+      {
+       "item": "Credentials",
+       "amount": 10
       }
      ]
     }
@@ -945,7 +957,19 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 696
+       "amount": 130
+      },
+      {
+       "item": "Email Header",
+       "amount": 133
+      },
+      {
+       "item": "Digital Signature",
+       "amount": 48
+      },
+      {
+       "item": "Signed Certificate",
+       "amount": 30
       }
      ]
     }
@@ -969,7 +993,19 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 929
+       "amount": 174
+      },
+      {
+       "item": "Mac Address",
+       "amount": 190
+      },
+      {
+       "item": "Badge Hash",
+       "amount": 56
+      },
+      {
+       "item": "Access Badge",
+       "amount": 42
       }
      ]
     }
@@ -993,7 +1029,19 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 902
+       "amount": 169
+      },
+      {
+       "item": "Routing Number",
+       "amount": 168
+      },
+      {
+       "item": "PINS",
+       "amount": 52
+      },
+      {
+       "item": "Account access tokens",
+       "amount": 44
       }
      ]
     }
@@ -1017,7 +1065,19 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 992
+       "amount": 186
+      },
+      {
+       "item": "Subnet Map",
+       "amount": 178
+      },
+      {
+       "item": "Private Keys",
+       "amount": 44
+      },
+      {
+       "item": "Officer Auth Key",
+       "amount": 45
       }
      ]
     }
@@ -1041,7 +1101,19 @@
      "costs": [
       {
        "item": "Databases",
-       "amount": 1455
+       "amount": 273
+      },
+      {
+       "item": "Gateway Address",
+       "amount": 261
+      },
+      {
+       "item": "Bio Template",
+       "amount": 54
+      },
+      {
+       "item": "Security Clearance",
+       "amount": 65
       }
      ]
     }
@@ -7025,8 +7097,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 84
+       "item": "Encrypted passwords",
+       "amount": 65
       }
      ]
     },
@@ -7040,8 +7112,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 215
+       "item": "Encrypted Signature",
+       "amount": 164
       }
      ]
     },
@@ -7055,8 +7127,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 287
+       "item": "Encrypted Badge Hash",
+       "amount": 235
       }
      ]
     },
@@ -7070,8 +7142,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 278
+       "item": "Encrypted PINS",
+       "amount": 207
       }
      ]
     },
@@ -7085,8 +7157,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 306
+       "item": "Encrypted SSH Key",
+       "amount": 219
       }
      ]
     },
@@ -7100,8 +7172,8 @@
      "effect": "Basic resources per decoded cache",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 449
+       "item": "Encrypted Bio Hash",
+       "amount": 322
       }
      ]
     }
@@ -7124,8 +7196,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 96
+       "item": "Passwords",
+       "amount": 30
       }
      ]
     },
@@ -7139,8 +7211,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 247
+       "item": "Digital Signature",
+       "amount": 69
       }
      ]
     },
@@ -7154,8 +7226,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 330
+       "item": "Badge Hash",
+       "amount": 80
       }
      ]
     },
@@ -7169,8 +7241,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 320
+       "item": "PINS",
+       "amount": 74
       }
      ]
     },
@@ -7184,8 +7256,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 352
+       "item": "Private Keys",
+       "amount": 62
       }
      ]
     },
@@ -7199,8 +7271,8 @@
      "effect": "Each cache without a rare adds rare chance to the next (resets on a rare drop); bad-luck protection",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 516
+       "item": "Bio Template",
+       "amount": 76
       }
      ]
     }
@@ -7223,8 +7295,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 111
+       "item": "Credentials",
+       "amount": 17
       }
      ]
     },
@@ -7238,8 +7310,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 284
+       "item": "Signed Certificate",
+       "amount": 48
       }
      ]
     },
@@ -7253,8 +7325,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 379
+       "item": "Access Badge",
+       "amount": 69
       }
      ]
     },
@@ -7268,8 +7340,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 368
+       "item": "Account access tokens",
+       "amount": 73
       }
      ]
     },
@@ -7283,8 +7355,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 405
+       "item": "Officer Auth Key",
+       "amount": 73
       }
      ]
     },
@@ -7298,8 +7370,8 @@
      "effect": "Each cache has a chance to also drop an Exploit or Hacking Mod of its tier",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 593
+       "item": "Security Clearance",
+       "amount": 106
       }
      ]
     }
@@ -7322,8 +7394,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Logs",
-       "amount": 127
+       "item": "Usernames",
+       "amount": 98
       }
      ]
     },
@@ -7337,8 +7409,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Archives",
-       "amount": 326
+       "item": "Case Number",
+       "amount": 249
       }
      ]
     },
@@ -7352,8 +7424,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Metadata",
-       "amount": 436
+       "item": "Staff IDs",
+       "amount": 356
       }
      ]
     },
@@ -7367,8 +7439,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Cookies",
-       "amount": 423
+       "item": "Account Numbers",
+       "amount": 314
       }
      ]
     },
@@ -7382,8 +7454,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Repositories",
-       "amount": 465
+       "item": "Badge Number",
+       "amount": 333
       }
      ]
     },
@@ -7397,8 +7469,8 @@
      "effect": "Intel lasts more hacks: +1 max intel hack, and a first find starts with +1 hack",
      "costs": [
       {
-       "item": "Databases",
-       "amount": 682
+       "item": "Clearance ID",
+       "amount": 489
       }
      ]
     }
@@ -7422,7 +7494,19 @@
      "costs": [
       {
        "item": "Logs",
-       "amount": 535
+       "amount": 100
+      },
+      {
+       "item": "IP address",
+       "amount": 104
+      },
+      {
+       "item": "Passwords",
+       "amount": 42
+      },
+      {
+       "item": "Credentials",
+       "amount": 21
       }
      ]
     }
@@ -7446,7 +7530,19 @@
      "costs": [
       {
        "item": "Archives",
-       "amount": 1373
+       "amount": 257
+      },
+      {
+       "item": "Email Header",
+       "amount": 263
+      },
+      {
+       "item": "Digital Signature",
+       "amount": 95
+      },
+      {
+       "item": "Signed Certificate",
+       "amount": 59
       }
      ]
     }
@@ -7470,7 +7566,19 @@
      "costs": [
       {
        "item": "Metadata",
-       "amount": 1834
+       "amount": 344
+      },
+      {
+       "item": "Mac Address",
+       "amount": 375
+      },
+      {
+       "item": "Badge Hash",
+       "amount": 111
+      },
+      {
+       "item": "Access Badge",
+       "amount": 83
       }
      ]
     }
@@ -7494,7 +7602,19 @@
      "costs": [
       {
        "item": "Cookies",
-       "amount": 1780
+       "amount": 334
+      },
+      {
+       "item": "Routing Number",
+       "amount": 331
+      },
+      {
+       "item": "PINS",
+       "amount": 103
+      },
+      {
+       "item": "Account access tokens",
+       "amount": 88
       }
      ]
     }
@@ -7518,7 +7638,19 @@
      "costs": [
       {
        "item": "Repositories",
-       "amount": 1958
+       "amount": 367
+      },
+      {
+       "item": "Subnet Map",
+       "amount": 351
+      },
+      {
+       "item": "Private Keys",
+       "amount": 86
+      },
+      {
+       "item": "Officer Auth Key",
+       "amount": 89
       }
      ]
     }
@@ -7542,7 +7674,19 @@
      "costs": [
       {
        "item": "Databases",
-       "amount": 2872
+       "amount": 538
+      },
+      {
+       "item": "Gateway Address",
+       "amount": 515
+      },
+      {
+       "item": "Bio Template",
+       "amount": 106
+      },
+      {
+       "item": "Security Clearance",
+       "amount": 128
       }
      ]
     }
@@ -8421,7 +8565,7 @@
      "costs": [
       {
        "item": "School payload",
-       "amount": 200
+       "amount": 120
       }
      ]
     }
@@ -8445,7 +8589,7 @@
      "costs": [
       {
        "item": "Lawfirm Payload",
-       "amount": 513
+       "amount": 310
       }
      ]
     }
@@ -8469,7 +8613,7 @@
      "costs": [
       {
        "item": "Hospital Payload",
-       "amount": 685
+       "amount": 410
       }
      ]
     }
@@ -8493,7 +8637,7 @@
      "costs": [
       {
        "item": "Bank Payload",
-       "amount": 665
+       "amount": 400
       }
      ]
     }
@@ -8517,7 +8661,7 @@
      "costs": [
       {
        "item": "Police Payload",
-       "amount": 731
+       "amount": 440
       }
      ]
     }
@@ -8541,7 +8685,7 @@
      "costs": [
       {
        "item": "Government Payload",
-       "amount": 1072
+       "amount": 645
       }
      ]
     }
@@ -9321,7 +9465,7 @@
      "costs": [
       {
        "item": "Superintendent cache",
-       "amount": 2
+       "amount": 1
       }
      ]
     },
@@ -9366,7 +9510,7 @@
      "costs": [
       {
        "item": "Chief Financial Officer Cache",
-       "amount": 2
+       "amount": 4
       }
      ]
     },
@@ -9468,7 +9612,7 @@
      "costs": [
       {
        "item": "Superintendent cache",
-       "amount": 6
+       "amount": 2
       }
      ]
     }
@@ -9492,7 +9636,7 @@
      "costs": [
       {
        "item": "Partner cache",
-       "amount": 10
+       "amount": 3
       }
      ]
     }
@@ -9516,7 +9660,7 @@
      "costs": [
       {
        "item": "Chief of medicine cache",
-       "amount": 14
+       "amount": 4
       }
      ]
     }
@@ -9540,7 +9684,7 @@
      "costs": [
       {
        "item": "Chief Financial Officer Cache",
-       "amount": 8
+       "amount": 5
       }
      ]
     }
@@ -9564,7 +9708,7 @@
      "costs": [
       {
        "item": "Captain cache",
-       "amount": 10
+       "amount": 6
       }
      ]
     }
@@ -9588,7 +9732,7 @@
      "costs": [
       {
        "item": "President Cache",
-       "amount": 14
+       "amount": 7
       }
      ]
     }

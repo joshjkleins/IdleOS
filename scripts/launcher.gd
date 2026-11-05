@@ -23,6 +23,9 @@ var _log: RichTextLabel
 var _input: LineEdit
 var _out: RichTextLabel
 var _modal: Control = null   # the open popup (new / rename / delete), or null
+var _main: Control           # the menu (fades in after the boot sequence)
+var _booting := false
+var _skip := false
 
 func _ready() -> void:
 	theme = load("res://theme/TerminalTheme.tres")
@@ -32,6 +35,7 @@ func _ready() -> void:
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var margin = MarginContainer.new()
+	_main = margin
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
@@ -58,9 +62,19 @@ func _ready() -> void:
 		card.mouse_entered.connect(func(): _select(n))
 		row.add_child(card)
 		_cards.append(card)
+	# 2026-11-05 (Josh): the cards jumped when this text changed height. It sits in a fixed-height box sized for the
+	# help text (the longest), bottom-aligned above the input, so the cards above never move.
+	var out_box = VBoxContainer.new()
+	out_box.add_theme_constant_override("separation", 0)
+	out_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	out_box.clip_contents = true
+	col.add_child(out_box)
+	out_box.add_child(_vspace())
 	_out = _rich(15)
 	_out.fit_content = true
-	col.add_child(_out)
+	out_box.add_child(_out)
+	var f: Font = _out.get_theme_font("normal_font")
+	out_box.custom_minimum_size.y = ceil(f.get_height(15) * (_help_text().count("\n") + 1)) + 6
 	var bar = HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 10)
 	col.add_child(bar)
@@ -85,6 +99,8 @@ func _ready() -> void:
 	bar.add_child(_button("Settings", func(): _open_settings()))
 	bar.add_child(_button("Quit", func(): _quit()))
 	_refresh()
+	_main.modulate.a = 0.0
+	await _boot_sequence()
 	_intro()
 
 ## Line edit look: thin border, a little room left of the caret
@@ -140,13 +156,95 @@ func _intro() -> void:
 		"Select a user profile."]
 	if DemoVeteran.pending_for_new_profile(): # 2026-11-03: a demo save was found
 		lines.insert(lines.size() - 2, "[color=%s][  OK  ][/color] Demo save found: your next new profile gets the [color=#ffc24a]demo veteran[/color] bonus" % GREEN)
-	_log.text = ""
-	for l in lines:
-		_log.text += ("\n" if _log.text != "" else "") + l
-		await get_tree().create_timer(0.08).timeout
+	_log.text = "\n".join(lines) # all at once (2026-11-05): lines appearing one by one pushed the cards down
 	if _out.text == "":
 		_say(_help_text()) # 2026-11-02 (Josh): the commands show from the start
 	_input.grab_focus()
+
+#region boot sequence
+## 2026-11-05 (Josh): a short "system update" before the menu (~2 s). Any key or click skips it.
+const BOOT_PACKAGES := [["idleos-core", "1.0.0"], ["miner", "1.0.0"], ["log-parser", "1.0.0"], ["pw-cracker", "1.0.0"],
+	["cred-matcher", "1.0.0"], ["phish-kit", "1.0.0"], ["cache-decoder", "1.0.0"], ["payload-compiler", "1.0.0"],
+	["sql-injector", "1.0.0"], ["vm-runtime", "1.0.0"], ["cloud-sync", "1.0.0"]]
+var _bt: RichTextLabel
+var _bt_lines: Array = []
+
+func _boot_sequence() -> void:
+	_booting = true
+	var ov = ColorRect.new()
+	ov.color = BG
+	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ov.mouse_filter = Control.MOUSE_FILTER_STOP
+	ov.gui_input.connect(_unhandled_key_or_click)
+	add_child(ov)
+	var m = MarginContainer.new()
+	m.set_anchors_preset(Control.PRESET_FULL_RECT)
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side in ["left", "right", "top", "bottom"]:
+		m.add_theme_constant_override("margin_" + side, 48)
+	ov.add_child(m)
+	_bt = _rich(16)
+	_bt.scroll_active = true
+	_bt.scroll_following = true
+	_bt.get_v_scroll_bar().modulate.a = 0.0
+	m.add_child(_bt)
+	var ok = "[color=%s][  OK  ][/color] " % GREEN
+	_bt_add("[color=%s]IdleOS 1.0[/color] [color=%s](tty1)[/color]" % [BRIGHT, FAINT])
+	await _wait(0.05)
+	for l in ["Started kernel 6.0.idle", "Mounted /home", "Reached target Network"]:
+		_bt_add(ok + l)
+		await _wait(0.07)
+	_bt_add("")
+	_bt_add("[color=%s]::[/color] Synchronizing package databases..." % GREEN)
+	for db in ["core", "extra"]:
+		await _boot_bar(" %s" % db.rpad(43), 0.08)
+	_bt_add("[color=%s]::[/color] Starting system upgrade..." % GREEN)
+	var n = BOOT_PACKAGES.size()
+	for i in n:
+		var pk = BOOT_PACKAGES[i]
+		await _boot_bar("[color=%s](%2d/%d)[/color] upgrading %s" % [FAINT, i + 1, n, ("%s %s" % pk).rpad(26)], 0.07)
+	_bt_add("")
+	_bt_add(ok + "System is up to date")
+	await _wait(0.35)
+	if !is_inside_tree():
+		return
+	var tw = create_tween()
+	tw.tween_property(ov, "modulate:a", 0.0, 0.0 if _skip else 0.25)
+	tw.parallel().tween_property(_main, "modulate:a", 1.0, 0.0 if _skip else 0.3)
+	await tw.finished
+	ov.queue_free()
+	_booting = false
+
+func _bt_add(line: String) -> void:
+	_bt_lines.append(line)
+	_bt.text = "\n".join(_bt_lines)
+
+## a line with a progress bar that fills over <secs>
+func _boot_bar(label: String, secs: float) -> void:
+	_bt_add("")
+	var steps = 4
+	for k in steps + 1:
+		var f = float(k) / steps
+		var w = 20
+		var filled = int(round(f * w))
+		_bt_lines[-1] = "%s [color=%s][lb]%s%s[rb][/color] %3d%%" % [label, GREEN, "#".repeat(filled), "[color=%s]%s[/color]" % [LINE.to_html(false), "-".repeat(w - filled)], int(round(f * 100))]
+		_bt.text = "\n".join(_bt_lines)
+		if k < steps:
+			await _wait(secs / steps)
+
+func _wait(secs: float) -> void:
+	if _skip or !is_inside_tree(): # skipped, or a profile booted and the launcher is gone
+		return
+	await get_tree().create_timer(secs).timeout
+
+func _shortcut_input(event: InputEvent) -> void:
+	_unhandled_key_or_click(event)
+
+func _unhandled_key_or_click(event: InputEvent) -> void:
+	if _booting and !_skip and ((event is InputEventKey and event.pressed) or (event is InputEventMouseButton and event.pressed)):
+		_skip = true
+		get_viewport().set_input_as_handled()
+#endregion
 
 func _filled() -> int:
 	var c = 0

@@ -601,7 +601,7 @@ func tutorial_event_completed(message: String):
 	add_line(message)
 
 ## TESTING: 'add <item>' (+100) and 'rm <item>' (all). Turn off before release (the demo branch removed them).
-const DEV_ITEM_COMMANDS := true
+const DEV_ITEM_COMMANDS := false
 
 func universal_commands(text):
 	text = text.to_lower().strip_edges()
@@ -622,6 +622,8 @@ func universal_commands(text):
 		var out = Drivers.handle(text, sk)
 		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -rm <id>")
 		return true
+	if text == "run queue" or text.begins_with("run queue "): # 2026-11-05: players type it naturally; alias of queue -run [n]
+		text = ("queue -run " + text.trim_prefix("run queue").strip_edges()).strip_edges()
 	if text == "queue" or text.begins_with("queue "): # 2026-11-02: the command queue
 		add_line(Queue.handle(text))
 		return true

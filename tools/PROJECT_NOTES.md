@@ -1386,7 +1386,8 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
   from econdump3), shown as units: "crack -password x22", "parse -footprint=logs x60", "land 490 phishing catches".
   Progress = the skill's XP (Exp.add_xp -> Alert.on_xp): any process of the skill, main / VMs / queue / offline,
   so upgrades and VM windows clear it faster; Survey (x2 XP) counts double. XP goes to that skill's alerted targets in
-  location order, overflow moves on (a cleared target prints a message).
+  location order, overflow moves on (a cleared target prints a message). CHANGED 2026-11-05 to SHARED CLEAR: the same XP
+  lowers every alerted target on that skill at once (each by its own tier's step cost), no queue/carry-over. Test: alertshared.gd.
 - UI: target card ALERT row (10 pips, cache %) + "lower: <chore>" + a progress bar in the skill's color; 'alert'
   (main terminal + hacking console, tab, -h rows) lists every alerted target.
 - tier_time2.py ALERT_STEP=240: heavy farmer ~34 -> ~40 h total.
@@ -1448,3 +1449,15 @@ Steps: 1 slots+meta (DONE) · 2 launcher scene, boot/new · 3 delete/rename · 4
   (cap 10, never lowered) + that many of its VM token (not Hacking), +100 of each School resource if the demo's
   School goal was done, and every demo rare it had uploaded (same amounts). Card tag DEMO VETERAN (meta "veteran").
   Test: tools/tests/veteran.gd (PHASE=1 writes a fake demo save, PHASE=2 with an empty IdleOS folder).
+
+- 2026-11-05 LOSS INTEL TIP: hacking_game.lose() appends _intel_hint(): "TIP: intel lowers every <target> stat. Run 'decode -intel=<target>' to gather it." Only when the target's intel isn't maxed, not in compromise fights, not before the tutorial is done. Test: tools/tests/intelhint.gd.
+
+- 2026-11-05 DECODING/SYSTEM COST SWAP: upgrades no longer cost only the tier mining item. Per tier: Speed/Efficiency/Cooling/Heat Reduction = mining item (unchanged); Yield & Defrag Duration = encrypted parse item; Rare Tracker & Defrag Cooldown = cracked item; Salvage Sweep & VM Snapshot = matched item; Field Notes & Kernel Modules = match-partner parse item; Background Services = the other parse item; capstones split 4 ways (mining, other parse, cracked, matched). Amounts = time-equivalent (econ dump seconds/unit) x0.75. 66 levels changed. Script: tools/balance/costswap_2026-11-05.py (dump.json, old json, K, out json); backup _to_delete/backup/upgrades.json.pre_costswap. Test: tools/tests/costcheck.gd.
+- 2026-11-05 HACKING slots 9/10 (boss cache): tier N costs N and N+1 caches (was 2/6, 2/10, 3/14, 2/8, 5/10, 6/14). Backup _to_delete/backup/upgrades.json.pre_hackcaps.
+- 2026-11-05 "run queue [n]" in the main terminal = alias of "queue -run [n]" (idle_os_2, before the queue handler); completion added.
+- 2026-11-05 OFFLINE BAIT FIX: Offline._phishing counted a run as baited with one cast's bait (10) but a Spear cycle costs 10 x lines (50); 10-49 bait left afforded 0 cycles and _run stopped -> the whole offline session gave nothing. Now baited needs a full cycle's bait; less than that runs unbaited (leftover bait kept). Test: tools/tests/offbait.gd.
+- 2026-11-05 "queue -clear" (or "queue clear") = queue -rm -a; in queue help, completions, the slots-full message.
+- 2026-11-05 Compiling capstones -40% (rounded to 5): 200/513/685/665/731/1072 -> 120/310/410/400/440/645. Backup upgrades.json.pre_compcap.
+- 2026-11-05 LAUNCHER: (1) boot sequence before the menu (launcher._boot_sequence, ~2.5 s, any key/click skips): kernel OK lines, package db sync, 11 package upgrade bars, "System is up to date", then the menu fades in. (2) Cards no longer move: the help/output text sits in a fixed-height bottom-aligned box (height = help text lines), and the intro lines are set at once. Test: tools/tests/bootseq.gd (frames + card y after help/ls/error).
+- 2026-11-05 Settings: window_mode full_screen is only applied when the window isn't already full screen (startup re-set it: black frame + splash flashed again before the launcher, Josh).
+- 2026-11-05 RELEASE PREP: dev flags off (DEV_ITEM_COMMANDS, Achievements.DEV, Drivers.DEV_GIVE, Ending.DEV; the rest were already false). config/version 1.0.0. Windows preset: file/product version 1.0.0.0, company LittleSmith, product IdleOS. launcher._wait / _boot_sequence stop if the launcher left the tree. Test: tools/tests/release.gd (fresh XDG_DATA_HOME, new profile, dev commands rejected). Linux preset to add in the editor (include filter data/*.json).

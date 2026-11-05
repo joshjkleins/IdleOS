@@ -1229,6 +1229,15 @@ func _loss_penalties() -> String:
 		t += "[color=#e24b4a]  %s[/color]\n" % l
 	return t
 
+## 2026-11-05: after a loss, point to 'decode -intel' when this target's intel isn't maxed
+func _intel_hint() -> String:
+	if current_target.is_empty() or !compromise_fights.is_empty() or !Tutorial.is_tutorial_complete():
+		return ""
+	if Decoding.is_intel_maxed(current_target):
+		return ""
+	var cmd = "decode -intel=%s" % str(current_target.get("name", "")).to_lower().replace(" ", "-")
+	return "[color=#e8c547]TIP:[/color] [color=#888888]intel lowers every %s stat. Run[/color] [color=#4ec994]'%s'[/color] [color=#888888]to gather it.[/color]\n" % [str(current_target.get("name", "")), cmd]
+
 static func _fmt_int(n: int) -> String:
 	var s = str(n)
 	var out = ""
@@ -1264,6 +1273,7 @@ func lose(killed: bool = false):
 		if back > 0.0:
 			messages += "[color=#888888]  (the alert those caches added is gone too: -%d%%)[/color]\n" % int(round(back))
 	messages += _loss_penalties()
+	messages += _intel_hint()
 	caches_gained = 0
 	vm_caches_gained = 0
 	remove_mod_duration()

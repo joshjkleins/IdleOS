@@ -7,7 +7,7 @@ extends Node
 ## back to 100%. Each stack clears with a step of that process's work: about STEP_SECONDS at the tier's arrival speed,
 ## shown as a count to the next 10% ("crack -biometric x6"). Cleanup lowers it smoothly: one step = 10%. Progress is that skill's XP (any process of the skill, main terminal, VMs,
 ## the queue and offline all count), so upgrades and VM windows clear it faster. XP goes to the alerted targets needing
-## that skill in location order; what's left over moves on. Exempt: compromise fights, hacks before the tutorial is done.
+## that skill all at once (shared clear, 2026-11-05: every alerted target on the skill drops together). Exempt: compromise fights, hacks before the tutorial is done.
 
 signal changed
 
@@ -147,7 +147,7 @@ func on_xp(major, amount: int) -> void:
 	var skill = str(major.SKILL.name)
 	if !(skill in SKILLS):
 		return
-	var left = float(amount)
+	# 2026-11-05 shared clear: the same XP lowers every alert on this skill at once (no queue, no carry-over).
 	for key in _ordered_keys():
 		var d: Dictionary = data[key]
 		if d.skill != skill:
@@ -155,9 +155,8 @@ func on_xp(major, amount: int) -> void:
 		var t = _target_of(key)
 		var tier = _tier(t) if !t.is_empty() else 1
 		var need = step_xp(skill, tier) # XP per 10%
-		var drop = STEP * left / need
+		var drop = STEP * float(amount) / need
 		if drop >= float(d.alert) - 0.001:
-			left -= float(d.alert) / STEP * need
 			if d.get("maxed", false):
 				Achievements.event("ALERT_CLEARED")
 			data.erase(key)
@@ -165,9 +164,6 @@ func on_xp(major, amount: int) -> void:
 				Signals.system_message_signal.emit("[color=#4ec994]%s's alert is cleared: caches drop every time again.[/color]" % (t.name if !t.is_empty() else key))
 		else:
 			d.alert = float(d.alert) - drop
-			left = 0.0
-		if left <= 0.0:
-			break
 	_changed()
 
 func _ordered_keys() -> Array:
