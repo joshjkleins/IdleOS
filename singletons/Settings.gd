@@ -17,7 +17,7 @@ const DEFS := {
 		"help": "Sets SFX volume percentage",
 	},
 	"music": {
-		"section": "Volume", "default": 70, "type": "range",
+		"section": "Volume", "default": 50, "type": "range",
 		"help": "Sets background music volume percentage",
 	},
 	"music_player": {

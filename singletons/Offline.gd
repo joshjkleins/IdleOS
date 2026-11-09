@@ -92,6 +92,7 @@ func _run_queue(snap: Dictionary, secs: float) -> void:
 	var idle = 0
 	var ran_steps := {}
 	var stopped = false
+	var finished = false
 	computing = true
 	for guard in 256:
 		if cur.is_empty():
@@ -113,7 +114,9 @@ func _run_queue(snap: Dictionary, secs: float) -> void:
 		if !done:
 			break # time ran out part way through this step: it resumes from here
 		cur = {}
-		Queue.index = (Queue.index + 1) % size
+		if Queue.advance_index(): # 2026-11-09: a counted run ('queue -run 5') finished its loops while away
+			finished = true
+			break
 		idle = 0 if progressed else idle + 1
 		if idle >= size:
 			stopped = true
@@ -124,6 +127,13 @@ func _run_queue(snap: Dictionary, secs: float) -> void:
 	limited_run_done = false # the queue's index is already where it should be
 	report.process = "Queue (%d step%s ran, half speed)" % [ran_steps.size(), "" if ran_steps.size() == 1 else "s"]
 	report.notes.append("the queue ran at half speed while you were away")
+	if finished:
+		report.notes.append("the queue finished its %d loop%s" % [Queue.loops_total, "" if Queue.loops_total == 1 else "s"])
+		Queue.running = false
+		Queue.loops_total = 0
+		Queue.changed.emit()
+		report.resume = {}
+		return
 	if stopped:
 		Queue.running = false
 		Queue.changed.emit()

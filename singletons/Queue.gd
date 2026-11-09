@@ -6,7 +6,8 @@ extends Node
 ## with an optional cycle count and modifier ('mine -logs 10 survey'). A step without a count runs as long as its
 ## process does - 'mine -logs' never ends (the queue does exactly what it's told).
 ## While it runs it owns the main terminal: no other process, no Hacking ('queue -kill' first: stops the step at once,
-## the queue waits on it - 'queue run' restarts it, 'queue run <n>' starts at step n). Offline (Offline._run_queue):
+## the queue waits on it - 'queue run' restarts it, 'queue run start=<n>' starts at step n, 'queue run <loops>' stops after
+## that many loops, 2026-11-09). Offline (Offline._run_queue):
 ## the queue keeps cycling its steps for half the capped away time, then resumes the step it got to.
 
 signal changed
@@ -21,6 +22,36 @@ var _fails := 0         # steps skipped in a row (a whole pass of them stops the
 var _accum := 0.0
 var _starting := false
 var _resume_pending := false # loaded running: wait for the welcome back (and its resume of the step) first
+# 2026-11-09 (Josh): 'queue -run 5' = 5 loops then stop (0 = forever). A loop ends when the last step is done.
+var loops_left := 0
+var loops_total := 0
+# 2026-11-09 (Josh): saved queues. lower-case name -> {"name": as typed, "steps": [commands]}. Saved per profile.
+var templates: Dictionary = {}
+const TEMPLATE_NAME_MAX := 32
+
+## Moves to the next step. True when that finished the last of a counted run's loops (the caller stops the queue).
+func advance_index() -> bool:
+	var size = max(1, steps.size())
+	index += 1
+	if index < size:
+		return false
+	index = 0
+	if loops_left > 0:
+		loops_left -= 1
+		return loops_left <= 0
+	return false
+
+## A counted run is done: the queue stops ('queue -run' starts it again)
+func _finish_loops(os: Node) -> void:
+	running = false
+	_active = false
+	if os:
+		os.add_line("[color=#4ec994]Queue finished: %d loop%s completed.[/color]" % [loops_total, "" if loops_total == 1 else "s"])
+	loops_total = 0
+	_changed()
+
+func loop_text() -> String:
+	return "" if loops_total <= 0 else "loop %d/%d" % [loops_total - loops_left + 1, loops_total]
 
 func unlocked() -> bool:
 	return 1 in Uploads.completed_tiers
@@ -50,7 +81,9 @@ func handle(text: String) -> String:
 	var t = text.strip_edges()
 	# 2026-11-02 (Josh): flags take a dash like every other command ('queue -add', '-rm', '-run', '-pause', '-kill',
 	# '-ls'); the bare words still work
-	for w in ["add", "rm", "run", "pause", "kill", "ls", "start", "stop", "list", "resume", "set", "ins"]:
+	if t.to_lower() in ["queue -t", "queue t", "queue -templates", "queue templates"]: # 2026-11-09
+		return templates_text()
+	for w in ["add", "rm", "run", "pause", "kill", "ls", "start", "stop", "list", "resume", "set", "ins", "save", "load", "delete"]:
 		if t.to_lower().begins_with("queue -" + w):
 			t = "queue " + t.substr(7)
 			break
@@ -119,21 +152,107 @@ func handle(text: String) -> String:
 		index = 0 if steps.is_empty() else index % steps.size()
 		_changed()
 		return "Removed step %d (%s)." % [n, gone]
+	if low == "queue save" or low.begins_with("queue save "):
+		return save_template(t.substr(10).strip_edges() if t.length() > 10 else "")
+	if low == "queue load" or low.begins_with("queue load "):
+		return load_template(t.substr(10).strip_edges() if t.length() > 10 else "")
+	if low == "queue delete" or low.begins_with("queue delete "):
+		return delete_template(t.substr(12).strip_edges() if t.length() > 12 else "")
 	if low in ["queue run", "queue start", "queue resume"]:
+		loops_left = 0
+		loops_total = 0
 		return start()
-	if low.begins_with("queue run "): # 'queue run 3': start at step 3
-		var n = low.trim_prefix("queue run ").strip_edges()
-		if !n.is_valid_int() or int(n) < 0 or int(n) >= steps.size():
-			return "usage: queue -run <n> (0-%d)" % max(0, steps.size() - 1)
+	# 2026-11-09 (Josh): 'queue -run 5' = 5 loops, 'queue -run start=2' = from step 2, 'queue -run 5 start=2' = both
+	if low.begins_with("queue run "):
+		var usage = "usage: queue -run [loops] [start=<step>]  ·  e.g. 'queue -run 5', 'queue -run start=%d', 'queue -run 5 start=%d'" % [max(0, steps.size() - 1), max(0, steps.size() - 1)]
+		var loops = 0
+		var from = -1
+		for w in low.trim_prefix("queue run ").strip_edges().split(" ", false):
+			if w.is_valid_int() and int(w) >= 1 and loops == 0:
+				loops = mini(int(w), 999)
+			elif w.begins_with("start=") and w.trim_prefix("start=").is_valid_int():
+				from = int(w.trim_prefix("start="))
+				if from < 0 or from >= steps.size():
+					return "There's no step %d: steps are 0-%d. %s" % [from, max(0, steps.size() - 1), usage]
+			else:
+				return usage
 		if running:
 			return "The queue is already running. 'queue -kill' first."
-		index = int(n)
+		if from >= 0:
+			index = from
+		elif loops > 0:
+			index = 0 # a counted run without start= does whole loops from the first step
+		loops_left = loops
+		loops_total = loops
 		return start()
 	if low in ["queue -kill", "queue kill", "queue stop", "queue -k"]:
 		return kill()
 	if low in ["queue pause", "queue -s"]:
 		return pause()
 	return "Unknown queue command. 'queue -h' lists them."
+
+#region templates
+func save_template(name: String) -> String:
+	if name == "":
+		return "usage: queue -save <name>  ·  e.g. 'queue -save farming'"
+	if name.length() > TEMPLATE_NAME_MAX:
+		return "Keep the name to %d characters or fewer." % TEMPLATE_NAME_MAX
+	if steps.is_empty():
+		return "The queue is empty: add steps first ('queue -add <command>'), then save it."
+	var key = name.to_lower()
+	var had = templates.has(key)
+	templates[key] = {"name": name, "steps": steps.duplicate()}
+	_changed()
+	return "%s template [color=#4ec994]%s[/color] (%d step%s). 'queue -load %s' brings it back." % ["Overwrote" if had else "Saved", name, steps.size(), "" if steps.size() == 1 else "s", name]
+
+func load_template(name: String) -> String:
+	if name == "":
+		return "usage: queue -load <name>  ·  'queue -templates' lists them"
+	var key = name.to_lower()
+	if !templates.has(key):
+		return "No template named '%s'. 'queue -templates' lists them." % name
+	if running:
+		return "Stop the queue first ('queue -kill'), then load a template."
+	var tsteps: Array = templates[key].steps
+	var fit = tsteps.slice(0, slots())
+	steps = fit.duplicate()
+	index = 0
+	_changed()
+	var t = "Loaded template [color=#4ec994]%s[/color]: %d step%s. 'queue -run' starts it." % [templates[key].name, steps.size(), "" if steps.size() == 1 else "s"]
+	if fit.size() < tsteps.size():
+		t += "\n[color=#d29922]It has %d steps but you have %d queue slots: the last %d were left out.[/color]" % [tsteps.size(), slots(), tsteps.size() - fit.size()]
+	return t
+
+func delete_template(name: String) -> String:
+	if name == "":
+		return "usage: queue -delete <name>"
+	var key = name.to_lower()
+	if !templates.has(key):
+		return "No template named '%s'. 'queue -templates' lists them." % name
+	var shown = templates[key].name
+	templates.erase(key)
+	_changed()
+	return "Deleted template %s." % shown
+
+func templates_text() -> String:
+	var G = "#4ec994"; var D = "#888888"; var Y = "#e3b341"
+	var t = "\n[bgcolor=#1a2a1a][color=%s] QUEUE TEMPLATES [/color][/bgcolor]  [color=%s]%d saved[/color]\n" % [G, D, templates.size()]
+	if templates.is_empty():
+		t += "  [color=%s](none yet)[/color]\n" % D
+	var keys = templates.keys()
+	keys.sort()
+	for k in keys:
+		var tp = templates[k]
+		t += "  [color=%s]%s[/color]  [color=%s]%d step%s[/color]\n" % [Y, tp.name, D, tp.steps.size(), "" if tp.steps.size() == 1 else "s"]
+		for i in tp.steps.size():
+			t += "      [color=%s]%d[/color]  [color=#cccccc]%s[/color]\n" % [D, i, tp.steps[i]]
+	t += "\n"
+	for row in [["queue -save <name>", "save the current queue as a template. using the same name overwrites the old one."],
+			["queue -load <name>", "loads a saved queue sequence, replacing the current queue sequence. queue must be stopped to load a new queue."],
+			["queue -delete <name>", "removes a template"]]:
+		t += "  [color=%s]%s[/color]  [color=%s]%s[/color]\n" % [G, row[0].rpad(25), D, row[1]]
+	return t
+#endregion
 
 func start() -> String:
 	if steps.is_empty():
@@ -148,7 +267,7 @@ func start() -> String:
 	_fails = 0
 	index = clampi(index, 0, steps.size() - 1)
 	_changed()
-	return "[color=#4ec994]Queue running[/color] from step %d. It owns the main terminal until 'queue -kill'." % index
+	return "[color=#4ec994]Queue running[/color] from step %d%s. It owns the main terminal until 'queue -kill'." % [index, (" for %d loop%s" % [loops_total, "" if loops_total == 1 else "s"]) if loops_total > 0 else ""]
 
 ## 'queue -kill' (and 'stop'): the queue stops and the running step is killed right away (overheated or mid-way
 ## through a long cycle, control comes back at once). The step it was on starts again on 'queue run'.
@@ -162,7 +281,7 @@ func kill() -> String:
 	if was_active and os and os.process_running:
 		os.kill_main_process()
 	_changed()
-	return "Queue stopped: step %d was killed. 'queue -run' restarts it, 'queue -run <n>' starts at another step." % index
+	return "Queue stopped: step %d was killed. 'queue -run' restarts it, 'queue -run start=<n>' starts at another step." % index
 
 ## 'queue pause' / 'stop -s': stops the queue after the current step's cycle; the step it was on resumes next time
 func pause(quiet: bool = false) -> String:
@@ -195,14 +314,18 @@ func _process(delta: float) -> void:
 		_active = os.process_running
 		if !_active and Offline.limited_run_done: # the step's count finished while away: on to the next one
 			Offline.limited_run_done = false
-			index = (index + 1) % max(1, steps.size())
+			if advance_index():
+				_finish_loops(os)
+				return
 		_changed()
 		return
 	if os.process_running:
 		return # the current step is still going
 	if _active: # the step's process ended: next one
 		_active = false
-		index = (index + 1) % max(1, steps.size())
+		if advance_index():
+			_finish_loops(os)
+			return
 		_changed()
 	_start_step(os)
 
@@ -227,8 +350,9 @@ func _start_step(os: Node) -> void:
 		if _fails >= steps.size():
 			running = false
 			os.add_line("[color=#d29922]Queue stopped: none of its %d step%s could run (out of inputs?).[/color]" % [steps.size(), "" if steps.size() == 1 else "s"])
-		else:
-			index = (index + 1) % steps.size()
+		elif advance_index():
+			_finish_loops(os)
+			return
 	_changed()
 
 func _changed() -> void:
@@ -239,7 +363,7 @@ func _changed() -> void:
 #region text
 func status_text(help: bool = true) -> String:
 	var G = "#4ec994"; var D = "#888888"; var Y = "#e3b341"
-	var t = "\n[bgcolor=#1a2a1a][color=%s] QUEUE [/color][/bgcolor]  [color=%s]%d/%d slots · %s[/color]\n" % [G, D, steps.size(), slots(), ("running step %d" % index) if running else "paused"]
+	var t = "\n[bgcolor=#1a2a1a][color=%s] QUEUE [/color][/bgcolor]  [color=%s]%d/%d slots · %s[/color]\n" % [G, D, steps.size(), slots(), (("running step %d" % index) + ((" · " + loop_text()) if loop_text() != "" else "")) if running else "paused"]
 	if steps.is_empty():
 		t += "  [color=%s](empty)[/color]\n" % D
 	for i in steps.size():
@@ -252,18 +376,29 @@ func status_text(help: bool = true) -> String:
 	t += "[color=%s]Offline it keeps cycling its steps at half speed (half your offline time). A step without a count never ends, so the queue stays on it, offline too.[/color]\n\n" % D
 	for row in [["queue -add <command>", "add a step: 'queue -add mine -logs 25', 'queue -add parse -footprint=logs 25 survey'"],
 			["queue -set <n> <command>", "replace step n"], ["queue -ins <n> <command>", "insert at step n (the rest move down)"],
-			["queue -rm <n>", "remove step n"], ["queue -clear", "remove every step (same as 'queue -rm -a')"], ["queue -run", "start (or resume) at the step it's on"], ["queue -run <n>", "start at step n"],
-			["queue -kill", "stop now: the running step is killed ('stop' does the same)"], ["queue -pause", "stop after the current cycle"], ["queue -ls", "the steps"]]:
+			["queue -rm <n>", "remove step n"], ["queue -clear", "remove every step (same as 'queue -rm -a')"], ["queue -run", "start (or resume) at the step it's on, looping until stopped"], ["queue -run <loops>", "run the whole queue <loops> times, then stop: 'queue -run 5'"],
+			["queue -run start=<n>", "start at step n (combine: 'queue -run 5 start=2')"],
+			["queue -kill", "stop now: the running step is killed ('stop' does the same)"], ["queue -pause", "stop after the current cycle"], ["queue -ls", "the steps"],
+			["queue -templates", "queue templates commands & management"]]:
 		t += "  [color=%s]%s[/color]  [color=%s]%s[/color]\n" % [G, row[0].rpad(25), D, row[1]]
 	return t
 #endregion
 
 func save_data() -> Dictionary:
-	return {"steps": steps, "running": running, "index": index}
+	return {"steps": steps, "running": running, "index": index, "loops_left": loops_left, "loops_total": loops_total, "templates": templates}
 
 func load_data(d: Dictionary) -> void:
 	steps = Array(d.get("steps", [])).map(func(s): return str(s))
 	index = int(d.get("index", 0))
+	loops_left = int(d.get("loops_left", 0))
+	loops_total = int(d.get("loops_total", 0))
+	templates = {}
+	var tp = d.get("templates", {})
+	if tp is Dictionary:
+		for k in tp:
+			var e = tp[k]
+			if e is Dictionary and e.get("steps") is Array:
+				templates[str(k).to_lower()] = {"name": str(e.get("name", k)), "steps": Array(e.steps).map(func(x): return str(x))}
 	running = bool(d.get("running", false))
 	_active = false
 	_resume_pending = running # the welcome back resumes the step; the queue picks up once it's done

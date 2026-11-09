@@ -15,7 +15,7 @@ const STATIC = [
 	"upload", "upload -a", "upload -a 10", "upload cancel ", "intel", "alert", "achievements", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
-	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -clear", "queue -run", "queue -run ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
+	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -clear", "queue -run", "queue -run ", "queue -run start=", "queue -templates", "queue -save ", "queue -load ", "queue -delete ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
 ]
 
 func _skills() -> Array:
@@ -155,9 +155,12 @@ func main_candidates() -> Array:
 	for vm in VMManager.vms:
 		for a in ["show", "hide", "kill"]:
 			c.append("vm %s %d" % [a, vm.vm_id])
+	for k in Queue.templates: # 2026-11-09: template names
+		c.append("queue -load " + str(Queue.templates[k].name))
+		c.append("queue -delete " + str(Queue.templates[k].name))
 	for i in Queue.steps.size(): # 'queue -rm 0', 'queue -run 1', 'queue -set 2 ', 'queue -ins 0 ' (2026-11-02)
 		c.append("queue -rm %d" % i)
-		c.append("queue -run %d" % i)
+		c.append("queue -run start=%d" % i)
 		c.append("queue -set %d " % i)
 		c.append("queue -ins %d " % i)
 	if Queue.unlocked():

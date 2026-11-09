@@ -607,8 +607,7 @@ func universal_commands(text):
 	text = text.to_lower().strip_edges()
 	if text.begins_with("settings"):
 		if text == "settings": # 2026-11-02: opens the settings box ('settings -h' lists the typed settings)
-			var sp = SettingsPopup.open(self)
-			sp.closed.connect(func(): input_line.grab_focus.call_deferred())
+			_open_settings()
 			return true
 		if text in ["settings -h", "settings help"]:
 			add_line(Settings.settings_help())
@@ -622,7 +621,7 @@ func universal_commands(text):
 		var out = Drivers.handle(text, sk)
 		add_line(out if out != "" else "usage: driver  ·  driver -add <id>  ·  driver -rm <id>")
 		return true
-	if text == "run queue" or text.begins_with("run queue "): # 2026-11-05: players type it naturally; alias of queue -run [n]
+	if text == "run queue" or text.begins_with("run queue "): # 2026-11-05: players type it naturally; alias of queue -run [loops] [start=n]
 		text = ("queue -run " + text.trim_prefix("run queue").strip_edges()).strip_edges()
 	if text == "queue" or text.begins_with("queue "): # 2026-11-02: the command queue
 		add_line(Queue.handle(text))
@@ -2883,6 +2882,16 @@ func marketplace_valuable_commands(text):
 			_:#default
 				add_line("Command not found")
 
+## The settings box ('settings' or Escape in the main terminal). Escape inside the box closes it (settings_popup).
+var _settings_popup: Control = null
+func _open_settings() -> void:
+	if is_instance_valid(_settings_popup):
+		return
+	_settings_popup = SettingsPopup.open(self)
+	_settings_popup.closed.connect(func():
+		_settings_popup = null
+		input_line.grab_focus.call_deferred())
+
 #used when navigating past commands with up/down arrows
 func _move_caret_to_end():
 	input_line.caret_column = input_line.text.length()
@@ -2909,6 +2918,11 @@ func _input(event):
 			install_idle_os()
 		if upload_awaiting_player_input and awaiting_player_input and event.keycode == KEY_ENTER:
 			finish_player_uploaded_proper_item()
+		# 2026-11-09 (Josh): Escape opens settings, main terminal only (not Hacking, not during boot/typing/the ending)
+		if event.keycode == KEY_ESCAPE and !event.echo and current_context != Context.HACKING and accepting_player_inputs and !Tutorial.show_intro and !is_instance_valid(_settings_popup):
+			_open_settings()
+			get_viewport().set_input_as_handled()
+			return
 		if event.keycode == KEY_TAB:
 			_tab_complete()
 			get_viewport().set_input_as_handled()

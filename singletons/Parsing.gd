@@ -98,7 +98,7 @@ var SKILL = {
 #Tier IV
 #Extraction -
 # From Mining Item: take additional argument to start, looks for that specific item
-# From Cache Item: Student Cache > Student Cache (Extraction) : If a rare item is decoded, find 4 additional copies
+# From Cache Item: Student Cache > Student Cache (Extraction) : If a rare item is decoded, find 1 additional copy (EXTRACTION_EXTRA_RARE)
 
 
 #footprint - doubles basic resources
@@ -239,7 +239,7 @@ var EXTRACTION = {
 	"vm token chance": 0.0338, # bonus parsing token per item parsed; scales with item length
 	"requirements": "[color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource x1 | Cache x1",
 	"resource gained": "Only the target item",
-	"description": "Hunts through a [color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource for one specific item you choose with target=<item> (use 'ls <item>' to see what it holds). If used on a Cache it will transform it to an Extraction variant, giving 4 additional copies of the rare upgrade material, if decoded.",
+	"description": "Hunts through a [color="+Mining.SKILL.color.to_html()+"]Mining[/color] resource for one specific item you choose with target=<item> (use 'ls <item>' to see what it holds). If used on a Cache it will transform it to an Extraction variant: if its rare upgrade material drops when decoded, you get " + str(1 + CacheData.EXTRACTION_EXTRA_RARE) + " copies instead of 1 (double).",
 	"efficiency description": "Chance to find the target item per line.",
 	"signal": basic_cycle_completed
 }

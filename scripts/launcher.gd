@@ -20,7 +20,7 @@ var _metas: Array = []     # meta per slot ({} empty)
 var _selected := 0
 var _busy := false
 var _log: RichTextLabel
-var _input: LineEdit
+var _input_line: LineEdit
 var _out: RichTextLabel
 var _modal: Control = null   # the open popup (new / rename / delete), or null
 var _main: Control           # the menu (fades in after the boot sequence)
@@ -85,17 +85,17 @@ func _ready() -> void:
 	lead.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	lead.size_flags_vertical = Control.SIZE_FILL
 	bar.add_child(lead)
-	_input = LineEdit.new()
-	_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_input.flat = true
-	_input.caret_blink = true
-	_input.placeholder_text = "type a command, e.g. 'boot 1'"
-	_input.add_theme_font_size_override("font_size", 16)
-	_style_field(_input)
-	if "keep_editing_on_text_submit" in _input:
-		_input.keep_editing_on_text_submit = true # (Godot 4.4) Enter doesn't drop focus
-	_input.text_submitted.connect(_on_submit)
-	bar.add_child(_input)
+	_input_line = LineEdit.new()
+	_input_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_input_line.flat = true
+	_input_line.caret_blink = true
+	_input_line.placeholder_text = "type a command, e.g. 'boot 1'"
+	_input_line.add_theme_font_size_override("font_size", 16)
+	_style_field(_input_line)
+	if "keep_editing_on_text_submit" in _input_line:
+		_input_line.keep_editing_on_text_submit = true # (Godot 4.4) Enter doesn't drop focus
+	_input_line.text_submitted.connect(_on_submit)
+	bar.add_child(_input_line)
 	bar.add_child(_button("Settings", func(): _open_settings()))
 	bar.add_child(_button("Quit", func(): _quit()))
 	_refresh()
@@ -118,8 +118,8 @@ func _style_field(le: LineEdit) -> void:
 		le.add_theme_stylebox_override(st, sb)
 
 func _refocus() -> void:
-	if _modal == null and is_instance_valid(_input):
-		_input.grab_focus()
+	if _modal == null and is_instance_valid(_input_line):
+		_input_line.grab_focus()
 
 func _vspace() -> Control:
 	var c = Control.new()
@@ -159,7 +159,7 @@ func _intro() -> void:
 	_log.text = "\n".join(lines) # all at once (2026-11-05): lines appearing one by one pushed the cards down
 	if _out.text == "":
 		_say(_help_text()) # 2026-11-02 (Josh): the commands show from the start
-	_input.grab_focus()
+	_input_line.grab_focus()
 
 #region boot sequence
 ## 2026-11-05 (Josh): a short "system update" before the menu (~2 s). Any key or click skips it.
@@ -239,6 +239,19 @@ func _wait(secs: float) -> void:
 
 func _shortcut_input(event: InputEvent) -> void:
 	_unhandled_key_or_click(event)
+
+## 2026-11-09 (Josh): Escape opens settings on the profile screen; with a box open, Escape closes it. Handled here,
+## before the input line (a focused LineEdit swallowed the first Escape). (The LineEdit var was renamed _input_line.)
+func _input(event: InputEvent) -> void:
+	if _booting or !(event is InputEventKey) or !event.pressed or event.echo or event.keycode != KEY_ESCAPE:
+		return
+	if _modal is SettingsPopup:
+		return # the settings box closes itself on Escape
+	if _modal != null:
+		_close_modal()
+	elif !_busy:
+		_open_settings()
+	get_viewport().set_input_as_handled()
 
 func _unhandled_key_or_click(event: InputEvent) -> void:
 	if _booting and !_skip and ((event is InputEventKey and event.pressed) or (event is InputEventMouseButton and event.pressed)):
@@ -407,7 +420,7 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if ev is InputEventKey and ev.pressed and ev.keycode == KEY_ESCAPE and _modal != null:
 		_close_modal()
 		return
-	if _busy or _modal != null or !(ev is InputEventKey) or !ev.pressed or _input.text != "":
+	if _busy or _modal != null or !(ev is InputEventKey) or !ev.pressed or _input_line.text != "":
 		return
 	if ev.keycode == KEY_LEFT:
 		_select(_selected - 1)
@@ -417,7 +430,7 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 func _on_submit(text: String) -> void:
 	var raw = text.strip_edges()
 	var t = raw.to_lower()
-	_input.clear()
+	_input_line.clear()
 	_refocus.call_deferred()
 	if _busy or _modal != null:
 		return

@@ -244,8 +244,7 @@ func get_help_text(skill: Node) -> String:
 		var d = p.get("efficiency description", skill.SKILL["efficiency description"])
 		distinct[d] = true
 		eff_lines.append([p.name, d])
-	if distinct.size() <= 1:
-		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
+	# 2026-11-09 (Josh): always the per-process list under the table (Matching / Compiling only had a top line)
 
 	var columns = [
 		{"title": "PROCESS", "drop": 0},
@@ -278,7 +277,7 @@ func get_help_text(skill: Node) -> String:
 		row_colors.append("" if p.unlocked else "#666666")
 
 	text += build_table(columns, rows, row_colors)
-	if distinct.size() > 1:
+	if !eff_lines.is_empty():
 		text += "\nEFFICIENCY (EFF) BY PROCESS\n"
 		for line in eff_lines:
 			text += "  %-12s %s\n" % line
@@ -342,12 +341,17 @@ func get_help_text_hacking(skill: Node) -> String:
 			info_text
 		]
 	text += "└─────────────────────────────────────────────────────────────────────────────────────┘\n"
+	if skill == Hacking: # 2026-11-09 (Josh): the efficiency line under the table, like the other skills
+		var eff = float(Hacking.SKILL["efficiency"]) * 100.0
+		var per = float(Hacking.SKILL["efficiency rate"]) * 100.0
+		text += "\nEFFICIENCY (EFF)\n"
+		text += "  %-12s %s  [color=#888888](now %.1f%%, +%.2f%% per level)[/color]\n" % ["Critical", "Chance for SQL Injectors to deal double damage", eff, per]
 	var final_text = text + "\n\n" + get_modifier_info_text(skill) + (Firmware.info_block("Hacking") if skill == Hacking else "")
 	return final_text
 
 func get_help_text_2(skill: Node) -> String:
 	var text = get_ascii_text(skill)
-	if skill != Defragging:
+	if skill != Defragging and skill != Hacking: # Hacking lists it under its table (2026-11-09)
 		text += "[font_size=12]Efficiency (EFF): " + skill.SKILL["efficiency description"] + "[/font_size]\n"
 	if skill == Defragging:
 		text += "┌───────────────────────────────────────────────────────────────────────────────────────┐\n"
