@@ -125,7 +125,7 @@ func _apply(key: String) -> void:
 			match v:
 				"windowed":
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-					_fit_window.call_deferred()
+					_fit_window_soon()
 				"full_screen":
 					# 2026-11-05: the game already starts full screen (project setting); setting it again at startup
 					# re-created the window: a black frame and the splash flashed again before the launcher
@@ -137,9 +137,24 @@ func _apply(key: String) -> void:
 ## Windowed mode (2026-10-29): Godot fell back to the project's base size (1920x720, an 8:3 strip) or the
 ## last tiny size. Size the window to 16:9 at 85% of the screen's usable area, centered, and keep a minimum
 ## size so the layout can't be squashed (still resizable above that).
-func _fit_window() -> void:
-	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+## 2026-11-06: the switch out of full screen finishes a frame or two later on Windows, and the old deferred call
+## saw "not windowed yet" and gave up, leaving a screen-sized window that Windows shows as full screen again
+## (player report: 'windowed' wouldn't take). Wait a few frames, then fit; fit once more after the OS settles.
+func _fit_window_soon() -> void:
+	if !is_inside_tree():
 		return
+	for i in 3:
+		await get_tree().process_frame
+	_fit_window()
+	await get_tree().create_timer(0.25).timeout
+	_fit_window()
+
+func _fit_window() -> void:
+	var mode = DisplayServer.window_get_mode()
+	if values.get("window_mode", "") != "windowed" or mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		return
+	if mode != DisplayServer.WINDOW_MODE_WINDOWED: # maximized / minimized: back to a plain window first
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	var screen = DisplayServer.window_get_current_screen()
 	var area: Rect2i = DisplayServer.screen_get_usable_rect(screen)
 	var w = int(area.size.x * 0.85)

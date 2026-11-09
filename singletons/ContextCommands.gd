@@ -35,6 +35,35 @@ func _ready():
 func strip_bbcode(text: String) -> String:
 	return _bbcode_regex.sub(text, "", true)
 
+## The first <n> visible characters of a bbcode string, tags kept; any tag still open at the cut is closed
+func trim_bbcode(text: String, n: int) -> String:
+	var out = ""
+	var shown = 0
+	var open: Array = [] # tag names still open, innermost last
+	var i = 0
+	while i < text.length() and shown < n:
+		var m = _bbcode_regex.search(text, i)
+		if m != null and m.get_start() == i:
+			var tag = m.get_string()
+			var name = m.get_string(1)
+			if tag.begins_with("[/"):
+				var k = open.rfind(name)
+				if k >= 0:
+					open.remove_at(k)
+			elif name != "lb" and name != "rb" and name != "img":
+				open.append(name)
+			if name == "lb" or name == "rb":
+				shown += 0 # stripped by strip_bbcode, so not counted as visible either
+			out += tag
+			i = m.get_end()
+			continue
+		out += text[i]
+		shown += 1
+		i += 1
+	for k in range(open.size() - 1, -1, -1):
+		out += "[/%s]" % open[k]
+	return out
+
 func pad_text(text: String, width: int, strip_bbc: bool = true) -> String:
 	var visible_length = text.length()
 	if strip_bbc:
@@ -199,7 +228,7 @@ func _table_row(cells: Array, active: Array, widths: Array, gap: int) -> String:
 		var cell = str(cells[i])
 		var plain = strip_bbcode(cell)
 		if plain.length() > w:
-			cell = plain.substr(0, max(1, w - 1)) + "~"
+			cell = trim_bbcode(cell, max(1, w - 1)) + "~" # 2026-11-06: keeps the colors (a red "8/16" cost lost its red when trimmed)
 		line += pad_text(cell, w) + " ".repeat(gap) + ("| " if i < active.size() - 1 else "│")
 	return line
 
