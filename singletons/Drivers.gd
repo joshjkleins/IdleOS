@@ -284,8 +284,8 @@ func skill_text(skill_name: String) -> String:
 	if mine.is_empty():
 		t += "  [color=%s]-[/color]\n" % D
 	for id in mine:
-		t += "  %s  %s  %s  rank %d  %s\n" % [id.rpad(14), DEFS[id].name.rpad(14), ("[color=%s]EQUIPPED[/color]" % G) if is_equipped(id) else "        ", rank(id), value_text(id)]
-	t += "\n[color=%s]driver -add <id>[/color]      [color=%s]equip a driver (ex. driver -add %s)[/color]\n" % [G, D, mine[0] if !mine.is_empty() else "long_haul"]
+		t += "  %s  %s  %s  rank %d  %s\n" % [shown_id(id).rpad(16), DEFS[id].name.rpad(16), ("[color=%s]EQUIPPED[/color]" % G) if is_equipped(id) else "        ", rank(id), value_text(id)]
+	t += "\n[color=%s]driver -add <id>[/color]      [color=%s]equip a driver (ex. driver -add %s)[/color]\n" % [G, D, shown_id(mine[0]) if !mine.is_empty() else "long_haul"]
 	t += "[color=%s]driver -rm <id>[/color]       [color=%s]unequip it (it keeps its rank)[/color]\n" % [G, D]
 	t += "[color=%s]Drivers increase in rank with %s XP[/color]\n" % [D, skill_name]
 	t += "[color=%s]New drivers drop from compromises in Hacking (ex. 'recon school')[/color]" % D
@@ -374,6 +374,12 @@ func handle(text: String, skill_name: String) -> String:
 			return ("[color=#888888](dev) granted: %s[/color]" % ", ".join(got)) if !got.is_empty() else "Nothing granted (unknown id or already owned)."
 	return ""
 
+## 2026-11-14 (player report): the id players see and type, from the driver's name ("clean_exit", "ghost_protocol").
+## Two drivers were renamed and kept their save ids (cool_head = Clean Exit, payload_recycler = Ghost Protocol);
+## _find still accepts the old ids.
+func shown_id(id: String) -> String:
+	return str(DEFS[id].name).to_lower().replace(" ", "_") if DEFS.has(id) else id
+
 ## id or name ("long_haul", "long haul", "Long Haul")
 func _find(arg: String) -> String:
 	var a = arg.to_lower().replace(" ", "_")
@@ -391,10 +397,10 @@ func ls_text(id: String) -> String:
 	var sk = str(d.skill)
 	var tier = skill_defs(sk).find(id) + 1
 	var loc = Uploads.get_location_name(tier) if tier > 0 else "?"
-	var t = "\n[color=#4ec9b0]%s[/color]  [color=%s]driver · %s · id %s[/color]\n" % [str(d.name).to_upper(), D, sk, id]
+	var t = "\n[color=#4ec9b0]%s[/color]  [color=%s]driver · %s · id %s[/color]\n" % [str(d.name).to_upper(), D, sk, shown_id(id)]
 	var state = "not owned  ·  drops from the %s compromise ('recon %s')" % [loc, loc.to_lower()]
 	if is_owned(id):
-		state = ("equipped in %s" % sk) if is_equipped(id) else "owned, not equipped ('driver -add %s')" % id
+		state = ("equipped in %s" % sk) if is_equipped(id) else "owned, not equipped ('driver -add %s')" % shown_id(id)
 	t += "├─ [color=%s]Status[/color]    %s\n" % [D, state]
 	if is_owned(id):
 		t += "├─ [color=%s]Rank[/color]      %s  %s\n" % [D, _rank_bar(id), _rank_progress(id)]
@@ -423,12 +429,12 @@ func manager_text() -> String:
 				t += "  [color=%s]slot %d  locked (level %d)[/color]\n" % [D, i + 1, SLOT_LEVELS[i]]
 			elif i < list.size():
 				var id = list[i]
-				t += "  slot %d  [color=%s]%s[/color]  [color=%s]%s[/color]  %s  %s\n" % [i + 1, G, DEFS[id].name.rpad(18), D, id.rpad(18), _rank_bar(id), value_text(id)]
+				t += "  slot %d  [color=%s]%s[/color]  [color=%s]%s[/color]  %s  %s\n" % [i + 1, G, DEFS[id].name.rpad(18), D, shown_id(id).rpad(18), _rank_bar(id), value_text(id)]
 			else:
 				t += "  slot %d  [color=%s]empty[/color]\n" % [i + 1, D]
 		var spare = skill_defs(sk).filter(func(id): return owned.has(id) and !list.has(id))
 		for id in spare:
-			t += "  [color=%s]spare[/color]   %s  [color=%s]%s[/color]  %s  %s\n" % [D, DEFS[id].name.rpad(18), D, id.rpad(18), _rank_bar(id), value_text(id)]
+			t += "  [color=%s]spare[/color]   %s  [color=%s]%s[/color]  %s  %s\n" % [D, DEFS[id].name.rpad(18), D, shown_id(id).rpad(18), _rank_bar(id), value_text(id)]
 	t += "\n[color=#4ec9b0]BUILDS[/color]  " + builds_line() + "\n"
 	t += "\n[color=%s]driver -add <id>[/color]          [color=%s]equip into its skill's free slot[/color]\n" % [G, D]
 	t += "[color=%s]driver -rm <id>[/color]           [color=%s]unequip (keeps its rank)[/color]\n" % [G, D]

@@ -11,7 +11,7 @@ const DIM := "#888888"
 const FAINT := "#555f69"
 const TEXT := "#cccccc"
 const LINE := Color("#2a333c")
-const NAMES := {"volume": "Master", "sfx": "Sound effects", "music": "Music", "music_player": "Music player", "window_mode": "Window"}
+const NAMES := {"volume": "Master", "sfx": "Sound effects", "music": "Music", "music_player": "Music player", "music_builtin": "Built-in tracks", "window_mode": "Window", "hack_transition": "Hacking load"}
 
 var _rows := {} # key -> {"slider", "label"} or {"buttons": {value: Button}}
 

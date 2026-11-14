@@ -37,7 +37,7 @@ func module_loaded():
 	player_hacking_box.grab()
 	player_hacking_box.clear()
 	var tween2 = create_tween()
-	tween2.tween_property(self, "modulate:a", 1.0, 0.5)
+	tween2.tween_property(self, "modulate:a", 1.0, Settings.transition_secs(0.5))
 	await tween2.finished
 	enemy_hacking_box.update_targets()
 	is_in_hacking_context = true
@@ -53,7 +53,7 @@ func tutorial_event_completed(message: String):
 func go_to_root() -> void:
 	Tutorial.complete_event(Tutorial.TutorialEvent.RETURN_TO_ROOT)
 	var tween2 = create_tween()
-	tween2.tween_property(self, "modulate:a", 0.0, 0.5)
+	tween2.tween_property(self, "modulate:a", 0.0, Settings.transition_secs(0.5))
 	await tween2.finished
 	visible = false
 	is_in_hacking_context = false

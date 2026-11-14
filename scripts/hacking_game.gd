@@ -963,15 +963,16 @@ func counter():
 		if integ_bar.value <= 0.0:
 			win()
 		return
-	if ghost_left > 0:
-		ghost_left -= 1
-		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Ghost Mode, %d left)" % ghost_left, C_EXP)])
-		_float(anon_bar, "MISS", C_EXP, 15)
-		return
+	# 2026-11-14 (Josh): Decoy Traffic (this hack only) before Smoke Screen (its misses carry over in a run)
 	if decoys_left > 0:
 		decoys_left -= 1
 		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Decoy Traffic, %d left)" % decoys_left, C_MOD)])
 		_float(anon_bar, "DECOY", C_MOD, 15)
+		return
+	if ghost_left > 0:
+		ghost_left -= 1
+		_log("CTR", C_CTR, "%s countermeasures -> you  %s  %s" % [target_name, _c("MISSED", C_EXP), _c("(Smoke Screen, %d left)" % ghost_left, C_EXP)])
+		_float(anon_bar, "MISS", C_EXP, 15)
 		return
 	drv_counters += 1
 	if Drivers.value("cover_story") > 0.0 and randf() < Drivers.value("cover_story"): # Cover Story (driver)

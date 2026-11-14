@@ -11,6 +11,7 @@ const SFX := {
 	"overheat_sfx": "res://audio/sfx/overheat_sfx.mp3",
 	"overheat_finished_sfx": "res://audio/sfx/overheat_finished_sfx.mp3",
 	"level_up": "res://audio/sfx/level_up.mp3",
+	"vm_shutdown": "res://audio/sfx/vm_shutdown.mp3", # 2026-11-14: a VM ends (uptime out, killed or closed)
 	"mining_item_received": "res://audio/sfx/mining_item_received.mp3",
 	"parsing_item_received": "res://audio/sfx/parsing_item_received.mp3",
 	"cracking_item_received": "res://audio/sfx/cracking_item_received.mp3",
@@ -64,6 +65,7 @@ func _ready() -> void:
 	unlocked_tracks = DEFAULT_UNLOCKED.duplicate()
 	_preload(SFX, _sfx_streams)
 	_preload(MUSIC, _music_streams)
+	scan_user_music()
 
 	for i in SFX_POOL_SIZE:
 		var p := AudioStreamPlayer.new()
@@ -103,15 +105,22 @@ func error() -> void:         play_sfx("error")
 func play_music(name: String, fade: float = DEFAULT_FADE) -> void:
 	if name == current_track:
 		return
-	if not _music_streams.has(name):
-		push_warning("AudioManager: unknown track '%s'" % name)
-		return
-	if not is_track_unlocked(name):
-		push_warning("AudioManager: track '%s' is locked" % name)
-		return
+	var stream: AudioStream = null
+	if _user_tracks.has(name):
+		stream = _load_user_track(name)
+		if stream == null:
+			return # unreadable: dropped from the list (see 'music')
+	else:
+		if not _music_streams.has(name):
+			push_warning("AudioManager: unknown track '%s'" % name)
+			return
+		if not is_track_unlocked(name):
+			push_warning("AudioManager: track '%s' is locked" % name)
+			return
+		stream = _music_streams[name]
 
 	var next := _music_b if _active_music == _music_a else _music_a
-	next.stream = _music_streams[name]
+	next.stream = stream
 	next.volume_db = -80.0
 	next.play()
 
@@ -159,7 +168,7 @@ func set_music_enabled(on: bool) -> void:
 
 func _play_next_in_playlist(fade: float) -> void:
 	if _queue.is_empty():
-		_queue = unlocked_tracks.filter(func(t): return _music_streams.has(t))
+		_queue = playlist_tracks()
 		_queue.shuffle()
 		if _queue.size() > 1 and _queue[0] == _last_track: # no repeat across reshuffles
 			_queue.append(_queue.pop_front())
@@ -169,6 +178,71 @@ func _play_next_in_playlist(fade: float) -> void:
 	_last_track = t
 	current_track = "" # so play_music doesn't skip a reshuffled repeat
 	play_music(t, fade)
+	if current_track == "" and !_queue.is_empty():
+		_play_next_in_playlist(fade) # that file couldn't be read: try the next one
+
+# ---------- PLAYER MUSIC (2026-11-14, Josh) ----------
+## .mp3 / .ogg / .wav files in user://music (Windows: %APPDATA%/IdleOS/music) join the shuffle. Loaded when they
+## play, not at startup. Settings music_builtin = "off" leaves the two built-in tracks out (only while there's
+## at least one of the player's own; with none, the built-ins still play).
+const USER_MUSIC_DIR := "user://music"
+const USER_MUSIC_EXT := ["mp3", "ogg", "wav"]
+var _user_tracks: Dictionary = {}  # "user:<file name>" -> {"path", "title"}
+var bad_user_files: Array = []     # files that couldn't be read
+var builtin_on := true
+
+func user_music_path() -> String:
+	return ProjectSettings.globalize_path(USER_MUSIC_DIR)
+
+## (Re)reads the folder (creating it). Returns how many tracks it holds.
+func scan_user_music() -> int:
+	DirAccess.make_dir_recursive_absolute(USER_MUSIC_DIR)
+	_user_tracks.clear()
+	bad_user_files.clear()
+	var files = DirAccess.get_files_at(USER_MUSIC_DIR)
+	files.sort()
+	for f in files:
+		if !(f.get_extension().to_lower() in USER_MUSIC_EXT):
+			continue
+		var title = f.get_basename().replace("_", " ").replace("-", " ").strip_edges()
+		_user_tracks["user:" + f] = {"path": USER_MUSIC_DIR.path_join(f), "title": title if title != "" else f}
+	_queue.clear() # the next pick sees the new list
+	return _user_tracks.size()
+
+func user_track_count() -> int:
+	return _user_tracks.size()
+
+func set_builtin(on: bool) -> void:
+	builtin_on = on
+	_queue.clear()
+	# a built-in playing when they're switched off: move on to one of the player's
+	if !on and playlist_on and !_user_tracks.is_empty() and !_user_tracks.has(current_track):
+		_play_next_in_playlist(PLAYLIST_FADE)
+
+## What the shuffle picks from
+func playlist_tracks() -> Array:
+	var builtin = unlocked_tracks.filter(func(t): return _music_streams.has(t))
+	var mine = _user_tracks.keys()
+	if mine.is_empty():
+		return builtin
+	return (builtin if builtin_on else []) + mine
+
+func _load_user_track(key: String) -> AudioStream:
+	var path: String = _user_tracks[key].path
+	var stream: AudioStream = null
+	match path.get_extension().to_lower():
+		"mp3":
+			stream = AudioStreamMP3.load_from_file(path)
+		"ogg":
+			stream = AudioStreamOggVorbis.load_from_file(path)
+		"wav":
+			stream = AudioStreamWAV.load_from_file(path)
+	if stream == null or stream.get_length() <= 0.0:
+		bad_user_files.append(path.get_file())
+		_user_tracks.erase(key)
+		_queue.erase(key)
+		return null
+	return stream
 
 func _process(_delta: float) -> void:
 	# crossfade into the next track as this one ends
@@ -186,7 +260,21 @@ func now_playing_text() -> String:
 	var i = TRACK_INFO.get(current_track, {})
 	var pos = _active_music.get_playback_position() if _active_music else 0.0
 	var length = _active_music.stream.get_length() if _active_music and _active_music.stream else 0.0
+	if _user_tracks.has(current_track):
+		return "[color=#4ec994]Now playing:[/color] %s  [color=#888888](your music)  ·  %d:%02d / %d:%02d[/color]" % [_user_tracks[current_track].title, int(pos) / 60, int(pos) % 60, int(length) / 60, int(length) % 60]
 	return "[color=#4ec994]Now playing:[/color] %s  [color=#888888]by %s (%s)  ·  %d:%02d / %d:%02d[/color]" % [i.get("title", current_track), i.get("artist", "?"), i.get("source", ""), int(pos) / 60, int(pos) % 60, int(length) / 60, int(length) % 60]
+
+## 'music': what's in the shuffle and where the player's folder is
+func playlist_text() -> String:
+	var n = _user_tracks.size()
+	var t = "[color=#888888]Your music: %d track%s in %s ('music folder' opens it, 'music reload' after adding files)[/color]" % [n, "" if n == 1 else "s", user_music_path()]
+	if n > 0 and !builtin_on:
+		t += "\n[color=#888888]Built-in tracks are off (settings).[/color]"
+	elif n == 0 and !builtin_on:
+		t += "\n[color=#888888]Built-in tracks are off, but there's none of yours yet, so they still play.[/color]"
+	if !bad_user_files.is_empty():
+		t += "\n[color=#d29922]Couldn't play: %s (use .mp3, .ogg or .wav)[/color]" % ", ".join(bad_user_files)
+	return t
 
 func stop_music(fade: float = DEFAULT_FADE) -> void:
 	if _fade_tween: _fade_tween.kill()

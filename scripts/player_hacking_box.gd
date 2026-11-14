@@ -32,7 +32,7 @@ func _on_input_line_text_submitted(new_text):
 		return
 	input_line.clear()
 	add_line(">" + new_text)
-	command_history.append(new_text)
+	ContextCommands.record_history(command_history, new_text) # 2026-11-14: no blanks / repeats, last 200
 	history_index = -1 # a new command resets the up/down position (like the main terminal)
 	var text = new_text.to_lower().strip_edges()
 	command_entered.emit(text)

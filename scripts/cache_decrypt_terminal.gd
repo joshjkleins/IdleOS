@@ -13,6 +13,7 @@ extends BaseTerminal
 const C_CORRUPT = "#e24b4a"
 
 var items_from_session = {} #reference for labels
+var _session_labels = {} # 2026-11-14: name -> its label row, updated in place (rebuilding every row on each find stuttered)
 var item_label = preload("res://scenes/cache_item_label.tscn")
 var target_cache: ItemData = null # Cache / Skim / Deep: only this cache (null = any). Salvage: the item.
 var target_arg = null # Intel: the target dictionary
@@ -267,11 +268,16 @@ func _on_text_found(event: String) -> void:
 
 func update_items_gained_label(label_name: String, amount: int) -> void:
 	items_from_session[label_name] = items_from_session.get(label_name, 0) + amount
-	clear_labels()
-	for i in items_from_session.keys():
-		var new_label = item_label.instantiate()
-		new_label.update(i, items_from_session[i])
-		labels_container.add_child(new_label)
+	_show_session_count(label_name)
+
+## One row per item found this session: the existing row's count changes, a new item adds a row at the end
+func _show_session_count(label_name: String) -> void:
+	var row = _session_labels.get(label_name)
+	if row == null or !is_instance_valid(row):
+		row = item_label.instantiate()
+		labels_container.add_child(row)
+		_session_labels[label_name] = row
+	row.update(label_name, items_from_session[label_name])
 #endregion
 
 
@@ -302,17 +308,14 @@ func _show_corruption() -> void:
 func clear_labels():
 	for n in labels_container.get_children():
 		n.queue_free()
+	_session_labels.clear()
 
 func update_items_gained(item, amount):
 	if items_from_session.has(item.name):
 		items_from_session[item.name] += amount
 	else:
 		items_from_session[item.name] = amount
-	clear_labels()
-	for i in items_from_session.keys():
-		var new_label = item_label.instantiate()
-		new_label.update(i, items_from_session[i])
-		labels_container.add_child(new_label)
+	_show_session_count(item.name)
 	Inventory.add_resource(item, amount)
 
 	# Corruption variant: each find (except the last) can corrupt the rest of the cache

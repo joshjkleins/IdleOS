@@ -10,9 +10,9 @@ const SKILL_DIRS = ["mining", "parsing", "cracking", "matching", "phishing", "ha
 
 ## Commands that don't depend on the save
 const STATIC = [
-	"-h", "help", "info", "ls", "exploits", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "date", "version", "driver", "system", "settings", "history",
+	"-h", "help", "info", "ls", "exploits", "clear", "tree", "flow", "hint", "next", "lost", "utility", "cd root", "music", "music next", "music off", "music on", "music folder", "music reload", "date", "version", "driver", "system", "settings", "history", "history -c",
 	"tutorial", "tutorial -l", "tutorial reset", "welcome", "discord", "discord -c", "version", "ps",
-	"upload", "upload -a", "upload -a 10", "upload cancel ", "intel", "alert", "achievements", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -rm all",
+	"upload", "upload -a", "upload -a 10", "upload cancel ", "intel", "alert", "achievements", "apt", "apt install ", "apt install all", "mod", "mods", "mod -tier", "mod -refresh", "mod -rm all",
 	"vm", "vm ls", "vm show -a", "vm hide -a", "vm kill -a", "ssh", "ssh -h", "process -h",
 	"kill", "kill -s", "stop", "stop -s", "focus", "pin", "unpin", "overclock", "overclock -kill",
 	"track ", "untrack ", "untrack -a", "trap", "trap collect", "flush", "flush -h", "queue", "queue -h", "queue -add ", "queue -rm ", "queue -rm -a", "queue -clear", "queue -run", "queue -run ", "queue -run start=", "queue -templates", "queue -save ", "queue -load ", "queue -delete ", "queue -set ", "queue -ins ", "queue -kill", "queue -pause", "queue -ls", "panel", "cd ..", "quit", "quit -s", "logout", "wishlist",
@@ -72,16 +72,16 @@ func main_candidates() -> Array:
 			c.append(m.command)
 			c.append(m.command + " -kill")
 	# drivers (2026-10-27)
-	for id in Drivers.owned:
-		c.append("driver -add " + id)
-		c.append("driver -rm " + id)
+	for id in Drivers.owned: # shown ids (2026-11-14: renamed drivers kept old save ids)
+		c.append("driver -add " + Drivers.shown_id(id))
+		c.append("driver -rm " + Drivers.shown_id(id))
 	if Drivers.manager_unlocked(): # Driver Manager (2026-10-30)
 		# 'driver -swap <old> <new>': each equipped driver with every spare of its own skill, so both ids complete
 		for old in Drivers.all_equipped():
-			c.append("driver -swap " + old + " ")
+			c.append("driver -swap " + Drivers.shown_id(old) + " ")
 			for new in Drivers.skill_defs(Drivers.DEFS[old].skill):
 				if Drivers.owned.has(new) and !Drivers.is_equipped(new):
-					c.append("driver -swap %s %s" % [old, new])
+					c.append("driver -swap %s %s" % [Drivers.shown_id(old), Drivers.shown_id(new)])
 		for n in 3:
 			c.append("driver build %d" % n)
 			c.append("driver build %d -save" % n)

@@ -12,6 +12,9 @@ const hacking_card: PackedScene = preload("res://scenes/target_card.tscn")
 const person_card: PackedScene = preload("res://scenes/person_card.tscn")
 
 func _ready():
+	# 2026-11-14: the targets panel grows DOWN only when the cards are taller than the box (growing both ways slid
+	# the cards over the "IdleOS > Hacking > <location>" title). Set here: a scene re-save reverted the .tscn value.
+	pc.grow_vertical = Control.GROW_DIRECTION_END
 	targets_container.visible = true
 	persons_container.visible = false
 	hacking_game.visible = false

@@ -162,7 +162,8 @@ func build_table(columns: Array, rows: Array, row_colors: Array = []) -> String:
 	for c in columns.size():
 		var w = columns[c].title.length()
 		for row in rows:
-			w = max(w, strip_bbcode(str(row[c])).length())
+			for ln in _cell_lines(row[c]):
+				w = max(w, strip_bbcode(ln).length())
 		widths.append(w)
 
 	var gap = 5
@@ -212,14 +213,25 @@ func build_table(columns: Array, rows: Array, row_colors: Array = []) -> String:
 	text += _table_row(header_cells, active, widths, gap) + "\n"
 	text += "├" + "─".repeat(inner) + "┤\n"
 	for r in rows.size():
-		var cells = []
+		# 2026-11-14: a cell can be an Array of lines (apt costs, one item per line): the row takes as many lines
+		var height = 1
 		for c in active:
-			cells.append(rows[r][c])
-		var line = _table_row(cells, active, widths, gap)
+			height = max(height, _cell_lines(rows[r][c]).size())
 		var col = row_colors[r] if r < row_colors.size() else ""
-		text += ("[color=%s]%s[/color]" % [col, line] if col != "" else line) + "\n"
+		for k in height:
+			var cells = []
+			for c in active:
+				var ls = _cell_lines(rows[r][c])
+				cells.append(ls[k] if k < ls.size() else "")
+			var line = _table_row(cells, active, widths, gap)
+			text += ("[color=%s]%s[/color]" % [col, line] if col != "" else line) + "\n"
 	text += "└" + "─".repeat(inner) + "┘\n"
 	return text
+
+func _cell_lines(cell) -> Array:
+	if cell is Array:
+		return cell.map(func(x): return str(x)) if !cell.is_empty() else [""]
+	return [str(cell)]
 
 func _table_row(cells: Array, active: Array, widths: Array, gap: int) -> String:
 	var line = "│ "
@@ -1026,7 +1038,7 @@ func utility_commands() -> String:
 		["hint", "Suggestions on what to run next"],
 		["", ""],
 		["", "TERMINAL"],
-		["history", "Commands you've typed"],
+		["history", "Commands you've typed ('history -c' copies them)"],
 		["clear", "Clear the terminal"],
 		["date / system", "Date and time / system info"],
 		["version", "The game version (handy for bug reports)"],
@@ -1079,10 +1091,29 @@ func get_ascii_tree(current_context: String) -> String:
 	
 	return text
 
+## 2026-11-14 (Josh): command history for up/down, 'history' and 'history -c'. Blank lines and a repeat of the
+## command right before it aren't recorded ('spoof', 'spoof'); only the last HISTORY_MAX are kept.
+const HISTORY_MAX := 200
+const HISTORY_SHOWN := 50
+static func record_history(history: Array, text: String) -> void:
+	var t = text.strip_edges()
+	if t == "" or (!history.is_empty() and str(history[-1]) == t):
+		return
+	history.append(t)
+	while history.size() > HISTORY_MAX:
+		history.pop_front()
+
+## 'history': the last HISTORY_SHOWN, numbered (oldest first), and how many there are
 func get_history_commands(command_history) -> String:
+	if command_history.is_empty():
+		return "[color=#888888]No commands yet.[/color]"
+	var start = max(0, command_history.size() - HISTORY_SHOWN)
 	var text = ""
-	for i in command_history:
-		text += i + "\n"
+	for i in range(start, command_history.size()):
+		text += "[color=#666666]%3d[/color]  %s\n" % [i + 1, command_history[i]]
+	text += "[color=#888888]%s · 'history -c' copies %s to the clipboard[/color]" % [
+		("showing the last %d of %d" % [command_history.size() - start, command_history.size()]) if start > 0 else "%d command%s" % [command_history.size(), "" if command_history.size() == 1 else "s"],
+		"all %d" % command_history.size() if command_history.size() > 1 else "it"]
 	return text
 
 func get_date_command() -> String:
@@ -1159,6 +1190,13 @@ func _apt_cost_text(level: Dictionary) -> String:
 	for r in Upgrades.cost_rows(level):
 		parts.append("%s [color=%s]%s/%s[/color]" % [r.name, APT_OK if r.have >= r.need else APT_BAD, _short_num(r.have), _short_num(r.need)])
 	return ", ".join(parts)
+
+## 2026-11-14 (Josh): one cost item per line in the apt table, so long costs aren't cut off with "~"
+func _apt_cost_lines(level: Dictionary) -> Array:
+	var parts = []
+	for r in Upgrades.cost_rows(level):
+		parts.append("%s [color=%s]%s/%s[/color]" % [r.name, APT_OK if r.have >= r.need else APT_BAD, _short_num(r.have), _short_num(r.need)])
+	return parts if !parts.is_empty() else [""]
 
 func _short_num(n: int) -> String:
 	if n >= 100000:
@@ -1258,7 +1296,7 @@ func get_skill_upgrades_text(group: String) -> String:
 			ready += 1
 		var status = "[color=%s]READY[/color]" % APT_OK if reason == "" else ("[color=%s]missing items[/color]" % APT_BAD if reason == "Missing requirements." else "[color=%s]-[/color]" % APT_DIM)
 		var change = Upgrades.level_change(p, lvl)
-		rows.append([p.id, label, change, _apt_cost_text(lvl), status])
+		rows.append([p.id, label, change, _apt_cost_lines(lvl), status])
 		colors.append("")
 	t += build_table(columns, rows, colors)
 	if waiting:
@@ -1501,6 +1539,7 @@ func get_mod_command(by_slot: bool = true) -> String: # 2026-11-01: by slot is t
 	return_text += _mod_items_text(by_slot)
 	return_text += "\n\n\nuse 'mod -add <ID>' to add mod items to active mods ('mod -add 1, 3, 0' adds several).\n"
 	return_text += "use 'mod -rm <ID>' to remove the mod in that slot ('mod -rm all' for every one). WARNING: removed mods are deleted.\n"
+	return_text += "use 'mod -refresh' to reset every active mod to full hacks, using a spare copy of each from your inventory.\n"
 	return_text += "Each slot takes one kind of mod: OFF (offense), DEF (defense) or UTL (utility). A mod goes in the first open slot of its kind.\n"
 	return_text += "BW: bandwidth each equipped mod adds to every SQL Injector attack (tier 1-2 +1, 3-4 +2, 5-6 +3).\n"
 	return_text += "Mod items are found with 'phish -mod' and in caches.\n"

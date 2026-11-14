@@ -98,6 +98,42 @@ func _update_rate() -> void:
 	var per_second = min(0.0, Stats.get_cooling_amount() / Stats.cooling_frequency)
 	rate_label.text = "%.1f°C/s" % per_second
 
+## The modifier the main terminal's process is running with ({} when none)
+func _main_proc() -> Node:
+	var os = get_tree().get_first_node_in_group("main_os") if get_tree() else null
+	if os == null or !os.get("process_running") or !is_instance_valid(os.get("current_process")):
+		return null
+	return os.current_process
+
+func _main_modifier() -> Dictionary:
+	var p = _main_proc()
+	if p == null or !("modifier" in p) or !(p.modifier is Dictionary):
+		return {}
+	return p.modifier
+
+func _modifier_color() -> Color:
+	var p = _main_proc()
+	return p.skill.SKILL.color if p and p.get("skill") and "SKILL" in p.skill else C_OC
+
+## "-20% speed · heat x1.5" from the modifier's numbers; its effect text when it changes neither
+func _modifier_hint(m: Dictionary) -> String:
+	var parts = []
+	var sp = float(m.get("speed", 1.0))
+	var ht = float(m.get("heat", 1.0))
+	var p = _main_proc()
+	if !is_equal_approx(sp, 1.0):
+		parts.append("%+d%% speed" % roundi((sp - 1.0) * 100.0))
+	if !is_equal_approx(ht, 1.0) and !(p and p.has_method("is_cooled") and p.is_cooled()):
+		parts.append("heat x%s" % str(snappedf(ht, 0.01)))
+	if parts.is_empty():
+		var eff = str(m.get("effect", ""))
+		if eff != "":
+			parts.append(eff.get_slice(".", 0).to_lower())
+	var t = " · ".join(parts)
+	if Stats.overclocked: # both: say which part is which ("overclocked · prospect -40% speed · heat x2")
+		t = "overclocked · %s %s" % [str(m.get("command", "")), t]
+	return t
+
 func _update_state() -> void:
 	var text: String
 	var color: Color
@@ -105,9 +141,16 @@ func _update_state() -> void:
 	if Stats.overheated:
 		text = "OVERHEATED"; color = C_CRIT
 		hint = "processes slowed · cool to %d°C" % int(overclock_limit())
-	elif Stats.overclocked:
-		text = "OVERCLOCKED"; color = C_OC
-		hint = "increased speed · extra heat per cycle"
+	elif Stats.overclocked or !_main_modifier().is_empty():
+		# 2026-11-14 (Josh): the main terminal's modifier (sift, prospect, survey ...) shows here like overclock
+		var m = _main_modifier()
+		if m.is_empty():
+			text = "OVERCLOCKED"; color = C_OC
+			hint = "increased speed · extra heat per cycle"
+		else:
+			text = ("OVERCLOCK + " if Stats.overclocked else "") + str(m.get("name", m.get("command", ""))).to_upper()
+			color = C_OC if Stats.overclocked else _modifier_color()
+			hint = _modifier_hint(m)
 	elif temperature >= overclock_limit():
 		text = "HOT"; color = C_HOT
 		hint = "overclock locked until < %d°C" % int(overclock_limit())

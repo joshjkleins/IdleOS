@@ -308,7 +308,8 @@ func _on_input_line_text_submitted(new_text, from_queue := false):
 	var text_with_lead = get_context_lead() + " " + new_text
 	input_line.clear()
 	add_line(text_with_lead)
-	command_history.append(new_text)
+	ContextCommands.record_history(command_history, new_text) # skips blanks and repeats, keeps the last 200
+	history_index = -1
 	# 2026-11-02: while the queue runs it owns the main terminal: no manual processes; stop pauses it
 	if Queue.running:
 		var qlow = new_text.to_lower().strip_edges()
@@ -714,11 +715,18 @@ func universal_commands(text):
 			"on", "start", "play":
 				Settings.set_value("music_player", "on")
 				add_line("Music on.")
+			"folder", "-folder", "dir":
+				OS.shell_open(Audiomanager.user_music_path())
+				add_line("[color=#888888]Opened %s. Drop .mp3 / .ogg / .wav files in, then 'music reload'.[/color]" % Audiomanager.user_music_path())
+			"reload", "-reload", "refresh":
+				var n = Audiomanager.scan_user_music()
+				add_line("Found %d track%s of yours. They join the shuffle from the next song ('music next' to skip now)." % [n, "" if n == 1 else "s"])
 			"":
 				add_line(Audiomanager.now_playing_text())
-				add_line("[color=#888888]music next · music off · music on · volume: settings music=50[/color]")
+				add_line(Audiomanager.playlist_text())
+				add_line("[color=#888888]music next · music off · music on · music folder · music reload · volume: settings music=50[/color]")
 			_:
-				add_line("music commands: music · music next · music off · music on  [color=#666666](volume: settings music=<0-100>)[/color]")
+				add_line("music commands: music · music next · music off · music on · music folder · music reload  [color=#666666](volume: settings music=<0-100>)[/color]")
 		return true
 	if text in ["utility", "utilities", "util"]:
 		add_line(ContextCommands.utility_commands())
@@ -904,6 +912,40 @@ func universal_commands(text):
 			add_line(ContextCommands.get_mod_command(false))
 			return true
 		
+		# 2026-11-14 (Josh): 'mod -refresh' re-equips every active mod from a spare copy (same mod, same tier) in the
+		# inventory, resetting its hacks to full. Mods already at full, or with no spare, are left as they are.
+		if text in ["mod -refresh", "mod -r", "mods -refresh", "mod refresh"]:
+			if HackingMods.current_mods.is_empty():
+				add_line("No active mods to refresh. 'mod' lists your mods.")
+				return true
+			var lines = []
+			var used = 0
+			for m in HackingMods.current_mods.keys():
+				var cur = HackingMods.current_mods[m]
+				var name = HackingMods.get_mod_name(m)
+				var spare = null
+				for it in Inventory.get_hacking_mods_items():
+					if int(it.hacking_mod_type) == int(m) and int(it.tier) == int(cur.tier) and Inventory.get_amount(it) > 0:
+						spare = it
+						break
+				if spare == null:
+					lines.append("[color=#888888]%s: no spare in your inventory (%d hack%s left)[/color]" % [name, int(cur.duration), "" if int(cur.duration) == 1 else "s"])
+					continue
+				var full = HackingMods.mod_duration(spare)
+				if int(cur.duration) >= full:
+					lines.append("[color=#888888]%s: already full (%d hacks)[/color]" % [name, int(cur.duration)])
+					continue
+				var before = int(cur.duration)
+				Inventory.remove_resource(spare, 1)
+				cur.duration = full
+				cur.value = max(float(cur.value), float(spare.hacking_mod_value))
+				used += 1
+				lines.append("[color=#4ec994]%s refreshed[/color]: %d -> %d hacks  [color=#888888](1 %s used, %d left)[/color]" % [name, before, full, spare.name, Inventory.get_amount(spare)])
+			add_line("\n".join(lines))
+			if used > 0:
+				SaveManager.mark_dirty()
+			return true
+
 		if text.begins_with("mod -rm"):
 			#NO MODS ACTIVE TO REMOVE
 			if HackingMods.current_mods.is_empty():
@@ -998,6 +1040,14 @@ func universal_commands(text):
 			return true
 		"history":
 			add_line(ContextCommands.get_history_commands(command_history))
+			return true
+		"history -c", "history -copy", "history copy":
+			var hist = command_history.filter(func(c): return !str(c).to_lower().begins_with("history"))
+			if hist.is_empty():
+				add_line("[color=#888888]No commands to copy yet.[/color]")
+			else:
+				DisplayServer.clipboard_set("\n".join(hist))
+				add_line("[color=#4ec994]Copied %d command%s to the clipboard.[/color]" % [hist.size(), "" if hist.size() == 1 else "s"])
 			return true
 		"process -h":
 			add_line(ContextCommands.process_commands())
@@ -1182,8 +1232,8 @@ func handle_cd_commands(text):
 			if tutorial_window and Tutorial.is_tutorial_complete():
 				tutorial_window.set_context_hidden(true)
 			var tween = create_tween()
-			tween.tween_property(terminal_root, "modulate:a", 0.0, 0.5)
-			tween.parallel().tween_property(system_dock, "modulate:a", 0.0, 0.5)
+			tween.tween_property(terminal_root, "modulate:a", 0.0, Settings.transition_secs(0.5))
+			tween.parallel().tween_property(system_dock, "modulate:a", 0.0, Settings.transition_secs(0.5))
 			await tween.finished
 			terminal_root.visible = false
 			await loading.show_loading()
@@ -2988,8 +3038,8 @@ func _on_hacking_start_loading() -> void:
 	input_line.grab_focus()
 	_flush_unlocks() # anything unlocked while you were hacking
 	var tween = create_tween()
-	tween.tween_property(terminal_root, "modulate:a", 1.0, 1.0)
-	tween.parallel().tween_property(system_dock, "modulate:a", 1.0, 1.0)
+	tween.tween_property(terminal_root, "modulate:a", 1.0, Settings.transition_secs(1.0))
+	tween.parallel().tween_property(system_dock, "modulate:a", 1.0, Settings.transition_secs(1.0))
 	await tween.finished
 
 func _on_cooling_timer_timeout():

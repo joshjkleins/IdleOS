@@ -14,7 +14,11 @@ func _run() -> void:
 	os.accepting_player_inputs = true
 	for e in Tutorial.steps():
 		if !Tutorial.completed_events.has(e): Tutorial.completed_events.append(e)
-	os._on_input_line_text_submitted("cd hacking/school")
+	var loc = OS.get_environment("LOC") if OS.get_environment("LOC") != "" else "school"
+	for k in Stats.hacking_targets:
+		if str(Stats.hacking_targets[k].name).to_lower() == loc:
+			Stats.hacking_targets[k].unlocked = true
+	os._on_input_line_text_submitted("cd hacking/" + loc)
 	var t0 = Time.get_ticks_msec()
 	while !os.hacking.is_in_hacking_context and Time.get_ticks_msec() - t0 < 20000:
 		await get_tree().process_frame

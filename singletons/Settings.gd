@@ -20,11 +20,26 @@ const DEFS := {
 		"section": "Volume", "default": 50, "type": "range",
 		"help": "Sets background music volume percentage",
 	},
+	"music_builtin": { # 2026-11-14: the two built-in tracks in the shuffle (with music of your own in the folder)
+		"section": "Volume", "default": "on", "type": "enum",
+		"values": {
+			"on":  "Built-in tracks play with your own music",
+			"off": "Only your own music (the 'music folder')",
+		},
+	},
 	"music_player": {
 		"section": "Volume", "default": "on", "type": "enum",
 		"values": {
 			"on":  "Background music playlist on",
 			"off": "Background music off",
+		},
+	},
+	# 2026-11-14 (Josh): the load between the main terminal and Hacking. The tutorial always plays the full one.
+	"hack_transition": {
+		"section": "Gameplay", "default": "short", "type": "enum",
+		"values": {
+			"short":   "Short loading bar between the terminal and Hacking",
+			"instant": "No loading bar, just a quick fade",
 		},
 	},
 	"window_mode": {
@@ -72,6 +87,21 @@ func set_value(key: String, raw: String) -> String:
 	setting_changed.emit(key, value)
 	return ""
 
+
+## "full" during the tutorial, then the hack_transition setting ("short" / "instant")
+func hack_transition() -> String:
+	if !Tutorial.is_tutorial_complete():
+		return "full"
+	return str(values.get("hack_transition", "short"))
+
+## A fade's length for the current transition: full as written, short ~40%, instant ~25%
+func transition_secs(full: float) -> float:
+	match hack_transition():
+		"short":
+			return full * 0.4
+		"instant":
+			return full * 0.25
+	return full
 
 func get_value(key: String):
 	return values.get(key, DEFS[key].default if DEFS.has(key) else null)
@@ -121,6 +151,8 @@ func _apply(key: String) -> void:
 				Audiomanager.stop_playlist()
 			elif _started:
 				Audiomanager.start_playlist()
+		"music_builtin":
+			Audiomanager.set_builtin(v == "on")
 		"window_mode":
 			match v:
 				"windowed":

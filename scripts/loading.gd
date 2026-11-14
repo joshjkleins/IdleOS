@@ -4,9 +4,21 @@ extends Control
 @onready var progress_bar = $CenterContainer/ProgressBar
 
 
+# 2026-11-14 (Josh): full bar in the tutorial (0.5 in, 1.5 fill, 0.5 out), then a short one (Settings hack_transition),
+# or none ("instant": the screens just fade)
+var _in := 0.5
+var _fill := 1.5
+
 func show_loading():
+	var mode = Settings.hack_transition()
+	if mode == "instant":
+		visible = false
+		await get_tree().process_frame
+		return
+	_in = 0.5 if mode == "full" else 0.15
+	_fill = 1.5 if mode == "full" else 0.4
 	progress_bar.value = 0.0
-	
+
 	await show_progress_bar()
 	await fill_progress_bar()
 	await hide_progress_bar()
@@ -14,7 +26,7 @@ func show_loading():
 
 func fill_progress_bar():
 	var fill_tween = create_tween()
-	fill_tween.tween_property(progress_bar, "value", 100.0, 1.5)
+	fill_tween.tween_property(progress_bar, "value", 100.0, _fill)
 	await fill_tween.finished
 
 func show_progress_bar():
@@ -33,14 +45,14 @@ func show_progress_bar():
 		progress_bar,
 		"position",
 		base_pos,
-		0.5
+		_in
 	)
 
 	tween.parallel().tween_property(
 		progress_bar,
 		"modulate:a",
 		1.0,
-		0.5
+		_in
 	)
 
 	await tween.finished
@@ -54,14 +66,14 @@ func hide_progress_bar():
 		progress_bar,
 		"position",
 		t_pos,
-		0.5
+		_in
 	)
 
 	tween.parallel().tween_property(
 		progress_bar,
 		"modulate:a",
 		0.0,
-		0.5
+		_in
 	)
 
 	await tween.finished

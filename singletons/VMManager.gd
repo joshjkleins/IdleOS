@@ -75,6 +75,7 @@ func release(node: Node) -> void:
 	if window == null or !vms.has(window):
 		return
 	vms.erase(window)
+	Audiomanager.play_sfx("vm_shutdown") # 2026-11-14 (Josh): every way a VM ends comes through here
 	window.skill.CURRENT_VMS = max(0, window.skill.CURRENT_VMS - 1)
 	Stats.remove_vm_count(1)
 	window.queue_free()

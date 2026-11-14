@@ -112,7 +112,6 @@ func update_help() -> void:
 		rows.append(["EXPLOITS", Color("#c084fc"), "Used to give you the edge during any hack. Requires EXPLOIT charge earned during the hack. Use 'exploits' in the main terminal for more info."])
 	if !Alert.exempt():
 		rows.append(["ALERT", C_BAD, "As you hack targets, their alertness level raises, lowering the chance to find their cache. Each hack raises alert level by 10%. Hacking consecutively (hack student=3) raises alert level by 4% per hack after the first. Alertness level can be reduced by running processes (main terminal, VMs, queue or offline)."])
-	rows.append(["RUNS", C_TEXT, "'hack student=10' chains hacks, which causes Alert level to raise slower."])
 	rows.append(["KILL", C_BAD, "Using the 'kill' command ends the current hack. If you're below %d%% anonymity it will count as a loss, so use with caution." % roundi(0.2 * 100)])
 	rows.append(["KILL -S", C_OK, "This will discontinue the current consecutive hack run you're on. Once the current hack ends, you will abort successfully."])
 	for r in rows:
@@ -239,6 +238,12 @@ func _add_reward(box: VBoxContainer, info) -> void:
 	row.add_child(_icon("reward"))
 	var qty = info.get("loot quantity", 1)
 	row.add_child(_label("%s x%d" % [info.loot.name, qty], 12, C_TEXT))
+	# 2026-11-14 (Josh): Hacking XP per win (hacking_game EXP_AMOUNT = target exp)
+	if int(info.get("exp", 0)) > 0:
+		var xp_l = _label("+%s xp" % _commas_int(int(info.exp)), 12, C_OK)
+		xp_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		xp_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(xp_l)
 	# 2026-10-30: the win streak reward (hacking_game._streak_rare)
 	if info.loot is CacheData and !info.loot.rare_pool.is_empty() and Upgrades.win_streak_unlocked():
 		var st = _label("streak: %d wins in one run ('hack %s=%d' or '-r') = +1 %s" % [5, str(info.name).to_lower(), 5, info.loot.rare_pool[0].item.name.to_lower()], 10, C_RARE)
@@ -433,6 +438,14 @@ func _label(text: String, size: int, color: Color) -> Label:
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
 	return l
+
+static func _commas_int(n: int) -> String:
+	var t = str(abs(n))
+	var out = ""
+	while t.length() > 3:
+		out = "," + t.right(3) + out
+		t = t.left(t.length() - 3)
+	return ("-" if n < 0 else "") + t + out
 
 static func _fmt(v: float) -> String:
 	return str(int(round(v))) if is_equal_approx(v, round(v)) else "%.1f" % v

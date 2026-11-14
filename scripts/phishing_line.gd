@@ -259,12 +259,22 @@ func _run_smish() -> void:
 #endregion
 
 #region trap
+## 2026-11-14 (player report): 'phish -trap ... 3' sets up to 3 traps (one after another), stopping early when
+## every trap slot is full. Without a count it sets one, as before.
 func _run_trap() -> void:
-	var bait: ItemData = terminal.bait if terminal.take_bait() else null
-	if await _cast("planting watering-hole trap" + (" (baited)" if bait else "")) < 0:
-		return
-	Phishing.set_trap(bait)
-	$Status.text = "trap set: fills in %s" % Phishing.format_minutes(Phishing.trap_seconds_total())
+	while true:
+		var bait: ItemData = terminal.bait if terminal.take_bait() else null
+		if await _cast("planting watering-hole trap" + (" (baited)" if bait else "")) < 0:
+			return
+		Phishing.set_trap(bait)
+		terminal.session_cycles += 1
+		$Status.text = "trap set (%d/%d slots): fills in %s" % [Phishing.traps.size(), Phishing.max_traps(), Phishing.format_minutes(Phishing.trap_seconds_total())]
+		var want = int(terminal.cycle_limit)
+		if !active or want <= 1 or terminal.session_cycles >= want or terminal.stop_requested:
+			break
+		if !Phishing.can_set_trap():
+			$Status.text = "every trap slot is full (%d/%d): %d of %d set" % [Phishing.traps.size(), Phishing.max_traps(), terminal.session_cycles, want]
+			break
 	stop()
 #endregion
 
