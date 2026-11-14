@@ -227,17 +227,34 @@ func _complete_queue(text: String) -> Dictionary:
 	if r.text != rest or !r.options.is_empty():
 		return {"text": pre + r.text, "options": r.options}
 	# then a modifier: '<command> [N] <modifier>'
-	if words.size() < 2 or !(verb in Queue.VERBS):
+	var m = _complete_modifier(rest)
+	return {"text": pre + m.text, "options": m.options}
+
+## 2026-11-09 (player report): '<process command> [N] <modifier>' completes the modifier ('mine -logs o' -> overclock),
+## in the terminal and in 'queue -add'. Only the ones this skill has unlocked (overclock + its capstone modifiers).
+const VERB_SKILL = {"mine": "Mining", "parse": "Parsing", "crack": "Cracking", "match": "Matching", "phish": "Phishing", "decode": "Decoding", "compile": "Compiling"}
+func unlocked_modifiers(skill: Node) -> Array:
+	var mods = []
+	if skill == null:
+		return mods
+	if Upgrades.can_overclock(skill):
+		mods.append("overclock")
+	for m in (skill.get("MODIFIERS") if skill.get("MODIFIERS") else []):
+		if Upgrades.has(str(m.get("package", ""))):
+			mods.append(str(m.command))
+	return mods
+
+func _complete_modifier(text: String) -> Dictionary:
+	var words = text.to_lower().split(" ", false)
+	if words.size() < 2 or !VERB_SKILL.has(words[0]):
 		return {"text": text, "options": []}
-	var skill_name = {"mine": "Mining", "parse": "Parsing", "crack": "Cracking", "match": "Matching", "phish": "Phishing", "decode": "Decoding", "compile": "Compiling"}[verb]
-	var skill = get_node_or_null("/root/" + skill_name)
-	var mods = ["overclock"]
-	for m in (skill.get("MODIFIERS") if skill and skill.get("MODIFIERS") else []):
-		mods.append(str(m.command))
-	var last = "" if rest.ends_with(" ") else words[-1]
+	var mods = unlocked_modifiers(get_node_or_null("/root/" + VERB_SKILL[words[0]]))
+	var last = "" if text.ends_with(" ") else words[-1]
+	if words.size() == 2 and last != "":
+		return {"text": text, "options": []} # still typing the process ('-logs')
 	if last != "" and (last.is_valid_int() or last.begins_with("-") or last.contains("=")):
 		return {"text": text, "options": []}
-	var hits = mods.filter(func(m): return m.begins_with(last))
+	var hits = mods.filter(func(x): return x.begins_with(last) and !(x in words.slice(1, words.size() - (0 if last == "" else 1))))
 	if hits.is_empty():
 		return {"text": text, "options": []}
 	var head = text.substr(0, text.length() - last.length())
@@ -255,7 +272,11 @@ func complete(text: String, hacking: bool = false, shown_loc: String = "") -> Di
 		var q = _complete_queue(text)
 		if !q.is_empty():
 			return q
-	return _complete_from(text, hacking_candidates(shown_loc) if hacking else main_candidates())
+		var r = _complete_from(text, main_candidates())
+		if r.text != text or !r.options.is_empty():
+			return r
+		return _complete_modifier(text) # 2026-11-09: 'mine -logs o' -> 'mine -logs overclock'
+	return _complete_from(text, hacking_candidates(shown_loc))
 
 func _complete_from(text: String, cands: Array) -> Dictionary:
 	var typed = text.to_lower()
